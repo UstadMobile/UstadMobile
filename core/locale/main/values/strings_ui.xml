@@ -750,4 +750,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="copied_to_clipboard">Copied to clipboard</string>
 
+    <string name="invite_link_desc">Anyone with this link can oin and apply to join %1$s. You can then approve or reject their request to join.</string>
+    <string name="copy_link">Copy link</string>
+    <string name="share_link">Share link</string>
+
 </resources>

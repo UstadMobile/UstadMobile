@@ -246,4 +246,9 @@
         android:name="com.ustadmobile.port.android.view.JoinWithCodeFragment"
         android:label=""/>
 
+    <fragment
+        android:id="@+id/invite_via_link_dest"
+        android:name="com.ustadmobile.port.android.view.InviteViaLinkFragment"
+        android:label=""/>
+
 </navigation>

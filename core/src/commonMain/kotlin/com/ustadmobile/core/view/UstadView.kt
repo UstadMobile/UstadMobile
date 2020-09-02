@@ -119,6 +119,12 @@ interface UstadView {
 
         const val ARG_SNACK_MESSAGE = "snack_message"
 
+        const val ARG_CODE = "argCode"
+
+        const val ARG_CODE_TABLE = "argCodeTable"
+
+        const val ARG_ENTITY_NAME = "argEntityName"
+
         const val CURRENT_DEST = ""
 
         /**

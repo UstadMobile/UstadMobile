@@ -15,7 +15,8 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinWithCodeView, di: DI): UstadBaseController<JoinWithCodeView>(context, args, view, di) {
+class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinWithCodeView, di: DI)
+    : UstadBaseController<JoinWithCodeView>(context, args, view, di) {
 
     val accountManager: UstadAccountManager by instance()
 

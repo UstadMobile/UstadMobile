@@ -3,9 +3,12 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ClazzDetailOverviewView
 import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.InviteViaLinkView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -45,6 +48,16 @@ class ClazzDetailOverviewPresenter(context: Any,
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         systemImpl.go(ClazzEdit2View.VIEW_NAME, mapOf(ARG_ENTITY_UID to entityUid.toString()),
             context)
+    }
+
+
+    fun handleGoToInviteViaLink(){
+
+        systemImpl.go(InviteViaLinkView.VIEW_NAME, mapOf(
+                UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString(),
+                UstadView.ARG_CODE to entity?.clazzCode.toString(),
+                UstadView.ARG_ENTITY_NAME to entity?.clazzName.toString()
+        ), context)
     }
 
 
