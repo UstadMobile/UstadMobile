@@ -216,11 +216,19 @@ abstract class PersonDao : BaseDao<Person> {
             AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_SELECT_PERMISSION) 
             AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
             ORDER BY CASE(:sortOrder)
-                WHEN $SORT_NAME_ASC THEN Person.firstNames
+                WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
                 ELSE ''
             END ASC,
             CASE(:sortOrder)
-                WHEN $SORT_NAME_DESC THEN Person.firstNames
+                WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
+                ELSE ''
+            END DESC,
+           CASE(:sortOrder)
+                WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
+                ELSE ''
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
                 ELSE ''
             END DESC
     """)
@@ -304,9 +312,13 @@ abstract class PersonDao : BaseDao<Person> {
 
     companion object {
 
-        const val SORT_NAME_ASC = 1
+        const val SORT_FIRST_NAME_ASC = 1
 
-        const val SORT_NAME_DESC = 2
+        const val SORT_FIRST_NAME_DESC = 2
+
+        const val SORT_LAST_NAME_ASC = 1
+
+        const val SORT_LAST_NAME_DESC = 2
 
         const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
             SELECT DISTINCT Person_Perm.personUid FROM Person Person_Perm

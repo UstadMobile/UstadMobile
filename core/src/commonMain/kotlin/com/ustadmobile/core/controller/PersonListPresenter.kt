@@ -49,7 +49,7 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         view.list = repo.personDao.findPersonsWithPermission(getSystemTimeInMillis(), filterExcludeMembersOfClazz,
                 filterExcludeMemberOfSchool, filterAlreadySelectedList,
                 accountManager.activeAccount.personUid, selectedSortOption?.flag ?: 0,
-                if(searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
+                if (searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
     }
 
     override fun handleClickEntry(entry: Person) {
@@ -78,8 +78,10 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     companion object {
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.name, PersonDao.SORT_NAME_ASC, true),
-                SortOrderOption(MessageID.name, PersonDao.SORT_NAME_DESC, false)
+                SortOrderOption(MessageID.first_name, PersonDao.SORT_FIRST_NAME_ASC, true),
+                SortOrderOption(MessageID.first_name, PersonDao.SORT_FIRST_NAME_DESC, false),
+                SortOrderOption(MessageID.last_name, PersonDao.SORT_LAST_NAME_ASC, true),
+                SortOrderOption(MessageID.last_name, PersonDao.SORT_LAST_NAME_DESC, false)
         )
     }
 }
