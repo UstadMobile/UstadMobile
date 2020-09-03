@@ -995,7 +995,7 @@ object ContentScraperUtil {
      * @param licenseUrl      license Url of entry
      * @return the contententry
      */
-    private fun createContentEntryObject(id: String, title: String?, sourceUrl: String, publisher: String, licenseType: Int,
+    private fun createContentEntryObject(id: String?, title: String?, sourceUrl: String, publisher: String, licenseType: Int,
                                          primaryLanguage: Long, languageVariant: Long?, description: String?, isLeaf: Boolean,
                                          author: String?, thumbnailUrl: String?, licenseName: String, licenseUrl: String, contentTypeFlag: Int): ContentEntry {
         val contentEntry = ContentEntry()
@@ -1037,7 +1037,7 @@ object ContentScraperUtil {
      * @param contentEntryDao dao to insert or updateState
      * @return the updated content entry
      */
-    fun createOrUpdateContentEntry(id: String, title: String?, sourceUrl: String, publisher: String, licenseType: Int,
+    fun createOrUpdateContentEntry(id: String?, title: String?, sourceUrl: String, publisher: String, licenseType: Int,
                                    primaryLanguage: Long, languageVariant: Long?, description: String?, isLeaf: Boolean,
                                    author: String?, thumbnailUrl: String?, licenseName: String, licenseUrl: String,
                                    contentTypeFlag: Int,

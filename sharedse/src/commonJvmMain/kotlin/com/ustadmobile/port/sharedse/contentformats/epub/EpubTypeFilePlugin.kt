@@ -25,10 +25,11 @@ import java.net.URI
  */
 class EpubTypeFilePlugin : EpubTypePlugin(), ContentTypeFilePlugin {
 
-    override fun getContentEntry(file: String): ContentEntryWithLanguage? {
+    override fun getContentEntry(uri: String): ContentEntryWithLanguage? {
         var contentEntry: ContentEntryWithLanguage? = null
         try {
-            ZipInputStream(FileInputStream(File(file))).use {
+            val file = File(uri)
+            ZipInputStream(FileInputStream(file)).use {
                 var zipEntry: ZipEntry? = null
                 while ({ zipEntry = it.nextEntry; zipEntry }() != null) {
 
@@ -41,7 +42,7 @@ class EpubTypeFilePlugin : EpubTypePlugin(), ContentTypeFilePlugin {
                         contentEntryVal.contentFlags = ContentEntry.FLAG_IMPORTED
                         contentEntryVal.contentTypeFlag = ContentEntry.TYPE_EBOOK
                         contentEntryVal.licenseType = LICENSE_TYPE_OTHER
-                        contentEntryVal.title = opfDocument.title
+                        contentEntryVal.title = if(opfDocument.title.isNullOrEmpty()) file.nameWithoutExtension else opfDocument.title
                         contentEntryVal.author = opfDocument.getCreator(0)?.creator
                         contentEntryVal.description = opfDocument.description
                         contentEntryVal.leaf = true

@@ -1,26 +1,25 @@
-package com.ustadmobile.lib.contentscrapers.folder
+package com.ustadmobile.lib.staging.contentscrapers.folder
 
-import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
-import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.lib.contentscrapers.*
+import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
+import com.ustadmobile.lib.contentscrapers.LanguageList
+import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.EPUB_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
+import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_PUBLIC_DOMAIN
+import com.ustadmobile.lib.db.entities.ContentEntry.Companion.TYPE_COLLECTION
 import com.ustadmobile.lib.db.entities.Language
-import org.apache.commons.io.FileUtils
+import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
+import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
+import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang.exception.ExceptionUtils
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
-import java.nio.file.Paths
 
 
 /**
@@ -39,7 +38,7 @@ class IndexFolderScraper {
     private var publisher: String? = null
     private var languageVariantDao: LanguageVariantDao? = null
     private val filePrefix = "file://"
-    private var db: UmAppDatabase? = null
+    private var db: UmAppDatabase = UmAppDatabase.getInstance(Any())
     private var repository: UmAppDatabase? = null
     private var containerDao: ContainerDao? = null
     private var containerDir: File? = null
@@ -50,7 +49,6 @@ class IndexFolderScraper {
         publisher = name
         containerDir.mkdirs()
         this.containerDir = containerDir
-        db = UmAppDatabase.getInstance(Any())
         repository = db //db!!.getRepository("https://localhost", "")
         contentEntryDao = repository!!.contentEntryDao
         contentParentChildJoinDao = repository!!.contentEntryParentChildJoinDao
@@ -98,7 +96,7 @@ class IndexFolderScraper {
                 val childEntry = ContentScraperUtil.createOrUpdateContentEntry(name, name,
                         filePrefix + folder.path, name, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null,
                         EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING,
-                        EMPTY_STRING, 0, contentEntryDao!!)
+                        EMPTY_STRING, TYPE_COLLECTION, contentEntryDao!!)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentEntry, childEntry, folderCount++)
 
@@ -106,81 +104,31 @@ class IndexFolderScraper {
 
             } else if (folder.isFile) {
 
-                if (folder.name.contains(EPUB_EXT)) {
+                println("file name is ${folder.name}")
+                runBlocking {
 
-                    var opfFileInputStream: FileInputStream? = null
-                    var ocfFileInputStream: FileInputStream? = null
-                    try {
+                    val metadata = extractContentEntryMetadataFromFile(folder.absolutePath, db)
+                            ?: return@runBlocking
 
-                        val tmpFolder = ShrinkerUtil.shrinkEpub(folder)
-                        val ocfDoc = OcfDocument()
-                        val ocfFile = File(tmpFolder, Paths.get("META-INF", "container.xml").toString())
-                        ocfFileInputStream = FileInputStream(ocfFile)
-                        val ocfParser = UstadMobileSystemImpl.instance
-                                .newPullParser(ocfFileInputStream)
-                        ocfDoc.loadFromParser(ocfParser)
+                    val metadataContentEntry = metadata.contentEntry
 
-                        val opfFile = File(tmpFolder, ocfDoc.getRootFiles()[0].fullPath!!)
-                        val document = OpfDocument()
-                        opfFileInputStream = FileInputStream(opfFile)
-                        val xmlPullParser = UstadMobileSystemImpl.instance
-                                .newPullParser(opfFileInputStream)
-                        document.loadFromOPF(xmlPullParser)
+                    val fileEntry = ContentScraperUtil.createOrUpdateContentEntry(metadataContentEntry.entryId, metadataContentEntry.title,
+                            filePrefix + folder.path, metadataContentEntry.publisher ?: "",
+                            metadataContentEntry.licenseType, metadataContentEntry.primaryLanguageUid, metadataContentEntry.languageVariantUid,
+                            metadataContentEntry.description, true, EMPTY_STRING,
+                            metadataContentEntry.thumbnailUrl, EMPTY_STRING,
+                            EMPTY_STRING,
+                            metadataContentEntry.contentTypeFlag, contentEntryDao!!)
 
-                        val title = document.title
-                        val lang = if (document.getLanguages().isNotEmpty()) document.getLanguages()[0] else null
+                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentEntry, fileEntry, fileCount++)
 
-                        val creators = StringBuilder()
-                        for (i in 0 until document.numCreators) {
-                            if (i != 0) {
-                                creators.append(",")
-                            }
-                            creators.append(document.getCreator(i))
-                        }
-
-                        val id = document.id
-
-                        val date = folder.lastModified()
-
-                        val country = lang?.split("-")
-                        val twoCode = country?.get(0)
-                        val variant = if (country != null && country.size > 1) country[1] else EMPTY_STRING
-
-                        val language = if (twoCode != null) ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao!!, twoCode) else null
-                        val languageVariant = if (language != null)ContentScraperUtil.insertOrUpdateLanguageVariant(languageVariantDao!!, variant, language) else null
-
-                        val childEntry = ContentScraperUtil.createOrUpdateContentEntry(id!!, title,
-                                filePrefix + folder.path, publisher!!, LICENSE_TYPE_PUBLIC_DOMAIN, language?.langUid
-                                ?: 0, languageVariant?.langVariantUid,
-                                EMPTY_STRING, true, creators.toString(), EMPTY_STRING, EMPTY_STRING,
-                                EMPTY_STRING, 0, contentEntryDao!!)
-
-                        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentEntry, childEntry, fileCount++)
-
-                        val serverDate = ContentScraperUtil.getLastModifiedOfFileFromContentEntry(childEntry, containerDao!!)
-
-                        if (serverDate == -1L || date > serverDate) {
-                            ContentScraperUtil.insertContainer(containerDao!!, childEntry, true,
-                                    ScraperConstants.MIMETYPE_EPUB, tmpFolder.lastModified(), tmpFolder, db!!, repository!!,
-                                    containerDir!!)
-                            UMIOUtils.closeInputStream(opfFileInputStream)
-                            UMIOUtils.closeInputStream(ocfFileInputStream)
-                            FileUtils.deleteDirectory(tmpFolder)
-                        }
-                    } catch (e: Exception) {
-                        UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-                        UMLogUtil.logError("Error while parsing a file " + folder.name)
-                    } finally {
-                        UMIOUtils.closeInputStream(opfFileInputStream)
-                        UMIOUtils.closeInputStream(ocfFileInputStream)
-                    }
+                    importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerDir!!.absolutePath, folder.absolutePath, db, db, metadata.importMode, Any())
 
                 }
-
             }
 
-
         }
+
 
     }
 

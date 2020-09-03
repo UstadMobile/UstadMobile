@@ -214,6 +214,8 @@ object ScraperConstants {
     const val MIMETYPE_OGG = "audio/ogg"
     const val MIMETYPE_WOFF2 = "font/woff2"
     const val MIMETYPE_OTF = "font/opentype"
+    const val MIMETYPE_GOOGLE_FOLDER = "application/vnd.google-apps.folder"
+    const val MIMETYPE_M4V = "video/x-m4v"
 
     val googleDriveFormat: DateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 

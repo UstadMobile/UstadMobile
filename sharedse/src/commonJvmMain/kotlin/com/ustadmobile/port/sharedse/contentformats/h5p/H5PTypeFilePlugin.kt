@@ -68,11 +68,10 @@ class H5PTypeFilePlugin : H5PTypePlugin(), ContentTypeFilePlugin {
                             contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
                             licenseType = licenseMap[json.jsonObject["license"] ?: ""]
                                     ?: ContentEntry.LICENSE_TYPE_OTHER
-                            title = json.jsonObject["title"]?.content ?: ""
+                            title = if(json.jsonObject["title"]?.content.isNullOrEmpty())
+                                file.nameWithoutExtension else json.jsonObject["title"]?.content
                             this.author = author
-                            description = ""
                             leaf = true
-                            entryId = file.name
                         }
                         break
                     }

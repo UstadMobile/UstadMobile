@@ -20,7 +20,8 @@ class XapiPackageTypeFilePlugin : XapiPackageTypePlugin(), ContentTypeFilePlugin
     override fun getContentEntry(uri: String): ContentEntryWithLanguage? {
         var contentEntry: ContentEntryWithLanguage? = null
         try {
-            ZipInputStream(FileInputStream(File(uri))).use {
+            val file = File(uri)
+            ZipInputStream(FileInputStream(file)).use {
                 var zipEntry: ZipEntry? = null
                 while ({ zipEntry = it.nextEntry; zipEntry }() != null) {
 
@@ -34,9 +35,9 @@ class XapiPackageTypeFilePlugin : XapiPackageTypePlugin(), ContentTypeFilePlugin
                         contentEntry = ContentEntryWithLanguage().apply {
                             contentFlags = ContentEntry.FLAG_IMPORTED
                             licenseType = ContentEntry.LICENSE_TYPE_OTHER
-                            title = activity.name
-                            contentFlags  = ContentEntry.FLAG_IMPORTED
-                            author = ""
+                            title = if(activity.name.isNullOrEmpty())
+                                file.nameWithoutExtension else activity.name
+                            contentTypeFlag  = ContentEntry.TYPE_INTERACTIVE_EXERCISE
                             description = activity.desc
                             leaf = true
                             entryId = activity.id
