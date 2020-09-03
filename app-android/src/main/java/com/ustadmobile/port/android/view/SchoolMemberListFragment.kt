@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -95,7 +93,8 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         val createNewText = requireContext().getString(R.string.add_new,
                 requireContext().getString(addNewStringId))
 
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
 
         return view
     }
@@ -129,12 +128,25 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
                 requireContext().getString(addNewStringId)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = true
+    }
+
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(v: View?) {
         if(v?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.person_detail_dest, Person::class.java)
+        else{
+            super.onClick(v)
+        }
     }
 
     override fun onDestroyView() {

@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzMemberDao
-import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
@@ -12,7 +11,10 @@ import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -24,21 +26,12 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
     var filterByClazzUid: Long = -1
 
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
-    }
-
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
-
-    class ClazzMemberListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
 
     override fun onCreate(savedState: Map<String, String>?) {
         filterByClazzUid = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: -1
         super.onCreate(savedState)
-
-        view.sortOptions = SortOrder.values().toList().map { ClazzMemberListSortOption(it, context) }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -53,8 +46,8 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
         view.addStudentVisible = db.clazzDao.personHasPermissionWithClazz(activePersonUid,
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_STUDENT)
 
+        selectedSortOption = SORT_OPTIONS[0]
         updateListOnView()
-
 
         view.addTeacherVisible = db.clazzDao.personHasPermissionWithClazz(activePersonUid,
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_TEACHER)

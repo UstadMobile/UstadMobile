@@ -1,7 +1,10 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.dao.PersonDao
+import com.ustadmobile.core.db.dao.SchoolMemberDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.enrollPersonToSchool
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.PersonDetailView
@@ -16,24 +19,19 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
-                        view: SchoolMemberListView, di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<SchoolMemberListView, SchoolMember>(context, arguments, view, di, lifecycleOwner) {
+                                view: SchoolMemberListView, di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<SchoolMemberListView, SchoolMember>(context, arguments, view, di, lifecycleOwner)
+        , OnSortOptionSelected, OnSearchSubmitted {
 
-    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
-
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
-    }
-
-    class SchoolMemberListSortOption(val sortOrder: SortOrder, context: Any)
-        : MessageIdOption(sortOrder.messageId, context)
+    override val sortOptions: List<SortOrderOption>
+        get() = SORT_OPTIONS
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
+
+        selectedSortOption = SORT_OPTIONS[0]
         updateListOnView()
-        view.sortOptions = SortOrder.values().toList().map { SchoolMemberListSortOption(it, context) }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -41,23 +39,19 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
                 arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L, Role.PERMISSION_SCHOOL_UPDATE)
     }
 
-    private fun updateListOnView() {
+    private fun updateListOnView(searchText: String? = null) {
 
-        val schoolRole = arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt()?:0
+        val schoolRole = arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0
 
-        val schoolUid: Long = arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong()?:0L
+        val schoolUid: Long = arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0L
 
-        view.list = when(currentSortOrder) {
-            SortOrder.ORDER_NAME_ASC ->
-                repo.schoolMemberDao.findAllActiveMembersAscBySchoolAndRoleUidAsc(
-                    schoolUid, schoolRole, mSearchQuery)
-            SortOrder.ORDER_NAME_DSC ->
-                repo.schoolMemberDao.findAllActiveMembersDescBySchoolAndRoleUidAsc(
-                    schoolUid, schoolRole, mSearchQuery)
-        }
+        view.list = repo.schoolMemberDao
+                .findAllActiveMembersBySchoolAndRoleUid(schoolUid, schoolRole,
+                        selectedSortOption?.flag ?: 0,
+                        if (searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
     }
 
-    fun handleEnrolMember(schoolUid: Long, personUid: Long, role:Int){
+    fun handleEnrolMember(schoolUid: Long, personUid: Long, role: Int) {
 
         GlobalScope.launch {
             db.enrollPersonToSchool(schoolUid, personUid, role)
@@ -66,10 +60,10 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
 
     override fun handleClickEntry(entry: SchoolMember) {
 
-        when(mListMode) {
+        when (mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
             ListViewMode.BROWSER -> systemImpl.go(PersonDetailView.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to entry.schoolMemberPersonUid.toString()), context)
+                    mapOf(UstadView.ARG_ENTITY_UID to entry.schoolMemberPersonUid.toString()), context)
         }
 
     }
@@ -78,11 +72,24 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
         view.addMember()
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? SchoolMemberListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            updateListOnView()
-        }
+    override fun onClickSort(sortOption: SortOrderOption) {
+        super.onClickSort(sortOption)
+        updateListOnView()
+    }
+
+
+    override fun onSearchSubmitted(text: String?) {
+        updateListOnView(text)
+    }
+
+    companion object {
+
+        val SORT_OPTIONS = listOf(
+                SortOrderOption(MessageID.first_name, SchoolMemberDao.SORT_FIRST_NAME_ASC, true),
+                SortOrderOption(MessageID.first_name, SchoolMemberDao.SORT_FIRST_NAME_DESC, false),
+                SortOrderOption(MessageID.last_name, SchoolMemberDao.SORT_LAST_NAME_ASC, true),
+                SortOrderOption(MessageID.last_name, SchoolMemberDao.SORT_LAST_NAME_DESC, false)
+        )
+
     }
 }
