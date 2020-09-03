@@ -405,6 +405,8 @@
     <string name="sort_by_name">Sort by name</string>
     <string name="sort_by_name_asc">name (ascending)</string>
     <string name="sort_by_name_desc">name (descending)</string>
+    <string name="date_enroll">Date enrolled</string>
+    <string name="date_left">Date left</string>
 
     <!--Ascending: used in the context of a sort order -->
     <string name="ascending">Ascending</string>
