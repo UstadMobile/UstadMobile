@@ -41,6 +41,7 @@ class InviteViaLinkFragment: UstadBaseFragment(), InviteViaLinkView, InvitationL
         mBinding = FragmentInviteViaLinkBinding.inflate(inflater, container, false).also {
             rootView = it.root
         }
+        mBinding?.activityEventHandler = this
 
         return rootView
     }

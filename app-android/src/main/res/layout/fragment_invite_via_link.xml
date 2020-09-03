@@ -25,6 +25,7 @@
         <TextView
             android:id="@+id/instructions_text"
             android:layout_width="0dp"
+            style="@style/UmTheme.TextAppearance.Body1"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginVertical="@dimen/dimen_16dp"
@@ -90,6 +91,7 @@
             android:layout_height="wrap_content"
             android:background="?attr/selectableItemBackground"
             android:layout_marginStart="8dp"
+            style="@style/UmTheme.TextAppearance.Body1"
             android:text="@string/copy_link"
             android:onClick="@{() -> activityEventHandler.handleClickCopyLink(link)}"
             app:layout_constraintBottom_toBottomOf="@+id/imageView4"
@@ -103,6 +105,7 @@
             android:background="?attr/selectableItemBackground"
             android:layout_marginStart="8dp"
             android:text="@string/share_link"
+            style="@style/UmTheme.TextAppearance.Body1"
             android:onClick="@{() -> activityEventHandler.handleClickShareLink(link)}"
             app:layout_constraintBottom_toBottomOf="@+id/imageView5"
             app:layout_constraintStart_toEndOf="@+id/imageView5"

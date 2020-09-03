@@ -13,6 +13,7 @@ import com.ustadmobile.lib.db.entities.ClazzWithDisplayDetails
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
@@ -52,12 +53,17 @@ class ClazzDetailOverviewPresenter(context: Any,
 
 
     fun handleGoToInviteViaLink(){
+        GlobalScope.launch {
+            val clazz = repo.clazzDao.findByUid(arguments[ARG_ENTITY_UID]?.toLong() ?: 0L)
+            view.runOnUiThread(Runnable {
+                systemImpl.go(InviteViaLinkView.VIEW_NAME, mapOf(
+                        UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString(),
+                        UstadView.ARG_CODE to clazz?.clazzCode.toString(),
+                        UstadView.ARG_ENTITY_NAME to clazz?.clazzName.toString()
+                ), context)
+            })
+        }
 
-        systemImpl.go(InviteViaLinkView.VIEW_NAME, mapOf(
-                UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString(),
-                UstadView.ARG_CODE to entity?.clazzCode.toString(),
-                UstadView.ARG_ENTITY_NAME to entity?.clazzName.toString()
-        ), context)
     }
 
 

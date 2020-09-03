@@ -23,8 +23,11 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_NAME
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson
 import com.ustadmobile.lib.db.entities.Person
@@ -208,8 +211,10 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
     }
 
     fun navigateToPickNewMember(keyName: String){
+        //TODO: Finish
         navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest,
-                bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString()),
+                bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
+                ARG_CODE_TABLE to Clazz.TABLE_ID.toString()),
                 keyName, true)
     }
 

@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_EXCLUDE_PERSONUIDS_LIST
@@ -73,6 +72,16 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     override fun onSearchSubmitted(text: String?) {
         updateListOnView(text)
+    }
+
+
+    fun handleClickInviteWithLink(tableId: Int, code: String?, entityName: String?){
+
+        systemImpl.go(InviteViaLinkView.VIEW_NAME, mapOf(
+                UstadView.ARG_CODE_TABLE to tableId.toString(),
+                UstadView.ARG_CODE to code,
+                UstadView.ARG_ENTITY_NAME to entityName
+        ), context)
     }
 
     companion object {

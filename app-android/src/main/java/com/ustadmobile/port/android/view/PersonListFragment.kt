@@ -3,13 +3,17 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.*
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemPersonListItemBinding
 import com.ustadmobile.core.controller.PersonListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.PersonListView
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
@@ -17,13 +21,45 @@ import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
+interface InviteWithLinkHandler{
+    fun handleClickInviteWithLink()
+}
+
 class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDetails>(),
-        PersonListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
+        PersonListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener,
+        InviteWithLinkHandler{
+
+
+    override fun handleClickInviteWithLink() {
+        mPresenter?.handleClickInviteWithLink(Clazz.TABLE_ID, "testCode",
+                "Class Test A")
+
+    }
 
     private var mPresenter: PersonListPresenter? = null
 
     override val listPresenter: UstadListPresenter<*, in PersonWithDisplayDetails>?
         get() = mPresenter
+
+    private var inviteWithLinkRecyclerViewAdapter: InviteWithLinkRecyclerViewAdapter? = null
+
+    override var autoMergeRecyclerViewAdapter: Boolean = false
+
+    override var addMode: ListViewAddMode = ListViewAddMode.NONE
+        get() = field
+        set(value) {
+            mDataBinding?.addMode = value
+            mNewItemRecyclerViewAdapter?.newItemVisible =
+                    (value == ListViewAddMode.FIRST_ITEM)
+            if(arguments?.containsKey(UstadView.ARG_CODE) == true){
+                inviteWithLinkRecyclerViewAdapter?.visible = mNewItemRecyclerViewAdapter?.newItemVisible?:false
+            }
+
+            fabManager?.visible =
+                    (value == ListViewAddMode.FAB)
+
+            field = value
+        }
 
     class PersonListViewHolder(val itemBinding: ItemPersonListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
@@ -64,11 +100,23 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
         mPresenter = PersonListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
 
+        inviteWithLinkRecyclerViewAdapter = InviteWithLinkRecyclerViewAdapter(this, mPresenter)
+        inviteWithLinkRecyclerViewAdapter?.code = arguments?.get(UstadView.ARG_CODE)?.toString()
+        inviteWithLinkRecyclerViewAdapter?.entityName = arguments?.get(UstadView.ARG_ENTITY_NAME)?.toString()
+        inviteWithLinkRecyclerViewAdapter?.tableId = arguments?.get(UstadView.ARG_CODE_TABLE)?.toString()?.toInt()?:0
+
+
         mDataRecyclerViewAdapter = PersonListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_a_new,
                 requireContext().getString(R.string.person))
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
+
+        mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
+        mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
+                inviteWithLinkRecyclerViewAdapter,
+                mDataRecyclerViewAdapter , mListStatusAdapter)
+        mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
         return view
     }
 

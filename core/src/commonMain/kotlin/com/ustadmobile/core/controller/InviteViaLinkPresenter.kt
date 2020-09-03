@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.InviteViaLinkView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_NAME
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.School
 import org.kodein.di.DI
@@ -24,7 +25,7 @@ class InviteViaLinkPresenter(context: Any, args: Map<String, String>, view: Invi
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        val code = arguments[ARG_CODE].toString()?:""
+        val code = arguments[ARG_CODE].toString()
         val link = when (arguments[ARG_CODE_TABLE].toString().toInt()) {
             Clazz.TABLE_ID -> {
                 "http://www.ustadmobile.com/ClazzJoin?code=$code"
@@ -37,6 +38,7 @@ class InviteViaLinkPresenter(context: Any, args: Map<String, String>, view: Invi
             }
         }
         view.inviteLink = link
+        view.entityName = arguments[ARG_ENTITY_NAME].toString()
     }
 
 
