@@ -6,7 +6,9 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.timeout
 import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.door.*
+import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ktor.respondUpdateNotifications
 import db2.*
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
@@ -27,11 +29,16 @@ import io.ktor.client.features.ClientRequestException
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.features.CallLogging
+import io.ktor.http.CacheControl
 import io.ktor.http.HttpStatusCode
+import io.ktor.request.header
+import io.ktor.response.cacheControl
 import io.ktor.response.respond
+import io.ktor.response.respondTextWriter
 import io.ktor.routing.get
 import io.ktor.routing.routing
 import io.netty.handler.codec.http.HttpResponse
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
 import org.junit.*
 import org.junit.rules.TemporaryFolder
@@ -64,6 +71,12 @@ class TestDbRepo {
     @Rule
     var temporaryFolder = TemporaryFolder()
 
+    @Before
+    fun setup() {
+        mockUpdateNotificationManager = mock {}
+    }
+
+
     fun createSyncableDaoServer(di: DI) = embeddedServer(Netty, 8089) {
         install(ContentNegotiation) {
             register(ContentType.Application.Json, GsonConverter())
@@ -71,8 +84,6 @@ class TestDbRepo {
         }
 
         tmpAttachmentsDir = temporaryFolder.newFolder("testdbrepoattachments")
-
-        mockUpdateNotificationManager = mock {}
 
         install(DIFeature) {
             extend(di)
@@ -85,21 +96,15 @@ class TestDbRepo {
 
         install(CallLogging)
 
-        routing {
-            get("/initrepo") {
-                try {
-                    val repo : ExampleDatabase2 = di().direct.on(call).instance(tag = DoorTag.TAG_REPO)
-                    call.respond("OK")
-                }catch(e: Exception) {
-                    e.printStackTrace()
-                    call.respond(HttpStatusCode.InternalServerError, e.toString())
-                }
-
-            }
-        }
+//        routing {
+//            get("/subscribe") {
+//                val repo: ExampleDatabase2 by di().on(call).instance(tag = DoorTag.TAG_REPO)
+//                call.respondUpdateNotifications(repo as DoorDatabaseSyncRepository)
+//            }
+//        }
     }
 
-    fun setupClientAndServerDb() {
+    fun setupClientAndServerDb(updateNotificationManager: UpdateNotificationManager = mockUpdateNotificationManager) {
         try {
             val virtualHostScope = TestDbRoute.VirtualHostScope()
             serverDi = DI {
@@ -113,7 +118,7 @@ class TestDbRepo {
                 bind<ExampleDatabase2>(tag = DoorTag.TAG_REPO) with scoped(virtualHostScope).singleton {
                     val db: ExampleDatabase2 = instance(tag = DoorTag.TAG_DB)
                     val repo = db.asRepository(Any(), "http://localhost/", "", httpClient,
-                            tmpAttachmentsDir?.absolutePath, mockUpdateNotificationManager)
+                            tmpAttachmentsDir?.absolutePath, updateNotificationManager)
                     ChangeLogMonitor(db, repo as DoorDatabaseRepository)
                     repo
                 }
@@ -128,6 +133,10 @@ class TestDbRepo {
                     SQLiteDataSource().also {
                         it.url = "jdbc:sqlite:${dbName}.sqlite"
                     }
+                }
+
+                bind<UpdateNotificationManager>() with scoped(virtualHostScope).singleton {
+                    updateNotificationManager
                 }
 
                 registerContextTranslator { call: ApplicationCall -> "localhost" }
@@ -461,7 +470,7 @@ class TestDbRepo {
 
     @Test
     fun givenEmptyDatabase_whenChangeMadeOnServer_thenOnNewUpdateNotificationShouldBeCalledAndNotificationEntityShouldBeInserted()  {
-        setupClientAndServerDb()
+        setupClientAndServerDb(UpdateNotificationManagerImpl())
 
         val testUid = 42L
 
@@ -481,8 +490,13 @@ class TestDbRepo {
             serverDb.exampleSyncableDao().insert(this)
         }
 
-        verify(mockUpdateNotificationManager, timeout(5000 * 50000)).onNewUpdateNotifications(
+        verify(mockUpdateNotificationManager, timeout(5000)).onNewUpdateNotifications(
                 argWhere { it.any { it.pnTableId ==  42 && it.pnDeviceId == 57} })
     }
+
+    fun givenClientSubscribedToUpdates_whenChangeMadeOnServer_thenShouldGetUpdateNotification() {
+
+    }
+
 
 }

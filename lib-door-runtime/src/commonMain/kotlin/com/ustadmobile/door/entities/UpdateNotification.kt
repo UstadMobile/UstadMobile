@@ -1,9 +1,11 @@
 package com.ustadmobile.door.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
-@Entity
+@Entity(indices = [Index(value = ["pnDeviceId", "pnTableId"], unique = true),
+        Index(value = ["pnDeviceId", "pnTimestamp"], unique = false)])
 class UpdateNotification(
         @PrimaryKey
         var pnUid: Long = 0,

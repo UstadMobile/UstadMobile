@@ -8,6 +8,6 @@ interface UpdateNotificationManager {
 
     fun addUpdateNotificationListener(deviceId: Int, listener: UpdateNotificationListener)
 
-    fun removeUpdateNotificationListener(deviceId: Int)
+    fun removeUpdateNotificationListener(deviceId: Int, listener: UpdateNotificationListener)
 
 }

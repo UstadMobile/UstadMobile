@@ -9,17 +9,20 @@ import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.SyncResult
 import com.ustadmobile.door.UpdateNotificationManager
 import com.ustadmobile.door.annotation.EntityWithAttachment
+import com.ustadmobile.door.annotation.PgOnConflict
 import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_INSTANCE_MEMBER
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_ON_MEMBER
+import io.ktor.application.call
 import io.ktor.client.HttpClient
 import io.ktor.client.request.forms.InputProvider
 import io.ktor.content.TextContent
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
+import io.ktor.response.respond
 import io.ktor.routing.Route
 import org.kodein.type.TypeToken
 import java.io.File
@@ -211,6 +214,29 @@ class DbProcessorSync: AbstractDbProcessor() {
         codeBlock.beginControlFlow("%M(%S)",
                 MemberName("io.ktor.routing", "route"), abstractDaoSimpleName)
 
+        //Route for clients to subscribe for updates
+        codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER, "_subscribe")
+                .add("val _repo: %T by %M().%M(call).%M(tag = %T.TAG_REPO)\n",
+                    dbType, MemberName("org.kodein.di.ktor", "di"),
+                    DI_ON_MEMBER, DI_INSTANCE_MEMBER, DoorTag::class)
+                .add("call.%M(_repo as %T)\n",
+                        MemberName("com.ustadmobile.door.ktor", "respondUpdateNotifications"),
+                        DoorDatabaseSyncRepository::class)
+                .endControlFlow()
+
+        codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER, "_deleteUpdateNotifications")
+                .addRequestDi()
+                .add(generateGetParamFromRequestCodeBlock(LONG, "timestamp", "_timestamp",
+                        serverType = DbProcessorKtorServer.SERVER_TYPE_KTOR))
+                .add(generateGetParamFromRequestCodeBlock(INT, "tableId", "_tableId",
+                        serverType = DbProcessorKtorServer.SERVER_TYPE_KTOR))
+                .addGetClientIdHeader("_clientId", DbProcessorKtorServer.SERVER_TYPE_KTOR)
+                .add("val _dao = _daoFn(_db)\n")
+                .add("_dao._deleteUpdateNotifications(_clientId, _tableId, _timestamp)\n")
+                .add("call.respond(%T.NoContent, %S)\n", HttpStatusCode::class, "")
+                .endControlFlow()
+
+
 
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
@@ -351,6 +377,22 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addParameter("result", SyncResult::class)
                 .addModifiers(KModifier.OVERRIDE)
                 .addCode("_dao._insertSyncResult(result)\n")
+                .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("findPendingUpdateNotifications")
+                .addParameter("deviceId", INT)
+                .returns(List::class.parameterizedBy(UpdateNotification::class))
+                .addModifiers(KModifier.OVERRIDE)
+                .addModifiers(KModifier.SUSPEND)
+                .addCode("return _dao.findPendingUpdateNotifications(deviceId)\n")
+                .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("_deleteUpdateNotifications")
+                .addParameter("deviceId", INT)
+                .addParameter("tableId", INT)
+                .addParameter("timestamp", LONG)
+                .addCode("return _dao._deleteUpdateNotifications(deviceId, tableId, timestamp)\n")
+                .addModifiers(KModifier.OVERRIDE)
                 .build())
 
         repoTypeSpec.addFunction(FunSpec.builder("dispatchUpdateNotifications")
@@ -600,6 +642,31 @@ class DbProcessorSync: AbstractDbProcessor() {
         implDaoTypeSpec.addFunction(implInsertSyncResultFn)
 
 
+        //Find pending UpdateNotification query
+        val (abstractFindUpdateFn, implFindUpdateFN, abstractInterfaceFindUpdateFn) =
+                generateAbstractAndImplQueryFunSpecs("SELECT * FROM UpdateNotification WHERE pnDeviceId = :deviceId",
+                        "findPendingUpdateNotifications",
+                        List::class.parameterizedBy(UpdateNotification::class),
+                        listOf(ParameterSpec.builder("deviceId", INT).build()),
+                        addReturnStmt = true, abstractFunIsOverride = true, suspended = true)
+        abstractDaoTypeSpec.addFunction(abstractFindUpdateFn)
+        implDaoTypeSpec.addFunction(implFindUpdateFN)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceFindUpdateFn)
+
+        val (abstractDeleteUpdateNotification, implDeleteUpdateNotification, abstractInterfaceDeleteUpdateNotification) =
+                generateAbstractAndImplQueryFunSpecs("DELETE FROM UpdateNotification WHERE " +
+                        "pnDeviceId = :deviceId AND pnTableId = :tableId AND pnTimestamp = :timestamp",
+                        "_deleteUpdateNotifications", UNIT,
+                        listOf(ParameterSpec("deviceId", INT),
+                                ParameterSpec("tableId", INT),
+                                ParameterSpec("timestamp", LONG)),
+                        addReturnStmt = false, abstractFunIsOverride = true)
+        abstractDaoTypeSpec.addFunction(abstractDeleteUpdateNotification)
+        implDaoTypeSpec.addFunction(implDeleteUpdateNotification)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceDeleteUpdateNotification)
+
+
+
         val updateNotificationClassName = UpdateNotification::class.asClassName()
         val updateNotificationTypeEl = processingEnv.elementUtils.getTypeElement(
             "${updateNotificationClassName.packageName}.${updateNotificationClassName.simpleName}")
@@ -609,7 +676,8 @@ class DbProcessorSync: AbstractDbProcessor() {
                         "_replaceUpdateNotifications",
                         ParameterSpec.builder("entities", List::class.parameterizedBy(UpdateNotification::class)).build(),
                         updateNotificationTypeEl.asEntityTypeSpec(),
-                        implDaoTypeSpec, abstractFunIsOverride = true)
+                        implDaoTypeSpec, abstractFunIsOverride = true,
+                        pgOnConflict = "ON CONFLICT (pnDeviceId, pnTableId) DO UPDATE SET pnTimestamp = excluded.pnTimestamp")
         abstractDaoTypeSpec.addFunction(abstractReplaceUpdateNotification)
         implDaoTypeSpec.addFunction(implReplaceUpdateNotification)
         abstractDaoInterfaceTypeSpec.addFunction(abstractDaoReplaceUpdateNotification)
@@ -656,7 +724,8 @@ class DbProcessorSync: AbstractDbProcessor() {
                     "_replace${syncableEntityInfo.tracker.simpleName}",
                     ParameterSpec.builder("entities", entitySyncTrackerListClassName).build(),
                     generateTrackerEntity(entityType, processingEnv),
-                    implDaoTypeSpec, abstractFunIsOverride = true)
+                    implDaoTypeSpec, abstractFunIsOverride = true,
+                            pgOnConflict = " ON CONFLICT(epk, clientId) DO UPDATE SET csn = excluded.csn")
             abstractDaoTypeSpec.addFunction(abstractInsertTrackerFun)
             implDaoTypeSpec.addFunction(implInsertTrackerFun)
             abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceInsertTrackerFun)
@@ -702,7 +771,8 @@ class DbProcessorSync: AbstractDbProcessor() {
     private fun generateAbstractAndImplUpsertFuns(funName: String, paramSpec: ParameterSpec,
                                                   entityTypeSpec: TypeSpec,
                                                   daoTypeBuilder: TypeSpec.Builder,
-                                                  abstractFunIsOverride: Boolean = false): AbstractImplAndInterfaceFunSpecs {
+                                                  abstractFunIsOverride: Boolean = false,
+                                                  pgOnConflict: String? = null): AbstractImplAndInterfaceFunSpecs {
         val funBuilders = (0..2).map {
             FunSpec.builder(funName)
                     .returns(UNIT)
@@ -717,10 +787,15 @@ class DbProcessorSync: AbstractDbProcessor() {
 
         funBuilders[0].addAnnotation(AnnotationSpec.builder(Insert::class)
                 .addMember("onConflict = %T.REPLACE", OnConflictStrategy::class).build())
+        if(pgOnConflict != null) {
+            funBuilders[0].addAnnotation(AnnotationSpec.builder(PgOnConflict::class)
+                    .addMember("value = %S", pgOnConflict)
+                    .build())
+        }
 
         funBuilders[1].addModifiers(KModifier.OVERRIDE)
         funBuilders[1].addCode(generateInsertCodeBlock(paramSpec, UNIT, entityTypeSpec,
-                daoTypeBuilder,true))
+                daoTypeBuilder,true, pgOnConflict = pgOnConflict))
 
         return AbstractImplAndInterfaceFunSpecs(funBuilders[0].build(), funBuilders[1].build(),
                 funBuilders[2].build())
@@ -731,11 +806,13 @@ class DbProcessorSync: AbstractDbProcessor() {
                                              returnType: TypeName,
                                              params: List<ParameterSpec>,
                                              addReturnStmt: Boolean = true,
-                                             abstractFunIsOverride: Boolean = false): AbstractImplAndInterfaceFunSpecs {
+                                             abstractFunIsOverride: Boolean = false,
+                                             suspended: Boolean = false): AbstractImplAndInterfaceFunSpecs {
         val funBuilders = (0..2).map {
             FunSpec.builder(funName)
                     .returns(returnType)
                     .addParameters(params)
+                    .apply { takeIf { suspended }?.addModifiers(KModifier.SUSPEND) }
         }
 
         funBuilders[0].addModifiers(KModifier.ABSTRACT)

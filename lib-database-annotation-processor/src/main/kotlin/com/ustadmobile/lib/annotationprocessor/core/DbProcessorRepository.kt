@@ -324,10 +324,15 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .build())
 
             dbRepoType.addFunction(FunSpec.builder("dispatchUpdateNotifications")
-                    .addParameter("tableId", INT)
-                    .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                    .addCode("_${syncableDaoClassName.simpleName}.dispatchUpdateNotifications(tableId)\n")
-                    .build())
+                        .addParameter("tableId", INT)
+                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                        .addCode("_${syncableDaoClassName.simpleName}.dispatchUpdateNotifications(tableId)\n")
+                        .build())
+                    .addFunction(FunSpec.builder("findPendingUpdateNotifications")
+                            .addParameter("deviceId", INT)
+                            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                            .addCode("return _${syncableDaoClassName.simpleName}.findPendingUpdateNotifications(deviceId)\n")
+                            .build())
 
         }
 

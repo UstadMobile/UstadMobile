@@ -919,7 +919,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         |WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name}
                         |;
                         |INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
-                        |VALUES(${syncableEntityInfo.tableId}, NEW.${syncableEntityInfo.entityPkField.name}, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000))
+                        |SELECT ${syncableEntityInfo.tableId}, NEW.${syncableEntityInfo.entityPkField.name}, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000)
+                        |WHERE COALESCE((SELECT master From SyncNode LIMIT 1), 0)
                         |;
                         |END
                     """.trimMargin())
@@ -1210,7 +1211,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                                    entityTypeSpec: TypeSpec,
                                    daoTypeBuilder: TypeSpec.Builder,
                                    upsertMode: Boolean = false,
-                                   addReturnStmt: Boolean = true): CodeBlock {
+                                   addReturnStmt: Boolean = true,
+                                   pgOnConflict: String? = null): CodeBlock {
         val codeBlock = CodeBlock.builder()
         val paramType = parameterSpec.type
         val entityClassName = if(paramType is ParameterizedTypeName && paramType.rawType == List::class.asClassName()) {
@@ -1224,8 +1226,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             paramType as ClassName
         }
 
-
-        val entityInserterPropName = "_insertAdapter${entityTypeSpec.name}_${if(upsertMode) "upsert" else ""}"
+        val pgOnConflictHash = pgOnConflict?.hashCode()?.let { Math.abs(it) }?.toString() ?: ""
+        val entityInserterPropName = "_insertAdapter${entityTypeSpec.name}_${if(upsertMode) "upsert" else ""}$pgOnConflictHash"
         if(!daoTypeBuilder.propertySpecs.any { it.name == entityInserterPropName }) {
             val fieldNames = mutableListOf<String>()
             val parameterHolders = mutableListOf<String>()
@@ -1263,8 +1265,9 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 val nonPkFieldPairs = nonPkFields.map { "${it.name}·=·excluded.${it.name}" }
                 val pkField = entityTypeSpec.propertySpecs
                         .firstOrNull { it.annotations.any { it.className == PrimaryKey::class.asClassName()}}
-                "\${when(_db.jdbcDbType){ DoorDbType.POSTGRES -> \"·ON·CONFLICT·(${pkField?.name})·" +
-                        "DO·UPDATE·SET·${nonPkFieldPairs.joinToString(separator = ",·")}\" " +
+                val pgOnConflictVal = pgOnConflict?.replace(" ", "·") ?: "ON·CONFLICT·(${pkField?.name})·" +
+                    "DO·UPDATE·SET·${nonPkFieldPairs.joinToString(separator = ",·")}"
+                "\${when(_db.jdbcDbType){ DoorDbType.POSTGRES -> \"$pgOnConflictVal\" " +
                         "else -> \"·\" } } "
             } else {
                 ""
