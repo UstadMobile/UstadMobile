@@ -56,9 +56,9 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         ORDER BY ClazzLog.logDate DESC
         LIMIT :limit
     """)
-    abstract fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long, excludeStatusFilter: Int, limit: Int): List<ClazzLog>
+    abstract suspend fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long, excludeStatusFilter: Int, limit: Int): List<ClazzLog>
 
-    fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long) = findByClazzUidWithinTimeRange(clazzUid, fromTime, toTime, 0, Int.MAX_VALUE)
+    suspend fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long) = findByClazzUidWithinTimeRange(clazzUid, fromTime, toTime, 0, Int.MAX_VALUE)
 
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
         WHERE 
