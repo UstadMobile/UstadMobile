@@ -946,7 +946,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                     | ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END)
                     | WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name};
                     | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
-                    | SELECT ${syncableEntityInfo.tableId}, NEW.${syncableEntityInfo.entityPkField.name}, 0, cast(extract(epoch from now()) * 1000 AS BIGINT)
+                    | SELECT ${syncableEntityInfo.tableId}, NEW.${syncableEntityInfo.entityPkField.name}, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
                     | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
                     | RETURN null;
                     | END $$

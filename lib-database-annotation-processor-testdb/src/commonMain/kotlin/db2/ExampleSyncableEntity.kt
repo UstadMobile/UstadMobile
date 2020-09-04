@@ -12,7 +12,7 @@ import kotlinx.serialization.Serializable
 @SyncableEntity(tableId = 42,
     notifyOnUpdate = """SELECT DISTINCT deviceId 
                             FROM AccessGrant 
-                            WHERE entityUid IN (SELECT chEntityPk FROM ChangeLog WHERE chTableId = 42 AND dispatched = 0)
+                            WHERE entityUid IN (SELECT chEntityPk FROM ChangeLog WHERE chTableId = 42 AND CAST(dispatched AS BOOLEAN) = false)
                             AND tableId = 42""")
 @Serializable
 open class ExampleSyncableEntity(@PrimaryKey(autoGenerate = true) var esUid: Long = 0,

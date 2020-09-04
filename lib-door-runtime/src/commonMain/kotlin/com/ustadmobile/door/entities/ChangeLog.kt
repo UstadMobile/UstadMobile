@@ -13,7 +13,7 @@ data class ChangeLog (
 
         val chEntityPk: Long = 0L,
 
-        val dispatched: Int = 0,
+        val dispatched: Boolean = false,
 
         val chTime: Long = 0L
 

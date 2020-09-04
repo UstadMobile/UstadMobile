@@ -423,6 +423,12 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addModifiers(KModifier.OVERRIDE)
                 .build())
 
+        repoTypeSpec.addFunction(FunSpec.builder("_updateChangeLogDispatched")
+                .addParameter("tableId", INT)
+                .addParameter("dispatched", BOOLEAN)
+                .addModifiers(KModifier.OVERRIDE)
+                .build())
+
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
             val entityListTypeName = List::class.asClassName().parameterizedBy(entityType.asClassName())
@@ -483,6 +489,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                                     UpdateNotification::class)
                                 .add("_replaceUpdateNotifications(_updateNotifications)\n")
                                 .add("_updateNotificationManager?.onNewUpdateNotifications(_updateNotifications)\n")
+                                .add("_dao._updateChangeLogDispatched(${syncableEntityInfo.tableId}, true)\n")
                                 .add("return _devicesToNotify\n")
                                 .build())
                         .build())
@@ -671,6 +678,7 @@ class DbProcessorSync: AbstractDbProcessor() {
         val updateNotificationTypeEl = processingEnv.elementUtils.getTypeElement(
             "${updateNotificationClassName.packageName}.${updateNotificationClassName.simpleName}")
 
+        //Generate _replaceUpdateNotifications - used by dispatchPushNotifications to create / update UpdateNotifications
         val (abstractReplaceUpdateNotification, implReplaceUpdateNotification, abstractDaoReplaceUpdateNotification) =
                 generateAbstractAndImplUpsertFuns(
                         "_replaceUpdateNotifications",
@@ -681,6 +689,21 @@ class DbProcessorSync: AbstractDbProcessor() {
         abstractDaoTypeSpec.addFunction(abstractReplaceUpdateNotification)
         implDaoTypeSpec.addFunction(implReplaceUpdateNotification)
         abstractDaoInterfaceTypeSpec.addFunction(abstractDaoReplaceUpdateNotification)
+
+        val (abstractUpdateChangeLogDispatched, implUpdateChangeLogDispatched, abstractDaoUpdateChangeLogDispatched) =
+                generateAbstractAndImplQueryFunSpecs(
+                        """UPDATE ChangeLog SET dispatched = :dispatched 
+                        |WHERE 
+                        |chTableId = :tableId
+                        |AND chTime < (SELECT max(pnTimestamp) FROM UpdateNotification WHERE pnTableId = :tableId)
+                        |""".trimMargin(),
+                        "_updateChangeLogDispatched", UNIT,
+                        listOf(ParameterSpec("tableId", INT),
+                                ParameterSpec("dispatched", BOOLEAN)),
+                        addReturnStmt = false,abstractFunIsOverride = true)
+        abstractDaoTypeSpec.addFunction(abstractUpdateChangeLogDispatched)
+        implDaoTypeSpec.addFunction(implUpdateChangeLogDispatched)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractDaoUpdateChangeLogDispatched)
 
         syncableEntityTypesOnDb(dbType, processingEnv).forEach {entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
