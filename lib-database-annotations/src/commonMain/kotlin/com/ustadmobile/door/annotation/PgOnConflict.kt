@@ -5,7 +5,7 @@ package com.ustadmobile.door.annotation
 
 /**
  * Postgres does not offer the same REPLACE INTO functionality that SQLite provides. It provides an
- * ON CONFLICT clause.
+ * ON CONFLICT clause, see: https://www.postgresql.org/docs/12/sql-insert.html
  *
  * This annotation can be added to a method that is annotated with @Insert using OnConflictStrategy.REPLACE .
  * By default door will generate an onconflict clause that only considers the primary key. If you
