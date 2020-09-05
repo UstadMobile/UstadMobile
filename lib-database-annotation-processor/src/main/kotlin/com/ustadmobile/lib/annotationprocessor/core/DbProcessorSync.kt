@@ -241,7 +241,12 @@ class DbProcessorSync: AbstractDbProcessor() {
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
             val entityTypeListClassName = List::class.asClassName().parameterizedBy(entityType.asClassName())
-            val getAllSql = "SELECT * FROM ${entityType.simpleName}"
+            val syncFindAllSql = entityType.getAnnotation(SyncableEntity::class.java)?.syncFindAllQuery
+            val getAllSql = if(syncFindAllSql?.isNotEmpty() == true) {
+                syncFindAllSql
+            }else {
+                "SELECT * FROM ${entityType.simpleName}"
+            }
             val getAllFunSpec = FunSpec.builder("_findMasterUnsent${entityType.simpleName}")
                     .returns(entityTypeListClassName)
                     .addAnnotation(AnnotationSpec.builder(Query::class)

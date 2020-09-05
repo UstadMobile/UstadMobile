@@ -13,7 +13,10 @@ import kotlinx.serialization.Serializable
     notifyOnUpdate = """SELECT DISTINCT deviceId 
                             FROM AccessGrant 
                             WHERE entityUid IN (SELECT chEntityPk FROM ChangeLog WHERE chTableId = 42 AND CAST(dispatched AS BOOLEAN) = false)
-                            AND tableId = 42""")
+                            AND tableId = 42""",
+    syncFindAllQuery = """Select ExampleSyncableEntity.* 
+                          FROM ExampleSyncableEntity
+                          JOIN AccessGrant ON AccessGrant.entityUid = ExampleSyncableEntity.esUid AND AccessGrant.tableId = 42 AND AccessGrant.deviceId = :clientId""")
 @Serializable
 open class ExampleSyncableEntity(@PrimaryKey(autoGenerate = true) var esUid: Long = 0,
                                  @LocalChangeSeqNum var esLcsn: Int = 0,

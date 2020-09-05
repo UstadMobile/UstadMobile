@@ -1,50 +1,38 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import com.google.gson.Gson
-import com.nhaarman.mockitokotlin2.argWhere
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.timeout
-import com.nhaarman.mockitokotlin2.verify
+import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.door.*
-import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ktor.respondUpdateNotifications
-import db2.*
-import io.ktor.client.HttpClient
-import io.ktor.client.features.json.JsonFeature
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
+import db2.AccessGrant
+import db2.ExampleDatabase2
+import db2.ExampleDatabase2_KtorRoute
+import db2.ExampleSyncableEntity
 import io.ktor.application.ApplicationCall
 import io.ktor.application.install
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.features.ClientRequestException
+import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.request.get
+import io.ktor.client.request.header
+import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
 import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
 import io.ktor.routing.Routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import io.ktor.application.call
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.ClientRequestException
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.features.CallLogging
-import io.ktor.http.CacheControl
-import io.ktor.http.HttpStatusCode
-import io.ktor.request.header
-import io.ktor.response.cacheControl
-import io.ktor.response.respond
-import io.ktor.response.respondTextWriter
-import io.ktor.routing.get
-import io.ktor.routing.routing
 import io.netty.handler.codec.http.HttpResponse
-import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.runBlocking
+import okhttp3.mockwebserver.MockResponse
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
-import org.kodein.di.ktor.di
 import org.sqlite.SQLiteDataSource
 import java.io.File
 import javax.sql.DataSource
@@ -271,6 +259,12 @@ class TestDbRepo {
                     "token", httpClient)
                     .asConnectedRepository<ExampleDatabase2>()
 
+            serverDb.accessGrantDao().insert(AccessGrant().apply {
+                tableId = 42
+                deviceId = (clientRepo as DoorDatabaseSyncRepository).clientId
+                entityUid = exampleSyncableEntity.esUid
+            })
+
             (clientRepo as DoorDatabaseSyncRepository).sync(null)
 
             Assert.assertNotNull("Entity is in client database after sync",
@@ -352,6 +346,11 @@ class TestDbRepo {
         runBlocking {
             val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
             exampleSyncableEntity.esUid = clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
+            serverDb.accessGrantDao().insert(AccessGrant().apply {
+                tableId = 42
+                deviceId = (clientRepo as DoorDatabaseSyncRepository).clientId
+                entityUid = exampleSyncableEntity.esUid
+            })
 
             (clientRepo as DoorDatabaseSyncRepository).sync(null)
 
@@ -384,10 +383,18 @@ class TestDbRepo {
         runBlocking {
             val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
             exampleSyncableEntity.esUid = serverRepo.exampleSyncableDao().insert(exampleSyncableEntity)
+
+            serverDb.accessGrantDao().insert(AccessGrant().apply {
+                tableId = 42
+                deviceId = (clientRepo as DoorDatabaseSyncRepository).clientId
+                entityUid = exampleSyncableEntity.esUid
+            })
+
             (clientRepo as DoorDatabaseSyncRepository).sync(listOf(ExampleSyncableEntity::class))
 
             val entityOnClientAfterSync = clientDb.exampleSyncableDao()
                     .findByUid(exampleSyncableEntity.esUid)
+
 
 
             clientRepo.exampleSyncableDao().updateNumberByUid(exampleSyncableEntity.esUid, 53)
@@ -470,7 +477,8 @@ class TestDbRepo {
 
     @Test
     fun givenEmptyDatabase_whenChangeMadeOnServer_thenOnNewUpdateNotificationShouldBeCalledAndNotificationEntityShouldBeInserted()  {
-        setupClientAndServerDb(UpdateNotificationManagerImpl())
+        mockUpdateNotificationManager = spy(UpdateNotificationManagerImpl())
+        setupClientAndServerDb(mockUpdateNotificationManager)
 
         val testUid = 42L
 
@@ -490,7 +498,7 @@ class TestDbRepo {
             serverDb.exampleSyncableDao().insert(this)
         }
 
-        verify(mockUpdateNotificationManager, timeout(5000)).onNewUpdateNotifications(
+        verify(mockUpdateNotificationManager, timeout(5000 )).onNewUpdateNotifications(
                 argWhere { it.any { it.pnTableId ==  42 && it.pnDeviceId == 57} })
     }
 
