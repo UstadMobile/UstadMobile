@@ -318,9 +318,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
             dbRepoType.addSuperinterface(DoorDatabaseSyncRepository::class)
             dbRepoType.addFunction(FunSpec.builder("sync")
                     .addModifiers(KModifier.OVERRIDE,KModifier.SUSPEND)
-                    .addParameter("entities", List::class.asClassName().parameterizedBy(
-                            KClass::class.asClassName().parameterizedBy(STAR)).copy(nullable = true))
-                    .addCode("_${syncableDaoClassName.simpleName}.sync(entities)\n")
+                    .addParameter("tablesToSync", List::class.parameterizedBy(Int::class)
+                            .copy(nullable = true))
+                    .addCode("_${syncableDaoClassName.simpleName}.sync(tablesToSync)\n")
                     .build())
 
             dbRepoType.addFunction(FunSpec.builder("dispatchUpdateNotifications")

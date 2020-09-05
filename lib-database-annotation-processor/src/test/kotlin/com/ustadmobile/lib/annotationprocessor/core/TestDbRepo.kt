@@ -83,13 +83,6 @@ class TestDbRepo {
         }
 
         install(CallLogging)
-
-//        routing {
-//            get("/subscribe") {
-//                val repo: ExampleDatabase2 by di().on(call).instance(tag = DoorTag.TAG_REPO)
-//                call.respondUpdateNotifications(repo as DoorDatabaseSyncRepository)
-//            }
-//        }
     }
 
     fun setupClientAndServerDb(updateNotificationManager: UpdateNotificationManager = mockUpdateNotificationManager) {

@@ -561,7 +561,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                     .returns(SyncResult::class)
                     .addCode(entitySyncCodeBlock.build())
 
-            syncFnCodeBlock.beginControlFlow("if(entities == null || %T::class in entities)",
+            syncFnCodeBlock.beginControlFlow("if(tablesToSync == null || ${syncableEntityInfo.tableId} in tablesToSync)",
                             entityType)
                     .beginControlFlow("try")
                     .add("val _syncResult = sync${entityType.simpleName}()\n")
@@ -589,8 +589,7 @@ class DbProcessorSync: AbstractDbProcessor() {
 
         repoTypeSpec.addFunction(FunSpec.builder("sync")
                 .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                .addParameter("entities", List::class.asClassName().parameterizedBy(
-                        KClass::class.asClassName().parameterizedBy(STAR)).copy(nullable = true))
+                .addParameter("tablesToSync", List::class.parameterizedBy(Int::class).copy(nullable = true))
                 .addCode(syncFnCodeBlock.build())
                 .build())
 
