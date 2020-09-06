@@ -75,8 +75,7 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
 
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
         try {
-            var requestUri = RouterNanoHTTPD.normalizeUri(session.uri)
-            requestUri = URI(requestUri).normalize().toString()
+            var requestUri = session.uri
             val containerUid = uriResource.initParameter(PARAM_CONTAINERUID_INDEX, String::class.java).toLong()
             val pathInContainer = requestUri.substring(
                     uriResource.uri.length - URI_ROUTE_POSTFIX.length)
@@ -84,7 +83,8 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
             val entryFile = appDb.containerEntryDao
                     .findByPathInContainer(containerUid, pathInContainer)
                     ?: return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
-                            "text/plain", "Entry not found in container")
+                            "text/plain", "Entry not found in container: $pathInContainer uriResource.uri=${uriResource.uri}\n" +
+                            "requestUri=${requestUri}")
 
             val filterList = uriResource.initParameter(PARAM_FILTERS_INDEX, List::class.java)
                     as List<MountedContainerFilter>
