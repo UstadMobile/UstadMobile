@@ -617,6 +617,32 @@ internal fun isSyncableDb(dbTypeEl: TypeElement, processingEnv: ProcessingEnviro
                 processingEnv.elementUtils.getTypeElement(SyncableDoorDatabase::class.java.canonicalName).asType())
 
 
+/**
+ *
+ */
+fun findEntityModifiedByQuery(querySql: String, allKnownEntityNames: List<String>): String? {
+    val stmtSplit = querySql.trim().split(Regex("\\s+"), limit = 4)
+    val tableModified = if(stmtSplit[0].equals("UPDATE", ignoreCase = true)) {
+        stmtSplit[1] // in case it is an update statement, will be the second word (e.g. update tablename)
+    }else if(stmtSplit[0].equals("DELETE", ignoreCase = true)){
+        stmtSplit[2] // in case it is a delete statement, will be the third word (e.g. delete from tablename)
+    }else {
+        null
+    }
+
+    /*
+     * If the entity did not exist, then our attempt to run the query would have thrown
+     * an SQLException . When calling handleTableChanged, we want to use the same case
+     * as the entity, so we look it up from the list of known entities to find the correct
+     * case to use.
+     */
+    return if(tableModified != null) {
+        allKnownEntityNames.first {it.equals(tableModified,  ignoreCase = true)}
+    }else {
+        null
+    }
+}
+
 abstract class AbstractDbProcessor: AbstractProcessor() {
 
     protected lateinit var messager: Messager
@@ -1105,20 +1131,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                  */
                 execStmt?.executeUpdate(execStmtSql)
                 codeBlock.add("val _numUpdates = _stmt.executeUpdate()\n")
-                val stmtSplit = execStmtSql!!.trim().split(Regex("\\s+"), limit = 4)
-                val tableName = if(stmtSplit[0].equals("UPDATE", ignoreCase = true)) {
-                    stmtSplit[1] // in case it is an update statement, will be the second word (e.g. update tablename)
-                }else {
-                    stmtSplit[2] // in case it is a delete statement, will be the third word (e.g. delete from tablename)
-                }
-
-                /*
-                 * If the entity did not exist, then our attempt to run the query would have thrown
-                 * an SQLException . When calling handleTableChanged, we want to use the same case
-                 * as the entity, so we look it up from the list of known entities to find the correct
-                 * case to use.
-                 */
-                val entityModified = allKnownEntityNames.first {it.equals(tableName,  ignoreCase = true)}
+                val entityModified = findEntityModifiedByQuery(execStmtSql!!, allKnownEntityNames)
 
                 codeBlock.beginControlFlow("if(_numUpdates > 0)")
                         .add("_db.handleTableChanged(listOf(%S))\n", entityModified)

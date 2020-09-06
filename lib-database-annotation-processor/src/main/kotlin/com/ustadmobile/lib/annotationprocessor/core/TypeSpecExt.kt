@@ -6,6 +6,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.util.*
 import javax.lang.model.element.ExecutableElement
 import com.ustadmobile.door.RepositoryConnectivityListener
+import com.ustadmobile.door.TableChangeListener
 import javax.lang.model.element.TypeElement
 
 /**
@@ -77,6 +78,21 @@ internal fun TypeSpec.Builder.addRepositoryHelperDelegateCalls(delegatePropName:
             .addModifiers(KModifier.OVERRIDE)
             .addParameter("listener", RepositoryConnectivityListener::class)
             .addCode("$delegatePropName.removeWeakConnectivityListener(listener)\n")
+            .build())
+    addFunction(FunSpec.builder("addTableChangeListener")
+            .addModifiers(KModifier.OVERRIDE)
+            .addParameter("listener", TableChangeListener::class)
+            .addCode("$delegatePropName.addTableChangeListener(listener)\n")
+            .build())
+    addFunction(FunSpec.builder("removeTableChangeListener")
+            .addModifiers(KModifier.OVERRIDE)
+            .addParameter("listener", TableChangeListener::class)
+            .addCode("$delegatePropName.removeTableChangeListener(listener)\n")
+            .build())
+    addFunction(FunSpec.builder("handleTableChanged")
+            .addModifiers(KModifier.OVERRIDE)
+            .addParameter("tableName", String::class)
+            .addCode("$delegatePropName.handleTableChanged(tableName)\n")
             .build())
 
 

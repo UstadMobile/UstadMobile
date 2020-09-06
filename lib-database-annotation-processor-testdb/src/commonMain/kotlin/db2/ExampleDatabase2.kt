@@ -4,6 +4,7 @@ import androidx.room.Database
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.entities.ChangeLog
+import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
 import db2.ExampleDatabase2.Companion.DB_VERSION
 
@@ -16,7 +17,8 @@ import db2.ExampleDatabase2.Companion.DB_VERSION
     ExampleAttachmentEntity::class,
     ChangeLog::class,
     AccessGrant::class,
-    UpdateNotification::class
+    UpdateNotification::class,
+    TableSyncStatus::class
     //#DOORDB_TRACKER_ENTITIES
 
 ])

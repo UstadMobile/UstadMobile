@@ -11,6 +11,7 @@ import com.ustadmobile.door.UpdateNotificationManager
 import com.ustadmobile.door.annotation.EntityWithAttachment
 import com.ustadmobile.door.annotation.PgOnConflict
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_INSTANCE_MEMBER
@@ -400,6 +401,26 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addModifiers(KModifier.OVERRIDE)
                 .build())
 
+        repoTypeSpec.addFunction(FunSpec.builder("updateTableSyncStatusLastChanged")
+                .addParameter("tableId", INT)
+                .addParameter("lastChanged", LONG)
+                .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                .addCode("_dao.updateTableSyncStatusLastChanged(tableId, lastChanged)")
+                .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("updateTableSyncStatusLastSynced")
+                .addParameter("tableId", INT)
+                .addParameter("lastSynced", LONG)
+                .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                .addCode("_dao.updateTableSyncStatusLastSynced(tableId, lastSynced)")
+                .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("findTablesToSync")
+                .addModifiers(KModifier.OVERRIDE)
+                .addCode("return _dao.findTablesToSync()\n")
+                .returns(List::class.parameterizedBy(TableSyncStatus::class))
+                .build())
+
         repoTypeSpec.addFunction(FunSpec.builder("dispatchUpdateNotifications")
                 .addParameter("tableId", INT)
                 .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
@@ -586,9 +607,11 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .endControlFlow()
                 .add("_insertSyncResult(%T(tableId = 0, status = _syncRunStatus, timestamp = %M()))\n",
                         SyncResult::class, SYSTEMTIME_MEMBER_NAME)
+                .add("return _allResults\n")
 
         repoTypeSpec.addFunction(FunSpec.builder("sync")
                 .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                .returns(List::class.parameterizedBy(SyncResult::class))
                 .addParameter("tablesToSync", List::class.parameterizedBy(Int::class).copy(nullable = true))
                 .addCode(syncFnCodeBlock.build())
                 .build())
@@ -653,7 +676,7 @@ class DbProcessorSync: AbstractDbProcessor() {
         implDaoTypeSpec.addFunction(implInsertSyncResultFn)
 
 
-        //Find pending UpdateNotification query
+        //Find pending UpdateNotification query - as declared in DoorDatabaseSyncRepository
         val (abstractFindUpdateFn, implFindUpdateFN, abstractInterfaceFindUpdateFn) =
                 generateAbstractAndImplQueryFunSpecs("SELECT * FROM UpdateNotification WHERE pnDeviceId = :deviceId",
                         "findPendingUpdateNotifications",
@@ -663,6 +686,44 @@ class DbProcessorSync: AbstractDbProcessor() {
         abstractDaoTypeSpec.addFunction(abstractFindUpdateFn)
         implDaoTypeSpec.addFunction(implFindUpdateFN)
         abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceFindUpdateFn)
+
+        //Generate query to update TableSyncStatus last changed (eg. when a local change is made or
+        // when a remote change notification is received) - as declared in DoorDatabaseSyncRepository
+        val (abstractUpdateTableLastChanged, implUpdateTableStatusChanged, abstractInterfaceUpdateTable) =
+                generateAbstractAndImplQueryFunSpecs("UPDATE TableSyncStatus SET " +
+                        "tsLastChanged = :lastChanged WHERE tsTableId = :tableId",
+                        "updateTableSyncStatusLastChanged",
+                        UNIT, listOf(ParameterSpec("tableId", INT),
+                        ParameterSpec("lastChanged", LONG)),
+                        addReturnStmt = false, abstractFunIsOverride = true, suspended = true)
+        abstractDaoTypeSpec.addFunction(abstractUpdateTableLastChanged)
+        implDaoTypeSpec.addFunction(implUpdateTableStatusChanged)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceUpdateTable)
+
+        //Generate query to update TableSyncStatus lastSynced (e.g. after a sync run has been
+        // completed
+        val (abstractUpdateLastSynced, implUpdateLastSynced, abstractInterfaceUpdateLastSynced) =
+                generateAbstractAndImplQueryFunSpecs("UPDATE TableSyncStatus SET " +
+                    "tsLastSynced = :lastSynced WHERE tsTableId = :tableId",
+                    "updateTableSyncStatusLastSynced", UNIT,
+                        listOf(ParameterSpec("tableId", INT),
+                                ParameterSpec("lastSynced", LONG)),
+                        addReturnStmt = false, abstractFunIsOverride = true, suspended = true)
+        abstractDaoTypeSpec.addFunction(abstractUpdateLastSynced)
+        implDaoTypeSpec.addFunction(implUpdateLastSynced)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceUpdateLastSynced)
+
+
+        //Generate query to find tables that need synced
+        val (abstractFindTablesToSyncFn, implFindTablesToSyncFn, abstractInterfaceFindTablesToSyncFn) =
+                generateAbstractAndImplQueryFunSpecs("SELECT TableSyncStatus.* " +
+                        "FROM TableSyncStatus WHERE tsLastChanged > tsLastSynced",
+                        "findTablesToSync", List::class.parameterizedBy(TableSyncStatus::class),
+                        listOf(), addReturnStmt = true, abstractFunIsOverride = true)
+        abstractDaoTypeSpec.addFunction(abstractFindTablesToSyncFn)
+        implDaoTypeSpec.addFunction(implFindTablesToSyncFn)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceFindTablesToSyncFn)
+
 
         val (abstractDeleteUpdateNotification, implDeleteUpdateNotification, abstractInterfaceDeleteUpdateNotification) =
                 generateAbstractAndImplQueryFunSpecs("DELETE FROM UpdateNotification WHERE " +

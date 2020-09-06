@@ -24,6 +24,8 @@ class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = do
 
     private val weakConnectivityListeners: MutableList<WeakReference<RepositoryConnectivityListener>> = CopyOnWriteArrayList()
 
+    private val tableChangeListeners: MutableList<TableChangeListener> = CopyOnWriteArrayList()
+
     var connectivityStatus: Int
         get() = connectivityStatusAtomic.get()
         set(newValue) {
@@ -63,8 +65,22 @@ class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = do
     }
 
     fun removeWeakConnectivityListener(listener: RepositoryConnectivityListener) {
-        val list = mutableListOf<Int>()
         weakConnectivityListeners.removeAll { it.get() == listener }
+    }
+
+    fun addTableChangeListener(listener: TableChangeListener) {
+        tableChangeListeners += listener
+    }
+
+    fun removeTableChangeListener(listener: TableChangeListener) {
+        tableChangeListeners -= listener
+    }
+
+    fun handleTableChanged(tableName: String) {
+        tableChangeListeners.forEach {
+            //TODO: Call the update function to mark this table as having been changed.
+            it.onTableChanged(tableName)
+        }
     }
 
 }

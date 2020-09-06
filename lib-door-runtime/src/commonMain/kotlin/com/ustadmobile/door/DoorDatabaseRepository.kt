@@ -46,10 +46,9 @@ interface DoorDatabaseRepository {
 
     /**
      * This function will be generated on all repositories. It is intended for use on the primary
-     * database (e.g. the server). This function should be called by the underlying db system
-     * (e.g. SQLite or Postgres) when changes have been made to a syncable table. The underlying
-     * database triggers should insert a row into the ChangeLog table (including the entity UID,
-     * and table ID).
+     * database (e.g. the server). This function should be called by something which is listening
+     * for database changes (e.g. RepositoryUpdateDispatcher). It is best for these to be dispatched
+     * using a fan-out pattern.
      *
      * This function should be called periodically after a change happens (e.g. as is done by
      * the ChangeLogMonitor) and NOT once for every single row (for performance reasons).
@@ -66,6 +65,12 @@ interface DoorDatabaseRepository {
      * currently subscribed for updates will be notified.
      */
     suspend fun dispatchUpdateNotifications(tableId: Int)
+
+    fun addTableChangeListener(listener: TableChangeListener)
+
+    fun removeTableChangeListener(listener: TableChangeListener)
+
+    fun handleTableChanged(tableName: String)
 
     companion object {
 

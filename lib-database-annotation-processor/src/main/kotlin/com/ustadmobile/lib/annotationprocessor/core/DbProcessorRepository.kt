@@ -21,7 +21,6 @@ import com.ustadmobile.door.util.RepositoryUpdateDispatcher
 import kotlinx.coroutines.newSingleThreadContext
 import java.io.File
 import java.util.*
-import kotlin.reflect.KClass
 
 internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: Boolean = false,
         extraConstructorParams: List<ParameterSpec> = listOf()): TypeSpec.Builder {
@@ -320,7 +319,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .addModifiers(KModifier.OVERRIDE,KModifier.SUSPEND)
                     .addParameter("tablesToSync", List::class.parameterizedBy(Int::class)
                             .copy(nullable = true))
-                    .addCode("_${syncableDaoClassName.simpleName}.sync(tablesToSync)\n")
+                    .returns(List::class.parameterizedBy(SyncResult::class))
+                    .addCode("return _${syncableDaoClassName.simpleName}.sync(tablesToSync)\n")
                     .build())
 
             dbRepoType.addFunction(FunSpec.builder("dispatchUpdateNotifications")
@@ -332,6 +332,22 @@ class DbProcessorRepository: AbstractDbProcessor() {
                             .addParameter("deviceId", INT)
                             .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
                             .addCode("return _${syncableDaoClassName.simpleName}.findPendingUpdateNotifications(deviceId)\n")
+                            .build())
+                    .addFunction(FunSpec.builder("findTablesToSync")
+                            .addModifiers(KModifier.OVERRIDE)
+                            .addCode("return _${syncableDaoClassName.simpleName}.findTablesToSync()\n")
+                            .build())
+                    .addFunction(FunSpec.builder("updateTableSyncStatusLastChanged")
+                            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                            .addParameter("tableId", INT)
+                            .addParameter("lastChanged", LONG)
+                            .addCode("_${syncableDaoClassName.simpleName}.updateTableSyncStatusLastChanged(tableId, lastChanged)\n")
+                            .build())
+                    .addFunction(FunSpec.builder("updateTableSyncStatusLastSynced")
+                            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                            .addParameter("tableId", INT)
+                            .addParameter("lastChanged", LONG)
+                            .addCode("_${syncableDaoClassName.simpleName}.updateTableSyncStatusLastSynced(tableId, lastChanged)")
                             .build())
 
         }
@@ -502,7 +518,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                 BOUNDARY_CALLBACK_CLASSNAME.parameterizedBy(entityType))
                                 .add("return _dataSource\n")
                     }else {
-                        codeBlock.add(generateRepositoryDelegateToDaoFun(daoFunSpec.build()))
+                        codeBlock.add(generateRepositoryDelegateToDaoFun(daoFunSpec.build(),
+                            daoMethodEl.getAnnotation(Query::class.java)?.value))
                     }
                 }
 
@@ -582,7 +599,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
      * Update method and the parameter type is syncable, then the last changed by field on the
      * syncable entity will be updated
      */
-    fun generateRepositoryDelegateToDaoFun(daoFunSpec: FunSpec): CodeBlock {
+    fun generateRepositoryDelegateToDaoFun(daoFunSpec: FunSpec, querySql: String? = null): CodeBlock {
         val codeBlock = CodeBlock.builder()
         if(isUpdateDeleteOrInsertMethod(daoFunSpec)) {
             val entityParam = daoFunSpec.parameters[0]
@@ -605,6 +622,27 @@ class DbProcessorRepository: AbstractDbProcessor() {
         codeBlock.add("_dao.${daoFunSpec.name}(")
                 .add(daoFunSpec.parameters.filter { !isContinuationParam(it.type)}.joinToString { it.name })
                 .add(")\n")
+
+        if(isUpdateDeleteOrInsertMethod(daoFunSpec)) {
+            val isList = isListOrArray(daoFunSpec.parameters[0].type)
+            codeBlock.add("_repo")
+
+            codeBlock.takeIf { isList }?.add(".takeIf·{·%L.isNotEmpty()·}?",
+                daoFunSpec.parameters[0].name)
+            codeBlock.add(".handleTableChanged(%S)\n",
+                    (resolveEntityFromResultType(daoFunSpec.parameters[0].type) as ClassName).simpleName)
+        }
+
+        //Check if this is a method annotated @Query that actually changes the database
+        val tableModifiedByQuery = if(querySql != null) {
+            findEntityModifiedByQuery(querySql, allKnownEntityNames)
+        }else {
+            null
+        }
+
+        if(tableModifiedByQuery != null) {
+            codeBlock.add("_repo.handleTableChanged(%S)\n", tableModifiedByQuery)
+        }
 
         if(daoFunSpec.returnType != UNIT)
             codeBlock.add("return _result\n")
