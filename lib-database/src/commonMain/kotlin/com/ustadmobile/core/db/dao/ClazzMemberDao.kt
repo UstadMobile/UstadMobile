@@ -117,11 +117,11 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
             END DESC,
             CASE(:sortOrder)
                 WHEN $SORT_DATE_LEFT_ASC THEN ClazzMember.clazzMemberDateLeft
-                ELSE ''
+                ELSE 0
             END ASC,
             CASE(:sortOrder)
                 WHEN $SORT_DATE_LEFT_DESC THEN ClazzMember.clazzMemberDateLeft
-                ELSE ''
+                ELSE 0
             END DESC
     """)
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%%"): DataSource.Factory<Int, ClazzMemberWithPerson>
