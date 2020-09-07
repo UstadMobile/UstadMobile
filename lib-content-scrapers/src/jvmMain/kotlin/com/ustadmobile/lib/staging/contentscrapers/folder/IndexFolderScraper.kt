@@ -17,9 +17,11 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
 import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
 import kotlinx.coroutines.runBlocking
+import org.apache.commons.cli.*
 import org.apache.commons.lang.exception.ExceptionUtils
 import java.io.File
 import java.io.IOException
+import kotlin.system.exitProcess
 
 
 /**
@@ -44,12 +46,11 @@ class IndexFolderScraper {
     private var containerDir: File? = null
 
     @Throws(IOException::class)
-    fun findContent(name: String, destinationDir: File, containerDir: File) {
+    fun findContent(name: String, destinationDir: File, containerDir: File, parentUid: Long) {
 
-        publisher = name
         containerDir.mkdirs()
         this.containerDir = containerDir
-        repository = db //db!!.getRepository("https://localhost", "")
+        repository = db
         contentEntryDao = repository!!.contentEntryDao
         contentParentChildJoinDao = repository!!.contentEntryParentChildJoinDao
         containerDao = repository!!.containerDao
@@ -60,18 +61,20 @@ class IndexFolderScraper {
 
         englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao!!, "English")
 
-        val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
-                ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null,
-                EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
-
-
         val parentFolder = ContentScraperUtil.createOrUpdateContentEntry(name, name,
                 filePrefix + destinationDir.path, name, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null,
                 EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING,
                 EMPTY_STRING, 0, contentEntryDao!!)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, parentFolder, 7)
+        var parentEntry = contentEntryDao!!.findByUid(parentUid)
+
+        if (parentEntry == null) {
+            parentEntry = ContentEntry().apply {
+                this.contentEntryUid = parentUid
+            }
+        }
+
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentEntry, parentFolder, 7)
 
         browseSubFolders(destinationDir, parentFolder)
 
@@ -136,20 +139,72 @@ class IndexFolderScraper {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            if (args.size < 3) {
-                System.err.println("Usage: <folder parent name> <file destination><folder container><optional log{trace, debug, info, warn, error, fatal}>")
-                System.exit(1)
-            }
-            UMLogUtil.setLevel(if (args.size == 4) args[3] else "")
-            UMLogUtil.logInfo(args[0])
-            UMLogUtil.logInfo(args[1])
+
+            val options = Options()
+
+            val scrapeOption = Option.builder("scrape")
+                    .argName("folder")
+                    .hasArg()
+                    .required()
+                    .desc("path to folder for scrape ")
+                    .build()
+            options.addOption(scrapeOption)
+
+            val containerOption = Option.builder("container")
+                    .argName("container")
+                    .hasArg()
+                    .required()
+                    .desc("path to container to store")
+                    .build()
+            options.addOption(containerOption)
+
+
+            val parentOption = Option.builder("parentUid")
+                    .argName("uid")
+                    .hasArg()
+                    .desc("parentUid to folder to join")
+                    .build()
+            options.addOption(parentOption)
+
+            val folderNameOption = Option.builder("folderName")
+                    .argName("name")
+                    .hasArg()
+                    .desc("optional name to folder")
+                    .build()
+            options.addOption(folderNameOption)
+
+            val logOption = Option.builder("log")
+                    .argName("option")
+                    .hasArg()
+                    .desc("og{trace, debug, info, warn, error, fatal}")
+                    .build()
+            options.addOption(logOption)
+
+            val cmd: CommandLine
             try {
-                IndexFolderScraper().findContent(args[0], File(args[1]), File(args[2]))
+
+                val parser: CommandLineParser = DefaultParser()
+                cmd = parser.parse(options, args)
+
+                val container = cmd.getOptionValue("container")
+                val folderPath = cmd.getOptionValue("scrape")
+                val file = File(folderPath)
+                val parentUid = cmd.getOptionValue("parentUid")?.toLongOrNull()
+                        ?: -4103245208651563007L
+                val folderName = cmd.getOptionValue("folderName") ?: file.name
+                val log = cmd.getOptionValue("log") ?: "INFO"
+
+                UMLogUtil.setLevel(log)
+
+                IndexFolderScraper().findContent(folderName, file, File(container), parentUid)
+
+            } catch (e: ParseException) {
+                System.err.println("Parsing failed.  Reason: " + e.message)
+                exitProcess(1)
             } catch (e: Exception) {
                 UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e))
                 UMLogUtil.logFatal("Exception running findContent Folder")
             }
-
         }
     }
 
