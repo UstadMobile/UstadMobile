@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE ncx PUBLIC "-//NISO//DTD ncx 2005-1//EN"
+   "http://www.daisy.org/z3986/2005/ncx-2005-1.dtd">
+
+<ncx xmlns="http://www.daisy.org/z3986/2005/ncx/" version="2005-1">
+  <head>
+    <meta name="dtb:uid" content="urn:uuid:ddcc2444-97cf-4b13-92d0-94634bd433fe"/>
+    <meta name="dtb:depth" content="2"/>
+    <meta name="dtb:totalPageCount" content="0"/>
+    <meta name="dtb:maxPageNumber" content="0"/>
+  </head>
+  <docTitle>
+    <text>[Место заголовка]</text>
+  </docTitle>
+  <navMap>
+    <navPoint id="navPoint-1" playOrder="1">
+      <navLabel>
+        <text>Муқаддима</text>
+      </navLabel>
+      <content src="Text/Section0004.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-2" playOrder="2">
+      <navLabel>
+        <text>Ватан мо</text>
+      </navLabel>
+      <content src="Text/Section0006.xhtml#sigil_toc_id_1"/>
+    </navPoint>
+    <navPoint id="navPoint-3" playOrder="3">
+      <navLabel>
+        <text>Оилаи мо</text>
+      </navLabel>
+      <content src="Text/Section0009.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-4" playOrder="4">
+      <navLabel>
+        <text>Хона ва мактаби мо</text>
+      </navLabel>
+      <content src="Text/Section0013.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-5" playOrder="5">
+      <navLabel>
+        <text>Дар осмон чӣ ҳаст?</text>
+      </navLabel>
+      <content src="Text/Section0018.xhtml"/>
+      <navPoint id="navPoint-6" playOrder="6">
+        <navLabel>
+          <text>Чаро Офтоб рӯзона ва Моҳ шабона намоён мешавад?</text>
+        </navLabel>
+        <content src="Text/Section0022.xhtml"/>
+      </navPoint>
+    </navPoint>
+    <navPoint id="navPoint-7" playOrder="7">
+      <navLabel>
+        <text>Чаро шакли Моҳ тағйир меёбад?</text>
+      </navLabel>
+      <content src="Text/Section0025.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-8" playOrder="8">
+      <navLabel>
+        <text>Санг ва хок</text>
+      </navLabel>
+      <content src="Text/Section0028.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-9" playOrder="9">
+      <navLabel>
+        <text>Рустанӣ</text>
+      </navLabel>
+      <content src="Text/Section0032.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-10" playOrder="10">
+      <navLabel>
+        <text>Парвариши гул</text>
+      </navLabel>
+      <content src="Text/Section0035.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-11" playOrder="11">
+      <navLabel>
+        <text>Мева ва сабзавот</text>
+      </navLabel>
+      <content src="Text/Section0038.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-12" playOrder="12">
+      <navLabel>
+        <text>Рангҳо дар табиат</text>
+      </navLabel>
+      <content src="Text/Section0042.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-13" playOrder="13">
+      <navLabel>
+        <text>Ҳашарот</text>
+      </navLabel>
+      <content src="Text/Section0045.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-14" playOrder="14">
+      <navLabel>
+        <text>Моҳӣ ва намудҳои он</text>
+      </navLabel>
+      <content src="Text/Section0050.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-15" playOrder="15">
+      <navLabel>
+        <text>Олами парандаҳо</text>
+      </navLabel>
+      <content src="Text/Section0052.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-16" playOrder="16">
+      <navLabel>
+        <text>Ҳайвонҳои хонагӣ</text>
+      </navLabel>
+      <content src="Text/Section0056.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-17" playOrder="17">
+      <navLabel>
+        <text>Ҳайвоноти ваҳшӣ (ёбоӣ)</text>
+      </navLabel>
+      <content src="Text/Section0061.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-18" playOrder="18">
+      <navLabel>
+        <text>Табиатро дӯст доред</text>
+      </navLabel>
+      <content src="Text/Section0064.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-19" playOrder="19">
+      <navLabel>
+        <text>Борон ва барф</text>
+      </navLabel>
+      <content src="Text/Section0066.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-20" playOrder="20">
+      <navLabel>
+        <text>Тирукамон чӣ гуна ба амал меояд?</text>
+      </navLabel>
+      <content src="Text/Section0068.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-21" playOrder="21">
+      <navLabel>
+        <text>Чаро мо шаб хоб мекунем?</text>
+      </navLabel>
+      <content src="Text/Section0070.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-22" playOrder="22">
+      <navLabel>
+        <text>Барон чӣ меваю сабзавотро зиёд истеъмол кардан зарур аст?</text>
+      </navLabel>
+      <content src="Text/Section0073.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-23" playOrder="23">
+      <navLabel>
+        <text>Шустани дасту рӯй ва дандонҳо чӣ аҳамият дорад?</text>
+      </navLabel>
+      <content src="Text/Section0076.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-24" playOrder="24">
+      <navLabel>
+        <text>Тозагӣ гарави саломатист</text>
+      </navLabel>
+      <content src="Text/Section0078.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-25" playOrder="25">
+      <navLabel>
+        <text>Асбобу ашёи рӯзгор дар кадом ҳолат метавонад хатарнок бошад?</text>
+      </navLabel>
+      <content src="Text/Section0081.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-26" playOrder="26">
+      <navLabel>
+        <text>Либос ва намудҳои он</text>
+      </navLabel>
+      <content src="Text/Section0083.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-27" playOrder="27">
+      <navLabel>
+        <text>Дучарха дар куҷо ихтироъ шудааст?</text>
+      </navLabel>
+      <content src="Text/Section0087.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-28" playOrder="28">
+      <navLabel>
+        <text>Неруи барқ дар куҷо ба вуҷуд меояд?</text>
+      </navLabel>
+      <content src="Text/Section0089.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-29" playOrder="29">
+      <navLabel>
+        <text>Аҳамияти оинаи нилгун ва телефон</text>
+      </navLabel>
+      <content src="Text/Section0091.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-30" playOrder="30">
+      <navLabel>
+        <text>Нақши компютер дар ҳаёти инсон</text>
+      </navLabel>
+      <content src="Text/Section0094.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-31" playOrder="31">
+      <navLabel>
+        <text>Нақлиёти автомобилӣ ва қатора</text>
+      </navLabel>
+      <content src="Text/Section0097.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-32" playOrder="32">
+      <navLabel>
+        <text>Чаро киштӣ ва тайёра месозанд?</text>
+      </navLabel>
+      <content src="Text/Section0101.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-33" playOrder="33">
+      <navLabel>
+        <text>Фаслҳои сол</text>
+      </navLabel>
+      <content src="Text/Section0105.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-34" playOrder="34">
+      <navLabel>
+        <text>Касб ва интихоби он</text>
+      </navLabel>
+      <content src="Text/Section0108.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-35" playOrder="35">
+      <navLabel>
+        <text>Ҷавоби чистонҳо</text>
+      </navLabel>
+      <content src="Text/Section0110.xhtml"/>
+    </navPoint>
+    <navPoint id="navPoint-36" playOrder="36">
+      <navLabel>
+        <text>Луғат</text>
+      </navLabel>
+      <content src="Text/Section0111.xhtml"/>
+    </navPoint>
+  </navMap>
+</ncx>
