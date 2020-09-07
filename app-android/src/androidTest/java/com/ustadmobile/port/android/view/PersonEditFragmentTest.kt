@@ -13,22 +13,21 @@ import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.soywiz.klock.DateTime
-import com.soywiz.klock.days
-import com.soywiz.klock.hours
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultGson
-import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
@@ -60,7 +59,8 @@ class PersonEditFragmentTest {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+    val dataBindingIdlingResourceRule =
+            ScenarioIdlingResourceRule(DataBindingIdlingResource())
 
     @JvmField
     @Rule
@@ -68,7 +68,8 @@ class PersonEditFragmentTest {
 
     @JvmField
     @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
+    val crudIdlingResourceRule =
+            ScenarioIdlingResourceRule(CrudIdlingResource())
 
     private val context = ApplicationProvider.getApplicationContext<Application>()
 
@@ -193,13 +194,10 @@ class PersonEditFragmentTest {
                     person.personGroupUid)
             Assert.assertTrue(savedRoles.isNotEmpty())
         }
-
-
-
-
     }
 
-    @AdbScreenRecord("given person edit opened in normal mode username and password should be hidden")
+    @AdbScreenRecord("given person edit opened in normal mode username and password " +
+            "should be hidden")
     @Test
     fun givenPersonEditOpened_whenInNoRegistrationMode_thenUsernameAndPasswordShouldBeHidden() {
         launchFragment(false, fillForm = false)
@@ -222,7 +220,8 @@ class PersonEditFragmentTest {
         onView(withId(R.id.clazzlist_header_textview)).check(matches(not(isDisplayed())))
     }
 
-    @AdbScreenRecord("given person edit opened in registration mode when username and password are not filled and save is clicked should show errors")
+    @AdbScreenRecord("given person edit opened in registration mode when username and " +
+            "password are not filled and save is clicked should show errors")
     @Test
     fun givenPersonEditOpenedInRegistrationMode_whenUserNameAndPasswordAreNotFilled_thenShouldShowErrors() {
         launchFragment(registrationMode = true, leftOutPassword = true, leftOutUsername = true)
@@ -236,7 +235,8 @@ class PersonEditFragmentTest {
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
     }
 
-    @AdbScreenRecord("given person edit opened in registration mode when dateOfBirth is not filled and save is clicked should show errors")
+    @AdbScreenRecord("given person edit opened in registration mode when dateOfBirth " +
+            "is not filled and save is clicked should show errors")
     @Test
     fun givenPersonEditOpenedInRegistrationMode_whenDateOfBirthAreNotFilled_thenShouldShowErrors() {
         launchFragment(registrationMode = true, leftOutDateOfBirth = true)
@@ -244,16 +244,19 @@ class PersonEditFragmentTest {
                 hasInputLayoutError(context.getString(R.string.field_required_prompt))))
     }
 
-    @AdbScreenRecord("given person edit opened in registration mode when dateOfBirth is less than 13 years of age and save is clicked should show errors")
+    @AdbScreenRecord("given person edit opened in registration mode when dateOfBirth " +
+            "is less than 13 years of age and save is clicked should show errors")
     @Test
     fun givenPersonEditOpenedInRegistrationMode_whenDateOfBirthIsLessThan13YearsOfAge_thenShouldShowErrors() {
-        launchFragment(registrationMode = true, selectedDateOfBirth = DateTime(2010, 10, 24).unixMillisLong)
+        launchFragment(registrationMode = true,
+                selectedDateOfBirth = DateTime(2010, 10, 24).unixMillisLong)
         onView(withId(R.id.birthday_textinputlayout)).check(matches(
                 hasInputLayoutError(context.getString(R.string.underRegistrationAgeError))))
     }
 
 
-    @AdbScreenRecord("given person edit opened in registration mode when password doesn't match and save is clicked should show errors")
+    @AdbScreenRecord("given person edit opened in registration mode when password " +
+            "doesn't match and save is clicked should show errors")
     @Test
     fun givenPersonEditOpenedInRegistrationMode_whenPasswordDoNotMatch_thenShouldShowErrors() {
         launchFragment(registrationMode = true, misMatchPassword = true)
@@ -267,7 +270,8 @@ class PersonEditFragmentTest {
                 hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
     }
 
-    @AdbScreenRecord("given person edit opened in registration mode when try to register existing person should show errors")
+    @AdbScreenRecord("given person edit opened in registration mode when try to register " +
+            "existing person should show errors")
     @Test
     fun givenPersonEditOpenedInRegistrationMode_whenTryToRegisterExistingPerson_thenShouldShowErrors() {
         mockWebServer.enqueue(MockResponse().setResponseCode(409))
@@ -282,13 +286,12 @@ class PersonEditFragmentTest {
 
 
     private fun launchFragment(registrationMode: Boolean = false, misMatchPassword: Boolean = false,
-                               leftOutPassword: Boolean = false, leftOutUsername: Boolean = false,
-                               fillForm: Boolean = true,
-                               entityRoles: List<EntityRoleWithNameAndRole> = listOf(),
-                               entityRolesOnForm: List<EntityRoleWithNameAndRole>? = null,
-                               personUid: Long = 0,
-                               leftOutDateOfBirth: Boolean = false,
-                                selectedDateOfBirth: Long = DateTime(1990,10,18).unixMillisLong)
+                leftOutPassword: Boolean = false, leftOutUsername: Boolean = false,
+                fillForm: Boolean = true,
+                entityRoles: List<EntityRoleWithNameAndRole> = listOf(),
+                entityRolesOnForm: List<EntityRoleWithNameAndRole>? = null,
+                personUid: Long = 0, leftOutDateOfBirth: Boolean = false,
+                selectedDateOfBirth: Long = DateTime(1990,10,18).unixMillisLong)
             : FragmentScenario<PersonEditFragment> {
 
         val password = "password"
@@ -312,7 +315,8 @@ class PersonEditFragmentTest {
 
         Espresso.onIdle()
 
-        //Soft keyboard tend to hide views, when try to type will throw exception so instead of type we'll replace text
+        //Soft keyboard tend to hide views, when try to type will throw exception so
+        // instead of type we'll replace text
         if (fillForm) {
 
             val personOnForm = scenario.letOnFragment { it.entity }
