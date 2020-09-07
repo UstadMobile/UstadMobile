@@ -222,15 +222,22 @@ class EpubContentPresenter(context: Any,
                 }?.let { url -> UMFileUtil.resolveLink(url, it) }
             }
 
-            if(navXhtmlUrl != null) {
-                val navContent = client.get<String>(navXhtmlUrl.toString())
+            val ncxUrl = opf.ncxItem?.href?.let {
+                ocf?.rootFiles?.get(0)?.fullPath?.let { path -> UMFileUtil.joinPaths(mountedPath, path)
+                }?.let { url -> UMFileUtil.resolveLink(url, it) }
+            }
+
+            val navUrlToLoad = navXhtmlUrl ?: ncxUrl
+
+            if(navUrlToLoad != null) {
+                val navContent = client.get<String>(navUrlToLoad)
 
                 val navDocument = EpubNavDocument()
                 val navParser = KMPXmlParser()
                 navParser.setInput(ByteArrayInputStream(navContent.toByteArray()), "UTF-8")
                 navDocument.load(navParser)
                 epubContentView.runOnUiThread(Runnable {
-                    epubContentView.tableOfContents = navDocument.toc
+                    epubContentView.tableOfContents = navDocument.toc ?: navDocument.ncxNavMap
                 })
             }
 

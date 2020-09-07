@@ -15,6 +15,10 @@ open class ContainerEntry() {
     @ColumnInfo(index = true)
     var ceContainerUid: Long = 0
 
+    /**
+     * The path of this entry inside the container. It is relative and should not begin with slash
+     * e.g. epub/book.opf NOT /epub/book.opf
+     */
     var cePath: String? = null
 
     var ceCefUid: Long = 0

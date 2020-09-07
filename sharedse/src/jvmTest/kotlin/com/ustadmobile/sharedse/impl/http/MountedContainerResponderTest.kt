@@ -12,6 +12,9 @@ import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Compani
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_FILTERS_INDEX
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
+import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -61,12 +64,40 @@ class MountedContainerResponderTest {
         container.containerUid = repo.containerDao.insert(container)
         containerManager = ContainerManager(container!!, db!!, repo!!,
                 containerTmpDir.absolutePath)
-        val tmpExtractFile = File(containerTmpDir, "testfile1.png")
-        UmFileUtilSe.extractResourceToFile("/com/ustadmobile/port/sharedse/container/testfile1.png",
-                tmpExtractFile)
-        runBlocking {
-            containerManager!!.addEntries(ContainerManagerCommon.AddEntryOptions(dontUpdateTotals = false), ContainerManager.FileEntrySource(tmpExtractFile, "subfolder/testfile1.png"))
+
+        val tmpFiles = (1..2).map {index ->
+            File(containerTmpDir, "testfile$index.png").also {file ->
+                UmFileUtilSe.extractResourceToFile("/com/ustadmobile/port/sharedse/container/testfile$index.png",
+                        file)
+            }
         }
+
+        runBlocking {
+            containerManager!!.addEntries(ContainerManagerCommon.AddEntryOptions(dontUpdateTotals = false),
+                    ContainerManager.FileEntrySource(tmpFiles[0], "subfolder/testfile1.png"),
+                    ContainerManager.FileEntrySource(tmpFiles[1], "subfolder/test file2.png"))
+        }
+    }
+
+    //Test handling of file names when url encoding is required
+    @Test
+    fun givenFileNameWithSpaces_whenGetCalled_thenContentsShouldMatch() {
+        val routerHttpd = RouterNanoHTTPD(0)
+        routerHttpd.start()
+        routerHttpd.addRoute("/endpoint/container/(.*)+", MountedContainerResponder::class.java,
+                container.containerUid.toString(), db, listOf<MountedContainerResponder.MountedContainerFilter>())
+
+        println("port = ${routerHttpd.listeningPort}")
+        val httpClient = HttpClient()
+
+        runBlocking {
+            httpClient.get<HttpStatement>("http://localhost:${routerHttpd.listeningPort}/endpoint/container/subfolder/test%20file2.png").execute {
+                Assert.assertEquals("Content status reported as 200", 200, it.status.value)
+            }
+        }
+
+        httpClient.close()
+        routerHttpd.stop()
     }
 
     @Test
