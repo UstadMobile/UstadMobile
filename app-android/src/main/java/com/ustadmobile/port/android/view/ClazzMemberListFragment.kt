@@ -30,6 +30,7 @@ import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
+import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMemberWithPerson>(),
@@ -188,6 +189,11 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
                 mStudentListRecyclerViewAdapter, mPendingStudentsHeaderRecyclerViewAdapter,
                 mPendingStudentListRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
+
+        presenterLifecycleObserver = PresenterViewLifecycleObserver(mPresenter).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
+
         return view
     }
 
@@ -219,15 +225,12 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
         menu.findItem(R.id.menu_search).isVisible = true
     }
 
+    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
+
     fun navigateToPickNewMember(keyName: String) {
         navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest,
                 bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString()),
                 keyName, true)
-    }
-
-    override fun onResume() {
-        super.onResume()
-
     }
 
     /**
@@ -242,6 +245,10 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
+        presenterLifecycleObserver?.also {
+            viewLifecycleOwner.lifecycle.removeObserver(it)
+        }
+        presenterLifecycleObserver = null
     }
 
     override val displayTypeRepo: Any?

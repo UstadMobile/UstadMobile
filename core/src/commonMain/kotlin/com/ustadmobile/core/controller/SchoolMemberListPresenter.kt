@@ -29,8 +29,11 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-
         selectedSortOption = SORT_OPTIONS[0]
+        updateListOnView()
+    }
+
+    override fun onPause() {
         updateListOnView()
     }
 

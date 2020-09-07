@@ -23,6 +23,7 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMemberWithPerson>(),
@@ -38,6 +39,8 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
     override val listPresenter: UstadListPresenter<*, in SchoolMemberWithPerson>?
         get() = mPresenter
+
+    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
 
     private lateinit var addPersonKeyName: String
 
@@ -95,6 +98,10 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
+
+        presenterLifecycleObserver = PresenterViewLifecycleObserver(mPresenter).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
 
         return view
     }
@@ -155,6 +162,10 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         dbRepo = null
         mDataBinding = null
         mDataRecyclerViewAdapter = null
+        presenterLifecycleObserver?.also {
+            viewLifecycleOwner.lifecycle.removeObserver(it)
+        }
+        presenterLifecycleObserver = null
     }
 
     override val displayTypeRepo: Any?

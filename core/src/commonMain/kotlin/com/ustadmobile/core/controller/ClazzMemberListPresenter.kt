@@ -34,6 +34,10 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
         super.onCreate(savedState)
     }
 
+    override fun onPause() {
+        updateListOnView()
+    }
+
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return false
     }
