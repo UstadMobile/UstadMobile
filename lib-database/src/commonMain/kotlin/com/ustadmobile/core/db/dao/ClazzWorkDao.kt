@@ -271,13 +271,17 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                         ELSE 0
                     END DESC,
                    CASE(:sortOrder)
-                        WHEN $SORT_STATUS_ASC THEN Person.lastName
-                        ELSE ''
-                    END ASC,
+                        WHEN $SORT_STATUS_ASC THEN 
+                        CASE WHEN (cws.clazzWorkSubmissionDateTimeMarked > 0) THEN cws.clazzWorkSubmissionDateTimeMarked
+                        ELSE CASE WHEN (cws.clazzWorkSubmissionDateTimeFinished > 0) THEN 
+                        cws.clazzWorkSubmissionDateTimeFinished ELSE mProgress 
+                    END END END ASC,
                     CASE(:sortOrder)
-                        WHEN $SORT_STATUS_DESC THEN Person.lastName
-                        ELSE ''
-                    END DESC
+                        WHEN $SORT_STATUS_DESC THEN 
+                        CASE WHEN (cws.clazzWorkSubmissionDateTimeMarked > 0) THEN cws.clazzWorkSubmissionDateTimeMarked
+                        ELSE CASE WHEN (cws.clazzWorkSubmissionDateTimeFinished > 0) THEN 
+                        cws.clazzWorkSubmissionDateTimeFinished ELSE mProgress 
+                        END END END DESC
         """
     }
 }
