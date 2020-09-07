@@ -77,8 +77,8 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
         try {
             var requestUri = session.uri
             val containerUid = uriResource.initParameter(PARAM_CONTAINERUID_INDEX, String::class.java).toLong()
-            val pathInContainer = requestUri.substring(
-                    uriResource.uri.length - URI_ROUTE_POSTFIX.length)
+            val pathInContainer: String = requestUri.substring(
+                    uriResource.uri.length - URI_ROUTE_POSTFIX.length).removePrefix("/")
             val appDb = uriResource.initParameter(PARAM_DB_INDEX, UmAppDatabase::class.java)
             val entryFile = appDb.containerEntryDao
                     .findByPathInContainer(containerUid, pathInContainer)
