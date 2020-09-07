@@ -5,8 +5,8 @@
     <application
         android:name="com.ustadmobile.port.android.App"
         android:allowBackup="false"
-        android:icon="@drawable/ic_launcher_maktab"
-        android:roundIcon="@drawable/ic_launcher_maktab"
+        android:icon="@drawable/ic_launcher_maktab2"
+        android:roundIcon="@drawable/ic_launcher_maktab2"
         android:label="@string/app_name"
         android:usesCleartextTraffic="true"
         android:theme="@style/UmTheme.App"

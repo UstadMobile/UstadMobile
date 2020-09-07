@@ -17,9 +17,9 @@
        app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintEnd_toEndOf="parent"
 
-       app:srcCompat="@drawable/ic_launcher_maktab"
+       app:srcCompat="@drawable/ic_launcher_maktab2"
        tools:ignore="ContentDescription"
-       tools:src="@drawable/ic_launcher_maktab" />
+       tools:src="@drawable/ic_launcher_maktab2" />
 
 
    <TextView
