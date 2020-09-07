@@ -75,6 +75,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
 
         view.createAccountVisible = workSpace.registrationAllowed
         view.connectAsGuestVisible = workSpace.guestLogin
+        view.versionInfo = impl.getVersion(context)
     }
 
     fun handleLogin(username: String?, password:String?){
