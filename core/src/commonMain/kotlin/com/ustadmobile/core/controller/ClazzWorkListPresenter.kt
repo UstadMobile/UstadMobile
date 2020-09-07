@@ -1,7 +1,10 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.dao.ClazzWorkDao
+import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -14,7 +17,8 @@ import org.kodein.di.DI
 
 class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view: ClazzWorkListView,
                              di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<ClazzWorkListView, ClazzWork>(context, arguments, view, di, lifecycleOwner) {
+    : UstadListPresenter<ClazzWorkListView, ClazzWork>(context, arguments, view, di, lifecycleOwner)
+        , OnSortOptionSelected, OnSearchSubmitted {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
@@ -24,42 +28,46 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
-    class ClazzWorkListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    override val sortOptions: List<SortOrderOption>
+        get() = SORT_OPTIONS
+
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         GlobalScope.launch(doorMainDispatcher()) {
+            selectedSortOption = SORT_OPTIONS[0]
             updateListOnView()
         }
-        view.sortOptions = SortOrder.values().toList().map { ClazzWorkListSortOption(it, context) }
-
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        val clazzUid = arguments.get(UstadView.ARG_FILTER_BY_CLAZZUID)?.toLong()?:0L
+        val clazzUid = arguments.get(UstadView.ARG_FILTER_BY_CLAZZUID)?.toLong() ?: 0L
         return db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid,
-            clazzUid, Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE)
+                clazzUid, Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE)
     }
 
-    private suspend fun updateListOnView() {
+    private suspend fun updateListOnView(searchText: String? = null) {
 
-        val clazzUid = arguments.get(UstadView.ARG_FILTER_BY_CLAZZUID)?.toLong()?:0L
+        val clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
         val loggedInPersonUid = accountManager.activeAccount.personUid
         val clazzMember: ClazzMember? =
                 db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
 
-        view.list = when (currentSortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.clazzWorkDao.findWithMetricsByClazzUidLiveAsc(
-                    clazzUid, clazzMember?.clazzMemberRole?:ClazzMember.ROLE_STUDENT,
-                    UMCalendarUtil.getDateInMilliPlusDays(0))
-            SortOrder.ORDER_NAME_DSC -> repo.clazzWorkDao.findWithMetricsByClazzUidLiveDesc(
-                    clazzUid, clazzMember?.clazzMemberRole?:ClazzMember.ROLE_STUDENT,
-                    UMCalendarUtil.getDateInMilliPlusDays(0))
-        }
+        view.list = repo.clazzWorkDao.findWithMetricsByClazzUidLive(
+                clazzUid, clazzMember?.clazzMemberRole ?: ClazzMember.ROLE_STUDENT,
+                UMCalendarUtil.getDateInMilliPlusDays(0), selectedSortOption?.flag ?: 0,
+                if (searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
+
+      /*  val data = repo.clazzWorkDao.findWithMetricsByClazzUidLiveTest(
+                clazzUid, clazzMember?.clazzMemberRole ?: ClazzMember.ROLE_STUDENT,
+                UMCalendarUtil.getDateInMilliPlusDays(0), selectedSortOption?.flag ?: 0,
+                if (searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
+
+        println(data)*/
     }
 
     override fun handleClickEntry(entry: ClazzWork) {
-        when(mListMode) {
+        when (mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
             ListViewMode.BROWSER -> systemImpl.go(ClazzWorkDetailView.VIEW_NAME,
                     mapOf(UstadView.ARG_ENTITY_UID to entry.clazzWorkUid.toString()), context)
@@ -67,7 +75,7 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
     }
 
     override fun handleClickCreateNewFab() {
-        val clazzUid = arguments.get(UstadView.ARG_FILTER_BY_CLAZZUID)?.toLong()?:0L
+        val clazzUid = arguments.get(UstadView.ARG_FILTER_BY_CLAZZUID)?.toLong() ?: 0L
 
         val clazzWork: ClazzWork = ClazzWork().apply {
             clazzWorkClazzUid = clazzUid
@@ -77,13 +85,29 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
                 mapOf(UstadEditView.ARG_ENTITY_JSON to clazzWorkJson), context)
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? ClazzWorkListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            GlobalScope.launch(doorMainDispatcher()) {
-                updateListOnView()
-            }
+    override fun onClickSort(sortOption: SortOrderOption) {
+        super.onClickSort(sortOption)
+        GlobalScope.launch(doorMainDispatcher()) {
+            updateListOnView()
         }
+    }
+
+
+    override fun onSearchSubmitted(text: String?) {
+        GlobalScope.launch(doorMainDispatcher()) {
+            updateListOnView(text)
+        }
+    }
+
+    companion object {
+
+        val SORT_OPTIONS = listOf(
+                SortOrderOption(MessageID.deadline, ClazzWorkDao.SORT_DEADLINE_ASC, true),
+                SortOrderOption(MessageID.deadline, ClazzWorkDao.SORT_DEADLINE_DESC, false),
+                SortOrderOption(MessageID.visible_from_date, ClazzWorkDao.SORT_VISIBLE_FROM_ASC, true),
+                SortOrderOption(MessageID.visible_from_date, ClazzWorkDao.SORT_VISIBLE_FROM_DESC, false),
+                SortOrderOption(MessageID.title, ClazzWorkDao.SORT_TITLE_ASC, true),
+                SortOrderOption(MessageID.title, ClazzWorkDao.SORT_TITLE_DESC, false)
+        )
     }
 }

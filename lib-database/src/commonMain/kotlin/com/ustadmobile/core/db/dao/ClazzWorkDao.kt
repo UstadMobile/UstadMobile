@@ -90,6 +90,63 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             : DataSource.Factory<Int, ClazzWorkWithMetrics>
 
 
+
+    @Query("""
+            SELECT ClazzWork.*, 
+            
+            (
+                SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid 
+                AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 
+                AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
+            ) as totalStudents, 
+            (
+                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
+                clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+            ) as submittedStudents, 
+            0 as notSubmittedStudents,
+            0 as completedStudents, 
+            (
+                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
+                ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
+            ) as markedStudents,
+             0 as firstContentEntryUid,
+             Clazz.clazzTimeZone as clazzTimeZone 
+             FROM ClazzWork 
+             LEFT JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
+             WHERE clazzWorkClazzUid = :clazzUid
+             AND (:role = ${ClazzMember.ROLE_TEACHER} OR clazzWorkStartDateTime < :today)
+            AND CAST(clazzWorkActive as INTEGER) = 1 
+            AND ClazzWork.clazzWorkTitle LIKE :searchText 
+            ORDER BY CASE(:sortOrder)
+                WHEN $SORT_DEADLINE_ASC THEN ClazzWork.clazzWorkDueDateTime
+                ELSE 0
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_DEADLINE_DESC THEN ClazzWork.clazzWorkDueDateTime
+                ELSE 0
+            END DESC,
+           CASE(:sortOrder)
+                WHEN $SORT_VISIBLE_FROM_ASC THEN ClazzWork.clazzWorkStartDateTime
+                ELSE 0
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_VISIBLE_FROM_DESC THEN ClazzWork.clazzWorkStartDateTime
+                ELSE 0
+            END DESC,
+            CASE(:sortOrder)
+                WHEN $SORT_TITLE_ASC THEN ClazzWork.clazzWorkTitle
+                ELSE ''
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_TITLE_DESC THEN ClazzWork.clazzWorkTitle
+                ELSE ''
+            END DESC
+        """
+    )
+    abstract fun findWithMetricsByClazzUidLiveTest(clazzUid: Long, role: Int, today: Long, sortOrder: Int, searchText: String? = "%%"): List<ClazzWorkWithMetrics>
+
+
     @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)
     abstract suspend fun findClazzWorkWithMetricsByClazzWorkUidAsync(clazzWorkUid: Long)
             : ClazzWorkWithMetrics?
@@ -103,7 +160,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             ClazzMemberWithClazzWorkProgress>
 
     @Query(STUDENT_PROGRESS_QUERY)
-    abstract fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long, sortOrder: Int = 1, searchText: String? = "%%"): List<ClazzMemberWithClazzWorkProgress>
+    abstract suspend fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long, sortOrder: Int = 1, searchText: String? = "%%"): List<ClazzMemberWithClazzWorkProgress>
 
     @Query(FIND_CLAZZMEMBER_AND_SUBMISSION_WITH_PERSON)
     abstract suspend fun findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid: Long,
@@ -248,17 +305,11 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                     AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
                     ORDER BY CASE(:sortOrder)
                         WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
-                        ELSE ''
-                    END ASC,
-                    CASE(:sortOrder)
-                        WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
-                        ELSE ''
-                    END DESC,
-                   CASE(:sortOrder)
                         WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
                         ELSE ''
                     END ASC,
                     CASE(:sortOrder)
+                        WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
                         WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
                         ELSE ''
                     END DESC,

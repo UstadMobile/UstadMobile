@@ -11,6 +11,8 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, String>,
@@ -45,8 +47,7 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
         view.list = repo.clazzWorkDao.findStudentProgressByClazzWork(
                 filterByClazzWorkUid,
                 selectedSortOption?.flag ?: ClazzWorkDao.SORT_FIRST_NAME_ASC,
-                searchText)
-
+                if (searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
     }
 
     override fun handleClickEntry(entry: ClazzMemberWithClazzWorkProgress) {
@@ -85,8 +86,8 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
                 SortOrderOption(MessageID.last_name, ClazzWorkDao.SORT_LAST_NAME_DESC, false),
                 SortOrderOption(MessageID.student_progress, ClazzWorkDao.SORT_CONTENT_PROGRESS_ASC, true),
                 SortOrderOption(MessageID.student_progress, ClazzWorkDao.SORT_CONTENT_PROGRESS_DESC, false),
-                SortOrderOption(MessageID.student_progress, ClazzWorkDao.SORT_STATUS_ASC, true),
-                SortOrderOption(MessageID.student_progress, ClazzWorkDao.SORT_STATUS_DESC, false)
+                SortOrderOption(MessageID.status, ClazzWorkDao.SORT_STATUS_ASC, true),
+                SortOrderOption(MessageID.status, ClazzWorkDao.SORT_STATUS_DESC, false)
         )
     }
 }

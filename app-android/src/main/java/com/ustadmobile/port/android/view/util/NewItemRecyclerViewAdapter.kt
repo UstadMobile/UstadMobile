@@ -41,6 +41,13 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
             submitList(currentHolderList)
         }
 
+    init{
+        takeIf { sortOrderOption != null }.apply {
+            submitList(currentHolderList)
+        }
+    }
+
+
     var onClickSort: View.OnClickListener? = onClickSort
         set(value) {
             field = value

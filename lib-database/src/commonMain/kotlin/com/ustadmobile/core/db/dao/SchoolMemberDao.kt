@@ -35,17 +35,11 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
         AND (Person.firstNames || ' ' || Person.lastName) LIKE :searchQuery
          ORDER BY CASE(:sortOrder)
                 WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
-                ELSE ''
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
-                ELSE ''
-            END DESC,
-           CASE(:sortOrder)
                 WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
                 ELSE ''
             END ASC,
             CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
                 WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
                 ELSE ''
             END DESC

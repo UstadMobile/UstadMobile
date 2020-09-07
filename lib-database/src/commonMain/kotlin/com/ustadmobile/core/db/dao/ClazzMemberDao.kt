@@ -85,41 +85,23 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
         AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
         ORDER BY CASE(:sortOrder)
                 WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
-                ELSE ''
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
-                ELSE ''
-            END DESC,
-           CASE(:sortOrder)
                 WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
                 ELSE ''
             END ASC,
             CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
                 WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
                 ELSE ''
             END DESC,
             CASE(:sortOrder)
                 WHEN $SORT_ATTENDANCE_ASC THEN ClazzMember.clazzMemberAttendancePercentage
-                ELSE 0
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_ATTENDANCE_DESC THEN ClazzMember.clazzMemberAttendancePercentage
-                ELSE 0
-            END DESC,
-            CASE(:sortOrder)
                 WHEN $SORT_DATE_REGISTERED_ASC THEN ClazzMember.clazzMemberDateJoined
-                ELSE 0
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_DATE_REGISTERED_DESC THEN ClazzMember.clazzMemberDateJoined
-                ELSE 0
-            END DESC,
-            CASE(:sortOrder)
                 WHEN $SORT_DATE_LEFT_ASC THEN ClazzMember.clazzMemberDateLeft
                 ELSE 0
             END ASC,
             CASE(:sortOrder)
+                WHEN $SORT_ATTENDANCE_DESC THEN ClazzMember.clazzMemberAttendancePercentage
+                WHEN $SORT_DATE_REGISTERED_DESC THEN ClazzMember.clazzMemberDateJoined
                 WHEN $SORT_DATE_LEFT_DESC THEN ClazzMember.clazzMemberDateLeft
                 ELSE 0
             END DESC
