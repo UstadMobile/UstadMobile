@@ -70,7 +70,7 @@ class UmAppDatabaseExtTest {
 
         db.enrolPersonIntoClazzAtLocalTimezone(testPerson, testClazz.clazzUid, ClazzMember.ROLE_TEACHER)
 
-        val personClazzes = db.clazzMemberDao.findAllClazzesByPersonWithClazzAsList(
+        val personClazzes = db.clazzMemberDao.findAllClazzesByPersonWithClazzAsListAsync(
                 testPerson.personUid, systemTimeInMillis())
 
         Assert.assertTrue("PersonMember was created", personClazzes.any { it.clazzMemberClazzUid == testClazz.clazzUid })

@@ -38,6 +38,9 @@ abstract class DownloadJobDao {
     @Insert
     abstract fun insert(job: DownloadJob): Long
 
+    @Insert
+    abstract suspend fun insertAsync(job: DownloadJob): Long
+
     @Query("DELETE FROM DownloadJob")
     abstract suspend fun deleteAllAsync()
 

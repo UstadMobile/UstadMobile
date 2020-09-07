@@ -29,15 +29,6 @@ class PersonAuth() {
 
     var personAuthStatus: Int = 0
 
-    @LocalChangeSeqNum
-    var personAuthLocalChangeSeqNum: Long = 0
-
-    @MasterChangeSeqNum
-    var personAuthMasterChangeSeqNum: Long = 0
-
-    @LastChangedBy
-    var lastChangedBy: Int = 0
-
     constructor(personAuthUid: Long, passwordHash: String) : this() {
         this.personAuthUid = personAuthUid
         this.passwordHash = passwordHash

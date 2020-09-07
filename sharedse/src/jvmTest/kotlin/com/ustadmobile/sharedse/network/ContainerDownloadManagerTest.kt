@@ -11,12 +11,12 @@ import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunn
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.sharedse.network.ext.addTestChildDownload
 import com.ustadmobile.sharedse.network.ext.addTestRootDownload
-import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import org.junit.Assert

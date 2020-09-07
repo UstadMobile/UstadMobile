@@ -30,6 +30,7 @@ import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
@@ -49,8 +50,11 @@ import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderManag
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
+import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 
 import org.kodein.di.*
+import java.io.File
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -73,11 +77,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
             }
         }
 
-//        bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
-//            instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
-//                    context.url, "", defaultHttpClient())
-//        }
-
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
             instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
                     context.url, "", defaultHttpClient()).also {
@@ -86,13 +85,21 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<EmbeddedHTTPD>() with singleton {
-            EmbeddedHTTPD(0, di).also { it.start() }
+            EmbeddedHTTPD(0, di).also {
+                it.UmAppDatabase_AddUriMapping(false, "/:endpoint/UmAppDatabase", di)
+                it.start()
+                Napier.i("EmbeddedHTTPD started on port ${it.listeningPort}")
+            }
         }
 
         bind<NetworkManagerBle>() with singleton {
             NetworkManagerBle(applicationContext, di, newSingleThreadContext("NetworkManager")).also {
                 it.onCreate()
             }
+        }
+
+        bind<BleGattServer>() with singleton {
+            BleGattServer(applicationContext, di)
         }
 
         bind<ContainerMounter>() with singleton { instance<EmbeddedHTTPD>() }
@@ -147,7 +154,19 @@ open class UstadApp : BaseUstadApp(), DIAware {
             XapiStateEndpointImpl(endpoint = context, di = di)
         }
 
+        bind<Int>(tag = TAG_LOCAL_HTTP_PORT) with singleton {
+            instance<EmbeddedHTTPD>().listeningPort
+        }
+
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+
+        registerContextTranslator { call: NanoHttpdCall -> Endpoint(call.urlParams["endpoint"] ?: "notfound")}
+
+        onReady {
+            instance<BleGattServer>()
+            instance<NetworkManagerBle>()
+            instance<EmbeddedHTTPD>()
+        }
     }
 
     override val di: DI by DI.lazy {
@@ -157,12 +176,13 @@ open class UstadApp : BaseUstadApp(), DIAware {
     override fun onCreate() {
         super.onCreate()
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
+        Napier.base(DebugAntilog())
         initPicasso(applicationContext)
+
     }
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
-        Napier.base(DebugAntilog())
     }
 
 }

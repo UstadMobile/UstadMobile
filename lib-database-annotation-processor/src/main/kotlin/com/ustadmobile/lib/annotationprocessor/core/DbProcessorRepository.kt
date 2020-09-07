@@ -22,6 +22,8 @@ import java.util.*
 import kotlin.reflect.KClass
 
 internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: Boolean = false): TypeSpec.Builder {
+    val idGetterLambdaType = LambdaTypeName.get(
+            parameters = *arrayOf(DoorDatabase::class.asClassName()), returnType = Int::class.asClassName())
     val repoClassSpec = TypeSpec.classBuilder("${daoType.simpleName}_${DbProcessorRepository.SUFFIX_REPOSITORY}")
             .addProperty(PropertySpec.builder("_db", DoorDatabase::class)
                     .initializer("_db").build())
@@ -32,7 +34,11 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
             .addProperty(PropertySpec.builder("_httpClient",
                     HttpClient::class).initializer("_httpClient").build())
             .addProperty(PropertySpec.builder("_clientId", Int::class)
-                    .initializer("_clientId").build())
+                    .getter(FunSpec.getterBuilder().addCode("return _clientIdFn(_db)\n")
+                            .build())
+                    .build())
+            .addProperty(PropertySpec.builder("_clientIdFn",
+                idGetterLambdaType).initializer("_clientIdFn").build())
             .addProperty(PropertySpec.builder("_endpoint", String::class)
                     .initializer("_endpoint").build())
             .addProperty(PropertySpec.builder("_dbPath", String::class)
@@ -49,7 +55,7 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
             .addParameter("_repo", DoorDatabaseRepository::class)
             .addParameter("_dao", daoType)
             .addParameter("_httpClient", HttpClient::class)
-            .addParameter("_clientId", Int::class)
+            .addParameter("_clientIdFn", idGetterLambdaType)
             .addParameter("_endpoint", String::class)
             .addParameter("_dbPath", String::class)
             .addParameter("_attachmentsDir", String::class)
@@ -242,6 +248,11 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             dbRepoType.addProperty(PropertySpec.builder("_clientId", INT)
                     .delegate("lazy { _syncDao._findSyncNodeClientId() }").build())
+            dbRepoType.addProperty(PropertySpec.builder("_clientIdFn",
+                LambdaTypeName.get(parameters = *arrayOf(DoorDatabase::class.asClassName()),
+                        returnType = Int::class.asClassName()))
+                    .initializer("{ _db -> _clientId  }")
+                    .build())
             dbRepoType.addProperty(PropertySpec.builder("clientId", INT)
                     .getter(FunSpec.getterBuilder().addCode("return _clientId").build())
                     .addModifiers(KModifier.OVERRIDE)
@@ -257,7 +268,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
             dbRepoType.addProperty(PropertySpec
                     .builder("_${syncableDaoClassName.simpleName}", repoImplClassName)
                     .delegate(CodeBlock.builder().beginControlFlow("lazy")
-                            .add("%T(_db, this, _syncDao, _httpClient, _clientId, _endpoint, $DB_NAME_VAR, _attachmentsDir) ", repoImplClassName)
+                            .add("%T(_db, this, _syncDao, _httpClient, _clientIdFn, _endpoint, $DB_NAME_VAR, _attachmentsDir) ", repoImplClassName)
                             .endControlFlow().build())
                     .build())
             dbRepoType.addSuperinterface(DoorDatabaseSyncRepository::class)
@@ -290,7 +301,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
             dbRepoType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",  repoImplClassName)
                     .delegate(CodeBlock.builder().beginControlFlow("lazy")
-                            .add("%T(_db, this, _db.%L, _httpClient, _clientId, _endpoint, $DB_NAME_VAR, " +
+                            .add("%T(_db, this, _db.%L, _httpClient, _clientIdFn, _endpoint, $DB_NAME_VAR, " +
                                     "_attachmentsDir $syncDaoParam) ",
                                 repoImplClassName, it.makeAccessorCodeBlock())
                             .endControlFlow()
@@ -453,7 +464,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                             httpResultType = resultType,
                             requestBuilderCodeBlock = CodeBlock.of("%M(%S, _clientId)\n",
                                     MemberName("io.ktor.client.request", "header"),
-                                    "X-nid"),
+                                    "x-nid"),
                             params = daoFunSpecBuilt.parameters))
                         .add("_httpResult\n")
                         .endControlFlow()

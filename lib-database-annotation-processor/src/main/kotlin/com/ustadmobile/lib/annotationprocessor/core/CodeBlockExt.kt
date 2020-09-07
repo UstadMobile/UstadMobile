@@ -31,10 +31,10 @@ fun CodeBlock.Builder.addGetClientIdHeader(varName: String, serverType: Int) : C
             ?.add("val $varName = %M.request.%M(%S)?.toInt() ?: 0\n",
                     DbProcessorKtorServer.CALL_MEMBER,
                     MemberName("io.ktor.request","header"),
-                    "X-nid")
+                    "x-nid")
     takeIf { serverType == DbProcessorKtorServer.SERVER_TYPE_NANOHTTPD }
             ?.add("val $varName = _session.headers.get(%S)?.toInt() ?: 0\n",
-                "X-nid")
+                "x-nid")
 
     return this
 }

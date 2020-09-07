@@ -25,7 +25,7 @@ abstract class ClazzWorkContentJoinDao : BaseDao<ClazzWorkContentJoin>, OneToMan
 
 
     @Query(FINDBY_CLAZZWORK_UID)
-    abstract fun findAllContentByClazzWorkUid(clazzWorkUid: Long, personUid : Long)
+    abstract suspend fun findAllContentByClazzWorkUidAsync(clazzWorkUid: Long, personUid : Long)
             :List <ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
     @Query(FINDBY_CLAZZWORK_UID)

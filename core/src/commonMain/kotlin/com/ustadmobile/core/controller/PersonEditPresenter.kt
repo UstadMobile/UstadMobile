@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -12,7 +13,6 @@ import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
@@ -35,7 +35,7 @@ class PersonEditPresenter(context: Any,
 
     private val impl: UstadMobileSystemImpl by instance()
 
-    private  lateinit var nextDestination: String
+    private lateinit var nextDestination: String
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -66,17 +66,17 @@ class PersonEditPresenter(context: Any,
                 MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
         view.clazzList = clazzMemberJoinEditHelper.liveList
 
-        registrationMode = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toBoolean()?:false
+        registrationMode = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toBoolean() ?: false
 
         serverUrl = if (arguments.containsKey(UstadView.ARG_SERVER_URL)) {
             arguments.getValue(UstadView.ARG_SERVER_URL)
         } else {
-            impl.getAppConfigString(AppConfig.KEY_API_URL, "http://localhost", context)?:""
+            impl.getAppConfigString(AppConfig.KEY_API_URL, "http://localhost", context) ?: ""
         }
 
         nextDestination = arguments[UstadView.ARG_NEXT] ?: impl.getAppConfigString(
-                AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context) ?:
-                ContentEntryListTabsView.VIEW_NAME
+                AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context)
+                ?: ContentEntryListTabsView.VIEW_NAME
 
         view.registrationMode = registrationMode
     }
@@ -92,12 +92,12 @@ class PersonEditPresenter(context: Any,
             db.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
         }
 
-        if(personPicture != null){
+        if (personPicture != null) {
             view.personPicturePath = repo.personPictureDao.getAttachmentPath(personPicture)
         }
 
         val clazzMemberWithClazzList = withTimeoutOrNull(2000) {
-            db.takeIf { entityUid != 0L }?.clazzMemberDao?.findAllClazzesByPersonWithClazzAsList(entityUid, getSystemTimeInMillis())
+            db.takeIf { entityUid != 0L }?.clazzMemberDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid, getSystemTimeInMillis())
         } ?: listOf()
         clazzMemberJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
 
@@ -109,9 +109,9 @@ class PersonEditPresenter(context: Any,
         super.onLoadFromJson(bundle)
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: Person? = null
-        editEntity = if(entityJsonStr != null) {
+        editEntity = if (entityJsonStr != null) {
             Json.parse(PersonWithAccount.serializer(), entityJsonStr)
-        }else {
+        } else {
             PersonWithAccount()
         }
 
@@ -128,36 +128,56 @@ class PersonEditPresenter(context: Any,
     override fun handleClickSave(entity: PersonWithAccount) {
         GlobalScope.launch(doorMainDispatcher()) {
             val noPasswordMatch = entity.newPassword != entity.confirmedPassword
-                    && !entity.newPassword.isNullOrEmpty() &&  !entity.confirmedPassword.isNullOrEmpty()
-            if(registrationMode && (entity.username.isNullOrEmpty()
+                    && !entity.newPassword.isNullOrEmpty() && !entity.confirmedPassword.isNullOrEmpty()
+            if (registrationMode && (entity.username.isNullOrEmpty()
                             || entity.newPassword.isNullOrEmpty() || entity.confirmedPassword.isNullOrEmpty()
-                            || noPasswordMatch)){
+                            || noPasswordMatch || entity.dateOfBirth == 0L)) {
                 val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
-                view.usernameError = if(entity.username.isNullOrEmpty()) requiredFieldMessage else null
-                view.passwordError = if(entity.newPassword.isNullOrEmpty()) requiredFieldMessage else null
-                view.confirmError = if(entity.confirmedPassword.isNullOrEmpty()) requiredFieldMessage else null
-                view.noMatchPasswordError = if(noPasswordMatch)
+                view.usernameError = if (entity.username.isNullOrEmpty()) requiredFieldMessage else null
+                view.passwordError = if (entity.newPassword.isNullOrEmpty()) requiredFieldMessage else null
+                view.confirmError = if (entity.confirmedPassword.isNullOrEmpty()) requiredFieldMessage else null
+                view.dateOfBirthError = if (entity.dateOfBirth == 0L) requiredFieldMessage else null
+                view.noMatchPasswordError = if (noPasswordMatch)
                     impl.getString(MessageID.filed_password_no_match, context) else null
                 return@launch
             }
 
-            if(registrationMode){
+            if (registrationMode) {
                 val password = entity.newPassword
-                if(password != null){
-                   try{
-                       val umAccount = accountManager.register(entity, serverUrl)
-                       accountManager.activeAccount = umAccount
-                       view.navigateToNextDestination(umAccount,nextDestination)
-                   }catch (e:Exception){
-                       view.errorMessage = impl.getString(if(e is IllegalArgumentException) MessageID.person_exists
-                       else MessageID.login_network_error , context)
-                       return@launch
-                   }
+                if (password != null) {
+
+                    val dateOfBirth = DateTime(entity.dateOfBirth)
+                    val dateToday = DateTime.now()
+                    var age = dateToday.yearInt - dateOfBirth.yearInt
+                    if (dateOfBirth.month0 > dateToday.month0) {
+                        age--
+                    } else if (dateToday.month0 == dateOfBirth.month0 && dateOfBirth.dayOfYear > dateToday.dayOfYear) {
+                        age--
+                    }
+                    if (age < 13) {
+                        view.dateOfBirthError = impl.getString(MessageID.underRegistrationAgeError, context)
+                        return@launch
+                    }
+
+                    try {
+                        val umAccount = accountManager.register(entity, serverUrl)
+                        accountManager.activeAccount = umAccount
+                        view.navigateToNextDestination(umAccount, nextDestination)
+                    } catch (e: Exception) {
+
+                        if (e is IllegalStateException) {
+                            view.usernameError = impl.getString(MessageID.person_exists, context)
+                        } else {
+                            view.showSnackBar(impl.getString(MessageID.login_network_error, context))
+                        }
+
+                        return@launch
+                    }
                 }
-            }else{
-                if(entity.personUid == 0L) {
+            } else {
+                if (entity.personUid == 0L) {
                     entity.personUid = repo.personDao.insertAsync(entity)
-                }else {
+                } else {
                     repo.personDao.updateAsync(entity)
                 }
 
@@ -170,18 +190,18 @@ class PersonEditPresenter(context: Any,
 
                 var personPicture = db.personPictureDao.findByPersonUidAsync(entity.personUid)
                 val viewPicturePath = view.personPicturePath
-                val currentPath = if(personPicture != null) repo.personPictureDao.getAttachmentPath(personPicture) else null
+                val currentPath = if (personPicture != null) repo.personPictureDao.getAttachmentPath(personPicture) else null
 
-                if(personPicture != null && viewPicturePath != null && currentPath != viewPicturePath) {
+                if (personPicture != null && viewPicturePath != null && currentPath != viewPicturePath) {
                     repo.personPictureDao.setAttachment(personPicture, viewPicturePath)
                     repo.personPictureDao.update(personPicture)
-                }else if(viewPicturePath != null && currentPath != viewPicturePath) {
+                } else if (viewPicturePath != null && currentPath != viewPicturePath) {
                     personPicture = PersonPicture().apply {
                         personPicturePersonUid = entity.personUid
                     }
-                    personPicture.personPictureUid = repo.personPictureDao.insert(personPicture)
+                    personPicture.personPictureUid = repo.personPictureDao.insertAsync(personPicture)
                     repo.personPictureDao.setAttachment(personPicture, viewPicturePath)
-                }else if(personPicture != null && currentPath != null && viewPicturePath == null) {
+                } else if (personPicture != null && currentPath != null && viewPicturePath == null) {
                     //picture has been removed
                     personPicture.personPictureActive = false
                     repo.personPictureDao.setAttachmentDataFromUri(personPicture, null, context)

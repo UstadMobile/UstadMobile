@@ -11,14 +11,19 @@ import java.security.MessageDigest
 import java.io.ByteArrayInputStream
 import com.github.aakira.napier.Napier
 import kotlinx.serialization.toUtf8Bytes
+import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
+import com.ustadmobile.lib.util.parseRangeRequestHeader
 
 data class ConcatenatedHttpResponse(val status: Int, val contentLength: Long, val etag: String?,
                                     val lastModifiedTime: Long,
-                                    val dataSrc: InputStream?)
+                                    val dataSrc: InputStream?,
+                                    val responseHeaders: Map<String, String> = mapOf())
 
 val ERROR_PART_NOT_FOUND = 503
 
-fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String): ConcatenatedHttpResponse {
+fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String,
+                                                            method: String = "GET",
+                                                            requestHeaders: Map<String, List<String>> = mapOf()): ConcatenatedHttpResponse {
     val containerEntryFileUids = fileList.split(";").map { it.toLong() }
     val containerEntryFiles = findEntriesByUids(containerEntryFileUids)
 
@@ -51,9 +56,33 @@ fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String): C
         concatenatedMd5s.forEach { messageDigest.update(it) }
         val etag = messageDigest.digest().encodeBase64()
         val lastModifiedTime = containerEntryFiles.maxBy { it.lastModified }?.lastModified ?: 0
-        return ConcatenatedHttpResponse(200,
-                ConcatenatingInputStream.calculateLength(concatenatedParts), etag, lastModifiedTime,
-                ConcatenatingInputStream(concatenatedParts))
+
+        val rangeRequestHeader = requestHeaders.entries
+                .firstOrNull { it.key.toLowerCase()  == "content-range"}?.value?.firstOrNull()
+        val totalLength = ConcatenatingInputStream.calculateLength(concatenatedParts)
+        val concatenatingInputStream = if(method.equals("HEAD", true)) {
+            null
+        }else {
+            ConcatenatingInputStream(concatenatedParts)
+        }
+
+        if(rangeRequestHeader != null) {
+            val rangeResponse = parseRangeRequestHeader(rangeRequestHeader, totalLength)
+            val rangeInputStream = if(concatenatingInputStream != null) {
+                RangeInputStream(concatenatingInputStream, rangeResponse.fromByte,
+                        rangeResponse.toByte)
+            }else {
+                null
+            }
+
+            return ConcatenatedHttpResponse(206, rangeResponse.actualContentLength, etag,
+                    lastModifiedTime, rangeInputStream)
+        }else {
+            return ConcatenatedHttpResponse(200, totalLength, etag, lastModifiedTime,
+                    concatenatingInputStream)
+        }
+
+
     }
 
 

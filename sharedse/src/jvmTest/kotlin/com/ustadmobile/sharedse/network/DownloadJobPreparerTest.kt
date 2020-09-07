@@ -54,10 +54,10 @@ class DownloadJobPreparerTest {
 
         accountManager = di.direct.instance()
         accountManager.activeAccount = UmAccount(0, "guest", "",
-            "http://localhost:8087/", "Guest", "User")
+            "http://localhost:8089/", "Guest", "User")
 
-        server = embeddedServer(Netty, 8087) {
-            umRestApplication(devMode = false, db = serverDb)
+        server = embeddedServer(Netty, 8089) {
+            umRestApplication(devMode = false)
         }
         server.start()
 

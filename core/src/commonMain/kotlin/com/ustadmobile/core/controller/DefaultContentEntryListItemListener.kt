@@ -45,6 +45,6 @@ class DefaultContentEntryListItemListener(var view: ContentEntryList2View? = nul
     }
 
     override fun onClickDownloadContentEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
-        view?.showDownloadDialog(mapOf(ARG_PARENT_ENTRY_UID to entry.toString()))
+        view?.showDownloadDialog(mapOf(UstadView.ARG_CONTENT_ENTRY_UID to entry.contentEntryUid.toString()))
     }
 }

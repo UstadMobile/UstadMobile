@@ -9,6 +9,7 @@
         <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryListRecyclerAdapter"/>
         <import type="com.ustadmobile.lib.db.entities.ContentEntryProgress" />
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
 
         <variable
             name="contentEntry"
@@ -24,6 +25,10 @@
         <variable
             name="selectablePagedListAdapter"
             type="ContentEntryListRecyclerAdapter" />
+
+        <variable
+            name="locallyAvailable"
+            type="boolean" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -88,6 +93,13 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrier_end"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="start"
+            app:constraint_referenced_ids="download_status_button,action_btn_holder"/>
+
         <TextView
             android:id="@+id/content_entry_item_title"
             android:layout_width="0dp"
@@ -98,13 +110,14 @@
             android:text="@{contentEntry.title}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:textStyle="bold"
-            app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
+            app:layout_constraintEnd_toStartOf="@id/barrier_end"
             app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Content Title" />
 
         <TextView
             android:id="@+id/content_entry_item_description"
+            android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(contentEntry.description)}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_10dp"
@@ -114,10 +127,63 @@
             android:maxLines="2"
             android:text="@{contentEntry.description}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-            app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
+            app:layout_constraintEnd_toStartOf="@id/barrier_end"
             app:layout_constraintStart_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_title"
             tools:text="Content Description" />
+
+
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/content_entry_desc_bottom_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="content_entry_item_description,content_entry_item_title"/>
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/content_entry_mimetype_icon"
+            android:layout_width="@dimen/dimen_16dp"
+            android:layout_height="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:tint="?colorOnIconTint"
+            android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
+            app:imageLookupKey="@{contentEntry.contentTypeFlag}"
+            app:imageLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP}"
+            app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
+            app:layout_constraintTop_toBottomOf="@+id/content_entry_desc_bottom_barrier"
+            tools:visibility="visible"
+            tools:src="@drawable/ic_book_black_24dp"
+            />
+
+
+        <TextView
+            android:id="@+id/content_entry_item_mimetype_text"
+            tools:text="Content Type"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_marginEnd="@dimen/dimen_4dp"
+            android:layout_marginBottom="@dimen/dimen_4dp"
+            android:gravity="start"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            android:tint="?colorOnIconTint"
+            android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
+            app:layout_constraintStart_toEndOf="@id/content_entry_mimetype_icon"
+            app:layout_constraintTop_toBottomOf="@id/content_entry_desc_bottom_barrier"
+            app:textMessageIdLookupKey="@{contentEntry.contentTypeFlag}"
+            app:textMessageIdLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_LABEL_MAP}" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/content_type_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="end"
+            app:constraint_referenced_ids="content_entry_item_mimetype_text,content_entry_item_thumbnail"/>
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/content_entry_locally_available"
@@ -128,45 +194,39 @@
             android:layout_marginEnd="@dimen/dimen_4dp"
             android:layout_marginBottom="@dimen/dimen_4dp"
             android:tint="?colorOnIconTint"
-            android:visibility="gone"
-            app:layout_constraintStart_toEndOf="@+id/content_entry_item_thumbnail"
+            android:visibility="@{locallyAvailable ? View.VISIBLE : View.GONE}"
+            app:layout_constraintStart_toEndOf="@+id/content_type_barrier"
             app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description"
-            app:srcCompat="@drawable/ic_location_pin_24dp"
-            tools:visibility="gone" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/content_entry_mimetype_icon"
-            android:layout_width="@dimen/dimen_16dp"
-            android:layout_height="@dimen/dimen_16dp"
-            android:layout_marginStart="@dimen/dimen_8dp"
-            android:layout_marginTop="@dimen/dimen_4dp"
-            android:layout_marginEnd="@dimen/dimen_4dp"
-            android:layout_marginBottom="@dimen/dimen_4dp"
-            android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
-            app:imageLookupKey="@{contentEntry.contentTypeFlag}"
-            app:imageLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_ICON_MAP}"
-            app:layout_constraintStart_toEndOf="@+id/content_entry_locally_available"
-            app:layout_constraintTop_toBottomOf="@+id/content_entry_item_description" />
-
+            app:srcCompat="@drawable/ic_nearby_black_24px"
+            tools:visibility="visible" />
 
         <TextView
-            android:id="@+id/content_entry_item_mimetype_text"
-            android:layout_width="0dp"
+            android:id="@+id/content_entry_locally_available_text"
+            android:text="@string/download_locally_availability"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_8dp"
-            android:layout_marginTop="@dimen/dimen_4dp"
-            android:layout_marginEnd="@dimen/dimen_4dp"
-            android:layout_marginBottom="@dimen/dimen_4dp"
-            android:gravity="start"
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
-            android:tint="?colorOnIconTint"
-            android:visibility="@{contentEntry.leaf ? View.VISIBLE:View.GONE}"
-            app:layout_constraintEnd_toStartOf="@id/action_btn_holder"
-            app:layout_constraintStart_toEndOf="@id/content_entry_mimetype_icon"
-            app:layout_constraintTop_toBottomOf="@id/content_entry_item_description"
-            app:textMessageIdLookupKey="@{contentEntry.contentTypeFlag}"
-            app:textMessageIdLookupMap="@{ContentEntryList2Fragment.CONTENT_ENTRY_TYPE_LABEL_MAP}" />
+            app:layout_constraintTop_toBottomOf="@id/content_entry_desc_bottom_barrier"
+            app:layout_constraintStart_toEndOf="@+id/content_entry_locally_available"
+            android:visibility="@{locallyAvailable ? View.VISIBLE : View.GONE}"
+            />
 
+
+        <com.ustadmobile.port.android.view.DownloadStatusButton
+            android:id="@+id/download_status_button"
+            android:visibility="@{isPickerMode ? View.GONE: View.VISIBLE}"
+            style="?android:attr/borderlessButtonStyle"
+            android:onClick="@{() -> itemListener.onClickDownloadContentEntry(contentEntry)}"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            android:padding="@dimen/dimen_8dp"
+            android:contentDescription="@string/download"
+            android:tint="?colorOnIconTint"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_file_download_black_24dp" />
 
         <FrameLayout
             android:id="@+id/action_btn_holder"
@@ -174,20 +234,6 @@
             android:layout_height="wrap_content"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-
-            <com.ustadmobile.port.android.view.DownloadStatusButton
-                android:id="@+id/content_entry_item_download"
-                style="?android:attr/borderlessButtonStyle"
-                android:onClick="@{() -> itemListener.onClickDownloadContentEntry(contentEntry)}"
-                android:layout_width="@dimen/dimen_40dp"
-                android:layout_height="@dimen/dimen_40dp"
-                android:padding="@dimen/dimen_8dp"
-                android:contentDescription="@string/download"
-                android:tint="?colorOnIconTint"
-                android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_file_download_black_24dp" />
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/content_entry_select_btn"

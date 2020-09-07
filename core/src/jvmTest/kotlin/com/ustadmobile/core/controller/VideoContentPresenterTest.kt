@@ -6,41 +6,29 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContentEntryProgressDao
-import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.activeRepoInstance
-import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.VideoPlayerView
-import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.util.test.checkJndiSetup
-import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.util.test.ext.insertVideoContent
 import kotlinx.coroutines.runBlocking
-import org.apache.commons.io.FileUtils
 import org.junit.Before
-import org.junit.Rule
 import org.junit.Test
-import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import java.io.File
 import java.io.IOException
 import javax.naming.InitialContext
 
@@ -120,7 +108,7 @@ class VideoContentPresenterTest {
 
         presenter.updateProgress(0, 100, true)
 
-        verify(mockEndpoint).storeStatements(any(), eq(""), eq(container!!.containerContentEntryUid))
+        verify(mockEndpoint, timeout(5000)).storeStatements(any(), eq(""), eq(container!!.containerContentEntryUid))
 
     }
 
