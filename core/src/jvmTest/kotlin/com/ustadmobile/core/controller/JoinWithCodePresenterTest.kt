@@ -97,4 +97,7 @@ class JoinWithCodePresenterTest {
         verify(mockView, timeout(5000)).errorText = any()
     }
 
+    @Test
+    fun givenValidCode_when
+
 }

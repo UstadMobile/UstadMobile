@@ -19,6 +19,7 @@ import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEM
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.SchoolMemberWithPerson
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
@@ -166,7 +167,8 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
     override fun addMember() {
         navigateToPickEntityFromList(Person::class.java,  R.id.person_list_dest,
-                bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to filterBySchoolUid.toString()),
+                bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to filterBySchoolUid.toString(),
+                        UstadView.ARG_CODE_TABLE to School.TABLE_ID.toString()),
                 addPersonKeyName,true)
     }
 }

@@ -23,6 +23,8 @@ abstract class SchoolDao : BaseDao<School> {
     abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): SchoolWithHolidayCalendar?
 
 
+    @Query("SELECT * FROM School WHERE schoolCode = :code")
+    abstract fun findBySchoolCode(code: String): School?
 
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */

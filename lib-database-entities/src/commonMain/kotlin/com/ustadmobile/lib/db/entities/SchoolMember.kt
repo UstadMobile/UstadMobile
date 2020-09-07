@@ -55,6 +55,7 @@ open class SchoolMember {
 
         const val SCHOOL_ROLE_STUDENT = 1
         const val SCHOOL_ROLE_TEACHER = 2
+        const val SCHOOL_ROLE_STUDENT_PENDING = 3
 
     }
 }

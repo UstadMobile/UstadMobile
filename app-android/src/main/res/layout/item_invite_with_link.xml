@@ -31,7 +31,7 @@
         android:layout_height="wrap_content"
         android:background="?attr/selectableItemBackground"
         android:id="@+id/item_comment_new_cl"
-        android:onClick="@{() -> mPresenter.handleClickInviteWithLink(tableId, code, entityName)}"
+        android:onClick="@{() -> mPresenter.handleClickInviteWithLink()}"
         >
 
         <de.hdodenhof.circleimageview.CircleImageView

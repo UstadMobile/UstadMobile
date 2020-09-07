@@ -8,10 +8,11 @@ import com.ustadmobile.core.view.PersonListView.Companion.ARG_EXCLUDE_PERSONUIDS
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class PersonListPresenter(context: Any, arguments: Map<String, String>, view: PersonListView,
@@ -75,13 +76,42 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     }
 
 
-    fun handleClickInviteWithLink(tableId: Int, code: String?, entityName: String?){
+    fun handleClickInviteWithLink(){
 
-        systemImpl.go(InviteViaLinkView.VIEW_NAME, mapOf(
-                UstadView.ARG_CODE_TABLE to tableId.toString(),
-                UstadView.ARG_CODE to code,
-                UstadView.ARG_ENTITY_NAME to entityName
-        ), context)
+        GlobalScope.launch {
+
+            val code: String?
+            val entityName: String?
+            val tableId: Int
+            when {
+                filterExcludeMembersOfClazz != 0L -> {
+                    val clazz = db.clazzDao.findByUidAsync(filterExcludeMembersOfClazz)
+                    code = clazz?.clazzCode
+                    entityName = clazz?.clazzName
+                    tableId = Clazz.TABLE_ID
+                }
+                filterExcludeMemberOfSchool != 0L -> {
+                    val school = db.schoolDao.findByUidAsync(filterExcludeMemberOfSchool)
+                    code = school?.schoolCode
+                    entityName = school?.schoolName
+                    tableId = School.TABLE_ID
+                }
+                else -> {
+                    code = ""
+                    entityName = ""
+                    tableId = 0
+                }
+            }
+
+            view.runOnUiThread(Runnable {
+                systemImpl.go(InviteViaLinkView.VIEW_NAME, mapOf(
+                        UstadView.ARG_CODE_TABLE to tableId.toString(),
+                        UstadView.ARG_CODE to code,
+                        UstadView.ARG_ENTITY_NAME to entityName
+                ), context)
+            })
+        }
+
     }
 
     companion object {

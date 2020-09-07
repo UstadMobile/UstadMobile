@@ -83,6 +83,47 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     return clazzMember
 }
 
+/**
+ * Enrol the given person into the given school. The effective date of joining is midnight as per
+ * the timezone of the school (e.g. when a teacher adds a student to the system who just joined and
+ * wants to mark their attendance for the same day).
+ */
+suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Person, schoolUid: Long,
+                                                              role: Int)
+        : SchoolMemberWithPerson {
+    val schoolVal =  schoolDao.findByUidAsync(schoolUid)
+    ?: throw IllegalArgumentException("School does not exist")
+
+    val schoolTimeZone = schoolVal.schoolTimeZone?: "UTC"
+    val joinTime = DateTime.now().toOffsetByTimezone(schoolTimeZone).localMidnight.utc.unixMillisLong
+    val schoolMember = SchoolMemberWithPerson().apply {
+        schoolMemberPersonUid = personToEnrol.personUid
+        schoolMemberSchoolUid = schoolUid
+        schoolMemberRole= role
+        schoolMemberActive = true
+        schoolMemberJoinDate = joinTime
+        person = personToEnrol
+        schoolMemberUid = schoolMemberDao.insertAsync(this)
+    }
+
+    val personGroupUid = when(role) {
+        SchoolMember.SCHOOL_ROLE_TEACHER -> schoolVal.schoolTeachersPersonGroupUid
+        SchoolMember.SCHOOL_ROLE_STUDENT -> schoolVal.schoolStudentsPersonGroupUid
+        SchoolMember.SCHOOL_ROLE_STUDENT_PENDING -> schoolVal.schoolPendingStudentsPersonGroupUid
+        else -> null
+    }
+
+    if(personGroupUid != null) {
+        val personGroupMember = PersonGroupMember().also {
+            it.groupMemberPersonUid = personToEnrol.personUid
+            it.groupMemberGroupUid = personGroupUid
+            it.groupMemberUid = personGroupMemberDao.insertAsync(it)
+        }
+    }
+
+    return schoolMember
+}
+
 suspend fun UmAppDatabase.approvePendingClazzMember(member: ClazzMember, clazz: Clazz? = null) {
     val effectiveClazz = clazz ?: clazzDao.findByUidAsync(member.clazzMemberClazzUid)
         ?: throw IllegalStateException("Class does not exist")

@@ -31,8 +31,7 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
 
 
     override fun handleClickInviteWithLink() {
-        mPresenter?.handleClickInviteWithLink(Clazz.TABLE_ID, "testCode",
-                "Class Test A")
+        mPresenter?.handleClickInviteWithLink()
 
     }
 
@@ -51,7 +50,7 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
             mDataBinding?.addMode = value
             mNewItemRecyclerViewAdapter?.newItemVisible =
                     (value == ListViewAddMode.FIRST_ITEM)
-            if(arguments?.containsKey(UstadView.ARG_CODE) == true){
+            if(arguments?.containsKey(UstadView.ARG_CODE_TABLE) == true){
                 inviteWithLinkRecyclerViewAdapter?.visible = mNewItemRecyclerViewAdapter?.newItemVisible?:false
             }
 

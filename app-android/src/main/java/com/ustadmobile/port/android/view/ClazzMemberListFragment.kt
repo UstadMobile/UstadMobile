@@ -210,8 +210,8 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
         fabManager?.visible = false
     }
 
-    fun navigateToPickNewMember(keyName: String){
-        //TODO: Finish
+    private fun navigateToPickNewMember(keyName: String){
+
         navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest,
                 bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
                 ARG_CODE_TABLE to Clazz.TABLE_ID.toString()),
