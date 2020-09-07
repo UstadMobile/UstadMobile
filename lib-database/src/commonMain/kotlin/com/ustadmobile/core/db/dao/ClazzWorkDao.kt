@@ -62,17 +62,11 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             AND ClazzWork.clazzWorkTitle LIKE :searchText 
             ORDER BY CASE(:sortOrder)
                 WHEN $SORT_DEADLINE_ASC THEN ClazzWork.clazzWorkDueDateTime
-                ELSE 0
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_DEADLINE_DESC THEN ClazzWork.clazzWorkDueDateTime
-                ELSE 0
-            END DESC,
-           CASE(:sortOrder)
                 WHEN $SORT_VISIBLE_FROM_ASC THEN ClazzWork.clazzWorkStartDateTime
                 ELSE 0
             END ASC,
             CASE(:sortOrder)
+                WHEN $SORT_DEADLINE_DESC THEN ClazzWork.clazzWorkDueDateTime
                 WHEN $SORT_VISIBLE_FROM_DESC THEN ClazzWork.clazzWorkStartDateTime
                 ELSE 0
             END DESC,
@@ -88,63 +82,6 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
     )
     abstract fun findWithMetricsByClazzUidLive(clazzUid: Long, role: Int, today: Long, sortOrder: Int, searchText: String? = "%%")
             : DataSource.Factory<Int, ClazzWorkWithMetrics>
-
-
-
-    @Query("""
-            SELECT ClazzWork.*, 
-            
-            (
-                SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid 
-                AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 
-                AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
-            ) as totalStudents, 
-            (
-                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
-                clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-            ) as submittedStudents, 
-            0 as notSubmittedStudents,
-            0 as completedStudents, 
-            (
-                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
-                ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
-            ) as markedStudents,
-             0 as firstContentEntryUid,
-             Clazz.clazzTimeZone as clazzTimeZone 
-             FROM ClazzWork 
-             LEFT JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
-             WHERE clazzWorkClazzUid = :clazzUid
-             AND (:role = ${ClazzMember.ROLE_TEACHER} OR clazzWorkStartDateTime < :today)
-            AND CAST(clazzWorkActive as INTEGER) = 1 
-            AND ClazzWork.clazzWorkTitle LIKE :searchText 
-            ORDER BY CASE(:sortOrder)
-                WHEN $SORT_DEADLINE_ASC THEN ClazzWork.clazzWorkDueDateTime
-                ELSE 0
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_DEADLINE_DESC THEN ClazzWork.clazzWorkDueDateTime
-                ELSE 0
-            END DESC,
-           CASE(:sortOrder)
-                WHEN $SORT_VISIBLE_FROM_ASC THEN ClazzWork.clazzWorkStartDateTime
-                ELSE 0
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_VISIBLE_FROM_DESC THEN ClazzWork.clazzWorkStartDateTime
-                ELSE 0
-            END DESC,
-            CASE(:sortOrder)
-                WHEN $SORT_TITLE_ASC THEN ClazzWork.clazzWorkTitle
-                ELSE ''
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_TITLE_DESC THEN ClazzWork.clazzWorkTitle
-                ELSE ''
-            END DESC
-        """
-    )
-    abstract fun findWithMetricsByClazzUidLiveTest(clazzUid: Long, role: Int, today: Long, sortOrder: Int, searchText: String? = "%%"): List<ClazzWorkWithMetrics>
 
 
     @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)

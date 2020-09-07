@@ -25,76 +25,74 @@ fun UmAppDatabase.createClazzLogs(fromTime: Long, toTime: Long, clazzFilter: Lon
                                   matchLocalFromDay: Boolean = false) {
     val holidayCalendarHolidayLists = mutableMapOf<Long, List<Holiday>>()
     val toDateTime = DateTime.fromUnix(toTime)
-    GlobalScope.launch {
-        clazzDao.findClazzesWithEffectiveHolidayCalendarAndFilter(clazzFilter).forEach { clazz ->
-            val alreadyCreatedClazzLogs = clazzLogDao.findByClazzUidWithinTimeRange(clazz.clazzUid,
-                    fromTime, toTime)
+    clazzDao.findClazzesWithEffectiveHolidayCalendarAndFilter(clazzFilter).forEach { clazz ->
+        val alreadyCreatedClazzLogs = clazzLogDao.findByClazzUidWithinTimeRange(clazz.clazzUid,
+                fromTime, toTime)
 
 
-            val effectiveTimeZone = clazz.clazzTimeZone ?: clazz.school?.schoolTimeZone ?: "UTC"
-            val startTimeOffset = getTimezoneOffset(effectiveTimeZone, fromTime)
-            val fromTimeLocal = DateTime.fromUnix(fromTime).toOffset(
-                    TimezoneOffset(startTimeOffset.toDouble()))
-            val fromDayOfWeekLocal = fromTimeLocal.dayOfWeek
+        val effectiveTimeZone = clazz.clazzTimeZone ?: clazz.school?.schoolTimeZone ?: "UTC"
+        val startTimeOffset = getTimezoneOffset(effectiveTimeZone, fromTime)
+        val fromTimeLocal = DateTime.fromUnix(fromTime).toOffset(
+                TimezoneOffset(startTimeOffset.toDouble()))
+        val fromDayOfWeekLocal = fromTimeLocal.dayOfWeek
 
-            val holCalendarUid = clazz.holidayCalendar?.umCalendarUid ?: 0L
-            val clazzHolidayList = holidayCalendarHolidayLists.getOrPut(holCalendarUid) {
-                holidayDao.findByHolidayCalendaUid(holCalendarUid)
+        val holCalendarUid = clazz.holidayCalendar?.umCalendarUid ?: 0L
+        val clazzHolidayList = holidayCalendarHolidayLists.getOrPut(holCalendarUid) {
+            holidayDao.findByHolidayCalendaUid(holCalendarUid)
+        }
+
+        for (schedule in scheduleDao.findAllSchedulesByClazzUidAsList(clazz.clazzUid)) {
+            val scheduleNextInstance = schedule.nextOccurence(effectiveTimeZone, fromTime)
+            if (scheduleNextInstance >= toDateTime) {
+                continue
             }
 
-            for (schedule in scheduleDao.findAllSchedulesByClazzUidAsList(clazz.clazzUid)) {
-                val scheduleNextInstance = schedule.nextOccurence(effectiveTimeZone, fromTime)
-                if (scheduleNextInstance >= toDateTime) {
-                    continue
-                }
-
-                val scheduleNextInstanceDateTimeTz = scheduleNextInstance.from.toOffsetByTimezone(
-                        effectiveTimeZone)
-                if (matchLocalFromDay && scheduleNextInstanceDateTimeTz.dayOfWeek != fromDayOfWeekLocal) {
-                    continue
-                }
+            val scheduleNextInstanceDateTimeTz = scheduleNextInstance.from.toOffsetByTimezone(
+                    effectiveTimeZone)
+            if (matchLocalFromDay && scheduleNextInstanceDateTimeTz.dayOfWeek != fromDayOfWeekLocal) {
+                continue
+            }
 
 
-                val holidayAndDateTimeRange = clazzHolidayList.map {
-                    val timezoneOffset = getTimezoneOffset(effectiveTimeZone, it.holStartTime)
-                    Pair(it, DateTime.fromUnix(
-                            it.holStartTime - timezoneOffset) until
-                            DateTime.fromUnix(it.holEndTime - timezoneOffset))
-                }
+            val holidayAndDateTimeRange = clazzHolidayList.map {
+                val timezoneOffset = getTimezoneOffset(effectiveTimeZone, it.holStartTime)
+                Pair(it, DateTime.fromUnix(
+                        it.holStartTime - timezoneOffset) until
+                        DateTime.fromUnix(it.holEndTime - timezoneOffset))
+            }
 
-                val overlappingHolidays = holidayAndDateTimeRange
-                        .filter { it.second.contains(scheduleNextInstance) }
+            val overlappingHolidays = holidayAndDateTimeRange
+                    .filter { it.second.contains(scheduleNextInstance) }
 
-                val clazzLogDate = scheduleNextInstance.from.unixMillisLong
-                val clazzLog = ClazzLog().apply {
-                    logDate = clazzLogDate
-                    clazzLogClazzUid = clazz.clazzUid
-                    clazzLogScheduleUid = schedule.scheduleUid
-                    clazzLogUid = generateUid()
-                    clazzLogCancelled = overlappingHolidays.isNotEmpty()
-                    if (clazzLogCancelled) {
-                        cancellationNote = overlappingHolidays.joinToString {
-                            it.first.holName ?: ""
-                        }
+            val clazzLogDate = scheduleNextInstance.from.unixMillisLong
+            val clazzLog = ClazzLog().apply {
+                logDate = clazzLogDate
+                clazzLogClazzUid = clazz.clazzUid
+                clazzLogScheduleUid = schedule.scheduleUid
+                clazzLogUid = generateUid()
+                clazzLogCancelled = overlappingHolidays.isNotEmpty()
+                if (clazzLogCancelled) {
+                    cancellationNote = overlappingHolidays.joinToString {
+                        it.first.holName ?: ""
                     }
                 }
+            }
 
-                //Check to see if the schedule has been updated. If it has been updated, then mark the
-                // old entry status as STATUS_RESCHEDULED and then update the join for any related
-                // ClazzLogAttendanceRecord entries
-                val logsToReschedule = alreadyCreatedClazzLogs.filter {
-                    it.clazzLogScheduleUid == schedule.scheduleUid && it.clazzLogUid != clazzLog.clazzLogUid
-                }
+            //Check to see if the schedule has been updated. If it has been updated, then mark the
+            // old entry status as STATUS_RESCHEDULED and then update the join for any related
+            // ClazzLogAttendanceRecord entries
+            val logsToReschedule = alreadyCreatedClazzLogs.filter {
+                it.clazzLogScheduleUid == schedule.scheduleUid && it.clazzLogUid != clazzLog.clazzLogUid
+            }
 
-                logsToReschedule.forEach {
-                    clazzLogDao.updateStatusByClazzLogUid(it.clazzLogUid, ClazzLog.STATUS_RESCHEDULED)
-                    clazzLogAttendanceRecordDao.updateRescheduledClazzLogUids(it.clazzLogUid,
-                            clazzLog.clazzLogUid)
-                }
+            logsToReschedule.forEach {
+                clazzLogDao.updateStatusByClazzLogUid(it.clazzLogUid, ClazzLog.STATUS_RESCHEDULED)
+                clazzLogAttendanceRecordDao.updateRescheduledClazzLogUids(it.clazzLogUid,
+                        clazzLog.clazzLogUid)
+            }
 
-                if (!alreadyCreatedClazzLogs.any { it.clazzLogUid == clazzLog.clazzLogUid }) {
-                    clazzLogDao.insert(clazzLog)
-                }
+            if (!alreadyCreatedClazzLogs.any { it.clazzLogUid == clazzLog.clazzLogUid }) {
+                clazzLogDao.insert(clazzLog)
             }
         }
 
