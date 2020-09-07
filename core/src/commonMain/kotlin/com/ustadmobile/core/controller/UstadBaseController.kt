@@ -101,6 +101,16 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
         lifecycleStatus.value = RESUMED
     }
 
+    open fun onPause() {
+        synchronized(lifecycleListeners) {
+            for (listener in lifecycleListeners) {
+                listener.onLifecyclePause(this)
+            }
+        }
+
+        lifecycleStatus.value = PAUSED
+    }
+
     /**
      * Handle when the presenter is no longer visible. Analogous to Android's onStop
      */
