@@ -16,7 +16,7 @@ import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.runBlocking
 
 @ExperimentalStdlibApi
-class GoogleDriveFolderIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentContentEntry, runUid, db, sqiUid, contentEntryUid) {
+class GoogleDriveFolderIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
 
 
     override fun indexUrl(sourceUrl: String) {
