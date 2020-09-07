@@ -38,6 +38,8 @@ import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.hamcrest.Matchers.not
@@ -186,10 +188,13 @@ class PersonEditFragmentTest {
         val allPeople = dbRule.db.personDao.getAllPerson()
 
         Assert.assertTrue(allPeople.isNotEmpty())
-        val savedRoles = dbRule.db.entityRoleDao.filterByPersonWithExtraAsList(
-                person.personGroupUid)
+        GlobalScope.launch {
+            val savedRoles = dbRule.db.entityRoleDao.filterByPersonWithExtraAsList(
+                    person.personGroupUid)
+            Assert.assertTrue(savedRoles.isNotEmpty())
+        }
 
-        Assert.assertTrue(savedRoles.isNotEmpty())
+
 
 
     }
