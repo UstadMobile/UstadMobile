@@ -106,7 +106,7 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
                 ELSE 0
             END DESC
     """)
-    abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%%"): DataSource.Factory<Int, ClazzMemberWithPerson>
+    abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int, ClazzMemberWithPerson>
 
 
     @Query("UPDATE ClazzMember SET clazzMemberActive = :enrolled WHERE " + "clazzMemberPersonUid = :personUid AND clazzMemberClazzUid = :clazzUid")

@@ -80,7 +80,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             END DESC
         """
     )
-    abstract fun findWithMetricsByClazzUidLive(clazzUid: Long, role: Int, today: Long, sortOrder: Int, searchText: String? = "%%")
+    abstract fun findWithMetricsByClazzUidLive(clazzUid: Long, role: Int, today: Long, sortOrder: Int, searchText: String? = "%")
             : DataSource.Factory<Int, ClazzWorkWithMetrics>
 
 
@@ -93,11 +93,11 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             : DataSource.Factory<Int, ClazzWorkWithMetrics>?
 
     @Query(STUDENT_PROGRESS_QUERY)
-    abstract fun findStudentProgressByClazzWork(clazzWorkUid: Long, sortOrder: Int = 1, searchText: String? = "%%"): DataSource.Factory<Int,
+    abstract fun findStudentProgressByClazzWork(clazzWorkUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int,
             ClazzMemberWithClazzWorkProgress>
 
     @Query(STUDENT_PROGRESS_QUERY)
-    abstract suspend fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long, sortOrder: Int = 1, searchText: String? = "%%"): List<ClazzMemberWithClazzWorkProgress>
+    abstract suspend fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long, sortOrder: Int, searchText: String? = "%"): List<ClazzMemberWithClazzWorkProgress>
 
     @Query(FIND_CLAZZMEMBER_AND_SUBMISSION_WITH_PERSON)
     abstract suspend fun findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid: Long,

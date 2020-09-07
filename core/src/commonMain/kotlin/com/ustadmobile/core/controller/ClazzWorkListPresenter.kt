@@ -21,14 +21,6 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
     : UstadListPresenter<ClazzWorkListView, ClazzWork>(context, arguments, view, di, lifecycleOwner)
         , OnSortOptionSelected, OnSearchSubmitted {
 
-
-    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
-
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
-    }
-
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 

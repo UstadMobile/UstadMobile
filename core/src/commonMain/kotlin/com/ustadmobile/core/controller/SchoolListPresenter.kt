@@ -13,7 +13,7 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
                           di: DI, lifecycleOwner: DoorLifecycleOwner)
     : UstadListPresenter<SchoolListView, School>(context, arguments, view, di, lifecycleOwner) {
 
-    var searchQuery = "%%"
+    var searchQuery = "%"
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
     enum class SortOrder(val messageId: Int) {
