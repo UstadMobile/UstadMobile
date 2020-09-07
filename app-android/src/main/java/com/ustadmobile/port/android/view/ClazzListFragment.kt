@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import android.widget.AdapterView
 import androidx.core.os.bundleOf
 import com.toughra.ustadmobile.R
@@ -42,11 +40,11 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
                 this, di, viewLifecycleOwner)
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
             requireContext().getString(R.string.add_a_new,
-                    requireContext().getString(R.string.clazz)))
+                    requireContext().getString(R.string.clazz)),  onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         mDataRecyclerViewAdapter = ClazzListRecyclerAdapter(mPresenter)
 
         return view
-    }                                                                                                                                                                                                                                                                       
+    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -67,6 +65,16 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
             val sheet = OptionsBottomSheetFragment(optionList, this)
             sheet.show(childFragmentManager, sheet.tag)
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     override fun onBottomSheetOptionSelected(optionSelected: BottomSheetOption) {
@@ -93,6 +101,8 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
             }
             navigateToEditEntity(null, R.id.clazz_edit_dest, Clazz::class.java,
                     argBundle = args)
+        } else {
+            super.onClick(v)
         }
     }
 
