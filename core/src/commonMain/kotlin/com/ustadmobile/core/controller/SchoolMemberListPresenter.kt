@@ -6,6 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.enrollPersonToSchool
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.SchoolMemberListView
@@ -26,6 +27,8 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
+    var searchText: String? = null
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
@@ -34,6 +37,7 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     override fun onPause() {
+        searchText = ""
         updateListOnView()
     }
 
@@ -42,7 +46,7 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
                 arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L, Role.PERMISSION_SCHOOL_UPDATE)
     }
 
-    private fun updateListOnView(searchText: String? = null) {
+    private fun updateListOnView() {
 
         val schoolRole = arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0
 
@@ -51,7 +55,7 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
         view.list = repo.schoolMemberDao
                 .findAllActiveMembersBySchoolAndRoleUid(schoolUid, schoolRole,
                         selectedSortOption?.flag ?: 0,
-                        if (searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
+                       searchText.toQueryLikeParam())
     }
 
     fun handleEnrolMember(schoolUid: Long, personUid: Long, role: Int) {
@@ -82,7 +86,8 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
 
 
     override fun onSearchSubmitted(text: String?) {
-        updateListOnView(text)
+        searchText = text
+        updateListOnView()
     }
 
     companion object {

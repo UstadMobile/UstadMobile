@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.approvePendingClazzMember
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView
@@ -29,12 +30,15 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
+    var searchText: String? = null
+
     override fun onCreate(savedState: Map<String, String>?) {
         filterByClazzUid = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: -1
         super.onCreate(savedState)
     }
 
     override fun onPause() {
+        searchText = ""
         updateListOnView()
     }
 
@@ -57,17 +61,17 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_TEACHER)
     }
 
-    private fun updateListOnView(searchText: String? = null) {
+    private fun updateListOnView() {
         view.list = repo.clazzMemberDao.findByClazzUidAndRole(filterByClazzUid,
                 ClazzMember.ROLE_TEACHER, selectedSortOption?.flag ?: 0,
-                if (searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
+                searchText.toQueryLikeParam())
         view.studentList = repo.clazzMemberDao.findByClazzUidAndRole(filterByClazzUid,
                 ClazzMember.ROLE_STUDENT, selectedSortOption?.flag ?: 0,
-                if (searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
+                searchText.toQueryLikeParam())
         if (view.addStudentVisible) {
             view.pendingStudentList = db.clazzMemberDao.findByClazzUidAndRole(filterByClazzUid,
                     ClazzMember.ROLE_STUDENT_PENDING, selectedSortOption?.flag ?: 0,
-                    if (searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
+                    searchText.toQueryLikeParam())
         }
     }
 
@@ -107,7 +111,8 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     }
 
     override fun onSearchSubmitted(text: String?) {
-        updateListOnView(text)
+        searchText = text
+        updateListOnView()
     }
 
     companion object {

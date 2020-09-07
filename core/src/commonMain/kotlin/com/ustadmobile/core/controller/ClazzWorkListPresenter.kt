@@ -6,6 +6,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -31,6 +32,7 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
+    var searchText: String? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -46,7 +48,7 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
                 clazzUid, Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE)
     }
 
-    private suspend fun updateListOnView(searchText: String? = null) {
+    private suspend fun updateListOnView() {
 
         val clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
         val loggedInPersonUid = accountManager.activeAccount.personUid
@@ -56,14 +58,7 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
         view.list = repo.clazzWorkDao.findWithMetricsByClazzUidLive(
                 clazzUid, clazzMember?.clazzMemberRole ?: ClazzMember.ROLE_STUDENT,
                 UMCalendarUtil.getDateInMilliPlusDays(0), selectedSortOption?.flag ?: 0,
-                if (searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
-
-      /*  val data = repo.clazzWorkDao.findWithMetricsByClazzUidLiveTest(
-                clazzUid, clazzMember?.clazzMemberRole ?: ClazzMember.ROLE_STUDENT,
-                UMCalendarUtil.getDateInMilliPlusDays(0), selectedSortOption?.flag ?: 0,
-                if (searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
-
-        println(data)*/
+                searchText.toQueryLikeParam())
     }
 
     override fun handleClickEntry(entry: ClazzWork) {
@@ -95,7 +90,8 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
 
     override fun onSearchSubmitted(text: String?) {
         GlobalScope.launch(doorMainDispatcher()) {
-            updateListOnView(text)
+            searchText = text
+            updateListOnView()
         }
     }
 

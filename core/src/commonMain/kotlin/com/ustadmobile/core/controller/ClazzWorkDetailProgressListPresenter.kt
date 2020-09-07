@@ -5,6 +5,7 @@ import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.core.view.UstadView
@@ -27,6 +28,8 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
+    var searchText: String? = null
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         filterByClazzWorkUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: -1
@@ -39,7 +42,7 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
         return false
     }
 
-    private fun updateListOnView(searchText: String? = null) {
+    private fun updateListOnView() {
 
         view.clazzWorkWithMetrics = repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUid(
                 filterByClazzWorkUid)
@@ -47,7 +50,7 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
         view.list = repo.clazzWorkDao.findStudentProgressByClazzWork(
                 filterByClazzWorkUid,
                 selectedSortOption?.flag ?: ClazzWorkDao.SORT_FIRST_NAME_ASC,
-                if (searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
+                searchText.toQueryLikeParam())
     }
 
     override fun handleClickEntry(entry: ClazzMemberWithClazzWorkProgress) {
@@ -73,7 +76,8 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
 
 
     override fun onSearchSubmitted(text: String?) {
-        updateListOnView(text)
+        searchText = text
+        updateListOnView()
     }
 
 

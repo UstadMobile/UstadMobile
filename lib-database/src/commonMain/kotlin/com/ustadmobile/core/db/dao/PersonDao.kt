@@ -228,7 +228,7 @@ abstract class PersonDao : BaseDao<Person> {
     """)
     abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
                                                  excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%%"): DataSource.Factory<Int, PersonWithDisplayDetails>
+                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int, PersonWithDisplayDetails>
 
 
     @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")

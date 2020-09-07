@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -22,6 +23,8 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     private var filterExcludeMembersOfSchool: Long = 0
 
+    private var searchText: String? = null
+
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
@@ -36,8 +39,8 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
         updateList()
     }
 
-    private fun updateList(searchText: String? = null) {
-        view.list = repo.clazzDao.findClazzesWithPermission(if(searchText.isNullOrEmpty()) "%%" else "%${searchText}%",
+    private fun updateList() {
+        view.list = repo.clazzDao.findClazzesWithPermission(searchText.toQueryLikeParam(),
                 loggedInPersonUid, filterExcludeMembersOfSchool, selectedSortOption?.flag ?: 0)
     }
 
@@ -61,7 +64,8 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
     }
 
     override fun onSearchSubmitted(text: String?) {
-        updateList(text)
+        searchText = text
+        updateList()
     }
 
 
