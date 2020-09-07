@@ -1,40 +1,45 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.dao.ClazzMemberDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.approvePendingClazzMember
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, view: ClazzMemberListView,
-                          di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<ClazzMemberListView, ClazzMember>(context, arguments, view, di, lifecycleOwner) {
+                               di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<ClazzMemberListView, ClazzMember>(context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
 
-
-    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
     var filterByClazzUid: Long = -1
 
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
-    }
+    override val sortOptions: List<SortOrderOption>
+        get() = SORT_OPTIONS
 
-    class ClazzMemberListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    var searchText: String? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
         filterByClazzUid = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: -1
         super.onCreate(savedState)
+    }
 
-        view.sortOptions = SortOrder.values().toList().map { ClazzMemberListSortOption(it, context) }
+    override fun onPause() {
+        searchText = ""
+        updateListOnView()
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -44,22 +49,30 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     override suspend fun onLoadFromDb() {
         super.onLoadFromDb()
 
-        view.list = repo.clazzMemberDao.findByClazzUidAndRole(filterByClazzUid,
-                ClazzMember.ROLE_TEACHER)
-        view.studentList = repo.clazzMemberDao.findByClazzUidAndRole(filterByClazzUid,
-                ClazzMember.ROLE_STUDENT)
         val activePersonUid = accountManager.activeAccount.personUid
 
         view.addStudentVisible = db.clazzDao.personHasPermissionWithClazz(activePersonUid,
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_STUDENT)
 
-        if(view.addStudentVisible) {
-            view.pendingStudentList = db.clazzMemberDao.findByClazzUidAndRole(filterByClazzUid,
-                    ClazzMember.ROLE_STUDENT_PENDING)
-        }
+        selectedSortOption = SORT_OPTIONS[0]
+        updateListOnView()
 
         view.addTeacherVisible = db.clazzDao.personHasPermissionWithClazz(activePersonUid,
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_TEACHER)
+    }
+
+    private fun updateListOnView() {
+        view.list = repo.clazzMemberDao.findByClazzUidAndRole(filterByClazzUid,
+                ClazzMember.ROLE_TEACHER, selectedSortOption?.flag ?: 0,
+                searchText.toQueryLikeParam())
+        view.studentList = repo.clazzMemberDao.findByClazzUidAndRole(filterByClazzUid,
+                ClazzMember.ROLE_STUDENT, selectedSortOption?.flag ?: 0,
+                searchText.toQueryLikeParam())
+        if (view.addStudentVisible) {
+            view.pendingStudentList = db.clazzMemberDao.findByClazzUidAndRole(filterByClazzUid,
+                    ClazzMember.ROLE_STUDENT_PENDING, selectedSortOption?.flag ?: 0,
+                    searchText.toQueryLikeParam())
+        }
     }
 
 
@@ -71,9 +84,9 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
     fun handleClickPendingRequest(member: ClazzMember, approved: Boolean) {
         GlobalScope.launch {
-            if(approved) {
+            if (approved) {
                 repo.approvePendingClazzMember(member)
-            }else {
+            } else {
                 repo.clazzMemberDao.updateAsync(member.also {
                     it.clazzMemberActive = false
                 })
@@ -92,12 +105,29 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
         }
     }
 
+    override fun onClickSort(sortOption: SortOrderOption) {
+        super.onClickSort(sortOption)
+        updateListOnView()
+    }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? ClazzMemberListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
+    override fun onSearchSubmitted(text: String?) {
+        searchText = text
+        updateListOnView()
+    }
 
-        }
+    companion object {
+
+        val SORT_OPTIONS = listOf(
+                SortOrderOption(MessageID.first_name, ClazzMemberDao.SORT_FIRST_NAME_ASC, true),
+                SortOrderOption(MessageID.first_name, ClazzMemberDao.SORT_FIRST_NAME_DESC, false),
+                SortOrderOption(MessageID.last_name, ClazzMemberDao.SORT_LAST_NAME_ASC, true),
+                SortOrderOption(MessageID.last_name, ClazzMemberDao.SORT_LAST_NAME_DESC, false),
+                SortOrderOption(MessageID.attendance, ClazzMemberDao.SORT_ATTENDANCE_ASC, true),
+                SortOrderOption(MessageID.attendance, ClazzMemberDao.SORT_ATTENDANCE_DESC, false),
+                SortOrderOption(MessageID.date_enroll, ClazzMemberDao.SORT_DATE_REGISTERED_ASC, true),
+                SortOrderOption(MessageID.date_enroll, ClazzMemberDao.SORT_DATE_REGISTERED_DESC, false),
+                SortOrderOption(MessageID.date_left, ClazzMemberDao.SORT_DATE_LEFT_ASC, true),
+                SortOrderOption(MessageID.date_left, ClazzMemberDao.SORT_DATE_LEFT_DESC, false)
+        )
     }
 }
