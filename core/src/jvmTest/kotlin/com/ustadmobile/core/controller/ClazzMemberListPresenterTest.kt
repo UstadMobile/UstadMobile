@@ -92,9 +92,9 @@ class ClazzMemberListPresenterTest {
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzMemberDaoSpy, timeout(5000)).findByClazzUidAndRole(42L,
-            ClazzMember.ROLE_STUDENT)
+            ClazzMember.ROLE_STUDENT,1, "%%")
         verify(repoClazzMemberDaoSpy, timeout(5000)).findByClazzUidAndRole(42L,
-                ClazzMember.ROLE_TEACHER)
+                ClazzMember.ROLE_TEACHER,1,"%%")
 
         verify(mockView, timeout(5000)).list = any()
         verify(mockView, timeout(5000)).studentList = any()
