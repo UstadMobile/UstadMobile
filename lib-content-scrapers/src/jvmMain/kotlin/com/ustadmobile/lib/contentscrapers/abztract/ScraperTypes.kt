@@ -39,6 +39,8 @@ object ScraperTypes {
 
     const val YOUTUBE_PLAYLIST_INDEXER = "youtubePlaylistIndexer"
 
+    const val APACHE_INDEXER = "apacheIndexer"
+
 
     val indexerTypeMap = mapOf(
             DDL_FRONT_PAGE_INDEXER to IndexerMap(DdlFrontPageIndexer::class.java, "https://www.ddl.af/"),
@@ -66,6 +68,8 @@ object ScraperTypes {
     const val KHAN_FULL_ARTICLE_SCRAPER = "khanFullArticleScraper"
 
     const val YOUTUBE_VIDEO_SCRAPER = "youtubeVideoScraper"
+
+    const val APACHE_SCRAPER = "apacheScraper"
 
     val scraperTypeMap = mapOf(
             DDL_ARTICLE_SCRAPER to DdlContentScraper::class.java,
