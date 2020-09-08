@@ -19,7 +19,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
     abstract suspend fun findByUidAsync(clazzWorkUid: Long): ClazzWork?
 
     @Update
-    abstract suspend fun updateAsync(entity: ClazzWork) : Int
+    abstract suspend fun updateAsync(entity: ClazzWork): Int
 
     @Query("""
         SELECT ClazzWork.*, ClazzWorkSubmission.* FROM ClazzWork 
@@ -33,13 +33,56 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
     """)
     abstract suspend fun findWithSubmissionByUidAndPerson(uid: Long, personUid: Long): ClazzWorkWithSubmission?
 
-    @Query("$FIND_WITH_METRICS_BY_CLAZZUID_WITH_ROLE ORDER BY ClazzWork.clazzWorkTitle ASC")
-    abstract fun findWithMetricsByClazzUidLiveAsc(clazzUid: Long, role: Int, today: Long)
-            : DataSource.Factory<Int,ClazzWorkWithMetrics>
+    @Query("""
+            SELECT ClazzWork.*, 
+            
+            (
+                SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid 
+                AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 
+                AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
+            ) as totalStudents, 
+            (
+                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
+                clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+            ) as submittedStudents, 
+            0 as notSubmittedStudents,
+            0 as completedStudents, 
+            (
+                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
+                ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
+            ) as markedStudents,
+             0 as firstContentEntryUid,
+             Clazz.clazzTimeZone as clazzTimeZone 
+             FROM ClazzWork 
+             LEFT JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
+             WHERE clazzWorkClazzUid = :clazzUid
+             AND (:role = ${ClazzMember.ROLE_TEACHER} OR clazzWorkStartDateTime < :today)
+            AND CAST(clazzWorkActive as INTEGER) = 1 
+            AND ClazzWork.clazzWorkTitle LIKE :searchText 
+            ORDER BY CASE(:sortOrder)
+                WHEN $SORT_DEADLINE_ASC THEN ClazzWork.clazzWorkDueDateTime
+                WHEN $SORT_VISIBLE_FROM_ASC THEN ClazzWork.clazzWorkStartDateTime
+                ELSE 0
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_DEADLINE_DESC THEN ClazzWork.clazzWorkDueDateTime
+                WHEN $SORT_VISIBLE_FROM_DESC THEN ClazzWork.clazzWorkStartDateTime
+                ELSE 0
+            END DESC,
+            CASE(:sortOrder)
+                WHEN $SORT_TITLE_ASC THEN ClazzWork.clazzWorkTitle
+                ELSE ''
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_TITLE_DESC THEN ClazzWork.clazzWorkTitle
+                ELSE ''
+            END DESC
+        """
+    )
+    abstract fun findWithMetricsByClazzUidLive(clazzUid: Long, role: Int, today: Long, sortOrder: Int, searchText: String? = "%")
+            : DataSource.Factory<Int, ClazzWorkWithMetrics>
 
-    @Query("$FIND_WITH_METRICS_BY_CLAZZUID_WITH_ROLE ORDER BY ClazzWork.clazzWorkTitle DESC")
-    abstract fun findWithMetricsByClazzUidLiveDesc(clazzUid: Long, role: Int, today: Long)
-            : DataSource.Factory<Int,ClazzWorkWithMetrics>
 
     @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)
     abstract suspend fun findClazzWorkWithMetricsByClazzWorkUidAsync(clazzWorkUid: Long)
@@ -50,20 +93,48 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             : DataSource.Factory<Int, ClazzWorkWithMetrics>?
 
     @Query(STUDENT_PROGRESS_QUERY)
-    abstract fun findStudentProgressByClazzWork(clazzWorkUid: Long): DataSource.Factory<Int,
+    abstract fun findStudentProgressByClazzWork(clazzWorkUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int,
             ClazzMemberWithClazzWorkProgress>
 
     @Query(STUDENT_PROGRESS_QUERY)
-    abstract fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long): List<ClazzMemberWithClazzWorkProgress>
+    abstract suspend fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long, sortOrder: Int, searchText: String? = "%"): List<ClazzMemberWithClazzWorkProgress>
 
     @Query(FIND_CLAZZMEMBER_AND_SUBMISSION_WITH_PERSON)
     abstract suspend fun findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid: Long,
-                                        clazzMemberUid: Long): ClazzMemberAndClazzWorkWithSubmission?
+                                                                    clazzMemberUid: Long): ClazzMemberAndClazzWorkWithSubmission?
 
     @Query("SELECT * FROM ClazzWork")
     abstract suspend fun findAllTesting(): List<ClazzWork>
 
-    companion object{
+    companion object {
+
+        const val SORT_DEADLINE_ASC = 1
+
+        const val SORT_DEADLINE_DESC = 2
+
+        const val SORT_VISIBLE_FROM_ASC = 3
+
+        const val SORT_VISIBLE_FROM_DESC = 4
+
+        const val SORT_TITLE_ASC = 5
+
+        const val SORT_TITLE_DESC = 6
+
+        const val SORT_FIRST_NAME_ASC = 7
+
+        const val SORT_FIRST_NAME_DESC = 8
+
+        const val SORT_LAST_NAME_ASC = 9
+
+        const val SORT_LAST_NAME_DESC = 10
+
+        const val SORT_CONTENT_PROGRESS_ASC = 11
+
+        const val SORT_CONTENT_PROGRESS_DESC = 12
+
+        const val SORT_STATUS_ASC = 13
+
+        const val SORT_STATUS_DESC = 14
 
 
         const val FIND_CLAZZWORKWITHMETRICS_QUERY = """
@@ -93,34 +164,6 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             AND CAST(ClazzWork.clazzWorkActive AS INTEGER) = 1
         """
 
-        const val FIND_WITH_METRICS_BY_CLAZZUID_WITH_ROLE = """
-            SELECT ClazzWork.*, 
-            
-            (
-                SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid 
-                AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 
-                AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
-            ) as totalStudents, 
-            (
-                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
-                clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-            ) as submittedStudents, 
-            0 as notSubmittedStudents,
-            0 as completedStudents, 
-            (
-                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
-                ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
-            ) as markedStudents,
-
-             0 as firstContentEntryUid,
-             Clazz.clazzTimeZone as clazzTimeZone 
-             FROM ClazzWork 
-             LEFT JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
-             WHERE clazzWorkClazzUid = :clazzUid
-             AND (:role = ${ClazzMember.ROLE_TEACHER} OR clazzWorkStartDateTime < :today)
-            AND CAST(clazzWorkActive as INTEGER) = 1
-        """
 
         const val FIND_CLAZZMEMBER_AND_SUBMISSION_WITH_PERSON =
                 """
@@ -195,7 +238,38 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                     LIMIT 1)
             WHERE 
                     ClazzMember.clazzMemberClazzUid = Clazz.clazzUid
-                    AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT}
+                    AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
+                    AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
+                    ORDER BY CASE(:sortOrder)
+                        WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
+                        WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
+                        ELSE ''
+                    END ASC,
+                    CASE(:sortOrder)
+                        WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
+                        WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
+                        ELSE ''
+                    END DESC,
+                    CASE(:sortOrder)
+                        WHEN $SORT_CONTENT_PROGRESS_ASC THEN mProgress
+                        ELSE 0
+                    END ASC,
+                    CASE(:sortOrder)
+                        WHEN $SORT_CONTENT_PROGRESS_DESC THEN mProgress
+                        ELSE 0
+                    END DESC,
+                   CASE(:sortOrder)
+                        WHEN $SORT_STATUS_ASC THEN 
+                        CASE WHEN (cws.clazzWorkSubmissionDateTimeMarked > 0) THEN cws.clazzWorkSubmissionDateTimeMarked
+                        ELSE CASE WHEN (cws.clazzWorkSubmissionDateTimeFinished > 0) THEN 
+                        cws.clazzWorkSubmissionDateTimeFinished ELSE mProgress 
+                    END END END ASC,
+                    CASE(:sortOrder)
+                        WHEN $SORT_STATUS_DESC THEN 
+                        CASE WHEN (cws.clazzWorkSubmissionDateTimeMarked > 0) THEN cws.clazzWorkSubmissionDateTimeMarked
+                        ELSE CASE WHEN (cws.clazzWorkSubmissionDateTimeFinished > 0) THEN 
+                        cws.clazzWorkSubmissionDateTimeFinished ELSE mProgress 
+                        END END END DESC
         """
     }
 }

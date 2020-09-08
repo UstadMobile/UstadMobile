@@ -4,6 +4,8 @@ import com.soywiz.klock.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Holiday
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 /**
  * This method will create the ClazzLog records for each day. A ClazzLog is created for each day
@@ -20,12 +22,12 @@ import com.ustadmobile.lib.db.entities.Holiday
  * generated must be for the same day according to the timezone of the
  */
 fun UmAppDatabase.createClazzLogs(fromTime: Long, toTime: Long, clazzFilter: Long = 0,
-    matchLocalFromDay: Boolean = false) {
+                                  matchLocalFromDay: Boolean = false) {
     val holidayCalendarHolidayLists = mutableMapOf<Long, List<Holiday>>()
     val toDateTime = DateTime.fromUnix(toTime)
     clazzDao.findClazzesWithEffectiveHolidayCalendarAndFilter(clazzFilter).forEach { clazz ->
         val alreadyCreatedClazzLogs = clazzLogDao.findByClazzUidWithinTimeRange(clazz.clazzUid,
-            fromTime, toTime)
+                fromTime, toTime)
 
 
         val effectiveTimeZone = clazz.clazzTimeZone ?: clazz.school?.schoolTimeZone ?: "UTC"
@@ -39,15 +41,15 @@ fun UmAppDatabase.createClazzLogs(fromTime: Long, toTime: Long, clazzFilter: Lon
             holidayDao.findByHolidayCalendaUid(holCalendarUid)
         }
 
-        for(schedule in scheduleDao.findAllSchedulesByClazzUidAsList(clazz.clazzUid)) {
+        for (schedule in scheduleDao.findAllSchedulesByClazzUidAsList(clazz.clazzUid)) {
             val scheduleNextInstance = schedule.nextOccurence(effectiveTimeZone, fromTime)
-            if(scheduleNextInstance >= toDateTime) {
+            if (scheduleNextInstance >= toDateTime) {
                 continue
             }
 
             val scheduleNextInstanceDateTimeTz = scheduleNextInstance.from.toOffsetByTimezone(
                     effectiveTimeZone)
-            if(matchLocalFromDay && scheduleNextInstanceDateTimeTz.dayOfWeek != fromDayOfWeekLocal) {
+            if (matchLocalFromDay && scheduleNextInstanceDateTimeTz.dayOfWeek != fromDayOfWeekLocal) {
                 continue
             }
 
@@ -69,8 +71,10 @@ fun UmAppDatabase.createClazzLogs(fromTime: Long, toTime: Long, clazzFilter: Lon
                 clazzLogScheduleUid = schedule.scheduleUid
                 clazzLogUid = generateUid()
                 clazzLogCancelled = overlappingHolidays.isNotEmpty()
-                if(clazzLogCancelled) {
-                    cancellationNote = overlappingHolidays.joinToString { it.first.holName ?: "" }
+                if (clazzLogCancelled) {
+                    cancellationNote = overlappingHolidays.joinToString {
+                        it.first.holName ?: ""
+                    }
                 }
             }
 
@@ -87,9 +91,10 @@ fun UmAppDatabase.createClazzLogs(fromTime: Long, toTime: Long, clazzFilter: Lon
                         clazzLog.clazzLogUid)
             }
 
-            if(!alreadyCreatedClazzLogs.any { it.clazzLogUid == clazzLog.clazzLogUid } ) {
+            if (!alreadyCreatedClazzLogs.any { it.clazzLogUid == clazzLog.clazzLogUid }) {
                 clazzLogDao.insert(clazzLog)
             }
         }
+
     }
 }

@@ -29,10 +29,8 @@ abstract class EntityRoleDao : BaseDao<EntityRole>, OneToManyJoinDao<EntityRole>
              JOIN PersonGroupMember ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
              WHERE 
              PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
-             AND EntityRole.erTableId = :tableId 
              AND (Role.rolePermissions & :permission) > 0) AS hasPermission""")
-    abstract suspend fun userHasTableLevelPermission(accountPersonUid: Long,
-             tableId: Int, permission: Long) : Boolean
+    abstract suspend fun userHasTableLevelPermission(accountPersonUid: Long, permission: Long) : Boolean
 
     @Query("""SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0) 
             OR EXISTS(SELECT EntityRole.erUid FROM EntityRole 

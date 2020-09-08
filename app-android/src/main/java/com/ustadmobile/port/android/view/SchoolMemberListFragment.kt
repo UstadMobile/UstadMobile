@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -25,6 +23,7 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMemberWithPerson>(),
@@ -40,6 +39,8 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
     override val listPresenter: UstadListPresenter<*, in SchoolMemberWithPerson>?
         get() = mPresenter
+
+    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
 
     private lateinit var addPersonKeyName: String
 
@@ -95,7 +96,12 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         val createNewText = requireContext().getString(R.string.add_new,
                 requireContext().getString(addNewStringId))
 
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
+
+        presenterLifecycleObserver = PresenterViewLifecycleObserver(mPresenter).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
 
         return view
     }
@@ -129,12 +135,25 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
                 requireContext().getString(addNewStringId)
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = true
+    }
+
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
     override fun onClick(v: View?) {
         if(v?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.person_detail_dest, Person::class.java)
+        else{
+            super.onClick(v)
+        }
     }
 
     override fun onDestroyView() {
@@ -143,6 +162,10 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         dbRepo = null
         mDataBinding = null
         mDataRecyclerViewAdapter = null
+        presenterLifecycleObserver?.also {
+            viewLifecycleOwner.lifecycle.removeObserver(it)
+        }
+        presenterLifecycleObserver = null
     }
 
     override val displayTypeRepo: Any?

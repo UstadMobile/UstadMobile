@@ -2,8 +2,8 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_EXCLUDE_PERSONUIDS_LIST
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
@@ -30,6 +30,8 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
+    var searchText: String? = null
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         filterExcludeMembersOfClazz = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
@@ -47,14 +49,14 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0L,
-                Person.TABLE_ID, Role.PERMISSION_PERSON_INSERT)
+                Role.PERMISSION_PERSON_INSERT)
     }
 
-    private fun updateListOnView(searchText: String? = null) {
-        view.list = repo.personDao.findPersonsWithPermission(getSystemTimeInMillis(),
-                filterExcludeMembersOfClazz, filterExcludeMemberOfSchool, filterAlreadySelectedList,
+    private fun updateListOnView() {
+        view.list = repo.personDao.findPersonsWithPermission(getSystemTimeInMillis(), filterExcludeMembersOfClazz,
+                filterExcludeMemberOfSchool, filterAlreadySelectedList,
                 accountManager.activeAccount.personUid, selectedSortOption?.flag ?: 0,
-                if(searchText.isNullOrEmpty()) "%%" else "%${searchText}%", filterByPermission)
+                searchText.toQueryLikeParam())
     }
 
     override fun handleClickEntry(entry: Person) {
@@ -77,14 +79,17 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
 
     override fun onSearchSubmitted(text: String?) {
-        updateListOnView(text)
+        searchText = text
+        updateListOnView()
     }
 
     companion object {
 
         val SORT_OPTIONS = listOf(
-                SortOrderOption(MessageID.name, PersonDao.SORT_NAME_ASC, true),
-                SortOrderOption(MessageID.name, PersonDao.SORT_NAME_DESC, false)
+                SortOrderOption(MessageID.first_name, PersonDao.SORT_FIRST_NAME_ASC, true),
+                SortOrderOption(MessageID.first_name, PersonDao.SORT_FIRST_NAME_DESC, false),
+                SortOrderOption(MessageID.last_name, PersonDao.SORT_LAST_NAME_ASC, true),
+                SortOrderOption(MessageID.last_name, PersonDao.SORT_LAST_NAME_DESC, false)
         )
     }
 }
