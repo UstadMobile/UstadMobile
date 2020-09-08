@@ -60,6 +60,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private var mIsAdmin: Boolean? = null
 
+    private var searchView: SearchView? = null
+
     //Observe the active account to show/hide the settings based on whether or not the user is admin
     private val mActiveUserObserver = Observer<UmAccount> {account ->
         GlobalScope.launch(Dispatchers.Main) {
@@ -126,6 +128,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
         menu.findItem(R.id.menu_main_settings).isVisible = (mainScreenItemsVisible && mIsAdmin == true)
         menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
+        searchView = menu.findItem(R.id.menu_search).actionView as SearchView
 
         mBinding.bottomNavView.visibility = if (DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag))
             View.GONE else View.VISIBLE
@@ -148,13 +151,29 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     override fun onBackPressed() {
         val fragment = supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.get(0)
-        if ((fragment as? FragmentBackHandler)?.onHostBackPressed() != true) {
-            super.onBackPressed()
+        when {
+            searchView?.isIconified == false -> {
+                searchView?.setQuery("",true)
+                searchView?.isIconified = true
+                return
+            }
+            (fragment as? FragmentBackHandler)?.onHostBackPressed() == true -> {
+                return
+            }
+            else -> {
+                super.onBackPressed()
+            }
         }
+
     }
 
     override val viewContext: Any
         get() = this
+
+    override fun onDestroy() {
+        super.onDestroy()
+        searchView = null
+    }
 
     /**
      * When settings gear clicked in the menu options - Goes to the settings activity.
