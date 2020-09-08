@@ -51,16 +51,7 @@ android {
     packagingOptions {
         // .kotlin_metadata files come from multiplatform modules, but are not needed unless we
         // use kotlin reflection, which we don't.
-        pickFirst "META-INF/DEPENDENCIES"
         excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module"]
-        exclude 'META-INF/INDEX.LIST'
-        exclude 'META-INF/LICENSE'
-        exclude 'META-INF/LICENSE.txt'
-        exclude 'META-INF/license.txt'
-        exclude 'META-INF/NOTICE'
-        exclude 'META-INF/NOTICE.txt'
-        exclude 'META-INF/notice.txt'
-        exclude 'META-INF/ASL2.0'
     }
 
     compileOptions {
