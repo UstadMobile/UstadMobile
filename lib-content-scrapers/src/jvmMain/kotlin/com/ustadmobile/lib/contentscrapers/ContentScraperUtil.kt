@@ -538,12 +538,12 @@ object ContentScraperUtil {
      * @param index
      * @return the updated/created join
      */
-    fun insertOrUpdateParentChildJoin(dao: ContentEntryParentChildJoinDao, parentEntry: ContentEntry, childEntry: ContentEntry, index: Int): ContentEntryParentChildJoin {
+    fun insertOrUpdateParentChildJoin(dao: ContentEntryParentChildJoinDao, parentEntry: ContentEntry?, childEntry: ContentEntry, index: Int): ContentEntryParentChildJoin {
 
         val existingParentChildJoin = dao.findParentByChildUuids(childEntry.contentEntryUid)
 
         val newJoin = ContentEntryParentChildJoin()
-        newJoin.cepcjParentContentEntryUid = parentEntry.contentEntryUid
+        newJoin.cepcjParentContentEntryUid = parentEntry?.contentEntryUid ?: -4103245208651563007L
         newJoin.cepcjChildContentEntryUid = childEntry.contentEntryUid
         newJoin.childIndex = index
         return if (existingParentChildJoin == null) {

@@ -2,6 +2,8 @@ import com.ustadmobile.lib.contentscrapers.abztract.YoutubeChannelIndexer
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubePlaylistIndexer
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
 import com.ustadmobile.lib.contentscrapers.ddl.*
+import com.ustadmobile.lib.contentscrapers.folder.FolderIndexer
+import com.ustadmobile.lib.contentscrapers.folder.FolderScraper
 import com.ustadmobile.lib.contentscrapers.googledrive.GoogleDriveFolderIndexer
 import com.ustadmobile.lib.contentscrapers.habaybna.HabFrontPageIndexer
 import com.ustadmobile.lib.contentscrapers.khanacademy.*
@@ -41,6 +43,8 @@ object ScraperTypes {
 
     const val APACHE_INDEXER = "apacheIndexer"
 
+    const val FOLDER_INDEXER = "folderIndexer"
+
 
     val indexerTypeMap = mapOf(
             DDL_FRONT_PAGE_INDEXER to IndexerMap(DdlFrontPageIndexer::class.java, "https://www.ddl.af/"),
@@ -54,7 +58,8 @@ object ScraperTypes {
             KHAN_TOPIC_INDEXER to IndexerMap(KhanTopicIndexer::class.java, null),
             KHAN_CHANNEL_INDEXER to IndexerMap(KhanYoutubeChannelIndexer::class.java, null),
             YOUTUBE_CHANNEL_INDEXER to IndexerMap(YoutubeChannelIndexer::class.java, null),
-            YOUTUBE_PLAYLIST_INDEXER to IndexerMap(YoutubePlaylistIndexer::class.java, null))
+            YOUTUBE_PLAYLIST_INDEXER to IndexerMap(YoutubePlaylistIndexer::class.java, null),
+            FOLDER_INDEXER to IndexerMap(FolderIndexer::class.java, null))
 
 
     const val DDL_ARTICLE_SCRAPER = "ddlArticleScraper"
@@ -71,12 +76,15 @@ object ScraperTypes {
 
     const val APACHE_SCRAPER = "apacheScraper"
 
+    const val FOLDER_SCRAPER = "folderScraper"
+
     val scraperTypeMap = mapOf(
             DDL_ARTICLE_SCRAPER to DdlContentScraper::class.java,
             KHAN_FULL_VIDEO_SCRAPER to KhanVideoScraper::class.java,
             KHAN_FULL_ARTICLE_SCRAPER to KhanArticleScraper::class.java,
             KHAN_FULL_EXERCISE_SCRAPER to KhanExerciseScraper::class.java,
             KHAN_LITE_VIDEO_SCRAPER to KhanLiteVideoScraper::class.java,
-            YOUTUBE_VIDEO_SCRAPER to YoutubeScraper::class.java)
+            YOUTUBE_VIDEO_SCRAPER to YoutubeScraper::class.java,
+            FOLDER_SCRAPER to FolderScraper::class.java)
 
 }

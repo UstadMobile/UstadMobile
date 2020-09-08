@@ -92,12 +92,6 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
     }
 
     fun start(startingUrl: String, scraperType: String, parentUid: Long) {
-        val parentEntry = getParentEntry(parentUid)
-        if (parentUid != 0L && parentEntry == null) {
-            System.err.println("Parent Uid given does not exist")
-            exitProcess(1)
-        }
-
         val runId = runDao.insert(ScrapeRun(scraperType,
                 ScrapeQueueItemDao.STATUS_PENDING)).toInt()
 
@@ -134,7 +128,6 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
                 val cons = indexerClazz?.clazz?.getConstructor(Long::class.java, Int::class.java, UmAppDatabase::class.java, Int::class.java, Long::class.java)
                 val obj = cons?.newInstance(it.sqiContentEntryParentUid, it.runId, db, it.sqiUid, it.sqiContentEntryUid) as Indexer?
                 obj?.indexUrl(it.scrapeUrl!!)
-
             } catch (e: Exception) {
                 UMLogUtil.logError("Exception running indexer ${it.scrapeUrl}")
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
@@ -338,7 +331,7 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
                         ?: ScraperTypes.indexerTypeMap[scraperType]?.defaultUrl
                         ?: throw IllegalArgumentException("No default url for this scraperType, please provide")
 
-                val parentUid = cmd?.getOptionValue(PARENT_ENTRY_UID_ARGS)?.toLongOrNull() ?: 0
+                val parentUid = cmd?.getOptionValue(PARENT_ENTRY_UID_ARGS)?.toLongOrNull() ?: -4103245208651563007L
 
                 runner.start(startingUrl, scraperType, parentUid)
             }

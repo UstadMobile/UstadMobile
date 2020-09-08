@@ -14,6 +14,7 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
 
 
     var parentcontentEntry: ContentEntry? = null
+    var contentEntry: ContentEntry? = null
     val contentEntryDao = db.contentEntryDao
     val contentEntryParentChildJoinDao = db.contentEntryParentChildJoinDao
     val queueDao = db.scrapeQueueItemDao
@@ -28,11 +29,12 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
     init {
         runBlocking {
             parentcontentEntry = db.contentEntryDao.findByUidAsync(parentContentEntryUid)
+            contentEntry = db.contentEntryDao.findByUidAsync(contentEntryUid)
         }
         LanguageList().addAllLanguages()
     }
 
-    fun createQueueItem(queueUrl: String, contentEntry: ContentEntry, contentType: String, scraperType: Int, parentContentEntryUid: Long , priority: Int = 1) {
+    fun createQueueItem(queueUrl: String, contentEntry: ContentEntry?, contentType: String, scraperType: Int, parentContentEntryUid: Long , priority: Int = 1) {
         var item = when (scraperType) {
             ScrapeQueueItem.ITEM_TYPE_INDEX -> {
                 queueDao.getExistingQueueItem(runUid, queueUrl)
@@ -48,7 +50,7 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
             item = ScrapeQueueItem()
             item.scrapeUrl = queueUrl
             item.sqiContentEntryParentUid = parentContentEntryUid
-            item.sqiContentEntryUid = contentEntry.contentEntryUid
+            item.sqiContentEntryUid = contentEntry?.contentEntryUid ?: 0
             item.status = ScrapeQueueItemDao.STATUS_PENDING
             item.contentType = contentType
             item.runId = runUid

@@ -12,6 +12,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEBM
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -34,6 +35,16 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
     val contentEntryDao = db.contentEntryDao
     val containerDao = db.containerDao
     val scrapeQueueDao = db.scrapeQueueItemDao
+
+    var contentEntry: ContentEntry? = null
+    var parentContentEntry: ContentEntry? = null
+
+    init {
+        runBlocking {
+            contentEntry = contentEntryDao.findByUid(contentEntryUid)
+            parentContentEntry = contentEntryDao.findByUid(parentContentEntryUid)
+        }
+    }
 
     abstract fun scrapeUrl(sourceUrl: String)
 
