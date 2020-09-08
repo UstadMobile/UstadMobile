@@ -40,6 +40,12 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
             mBinding?.loginErrorText?.text = value
         }
 
+    override var versionInfo: String? = null
+        set(value) {
+            field = value
+            mBinding?.versionInfo = versionInfo
+        }
+
     override var isEmptyUsername: Boolean = false
         set(value) {
             field = false

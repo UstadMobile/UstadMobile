@@ -120,7 +120,7 @@ class XapiPackageContentPresenterTest {
         xapiPresenter.onCreate(null)
 
         argumentCaptor<String> {
-            verify(mockedView, timeout(5000 * 5000)).url = capture()
+            verify(mockedView, timeout(5000 )).url = capture()
             val httpd = di.direct.instance<ContainerMounter>() as EmbeddedHTTPD
             Assert.assertTrue("Mounted path starts with url and html name",
                     firstValue.startsWith(httpd.localHttpUrl) && firstValue.contains("tetris.html"))

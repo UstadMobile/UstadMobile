@@ -29,7 +29,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
 
     fun handleClickDone(code: String) {
         GlobalScope.launch(doorMainDispatcher()) {
-            val clazzToJoin = dbRepo.clazzDao.findByClazzCode(code)
+            val clazzToJoin = dbRepo.clazzDao.findByClazzCode(code.trim())
             val personToEnrol = dbRepo.takeIf { clazzToJoin != null }?.personDao
                     ?.findByUid(accountManager.activeAccount.personUid)
             if(clazzToJoin  != null && personToEnrol != null) {

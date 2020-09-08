@@ -294,6 +294,26 @@ class Login2PresenterTest {
     }
 
 
+    @Test
+    fun givenUserNameOrPasswordContainsPaddingSpaces_whenHandleLoginCalled_thenShouldTrimSpace() {
+        val nextDestination = "nextDummyDestination"
+        val fromDestination = "fromDummyDestination"
+        enQueueLoginResponse()
+
+        val httpUrl = mockWebServer.url("/").toString()
+
+        InitialContext().bindJndiForActiveEndpoint(httpUrl)
+
+        val presenter = Login2Presenter(context,
+                createParams(extraParam = mapOf(ARG_SERVER_URL to httpUrl,
+                        ARG_FROM to fromDestination, ARG_NEXT to nextDestination)), view, di)
+        presenter.onCreate(null)
+
+        presenter.handleLogin(" $VALID_USER ", "$VALID_PASS ")
+
+        verifyBlocking(accountManager) { login(VALID_USER, VALID_PASS, httpUrl) }
+    }
+
 
     companion object {
 

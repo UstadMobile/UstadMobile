@@ -1,0 +1,357 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package version="2.0" unique-identifier="BookId" xmlns="http://www.idpf.org/2007/opf">
+  <metadata xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:opf="http://www.idpf.org/2007/opf">
+    <dc:creator>Мӯсоев,  Ш. Раҳмонов</dc:creator>
+    <dc:title>Tabiatshinosi s 1</dc:title>
+    <dc:date>2015</dc:date>
+    <dc:identifier opf:scheme="UUID" id="BookId">urn:uuid:ddcc2444-97cf-4b13-92d0-94634bd433fe</dc:identifier>
+    <meta content="0.9.14" name="Sigil version" />
+    <dc:date opf:event="modification" xmlns:opf="http://www.idpf.org/2007/opf">2019-06-22</dc:date>
+  </metadata>
+  <manifest>
+    <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/>
+    <item id="Section0114.xhtml" href="Text/Section0114.xhtml" media-type="application/xhtml+xml"/>
+    <item id="x1.png" href="Images/1.png" media-type="image/png"/>
+    <item id="x2.png" href="Images/2.png" media-type="image/png"/>
+    <item id="x3.png" href="Images/3.png" media-type="image/png"/>
+    <item id="x4.png" href="Images/4.png" media-type="image/png"/>
+    <item id="x5.png" href="Images/5.png" media-type="image/png"/>
+    <item id="x6.png" href="Images/6.png" media-type="image/png"/>
+    <item id="x7.png" href="Images/7.png" media-type="image/png"/>
+    <item id="x8.png" href="Images/8.png" media-type="image/png"/>
+    <item id="x9.png" href="Images/9.png" media-type="image/png"/>
+    <item id="x10.png" href="Images/10.png" media-type="image/png"/>
+    <item id="x11.png" href="Images/11.png" media-type="image/png"/>
+    <item id="x12.png" href="Images/12.png" media-type="image/png"/>
+    <item id="x13.png" href="Images/13.png" media-type="image/png"/>
+    <item id="x14.png" href="Images/14.png" media-type="image/png"/>
+    <item id="x15.png" href="Images/15.png" media-type="image/png"/>
+    <item id="x16.png" href="Images/16.png" media-type="image/png"/>
+    <item id="x17.png" href="Images/17.png" media-type="image/png"/>
+    <item id="x18.png" href="Images/18.png" media-type="image/png"/>
+    <item id="x19.png" href="Images/19.png" media-type="image/png"/>
+    <item id="x20.png" href="Images/20.png" media-type="image/png"/>
+    <item id="x21.png" href="Images/21.png" media-type="image/png"/>
+    <item id="x22.png" href="Images/22.png" media-type="image/png"/>
+    <item id="x23.png" href="Images/23.png" media-type="image/png"/>
+    <item id="x24.png" href="Images/24.png" media-type="image/png"/>
+    <item id="x25.png" href="Images/25.png" media-type="image/png"/>
+    <item id="x26.png" href="Images/26.png" media-type="image/png"/>
+    <item id="x27.png" href="Images/27.png" media-type="image/png"/>
+    <item id="x28.png" href="Images/28.png" media-type="image/png"/>
+    <item id="x29.png" href="Images/29.png" media-type="image/png"/>
+    <item id="x30.png" href="Images/30.png" media-type="image/png"/>
+    <item id="x31.png" href="Images/31.png" media-type="image/png"/>
+    <item id="x32.png" href="Images/32.png" media-type="image/png"/>
+    <item id="x33.png" href="Images/33.png" media-type="image/png"/>
+    <item id="x34.png" href="Images/34.png" media-type="image/png"/>
+    <item id="x35.png" href="Images/35.png" media-type="image/png"/>
+    <item id="x36.png" href="Images/36.png" media-type="image/png"/>
+    <item id="x37.png" href="Images/37.png" media-type="image/png"/>
+    <item id="x38.png" href="Images/38.png" media-type="image/png"/>
+    <item id="x39.png" href="Images/39.png" media-type="image/png"/>
+    <item id="x40.png" href="Images/40.png" media-type="image/png"/>
+    <item id="x41.png" href="Images/41.png" media-type="image/png"/>
+    <item id="x42.png" href="Images/42.png" media-type="image/png"/>
+    <item id="x43.png" href="Images/43.png" media-type="image/png"/>
+    <item id="x44.png" href="Images/44.png" media-type="image/png"/>
+    <item id="x45.png" href="Images/45.png" media-type="image/png"/>
+    <item id="x46.png" href="Images/46.png" media-type="image/png"/>
+    <item id="x47.png" href="Images/47.png" media-type="image/png"/>
+    <item id="x48.png" href="Images/48.png" media-type="image/png"/>
+    <item id="x49.png" href="Images/49.png" media-type="image/png"/>
+    <item id="x50.png" href="Images/50.png" media-type="image/png"/>
+    <item id="x51.png" href="Images/51.png" media-type="image/png"/>
+    <item id="x52.png" href="Images/52.png" media-type="image/png"/>
+    <item id="x53.png" href="Images/53.png" media-type="image/png"/>
+    <item id="x54.png" href="Images/54.png" media-type="image/png"/>
+    <item id="x55.png" href="Images/55.png" media-type="image/png"/>
+    <item id="x56.png" href="Images/56.png" media-type="image/png"/>
+    <item id="x57.png" href="Images/57.png" media-type="image/png"/>
+    <item id="x58.png" href="Images/58.png" media-type="image/png"/>
+    <item id="x59.png" href="Images/59.png" media-type="image/png"/>
+    <item id="x60.png" href="Images/60.png" media-type="image/png"/>
+    <item id="x61.png" href="Images/61.png" media-type="image/png"/>
+    <item id="x62.png" href="Images/62.png" media-type="image/png"/>
+    <item id="x63.png" href="Images/63.png" media-type="image/png"/>
+    <item id="x64.png" href="Images/64.png" media-type="image/png"/>
+    <item id="x65.png" href="Images/65.png" media-type="image/png"/>
+    <item id="x66.png" href="Images/66.png" media-type="image/png"/>
+    <item id="x67.png" href="Images/67.png" media-type="image/png"/>
+    <item id="x68.png" href="Images/68.png" media-type="image/png"/>
+    <item id="x69.png" href="Images/69.png" media-type="image/png"/>
+    <item id="x70.png" href="Images/70.png" media-type="image/png"/>
+    <item id="x71.png" href="Images/71.png" media-type="image/png"/>
+    <item id="x72.png" href="Images/72.png" media-type="image/png"/>
+    <item id="x73.png" href="Images/73.png" media-type="image/png"/>
+    <item id="x74.png" href="Images/74.png" media-type="image/png"/>
+    <item id="x75.png" href="Images/75.png" media-type="image/png"/>
+    <item id="x76.png" href="Images/76.png" media-type="image/png"/>
+    <item id="x77.png" href="Images/77.png" media-type="image/png"/>
+    <item id="x78.png" href="Images/78.png" media-type="image/png"/>
+    <item id="x79.png" href="Images/79.png" media-type="image/png"/>
+    <item id="x80.png" href="Images/80.png" media-type="image/png"/>
+    <item id="x81.png" href="Images/81.png" media-type="image/png"/>
+    <item id="x82.png" href="Images/82.png" media-type="image/png"/>
+    <item id="x83.png" href="Images/83.png" media-type="image/png"/>
+    <item id="x84.png" href="Images/84.png" media-type="image/png"/>
+    <item id="x85.png" href="Images/85.png" media-type="image/png"/>
+    <item id="x86.png" href="Images/86.png" media-type="image/png"/>
+    <item id="x87.png" href="Images/87.png" media-type="image/png"/>
+    <item id="x88.png" href="Images/88.png" media-type="image/png"/>
+    <item id="x89.png" href="Images/89.png" media-type="image/png"/>
+    <item id="x90.png" href="Images/90.png" media-type="image/png"/>
+    <item id="x91.png" href="Images/91.png" media-type="image/png"/>
+    <item id="x92.png" href="Images/92.png" media-type="image/png"/>
+    <item id="x93.png" href="Images/93.png" media-type="image/png"/>
+    <item id="x94.png" href="Images/94.png" media-type="image/png"/>
+    <item id="x95.png" href="Images/95.png" media-type="image/png"/>
+    <item id="x96.png" href="Images/96.png" media-type="image/png"/>
+    <item id="x97.png" href="Images/97.png" media-type="image/png"/>
+    <item id="x98.png" href="Images/98.png" media-type="image/png"/>
+    <item id="x99.png" href="Images/99.png" media-type="image/png"/>
+    <item id="x100.png" href="Images/100.png" media-type="image/png"/>
+    <item id="x101.png" href="Images/101.png" media-type="image/png"/>
+    <item id="x102.png" href="Images/102.png" media-type="image/png"/>
+    <item id="x103.png" href="Images/103.png" media-type="image/png"/>
+    <item id="x104.png" href="Images/104.png" media-type="image/png"/>
+    <item id="x105.png" href="Images/105.png" media-type="image/png"/>
+    <item id="x106.png" href="Images/106.png" media-type="image/png"/>
+    <item id="x107.png" href="Images/107.png" media-type="image/png"/>
+    <item id="x108.png" href="Images/108.png" media-type="image/png"/>
+    <item id="x109.png" href="Images/109.png" media-type="image/png"/>
+    <item id="x110.png" href="Images/110.png" media-type="image/png"/>
+    <item id="x111.png" href="Images/111.png" media-type="image/png"/>
+    <item id="x112.png" href="Images/112.png" media-type="image/png"/>
+    <item id="x113.png" href="Images/113.png" media-type="image/png"/>
+    <item id="Section0001.xhtml" href="Text/Section0001.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0002.xhtml" href="Text/Section0002.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0003.xhtml" href="Text/Section0003.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0004.xhtml" href="Text/Section0004.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0005.xhtml" href="Text/Section0005.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0007.xhtml" href="Text/Section0007.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0008.xhtml" href="Text/Section0008.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0009.xhtml" href="Text/Section0009.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0010.xhtml" href="Text/Section0010.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0011.xhtml" href="Text/Section0011.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0012.xhtml" href="Text/Section0012.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0013.xhtml" href="Text/Section0013.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0014.xhtml" href="Text/Section0014.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0015.xhtml" href="Text/Section0015.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0016.xhtml" href="Text/Section0016.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0017.xhtml" href="Text/Section0017.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0018.xhtml" href="Text/Section0018.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0019.xhtml" href="Text/Section0019.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0020.xhtml" href="Text/Section0020.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0021.xhtml" href="Text/Section0021.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0022.xhtml" href="Text/Section0022.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0023.xhtml" href="Text/Section0023.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0024.xhtml" href="Text/Section0024.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0025.xhtml" href="Text/Section0025.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0026.xhtml" href="Text/Section0026.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0027.xhtml" href="Text/Section0027.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0028.xhtml" href="Text/Section0028.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0029.xhtml" href="Text/Section0029.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0030.xhtml" href="Text/Section0030.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0031.xhtml" href="Text/Section0031.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0032.xhtml" href="Text/Section0032.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0033.xhtml" href="Text/Section0033.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0034.xhtml" href="Text/Section0034.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0035.xhtml" href="Text/Section0035.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0036.xhtml" href="Text/Section0036.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0037.xhtml" href="Text/Section0037.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0038.xhtml" href="Text/Section0038.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0039.xhtml" href="Text/Section0039.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0040.xhtml" href="Text/Section0040.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0041.xhtml" href="Text/Section0041.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0042.xhtml" href="Text/Section0042.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0043.xhtml" href="Text/Section0043.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0044.xhtml" href="Text/Section0044.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0045.xhtml" href="Text/Section0045.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0046.xhtml" href="Text/Section0046.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0047.xhtml" href="Text/Section0047.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0048.xhtml" href="Text/Section0048.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0049.xhtml" href="Text/Section0049.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0050.xhtml" href="Text/Section0050.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0051.xhtml" href="Text/Section0051.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0052.xhtml" href="Text/Section0052.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0053.xhtml" href="Text/Section0053.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0054.xhtml" href="Text/Section0054.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0055.xhtml" href="Text/Section0055.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0056.xhtml" href="Text/Section0056.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0057.xhtml" href="Text/Section0057.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0058.xhtml" href="Text/Section0058.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0059.xhtml" href="Text/Section0059.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0060.xhtml" href="Text/Section0060.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0061.xhtml" href="Text/Section0061.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0062.xhtml" href="Text/Section0062.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0063.xhtml" href="Text/Section0063.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0064.xhtml" href="Text/Section0064.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0065.xhtml" href="Text/Section0065.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0066.xhtml" href="Text/Section0066.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0067.xhtml" href="Text/Section0067.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0068.xhtml" href="Text/Section0068.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0069.xhtml" href="Text/Section0069.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0070.xhtml" href="Text/Section0070.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0071.xhtml" href="Text/Section0071.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0072.xhtml" href="Text/Section0072.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0073.xhtml" href="Text/Section0073.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0074.xhtml" href="Text/Section0074.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0075.xhtml" href="Text/Section0075.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0076.xhtml" href="Text/Section0076.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0077.xhtml" href="Text/Section0077.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0078.xhtml" href="Text/Section0078.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0079.xhtml" href="Text/Section0079.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0080.xhtml" href="Text/Section0080.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0081.xhtml" href="Text/Section0081.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0082.xhtml" href="Text/Section0082.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0083.xhtml" href="Text/Section0083.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0084.xhtml" href="Text/Section0084.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0085.xhtml" href="Text/Section0085.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0086.xhtml" href="Text/Section0086.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0087.xhtml" href="Text/Section0087.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0088.xhtml" href="Text/Section0088.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0089.xhtml" href="Text/Section0089.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0090.xhtml" href="Text/Section0090.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0091.xhtml" href="Text/Section0091.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0092.xhtml" href="Text/Section0092.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0093.xhtml" href="Text/Section0093.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0094.xhtml" href="Text/Section0094.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0095.xhtml" href="Text/Section0095.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0096.xhtml" href="Text/Section0096.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0097.xhtml" href="Text/Section0097.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0098.xhtml" href="Text/Section0098.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0099.xhtml" href="Text/Section0099.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0100.xhtml" href="Text/Section0100.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0101.xhtml" href="Text/Section0101.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0102.xhtml" href="Text/Section0102.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0103.xhtml" href="Text/Section0103.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0104.xhtml" href="Text/Section0104.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0105.xhtml" href="Text/Section0105.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0106.xhtml" href="Text/Section0106.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0107.xhtml" href="Text/Section0107.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0108.xhtml" href="Text/Section0108.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0109.xhtml" href="Text/Section0109.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0110.xhtml" href="Text/Section0110.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0111.xhtml" href="Text/Section0111.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0112.xhtml" href="Text/Section0112.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0113.xhtml" href="Text/Section0113.xhtml" media-type="application/xhtml+xml"/>
+    <item id="Section0006.xhtml" href="Text/Section0006.xhtml" media-type="application/xhtml+xml"/>
+  </manifest>
+  <spine toc="ncx">
+    <itemref idref="Section0001.xhtml"/>
+    <itemref idref="Section0002.xhtml"/>
+    <itemref idref="Section0003.xhtml"/>
+    <itemref idref="Section0004.xhtml"/>
+    <itemref idref="Section0005.xhtml"/>
+    <itemref idref="Section0006.xhtml"/>
+    <itemref idref="Section0007.xhtml"/>
+    <itemref idref="Section0008.xhtml"/>
+    <itemref idref="Section0009.xhtml"/>
+    <itemref idref="Section0010.xhtml"/>
+    <itemref idref="Section0011.xhtml"/>
+    <itemref idref="Section0012.xhtml"/>
+    <itemref idref="Section0013.xhtml"/>
+    <itemref idref="Section0014.xhtml"/>
+    <itemref idref="Section0015.xhtml"/>
+    <itemref idref="Section0016.xhtml"/>
+    <itemref idref="Section0017.xhtml"/>
+    <itemref idref="Section0018.xhtml"/>
+    <itemref idref="Section0019.xhtml"/>
+    <itemref idref="Section0020.xhtml"/>
+    <itemref idref="Section0021.xhtml"/>
+    <itemref idref="Section0022.xhtml"/>
+    <itemref idref="Section0023.xhtml"/>
+    <itemref idref="Section0024.xhtml"/>
+    <itemref idref="Section0025.xhtml"/>
+    <itemref idref="Section0026.xhtml"/>
+    <itemref idref="Section0027.xhtml"/>
+    <itemref idref="Section0028.xhtml"/>
+    <itemref idref="Section0029.xhtml"/>
+    <itemref idref="Section0030.xhtml"/>
+    <itemref idref="Section0031.xhtml"/>
+    <itemref idref="Section0032.xhtml"/>
+    <itemref idref="Section0033.xhtml"/>
+    <itemref idref="Section0034.xhtml"/>
+    <itemref idref="Section0035.xhtml"/>
+    <itemref idref="Section0036.xhtml"/>
+    <itemref idref="Section0037.xhtml"/>
+    <itemref idref="Section0038.xhtml"/>
+    <itemref idref="Section0039.xhtml"/>
+    <itemref idref="Section0040.xhtml"/>
+    <itemref idref="Section0041.xhtml"/>
+    <itemref idref="Section0042.xhtml"/>
+    <itemref idref="Section0043.xhtml"/>
+    <itemref idref="Section0044.xhtml"/>
+    <itemref idref="Section0045.xhtml"/>
+    <itemref idref="Section0046.xhtml"/>
+    <itemref idref="Section0047.xhtml"/>
+    <itemref idref="Section0048.xhtml"/>
+    <itemref idref="Section0049.xhtml"/>
+    <itemref idref="Section0050.xhtml"/>
+    <itemref idref="Section0051.xhtml"/>
+    <itemref idref="Section0052.xhtml"/>
+    <itemref idref="Section0053.xhtml"/>
+    <itemref idref="Section0054.xhtml"/>
+    <itemref idref="Section0055.xhtml"/>
+    <itemref idref="Section0056.xhtml"/>
+    <itemref idref="Section0057.xhtml"/>
+    <itemref idref="Section0058.xhtml"/>
+    <itemref idref="Section0059.xhtml"/>
+    <itemref idref="Section0060.xhtml"/>
+    <itemref idref="Section0061.xhtml"/>
+    <itemref idref="Section0062.xhtml"/>
+    <itemref idref="Section0063.xhtml"/>
+    <itemref idref="Section0064.xhtml"/>
+    <itemref idref="Section0065.xhtml"/>
+    <itemref idref="Section0066.xhtml"/>
+    <itemref idref="Section0067.xhtml"/>
+    <itemref idref="Section0068.xhtml"/>
+    <itemref idref="Section0069.xhtml"/>
+    <itemref idref="Section0070.xhtml"/>
+    <itemref idref="Section0071.xhtml"/>
+    <itemref idref="Section0072.xhtml"/>
+    <itemref idref="Section0073.xhtml"/>
+    <itemref idref="Section0074.xhtml"/>
+    <itemref idref="Section0075.xhtml"/>
+    <itemref idref="Section0076.xhtml"/>
+    <itemref idref="Section0077.xhtml"/>
+    <itemref idref="Section0078.xhtml"/>
+    <itemref idref="Section0079.xhtml"/>
+    <itemref idref="Section0080.xhtml"/>
+    <itemref idref="Section0081.xhtml"/>
+    <itemref idref="Section0082.xhtml"/>
+    <itemref idref="Section0083.xhtml"/>
+    <itemref idref="Section0084.xhtml"/>
+    <itemref idref="Section0085.xhtml"/>
+    <itemref idref="Section0086.xhtml"/>
+    <itemref idref="Section0087.xhtml"/>
+    <itemref idref="Section0088.xhtml"/>
+    <itemref idref="Section0089.xhtml"/>
+    <itemref idref="Section0090.xhtml"/>
+    <itemref idref="Section0091.xhtml"/>
+    <itemref idref="Section0092.xhtml"/>
+    <itemref idref="Section0093.xhtml"/>
+    <itemref idref="Section0094.xhtml"/>
+    <itemref idref="Section0095.xhtml"/>
+    <itemref idref="Section0096.xhtml"/>
+    <itemref idref="Section0097.xhtml"/>
+    <itemref idref="Section0098.xhtml"/>
+    <itemref idref="Section0099.xhtml"/>
+    <itemref idref="Section0100.xhtml"/>
+    <itemref idref="Section0101.xhtml"/>
+    <itemref idref="Section0102.xhtml"/>
+    <itemref idref="Section0103.xhtml"/>
+    <itemref idref="Section0104.xhtml"/>
+    <itemref idref="Section0105.xhtml"/>
+    <itemref idref="Section0106.xhtml"/>
+    <itemref idref="Section0107.xhtml"/>
+    <itemref idref="Section0108.xhtml"/>
+    <itemref idref="Section0109.xhtml"/>
+    <itemref idref="Section0110.xhtml"/>
+    <itemref idref="Section0111.xhtml"/>
+    <itemref idref="Section0112.xhtml"/>
+    <itemref idref="Section0113.xhtml"/>
+    <itemref idref="Section0114.xhtml"/>
+  </spine>
+</package>
