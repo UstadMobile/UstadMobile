@@ -28,7 +28,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
 
     val systemImpl: UstadMobileSystemImpl by instance()
 
-    var entityTableId : Int = 0
+    private var entityTableId : Int = 0
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
