@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.rest.ext.ktorInit
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
@@ -25,7 +24,6 @@ import io.ktor.request.header
 import io.ktor.routing.Routing
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
-import org.kodein.type.TypeToken
 import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
@@ -110,9 +108,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 it.ktorInit(File(storageRoot, context.identifier(dbMode)).absolutePath)
             }
         }
-      /*  bind<ScraperManager> with scoped(EndpointScope.Default).singleton {
-            ScraperManager(endpoint = context, di = di)
-        }*/
 
         registerContextTranslator { call: ApplicationCall -> Endpoint(call.request.header("Host") ?: "nohost") }
     }
