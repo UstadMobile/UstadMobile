@@ -834,4 +834,7 @@
     <string name="join_existing">الانضمام ل %1$s الموجود</string>
     <string name="pending_requests">الطلبات المعلقة</string>
     <string name="class_code">رمز الصف</string>
+    <string name="copied_to_clipboard">تم النسخ</string>
+    <string name="please_wait_for_approval">الرجاء الانتظار لموافقة طلبك من المعلمة.</string>
+    <string name="pending">في الانتظار</string>
 </resources>
