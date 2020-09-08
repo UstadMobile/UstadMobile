@@ -17,7 +17,7 @@ import java.nio.file.Files
 
 
 @ExperimentalStdlibApi
-class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : YoutubeScraper(containerDir, db, contentEntryUid, sqiUid) {
+class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : YoutubeScraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
 
 
     override fun scrapeUrl(sourceUrl: String) {

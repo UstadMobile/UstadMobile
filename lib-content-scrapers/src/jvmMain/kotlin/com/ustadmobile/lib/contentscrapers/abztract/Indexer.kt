@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import kotlinx.coroutines.runBlocking
 
 @ExperimentalStdlibApi
-abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db: UmAppDatabase, val sqiUid: Int) {
+abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db: UmAppDatabase, val sqiUid: Int, val contentEntryUid: Long) {
 
 
     var parentcontentEntry: ContentEntry? = null
@@ -32,7 +32,7 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
         LanguageList().addAllLanguages()
     }
 
-    fun createQueueItem(queueUrl: String, contentEntry: ContentEntry, contentType: String, scraperType: Int, priority: Int = 1) {
+    fun createQueueItem(queueUrl: String, contentEntry: ContentEntry, contentType: String, scraperType: Int, parentContentEntryUid: Long , priority: Int = 1) {
         var item = when (scraperType) {
             ScrapeQueueItem.ITEM_TYPE_INDEX -> {
                 queueDao.getExistingQueueItem(runUid, queueUrl)
@@ -47,7 +47,8 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
         if (item == null) {
             item = ScrapeQueueItem()
             item.scrapeUrl = queueUrl
-            item.sqiContentEntryParentUid = contentEntry.contentEntryUid
+            item.sqiContentEntryParentUid = parentContentEntryUid
+            item.sqiContentEntryUid = contentEntry.contentEntryUid
             item.status = ScrapeQueueItemDao.STATUS_PENDING
             item.contentType = contentType
             item.runId = runUid

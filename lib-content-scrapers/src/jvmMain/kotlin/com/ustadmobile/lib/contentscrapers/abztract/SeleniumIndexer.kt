@@ -13,7 +13,7 @@ import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.support.ui.WebDriverWait
 
 @ExperimentalStdlibApi
-abstract class SeleniumIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
+abstract class SeleniumIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentContentEntry, runUid, db, sqiUid, contentEntryUid) {
 
     protected var chromeDriver: ChromeDriver
 

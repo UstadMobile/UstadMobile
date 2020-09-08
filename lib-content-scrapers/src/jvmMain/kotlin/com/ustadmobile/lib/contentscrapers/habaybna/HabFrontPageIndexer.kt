@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 
 @ExperimentalStdlibApi
-class HabFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
+class HabFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentContentEntry, runUid, db, sqiUid, contentEntryUid) {
 
     private val arabicLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "ar")
 
@@ -48,7 +48,7 @@ class HabFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDataba
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentHab, playlist, playlistCount++)
 
-        createQueueItem(sourceUrl, playlist, ScraperTypes.HAB_PLAYLIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX)
+        createQueueItem(sourceUrl, playlist, ScraperTypes.HAB_PLAYLIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentHab.contentEntryUid)
     }
 
     override fun close() {

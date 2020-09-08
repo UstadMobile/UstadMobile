@@ -15,7 +15,7 @@ import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import java.net.URL
 
 @ExperimentalStdlibApi
-class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
+class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentContentEntry, runUid, db, sqiUid, contentEntryUid) {
 
 
     override fun indexUrl(sourceUrl: String) {
@@ -120,7 +120,7 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase,
 
 
                             createQueueItem(contentUrl.toString(), entry,
-                                    type, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+                                    type, ScrapeQueueItem.ITEM_TYPE_SCRAPE, tutorialEntry.contentEntryUid)
 
 
                         }
@@ -185,7 +185,7 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase,
                                 entry, itemCount)
 
                         createQueueItem(contentUrl.toString(), entry,
-                                type, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+                                type, ScrapeQueueItem.ITEM_TYPE_SCRAPE, tutorialEntry.contentEntryUid)
 
 
                     }
@@ -224,7 +224,7 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase,
                 parentcontentEntry!!, subjectEntry, count)
 
         createQueueItem(subjectUrl.toString(), subjectEntry,
-                ScraperTypes.KHAN_TOPIC_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX)
+                ScraperTypes.KHAN_TOPIC_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentContentEntryUid)
 
 
     }

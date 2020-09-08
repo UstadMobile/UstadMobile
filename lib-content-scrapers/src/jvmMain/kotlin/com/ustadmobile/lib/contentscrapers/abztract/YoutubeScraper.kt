@@ -22,7 +22,7 @@ import kotlin.random.Random
 import kotlin.system.exitProcess
 
 @ExperimentalStdlibApi
-open class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : Scraper(containerDir, db, contentEntryUid, sqiUid) {
+open class YoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : Scraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
 
     private val ytPath: String
     private val gson: Gson

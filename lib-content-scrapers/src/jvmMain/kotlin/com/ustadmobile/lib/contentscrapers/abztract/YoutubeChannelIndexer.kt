@@ -5,16 +5,12 @@ import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.YoutubeData
-import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import org.apache.commons.io.FileUtils
 import java.io.File
 import java.io.IOException
 import java.lang.Exception
-import java.nio.file.Files
 import kotlin.concurrent.withLock
 import kotlin.math.pow
 import kotlin.random.Random
@@ -22,7 +18,7 @@ import kotlin.system.exitProcess
 
 
 @ExperimentalStdlibApi
-class YoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntryUid, runUid, db, sqiUid) {
+class YoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentContentEntryUid, runUid, db, sqiUid, contentEntryUid) {
 
 
     private val ytPath: String
@@ -115,7 +111,7 @@ class YoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppD
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, playlistEntry, counter)
 
-            createQueueItem(entry.url!!, playlistEntry, ScraperTypes.YOUTUBE_PLAYLIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX)
+            createQueueItem(entry.url!!, playlistEntry, ScraperTypes.YOUTUBE_PLAYLIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentContentEntryUid)
         }
 
         setIndexerDone(true, 0)

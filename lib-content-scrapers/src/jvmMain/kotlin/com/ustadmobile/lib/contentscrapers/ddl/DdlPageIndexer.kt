@@ -6,7 +6,7 @@ import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.jsoup.Jsoup
 
 @ExperimentalStdlibApi
-class DdlPageIndexer(contentEntryUid: Long, runId: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(contentEntryUid, runId, db, sqiUid) {
+class DdlPageIndexer(parentContentEntryUid: Long, runId: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentContentEntryUid, runId, db, sqiUid, contentEntryUid) {
 
     override fun indexUrl(sourceUrl: String) {
 
@@ -37,7 +37,7 @@ class DdlPageIndexer(contentEntryUid: Long, runId: Int, db: UmAppDatabase, sqiUi
         for (i in 1..maxNumber) {
 
             val url = "https://www.ddl.af/$twoCodeLang/resources/list?subject_area=${subjectId}&page=$i"
-            createQueueItem(url, parentcontentEntry!!, ScraperTypes.DDL_LIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX)
+            createQueueItem(url, parentcontentEntry!!, ScraperTypes.DDL_LIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentContentEntryUid)
         }
 
         setIndexerDone(true, 0)

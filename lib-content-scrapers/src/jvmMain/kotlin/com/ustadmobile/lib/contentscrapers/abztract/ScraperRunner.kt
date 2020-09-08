@@ -131,8 +131,8 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
             try {
 
                 val indexerClazz = ScraperTypes.indexerTypeMap[it.contentType]
-                val cons = indexerClazz?.clazz?.getConstructor(Long::class.java, Int::class.java, UmAppDatabase::class.java, Int::class.java)
-                val obj = cons?.newInstance(it.sqiContentEntryParentUid, it.runId, db, it.sqiUid) as Indexer?
+                val cons = indexerClazz?.clazz?.getConstructor(Long::class.java, Int::class.java, UmAppDatabase::class.java, Int::class.java, Long::class.java)
+                val obj = cons?.newInstance(it.sqiContentEntryParentUid, it.runId, db, it.sqiUid, it.sqiContentEntryUid) as Indexer?
                 obj?.indexUrl(it.scrapeUrl!!)
 
             } catch (e: Exception) {
@@ -164,8 +164,8 @@ class ScraperRunner(private val containerPath: String, private val indexTotal: I
                 withTimeout(900000) {
 
                     val scraperClazz = ScraperTypes.scraperTypeMap[it.contentType]
-                    val cons = scraperClazz?.getConstructor(File::class.java, UmAppDatabase::class.java, Long::class.java, Int::class.java)
-                    obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid, it.sqiUid)
+                    val cons = scraperClazz?.getConstructor(File::class.java, UmAppDatabase::class.java, Long::class.java, Int::class.java, Long::class.java)
+                    obj = cons?.newInstance(File(containerPath), db, it.sqiContentEntryParentUid, it.sqiUid, it.sqiContentEntryUid)
                     obj?.scrapeUrl(it.scrapeUrl!!)
                 }
             } catch (t: TimeoutCancellationException) {

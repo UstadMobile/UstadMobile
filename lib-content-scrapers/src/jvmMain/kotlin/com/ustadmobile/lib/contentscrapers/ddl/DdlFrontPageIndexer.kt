@@ -10,7 +10,7 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 
 @ExperimentalStdlibApi
-class DdlFrontPageIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(contentEntryUid, runUid, db, sqiUid) {
+class DdlFrontPageIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentContentEntryUid, runUid, db, sqiUid, contentEntryUid) {
 
     var langCount = 0
 
@@ -44,7 +44,7 @@ class DdlFrontPageIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase,
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentDdl, langEntry, langCount++)
 
-        createQueueItem(url, langEntry, DDL_SUBJECT_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX)
+        createQueueItem(url, langEntry, DDL_SUBJECT_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentDdl.contentEntryUid)
     }
 
 

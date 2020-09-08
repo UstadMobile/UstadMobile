@@ -47,7 +47,7 @@ import java.util.*
  * Create the content entry
  */
 @ExperimentalStdlibApi
-class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : HarScraper(containerDir, db, contentEntryUid, sqiUid) {
+class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : HarScraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
 
     private val categorySchemaDao: ContentCategorySchemaDao
     private val contentCategoryDao: ContentCategoryDao

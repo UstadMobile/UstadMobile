@@ -13,6 +13,8 @@ class ScrapeQueueItem() {
 
     var sqiContentEntryParentUid: Long = 0
 
+    var sqiContentEntryUid: Long = 0
+
     var destDir: String? = null
 
     var scrapeUrl: String? = null

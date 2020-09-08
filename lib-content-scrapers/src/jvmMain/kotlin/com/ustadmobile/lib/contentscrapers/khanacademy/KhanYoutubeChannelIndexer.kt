@@ -8,7 +8,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 
 @ExperimentalStdlibApi
-class KhanYoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntryUid, runUid, db, sqiUid) {
+class KhanYoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentContentEntryUid, runUid, db, sqiUid, contentEntryUid) {
 
     private var playlistCount = 0
     private lateinit var parentEntry: ContentEntry
@@ -42,7 +42,7 @@ class KhanYoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, db: Um
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentEntry, playlist, playlistCount++)
 
-        createQueueItem(sourceUrl, playlist, ScraperTypes.KHAN_PLAYLIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX)
+        createQueueItem(sourceUrl, playlist, ScraperTypes.KHAN_PLAYLIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentEntry.contentEntryUid)
     }
     override fun close() {
 

@@ -13,7 +13,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions
 import java.net.URL
 
 @ExperimentalStdlibApi
-class DdlSubjectIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : SeleniumIndexer(contentEntryUid, runUid, db, sqiUid) {
+class DdlSubjectIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : SeleniumIndexer(parentContentEntryUid, runUid, db, sqiUid, contentEntryUid) {
 
     override fun indexUrl(sourceUrl: String) {
 
@@ -50,7 +50,7 @@ class DdlSubjectIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase, s
 
             subjectSubTopicMap[subjectId] = subjectEntry
 
-            createQueueItem(subjectUrl.toString(), subjectEntry, ScraperTypes.DDL_PAGES_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX)
+            createQueueItem(subjectUrl.toString(), subjectEntry, ScraperTypes.DDL_PAGES_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentContentEntryUid)
 
         }
 
@@ -88,7 +88,7 @@ class DdlSubjectIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase, s
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentEntry!!, subjectEntry, i)
 
-                createQueueItem(subjectUrl.toString(), subjectEntry, ScraperTypes.DDL_PAGES_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX)
+                createQueueItem(subjectUrl.toString(), subjectEntry, ScraperTypes.DDL_PAGES_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentEntry.contentEntryUid)
 
             }
 

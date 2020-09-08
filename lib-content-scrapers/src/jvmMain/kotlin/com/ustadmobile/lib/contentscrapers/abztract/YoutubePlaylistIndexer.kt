@@ -6,18 +6,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.HAB
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.YoutubeData
-import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import org.apache.commons.io.FileUtils.readFileToString
 import java.io.File
 import java.io.IOException
 import java.lang.Exception
-import java.nio.file.Files
 import kotlin.concurrent.withLock
 import kotlin.math.pow
 import kotlin.random.Random
@@ -25,7 +19,7 @@ import kotlin.system.exitProcess
 
 
 @ExperimentalStdlibApi
-open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, sqiUid) {
+open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentContentEntry, runUid, db, sqiUid,contentEntryUid ) {
 
     private val ytPath: String
     private val gson: Gson
@@ -128,7 +122,7 @@ open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmA
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, youtubeEntry, counter)
 
-            createQueueItem(youtubeUrl, youtubeEntry, ScraperTypes.YOUTUBE_VIDEO_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+            createQueueItem(youtubeUrl, youtubeEntry, ScraperTypes.YOUTUBE_VIDEO_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, parentContentEntryUid)
         }
 
         setIndexerDone(true, 0)

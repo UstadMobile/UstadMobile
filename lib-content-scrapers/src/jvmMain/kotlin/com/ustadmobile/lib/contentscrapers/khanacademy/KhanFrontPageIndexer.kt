@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 
 @ExperimentalStdlibApi
-class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(parentContentEntry, runUid, db, 0) {
+class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int,contentEntryUid: Long) : Indexer(parentContentEntry, runUid, db, 0, contentEntryUid) {
 
     private lateinit var parentEntry: ContentEntry
 
@@ -26,11 +26,11 @@ class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatab
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, parentEntry, 12)
 
         khanLiteMap.values.forEach{
-            createQueueItem(it.url, parentEntry, ScraperTypes.KHAN_LITE_INDEXER,  ScrapeQueueItem.ITEM_TYPE_INDEX)
+            createQueueItem(it.url, parentEntry, ScraperTypes.KHAN_LITE_INDEXER,  ScrapeQueueItem.ITEM_TYPE_INDEX, masterRootParent.contentEntryUid)
         }
 
         khanFullMap.values.forEach{
-            createQueueItem(it.url, parentEntry, ScraperTypes.KHAN_FULL_INDEXER,  ScrapeQueueItem.ITEM_TYPE_INDEX)
+            createQueueItem(it.url, parentEntry, ScraperTypes.KHAN_FULL_INDEXER,  ScrapeQueueItem.ITEM_TYPE_INDEX, masterRootParent.contentEntryUid)
         }
 
         setIndexerDone(true, 0)

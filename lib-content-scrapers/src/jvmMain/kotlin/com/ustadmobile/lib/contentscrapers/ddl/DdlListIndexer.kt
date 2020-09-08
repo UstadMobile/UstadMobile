@@ -5,11 +5,13 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent.Companion.DDL
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.jsoup.Jsoup
 
 @ExperimentalStdlibApi
-class DdlListIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : Indexer(contentEntryUid, runUid, db, sqiUid) {
+// TOOO check ddl
+class DdlListIndexer(parentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentEntryUid, runUid, db, sqiUid, contentEntryUid) {
 
     override fun indexUrl(sourceUrl: String) {
 
@@ -40,7 +42,7 @@ class DdlListIndexer(contentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiU
 
                 ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, entry, counter++)
 
-                createQueueItem(url,  entry, ScraperTypes.DDL_ARTICLE_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+                createQueueItem(url,  entry, ScraperTypes.DDL_ARTICLE_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, parentContentEntryUid)
             }
 
         }

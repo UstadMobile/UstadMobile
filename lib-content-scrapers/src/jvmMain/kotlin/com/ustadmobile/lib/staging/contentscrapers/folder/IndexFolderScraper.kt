@@ -37,7 +37,6 @@ class IndexFolderScraper {
     private var contentParentChildJoinDao: ContentEntryParentChildJoinDao? = null
     private var languageDao: LanguageDao? = null
     private var englishLang: Language? = null
-    private var publisher: String? = null
     private var languageVariantDao: LanguageVariantDao? = null
     private val filePrefix = "file://"
     private var db: UmAppDatabase = UmAppDatabase.getInstance(Any())

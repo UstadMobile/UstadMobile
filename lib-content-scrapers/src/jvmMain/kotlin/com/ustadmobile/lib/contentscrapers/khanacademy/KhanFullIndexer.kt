@@ -14,7 +14,7 @@ import java.lang.Exception
 import java.net.URL
 
 @ExperimentalStdlibApi
-class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int) : HarIndexer(parentContentEntry, runUid, db, sqiUid) {
+class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : HarIndexer(parentContentEntry, runUid, db, sqiUid, contentEntryUid) {
 
     override fun indexUrl(sourceUrl: String) {
 
@@ -61,7 +61,7 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
                     parentLangEntry, topicEntry, topicCount)
 
             createQueueItem(topicUrl.toString(), topicEntry, KHAN_TOPIC_INDEXER,
-                    ScrapeQueueItem.ITEM_TYPE_INDEX)
+                    ScrapeQueueItem.ITEM_TYPE_INDEX, parentLangEntry.contentEntryUid)
 
             if(lang == "hi"){
 
@@ -83,7 +83,7 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
                             topicEntry, childTopicEntry, childTopicCount)
 
                     createQueueItem(childTopicUrl.toString(), childTopicEntry, KHAN_TOPIC_INDEXER,
-                            ScrapeQueueItem.ITEM_TYPE_INDEX)
+                            ScrapeQueueItem.ITEM_TYPE_INDEX, topicEntry.contentEntryUid)
 
                 }
             }

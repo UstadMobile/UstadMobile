@@ -44,7 +44,7 @@ import java.util.*
 import java.util.regex.Pattern
 
 @ExperimentalStdlibApi
-class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : HarScraper(containerDir, db, contentEntryUid, sqiUid) {
+class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : HarScraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
 
     override fun scrapeUrl(sourceUrl: String) {
 

@@ -36,7 +36,7 @@ import java.util.*
 
 
 @ExperimentalStdlibApi
-class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : YoutubeScraper(containerDir, db, contentEntryUid, sqiUid) {
+class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : YoutubeScraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
 
 
     private var tempDir: File? = null
