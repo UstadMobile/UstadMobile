@@ -62,7 +62,7 @@ class ClazzLogEditAttendancePresenterTest {
     @Test
     fun givenExistingClazzWithStudentsAndNoAttendanceLogsYet_whenLoadedFromDbAndAttendanceSet_thenShouldSetListWithAllMembersAndSaveToDatabase() {
         val testClazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5, 1) }
-        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
+        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid) }
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
@@ -89,7 +89,7 @@ class ClazzLogEditAttendancePresenterTest {
     @Test
     fun givenExistingClazWithStudentsAndAttendanceLogsInDb_whenLoadedFromDb_thenShouldSetListWithAllMembers() {
         val testClazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5, 1) }
-        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
+        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid) }
         val testAttendanceLogs = runBlocking {
             db.clazzLogAttendanceRecordDao.insertTestRecordsForClazzLog(testClazzLog,
                     testClazzAndMembers.studentList)
@@ -110,9 +110,11 @@ class ClazzLogEditAttendancePresenterTest {
 
     @Test
     fun givenExistingClazzLoaded_whenUserSelectsNextClazzDay_currentValuesAreSavedAndNextDayIsDisplayed() {
-        val testClazzAndMembers = runBlocking { db.insertTestClazzAndMembers(
-                5, 1, (DateTime.now() - 36.hours).unixMillisLong) }
-        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
+        val testClazzAndMembers = runBlocking {
+            db.insertTestClazzAndMembers(
+                    5, 1, (DateTime.now() - 36.hours).unixMillisLong)
+        }
+        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid) }
         val prevTestClazzLog = ClazzLog().apply {
             logDate = System.currentTimeMillis() - 12.hours.millisecondsLong
             clazzLogClazzUid = testClazzAndMembers.clazz.clazzUid
@@ -154,8 +156,10 @@ class ClazzLogEditAttendancePresenterTest {
         //wait for items from previous log to be saved
         runBlocking {
             db.waitUntil(5000, listOf("ClazzLogAttendanceRecord")) {
-                db.clazzLogAttendanceRecordDao.findByClazzLogUid(testClazzLog.clazzLogUid).size ==
-                        testClazzAndMembers.studentList.size
+                runBlocking {
+                    db.clazzLogAttendanceRecordDao.findByClazzLogUid(testClazzLog.clazzLogUid).size ==
+                            testClazzAndMembers.studentList.size
+                }
             }
         }
 
@@ -163,18 +167,20 @@ class ClazzLogEditAttendancePresenterTest {
                 clazzLogAttendanceRecordLiveData.getValue()!!.all { it.attendanceStatus == 0 })
         Assert.assertEquals("After selecting a different clazz log day, same number of student records are loaded",
                 testClazzAndMembers.studentList.size, clazzLogAttendanceRecordLiveData.getValue()!!.size)
+        runBlocking {
+            val clazzLog1AttendanceRecords = db.clazzLogAttendanceRecordDao.findByClazzLogUid(testClazzLog.clazzLogUid)
+            Assert.assertEquals("Previous clazz log was recorded", testClazzAndMembers.studentList.size,
+                    clazzLog1AttendanceRecords.size)
+            Assert.assertTrue("Previous clazz log attendance records show all students aremarked present",
+                    clazzLog1AttendanceRecords.all { it.attendanceStatus == STATUS_ATTENDED })
+        }
 
-        val clazzLog1AttendanceRecords = db.clazzLogAttendanceRecordDao.findByClazzLogUid(testClazzLog.clazzLogUid)
-        Assert.assertEquals("Previous clazz log was recorded",  testClazzAndMembers.studentList.size,
-                clazzLog1AttendanceRecords.size)
-        Assert.assertTrue("Previous clazz log attendance records show all students aremarked present",
-            clazzLog1AttendanceRecords.all { it.attendanceStatus == STATUS_ATTENDED})
     }
 
     @Test
     fun givenExistingClazzWithStudents_whenClickMarkAllThenSavedCalled_thenShouldSetAllAndSaveToDatabase() {
         val testClazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5, 1) }
-        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid )}
+        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid) }
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
@@ -201,7 +207,7 @@ class ClazzLogEditAttendancePresenterTest {
                         testClazzAndMembers.studentList.size, firstValue!!.getValue()!!.size)
 
                 assertTrue("Last value marks all as attended",
-                    firstValue!!.getValue()!!.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED })
+                        firstValue!!.getValue()!!.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED })
             }
         }
     }

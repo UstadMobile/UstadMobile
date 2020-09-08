@@ -43,28 +43,27 @@ abstract class SchoolDao : BaseDao<School> {
          '' as locationName,
           (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
          FROM School WHERE CAST(schoolActive AS INTEGER) = 1 
-             AND schoolName LIKE :searchBit ORDER BY schoolName ASC""")
-    abstract fun findAllActiveSchoolWithMemberCountAndLocationNameAsc(searchBit: String): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
-
-
-    @Query("""SELECT School.*, 
-         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
-         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
-         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_STUDENT}) as numStudents,
-         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
-         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
-         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_TEACHER}) as numTeachers, 
-         '' as locationName,
-          (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount 
-         FROM School WHERE CAST(schoolActive AS INTEGER) = 1 
-             AND schoolName LIKE :searchBit ORDER BY schoolName DESC""")
-    abstract fun findAllActiveSchoolWithMemberCountAndLocationNameDesc(searchBit: String): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
+             AND schoolName LIKE :searchBit 
+                ORDER BY CASE(:sortOrder)
+                WHEN $SORT_NAME_ASC THEN School.schoolName
+                ELSE ''
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_NAME_DESC THEN School.schoolName
+                ELSE ''
+            END DESC
+            """)
+    abstract fun findAllActiveSchoolWithMemberCountAndLocationName(searchBit: String, sortOrder: Int): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
 
 
     @Update
     abstract suspend fun updateAsync(entity: School): Int
 
     companion object {
+
+        const val SORT_NAME_ASC = 1
+
+        const val SORT_NAME_DESC = 2
 
         const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
             SELECT DISTINCT Person.PersonUid FROM Person

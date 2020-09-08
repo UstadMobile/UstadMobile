@@ -75,6 +75,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
 
         view.createAccountVisible = workSpace.registrationAllowed
         view.connectAsGuestVisible = workSpace.guestLogin
+        view.versionInfo = impl.getVersion(context)
     }
 
     fun handleLogin(username: String?, password:String?){
@@ -85,7 +86,8 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         if(username != null && username.isNotEmpty() && password != null && password.isNotEmpty()){
             GlobalScope.launch(doorMainDispatcher()) {
                 try {
-                    val umAccount = accountManager.login(username,password,serverUrl)
+                    val umAccount = accountManager.login(username.trim(),
+                            password.trim() ,serverUrl)
                     view.inProgress = false
                     view.navigateToNextDestination(umAccount,fromDestination,nextDestination)
                 } catch (e: Exception) {

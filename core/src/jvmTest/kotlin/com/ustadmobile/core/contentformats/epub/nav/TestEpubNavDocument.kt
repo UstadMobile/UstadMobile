@@ -26,6 +26,18 @@ class TestEpubNavDocument {
 
 
     @Test
+    fun givenValidNcxDoc_whenParsed_thenPropertiesShouldMatch() {
+        val navDoc = EpubNavDocument()
+        val docIn = javaClass.getResourceAsStream("TestEpubNcx.ncx")
+
+        navDoc.load(
+                UstadMobileSystemImpl.instance.newPullParser(docIn, "UTF-8"))
+
+        Assert.assertNotNull("Navigation doc has found ncx", navDoc.ncxNavMap)
+        Assert.assertEquals("NCX has 35 children", 35, navDoc.ncxNavMap!!.size())
+    }
+
+    @Test
     @Throws(KMPPullParserException::class, IOException::class)
     fun givenDocLoaded_whenSerializedAndReloaded_thenShouldBeTheSame() {
         val navDoc = EpubNavDocument()
