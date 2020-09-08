@@ -104,7 +104,7 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
 
     override fun handleClickCreateNewFab() {
         GlobalScope.launch(doorMainDispatcher()) {
-            val lastLog = db.clazzLogDao.findByClazzUidWithinTimeRange(
+            val lastLog = db.clazzLogDao.findByClazzUidWithinTimeRangeAsync(
                     clazzUidFilter, 0, Long.MAX_VALUE,
                     ClazzLog.STATUS_INACTIVE, 1).firstOrNull()
             if(lastLog != null){

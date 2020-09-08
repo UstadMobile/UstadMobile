@@ -23,6 +23,11 @@
         <variable
             name="fieldsEnabled"
             type="boolean" />
+
+        <variable
+            name="versionInfo"
+            type="String" />
+
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -156,6 +161,25 @@
                 android:text="@string/connect_as_guest"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/create_account" />
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/bottom_barrier"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="connect_as_guest,create_account,login_button"/>
+
+            <TextView
+                android:id="@+id/version_info_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{versionInfo}"
+                android:gravity="center"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                app:layout_constraintTop_toBottomOf="@+id/bottom_barrier"
+                tools:text="v42"
+                />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

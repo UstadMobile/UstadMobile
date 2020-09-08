@@ -24,7 +24,7 @@ abstract class ReportFilterDao : BaseDao<ReportFilter>, OneToManyJoinDao<ReportF
           LEFT JOIN ContentEntry On ReportFilter.entityType = ${ReportFilter.CONTENT_FILTER}
            AND ContentEntry.contentEntryUid = ReportFilter.entityUid
         WHERE ReportFilter.reportFilterReportUid = :reportUid AND NOT ReportFilter.filterInactive""")
-    abstract fun findByReportUid(reportUid: Long): List<ReportFilterWithDisplayDetails>
+    abstract suspend fun findByReportUid(reportUid: Long): List<ReportFilterWithDisplayDetails>
 
     @Update
     abstract fun updateAsyncList(reportFilterList: List<ReportFilter>)

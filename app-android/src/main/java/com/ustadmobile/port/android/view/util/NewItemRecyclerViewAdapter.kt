@@ -24,9 +24,9 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
                                  val sortOrderOption: SortOrderOption? = null) : ListAdapter<Int, RecyclerView.ViewHolder>(DIFFUTIL_NEWITEM) {
 
     val currentHolderList: List<Int>
-        get() = (if (headerLayoutId != 0) listOf(ITEM_HEADERHOLDER) else listOf()) +
-                (if (newItemVisible) listOf(ITEM_NEWITEMHOLDER) else listOf()) +
-                (if (sortOrderOption != null) listOf(ITEM_SORT_HOLDER) else listOf())
+        get() = (if (sortOrderOption != null) listOf(ITEM_SORT_HOLDER) else listOf()) +
+                (if (headerLayoutId != 0) listOf(ITEM_HEADERHOLDER) else listOf()) +
+                (if (newItemVisible) listOf(ITEM_NEWITEMHOLDER) else listOf())
 
 
     var newItemVisible: Boolean = false
@@ -40,6 +40,13 @@ class NewItemRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null,
             field = value
             submitList(currentHolderList)
         }
+
+    init{
+        takeIf { sortOrderOption != null }.apply {
+            submitList(currentHolderList)
+        }
+    }
+
 
     var onClickSort: View.OnClickListener? = onClickSort
         set(value) {

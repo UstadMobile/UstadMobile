@@ -27,7 +27,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
          LEFT JOIN ClazzMember ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid
          LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
          WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid""")
-    abstract fun findByClazzLogUid(clazzLogUid: Long): List<ClazzLogAttendanceRecordWithPerson>
+    abstract suspend fun findByClazzLogUid(clazzLogUid: Long): List<ClazzLogAttendanceRecordWithPerson>
 
     @Query("""UPDATE ClazzLogAttendanceRecord
         SET clazzLogAttendanceRecordClazzLogUid = :newClazzLogUid,
