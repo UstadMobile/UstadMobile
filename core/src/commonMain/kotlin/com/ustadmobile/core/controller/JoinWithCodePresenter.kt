@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -11,11 +12,14 @@ import com.ustadmobile.core.view.JoinWithCodeView
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.School
+import com.ustadmobile.lib.db.entities.SchoolMember
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -33,12 +37,13 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        val apiUrl = arguments.get(UstadView.ARG_SERVER_URL)
+        val apiUrl = arguments.get(UstadView.ARG_SERVER_URL)?:""
         val tableId = arguments.get(UstadView.ARG_CODE_TABLE)
         val code = arguments.get(UstadView.ARG_CODE) ?:""
         entityTableId = tableId?.toInt()?:0
         val loggedInPersonUid = accountManager.activeAccount.personUid
-        val validEntity = when (entityTableId) {
+
+        var validEntity = when (entityTableId) {
             Clazz.TABLE_ID -> {
                 dbRepo.clazzDao.findByClazzCode(code) != null
             }
@@ -49,10 +54,23 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                 false
             }
         }
-        if(validEntity && accountManager.activeAccount.endpointUrl.equals(apiUrl) && loggedInPersonUid != 0L){
+        if(apiUrl.isNotEmpty() && validEntity &&
+                accountManager.activeAccount.endpointUrl.equals(apiUrl)
+                && loggedInPersonUid != 0L) {
             //Continue..
 
-        }else if (!validEntity) {
+        }
+        else if(apiUrl.isNotEmpty() && !accountManager.activeAccount.endpointUrl.equals(apiUrl)){
+
+            //Ignoring entity check and proceeding to login
+            //Go to login
+            systemImpl.go(Login2View.VIEW_NAME, mapOf(UstadView.ARG_SERVER_URL to apiUrl,
+                    UstadView.ARG_NEXT to
+                            "${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_SERVER_URL}=$apiUrl" +
+                            "&${UstadView.ARG_CODE_TABLE}=$tableId"),
+                    context)
+        }
+        else if (!validEntity) {
             //Send message invalid code.
             view.errorText = systemImpl.getString(MessageID.invalid_register_code,
                     context)
