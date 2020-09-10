@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -29,8 +30,10 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
+import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
@@ -70,6 +73,26 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
                 invalidateOptionsMenu()
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        //Get url
+        val uri = intent?.data?.toString()
+
+        val destinationIndex : Int? = uri?.indexOf("/umclient")?.plus(10)
+
+        val apiUrlStartFrom = uri?.indexOf("/umclient")
+        val apiUrl = uri?.substring(apiUrlStartFrom?:0)
+
+        //TODO: Check if & is needed vs just adding ?
+        val destination = uri?.substring(destinationIndex?:0) +
+                "?${UstadView.ARG_SERVER_URL}=$apiUrl"
+
+        println("Go to uri")
+        UstadMobileSystemImpl.instance.go(destination, getActivityContext())
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

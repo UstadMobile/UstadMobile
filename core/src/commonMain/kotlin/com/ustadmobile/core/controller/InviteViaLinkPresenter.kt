@@ -5,6 +5,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.InviteViaLinkView
+import com.ustadmobile.core.view.JoinWithCodeView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_NAME
@@ -26,12 +28,16 @@ class InviteViaLinkPresenter(context: Any, args: Map<String, String>, view: Invi
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val code = arguments[ARG_CODE].toString()
+        var apiUrl = accountManager.activeAccount.endpointUrl.trim()
+        if(!apiUrl.endsWith("/")){
+            apiUrl = "$apiUrl/"
+        }
         val link = when (arguments[ARG_CODE_TABLE].toString().toInt()) {
             Clazz.TABLE_ID -> {
-                "http://www.ustadmobile.com/ClazzJoin?code=$code"
+                "${apiUrl}umclient/${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_CODE}=$code&${UstadView.ARG_CODE_TABLE}=${Clazz.TABLE_ID.toString()}&${UstadView.ARG_SERVER_URL}=$apiUrl"
             }
             School.TABLE_ID -> {
-                "http://www.ustadmobile.com:/SchoolJoin?code=$code"
+                "${apiUrl}umclient/${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_CODE}=$code&${UstadView.ARG_CODE_TABLE}=${School.TABLE_ID.toString()}&${UstadView.ARG_SERVER_URL}=$apiUrl"
             }
             else -> {
                 ""

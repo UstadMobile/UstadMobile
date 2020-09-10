@@ -23,6 +23,11 @@ class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
             mBinding?.errorText = value
             field = value
         }
+    override var code: String? = null
+        set(value) {
+            mBinding?.code = value
+            field = value
+        }
 
     private var mBinding: FragmentJoinWithCodeBinding? = null
 
