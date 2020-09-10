@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -78,9 +79,12 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
 
-        //Get url
         val uri = intent?.data?.toString()
+        loadFromUriString(uri)
 
+    }
+
+    private fun loadFromUriString(uri: String?){
         val destinationIndex : Int? = uri?.indexOf("/umclient")?.plus(10)
 
         val apiUrlStartFrom = uri?.indexOf("/umclient")
@@ -92,7 +96,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         println("Go to uri")
         UstadMobileSystemImpl.instance.go(destination, getActivityContext())
-
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -113,6 +116,12 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
         accountManager.activeAccountLive.observe(this, mActiveUserObserver)
+
+        val uri = intent?.data?.toString()
+        if(uri?.isNotEmpty() == true) {
+            loadFromUriString(uri)
+        }
+
     }
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,
