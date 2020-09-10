@@ -15,6 +15,7 @@ import androidx.core.view.GravityCompat
 import androidx.databinding.DataBindingUtil
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -106,7 +107,8 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
     override var spinePosition: Int = 0
         set(value) {
-            mBinding.containerEpubrunnerPager.setCurrentItem(value, true)
+            mBinding.containerEpubrunnerPager.scrollToPosition(spinePosition)
+            field = value
         }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -177,16 +179,6 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
             mBinding.epubContentview.webViewClient = WebViewClient()
             mBinding.epubContentview.webChromeClient = WebChromeClient()
 
-
-            gestureDetector = GestureDetectorCompat(mBinding.epubContentview.context,
-                    object : GestureDetector.SimpleOnGestureListener() {
-                        override fun onSingleTapUp(e: MotionEvent): Boolean {
-                            webViewTouchHandler.sendEmptyMessageDelayed(HANDLER_CLICK_ON_VIEW, 200)
-                            return super.onSingleTapUp(e)
-                        } })
-
-            mBinding.epubContentview.setOnTouchListener { _, motionEvent ->
-                gestureDetector?.onTouchEvent(motionEvent)?:false}
             return EpubContentViewHolder(mBinding)
         }
 
@@ -256,8 +248,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         }
 
         mContentPagerAdapter = EpubContentPagerAdapter()
-        mBinding.containerEpubrunnerPager.registerOnPageChangeCallback(onPageChangeCallback)
-        mBinding.containerEpubrunnerPager.offscreenPageLimit = 1
+        mBinding.containerEpubrunnerPager.layoutManager = LinearLayoutManager(this)
         mBinding.containerEpubrunnerPager.adapter = mContentPagerAdapter
 
         mPresenter = EpubContentPresenter(this, bundleToMap(intent.extras),
@@ -288,7 +279,6 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
     override fun onDestroy() {
         mPresenter?.onDestroy()
-        mBinding.containerEpubrunnerPager.unregisterOnPageChangeCallback(onPageChangeCallback)
         mBinding.containerEpubrunnerPager.adapter = null
         mSavedInstanceState = null
         mPresenter = null

@@ -54,6 +54,10 @@ import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 
 import org.kodein.di.*
+import org.xmlpull.v1.XmlPullParser
+import org.xmlpull.v1.XmlPullParserFactory
+import org.xmlpull.v1.XmlSerializer
+
 import java.io.File
 
 /**
@@ -156,6 +160,18 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<Int>(tag = TAG_LOCAL_HTTP_PORT) with singleton {
             instance<EmbeddedHTTPD>().listeningPort
+        }
+
+        bind<XmlPullParserFactory>() with singleton { XmlPullParserFactory.newInstance().also {
+            it.isNamespaceAware = true
+        }}
+
+        bind<XmlPullParser>() with provider {
+            instance<XmlPullParserFactory>().newPullParser()
+        }
+
+        bind<XmlSerializer>() with provider {
+            instance<XmlPullParserFactory>().newSerializer()
         }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

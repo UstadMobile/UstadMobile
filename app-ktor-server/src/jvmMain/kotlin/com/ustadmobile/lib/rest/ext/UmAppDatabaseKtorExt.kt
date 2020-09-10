@@ -28,7 +28,9 @@ fun UmAppDatabase.ktorInit(passwordFilePath: String) {
         val adminPerson = Person("admin", "Admin", "User")
         adminPerson.admin = true
         adminPerson.personUid = personDao.insert(adminPerson)
-        val adminPass = RandomStringUtils.randomAlphanumeric(8)
+
+        //Remove lower case l, upper case I, and the number 1
+        val adminPass = RandomStringUtils.random(10, "abcdefghijkmnpqrstuvxwyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")
 
         personAuthDao.insert(PersonAuth(adminPerson.personUid,
                 PersonAuthDao.ENCRYPTED_PASS_PREFIX + encryptPassword(adminPass)))

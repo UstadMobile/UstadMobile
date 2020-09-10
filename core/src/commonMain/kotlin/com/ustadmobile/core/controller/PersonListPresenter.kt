@@ -45,7 +45,7 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0L,
-                Person.TABLE_ID, Role.PERMISSION_PERSON_INSERT)
+                Role.PERMISSION_PERSON_INSERT)
     }
 
     private fun updateListOnView() {
