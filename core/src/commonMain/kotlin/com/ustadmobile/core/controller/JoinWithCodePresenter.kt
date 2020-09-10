@@ -40,7 +40,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
 
 
 
-        val apiUrl = arguments.get(UstadView.ARG_SERVER_URL)?:""
+        var apiUrl = arguments.get(UstadView.ARG_SERVER_URL)?:""
         val tableId = arguments.get(UstadView.ARG_CODE_TABLE)
         val code = arguments.get(UstadView.ARG_CODE) ?:""
         entityTableId = tableId?.toInt()?:0
@@ -59,6 +59,9 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                 }
             }
 
+            if(apiUrl.endsWith("/")){
+                apiUrl = apiUrl.substring(0, apiUrl.length -1)
+            }
             if (apiUrl.isNotEmpty() && validEntity &&
                     accountManager.activeAccount.endpointUrl.equals(apiUrl)
                     && loggedInPersonUid != 0L) {
