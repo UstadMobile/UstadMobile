@@ -4,7 +4,6 @@ import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import org.xmlpull.v1.XmlPullParserException
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -14,6 +13,7 @@ import java.util.*
 import java.util.regex.Pattern
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMURLEncoder
+import java.io.ByteArrayInputStream
 
 class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
 
@@ -25,53 +25,6 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
                            session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response
 
     }
-
-    @Deprecated("")
-    class MountedZipFilter(var pattern: Pattern, var replacement: String)
-
-    class FilteredHtmlSource(private val src: IFileSource, private val scriptPath: String) : IFileSource {
-
-        private var sourceLength: Long = -1
-
-        override val lastModifiedTime: Long
-            get() = src.lastModifiedTime
-
-        override val name: String?
-            get() = src.name
-
-        override val inputStream: InputStream by lazy {
-            //init and filter
-            val srcIn = src.inputStream
-            try {
-                val filterSerializer = EpubHtmlFilterSerializer()
-                filterSerializer.scriptSrcToAdd = scriptPath
-                filterSerializer.setIntput(srcIn)
-                val filteredBytes = filterSerializer.output
-                sourceLength = filteredBytes.size.toLong()
-                ByteArrayInputStream(filteredBytes)
-            } catch (x: XmlPullParserException) {
-                throw IOException(x)
-            }
-        }
-
-        override val length: Long
-            get() {
-                try {
-                    inputStream
-                } catch (e: IOException) {
-                }
-
-                return sourceLength
-            }
-
-
-        override val exists: Boolean
-            get() = src.exists
-
-        override val eTag: String?
-            get() = null
-    }
-
 
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
         try {

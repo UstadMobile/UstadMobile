@@ -57,7 +57,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return db.entityRoleDao.userHasTableLevelPermission(accountManager.activeAccount.personUid,
-            ContentEntry.TABLE_ID, Role.PERMISSION_CONTENT_INSERT)
+            Role.PERMISSION_CONTENT_INSERT)
     }
 
     private fun getAndSetList(sortOrder: SortOrder = currentSortOrder) {

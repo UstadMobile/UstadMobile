@@ -115,7 +115,7 @@ class ClazzLogEditAttendanceFragmentTest  {
         clickDoneAndWaitForAttendanceToSave(clazzLogAttendanceListScenario, clazzLog.clazzLogUid)
 
 
-        val clazzLogAttendanceRecords = dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(clazzLog.clazzLogUid)
+        val clazzLogAttendanceRecords = runBlocking { dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(clazzLog.clazzLogUid) }
         Assert.assertEquals("Found expected number of attendance records", clazzAndMembers.studentList.size,
                 clazzLogAttendanceRecords.size)
         Assert.assertEquals("Expected number of students are present", 3,
@@ -166,8 +166,9 @@ class ClazzLogEditAttendanceFragmentTest  {
 
         clickDoneAndWaitForAttendanceToSave(clazzLogAttendanceListScenario, clazzLog.clazzLogUid)
 
-        val clazzLogAttendanceRecords = dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(
-                clazzLog.clazzLogUid)
+        val clazzLogAttendanceRecords = runBlocking {
+            dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(clazzLog.clazzLogUid)
+        }
         Assert.assertTrue("All clazz logs are marked as attended",
                 clazzLogAttendanceRecords.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED})
 
@@ -217,13 +218,17 @@ class ClazzLogEditAttendanceFragmentTest  {
 
         clickDoneAndWaitForAttendanceToSave(clazzLogAttendanceListScenario, prevDayClazzLog.clazzLogUid)
 
-        val clazzLogAttendanceRecords = dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(
-                clazzLog.clazzLogUid)
+        val clazzLogAttendanceRecords = runBlocking {
+            dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(
+                    clazzLog.clazzLogUid)
+        }
         Assert.assertTrue("All clazz logs are marked as attended for most recent day",
                 clazzLogAttendanceRecords.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED})
 
-        val prevDayClazzLogAttendanceRecords = dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(
-                clazzLog.clazzLogUid)
+        val prevDayClazzLogAttendanceRecords = runBlocking {
+            dbRule.db.clazzLogAttendanceRecordDao.findByClazzLogUid(clazzLog.clazzLogUid)
+        }
+
         Assert.assertTrue("All clazz logs are marked as attended for most recent day",
                 prevDayClazzLogAttendanceRecords.all { it.attendanceStatus == ClazzLogAttendanceRecord.STATUS_ATTENDED})
 

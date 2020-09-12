@@ -29,8 +29,9 @@ class DefaultClazzListItemListener(var view: ClazzList2View?,
         if(listViewMode == ListViewMode.BROWSER) {
             val db = on(accountManager.activeAccount).direct.instance<UmAppDatabase>(tag = TAG_DB)
             GlobalScope.launch(doorMainDispatcher()) {
-                val canOpen = db.clazzDao.personHasPermission(accountManager.activeAccount.personUid,
-                    Role.PERMISSION_CLAZZ_OPEN)
+                val canOpen = db.clazzDao.personHasPermissionWithClazz(
+                        accountManager.activeAccount.personUid, clazz.clazzUid,
+                        Role.PERMISSION_CLAZZ_OPEN)
                 if(canOpen) {
                     systemImpl.go(ClazzDetailView.VIEW_NAME,
                             mapOf(UstadView.ARG_ENTITY_UID to clazz.clazzUid.toString()), context)

@@ -2,10 +2,17 @@ package com.ustadmobile.port.sharedse.impl.http
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.util.UMUtil
+import com.ustadmobile.port.sharedse.util.XmlPassThroughFilter
+import com.ustadmobile.port.sharedse.util.passXmlThrough
+import org.kmp.io.KMPPullParser.Companion.FEATURE_PROCESS_DOCDECL
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.instance
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
+import org.xmlpull.v1.XmlSerializer
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
@@ -19,7 +26,7 @@ import java.io.InputStream
  * - Add a meta viewport tag  -
  *
  */
-class EpubHtmlFilterSerializer {
+class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
 
     var scriptSrcToAdd: String? = null
 
@@ -30,32 +37,47 @@ class EpubHtmlFilterSerializer {
         @Throws(IOException::class, XmlPullParserException::class)
         get() {
             val bout = ByteArrayOutputStream()
-            val xs = UstadMobileSystemImpl.instance.newXMLSerializer()
+            val xs: XmlSerializer by di.instance()
             xs.setOutput(bout, "UTF-8")
 
-            val xpp = UstadMobileSystemImpl.instance.newPullParser(`in`!!, "UTF-8")
+            val xpp: XmlPullParser by di.instance()
+            xpp.setInput(`in`!!, "UTF-8")
+
             xs.startDocument("UTF-8", false)
-            UMUtil.passXmlThrough(xpp, xs, true, object : UMUtil.PassXmlThroughFilter {
+            var seenViewPort = false
+            passXmlThrough(xpp, xs, arrayOf("script", "style", "title"), object : XmlPassThroughFilter {
                 @Throws(IOException::class)
-                override fun beforePassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean {
-                    if (evtType == XmlPullParser.END_TAG && parser.getName() == "head") {
+                override fun beforePassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
+                    if (evtType == XmlPullParser.END_TAG && parser.getName() == "head" && !seenViewPort) {
                         serializer.startTag(parser.getNamespace(), "meta")
                         serializer.attribute(parser.getNamespace(), "name", "viewport")
                         serializer.attribute(parser.getNamespace(), "content",
                                 "height=device-height, initial-scale=1,user-scalable=no")
                         serializer.endTag(parser.getNamespace(), "meta")
+
+                        serializer.startTag(parser.getNamespace(), "style")
+                        serializer.attribute(parser.getNamespace(), "type", "text/css")
+                        serializer.text("""
+                            img, video, audio {
+                                max-width: 95% !important;
+                                max-height: 95% !important;
+                            }
+
+                            body {
+                                margin: 8dp;
+                                overflow-x: hidden;
+                            }
+                        """.trimIndent())
+                        serializer.endTag(parser.getNamespace(), "style")
                     }
                     return true
                 }
 
                 @Throws(IOException::class, XmlPullParserException::class)
-                override fun afterPassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean {
-                    if (evtType == XmlPullParser.START_TAG && parser.getName() == "body") {
-                        serializer.startTag(parser.getNamespace(), "script")
-                        serializer.attribute(parser.getNamespace(), "src", scriptSrcToAdd?: "")
-                        serializer.attribute(parser.getNamespace(), "type", "text/javascript")
-                        serializer.text(" ")
-                        serializer.endTag(parser.getNamespace(), "script")
+                override fun afterPassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
+                    if(evtType == XmlPullParser.START_TAG && parser.getName() == "meta"
+                            && parser.getAttributeValue(null, "name") == "viewport") {
+                        seenViewPort = true
                     }
 
                     return true

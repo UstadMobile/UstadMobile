@@ -157,7 +157,7 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
             childItemsToCreate = jobItemDao.findByParentContentEntryUuids(parentUids)
             UMLog.l(UMLog.DEBUG, 420, "DownloadJobPreparer: found " +
                     childItemsToCreate.size + " child items on from parents " +
-                    UMUtil.debugPrintList(parentUids))
+                    childItemsToCreate.joinToString())
 
             parentUids.clear()
 

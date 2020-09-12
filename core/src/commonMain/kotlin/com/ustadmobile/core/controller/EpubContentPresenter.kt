@@ -73,6 +73,7 @@ import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.core.view.ContainerMounter.Companion.FILTER_MODE_EPUB
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.util.UMUtil
@@ -133,7 +134,7 @@ class EpubContentPresenter(context: Any,
         mountedEndpoint = accountManager.activeAccount.endpointUrl
         GlobalScope.launch {
             mountedPath = mountHandler.mountContainer(accountManager.activeAccount.endpointUrl,
-                    containerUid)
+                    containerUid, FILTER_MODE_EPUB)
             handleMountedContainer()
         }
     }
