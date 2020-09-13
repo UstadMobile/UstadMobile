@@ -5,8 +5,10 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper
+import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
 import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
+import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import java.io.File
@@ -24,13 +26,32 @@ class ApacheScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long
         val url = URL(sourceUrl)
 
         val conn = url.openConnection() as HttpURLConnection
+        val eTag = conn.getHeaderField("etag")
+        val mimetype = conn.contentType
+        conn.disconnect()
+
+        val supported = mimeTypeSupported.find { fileMimeType -> fileMimeType == mimetype }
+
+        if(supported == null){
+            hideContentEntry()
+            setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
+        }
+
+        val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
+
+        if (recentContainer != null) {
+            val isUpdated = isUrlContentUpdated(url, recentContainer)
+            if (!isUpdated) {
+                showContentEntry()
+                setScrapeDone(true, 0)
+                return
+            }
+        }
 
         val name = sourceUrl.substringAfterLast("/")
         tempDir = Files.createTempDirectory("apache").toFile()
         var file = File(tempDir, name)
-
-        FileUtils.copyInputStreamToFile(conn.inputStream, file)
-        conn.disconnect()
+        FileUtils.copyURLToFile(url, file)
 
         runBlocking {
 
@@ -38,7 +59,7 @@ class ApacheScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long
 
             if (metadata == null) {
                 hideContentEntry()
-                setScrapeDone(true, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
+                setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
                 return@runBlocking
             }
 
@@ -63,7 +84,11 @@ class ApacheScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
 
-            importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerDir.absolutePath, file.absolutePath, db, db, metadata.importMode, Any())
+            val container = importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerDir.absolutePath, file.absolutePath, db, db, metadata.importMode, Any())
+            if (!eTag.isNullOrEmpty()) {
+                val etagContainer = ContainerETag(container.containerUid, eTag)
+                db.containerETagDao.insert(etagContainer)
+            }
 
             close()
 

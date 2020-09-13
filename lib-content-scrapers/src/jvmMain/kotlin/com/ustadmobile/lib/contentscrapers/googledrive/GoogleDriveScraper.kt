@@ -22,7 +22,7 @@ import java.io.InputStream
 import java.nio.file.Files
 
 @ExperimentalStdlibApi
-class GoogleDriveScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : Scraper(containerDir, db, contentEntryUid, sqiUid) {
+class GoogleDriveScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : Scraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
 
     private var tempDir: File? = null
 
@@ -62,9 +62,7 @@ class GoogleDriveScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
                         ScraperConstants.EMPTY_STRING,
                         0, contentEntryDao)
 
-                if (parentContentEntry != null) {
-                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry!!, fileEntry, 0)
-                }
+                ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
 
                 val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
                 val modifiedTime: Long = googleDriveFormat.parse(file.modifiedTime!!).local.unixMillisLong
