@@ -67,7 +67,7 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
     }
 
     fun handleClickJoinClazz() {
-        systemImpl.go(JoinWithCodeView.VIEW_NAME, mapOf(), context)
+        systemImpl.go(JoinWithCodeView.VIEW_NAME, mapOf(UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString()), context)
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {

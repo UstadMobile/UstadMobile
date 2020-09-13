@@ -49,8 +49,7 @@ class InviteViaLinkFragment: UstadBaseFragment(), InviteViaLinkView, InvitationL
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        ustadFragmentTitle = requireContext().getString(R.string.join_existing,
-                requireContext().getString(R.string.clazz))
+        ustadFragmentTitle = requireContext().getString(R.string.invite_with_link)
         mPresenter = InviteViaLinkPresenter(requireContext(), arguments.toStringMap(), this,
             di)
         mPresenter?.onCreate(null)

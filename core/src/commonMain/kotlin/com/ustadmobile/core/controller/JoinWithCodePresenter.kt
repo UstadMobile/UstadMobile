@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolMember
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -38,15 +39,25 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
+        var endpointUrl = accountManager.activeAccount.endpointUrl
+        if(!endpointUrl.endsWith("/")){
+            endpointUrl = "$endpointUrl/"
+        }
 
+        var apiUrl = arguments[UstadView.ARG_SERVER_URL] ?:""
+        if(apiUrl.isEmpty()){
+            apiUrl = accountManager.activeAccount.endpointUrl
+        }
+        if(!apiUrl.endsWith("/")){
+            apiUrl = "$apiUrl/"
+        }
 
-        var apiUrl = arguments.get(UstadView.ARG_SERVER_URL)?:""
-        val tableId = arguments.get(UstadView.ARG_CODE_TABLE)
-        val code = arguments.get(UstadView.ARG_CODE) ?:""
+        val tableId = arguments[UstadView.ARG_CODE_TABLE]
+        val code = arguments[UstadView.ARG_CODE] ?:""
         entityTableId = tableId?.toInt()?:0
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
-        GlobalScope.launch {
+        GlobalScope.launch() {
             val validEntity = when (entityTableId) {
                 Clazz.TABLE_ID -> {
                     dbRepo.clazzDao.findByClazzCode(code) != null
@@ -59,43 +70,45 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                 }
             }
 
-            if(apiUrl.endsWith("/")){
-                apiUrl = apiUrl.substring(0, apiUrl.length -1)
-            }
-            if (apiUrl.isNotEmpty() && validEntity &&
-                    accountManager.activeAccount.endpointUrl.equals(apiUrl)
+
+            if (apiUrl.isNotEmpty() && validEntity && endpointUrl.equals(apiUrl)
                     && loggedInPersonUid != 0L) {
                 view.runOnUiThread(Runnable {
                     view.code = code
                 })
+
                 //Continue..
 
-            } else if (apiUrl.isNotEmpty() && !accountManager.activeAccount.endpointUrl.equals(apiUrl)) {
+            } else if (apiUrl.isNotEmpty() && !endpointUrl.equals(apiUrl)) {
 
                 //Ignoring entity check and proceeding to login
                 //Go to login
                 view.runOnUiThread(Runnable {
+
                     systemImpl.go(Login2View.VIEW_NAME, mapOf(UstadView.ARG_SERVER_URL to apiUrl,
-                            UstadView.ARG_NEXT to
-                                    "${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_SERVER_URL}=$apiUrl" +
-                                    "&${UstadView.ARG_CODE_TABLE}=${tableId}&${UstadView.ARG_CODE}=$code"),
-                            context)
+                        UstadView.ARG_NEXT to
+                                "${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_SERVER_URL}=${apiUrl}" +
+                                "&${UstadView.ARG_CODE_TABLE}=${tableId}&${UstadView.ARG_CODE}=$code"),
+                        context)
                 })
             } else if (!validEntity) {
+
                 view.runOnUiThread(Runnable {
                     //Send message invalid code.
                     view.errorText = systemImpl.getString(MessageID.invalid_register_code,
                             context)
+
                 })
             } else {
                 //Go to login
                 view.runOnUiThread(Runnable {
                     systemImpl.go(Login2View.VIEW_NAME, mapOf(UstadView.ARG_SERVER_URL to apiUrl,
                             UstadView.ARG_NEXT to
-                                    "${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_SERVER_URL}=$apiUrl" +
+                                    "${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_SERVER_URL}=${apiUrl}" +
                                     "&${UstadView.ARG_CODE_TABLE}=${tableId}&${UstadView.ARG_CODE}=$code"),
                             context)
                 })
+
             }
         }
     }
@@ -126,6 +139,9 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                     view.errorText = systemImpl.getString(MessageID.invalid_register_code,
                             context)
                 }
+            }else {
+                view.errorText = systemImpl.getString(MessageID.invalid_register_code,
+                        context)
             }
 
         }

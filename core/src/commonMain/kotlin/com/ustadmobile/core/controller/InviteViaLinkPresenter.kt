@@ -34,10 +34,10 @@ class InviteViaLinkPresenter(context: Any, args: Map<String, String>, view: Invi
         }
         val link = when (arguments[ARG_CODE_TABLE].toString().toInt()) {
             Clazz.TABLE_ID -> {
-                "${apiUrl}umclient/${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_CODE}=$code&${UstadView.ARG_CODE_TABLE}=${Clazz.TABLE_ID.toString()}&${UstadView.ARG_SERVER_URL}=$apiUrl"
+                "${apiUrl}umclient/${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_CODE}=$code&${UstadView.ARG_CODE_TABLE}=${Clazz.TABLE_ID.toString()}"
             }
             School.TABLE_ID -> {
-                "${apiUrl}umclient/${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_CODE}=$code&${UstadView.ARG_CODE_TABLE}=${School.TABLE_ID.toString()}&${UstadView.ARG_SERVER_URL}=$apiUrl"
+                "${apiUrl}umclient/${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_CODE}=$code&${UstadView.ARG_CODE_TABLE}=${School.TABLE_ID.toString()}"
             }
             else -> {
                 ""

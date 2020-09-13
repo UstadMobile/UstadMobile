@@ -87,15 +87,20 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     private fun loadFromUriString(uri: String?){
         val destinationIndex : Int? = uri?.indexOf("/umclient")?.plus(10)
 
-        val apiUrlStartFrom = uri?.indexOf("/umclient")
-        val apiUrl = uri?.substring(apiUrlStartFrom?:0)
+        val apiUrl = uri?.substring(0, uri?.indexOf("/umclient")?:0) + '/'
 
-        //TODO: Check if & is needed vs just adding ?
+        var charToAdd = "?"
+        val sansApi = uri?.substring(destinationIndex?:0+1?:0)?:""
+        if(sansApi.contains('?') || sansApi.contains('&')){
+            charToAdd = "&"
+        }
         val destination = uri?.substring(destinationIndex?:0) +
-                "?${UstadView.ARG_SERVER_URL}=$apiUrl"
+                "${charToAdd}${UstadView.ARG_SERVER_URL}=$apiUrl"
 
-        println("Go to uri")
+        println("REDIRECT42: MainActivity")
         UstadMobileSystemImpl.instance.go(destination, getActivityContext())
+
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -115,6 +115,8 @@ interface UstadView {
 
         const val ARG_SERVER_URL = "serverUrl"
 
+        const val ARG_INTENT = "argIntent"
+
         const val ARG_FROM = "from"
 
         const val ARG_SNACK_MESSAGE = "snack_message"
