@@ -29,7 +29,7 @@ import java.io.File
 import java.net.URL
 
 @ExperimentalStdlibApi
-class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : HarScraper(containerDir, db, contentEntryUid, sqiUid) {
+class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid : Long) : HarScraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
 
 
     override fun scrapeUrl(sourceUrl: String) {

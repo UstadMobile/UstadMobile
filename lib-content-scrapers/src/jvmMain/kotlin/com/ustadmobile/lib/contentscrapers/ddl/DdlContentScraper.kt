@@ -54,8 +54,6 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
     private val containerEtagDao: ContainerETagDao
     private val repository: UmAppDatabase = db
 
-    private lateinit var contentEntry: ContentEntry
-
     private val licenseList = listOf(
             "CC 0" to LICENSE_TYPE_PUBLIC_DOMAIN,
             "public domain" to LICENSE_TYPE_PUBLIC_DOMAIN,
@@ -205,7 +203,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
 
                     val categoryEntry = ContentScraperUtil.insertOrUpdateCategoryContent(contentCategoryDao, ddlSchema, title)
                     ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(
-                            db.contentEntryContentCategoryJoinDao, categoryEntry, contentEntry)
+                            db.contentEntryContentCategoryJoinDao, categoryEntry, contentEntry!!)
 
                 }
 
@@ -217,10 +215,10 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                     val index = relatedHref.indexOf("af/")
                     val relatedUrl = StringBuilder(relatedHref).insert(index + 3, "$twoLangCode/").toString()
 
-                    val relatedEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, relatedUrl, contentEntry.primaryLanguageUid, element.text()
+                    val relatedEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, relatedUrl, contentEntry?.primaryLanguageUid ?: 0, element.text()
                             ?: "")
 
-                    ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, relatedEntry, contentEntry, REL_TYPE_SEE_ALSO)
+                    ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, relatedEntry, contentEntry!!, REL_TYPE_SEE_ALSO)
                 }
 
                 val translatedList = doc.select("article.resource-view-details a[title=language]:not([style])")
@@ -237,7 +235,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                         val relatedLink = element.attr("href")
 
                         val translatedEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, relatedLink, ContentScraperUtil.insertOrUpdateLanguageByTwoCode(db.languageDao, relatedTwoCode).langUid, "")
-                        ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, translatedEntry, contentEntry,
+                        ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, translatedEntry, contentEntry!!,
                                 REL_TYPE_TRANSLATED_VERSION)
 
                     }
@@ -270,7 +268,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
                 val entryETag = fileEntry.response.headers.find { valuePair -> valuePair.name == ETAG }
                 eTagValue = entryETag?.value
 
-                val container = containerDao.getMostRecentContainerForContentEntry(contentEntry.contentEntryUid)
+                val container = containerDao.getMostRecentContainerForContentEntry(contentEntry?.contentEntryUid ?: 0)
                         ?: return@startHarScrape true
 
                 return@startHarScrape isContentUpdated(fileEntry, container)
@@ -340,7 +338,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
             UMLogUtil.logInfo(args[0])
             UMLogUtil.logInfo(args[1])
             try {
-                DdlContentScraper(File(args[1]), UmAppDatabase.Companion.getInstance(Any()), 0, 0).scrapeUrl(args[0])
+                DdlContentScraper(File(args[1]), UmAppDatabase.Companion.getInstance(Any()), 0, 0, 0).scrapeUrl(args[0])
             } catch (e: IOException) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
                 UMLogUtil.logError("$DDL Exception running scrapeContent ddl")

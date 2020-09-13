@@ -1,10 +1,12 @@
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeChannelIndexer
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubePlaylistIndexer
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
+import com.ustadmobile.lib.contentscrapers.apache.ApacheIndexer
+import com.ustadmobile.lib.contentscrapers.apache.ApacheScraper
 import com.ustadmobile.lib.contentscrapers.ddl.*
 import com.ustadmobile.lib.contentscrapers.folder.FolderIndexer
 import com.ustadmobile.lib.contentscrapers.folder.FolderScraper
-import com.ustadmobile.lib.contentscrapers.googledrive.GoogleDriveFolderIndexer
+import com.ustadmobile.lib.contentscrapers.googledrive.GoogleDriveScraper
 import com.ustadmobile.lib.contentscrapers.habaybna.HabFrontPageIndexer
 import com.ustadmobile.lib.contentscrapers.khanacademy.*
 
@@ -59,7 +61,8 @@ object ScraperTypes {
             KHAN_CHANNEL_INDEXER to IndexerMap(KhanYoutubeChannelIndexer::class.java, null),
             YOUTUBE_CHANNEL_INDEXER to IndexerMap(YoutubeChannelIndexer::class.java, null),
             YOUTUBE_PLAYLIST_INDEXER to IndexerMap(YoutubePlaylistIndexer::class.java, null),
-            FOLDER_INDEXER to IndexerMap(FolderIndexer::class.java, null))
+            FOLDER_INDEXER to IndexerMap(FolderIndexer::class.java, null),
+            APACHE_INDEXER to IndexerMap(ApacheIndexer::class.java, null))
 
 
     const val DDL_ARTICLE_SCRAPER = "ddlArticleScraper"
@@ -78,6 +81,8 @@ object ScraperTypes {
 
     const val FOLDER_SCRAPER = "folderScraper"
 
+    const val GOOGLE_DRIVE_SCRAPE = "googleDriveScraper"
+
     val scraperTypeMap = mapOf(
             DDL_ARTICLE_SCRAPER to DdlContentScraper::class.java,
             KHAN_FULL_VIDEO_SCRAPER to KhanVideoScraper::class.java,
@@ -85,6 +90,8 @@ object ScraperTypes {
             KHAN_FULL_EXERCISE_SCRAPER to KhanExerciseScraper::class.java,
             KHAN_LITE_VIDEO_SCRAPER to KhanLiteVideoScraper::class.java,
             YOUTUBE_VIDEO_SCRAPER to YoutubeScraper::class.java,
-            FOLDER_SCRAPER to FolderScraper::class.java)
+            FOLDER_SCRAPER to FolderScraper::class.java,
+            APACHE_SCRAPER to ApacheScraper::class.java,
+            GOOGLE_DRIVE_SCRAPE to GoogleDriveScraper::class.java)
 
 }

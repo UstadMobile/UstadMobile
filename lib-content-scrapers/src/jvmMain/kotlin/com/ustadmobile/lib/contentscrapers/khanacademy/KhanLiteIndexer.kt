@@ -89,7 +89,7 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, 
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, headerEntry, entry, contentCount)
 
-                createQueueItem(contentUrl.toString(), entry, KHAN_LITE_VIDEO_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE)
+                createQueueItem(contentUrl.toString(), entry, KHAN_LITE_VIDEO_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, headerEntry.contentEntryUid)
 
             }
 

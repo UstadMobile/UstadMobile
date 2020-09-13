@@ -7,7 +7,7 @@ import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.io.File
 @ExperimentalStdlibApi
-class CK12FlexScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : HarScraper(containerDir, db, contentEntryUid, sqiUid) {
+class CK12FlexScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : HarScraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
 
     override fun scrapeUrl(sourceUrl: String) {
 
