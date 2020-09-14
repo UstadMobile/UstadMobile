@@ -73,21 +73,28 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
         scrapeQueueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, errorCode)
     }
 
-    fun isUrlContentUpdated(url: URL, container: Container): Boolean {
+    data class HeadRequestValues(val isUpdated: Boolean, val etag: String, val mimeType: String, val lastModified: Long)
+
+    fun isUrlContentUpdated(url: URL, container: Container?): HeadRequestValues {
         val conn = (url.openConnection() as HttpURLConnection)
+        conn.requestMethod = "HEAD"
+        val mimeType = conn.contentType
         val lastModified = conn.lastModified
         val eTagHeaderValue = conn.getHeaderField(ETAG.toLowerCase())
 
+        var isUpdated = true
         if (lastModified != 0L) {
-            return lastModified > container.cntLastModified
+            isUpdated = lastModified > container?.cntLastModified ?: 0
         }
 
-        if (eTagHeaderValue != null) {
-            val eTag = db.containerETagDao.getEtagOfContainer(container.containerUid)
-            return eTag != eTag
+        if (isUpdated && eTagHeaderValue != null) {
+            val eTag = db.containerETagDao.getEtagOfContainer(container?.containerUid?: 0)
+            if(!eTag.isNullOrEmpty()){
+               isUpdated =  eTagHeaderValue != eTag
+            }
         }
         conn.disconnect()
-        return true
+        return HeadRequestValues(isUpdated, eTagHeaderValue ?: "", mimeType, lastModified)
     }
 
     companion object {

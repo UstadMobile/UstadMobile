@@ -25,23 +25,20 @@ class ApacheScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long
 
         val url = URL(sourceUrl)
 
-        val conn = url.openConnection() as HttpURLConnection
-        val eTag = conn.getHeaderField("etag")
-        val mimetype = conn.contentType
-        conn.disconnect()
-
-        val supported = mimeTypeSupported.find { fileMimeType -> fileMimeType == mimetype }
-
-        if(supported == null){
-            hideContentEntry()
-            setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
-        }
-
         val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
 
-        if (recentContainer != null) {
-            val isUpdated = isUrlContentUpdated(url, recentContainer)
-            if (!isUpdated) {
+        val headRequestValues = isUrlContentUpdated(url, recentContainer)
+
+        val supported = mimeTypeSupported.find { fileMimeType -> fileMimeType == headRequestValues.mimeType }
+
+        if (supported == null) {
+            hideContentEntry()
+            setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
+            return
+        }
+
+        if(recentContainer != null){
+            if (!headRequestValues.isUpdated) {
                 showContentEntry()
                 setScrapeDone(true, 0)
                 return
@@ -85,8 +82,8 @@ class ApacheScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
 
             val container = importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerDir.absolutePath, file.absolutePath, db, db, metadata.importMode, Any())
-            if (!eTag.isNullOrEmpty()) {
-                val etagContainer = ContainerETag(container.containerUid, eTag)
+            if (!headRequestValues.etag.isNullOrEmpty()) {
+                val etagContainer = ContainerETag(container.containerUid, headRequestValues.etag)
                 db.containerETagDao.insert(etagContainer)
             }
 

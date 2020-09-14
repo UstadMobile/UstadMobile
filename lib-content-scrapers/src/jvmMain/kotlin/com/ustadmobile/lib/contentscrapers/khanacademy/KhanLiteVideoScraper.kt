@@ -8,6 +8,7 @@ import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanContentIndexer.Companion.KHAN_PREFIX
 import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import java.io.File
@@ -51,24 +52,19 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
 
         } else {
 
-            val conn = (url.openConnection() as HttpURLConnection)
-            val eTag = conn.getHeaderField("etag")
-            val mimetype = conn.contentType
-            conn.disconnect()
-
-            if (!VIDEO_MIME_MAP.keys.contains(mimetype)) {
-                hideContentEntry()
-                setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
-                throw ScraperException(ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED, "Video type not supported for $mimetype for url $url")
-            }
-
-            val ext = VIDEO_MIME_MAP[mimetype]
-
             val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
 
-            if (recentContainer != null) {
-                val isUpdated = isUrlContentUpdated(url, recentContainer)
-                if (!isUpdated) {
+            val headRequestValues = isUrlContentUpdated(url, recentContainer)
+
+            val ext = VIDEO_MIME_MAP[headRequestValues.mimeType]
+            if (!VIDEO_MIME_MAP.keys.contains(headRequestValues.mimeType)) {
+                hideContentEntry()
+                setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
+                throw ScraperException(ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED, "Video type not supported for ${headRequestValues.mimeType} for url $url")
+            }
+
+            if(recentContainer != null){
+                if (!headRequestValues.isUpdated) {
                     showContentEntry()
                     setScrapeDone(true, 0)
                     return
@@ -79,13 +75,13 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
             val tempFile = File(tempDir, khanId + ext)
             FileUtils.copyURLToFile(url, tempFile)
 
-            val container = createBaseContainer(mimetype)
+            val container = createBaseContainer(headRequestValues.mimeType)
             val containerManager = ContainerManager(container, db, db, containerDir.absolutePath)
             runBlocking {
                 containerManager.addEntries(ContainerManager.FileEntrySource(tempFile, tempFile.name))
             }
-            if (!eTag.isNullOrEmpty()) {
-                val etagContainer = ContainerETag(container.containerUid, eTag)
+            if (!headRequestValues.mimeType.isNullOrEmpty()) {
+                val etagContainer = ContainerETag(container.containerUid, headRequestValues.etag)
                 db.containerETagDao.insert(etagContainer)
             }
 
