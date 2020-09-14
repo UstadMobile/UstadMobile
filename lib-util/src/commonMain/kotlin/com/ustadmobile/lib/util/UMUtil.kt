@@ -37,12 +37,6 @@ import kotlin.js.JsName
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
 
-/* $if umplatform == 2  $
-    import org.json.me.*;
- $else$ */
-
-/* $endif$ */
-
 /**
  * Misc utility methods
  *
@@ -59,153 +53,8 @@ object UMUtil {
     /**
      * A list of elements that must have their own end tag
      */
-    val SEPARATE_END_TAG_REQUIRED_ELEMENTS = arrayOf("script", "style")
+    val SEPARATE_END_TAG_REQUIRED_ELEMENTS = arrayOf("script", "style", "title")
 
-
-    /**
-     * Gets the index of a particular item in an array
-     *
-     * Needed because J2ME does not support the Collections framework
-     *
-     * @param obj
-     * @param arr
-     * @return
-     */
-    fun getIndexInArray(obj: Any, arr: Array<Any>): Int {
-        for (i in arr.indices) {
-            if (arr[i] == obj) {
-                return i
-            }
-        }
-
-        return -1
-    }
-
-    /**
-     * Find the index of a string in an array of strings using
-     * equalsIgnoreCase to find the match
-     *
-     * @param str String to locate array
-     * @param arr Array in which to search
-     * @return the index of the given string in the array if found; -1 otherwise
-     */
-    @JvmStatic
-    fun getIndexInArrayIgnoreCase(str: String, arr: Array<String>): Int {
-        for (i in arr.indices) {
-            if (arr[i].equals(str, ignoreCase = true)) {
-                return i
-            }
-        }
-
-        return -1
-    }
-
-    /**
-     * Tokenize the given string into a vector with String elements
-     *
-     * @param str the string to tokenize
-     * @param deliminators the characters that are to be used as deliminators
-     * @param start the position to start at (inclusive)
-     * @pparam end the position to end at (exclusive)
-     *
-     * @return A vector with the string tokens as elements in the order in which they were found
-     */
-    fun tokenize(str: String, deliminators: CharArray, start: Int, end: Int): MutableList<*> {
-        var inToken = false
-        var isDelim: Boolean
-
-        var c: Char
-        var i: Int = start
-        var j: Int
-        val tokens = mutableListOf<String>()
-        var tStart = 0
-
-
-        while (i < end) {
-            c = str[i]
-            isDelim = false
-
-            j = 0
-            while (j < deliminators.size) {
-                if (c == deliminators[j]) {
-                    isDelim = true
-                    break
-                }
-                j++
-            }
-
-            if (!isDelim && !inToken) {
-                tStart = i
-                inToken = true
-            } else if (inToken && (isDelim || i == end - 1)) {
-                tokens.add(str.substring(tStart, if (isDelim) i else i + 1))
-                inToken = false
-            }
-            i++
-
-        }
-
-        return tokens
-    }
-
-    fun filterArrByPrefix(arr: Array<String>, prefix: String): Array<String?> {
-        val matches = BooleanArray(arr.size)
-
-        var i: Int = 0
-        var matchCount = 0
-        val arrayLen = arr.size
-
-        while (i < arrayLen) {
-            if (arr[i].startsWith(prefix)) {
-                matches[i] = true
-                matchCount++
-            }
-            i++
-        }
-
-        val retVal = arrayOfNulls<String>(matchCount)
-        matchCount = 0
-        i = 0
-        while (i < arrayLen) {
-            if (matches[i]) {
-                retVal[matchCount] = arr[i]
-                matchCount++
-            }
-            i++
-        }
-
-        return retVal
-    }
-
-    /**
-     * Utility method to fill boolean array with a set value
-     *
-     * @param arr The boolean array
-     * @param value Value to put in
-     * @param from starting index (inclusive)
-     * @param to  end index (exclusive)
-     */
-    fun fillBooleanArray(arr: BooleanArray, value: Boolean, from: Int, to: Int) {
-        for (i in from until to) {
-            arr[i] = value
-        }
-    }
-
-    /**
-     * Add all the elements from one vector to another
-     *
-     * @param vector The vector elements will be added to
-     * @param toAdd The vector elements will be added from
-     * @return the vector with all the elements (same as vector argument)
-     */
-    fun addVectorToVector(vector: MutableList<Any>, toAdd: MutableList<Any>): MutableList<Any> {
-        val numElements = toAdd.size
-        for (i in 0 until numElements) {
-            vector.add(toAdd.elementAt(i))
-        }
-
-        return vector
-    }
 
     /**
      * If i < 0  - return "0i", else return "i" - E.g. to dislpay 10:01 instead of 10:1
@@ -217,21 +66,6 @@ object UMUtil {
             i.toString()
         } else {
             "0$i"
-        }
-    }
-
-    /**
-     * Copy references from one hashtable to another hashtable
-     *
-     * @param src Source hashtable to copy from
-     * @param dst Destination hashtable to copy into
-     */
-    fun copyHashtable(src: Map<String, String>, dst: MutableMap<String, String?>) {
-        val keys = src.keys.iterator()
-        var key: Any
-        while (keys.hasNext()) {
-            key = keys.next()
-            dst[key] = src[key]
         }
     }
 
@@ -331,6 +165,12 @@ object UMUtil {
                 return
 
             when (evtType) {
+                KMPPullParser.DOCDECL -> {
+                    xpp.getText()?.let {
+                        xs.docdecl(it)
+                    }
+                }
+
                 KMPPullParser.START_TAG -> {
                     xs.startTag(xpp.getNamespace(), xpp.getName().toString())
                     for (i in 0 until xpp.getAttributeCount()) {
@@ -522,27 +362,6 @@ object UMUtil {
                  ':'.toString() + password)
      } */
 
-
-    @JvmStatic
-    fun debugPrintList(list: List<Any?>?) : String {
-        if(list == null)
-            return "[null list]"
-
-        var isFirst = true
-        val sb = StringBuilder()
-        sb.append('[')
-        for(obj in list) {
-            if(!isFirst)
-                sb.append(',')
-
-            sb.append(obj?.toString())
-            isFirst = false
-        }
-
-        sb.append(']')
-
-        return sb.toString()
-    }
 
     @JsName("jsArrayToKotlinList")
     @JvmStatic

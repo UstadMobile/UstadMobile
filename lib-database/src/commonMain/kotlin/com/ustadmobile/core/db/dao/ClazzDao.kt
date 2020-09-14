@@ -129,12 +129,6 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     abstract suspend fun personHasPermissionWithClazz(accountPersonUid: Long, clazzUid: Long,
                                                       permission: Long) : Boolean
 
-    @Query("SELECT " + TABLE_LEVEL_PERMISSION_CONDITION1 + " :permission "
-            + TABLE_LEVEL_PERMISSION_CONDITION2 + " AS hasPermission")
-    abstract suspend fun personHasPermission(accountPersonUid: Long, permission: Long): Boolean
-
-
-
     @Query("""SELECT Clazz.*, HolidayCalendar.*, School.*,
         (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = 1) AS numStudents,
         (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = 2) AS numTeachers
@@ -182,8 +176,11 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
             WHERE 
             CAST(Person.admin AS INTEGER) = 1
             OR 
-            (EntityRole.ertableId = ${Clazz.TABLE_ID} AND 
-            EntityRole.erEntityUid = Clazz.clazzUid AND
+            (
+            ((EntityRole.ertableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) OR
+            (EntityRole.ertableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
+            )
+            AND
             (Role.rolePermissions &  
         """
 
@@ -193,48 +190,6 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
         const val ENTITY_PERSON_WITH_SELECT_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 " +
                 "${Role.PERMISSION_CLAZZ_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT2"
-
-
-        const val TABLE_LEVEL_PERMISSION_CONDITION1 = " CASE WHEN EXISTS (SELECT admin FROM Person WHERE personUid " +
-                "= :accountPersonUid) THEN (SELECT admin FROM Person WHERE personUid = :accountPersonUid) ELSE 0 END " +
-                " OR " +
-                " EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
-                " JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
-                " JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
-                " WHERE " +
-                " PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
-                " AND EntityRole.erTableId = " + Clazz.TABLE_ID +
-                " AND Role.rolePermissions & "
-
-        const val TABLE_LEVEL_PERMISSION_CONDITION2 = " > 0)"
-
-        private const val CLAZZ_SELECT = " SELECT Clazz.*, " +
-                "(SELECT ClazzLog.logDate FROM ClazzLog " +
-                "WHERE ClazzLog.clazzLogClazzUid = Clazz.clazzUid AND CAST(ClazzLog.clazzLogDone AS INTEGER) = 1 " +
-                "ORDER BY ClazzLog.logDate DESC LIMIT 1) AS lastRecorded, " +
-                "(SELECT COUNT(*) " +
-                "   FROM ClazzMember " +
-                "   LEFT JOIN Person AS SP ON SP.personUid = ClazzMember.clazzMemberPersonUid " +
-                "   WHERE " +
-                "   ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
-                "   AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_STUDENT +
-                "   AND CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1 " +
-                "   AND CAST(SP.active AS INTEGER) = 1 ) AS numStudents, " +
-                " (SELECT COUNT(*) FROM ClazzMember " +
-                "   LEFT JOIN Person AS CP ON CP.personUid = ClazzMember.clazzMemberPersonUid " +
-                "   WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid " +
-                "   AND ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER +
-                "   AND CAST(ClazzMember.clazzMemberActive AS INTEGER) = 1 AND CAST(CP.active AS INTEGER) = 1 ) AS numTeachers, " +
-                " (SELECT GROUP_CONCAT(Person.firstNames || ' ' ||  Person.lastName ) as teacherName " +
-                "   FROM Person where Person.personUid in (SELECT ClazzMember.clazzMemberPersonUid " +
-                "   FROM ClazzMember WHERE ClazzMember.clazzMemberRole = " + ClazzMember.ROLE_TEACHER +
-                "   AND ClazzMember.clazzMemberClazzUid = Clazz.clazzUid" +
-                "   AND CAST(ClazzMember.clazzMemberActive AS INTEGER)  = 1) " +
-                " ) AS teacherNames "
-
-        private const val CLAZZ_WHERE_CLAZZMEMBER =
-                " FROM Clazz " +
-                " LEFT JOIN Person ON Person.personUid = :personUid "
 
         private const val SELECT_ACTIVE_CLAZZES = "SELECT * FROM Clazz WHERE CAST(isClazzActive AS INTEGER) = 1"
     }

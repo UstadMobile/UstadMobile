@@ -119,7 +119,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
     fun handleClickDone(code: String) {
         GlobalScope.launch(doorMainDispatcher()) {
             if(entityTableId == Clazz.TABLE_ID){
-                val clazzToJoin = dbRepo.clazzDao.findByClazzCode(code)
+                val clazzToJoin = dbRepo.clazzDao.findByClazzCode(code.trim())
                 val personToEnrol = dbRepo.takeIf { clazzToJoin != null }?.personDao
                         ?.findByUid(accountManager.activeAccount.personUid)
                 if(clazzToJoin  != null && personToEnrol != null) {
@@ -131,7 +131,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                             context)
                 }
             }else if(entityTableId == School.TABLE_ID){
-                val schoolToJoin = dbRepo.schoolDao.findBySchoolCode(code)
+                val schoolToJoin = dbRepo.schoolDao.findBySchoolCode(code.trim())
                 val personToEnrol = dbRepo.takeIf { schoolToJoin != null }?.personDao
                         ?.findByUid(accountManager.activeAccount.personUid)
                 if(schoolToJoin  != null && personToEnrol != null) {

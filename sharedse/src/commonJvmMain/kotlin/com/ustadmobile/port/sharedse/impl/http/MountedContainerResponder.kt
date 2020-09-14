@@ -4,7 +4,6 @@ import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import org.xmlpull.v1.XmlPullParserException
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -14,6 +13,7 @@ import java.util.*
 import java.util.regex.Pattern
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMURLEncoder
+import java.io.ByteArrayInputStream
 
 class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
 
@@ -26,65 +26,18 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
 
     }
 
-    @Deprecated("")
-    class MountedZipFilter(var pattern: Pattern, var replacement: String)
-
-    class FilteredHtmlSource(private val src: IFileSource, private val scriptPath: String) : IFileSource {
-
-        private var sourceLength: Long = -1
-
-        override val lastModifiedTime: Long
-            get() = src.lastModifiedTime
-
-        override val name: String?
-            get() = src.name
-
-        override val inputStream: InputStream by lazy {
-            //init and filter
-            val srcIn = src.inputStream
-            try {
-                val filterSerializer = EpubHtmlFilterSerializer()
-                filterSerializer.scriptSrcToAdd = scriptPath
-                filterSerializer.setIntput(srcIn)
-                val filteredBytes = filterSerializer.output
-                sourceLength = filteredBytes.size.toLong()
-                ByteArrayInputStream(filteredBytes)
-            } catch (x: XmlPullParserException) {
-                throw IOException(x)
-            }
-        }
-
-        override val length: Long
-            get() {
-                try {
-                    inputStream
-                } catch (e: IOException) {
-                }
-
-                return sourceLength
-            }
-
-
-        override val exists: Boolean
-            get() = src.exists
-
-        override val eTag: String?
-            get() = null
-    }
-
-
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
         try {
-            var requestUri = RouterNanoHTTPD.normalizeUri(session.uri)
-            requestUri = URI(requestUri).normalize().toString()
+            var requestUri = session.uri
             val containerUid = uriResource.initParameter(PARAM_CONTAINERUID_INDEX, String::class.java).toLong()
-            val pathInContainer = requestUri.substring(
-                    uriResource.uri.length - URI_ROUTE_POSTFIX.length)
+            val pathInContainer: String = requestUri.substring(
+                    uriResource.uri.length - URI_ROUTE_POSTFIX.length).removePrefix("/")
             val appDb = uriResource.initParameter(PARAM_DB_INDEX, UmAppDatabase::class.java)
             val entryFile = appDb.containerEntryDao
                     .findByPathInContainer(containerUid, pathInContainer)
                     ?: return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
-                            "text/plain", "Entry not found in container")
+                            "text/plain", "Entry not found in container: $pathInContainer uriResource.uri=${uriResource.uri}\n" +
+                            "requestUri=${requestUri}")
 
             val filterList = uriResource.initParameter(PARAM_FILTERS_INDEX, List::class.java)
                     as List<MountedContainerFilter>

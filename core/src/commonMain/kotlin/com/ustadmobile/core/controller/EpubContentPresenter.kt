@@ -73,6 +73,7 @@ import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.core.view.ContainerMounter.Companion.FILTER_MODE_EPUB
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.util.UMUtil
@@ -133,7 +134,7 @@ class EpubContentPresenter(context: Any,
         mountedEndpoint = accountManager.activeAccount.endpointUrl
         GlobalScope.launch {
             mountedPath = mountHandler.mountContainer(accountManager.activeAccount.endpointUrl,
-                    containerUid)
+                    containerUid, FILTER_MODE_EPUB)
             handleMountedContainer()
         }
     }
@@ -222,15 +223,22 @@ class EpubContentPresenter(context: Any,
                 }?.let { url -> UMFileUtil.resolveLink(url, it) }
             }
 
-            if(navXhtmlUrl != null) {
-                val navContent = client.get<String>(navXhtmlUrl.toString())
+            val ncxUrl = opf.ncxItem?.href?.let {
+                ocf?.rootFiles?.get(0)?.fullPath?.let { path -> UMFileUtil.joinPaths(mountedPath, path)
+                }?.let { url -> UMFileUtil.resolveLink(url, it) }
+            }
+
+            val navUrlToLoad = navXhtmlUrl ?: ncxUrl
+
+            if(navUrlToLoad != null) {
+                val navContent = client.get<String>(navUrlToLoad)
 
                 val navDocument = EpubNavDocument()
                 val navParser = KMPXmlParser()
                 navParser.setInput(ByteArrayInputStream(navContent.toByteArray()), "UTF-8")
                 navDocument.load(navParser)
                 epubContentView.runOnUiThread(Runnable {
-                    epubContentView.tableOfContents = navDocument.toc
+                    epubContentView.tableOfContents = navDocument.toc ?: navDocument.ncxNavMap
                 })
             }
 

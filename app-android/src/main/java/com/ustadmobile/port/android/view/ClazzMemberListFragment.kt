@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -35,10 +33,11 @@ import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
+import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
-class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberWithPerson>(),
-        ClazzMemberListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMemberWithPerson>(),
+        ClazzMemberListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
 
     private var mPresenter: ClazzMemberListPresenter? = null
 
@@ -57,12 +56,12 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
             mCurrentStudentListLiveData?.observe(viewLifecycleOwner, studentObserverVal)
         }
 
-    private val pendingStudentsObserver = object: Observer<PagedList<ClazzMemberWithPerson>> {
+    private val pendingStudentsObserver = object : Observer<PagedList<ClazzMemberWithPerson>> {
         override fun onChanged(t: PagedList<ClazzMemberWithPerson>?) {
             mPendingStudentListRecyclerViewAdapter?.submitList(t)
-            mPendingStudentsHeaderRecyclerViewAdapter?.headerLayoutId = if(t != null && !t.isEmpty()) {
+            mPendingStudentsHeaderRecyclerViewAdapter?.headerLayoutId = if (t != null && !t.isEmpty()) {
                 R.layout.item_simple_list_header
-            }else {
+            } else {
                 0
             }
         }
@@ -78,7 +77,6 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
             mCurrentStudentListLiveData?.observe(viewLifecycleOwner, pendingStudentsObserver)
             field = value
         }
-
 
 
     private var mNewStudentListRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
@@ -103,6 +101,10 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
         navigateToPickNewMember(KEY_STUDENT_SELECTED)
     }
 
+    private val mOnClickAddTeacher: View.OnClickListener = View.OnClickListener {
+        navigateToPickNewMember(KEY_TEACHER_SELECTED)
+    }
+
     override var addTeacherVisible: Boolean = false
         set(value) {
             field = value
@@ -115,7 +117,7 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
             mNewStudentListRecyclerViewAdapter?.newItemVisible = value
         }
 
-    class ClazzMemberListViewHolder(val itemBinding: ItemClazzmemberListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
+    class ClazzMemberListViewHolder(val itemBinding: ItemClazzmemberListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
     class ClazzMemberListRecyclerAdapter(var presenter: ClazzMemberListPresenter?)
         : SelectablePagedListAdapter<ClazzMemberWithPerson, ClazzMemberListViewHolder>(DIFF_CALLBACK) {
@@ -163,7 +165,7 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
         val view = super.onCreateView(inflater, container, savedInstanceState)
         filterByClazzUid = arguments?.getString(ARG_FILTER_BY_CLAZZUID)?.toLong() ?: 0
         mPresenter = ClazzMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this,  di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ClazzMemberListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_a,
@@ -171,9 +173,10 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
         mStudentListRecyclerViewAdapter = ClazzMemberListRecyclerAdapter(mPresenter).also {
             mStudentListObserver = PagedListSubmitObserver(it)
         }
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
-            headerStringId = R.string.teachers_literal,
-            headerLayoutId = R.layout.item_simple_list_header)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(mOnClickAddTeacher, createNewText,
+                headerStringId = R.string.teachers_literal,
+                headerLayoutId = R.layout.item_simple_list_header,
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         val addStudentText = requireContext().getString(R.string.add_a,
                 requireContext().getString(R.string.students))
         mNewStudentListRecyclerViewAdapter = NewItemRecyclerViewAdapter(mOnClickAddStudent,
@@ -185,10 +188,15 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
                 "", R.string.pending_requests, headerLayoutId = 0)
 
         mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
-            mDataRecyclerViewAdapter, mNewStudentListRecyclerViewAdapter,
-            mStudentListRecyclerViewAdapter, mPendingStudentsHeaderRecyclerViewAdapter,
-            mPendingStudentListRecyclerViewAdapter)
+                mDataRecyclerViewAdapter, mNewStudentListRecyclerViewAdapter,
+                mStudentListRecyclerViewAdapter, mPendingStudentsHeaderRecyclerViewAdapter,
+                mPendingStudentListRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
+
+        presenterLifecycleObserver = PresenterViewLifecycleObserver(mPresenter).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
+
         return view
     }
 
@@ -210,29 +218,48 @@ class ClazzMemberListFragment(): UstadListViewFragment<ClazzMember, ClazzMemberW
         fabManager?.visible = false
     }
 
-    private fun navigateToPickNewMember(keyName: String){
+    private fun navigateToPickNewMember(keyName: String) {
 
         navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest,
                 bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
-                ARG_CODE_TABLE to Clazz.TABLE_ID.toString()),
+                        ARG_CODE_TABLE to Clazz.TABLE_ID.toString()),
                 keyName, true)
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = true
+    }
+
+    private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
+
+    fun navigateToPickNewMember(keyName: String) {
+        navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest,
+                bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString()),
+                keyName, true)
     }
 
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
-    override fun onClick(view: View?) = navigateToPickNewMember(KEY_TEACHER_SELECTED)
+    override fun onClick(view: View?) {
+        super.onClick(view)
+    }
 
 
     override fun onDestroyView() {
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
+        presenterLifecycleObserver?.also {
+            viewLifecycleOwner.lifecycle.removeObserver(it)
+        }
+        presenterLifecycleObserver = null
     }
 
     override val displayTypeRepo: Any?

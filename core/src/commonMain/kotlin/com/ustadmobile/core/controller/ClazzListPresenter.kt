@@ -3,6 +3,8 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -14,26 +16,17 @@ import org.kodein.di.DI
 class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: ClazzList2View,
                          di: DI, lifecycleOwner: DoorLifecycleOwner,
                          private val clazzList2ItemListener:
-                          DefaultClazzListItemListener = DefaultClazzListItemListener(view, ListViewMode.BROWSER, context, di))
-    : UstadListPresenter<ClazzList2View, Clazz>(context, arguments, view,  di, lifecycleOwner), ClazzListItemListener by clazzList2ItemListener {
-
-    var searchQuery: String = "%"
+                         DefaultClazzListItemListener = DefaultClazzListItemListener(view, ListViewMode.BROWSER, context, di))
+    : UstadListPresenter<ClazzList2View, Clazz>(context, arguments, view, di, lifecycleOwner), ClazzListItemListener by clazzList2ItemListener, OnSortOptionSelected, OnSearchSubmitted {
 
     var loggedInPersonUid = 0L
 
-    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
+    private var filterExcludeMembersOfSchool: Long = 0
 
-    private var filterExcludeMembersOfSchool : Long = 0
+    private var searchText: String? = null
 
-
-    enum class SortOrder(val messageId: Int, val sortOrderCode: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc, ClazzDao.SORT_CLAZZNAME_ASC),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc, ClazzDao.SORT_CLAZZNAME_DESC),
-        ORDER_ATTENDANCE_ASC(MessageID.attendance_low_to_high, ClazzDao.SORT_ATTENDANCE_ASC),
-        ORDER_ATTENDANCE_DESC(MessageID.attendance_high_to_low, ClazzDao.SORT_ATTENDANCE_DESC)
-    }
-
-    class ClazzListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    override val sortOptions: List<SortOrderOption>
+        get() = SORT_OPTIONS
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -42,24 +35,20 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
         clazzList2ItemListener.listViewMode = mListMode
 
         loggedInPersonUid = accountManager.activeAccount.personUid
-        view.sortOptions = SortOrder.values().toList().map { ClazzListSortOption(it, context) }
+        selectedSortOption = SORT_OPTIONS[0]
         updateList()
     }
 
     private fun updateList() {
-        view.list = repo.clazzDao.findClazzesWithPermission(searchQuery,
-                loggedInPersonUid, filterExcludeMembersOfSchool, currentSortOrder.sortOrderCode)
+        view.list = repo.clazzDao.findClazzesWithPermission(searchText.toQueryLikeParam(),
+                loggedInPersonUid, filterExcludeMembersOfSchool, selectedSortOption?.flag ?: 0)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         //All user should be able to see the plus button - but only those with permission can create a new class
-        view.newClazzListOptionVisible = repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
+        view.newClazzListOptionVisible = repo.entityRoleDao.userHasTableLevelPermission(
+                loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
         return true
-    }
-
-    private fun getAndSetList(sortOrder: SortOrder) {
-        currentSortOrder = sortOrder
-        updateList()
     }
 
     override fun handleClickCreateNewFab() {
@@ -70,11 +59,24 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
         systemImpl.go(JoinWithCodeView.VIEW_NAME, mapOf(UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString()), context)
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? ClazzListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            getAndSetList(sortOrder)
-        }
+    override fun onClickSort(sortOption: SortOrderOption) {
+        super.onClickSort(sortOption)
+        updateList()
+    }
+
+    override fun onSearchSubmitted(text: String?) {
+        searchText = text
+        updateList()
+    }
+
+
+    companion object {
+
+        val SORT_OPTIONS = listOf(
+                SortOrderOption(MessageID.name, ClazzDao.SORT_CLAZZNAME_ASC, true),
+                SortOrderOption(MessageID.name, ClazzDao.SORT_CLAZZNAME_DESC, false),
+                SortOrderOption(MessageID.attendance, ClazzDao.SORT_ATTENDANCE_ASC, true),
+                SortOrderOption(MessageID.attendance, ClazzDao.SORT_ATTENDANCE_DESC, false)
+        )
     }
 }

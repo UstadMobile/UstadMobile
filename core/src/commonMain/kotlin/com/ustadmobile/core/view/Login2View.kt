@@ -18,6 +18,8 @@ interface Login2View : UstadView {
 
     var errorMessage: String
 
+    var versionInfo: String?
+
     companion object {
 
         const val VIEW_NAME = "Login2View"

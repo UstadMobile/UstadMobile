@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -65,7 +63,8 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
 
         val createNewText = requireContext().getString(R.string.add_a_new,
                 requireContext().getString(R.string.clazz_work))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         return view
     }
 
@@ -73,6 +72,16 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
                 requireContext().getString(R.string.clazz_work)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     /**
@@ -85,6 +94,8 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
                 clazzWorkClazzUid = clazzUid
             }
             navigateToEditEntity(null, R.id.clazzwork_edit_dest, ClazzWork::class.java)
+        }else {
+            super.onClick(view)
         }
     }
 

@@ -7,12 +7,9 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
-import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION1
-import com.ustadmobile.core.db.dao.PersonDao.Companion.ENTITY_LEVEL_PERMISSION_CONDITION2
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.util.KmpUuid
-import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
 import com.ustadmobile.lib.db.entities.*
@@ -21,13 +18,8 @@ import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.serialization.Serializable
 import kotlin.js.JsName
-import kotlin.math.log
 
 
-@UmDao(selectPermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_SELECT
-        + ENTITY_LEVEL_PERMISSION_CONDITION2,
-        updatePermissionCondition = ENTITY_LEVEL_PERMISSION_CONDITION1 + Role.PERMISSION_PERSON_UPDATE
-        + ENTITY_LEVEL_PERMISSION_CONDITION2)
 @Dao
 @UmRepository
 abstract class PersonDao : BaseDao<Person> {
@@ -214,19 +206,21 @@ abstract class PersonDao : BaseDao<Person> {
             AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
             AND (Person.personUid NOT IN (:excludeSelected))
             AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_SELECT_PERMISSION) 
-            AND Person.firstNames LIKE :searchText
+            AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
             ORDER BY CASE(:sortOrder)
-                WHEN $SORT_NAME_ASC THEN Person.firstNames
+                WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
+                WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
                 ELSE ''
             END ASC,
             CASE(:sortOrder)
-                WHEN $SORT_NAME_DESC THEN Person.firstNames
+                WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
+                WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
                 ELSE ''
             END DESC
     """)
     abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
                                                  excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%%"): DataSource.Factory<Int, PersonWithDisplayDetails>
+                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int, PersonWithDisplayDetails>
 
 
     @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")
@@ -304,9 +298,13 @@ abstract class PersonDao : BaseDao<Person> {
 
     companion object {
 
-        const val SORT_NAME_ASC = 1
+        const val SORT_FIRST_NAME_ASC = 1
 
-        const val SORT_NAME_DESC = 2
+        const val SORT_FIRST_NAME_DESC = 2
+
+        const val SORT_LAST_NAME_ASC = 3
+
+        const val SORT_LAST_NAME_DESC = 4
 
         const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
             SELECT DISTINCT Person_Perm.personUid FROM Person Person_Perm
@@ -320,7 +318,13 @@ abstract class PersonDao : BaseDao<Person> {
             OR
             (
             ((EntityRole.erTableId = ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid) OR 
-            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))
+            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid)) OR
+            (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.PersonUid)) OR
+            (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
+                SELECT DISTINCT Clazz.clazzSchoolUid 
+                FROM Clazz
+                JOIN ClazzMember ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberPersonUid = Person.personUid
+            ))
             ) 
             AND (Role.rolePermissions & 
         """
@@ -330,23 +334,6 @@ abstract class PersonDao : BaseDao<Person> {
         const val ENTITY_PERSONS_WITH_SELECT_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT2"
 
         const val ENTITY_PERSONS_WITH_PERMISSION_PARAM = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :permission $ENTITY_PERSONS_WITH_PERMISSION_PT2"
-
-        const val ENTITY_LEVEL_PERMISSION_CONDITION1 = " Person.personUid = :accountPersonUid OR " +
-                " CAST((SELECT admin FROM Person WHERE personUid = :accountPersonUid) AS INTEGER) = 1 OR " +
-                " EXISTS(SELECT PersonGroupMember.groupMemberPersonUid FROM PersonGroupMember " +
-                " JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid " +
-                " JOIN Role ON EntityRole.erRoleUid = Role.roleUid " +
-                " WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid " +
-                "  AND (" +
-                " (EntityRole.ertableId = " + Person.TABLE_ID +
-                "  AND EntityRole.erEntityUid = Person.personUid) " +
-                " OR " +
-                " (EntityRole.ertableId = " + Clazz.TABLE_ID +
-                "  AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM " +
-                "  ClazzMember WHERE clazzMemberPersonUid = Person.personUid))" +
-                " ) AND (Role.rolePermissions & "
-
-        const val ENTITY_LEVEL_PERMISSION_CONDITION2 = ") > 0)"
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
 
