@@ -50,7 +50,7 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val db:
             item = ScrapeQueueItem()
             item.scrapeUrl = queueUrl
             item.sqiContentEntryParentUid = parentContentEntryUid
-            item.sqiContentEntryUid = contentEntry?.contentEntryUid ?: 0
+            item.sqiContentEntryUid = contentEntry.contentEntryUid
             item.status = ScrapeQueueItemDao.STATUS_PENDING
             item.contentType = contentType
             item.runId = runUid

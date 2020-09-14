@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.contentscrapers.folder.IndexFolderScraper
+import com.ustadmobile.lib.staging.contentscrapers.folder.IndexFolderScraper
 import org.apache.commons.io.FileUtils
 import org.junit.Assert
 import org.junit.Before
@@ -48,7 +48,7 @@ class TestFolderScraper {
                 File(arabicFolder, "ruby-ar.epub"))
 
         scooterFile = File(scienceFolder, "scooter-en.epub")
-        FileUtils.copyToFile(javaClass.getResourceAsStream("/com/ustadmobile/lib/contentscrapers/folder/314-my very own scooter-EN.epub"),
+        FileUtils.copyToFile(javaClass.getResourceAsStream("/com/ustadmobile/lib/contentscrapers/folder/314-my-very-own-scooter-EN.epub"),
                 scooterFile!!)
     }
 
@@ -58,7 +58,7 @@ class TestFolderScraper {
 
         val scraper = IndexFolderScraper()
         scraper.findContent("3asafeer",
-                tmpDir!!, containerDir!!)
+                tmpDir!!, containerDir!!,0)
 
         val db = UmAppDatabase.getInstance(Any())
         val repo = db //db.getRepository("https://localhost", "")

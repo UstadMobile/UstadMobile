@@ -32,7 +32,7 @@ class FolderScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long
 
                 if (metadata == null) {
                     hideContentEntry()
-                    setScrapeDone(true, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
+                    setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
                     return@runBlocking
                 }
 
@@ -47,8 +47,7 @@ class FolderScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long
                 val fileEntry = ContentScraperUtil.createOrUpdateContentEntry(
                         metadataContentEntry.entryId ?: contentEntry?.entryId ?: name,
                         metadataContentEntry.title ?: contentEntry?.title ?: name,
-                        sourceUrl, metadataContentEntry.publisher ?: parentContentEntry?.publisher
-                ?: "",
+                        sourceUrl, metadataContentEntry.publisher ?: parentContentEntry?.publisher ?: "",
                         metadataContentEntry.licenseType, primaryLanguage, variant,
                         metadataContentEntry.description, true, ScraperConstants.EMPTY_STRING,
                         metadataContentEntry.thumbnailUrl, ScraperConstants.EMPTY_STRING,

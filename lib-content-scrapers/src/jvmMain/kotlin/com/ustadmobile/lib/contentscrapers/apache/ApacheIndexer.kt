@@ -65,7 +65,7 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase,
 
                     UMLogUtil.logInfo("it was a file")
 
-                    conn = url.openConnection() as HttpURLConnection
+                    conn = hrefUrl.openConnection() as HttpURLConnection
                     conn.requestMethod = "HEAD"
                     val mimeType = conn.contentType
 

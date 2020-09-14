@@ -21,6 +21,7 @@ import org.junit.Test
 import org.openqa.selenium.chrome.ChromeDriver
 import java.io.File
 import java.io.IOException
+import java.net.URLConnection
 import java.nio.file.Files
 
 @ExperimentalStdlibApi
@@ -44,8 +45,7 @@ class TestIndexKhanAcademy {
 
                 } else if (request.path.contains("content")) {
 
-                    val fileLocation = request.path.substring(8
-                    )
+                    val fileLocation = request.path.substring(8)
                     val videoIn = javaClass.getResourceAsStream(fileLocation)
                     val source = Okio.buffer(Okio.source(videoIn))
                     val buffer = Buffer()

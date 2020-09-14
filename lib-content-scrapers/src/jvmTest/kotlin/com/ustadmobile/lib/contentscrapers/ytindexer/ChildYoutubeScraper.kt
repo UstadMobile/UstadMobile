@@ -5,7 +5,7 @@ import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
 import java.io.File
 
 @ExperimentalStdlibApi
-class ChildYoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : YoutubeScraper(containerDir, db, contentEntryUid, sqiUid) {
+class ChildYoutubeScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int) : YoutubeScraper(containerDir, db, contentEntryUid, sqiUid, 0) {
     override fun scrapeUrl(sourceUrl: String) {
 
     }

@@ -163,7 +163,7 @@ class TestPrathamContentScraper {
         mockWebServer.setDispatcher(dispatcher)
 
         val scraper = DdlContentScraper(
-                containerDir, db, 0, 0)
+                containerDir, db, 0, 0, 0)
         scraper.scrapeUrl(mockWebServer.url("json/com/ustadmobile/lib/contentscrapers/ddl/ddlcontent.txt").toString())
 
         val contentFolder = File(tmpDir, "ddlcontent")
@@ -202,7 +202,7 @@ class TestPrathamContentScraper {
         var sourceUrl = "https://ddl.af/fa/resource/9398/"*/
 
         // val khan = KhanArticleScraper(containerDir, db, entry.contentEntryUid, 0)
-        val khan = KhanExerciseScraper(containerDir, db, entry.contentEntryUid, 0)
+        val khan = KhanExerciseScraper(containerDir, db, entry.contentEntryUid, 0, 0)
         khan.scrapeUrl(entry.sourceUrl!!)
 
     }
@@ -218,7 +218,7 @@ class TestPrathamContentScraper {
         entry.contentEntryUid = db.contentEntryDao.insert(entry)
 
         runBlocking {
-            val khan = KhanExerciseScraper(containerDir, db, entry.contentEntryUid, 0)
+            val khan = KhanExerciseScraper(containerDir, db, entry.contentEntryUid, 0,0)
             khan.scrapeUrl("https://www.khanacademy.org/math/cc-fourth-grade-math/imp-place-value-and-rounding-2/imp-intro-to-place-value/e/place-value-tables")
         }
 
@@ -235,7 +235,7 @@ class TestPrathamContentScraper {
         entry.contentEntryUid = db.contentEntryDao.insert(entry)
 
         runBlocking {
-            val khan = YoutubeScraper(containerDir, db, entry.contentEntryUid, 0)
+            val khan = YoutubeScraper(containerDir, db, entry.contentEntryUid, 0,0)
             khan.scrapeUrl("https://www.youtube.com/watch?v=SGUJCVVryTU")
         }
 
