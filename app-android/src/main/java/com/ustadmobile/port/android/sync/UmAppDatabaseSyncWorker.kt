@@ -21,16 +21,16 @@ class UmAppDatabaseSyncWorker(context: Context, workerParams: WorkerParameters) 
     override fun doWork(): Result {
         val di: DI by di(applicationContext)
 
-        EndpointScope.Default.activeEndpointUrls.forEach { endpointUrl ->
-            try {
-                val clientRepo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = TAG_REPO)
-                runBlocking {
-                    (clientRepo as? DoorDatabaseSyncRepository)?.sync(null)
-                }
-            } catch (e: Exception) {
-                UMLog.l(UMLog.WARN, 101, "Exception running syncWith for $endpointUrl:" + e.message)
-            }
-        }
+//        EndpointScope.Default.activeEndpointUrls.forEach { endpointUrl ->
+//            try {
+//                val clientRepo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = TAG_REPO)
+//                runBlocking {
+//                    (clientRepo as? DoorDatabaseSyncRepository)?.sync(null)
+//                }
+//            } catch (e: Exception) {
+//                UMLog.l(UMLog.WARN, 101, "Exception running syncWith for $endpointUrl:" + e.message)
+//            }
+//        }
 
 
         if (!isStopped) {

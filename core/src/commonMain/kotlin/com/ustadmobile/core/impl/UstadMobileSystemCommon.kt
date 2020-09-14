@@ -4,6 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.UstadView
 import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
@@ -124,12 +125,29 @@ abstract class UstadMobileSystemCommon {
      * @param context System context object
      */
     open fun go(destination: String?, context: Any) {
-        val destinationQueryPos = destination!!.indexOf('?')
+        val destinationParsed =
+        if(destination?.contains(LINK_INTENT_FILTER) == true){
+            val destinationIndex : Int? = destination.indexOf("/${LINK_INTENT_FILTER}").plus(10)
+
+            val apiUrl = destination.substring(0, destination.indexOf("/${LINK_INTENT_FILTER}")) + '/'
+
+            var charToAdd = "?"
+            val sansApi = destination.substring(destinationIndex?:0+1?:0)?:""
+            if(sansApi.contains('?') || sansApi.contains('&')){
+                charToAdd = "&"
+            }
+            destination.substring(destinationIndex?:0) +
+                    "${charToAdd}${UstadView.ARG_SERVER_URL}=$apiUrl"
+
+        }else{
+            destination
+        }
+        val destinationQueryPos = destinationParsed!!.indexOf('?')
         if (destinationQueryPos == -1) {
-            go(destination, mapOf(), context)
+            go(destinationParsed, mapOf(), context)
         } else {
-            go(destination.substring(0, destinationQueryPos), UMFileUtil.parseURLQueryString(
-                    destination), context)
+            go(destinationParsed.substring(0, destinationQueryPos), UMFileUtil.parseURLQueryString(
+                    destinationParsed), context)
         }
     }
 
@@ -455,6 +473,8 @@ abstract class UstadMobileSystemCommon {
         const val TAG_DLMGR_SINGLETHREAD_CONTEXT = 32
 
         const val TAG_LOCAL_HTTP_PORT = 64
+
+        const val LINK_INTENT_FILTER = "umclient"
 
     }
 }

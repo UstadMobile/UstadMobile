@@ -4,11 +4,9 @@ import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEntryListTabsView
-import com.ustadmobile.core.view.GetStartedView
-import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
@@ -58,19 +56,28 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
             impl.getAppConfigString(
                     AppConfig.KEY_API_URL, "http://localhost", context)?:""
         }
+
+        if(!serverUrl.endsWith("/")){
+            serverUrl += "/"
+        }
         val mWorkSpace = arguments[ARG_WORKSPACE]
         if(mWorkSpace != null){
             workSpace = Json.parse(WorkSpace.serializer(), mWorkSpace)
         }else{
             val isRegistrationAllowed = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_REGISTRATION,
                     context)
-            val isGuestLoginAllowed = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_GUEST_LOGIN,
-                    context)
+            val isGuestLoginAllowed =  if(arguments.containsKey(Login2View.ARG_NO_GUEST)){
+                false
+            }else{
+                impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_GUEST_LOGIN,
+                        context)
+            }
 
             workSpace = WorkSpace().apply {
                 registrationAllowed = isRegistrationAllowed
                 guestLogin = isGuestLoginAllowed
             }
+
         }
 
         view.createAccountVisible = workSpace.registrationAllowed
@@ -87,7 +94,9 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                 try {
                     val umAccount = accountManager.login(username,password,serverUrl)
                     view.inProgress = false
-                    view.navigateToNextDestination(umAccount,fromDestination,nextDestination)
+                    val goOptions = UstadMobileSystemCommon.UstadGoOptions(fromDestination,
+                            true)
+                    impl.go(nextDestination, mapOf(), context, goOptions)
                 } catch (e: Exception) {
                     view.errorMessage = impl.getString(if(e is UnauthorizedException)
                         MessageID.wrong_user_pass_combo else

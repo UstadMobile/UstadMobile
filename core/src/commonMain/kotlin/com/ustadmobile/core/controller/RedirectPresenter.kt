@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LINK_INTENT_FILTER
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
@@ -43,9 +44,9 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
     }
 
     private fun loadFromUriString(uri: String?){
-        val destinationIndex : Int? = uri?.indexOf("/umclient")?.plus(10)
+        val destinationIndex : Int? = uri?.indexOf("/${LINK_INTENT_FILTER}")?.plus(10)
 
-        val apiUrl = uri?.substring(0, uri?.indexOf("/umclient")?:0) + '/'
+        val apiUrl = uri?.substring(0, uri.indexOf("/${LINK_INTENT_FILTER}")) + '/'
 
         var charToAdd = "?"
         val sansApi = uri?.substring(destinationIndex?:0+1?:0)?:""
@@ -60,7 +61,6 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
 
         val args = UMFileUtil.parseURLQueryString(destination)
 
-        println("REDIRECT42: RedirectPresenter")
         view.showNextScreen(destinationOnly, args)
 
     }

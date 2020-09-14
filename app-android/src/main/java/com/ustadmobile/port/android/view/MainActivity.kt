@@ -28,6 +28,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
@@ -85,21 +86,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     }
 
     private fun loadFromUriString(uri: String?){
-        val destinationIndex : Int? = uri?.indexOf("/umclient")?.plus(10)
 
-        val apiUrl = uri?.substring(0, uri?.indexOf("/umclient")?:0) + '/'
-
-        var charToAdd = "?"
-        val sansApi = uri?.substring(destinationIndex?:0+1?:0)?:""
-        if(sansApi.contains('?') || sansApi.contains('&')){
-            charToAdd = "&"
-        }
-        val destination = uri?.substring(destinationIndex?:0) +
-                "${charToAdd}${UstadView.ARG_SERVER_URL}=$apiUrl"
-
-        println("REDIRECT42: MainActivity")
-        UstadMobileSystemImpl.instance.go(destination, getActivityContext())
-
+        UstadMobileSystemImpl.instance.go(uri, getActivityContext())
 
     }
 
@@ -121,11 +109,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
         accountManager.activeAccountLive.observe(this, mActiveUserObserver)
-
-        val uri = intent?.data?.toString()
-        if(uri?.isNotEmpty() == true) {
-            loadFromUriString(uri)
-        }
 
     }
 

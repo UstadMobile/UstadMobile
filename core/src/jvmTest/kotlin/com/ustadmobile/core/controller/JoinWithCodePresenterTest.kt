@@ -188,7 +188,8 @@ class JoinWithCodePresenterTest {
                                         JoinWithCodeView.VIEW_NAME +
                                         "?${UstadView.ARG_SERVER_URL}=${apiUrl}" +
                                         "&${UstadView.ARG_CODE_TABLE}=${tableId}"+
-                                        "&${UstadView.ARG_CODE}=${clazzToEnrolInto.clazzCode.toString()}")
+                                        "&${UstadView.ARG_CODE}=${clazzToEnrolInto.clazzCode.toString()}",
+                        Login2View.ARG_NO_GUEST to "true")
                 ), any())
 
     }
@@ -221,7 +222,8 @@ class JoinWithCodePresenterTest {
                                         "${JoinWithCodeView.VIEW_NAME}" +
                                         "?${UstadView.ARG_SERVER_URL}=$endpointUrl" +
                                         "&${UstadView.ARG_CODE_TABLE}=${tableId}" +
-                                        "&${UstadView.ARG_CODE}=${clazzToEnrolInto.clazzCode.toString()}")
+                                        "&${UstadView.ARG_CODE}=${clazzToEnrolInto.clazzCode.toString()}",
+                                Login2View.ARG_NO_GUEST to "true")
                 ), any())
 
     }

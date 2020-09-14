@@ -88,13 +88,15 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                     systemImpl.go(Login2View.VIEW_NAME, mapOf(UstadView.ARG_SERVER_URL to apiUrl,
                         UstadView.ARG_NEXT to
                                 "${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_SERVER_URL}=${apiUrl}" +
-                                "&${UstadView.ARG_CODE_TABLE}=${tableId}&${UstadView.ARG_CODE}=$code"),
+                                "&${UstadView.ARG_CODE_TABLE}=${tableId}&${UstadView.ARG_CODE}=$code",
+                    Login2View.ARG_NO_GUEST to "true"),
                         context)
                 })
             } else if (!validEntity) {
 
                 view.runOnUiThread(Runnable {
                     //Send message invalid code.
+                    view.code = code
                     view.errorText = systemImpl.getString(MessageID.invalid_register_code,
                             context)
 
@@ -105,7 +107,8 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                     systemImpl.go(Login2View.VIEW_NAME, mapOf(UstadView.ARG_SERVER_URL to apiUrl,
                             UstadView.ARG_NEXT to
                                     "${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_SERVER_URL}=${apiUrl}" +
-                                    "&${UstadView.ARG_CODE_TABLE}=${tableId}&${UstadView.ARG_CODE}=$code"),
+                                    "&${UstadView.ARG_CODE_TABLE}=${tableId}&${UstadView.ARG_CODE}=$code",
+                            Login2View.ARG_NO_GUEST to "true"),
                             context)
                 })
 
