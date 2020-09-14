@@ -20,7 +20,7 @@ import org.kodein.di.on
  */
 suspend fun ApplicationCall.respondUpdateNotifications(repo: DoorDatabaseSyncRepository) {
     response.cacheControl(io.ktor.http.CacheControl.NoCache(null))
-    val deviceId = request.header("x-nid")?.toInt() ?: -1
+    val deviceId = request.queryParameters["deviceId"]?.toInt() ?: 0
     val channel = Channel<UpdateNotification>(capacity = Channel.UNLIMITED)
 
     val updateManager: UpdateNotificationManager by di().on(this).instance()
@@ -44,8 +44,7 @@ suspend fun ApplicationCall.respondUpdateNotifications(repo: DoorDatabaseSyncRep
             for(notification in channel) {
                 write("id: ${notification.pnUid}\n")
                 write("event: UPDATE\n")
-                write("data: ${notification.pnTableId} ${notification.pnTimestamp}")
-                write("\n")
+                write("data: ${notification.pnTableId} ${notification.pnTimestamp}\n\n")
                 flush()
             }
         }

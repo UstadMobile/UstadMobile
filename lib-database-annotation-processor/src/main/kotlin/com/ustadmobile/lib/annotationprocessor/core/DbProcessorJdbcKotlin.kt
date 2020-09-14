@@ -612,6 +612,24 @@ internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
 }
 
 /**
+ * Generate insert statements that will put the TableSyncStatus entities required for each
+ * syncable entity on the database in place.
+ */
+internal fun generateInsertTableSyncStatusCodeBlock(dbType: TypeElement,
+                                         execSqlFunName: String = "_stmt.executeUpdate",
+                                         processingEnv: ProcessingEnvironment): CodeBlock {
+    val codeBlock = CodeBlock.builder()
+    syncableEntityTypesOnDb(dbType, processingEnv).forEach {
+        val syncableEntityInfo = SyncableEntityInfo(it.asClassName(), processingEnv)
+        codeBlock.add("$execSqlFunName(\"INSERT·INTO·TableSyncStatus(tsTableId,·tsLastChanged,·tsLastSynced)·" +
+                    "VALUES(${syncableEntityInfo.tableId},·0,·\${systemTimeInMillis()})\")\n")
+    }
+
+    return codeBlock.build()
+}
+
+
+/**
  * Determine if the result type is nullable. Any single result entity object or String result can be
  * null (e.g. no such object was found by the query). Primitives cannot be null as they will be 0/false.
  * Lists and arrays (parameterized types) cannot be null: no results will provide an non-null empty
@@ -686,6 +704,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
     fun generateDbImplClass(dbTypeElement: TypeElement): FileSpec {
         val dbImplFile = FileSpec.builder(pkgNameOfElement(dbTypeElement, processingEnv),
                 "${dbTypeElement.simpleName}_$SUFFIX_JDBC_KT")
+                .addImport("com.ustadmobile.door.util", "systemTimeInMillis")
 
 
         val constructorFn = FunSpec.constructorBuilder()
@@ -756,6 +775,12 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 .add("_stmt = _con.createStatement()!!\n")
                 .beginControlFlow("when(jdbcDbType)")
 
+        val dbTypeIsSyncable = processingEnv.typeUtils.isAssignable(dbTypeElement.asType(),
+                processingEnv.elementUtils.getTypeElement(
+                        SyncableDoorDatabase::class.java.canonicalName).asType())
+
+
+
         for(dbProductType in DoorDbType.SUPPORTED_TYPES) {
             val dbTypeName = DoorDbType.PRODUCT_INT_TO_NAME_MAP[dbProductType] as String
             codeBlock.beginControlFlow("$dbProductType -> ")
@@ -821,18 +846,20 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 codeBlock.add("//End: Create table ${entityType.simpleName} for $dbTypeName\n\n")
             }
 
-            if(processingEnv.typeUtils.isAssignable(dbTypeElement.asType(),
-                            processingEnv.elementUtils.getTypeElement(SyncableDoorDatabase::class.java.canonicalName).asType())){
+            if(dbTypeIsSyncable){
                 codeBlock.add(generateInsertNodeIdFun(dbTypeElement, dbProductType, "_stmt.executeUpdate",
                         processingEnv))
             }
 
-
             codeBlock.endControlFlow()
         }
 
+
         codeBlock.endControlFlow() //end when
-                .nextControlFlow("catch(e: %T)", Exception::class)
+                .apply {
+                    takeIf { dbTypeIsSyncable }?.add(generateInsertTableSyncStatusCodeBlock(dbTypeElement,
+                            "_stmt.executeUpdate", processingEnv))
+                }.nextControlFlow("catch(e: %T)", Exception::class)
                 .add("e.printStackTrace()\n")
                 .add("throw %T(%S, e)\n", RuntimeException::class, "Exception creating tables")
                 .nextControlFlow("finally")
@@ -895,7 +922,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                     .endControlFlow()
         }
         dropFunSpec.endControlFlow()
-
+        dropFunSpec.addCode(generateInsertTableSyncStatusCodeBlock(dbTypeElement,
+                "_stmt.executeUpdate",processingEnv))
 
         dropFunSpec.nextControlFlow("finally")
                 .addCode("_stmt?.close()\n")

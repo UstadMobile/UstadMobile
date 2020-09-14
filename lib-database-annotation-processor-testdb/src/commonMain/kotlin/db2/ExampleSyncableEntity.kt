@@ -6,10 +6,11 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import db2.ExampleSyncableEntity.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = 42,
+@SyncableEntity(tableId = TABLE_ID,
     notifyOnUpdate = """SELECT DISTINCT deviceId 
                             FROM AccessGrant 
                             WHERE entityUid IN (SELECT chEntityPk FROM ChangeLog WHERE chTableId = 42 AND CAST(dispatched AS BOOLEAN) = false)
@@ -45,5 +46,10 @@ open class ExampleSyncableEntity(@PrimaryKey(autoGenerate = true) var esUid: Lon
         result = 31 * result + esLcb
         result = 31 * result + esNumber
         return result
+    }
+
+
+    companion object {
+        const val TABLE_ID = 42
     }
 }

@@ -3,7 +3,9 @@ package com.ustadmobile.lib.annotationprocessor.core
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.door.*
+import com.ustadmobile.door.DoorDatabaseRepository.Companion.STATUS_CONNECTED
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.waitUntil
 import db2.AccessGrant
 import db2.ExampleDatabase2
 import db2.ExampleDatabase2_KtorRoute
@@ -26,6 +28,8 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.netty.handler.codec.http.HttpResponse
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -383,7 +387,7 @@ class TestDbRepo {
                 entityUid = exampleSyncableEntity.esUid
             })
 
-            (clientRepo as DoorDatabaseSyncRepository).sync(listOf(ExampleSyncableEntity::class))
+            (clientRepo as DoorDatabaseSyncRepository).sync(listOf(ExampleSyncableEntity.TABLE_ID))
 
             val entityOnClientAfterSync = clientDb.exampleSyncableDao()
                     .findByUid(exampleSyncableEntity.esUid)
@@ -391,7 +395,7 @@ class TestDbRepo {
 
 
             clientRepo.exampleSyncableDao().updateNumberByUid(exampleSyncableEntity.esUid, 53)
-            (clientRepo as DoorDatabaseSyncRepository).sync(listOf(ExampleSyncableEntity::class))
+            (clientRepo as DoorDatabaseSyncRepository).sync(listOf(ExampleSyncableEntity.TABLE_ID))
 
 
             Assert.assertNotNull("Entity was synced to client after being created on server",
@@ -495,8 +499,49 @@ class TestDbRepo {
                 argWhere { it.any { it.pnTableId ==  42 && it.pnDeviceId == 57} })
     }
 
-    fun givenClientSubscribedToUpdates_whenChangeMadeOnServer_thenShouldGetUpdateNotification() {
+    //Test the realtime update notification setup
+    @Test
+    fun givenClientSubscribedToUpdates_whenChangeMadeOnServer_thenShouldUpdateClient() {
+        mockUpdateNotificationManager = spy(UpdateNotificationManagerImpl())
+        setupClientAndServerDb(mockUpdateNotificationManager)
 
+
+        val serverDb: ExampleDatabase2 by serverDi.on("localhost").instance(tag = DoorTag.TAG_DB)
+        val serverRepo: ExampleDatabase2 by serverDi.on("localhost").instance(tag = DoorTag.TAG_REPO)
+
+        val clientDb = this.clientDb!!
+        val clientRepo = clientDb.asRepository(Any(),"http://localhost:8089/",
+                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
+
+        val clientSyncManager = ClientSyncManager(clientRepo as DoorDatabaseSyncRepository,
+            5, STATUS_CONNECTED, httpClient, "ExampleDatabase2/ExampleDatabase2SyncDao/_subscribe")
+
+
+        val testUid = 42L
+
+        //wait for subscription to take effect.
+        Thread.sleep(2000)
+
+        serverDb.accessGrantDao().insert(AccessGrant().apply {
+            deviceId = clientRepo.clientId
+            tableId = 42
+            entityUid = testUid
+        })
+
+        val exampleEntity = ExampleSyncableEntity().apply {
+            esUid = testUid
+            esName = "Hello Notification"
+            serverDb.exampleSyncableDao().insert(this)
+        }
+
+        runBlocking {
+            clientDb.waitUntil(10000, listOf("ExampleSyncableEntity")) {
+                clientDb.exampleSyncableDao().findByUid(testUid) != null
+            }
+        }
+
+        Assert.assertNotNull("Entity udpated on server was automagically brought to client",
+            clientDb.exampleSyncableDao().findByUid(testUid))
     }
 
 

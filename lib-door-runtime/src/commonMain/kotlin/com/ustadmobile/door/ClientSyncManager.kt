@@ -1,18 +1,29 @@
 package com.ustadmobile.door
 
 import com.github.aakira.napier.Napier
+import com.ustadmobile.door.DoorConstants.HEADER_DBVERSION
+import com.ustadmobile.door.DoorDatabaseRepository.Companion.STATUS_CONNECTED
+import com.ustadmobile.door.sse.DoorEventListener
+import com.ustadmobile.door.sse.DoorEventSource
+import com.ustadmobile.door.sse.DoorServerSentEvent
 import com.ustadmobile.door.util.systemTimeInMillis
+import io.ktor.client.HttpClient
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import kotlin.math.min
 
 /**
  * The client sync manager is responsible to trigger the DoorDatabaseSyncRepository to sync tables
  * that have been updated (locally or remotely).
  *
  */
-class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val maxProcessors: Int = 5, initialConnectivityStatus: Int): TableChangeListener {
+class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int,
+                        val maxProcessors: Int = 5, initialConnectivityStatus: Int,
+    private val httpClient: HttpClient, private val syncDaoSubscribePath: String): TableChangeListener {
 
     val updateCheckJob: AtomicRef<Job?> = atomic(null)
 
@@ -21,12 +32,28 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val maxProcessors:
 
     val channel = Channel<Int>(Channel.UNLIMITED)
 
+    val eventSource: AtomicRef<DoorEventSource?> = atomic(null)
+
+    val eventSourceLock = Mutex()
+
     var connectivityStatus: Int = initialConnectivityStatus
         set(value) {
             field = value
-            if(value == DoorDatabaseRepository.STATUS_CONNECTED) {
-                checkQueue()
+            GlobalScope.launch {
+                eventSourceLock.withLock {
+                    if(value == STATUS_CONNECTED) {
+                        checkEndpointEventSource()
+                    }else {
+                        val eventSourceVal = eventSource.value
+                        if(eventSourceVal != null) {
+                            eventSourceVal.close()
+                            eventSource.value = null
+                        }
+                    }
+                }
             }
+
+            takeIf { value == STATUS_CONNECTED }?.checkQueue()
         }
 
     fun CoroutineScope.launchProcessor(id: Int, channel: Channel<Int>) = launch {
@@ -48,10 +75,45 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val maxProcessors:
             repeat(maxProcessors) {
                 launchProcessor(it, channel)
             }
+
+            if(initialConnectivityStatus == STATUS_CONNECTED) {
+                checkQueue()
+                checkEndpointEventSource()
+            }
         }
 
         repo.addTableChangeListener(this)
     }
+
+    suspend fun checkEndpointEventSource() {
+        eventSourceLock.withLock {
+            if(eventSource.value != null)
+                return
+
+            eventSource.value = DoorEventSource("${repo.endpoint}$syncDaoSubscribePath?deviceId=${repo.clientId}&$HEADER_DBVERSION=$dbVersion",
+                    object : DoorEventListener {
+                override fun onOpen() {
+
+                }
+
+                override fun onMessage(message: DoorServerSentEvent) {
+                    if(message.event.equals("update", true)) {
+                        val lineParts = message.data.split(REGEX_WHITESPACE)
+                        GlobalScope.launch {
+                            repo.updateTableSyncStatusLastChanged(lineParts[0].toInt(),
+                                    lineParts[1].toLong())
+                            invalidate()
+                        }
+                    }
+                }
+
+                override fun onError(e: Exception) {
+
+                }
+            })
+        }
+    }
+
 
     override fun onTableChanged(tableName: String) {
         val tableId = repo.tableIdMap[tableName] ?: -1
@@ -72,11 +134,17 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val maxProcessors:
     }
 
     fun checkQueue() {
-        repo.findTablesToSync().filter { it.tsTableId in pendingJobs }
-                .subList(0, maxProcessors - pendingJobs.size).forEach {
-                    pendingJobs += it.tsTableId
-                    channel.offer(it.tsTableId)
-                }
+        val newJobs = repo.findTablesToSync().filter { it.tsTableId !in pendingJobs }
+        newJobs.subList(0, min(maxProcessors, newJobs.size)).forEach {
+            pendingJobs += it.tsTableId
+            channel.offer(it.tsTableId)
+        }
+    }
+
+    companion object {
+
+        val REGEX_WHITESPACE = "\\s+".toRegex()
+
     }
 
 }

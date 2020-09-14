@@ -566,16 +566,8 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
         val minSyncVersionAnnotation = dbTypeElement.getAnnotation(MinSyncVersion::class.java)
         if(minSyncVersionAnnotation != null) {
-            codeBlock.beginControlFlow("this.intercept(%T.Features)", ApplicationCallPipeline::class)
-                    .add("val _clientVersion = this.context.request.headers[%T.HEADER_DBVERSION]?.toInt() ?: 0\n",
-                            DoorConstants::class)
-                    .beginControlFlow("if(_clientVersion < ${minSyncVersionAnnotation.value})")
-                    .add("context.request.call.%M(%T.BadRequest, %S)\n", RESPOND_MEMBER,
-                            HttpStatusCode::class,
-                            "Door DB Version does not meet minimum required: ${minSyncVersionAnnotation.value}")
-                    .add("return@intercept finish()\n")
-                    .endControlFlow()
-                    .endControlFlow()
+            codeBlock.add("%M(${minSyncVersionAnnotation.value})\n",
+                MemberName("com.ustadmobile.door.ktor", "addDbVersionCheckIntercept"))
         }
 
 
