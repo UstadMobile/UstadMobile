@@ -70,7 +70,6 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                 }
             }
 
-
             if (apiUrl.isNotEmpty() && validEntity && endpointUrl.equals(apiUrl)
                     && loggedInPersonUid != 0L) {
                 view.runOnUiThread(Runnable {
@@ -111,7 +110,6 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                             Login2View.ARG_NO_GUEST to "true"),
                             context)
                 })
-
             }
         }
     }

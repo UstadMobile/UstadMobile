@@ -238,11 +238,6 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
 
     private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
 
-    fun navigateToPickNewMember(keyName: String) {
-        navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest,
-                bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString()),
-                keyName, true)
-    }
 
     /**
      * OnClick function that will handle when the user clicks to create a new item
