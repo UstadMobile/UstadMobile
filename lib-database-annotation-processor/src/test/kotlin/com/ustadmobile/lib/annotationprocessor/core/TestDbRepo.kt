@@ -28,8 +28,6 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.netty.handler.codec.http.HttpResponse
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -55,7 +53,7 @@ class TestDbRepo {
 
     lateinit var tmpAttachmentsDir: File
 
-    lateinit var mockUpdateNotificationManager: UpdateNotificationManager
+    lateinit var mockUpdateNotificationManager: ServerUpdateNotificationManager
 
     lateinit var serverDi: DI
 
@@ -89,7 +87,7 @@ class TestDbRepo {
         install(CallLogging)
     }
 
-    fun setupClientAndServerDb(updateNotificationManager: UpdateNotificationManager = mockUpdateNotificationManager) {
+    fun setupClientAndServerDb(updateNotificationManager: ServerUpdateNotificationManager = mockUpdateNotificationManager) {
         try {
             val virtualHostScope = TestDbRoute.VirtualHostScope()
             serverDi = DI {
@@ -120,7 +118,7 @@ class TestDbRepo {
                     }
                 }
 
-                bind<UpdateNotificationManager>() with scoped(virtualHostScope).singleton {
+                bind<ServerUpdateNotificationManager>() with scoped(virtualHostScope).singleton {
                     updateNotificationManager
                 }
 
@@ -474,7 +472,7 @@ class TestDbRepo {
 
     @Test
     fun givenEmptyDatabase_whenChangeMadeOnServer_thenOnNewUpdateNotificationShouldBeCalledAndNotificationEntityShouldBeInserted()  {
-        mockUpdateNotificationManager = spy(UpdateNotificationManagerImpl())
+        mockUpdateNotificationManager = spy(ServerUpdateNotificationManagerImpl())
         setupClientAndServerDb(mockUpdateNotificationManager)
 
         val testUid = 42L
@@ -502,7 +500,7 @@ class TestDbRepo {
     //Test the realtime update notification setup
     @Test
     fun givenClientSubscribedToUpdates_whenChangeMadeOnServer_thenShouldUpdateClient() {
-        mockUpdateNotificationManager = spy(UpdateNotificationManagerImpl())
+        mockUpdateNotificationManager = spy(ServerUpdateNotificationManagerImpl())
         setupClientAndServerDb(mockUpdateNotificationManager)
 
 

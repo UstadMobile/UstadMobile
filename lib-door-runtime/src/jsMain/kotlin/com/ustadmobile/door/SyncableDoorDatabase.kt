@@ -7,6 +7,7 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
                                                                     accessToken: String,
                                                                     httpClient: HttpClient,
                                                                     attachmentsDir: String?,
-                                                                    updateNotificationManager: UpdateNotificationManager?): T {
+                                                                    updateNotificationManager: ServerUpdateNotificationManager?,
+                                                                    useClientSyncManager: Boolean): T {
     return this
 }

@@ -11,7 +11,8 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
                                                                     accessToken: String,
                                                                     httpClient: HttpClient,
                                                                     attachmentsDir: String?,
-                                                                    updateNotificationManager: UpdateNotificationManager?): T {
+                                                                    updateNotificationManager: ServerUpdateNotificationManager?,
+                                                                    useClientSyncManager: Boolean): T {
     val dbName = (this as RoomDatabase).openHelper.databaseName
     val attachmentsDirToUse = if(attachmentsDir == null) {
         File(ContextCompat.getExternalFilesDirs(context as Context, null)[0],
@@ -25,7 +26,7 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
     val repoImplClass = Class.forName("${dbClassName}_Repo") as Class<T>
     val repo = repoImplClass
             .getConstructor(dbClass, String::class.java,String::class.java, HttpClient::class.java,
-                    String::class.java, UpdateNotificationManager::class.java)
+                    String::class.java, ServerUpdateNotificationManager::class.java)
             .newInstance(this, endpoint, accessToken, httpClient, attachmentsDirToUse)
     return repo
 }

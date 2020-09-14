@@ -7,7 +7,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.SyncResult
-import com.ustadmobile.door.UpdateNotificationManager
+import com.ustadmobile.door.ServerUpdateNotificationManager
 import com.ustadmobile.door.annotation.EntityWithAttachment
 import com.ustadmobile.door.annotation.PgOnConflict
 import com.ustadmobile.door.annotation.SyncableEntity
@@ -16,14 +16,12 @@ import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_INSTANCE_MEMBER
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_ON_MEMBER
-import io.ktor.application.call
 import io.ktor.client.HttpClient
 import io.ktor.client.request.forms.InputProvider
 import io.ktor.content.TextContent
 import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
-import io.ktor.response.respond
 import io.ktor.routing.Route
 import org.kodein.type.TypeToken
 import java.io.File
@@ -337,7 +335,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                 "${dbClassName.simpleName}$SUFFIX_SYNCDAO_ABSTRACT")
         val repoTypeSpec = newRepositoryClassBuilder(daoClassName, false,
             extraConstructorParams = listOf(ParameterSpec.builder("_updateNotificationManager",
-                UpdateNotificationManager::class.asClassName().copy(nullable = true)).build()))
+                ServerUpdateNotificationManager::class.asClassName().copy(nullable = true)).build()))
                 .addSuperinterface(DoorDatabaseSyncRepository::class as KClass<*>)
                 .addProperty(PropertySpec.builder("auth", String::class)
                         .getter(FunSpec.getterBuilder().addCode("return %S\n", "").build())
@@ -365,7 +363,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
                         .build())
                 .addProperty(PropertySpec.builder("_updateNotificationManager",
-                    UpdateNotificationManager::class.asClassName().copy(nullable = true))
+                    ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
                         .initializer("_updateNotificationManager")
                         .build())
                 .addRepositoryHelperDelegateCalls("_repo")

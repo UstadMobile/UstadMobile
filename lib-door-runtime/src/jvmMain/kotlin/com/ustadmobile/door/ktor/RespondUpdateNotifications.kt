@@ -2,10 +2,9 @@ package com.ustadmobile.door.ktor
 
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.UpdateNotificationListener
-import com.ustadmobile.door.UpdateNotificationManager
+import com.ustadmobile.door.ServerUpdateNotificationManager
 import com.ustadmobile.door.entities.UpdateNotification
 import io.ktor.application.ApplicationCall
-import io.ktor.request.header
 import io.ktor.response.cacheControl
 import io.ktor.response.respondTextWriter
 import kotlinx.coroutines.channels.Channel
@@ -23,7 +22,7 @@ suspend fun ApplicationCall.respondUpdateNotifications(repo: DoorDatabaseSyncRep
     val deviceId = request.queryParameters["deviceId"]?.toInt() ?: 0
     val channel = Channel<UpdateNotification>(capacity = Channel.UNLIMITED)
 
-    val updateManager: UpdateNotificationManager by di().on(this).instance()
+    val updateManager: ServerUpdateNotificationManager by di().on(this).instance()
 
     val listener = object: UpdateNotificationListener {
         override fun onNewUpdate(notification: UpdateNotification) {

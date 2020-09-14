@@ -144,7 +144,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addParameter(ParameterSpec.builder("_httpClient", HttpClient::class.asClassName()).build())
                         .addParameter(ParameterSpec.builder("_attachmentsDir", String::class).build())
                         .addParameter("_updateNotificationManager",
-                            UpdateNotificationManager::class.asClassName().copy(nullable = true))
+                            ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
                         .build())
                 .addProperties(listOf(
                         PropertySpec.builder("_db",
@@ -175,7 +175,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                 .initializer("_attachmentsDir")
                                 .build(),
                         PropertySpec.builder("_updateNotificationManager",
-                                UpdateNotificationManager::class.asClassName().copy(nullable = true))
+                                ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
                                 .initializer("_updateNotificationManager")
                                 .build(),
                         PropertySpec.builder("_repositoryHelper", RepositoryHelper::class)

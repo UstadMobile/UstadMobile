@@ -2,7 +2,7 @@ package com.ustadmobile.door
 
 import com.ustadmobile.door.entities.UpdateNotification
 
-class UpdateNotificationManagerImpl: UpdateNotificationManager {
+class ServerUpdateNotificationManagerImpl: ServerUpdateNotificationManager {
 
     //TODO: Use thread safe versions on JVM via expect / actual
     val notificationListeners: MutableMap<Int, MutableList<UpdateNotificationListener>> = mutableMapOf()

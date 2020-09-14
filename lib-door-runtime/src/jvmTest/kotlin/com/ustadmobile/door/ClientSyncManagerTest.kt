@@ -36,7 +36,6 @@ class ClientSyncManagerTest {
 
     @Test
     fun givenValidRepo_whenRepoChanges_thenShouldUpdateStatusTableAndCallSync() {
-        val httpClient = HttpClient()
         val exampleTableId = 42
         val tableChanged = AtomicBoolean(false)
         val mockRepo = mock<DoorDatabaseSyncRepository> {
@@ -50,8 +49,8 @@ class ClientSyncManagerTest {
             }
         }
 
-        val clientSyncManager = ClientSyncManager(mockRepo, 5, STATUS_CONNECTED,
-            httpClient,"none")
+        val clientSyncManager = ClientSyncManager(mockRepo, 2, 5,
+                STATUS_CONNECTED, "none")
 
         //wait for the initial load
         verify(mockRepo, timeout(4000)).findTablesToSync()
@@ -88,7 +87,7 @@ class ClientSyncManagerTest {
                     listOf(UpdateNotification(5000, 1234, exampleTableId, systemTimeInMillis())))
         }
 
-        val mockUpdateNotificationManager = mock<UpdateNotificationManager> {
+        val mockUpdateNotificationManager = mock<ServerUpdateNotificationManager> {
             on { addUpdateNotificationListener(any(), any()) }.thenAnswer {
                 updateListeners.add(it.arguments[1] as UpdateNotificationListener)
             }
@@ -102,7 +101,7 @@ class ClientSyncManagerTest {
             }
 
             install(DIFeature) {
-                bind<UpdateNotificationManager>() with scoped(virtualHostScope).singleton {
+                bind<ServerUpdateNotificationManager>() with scoped(virtualHostScope).singleton {
                     mockUpdateNotificationManager
                 }
 
@@ -118,17 +117,10 @@ class ClientSyncManagerTest {
         }
         server.start()
 
-        val httpClient = HttpClient() {
-            install(HttpTimeout)
-        }
-
-        val clientSyncManager = ClientSyncManager(mockRepo, 5, STATUS_CONNECTED,
-            httpClient, "ExampleDatabaseSyncDao/_subscribe")
+        val clientSyncManager = ClientSyncManager(mockRepo, 2, 5, STATUS_CONNECTED,
+            "ExampleDatabaseSyncDao/_subscribe")
 
         runBlocking {
-            GlobalScope.launch {
-                clientSyncManager.subscribeToEndpoint()
-            }
             verifyBlocking(mockRepo, timeout(30000)) {
                 updateTableSyncStatusLastChanged(eq(exampleTableId), any())
             }
