@@ -1,5 +1,8 @@
 package com.ustadmobile.lib.contentscrapers.googledrive
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 class GoogleFile {
 
     var kind: String? = null

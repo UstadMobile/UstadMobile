@@ -9,12 +9,14 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper
+import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpStatement
+import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import java.io.File
@@ -83,7 +85,14 @@ class GoogleDriveScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
                     val stream = it.receive<InputStream>()
                     FileUtils.writeByteArrayToFile(contentFile, stream.readBytes())
 
-                    val containerManager = ContainerManager(createBaseContainer(file.mimeType!!), db, db, containerDir.absolutePath)
+                    val container = Container().apply {
+                        containerContentEntryUid = fileEntry.contentEntryUid
+                        mimeType = file.mimeType
+                        mobileOptimized = true
+                        cntLastModified = System.currentTimeMillis()
+                        containerUid = containerDao.insert(this)
+                    }
+                    val containerManager = ContainerManager(container, db, db, containerDir.absolutePath)
                     runBlocking {
                         containerManager.addEntries(ContainerManager.FileEntrySource(contentFile, contentFile.name))
                     }
