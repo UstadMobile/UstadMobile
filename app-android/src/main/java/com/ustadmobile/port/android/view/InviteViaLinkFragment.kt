@@ -17,12 +17,18 @@ import com.ustadmobile.core.view.InviteViaLinkView
 interface InvitationLinkHandler{
     fun handleClickCopyLink(link: String)
     fun handleClickShareLink(link: String)
+    fun handleClickCopyCode(code: String)
 }
 class InviteViaLinkFragment: UstadBaseFragment(), InviteViaLinkView, InvitationLinkHandler {
 
     override var inviteLink: String? = null
         set(value) {
             mBinding?.link = value
+            field = value
+        }
+    override var inviteCode: String? = null
+        set(value) {
+            mBinding?.code = value
             field = value
         }
 
@@ -65,6 +71,12 @@ class InviteViaLinkFragment: UstadBaseFragment(), InviteViaLinkView, InvitationL
     override fun handleClickCopyLink(link: String) {
         val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
         clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("link", link)))
+        showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
+    }
+
+    override fun handleClickCopyCode(code: String) {
+        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+        clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("link", code)))
         showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
     }
 

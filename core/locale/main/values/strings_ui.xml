@@ -752,6 +752,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="invite_link_desc">Anyone with this link can join and apply to join %1$s. You can then approve or reject their request to join.</string>
     <string name="copy_link">Copy link</string>
+    <string name="copy_code">Copy code</string>
     <string name="share_link">Share link</string>
     <string name="invite_with_link">Invite with link</string>
 

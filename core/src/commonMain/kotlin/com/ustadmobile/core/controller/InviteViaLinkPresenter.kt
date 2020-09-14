@@ -44,6 +44,7 @@ class InviteViaLinkPresenter(context: Any, args: Map<String, String>, view: Invi
             }
         }
         view.inviteLink = link
+        view.inviteCode = code
         view.entityName = arguments[ARG_ENTITY_NAME].toString()
     }
 
