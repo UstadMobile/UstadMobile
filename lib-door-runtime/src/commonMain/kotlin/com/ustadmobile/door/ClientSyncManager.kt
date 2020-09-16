@@ -21,8 +21,8 @@ import kotlin.math.min
  *
  */
 class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int,
-                        val maxProcessors: Int = 5, initialConnectivityStatus: Int,
-                        private val syncDaoSubscribePath: String): TableChangeListener {
+                        initialConnectivityStatus: Int,
+                        private val syncDaoSubscribePath: String, val maxProcessors: Int = 5): TableChangeListener {
 
     val updateCheckJob: AtomicRef<Job?> = atomic(null)
 
@@ -39,10 +39,10 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
         set(value) {
             field = value
             GlobalScope.launch {
-                eventSourceLock.withLock {
-                    if(value == STATUS_CONNECTED) {
-                        checkEndpointEventSource()
-                    }else {
+                if(value == STATUS_CONNECTED) {
+                    checkEndpointEventSource()
+                }else {
+                    eventSourceLock.withLock {
                         val eventSourceVal = eventSource.value
                         if(eventSourceVal != null) {
                             eventSourceVal.close()

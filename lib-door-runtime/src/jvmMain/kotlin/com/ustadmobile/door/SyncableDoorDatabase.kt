@@ -11,7 +11,7 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
                                                                     updateNotificationManager: ServerUpdateNotificationManager?,
                                                                     useClientSyncManager: Boolean): T {
     val dbClass = T::class
-    val repoImplClass = Class.forName("${dbClass.simpleName}_Repo") as Class<T>
+    val repoImplClass = Class.forName("${dbClass.qualifiedName}_Repo") as Class<T>
     val attachmentsDirToUse = if(attachmentsDir != null){
         attachmentsDir
     }else {
@@ -19,7 +19,8 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
     }
     val repo = repoImplClass
             .getConstructor(dbClass.java, String::class.java,String::class.java, HttpClient::class.java,
-                    String::class.java, ServerUpdateNotificationManager::class.java)
-            .newInstance(this, endpoint, accessToken, httpClient, attachmentsDirToUse, updateNotificationManager)
+                    String::class.java, ServerUpdateNotificationManager::class.java, Boolean::class.javaPrimitiveType)
+            .newInstance(this, endpoint, accessToken, httpClient, attachmentsDirToUse,
+                    updateNotificationManager, useClientSyncManager)
     return repo
 }

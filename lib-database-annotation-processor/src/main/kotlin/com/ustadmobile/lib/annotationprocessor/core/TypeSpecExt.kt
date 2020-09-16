@@ -36,7 +36,8 @@ fun TypeSpec.Builder.addAccessorOverride(executableElement: ExecutableElement, c
  * Implement the DoorDatabaseRepository methods for add/remove mirror etc. by delegating to a
  * RepositoryHelper.
  */
-internal fun TypeSpec.Builder.addRepositoryHelperDelegateCalls(delegatePropName: String): TypeSpec.Builder {
+internal fun TypeSpec.Builder.addRepositoryHelperDelegateCalls(delegatePropName: String,
+    clientSyncMgrVarName: String? = null): TypeSpec.Builder {
     addProperty(PropertySpec.builder("connectivityStatus", INT)
             .addModifiers(KModifier.OVERRIDE)
             .mutable(true)
@@ -46,6 +47,8 @@ internal fun TypeSpec.Builder.addRepositoryHelperDelegateCalls(delegatePropName:
             .setter(FunSpec.setterBuilder()
                     .addParameter("newValue", INT)
                     .addCode("$delegatePropName.connectivityStatus = newValue\n")
+                    .apply { takeIf { clientSyncMgrVarName != null }
+                            ?.addCode("$clientSyncMgrVarName?.connectivityStatus = newValue\n") }
                     .build())
             .build())
     addFunction(FunSpec.builder("addMirror")

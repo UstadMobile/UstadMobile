@@ -26,7 +26,7 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
     val repoImplClass = Class.forName("${dbClassName}_Repo") as Class<T>
     val repo = repoImplClass
             .getConstructor(dbClass, String::class.java,String::class.java, HttpClient::class.java,
-                    String::class.java, ServerUpdateNotificationManager::class.java)
-            .newInstance(this, endpoint, accessToken, httpClient, attachmentsDirToUse)
+                    String::class.java, ServerUpdateNotificationManager::class.java, Boolean::class.javaPrimitiveType)
+            .newInstance(this, endpoint, accessToken, httpClient, attachmentsDirToUse, useClientSyncManager)
     return repo
 }

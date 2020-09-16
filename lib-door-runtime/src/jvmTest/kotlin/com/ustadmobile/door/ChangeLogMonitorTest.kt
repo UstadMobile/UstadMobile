@@ -24,7 +24,7 @@ class ChangeLogMonitorTest {
         val changeLogMonitor = ChangeLogMonitor(mockDb, mockRepo)
         changeLogMonitor.onTablesChanged(listOf("Test"))
 
-        verifyBlocking(mockRepo, timeout(2000)) { onPendingChangeLog(argWhere<Set<Int>> { 42 in it })  }
+        verifyBlocking(mockRepo, timeout(2000)) { dispatchUpdateNotifications(42)  }
     }
 
     @Test
@@ -37,7 +37,7 @@ class ChangeLogMonitorTest {
 
         Thread.sleep(400)
         verifyBlocking(mockRepo, timeout(2000).times(1)) {
-            onPendingChangeLog(argWhere{ 42 in it && it.size == 1})
+            dispatchUpdateNotifications(42)
         }
     }
 

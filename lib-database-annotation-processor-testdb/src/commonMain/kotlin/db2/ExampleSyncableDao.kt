@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.ParamName
 import com.ustadmobile.door.annotation.Repository
 
@@ -63,5 +64,8 @@ abstract class ExampleSyncableDao {
     @Repository(methodType = Repository.METHOD_DELEGATE_TO_WEB)
     @Query("SELECT * FROM ExampleSyncableEntity LIMIT 1")
     abstract suspend fun findOneFromWeb(): ExampleSyncableEntity?
+
+    @Query("SELECT SyncNode.* FROM SyncNode LIMIT 1")
+    abstract fun getSyncNode(): SyncNode?
 
 }

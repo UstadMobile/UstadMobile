@@ -16,8 +16,6 @@ import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.GetAttachmentData
 import com.ustadmobile.door.annotation.SetAttachmentData
-import com.ustadmobile.door.util.RepositoryPendingChangeLogListener
-import com.ustadmobile.door.util.RepositoryUpdateDispatcher
 import kotlinx.coroutines.newSingleThreadContext
 import java.io.File
 import java.util.*
@@ -136,7 +134,6 @@ class DbProcessorRepository: AbstractDbProcessor() {
         val dbRepoType = TypeSpec.classBuilder("${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
                 .superclass(dbTypeElement.asClassName())
                 .addSuperinterface(repoInterface)
-                .addSuperinterface(RepositoryPendingChangeLogListener::class)
                 .primaryConstructor(FunSpec.constructorBuilder()
                         .addParameter(ParameterSpec.builder("_db", dbTypeElement.asClassName() ).build())
                         .addParameter(ParameterSpec.builder("_endpoint", String::class.asClassName()).build())
@@ -145,6 +142,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addParameter(ParameterSpec.builder("_attachmentsDir", String::class).build())
                         .addParameter("_updateNotificationManager",
                             ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
+                        .addParameter("_useClientSyncManager", Boolean::class)   
                         .build())
                 .addProperties(listOf(
                         PropertySpec.builder("_db",
@@ -183,8 +181,16 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                         MemberName("kotlinx.coroutines", "newSingleThreadContext"),
                                         "Repo-${dbTypeElement.simpleName}")
                                 .build(),
-                        PropertySpec.builder("_updateDispatcher", RepositoryUpdateDispatcher::class)
-                                .initializer(CodeBlock.of("%T(this)", RepositoryUpdateDispatcher::class))
+                        PropertySpec.builder("_clientSyncManager",
+                                ClientSyncManager::class.asClassName().copy(nullable = true))
+                                .initializer(CodeBlock.builder().beginControlFlow("if(_useClientSyncManager)")
+                                        .add("%T(this, _db.%M(), _repositoryHelper.connectivityStatus, %S)\n",
+                                            ClientSyncManager::class, MemberName("com.ustadmobile.door.ext", "dbSchemaVersion"),
+                                            "${dbTypeElement.simpleName}/${dbTypeElement.simpleName}SyncDao/_subscribe")
+                                        .nextControlFlow("else")
+                                        .add("null\n")
+                                        .endControlFlow()
+                                        .build())
                                 .build(),
                         PropertySpec.builder("tableIdMap",
                                 Map::class.asClassName().parameterizedBy(String::class.asClassName(), INT))
@@ -195,11 +201,6 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 .addFunction(FunSpec.builder("clearAllTables")
                         .addModifiers(KModifier.OVERRIDE)
                         .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to clearAllTables!")
-                        .build())
-                .addFunction(FunSpec.builder("onPendingChangeLog")
-                        .addModifiers(KModifier.OVERRIDE)
-                        .addParameter("tableIdList", Set::class.asClassName().parameterizedBy(INT))
-                        .addCode("_updateDispatcher.onPendingChangeLog(tableIdList)\n")
                         .build())
                 .addType(TypeSpec.companionObjectBuilder()
                         .addProperty(PropertySpec.builder(DB_NAME_VAR, String::class)
@@ -227,10 +228,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .build())
 
 
-        dbRepoType.addRepositoryHelperDelegateCalls("_repositoryHelper")
+        dbRepoType.addRepositoryHelperDelegateCalls("_repositoryHelper",
+                "_clientSyncManager")
 
         if(overrideClearAllTables) {
-            newSingleThreadContext("")
             dbRepoType.addFunction(FunSpec.builder("createAllTables")
                     .addModifiers(KModifier.OVERRIDE)
                     .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to createAllTables!")
@@ -332,6 +333,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
                             .addParameter("deviceId", INT)
                             .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
                             .addCode("return _${syncableDaoClassName.simpleName}.findPendingUpdateNotifications(deviceId)\n")
+                            .build())
+                    .addFunction(FunSpec.builder("findTablesWithPendingChangeLogs")
+                            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                            .addCode("return _${syncableDaoClassName.simpleName}.findTablesWithPendingChangeLogs()\n")
                             .build())
                     .addFunction(FunSpec.builder("findTablesToSync")
                             .addModifiers(KModifier.OVERRIDE)

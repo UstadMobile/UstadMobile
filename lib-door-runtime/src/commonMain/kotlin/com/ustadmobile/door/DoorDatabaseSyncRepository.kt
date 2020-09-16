@@ -17,9 +17,21 @@ interface DoorDatabaseSyncRepository: DoorDatabaseRepository {
     suspend fun sync(tablesToSync: List<Int>?) : List<SyncResult>
 
     /**
-     *
+     * This will be implemented by generated code to run the query. It will find a list of all
+     * pending UpdateNotification entities for the given deviceId (e.g. used to find the backlog
+     * of notifications when a client subscribes to events).
      */
     suspend fun findPendingUpdateNotifications(deviceId: Int): List<UpdateNotification>
+
+    /**
+     * This will be implemented by generated code to run the query. It will find a list of any
+     * tableIds that have pending ChangeLog items that should be sent to dispatchUpdateNotifications.
+     * This is used on startup to find any changes that happen when ChangeLogMonitor was not running.
+     *
+     * @return A list of tableIds for which there are pending ChangeLogs
+     */
+    suspend fun findTablesWithPendingChangeLogs(): List<Int>
+
 
     /**
      * Find a list of tables that need to be sync'd (e.g. those that have changed more recently than

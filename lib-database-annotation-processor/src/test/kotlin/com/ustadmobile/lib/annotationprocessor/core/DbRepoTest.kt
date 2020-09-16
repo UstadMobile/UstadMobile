@@ -5,6 +5,7 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.door.*
 import com.ustadmobile.door.DoorDatabaseRepository.Companion.STATUS_CONNECTED
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.waitUntil
 import db2.AccessGrant
 import db2.ExampleDatabase2
@@ -41,7 +42,7 @@ import javax.sql.DataSource
 import kotlin.test.assertEquals
 
 
-class TestDbRepo {
+class DbRepoTest {
 
     var serverDb : ExampleDatabase2? = null
 
@@ -171,7 +172,7 @@ class TestDbRepo {
         db.clearAllTables()
         val dbRepo = db.asRepository(Any(), mockServer.url("/").toString(),
                 "", httpClient, null)
-                .asConnectedRepository<ExampleDatabase2>()
+                .asConnectedRepository()
 
         val clientNodeId = (dbRepo as DoorDatabaseSyncRepository).clientId
         val repo = dbRepo.exampleSyncableDao()
@@ -198,9 +199,9 @@ class TestDbRepo {
         val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
         exampleSyncableEntity.esUid = serverDb!!.exampleSyncableDao().insert(exampleSyncableEntity)
 
-        val clientRepo = clientDb!!.asRepository<ExampleDatabase2>(Any(),
+        val clientRepo = clientDb!!.asRepository(Any(),
                 "http://localhost:8089/", "token", httpClient)
-                .asConnectedRepository<ExampleDatabase2>()
+                .asConnectedRepository()
 
         val entityFromServer = clientRepo.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)
         Assert.assertNotNull("Entity came back from server using repository", entityFromServer)
@@ -241,26 +242,30 @@ class TestDbRepo {
 
     @Test
     fun givenEntityCreatedOnServer_whenRepoSyncCalled_thenShouldBePresentOnClient() {
-        setupClientAndServerDb()
+        setupClientAndServerDb(ServerUpdateNotificationManagerImpl())
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
         runBlocking {
-
-
-            val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
-            exampleSyncableEntity.esUid = serverDb.exampleSyncableDao().insert(exampleSyncableEntity)
-
-            val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/",
-                    "token", httpClient)
-                    .asConnectedRepository<ExampleDatabase2>()
+            val clientId = clientDb.exampleSyncableDao().getSyncNode()!!.nodeClientId
+            val exampleSyncableEntity = ExampleSyncableEntity(esUid = 50, esNumber = 42)
 
             serverDb.accessGrantDao().insert(AccessGrant().apply {
                 tableId = 42
-                deviceId = (clientRepo as DoorDatabaseSyncRepository).clientId
+                deviceId = clientId
                 entityUid = exampleSyncableEntity.esUid
             })
 
-            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+            serverDb.exampleSyncableDao().insert(exampleSyncableEntity)
+
+
+            val clientRepo = clientDb.asRepository(Any(), "http://localhost:8089/",
+                    "token", httpClient, useClientSyncManager = true)
+                    .asConnectedRepository()
+
+
+            clientDb.waitUntil(10000 * 5000, listOf("ExampleSyncableEntity")) {
+                clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid) != null
+            }
 
             Assert.assertNotNull("Entity is in client database after sync",
                     clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid))
@@ -512,7 +517,7 @@ class TestDbRepo {
                 "token", httpClient).asConnectedRepository<ExampleDatabase2>()
 
         val clientSyncManager = ClientSyncManager(clientRepo as DoorDatabaseSyncRepository,
-            5, STATUS_CONNECTED, httpClient, "ExampleDatabase2/ExampleDatabase2SyncDao/_subscribe")
+            2, STATUS_CONNECTED, "ExampleDatabase2/ExampleDatabase2SyncDao/_subscribe")
 
 
         val testUid = 42L

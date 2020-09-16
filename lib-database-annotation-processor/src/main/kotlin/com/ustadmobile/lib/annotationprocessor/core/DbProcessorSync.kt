@@ -391,6 +391,12 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addCode("return _dao.findPendingUpdateNotifications(deviceId)\n")
                 .build())
 
+        repoTypeSpec.addFunction(FunSpec.builder("findTablesWithPendingChangeLogs")
+                .returns(List::class.parameterizedBy(Int::class))
+                .addModifiers(KModifier.SUSPEND, KModifier.OVERRIDE)
+                .addCode("return _dao.findTablesWithPendingChangeLogs()\n")
+                .build())
+
         repoTypeSpec.addFunction(FunSpec.builder("_deleteUpdateNotifications")
                 .addParameter("deviceId", INT)
                 .addParameter("tableId", INT)
@@ -434,11 +440,6 @@ class DbProcessorSync: AbstractDbProcessor() {
                         }
                         .endControlFlow()
                         .build())
-                .build())
-
-        repoTypeSpec.addFunction(FunSpec.builder("onPendingChangeLog")
-                .addParameter("tableIds", Set::class.asClassName().parameterizedBy(INT))
-                .addModifiers(KModifier.OVERRIDE)
                 .build())
 
         repoTypeSpec.addFunction(FunSpec.builder("_replaceUpdateNotifications")
@@ -684,6 +685,15 @@ class DbProcessorSync: AbstractDbProcessor() {
         abstractDaoTypeSpec.addFunction(abstractFindUpdateFn)
         implDaoTypeSpec.addFunction(implFindUpdateFN)
         abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceFindUpdateFn)
+
+        val (abstractFindPendingChangeLogs, implFindPendingChangeLogs, abstractInterfaceFindPendingChangeLogs) =
+                generateAbstractAndImplQueryFunSpecs("SELECT DISTINCT chTableId FROM ChangeLog WHERE CAST(dispatched AS INTEGER) = 0",
+                "findTablesWithPendingChangeLogs", List::class.parameterizedBy(Int::class),
+                listOf(), addReturnStmt = true, abstractFunIsOverride = true, suspended = true)
+        abstractDaoTypeSpec.addFunction(abstractFindPendingChangeLogs)
+        implDaoTypeSpec.addFunction(implFindPendingChangeLogs)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceFindPendingChangeLogs)
+
 
         //Generate query to update TableSyncStatus last changed (eg. when a local change is made or
         // when a remote change notification is received) - as declared in DoorDatabaseSyncRepository
