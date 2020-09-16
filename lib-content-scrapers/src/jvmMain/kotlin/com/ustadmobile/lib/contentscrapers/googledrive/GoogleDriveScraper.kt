@@ -10,15 +10,18 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
+import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
 import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpStatement
-import io.ktor.http.contentType
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
+import org.kodein.di.ktor.di
 import java.io.File
 import java.io.InputStream
 import java.nio.file.Files
@@ -29,6 +32,8 @@ class GoogleDriveScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
     private var tempDir: File? = null
 
     val googleDriveFormat: DateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+
+    val googleApiKey: String by di().instance()
 
     override fun scrapeUrl(sourceUrl: String) {
 
@@ -54,18 +59,6 @@ class GoogleDriveScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
                 mimeTypeSupported.find { fileMimeType -> fileMimeType == file.mimeType }
                         ?: return@execute
 
-                val fileEntry = ContentScraperUtil.createOrUpdateContentEntry(
-                        file.id!!, file.name,
-                        "https://www.googleapis.com/drive/v3/files/${file.id}", "", ContentEntry.LICENSE_TYPE_OTHER,
-                        parentContentEntry?.primaryLanguageUid ?: 0,
-                        parentContentEntry?.languageVariantUid,
-                        file.description, true, ScraperConstants.EMPTY_STRING,
-                        file.thumbnailLink, ScraperConstants.EMPTY_STRING,
-                        ScraperConstants.EMPTY_STRING,
-                        0, contentEntryDao)
-
-                ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
-
                 val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
                 val modifiedTime: Long = googleDriveFormat.parse(file.modifiedTime!!).local.unixMillisLong
                 val isUpdated = modifiedTime > recentContainer?.cntLastModified ?: 0
@@ -78,24 +71,46 @@ class GoogleDriveScraper(containerDir: File, db: UmAppDatabase, contentEntryUid:
 
                 defaultHttpClient().get<HttpStatement>(apiCall) {
                     parameter("alt", "media")
-                    parameter("key", "AIzaSyCoVemuuYfb3zT3Qe-CuCjATKPDVbmSzO0")
+                    parameter("key", googleApiKey)
                 }.execute() {
 
                     val contentFile = File(tempDir, file.id!!)
                     val stream = it.receive<InputStream>()
                     FileUtils.writeByteArrayToFile(contentFile, stream.readBytes())
 
-                    val container = Container().apply {
-                        containerContentEntryUid = fileEntry.contentEntryUid
-                        mimeType = file.mimeType
-                        mobileOptimized = true
-                        cntLastModified = System.currentTimeMillis()
-                        containerUid = containerDao.insert(this)
+                    val metadata = extractContentEntryMetadataFromFile(contentFile.path, db)
+
+                    if (metadata == null) {
+                        hideContentEntry()
+                        setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
+                        close()
+                        return@execute
                     }
-                    val containerManager = ContainerManager(container, db, db, containerDir.absolutePath)
-                    runBlocking {
-                        containerManager.addEntries(ContainerManager.FileEntrySource(contentFile, contentFile.name))
-                    }
+
+                    val metadataContentEntry = metadata.contentEntry
+                    val primaryLanguage = if (metadataContentEntry.primaryLanguageUid == 0L)
+                        parentContentEntry?.primaryLanguageUid ?: contentEntry?.primaryLanguageUid
+                        ?: 0 else metadataContentEntry.primaryLanguageUid
+                    val variant = if (metadataContentEntry.languageVariantUid == 0L)
+                        parentContentEntry?.languageVariantUid ?: contentEntry?.languageVariantUid
+                        ?: 0 else metadataContentEntry.languageVariantUid
+
+                    val fileEntry = ContentScraperUtil.createOrUpdateContentEntry(
+                            metadataContentEntry.entryId ?: contentEntry?.entryId ?: file.id,
+                            metadataContentEntry.title ?: contentEntry?.title ?: file.name,
+                            "https://www.googleapis.com/drive/v3/files/${file.id}", metadataContentEntry.publisher ?: parentContentEntry?.publisher
+                    ?: "",
+                            metadataContentEntry.licenseType, primaryLanguage, variant,
+                            metadataContentEntry.description ?: file.description, true, ScraperConstants.EMPTY_STRING,
+                            metadataContentEntry.thumbnailUrl ?: file.thumbnailLink, ScraperConstants.EMPTY_STRING,
+                            ScraperConstants.EMPTY_STRING,
+                            metadataContentEntry.contentTypeFlag, contentEntryDao)
+
+                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
+
+                    importContainerFromFile(fileEntry.contentEntryUid,
+                            metadata.mimeType, containerDir.absolutePath,
+                            contentFile.absolutePath, db, db, metadata.importMode, Any())
 
                     showContentEntry()
                     setScrapeDone(true, 0)

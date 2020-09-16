@@ -13,8 +13,8 @@ abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
     @Query("SELECT * FROM ScrapeQueueItem")
     abstract fun findAll(): List<ScrapeQueueItem>
 
-    @Query("SELECT * FROM ScrapeQueueItem WHERE status = 1 AND runId = :runId AND itemType = :itemType ORDER BY priority ASC LIMIT 10")
-    abstract fun findNextQueueItems(runId: Int, itemType: Int): DoorLiveData<List<ScrapeQueueItem>>
+    @Query("SELECT * FROM ScrapeQueueItem WHERE status = $STATUS_PENDING AND itemType = :itemType ORDER BY priority ASC LIMIT 10")
+    abstract fun findNextQueueItems(itemType: Int): DoorLiveData<List<ScrapeQueueItem>>
 
     @Query("UPDATE ScrapeQueueItem SET status = :status, errorCode = :errorCode WHERE sqiUid = :uid")
     abstract fun updateSetStatusById(uid: Int, status: Int, errorCode: Int)

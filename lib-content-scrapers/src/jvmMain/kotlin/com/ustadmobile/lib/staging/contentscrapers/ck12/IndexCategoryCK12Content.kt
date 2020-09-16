@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.lib.contentscrapers.ck12
 
 import com.ustadmobile.core.db.UmAppDatabase
@@ -30,6 +31,7 @@ import java.net.URL
 import java.util.*
 
 
+*/
 /**
  * The CK 12 Website has a list of available subjects to download content from "https://www.ck12.org/browse/"
  * Each Subject has a list of topics that appear in different layouts.
@@ -65,7 +67,8 @@ import java.util.*
  * Identify the type of content it is by searching the class name for js-components-newspaper-Card-Card__groupType
  * Link to the content can be found using the class js-components-newspaper-Card-Card__title
  * Once all information is found, use the groupType to identify the scraper to use.
- */
+ *//*
+
 @ExperimentalStdlibApi
 class IndexCategoryCK12Content @Throws(IOException::class)
 constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: File,
@@ -637,3 +640,4 @@ constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: 
 
 
 }
+*/

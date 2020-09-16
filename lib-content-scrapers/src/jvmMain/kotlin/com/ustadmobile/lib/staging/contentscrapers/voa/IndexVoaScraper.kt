@@ -280,7 +280,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
 
             //start the indexing work queue
             val indexProcessors = 2
-            val indexWorkQueue = LiveDataWorkQueue<ScrapeQueueItem>(queueDao!!.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX),
+            val indexWorkQueue = LiveDataWorkQueue<ScrapeQueueItem>(queueDao!!.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_INDEX),
                     { item1, item2 -> item1.sqiUid == item2.sqiUid },
                     indexProcessors) {
 
@@ -305,7 +305,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
 
 
             val scrapePrecessor = 6
-            scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE),
+            scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_SCRAPE),
                     { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
 
                 queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING, 0)

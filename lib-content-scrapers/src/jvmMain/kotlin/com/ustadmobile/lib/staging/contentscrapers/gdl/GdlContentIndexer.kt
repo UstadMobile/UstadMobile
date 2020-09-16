@@ -293,7 +293,7 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             ContentScraperUtil.createQueueItem(queueDao, url, gdlEntry, englishFolder, ScraperConstants.GDLContentType.ROOT.type, runId, ScrapeQueueItem.ITEM_TYPE_INDEX)
 
             val indexProcessor = 4
-            val indexWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_INDEX),
+            val indexWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_INDEX),
                     { item1, item2 -> item1.sqiUid == item2.sqiUid },
                     indexProcessor) {
                 queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING, 0)
@@ -315,7 +315,7 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             }
 
             val scrapePrecessor = 6
-            scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(runId, ScrapeQueueItem.ITEM_TYPE_SCRAPE),
+            scrapeWorkQueue = LiveDataWorkQueue(queueDao.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_SCRAPE),
                     { item1, item2 -> item1.sqiUid == item2.sqiUid }, scrapePrecessor) {
 
                 queueDao.updateSetStatusById(it.sqiUid, STATUS_RUNNING, 0)

@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -23,11 +24,10 @@ import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.sharedse.contentformats.*
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
@@ -126,15 +126,15 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         builder.setItems(R.array.content_source_option) { dialog, which ->
             when (which) {
                 0 -> handleFileSelection()
-                1 -> {
-                    //Handle link import here
-                }
+                1 -> handleLinkSelection()
             }
             dialog.dismiss()
         }
         builder.show()
 
     }
+
+
 
     internal fun handleFileSelection() {
         registerForActivityResult(ActivityResultContracts.GetContent(),
@@ -152,7 +152,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                     GlobalScope.launch {
                         val accountManager: UstadAccountManager by instance()
                         val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
-                        val metaData = extractContentEntryMetadataFromFile(tmpFile.toURI(), db)
+                        val metaData = extractContentEntryMetadataFromFile(tmpFile.toURI().toString(), db)
                         entryMetaData = metaData
                         when (entryMetaData) {
                             null -> {
@@ -184,8 +184,14 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     }
 
 
+    private fun handleLinkSelection() {
+        onSaveStateToBackStackStateHandle()
+        navigateToPickEntityFromList(ImportedContentEntryMetaData::class.java, R.id.import_link_view)
+    }
+
+
     override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase): Container? {
-        val file = entryMetaData?.fileUri
+        val file = entryMetaData?.uri
         val importMode = entryMetaData?.importMode
         val container = if (file != null && importMode != null) {
             withContext(Dispatchers.IO) {
@@ -221,6 +227,29 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             entity?.language = language
             entity?.primaryLanguageUid = language.langUid
         }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                ImportedContentEntryMetaData::class.java) {
+            val metadata = it.firstOrNull() ?: return@observeResult
+            // back from navigate import
+            entryMetaData = metadata
+            when (entryMetaData) {
+                null -> {
+                    showSnackBar(getString(R.string.import_link_content_not_supported))
+                }
+                else -> {
+
+                }
+            }
+            val entry = entryMetaData?.contentEntry
+            val entryUid = arguments?.get(ARG_ENTITY_UID)
+            if (entry != null) {
+                if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
+                entity = entry
+            }
+        }
+
+
     }
 
     override fun onDestroyView() {

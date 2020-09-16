@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
@@ -10,13 +11,13 @@ import io.ktor.client.call.receive
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpStatement
+import io.ktor.client.statement.response
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
-//import com.ustadmobile.port.sharedse.contentformats.ImportedContentEntryMetaData
 
 class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, String>, view: ContentEntryImportLinkView,
                                       di: DI) :
@@ -32,24 +33,25 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     fun handleClickDone(link: String) {
         view.showHideProgress(true)
-       // TODO check if link is valid first
-
-
 
         GlobalScope.launch {
 
-            delay(1000)
             view.showHideProgress(false)
 
             currentHttpClient.post<HttpStatement>(){
-                url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl),"/import/validateLink/")
+                url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl, "/import/validateLink/"))
                 body = link
             }.execute(){
 
                 val status = it.status
-               // val data = it.receive<ImportedContentEntryMetaData>()
 
+                if(status.value != 200){
+                    view.validLink = false
+                    return@execute
+                }
 
+                val data = it.receive<ImportedContentEntryMetaData>()
+                view.finishWithResult(data)
 
             }
 

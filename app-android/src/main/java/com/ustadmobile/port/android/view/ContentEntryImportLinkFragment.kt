@@ -1,14 +1,16 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.os.Handler
 import android.view.*
-import android.webkit.URLUtil
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentEntryImportLinkBinding
+import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryImportLinkView
+import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
 
 class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLinkView {
 
@@ -20,7 +22,6 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
 
     override fun showHideProgress(show: Boolean) {
         mBinding?.entryImportLinkTextInput?.isEnabled = !show
-        menuDoneItem?.isEnabled = !show
     }
 
     override var validLink: Boolean = false
@@ -62,6 +63,10 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun finishWithResult(result: ImportedContentEntryMetaData) {
+        saveResultToBackStackSavedStateHandle(listOf(result))
     }
 
 

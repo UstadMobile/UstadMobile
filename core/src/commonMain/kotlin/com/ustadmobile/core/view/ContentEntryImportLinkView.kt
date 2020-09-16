@@ -1,10 +1,14 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
+
 interface ContentEntryImportLinkView : UstadView {
 
     fun showHideProgress(show: Boolean)
 
     var validLink: Boolean
+
+    fun finishWithResult(result: ImportedContentEntryMetaData)
 
     companion object {
 

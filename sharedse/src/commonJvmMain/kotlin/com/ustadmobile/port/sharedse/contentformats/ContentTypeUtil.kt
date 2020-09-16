@@ -1,11 +1,9 @@
 package com.ustadmobile.port.sharedse.contentformats
 
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.FILE
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.H5P
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.ZIPPED
@@ -14,13 +12,7 @@ import com.ustadmobile.port.sharedse.contentformats.h5p.H5PImporter
 import com.ustadmobile.port.sharedse.contentformats.h5p.H5PTypeFilePlugin
 import com.ustadmobile.port.sharedse.contentformats.video.VideoTypeFilePlugin
 import com.ustadmobile.port.sharedse.contentformats.xapi.plugin.XapiPackageTypeFilePlugin
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import kotlinx.serialization.Serializable
-import java.io.File
 import java.io.IOException
-import java.lang.IllegalArgumentException
-import java.net.URI
 import java.util.zip.ZipException
 
 /**
@@ -81,11 +73,6 @@ suspend fun importContentEntryFromFile(file: String, db: UmAppDatabase, dbRepo: 
     return Pair(contentEntry, container)
 }
 
-/**
- *
- */
-@Serializable
-data class ImportedContentEntryMetaData(var contentEntry: ContentEntryWithLanguage, var mimeType: String, var fileUri: String, var importMode: Int)
 
 object ContentTypeUtil {
 
@@ -95,5 +82,4 @@ object ContentTypeUtil {
 
     const val H5P = 3
 
-    const val GFOLDER = 4
 }

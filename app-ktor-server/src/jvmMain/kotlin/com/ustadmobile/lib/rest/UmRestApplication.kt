@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.rest.ext.ktorInit
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
@@ -36,6 +37,8 @@ const val CONF_DBMODE_VIRTUALHOST = "virtualhost"
 
 const val CONF_DBMODE_SINGLETON = "singleton"
 
+const val CONF_GOOGLE_API = "apikey"
+
 /**
  *
  */
@@ -45,6 +48,7 @@ private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBM
     sanitizeDbNameFromUrl(url)
 }
 
+@ExperimentalStdlibApi
 fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: String? = null,
                                   singletonDbName: String = "UmAppDatabase") {
 
@@ -80,6 +84,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     val storageRoot = File(environment.config.propertyOrNull("ktor.ustad.storagedir")?.getString() ?: "build/storage")
     storageRoot.takeIf { !it.exists() }?.mkdirs()
 
+    val apiKey = environment.config.propertyOrNull("ktor.ustad.googleapi")?.getString() ?: CONF_GOOGLE_API
+
     install(DIFeature) {
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
             File(tmpRootDir, context.identifier(dbMode)).also {
@@ -91,6 +97,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             File(File(storageRoot, context.identifier(dbMode)), "container").also {
                 it.takeIf { !it.exists() }?.mkdirs()
             }
+        }
+
+        bind<String>() with singleton {
+            apiKey
         }
 
         bind<Gson>() with singleton { Gson() }
@@ -107,6 +117,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 it.preload()
                 it.ktorInit(File(storageRoot, context.identifier(dbMode)).absolutePath)
             }
+        }
+
+        bind<ScraperManager>() with scoped(EndpointScope.Default).singleton {
+            ScraperManager(endpoint = context, di = di)
         }
 
         registerContextTranslator { call: ApplicationCall -> Endpoint(call.request.header("Host") ?: "nohost") }
