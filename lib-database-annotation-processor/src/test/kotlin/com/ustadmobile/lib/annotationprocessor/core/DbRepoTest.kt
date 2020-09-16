@@ -277,13 +277,15 @@ class DbRepoTest {
         setupClientAndServerDb()
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
-        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),"http://localhost:8089/",
-                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
+        val clientRepo = clientDb.asRepository(Any(),"http://localhost:8089/",
+                "token", httpClient, useClientSyncManager = true).asConnectedRepository()
         runBlocking {
             val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
             exampleSyncableEntity.esUid = clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
 
-            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+            serverDb.waitUntil(5000, listOf("ExampleSyncableEntity")) {
+                serverDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid) != null
+            }
 
             Assert.assertNotNull("Entity is in client database after sync",
                     serverDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid))
@@ -295,15 +297,17 @@ class DbRepoTest {
         setupClientAndServerDb()
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
-        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),"http://localhost:8089/",
-                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
+        val clientRepo = clientDb.asRepository(Any(),"http://localhost:8089/",
+                "token", httpClient, useClientSyncManager = true).asConnectedRepository()
         val entityName = "سلام"
 
         runBlocking {
             val exampleSyncableEntity = ExampleSyncableEntity(esNumber =  50, esName = entityName)
             exampleSyncableEntity.esUid = clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
 
-            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+            serverDb.waitUntil(5000, listOf("ExampleSyncableEntity")) {
+                serverDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid) != null
+            }
 
             val entityInServer = serverDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)
             val entityOnClient = clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)
