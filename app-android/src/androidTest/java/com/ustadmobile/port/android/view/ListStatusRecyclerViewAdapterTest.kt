@@ -139,7 +139,7 @@ class ListStatusRecyclerViewAdapterTest {
         val loadingStatusLiveData = MutableLiveData(loadingStatus)
         fragmentScenario.onFragment { fragment ->
             val dataSource = dbRule.db.personDao.findPersonsWithPermission(0, 0, 0, excludePersonUids,
-                adminPerson.personUid, PersonDao.SORT_NAME_ASC, "%%", Role.PERMISSION_PERSON_SELECT)
+                    adminPerson.personUid, PersonDao.SORT_FIRST_NAME_ASC)
             val livePagedList = LivePagedListBuilder(dataSource, 20).build()
             fragment.listStatusAdapter?.pagedListLiveData = livePagedList
             livePagedList.observe(fragment.viewLifecycleOwner, Observer {

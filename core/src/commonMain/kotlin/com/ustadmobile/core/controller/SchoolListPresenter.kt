@@ -21,9 +21,17 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
+    var loggedInPersonUid = 0L
+    private var filterByPermission: Long = 0
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         selectedSortOption = SORT_OPTIONS[0]
+        loggedInPersonUid = accountManager.activeAccount.personUid
+
+        filterByPermission = arguments[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
+                ?: Role.PERMISSION_SCHOOL_SELECT
+
         updateListOnView()
     }
 
@@ -34,7 +42,7 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
 
     private fun updateListOnView() {
         view.list = repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationName(
-                searchText.toQueryLikeParam(),
+                searchText.toQueryLikeParam(), loggedInPersonUid, filterByPermission,
                 selectedSortOption?.flag ?: SchoolDao.SORT_NAME_ASC)
     }
 

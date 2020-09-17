@@ -22,9 +22,9 @@ import androidx.core.view.ViewCompat
  */
 class EpubWebView : WebView, GestureDetector.OnGestureListener {
 
-    private var mScroller: OverScroller? = null
+    private lateinit var mScroller: OverScroller
 
-    private var mGestureDetector: GestureDetectorCompat? = null
+    private lateinit var mGestureDetector: GestureDetectorCompat
 
     private var isScrolling = false
 
@@ -33,6 +33,8 @@ class EpubWebView : WebView, GestureDetector.OnGestureListener {
     private var scrollEvt2: MotionEvent? = null
 
     private var mDownY: Float = 0.toFloat()
+
+    private var columnIndex: Int = 0
 
 
     constructor(context: Context) : super(context) {
@@ -61,17 +63,17 @@ class EpubWebView : WebView, GestureDetector.OnGestureListener {
 
     override fun computeScroll() {
         super.computeScroll()
-        if (mScroller!!.computeScrollOffset()) {
-            scrollTo(mScroller!!.currX, mScroller!!.currY)
+        if (mScroller.computeScrollOffset()) {
+            scrollTo(mScroller.currX, mScroller.currY)
             ViewCompat.postInvalidateOnAnimation(this)
         }
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
-        if (mGestureDetector!!.onTouchEvent(event)) {
+        if (mGestureDetector.onTouchEvent(event)) {
             return true
         }
-        mGestureDetector!!.onTouchEvent(event)
+        mGestureDetector.onTouchEvent(event)
 
         var endOfScroll = false
 
@@ -99,11 +101,12 @@ class EpubWebView : WebView, GestureDetector.OnGestureListener {
             return handleFlick(scrollEvt1!!, scrollEvt2!!, 1f, 0f)
         }
 
+
         return super.onTouchEvent(event)
     }
 
     override fun onDown(motionEvent: MotionEvent): Boolean {
-        mScroller!!.abortAnimation()
+        mScroller.abortAnimation()
         return false
     }
 
@@ -137,7 +140,7 @@ class EpubWebView : WebView, GestureDetector.OnGestureListener {
         Log.i("EpubWebView", "handleFlick Delta X = " + swipeDeltaX + " threshold px = "
                 + swipeThresholdPx + " isFlick: " + isFlick)
         val currentXPos = scrollX
-        val currentChunk = currentXPos / width// better to use the position that it would have been at
+        //val currentChunk = currentXPos / width// better to use the position that it would have been at
         var increment = 0
         if (isFlick) {
             if (e1.x > e2.x) {
@@ -147,7 +150,7 @@ class EpubWebView : WebView, GestureDetector.OnGestureListener {
             }
         }
 
-        val xDestination = (currentChunk + increment) * width
+        val xDestination = (columnIndex + increment) * width
         val distanceX = xDestination - currentXPos
 
         //As per Android's own ViewPager.java see line 677
@@ -157,7 +160,8 @@ class EpubWebView : WebView, GestureDetector.OnGestureListener {
                 MAX_SETTLE_DURATION)
         Log.i("EpubWebView", ": scroll duration $duration, distanceX = $distanceX, velocity = $velocityX")
 
-        mScroller!!.startScroll(scrollX, 0, distanceX, 0, duration)
+        mScroller.startScroll(scrollX, 0, distanceX, 0, duration)
+        columnIndex += increment
         ViewCompat.postInvalidateOnAnimation(this)
         return true
     }

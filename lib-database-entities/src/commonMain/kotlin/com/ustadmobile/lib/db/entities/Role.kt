@@ -146,6 +146,8 @@ open class Role() {
 
         const val PERMISSION_ROLE_INSERT: Long = 34359738368L
 
+        const val PERMISSION_RESET_PASSWORD: Long = 68719476736L
+
         //Predefined roles that are added by the system
         const val ROLE_TEACHER_NAME = "Teacher"
 

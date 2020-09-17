@@ -62,7 +62,8 @@ abstract class SchoolDao : BaseDao<School> {
           (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
          FROM School WHERE CAST(schoolActive AS INTEGER) = 1 
              AND schoolName LIKE :searchBit 
-                ORDER BY CASE(:sortOrder)
+             AND :personUid IN (${ENTITY_PERSONS_WITH_PERMISSION} )
+            ORDER BY CASE(:sortOrder)
                 WHEN $SORT_NAME_ASC THEN School.schoolName
                 ELSE ''
             END ASC,
@@ -71,7 +72,9 @@ abstract class SchoolDao : BaseDao<School> {
                 ELSE ''
             END DESC
             """)
-    abstract fun findAllActiveSchoolWithMemberCountAndLocationName(searchBit: String, sortOrder: Int): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
+    abstract fun findAllActiveSchoolWithMemberCountAndLocationName(searchBit: String,
+                    personUid: Long, permission: Long, sortOrder: Int)
+            : DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
 
 
     @Update

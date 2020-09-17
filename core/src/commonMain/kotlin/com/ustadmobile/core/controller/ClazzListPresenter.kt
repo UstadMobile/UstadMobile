@@ -47,7 +47,8 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     private fun updateList() {
         view.list = repo.clazzDao.findClazzesWithPermission(searchText.toQueryLikeParam(),
-                loggedInPersonUid, filterExcludeMembersOfSchool, selectedSortOption?.flag ?: 0, filterByPermission)
+                loggedInPersonUid, filterExcludeMembersOfSchool,
+                selectedSortOption?.flag ?: 0, filterByPermission)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
