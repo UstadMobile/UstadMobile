@@ -34,6 +34,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 import java.io.InputStream
+import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.file.Files
@@ -135,9 +136,18 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
     }
 
-    fun start(startingUrl: String, scraperType: String, parentUid: Long, contentEntryUid: Long) {
+    fun start(startingUrl: String, scraperType: String, parentUid: Long, contentEntryUid: Long, overrideEntry: Boolean = false) {
         val runId = runDao.insert(ScrapeRun(scraperType,
                 ScrapeQueueItemDao.STATUS_PENDING)).toInt()
+
+        var isIndexer = ScraperTypes.indexerTypeMap.keys.find { it == scraperType }
+        var isScraper = ScraperTypes.scraperTypeMap.keys.find { it == scraperType }
+
+        val itemType = when {
+            isIndexer != null -> ScrapeQueueItem.ITEM_TYPE_INDEX
+            isScraper != null -> ScrapeQueueItem.ITEM_TYPE_SCRAPE
+            else -> throw IllegalArgumentException()
+        }
 
         val scrapeQueue = ScrapeQueueItem().apply {
             this.runId = runId
@@ -145,8 +155,9 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
             scrapeUrl = startingUrl
             sqiContentEntryParentUid = parentUid
             sqiContentEntryUid = contentEntryUid
+            this.overrideEntry = overrideEntry
             status = ScrapeQueueItemDao.STATUS_PENDING
-            itemType = ScrapeQueueItem.ITEM_TYPE_INDEX
+            this.itemType = itemType
             timeAdded = System.currentTimeMillis()
         }
         queueDao.insert(scrapeQueue)
@@ -173,32 +184,6 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
         } else {
 
             when {
-                mimeType.contains("text/html") -> {
-
-                    val data = FileUtils.readFileToString(contentFile, ScraperConstants.UTF_ENCODING)
-                    tempDir.deleteRecursively()
-                    val document = Jsoup.parse(data)
-
-                    val table = document.select("table tr th")
-                    if (table.isEmpty()) {
-                        return null
-                    }
-
-                    var altElement = table.select("[alt]")
-                    if (altElement.isNullOrEmpty() || altElement.attr("alt") != "[ICO]") {
-                        return null
-                    }
-
-                    val entry = ContentEntryWithLanguage()
-                    entry.title = document.title().substringAfterLast("/")
-                    entry.sourceUrl = url
-                    entry.leaf = false
-                    entry.contentTypeFlag = ContentEntry.TYPE_COLLECTION
-
-                    return ImportedContentEntryMetaData(entry, mimeType, url, 0, ScraperTypes.APACHE_INDEXER)
-
-
-                }
                 url.startsWith("https://drive.google.com/") -> {
 
                     var apiCall: String
@@ -239,14 +224,42 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     }.execute()
 
                     val googleStream = dataStatement.receive<InputStream>()
-                    val googleFile = File(tempDir, file.id!!)
+                    val googleFile = File(tempDir, file.name ?: file.id!!)
                     FileUtils.writeByteArrayToFile(googleFile, googleStream.readBytes())
-
                     val metadata = extractContentEntryMetadataFromFile(googleFile.path, db)
                     metadata?.scraperType = ScraperTypes.GOOGLE_DRIVE_SCRAPE
+                    metadata?.uri = apiCall
+                    metadata?.contentEntry?.sourceUrl = apiCall
                     tempDir.deleteRecursively()
                     return metadata
                 }
+                mimeType.contains("text/html") -> {
+
+                    val data = FileUtils.readFileToString(contentFile, ScraperConstants.UTF_ENCODING)
+                    tempDir.deleteRecursively()
+                    val document = Jsoup.parse(data)
+
+                    val table = document.select("table tr th")
+                    if (table.isEmpty()) {
+                        return null
+                    }
+
+                    var altElement = table.select("[alt]")
+                    if (altElement.isNullOrEmpty() || altElement.attr("alt") != "[ICO]") {
+                        return null
+                    }
+
+                    val entry = ContentEntryWithLanguage()
+                    entry.title = document.title().substringAfterLast("/")
+                    entry.sourceUrl = url
+                    entry.leaf = false
+                    entry.contentTypeFlag = ContentEntry.TYPE_COLLECTION
+
+                    return ImportedContentEntryMetaData(entry, mimeType, url, 0, ScraperTypes.APACHE_INDEXER)
+
+
+                }
+
                 else -> return null
             }
         }

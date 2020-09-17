@@ -83,7 +83,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     val storageRoot = File(environment.config.propertyOrNull("ktor.ustad.storagedir")?.getString() ?: "build/storage")
     storageRoot.takeIf { !it.exists() }?.mkdirs()
 
-    val apiKey = environment.config.propertyOrNull("ktor.ustad.googleapi")?.getString() ?: CONF_GOOGLE_API
+    val apiKey = environment.config.propertyOrNull("ktor.ustad.apikey")?.getString() ?: CONF_GOOGLE_API
 
     install(DIFeature) {
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {

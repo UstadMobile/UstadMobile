@@ -75,7 +75,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     parameter("key", googleApiKey)
                 }.execute() {
 
-                    val contentFile = File(tempDir, file.id!!)
+                    val contentFile = File(tempDir, file.name ?: file.id!!)
                     val stream = it.receive<InputStream>()
                     FileUtils.writeByteArrayToFile(contentFile, stream.readBytes())
 

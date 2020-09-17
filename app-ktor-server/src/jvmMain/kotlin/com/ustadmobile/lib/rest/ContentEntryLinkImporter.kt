@@ -40,14 +40,17 @@ fun Route.ContentEntryLinkImporter() {
             val scraperType = call.request.queryParameters["scraperType"] ?: ""
 
             val scraperManager: ScraperManager by di().on(call).instance()
-            scraperManager.start(url, scraperType, parentUid, contentEntryUid)
+            try {
+                scraperManager.start(url, scraperType, parentUid, contentEntryUid, true)
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "Unsupported")
+                return@post
+            }
             call.respond(HttpStatusCode.OK)
 
         }
 
     }
-
-
 
 
 }
