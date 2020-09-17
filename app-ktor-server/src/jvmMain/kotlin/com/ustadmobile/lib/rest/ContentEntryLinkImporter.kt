@@ -10,6 +10,7 @@ import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
+import org.apache.http.HttpStatus
 import org.kodein.di.instance
 import org.kodein.di.ktor.di
 import org.kodein.di.on
@@ -42,6 +43,7 @@ fun Route.ContentEntryLinkImporter() {
 
         val scraperManager: ScraperManager by di().on(call).instance()
         scraperManager.start(url, scraperType, parentUid, contentEntryUid)
+        call.respond(HttpStatusCode.OK)
 
     }
 

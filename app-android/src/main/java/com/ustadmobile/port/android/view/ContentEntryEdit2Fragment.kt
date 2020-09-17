@@ -52,7 +52,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     private var mPresenter: ContentEntryEdit2Presenter? = null
 
-    private var entryMetaData: ImportedContentEntryMetaData? = null
+    override var entryMetaData: ImportedContentEntryMetaData? = null
 
     override val mEditPresenter: UstadEditPresenter<*, ContentEntryWithLanguage>?
         get() = mPresenter

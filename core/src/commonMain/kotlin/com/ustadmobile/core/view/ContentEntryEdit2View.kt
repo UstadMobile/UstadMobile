@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMStorageDir
@@ -22,6 +23,8 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
     var fileImportErrorVisible: Boolean
 
     var storageOptions: List<UMStorageDir> ?
+
+    var entryMetaData: ImportedContentEntryMetaData?
 
     suspend fun saveContainerOnExit(entryUid: Long,selectedBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase): Container?
 
