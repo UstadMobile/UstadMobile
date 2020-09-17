@@ -92,7 +92,7 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
 
                     if (supported != null) {
                         val childEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, hrefUrl.toString(), folderEntry.primaryLanguageUid, title)
-                        createQueueItem(hrefUrl.toString(), childEntry, ScraperTypes.APACHE_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, folderEntry.contentEntryUid)
+                        createQueueItem(hrefUrl.toString(), childEntry, ScraperTypes.URL_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, folderEntry.contentEntryUid)
                     } else {
                         println("file: $title not supported with mimeType: $mimeType")
                         UMLogUtil.logInfo("file: $title not supported with mimeType: $mimeType")

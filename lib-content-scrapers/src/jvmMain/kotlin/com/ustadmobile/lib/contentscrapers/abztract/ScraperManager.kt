@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.db.dao.ScrapeRunDao
-import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper.Companion.ERROR_TYPE_TIMEOUT
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -14,7 +13,6 @@ import com.ustadmobile.lib.db.entities.ScrapeRun
 import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.googledrive.GoogleFile
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -25,11 +23,9 @@ import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpStatement
-import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.*
 import org.apache.commons.cli.*
 import org.apache.commons.io.FileUtils
-import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.kodein.di.DI
@@ -38,7 +34,6 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 import java.io.InputStream
-import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.file.Files
@@ -172,6 +167,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
         val supported = mimeTypeSupported.find { fileMimeType -> fileMimeType == mimeType }
         return if (supported != null) {
             val metaData = extractContentEntryMetadataFromFile(contentFile.toURI().path, db)
+            metaData.scraperType = ScraperTypes.URL_SCRAPER
             tempDir.deleteRecursively()
             metaData
         } else {

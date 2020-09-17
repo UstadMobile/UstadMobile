@@ -1,26 +1,15 @@
 package com.ustadmobile.lib.contentscrapers.apache
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.folder.FolderScraper
+import com.ustadmobile.lib.contentscrapers.abztract.UrlScraper
 import com.ustadmobile.lib.contentscrapers.globalDisptacher
 import kotlinx.coroutines.runBlocking
-import okhttp3.mockwebserver.Dispatcher
-import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import okhttp3.mockwebserver.RecordedRequest
-import okio.Buffer
-import okio.Okio
-import org.apache.commons.io.FileUtils
-import org.apache.commons.io.IOUtils
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import java.io.File
-import java.io.IOException
-import java.net.URLConnection
 import java.nio.file.Files
 
 @ExperimentalStdlibApi
@@ -67,7 +56,7 @@ class TestApacheIndexer {
     @Test
     fun givenApacheFile_whenScraped_createContainer(){
 
-        val scraper = ApacheScraper(containerDir, db, 0, 0,0 )
+        val scraper = UrlScraper(containerDir, db, 0, 0, 0)
         scraper.scrapeUrl(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/folder/314-my-very-own-scooter-EN.epub").toString())
 
         val filEntry = db.contentEntryDao.findBySourceUrl("http://localhost:${mockWebServer.port}/content/com/ustadmobile/lib/contentscrapers/folder/314-my-very-own-scooter-EN.epub")

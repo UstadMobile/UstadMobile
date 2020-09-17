@@ -2,7 +2,7 @@ import com.ustadmobile.lib.contentscrapers.abztract.YoutubeChannelIndexer
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubePlaylistIndexer
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
 import com.ustadmobile.lib.contentscrapers.apache.ApacheIndexer
-import com.ustadmobile.lib.contentscrapers.apache.ApacheScraper
+import com.ustadmobile.lib.contentscrapers.abztract.UrlScraper
 import com.ustadmobile.lib.contentscrapers.ddl.*
 import com.ustadmobile.lib.contentscrapers.folder.FolderIndexer
 import com.ustadmobile.lib.contentscrapers.folder.FolderScraper
@@ -77,7 +77,7 @@ object ScraperTypes {
 
     const val YOUTUBE_VIDEO_SCRAPER = "youtubeVideoScraper"
 
-    const val APACHE_SCRAPER = "apacheScraper"
+    const val URL_SCRAPER = "urlScraper"
 
     const val FOLDER_SCRAPER = "folderScraper"
 
@@ -91,7 +91,7 @@ object ScraperTypes {
             KHAN_LITE_VIDEO_SCRAPER to KhanLiteVideoScraper::class.java,
             YOUTUBE_VIDEO_SCRAPER to YoutubeScraper::class.java,
             FOLDER_SCRAPER to FolderScraper::class.java,
-            APACHE_SCRAPER to ApacheScraper::class.java,
+            URL_SCRAPER to UrlScraper::class.java,
             GOOGLE_DRIVE_SCRAPE to GoogleDriveScraper::class.java)
 
 }
