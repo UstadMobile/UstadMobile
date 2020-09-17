@@ -107,6 +107,8 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
                 db.containerETagDao.insert(etagContainer)
             }
 
+            showContentEntry()
+            setScrapeDone(true, 0)
             close()
 
         }
