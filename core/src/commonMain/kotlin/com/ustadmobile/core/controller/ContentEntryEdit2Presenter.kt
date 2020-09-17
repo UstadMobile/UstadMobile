@@ -20,10 +20,12 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpStatement
+import io.ktor.http.contentType
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
@@ -182,6 +184,7 @@ class ContentEntryEdit2Presenter(context: Any,
                             parameter("parentUid", parentEntryUid)
                             parameter("contentEntryUid", entity.contentEntryUid)
                             parameter("scraperType", view.entryMetaData?.scraperType)
+                            body = view.selectedUrl ?: ""
                         }.execute()
 
                     }

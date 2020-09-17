@@ -32,20 +32,22 @@ fun Route.ContentEntryLinkImporter() {
             }
         }
 
+        post("downloadLink") {
+
+            val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
+            val contentEntryUid = call.request.queryParameters["contentEntryUid"]?.toLong() ?: 0L
+            val url = call.receive<String>()
+            val scraperType = call.request.queryParameters["scraperType"] ?: ""
+
+            val scraperManager: ScraperManager by di().on(call).instance()
+            scraperManager.start(url, scraperType, parentUid, contentEntryUid)
+            call.respond(HttpStatusCode.OK)
+
+        }
+
     }
 
-    post("downloadLink") {
 
-        val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
-        val contentEntryUid = call.request.queryParameters["contentEntryUid"]?.toLong() ?: 0L
-        val url = call.receive<String>()
-        val scraperType = call.request.queryParameters["scraperType"] ?: ""
-
-        val scraperManager: ScraperManager by di().on(call).instance()
-        scraperManager.start(url, scraperType, parentUid, contentEntryUid)
-        call.respond(HttpStatusCode.OK)
-
-    }
 
 
 }

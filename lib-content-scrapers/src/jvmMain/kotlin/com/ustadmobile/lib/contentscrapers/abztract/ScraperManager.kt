@@ -198,7 +198,6 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     entry.sourceUrl = url
                     entry.leaf = false
                     entry.contentTypeFlag = ContentEntry.TYPE_COLLECTION
-                    entry.contentEntryUid = contentEntryDao.insert(entry)
 
                     return ImportedContentEntryMetaData(entry, mimeType, url, 0, ScraperTypes.APACHE_INDEXER)
 
