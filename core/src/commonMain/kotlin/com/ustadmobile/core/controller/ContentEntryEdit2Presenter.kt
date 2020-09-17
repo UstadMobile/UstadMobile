@@ -182,9 +182,10 @@ class ContentEntryEdit2Presenter(context: Any,
                         defaultHttpClient().post<HttpStatement>() {
                             url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl, "/import/downloadLink/"))
                             parameter("parentUid", parentEntryUid)
-                            parameter("contentEntryUid", entity.contentEntryUid)
                             parameter("scraperType", view.entryMetaData?.scraperType)
-                            body = view.selectedUrl ?: ""
+                            parameter("url", view.selectedUrl)
+                            header("content-type", "application/json")
+                            body = entity
                         }.execute()
 
                     }

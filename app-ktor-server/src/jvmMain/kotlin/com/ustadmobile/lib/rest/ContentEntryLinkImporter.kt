@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import io.ktor.application.call
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
@@ -35,13 +36,16 @@ fun Route.ContentEntryLinkImporter() {
         post("downloadLink") {
 
             val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
-            val contentEntryUid = call.request.queryParameters["contentEntryUid"]?.toLong() ?: 0L
-            val url = call.receive<String>()
+            val url = call.request.queryParameters["url"]?: ""
+            val contentEntry = call.receive<ContentEntryWithLanguage>()
             val scraperType = call.request.queryParameters["scraperType"] ?: ""
+
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
+            db.contentEntryDao.insert(contentEntry)
 
             val scraperManager: ScraperManager by di().on(call).instance()
             try {
-                scraperManager.start(url, scraperType, parentUid, contentEntryUid, true)
+                scraperManager.start(url, scraperType, parentUid, contentEntry.contentEntryUid, true)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, "Unsupported")
                 return@post
