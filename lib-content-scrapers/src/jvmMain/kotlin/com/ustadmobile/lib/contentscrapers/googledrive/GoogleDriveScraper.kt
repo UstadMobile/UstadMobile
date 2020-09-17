@@ -120,7 +120,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                                 metadataContentEntry.languageVariantUid.alternative(contentEntry?.languageVariantUid ?: 0),
                                 metadataContentEntry.description.alternative(contentEntry?.description ?: file.description ?: "")
                                 , true, metadataContentEntry.author.alternative(contentEntry?.author ?: ""),
-                                metadataContentEntry.thumbnailUrl.alternative(contentEntry.thumbnailUrl ?: file.thumbnailLink ?: ""),
+                                metadataContentEntry.thumbnailUrl.alternative(contentEntry?.thumbnailUrl ?: file.thumbnailLink ?: ""),
                                 ScraperConstants.EMPTY_STRING,
                                 ScraperConstants.EMPTY_STRING,
                                 metadataContentEntry.contentTypeFlag, contentEntryDao)

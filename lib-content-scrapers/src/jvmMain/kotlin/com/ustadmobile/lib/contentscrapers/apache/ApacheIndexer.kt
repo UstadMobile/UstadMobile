@@ -39,14 +39,15 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
         var folderEntry: ContentEntry
         if (scrapeQueueItem?.overrideEntry == true) {
 
-            folderEntry = ContentScraperUtil.createOrUpdateContentEntry(contentEntry?.entryId.alternative(folderTitle), contentEntry?.title.alternative(folderTitle),
+            folderEntry = ContentScraperUtil.createOrUpdateContentEntry(contentEntry?.entryId.alternative(folderTitle),
+                    contentEntry?.title.alternative(folderTitle),
                     sourceUrl, contentEntry?.publisher.alternative(""),
                     contentEntry?.licenseType?.alternative(ContentEntry.LICENSE_TYPE_OTHER)
                             ?: ContentEntry.LICENSE_TYPE_OTHER,
                     contentEntry?.primaryLanguageUid?.alternative(englishLang.langUid)
                             ?: englishLang.langUid,
                     contentEntry?.languageVariantUid,
-                    ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                    ScraperConstants.EMPTY_STRING, false, contentEntry?.author ?: "", ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
                     ScraperConstants.EMPTY_STRING, ContentEntry.TYPE_COLLECTION, contentEntryDao)
         } else {
 

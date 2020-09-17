@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers.folder
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
@@ -28,10 +29,29 @@ class FolderIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
 
             val name = folder.nameWithoutExtension
 
-            val folderEntry = ContentScraperUtil.createOrUpdateContentEntry(name, name,
-                    folder.path, name, ContentEntry.LICENSE_TYPE_PUBLIC_DOMAIN, englishLang.langUid, null,
-                    ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                    ScraperConstants.EMPTY_STRING, ContentEntry.TYPE_COLLECTION, contentEntryDao)
+            val folderEntry: ContentEntry
+            if (scrapeQueueItem?.overrideEntry == true && contentEntry != null) {
+
+                folderEntry = ContentScraperUtil.createOrUpdateContentEntry(contentEntry?.entryId.alternative(name), contentEntry?.title.alternative(name),
+                        folder.path, contentEntry?.publisher.alternative(""),
+                        contentEntry?.licenseType?.alternative(ContentEntry.LICENSE_TYPE_OTHER)
+                                ?: ContentEntry.LICENSE_TYPE_OTHER,
+                        contentEntry?.primaryLanguageUid?.alternative(englishLang.langUid)
+                                ?: englishLang.langUid,
+                        contentEntry?.languageVariantUid,
+                        ScraperConstants.EMPTY_STRING, false, contentEntry?.author ?: "", ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                        ScraperConstants.EMPTY_STRING, ContentEntry.TYPE_COLLECTION, contentEntryDao)
+
+            }else{
+
+                folderEntry = ContentScraperUtil.createOrUpdateContentEntry(name, name,
+                        folder.path, name, ContentEntry.LICENSE_TYPE_OTHER, englishLang.langUid, null,
+                        ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                        ScraperConstants.EMPTY_STRING, ContentEntry.TYPE_COLLECTION, contentEntryDao)
+
+            }
+
+
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry, folderEntry, 0)
 

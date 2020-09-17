@@ -140,65 +140,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
     }
 
-
-    fun getParentEntry(parentUid: Long): ContentEntry? {
-
-        var parentEntry: ContentEntry? = null
-        if (parentUid != 0L) {
-            runBlocking {
-                parentEntry = contentEntryDao.findByUidAsync(parentUid)
-            }
-        }
-        return parentEntry
-
-    }
-
-    fun createEntry(startingUrl: String, entryTitle: String?, entryLang: String, parentUid: Long, publisher: String) {
-
-        val parentEntry = getParentEntry(parentUid)
-        if (parentUid != 0L && parentEntry == null) {
-            System.err.println("Parent Uid given does not exist")
-            exitProcess(1)
-        }
-
-        val langSplit = entryLang.split("-")
-        val primaryLang = langSplit[0]
-        val langVariant = langSplit.getOrNull(1)
-
-        val lang = when (primaryLang.length) {
-            2 -> {
-                ContentScraperUtil.insertOrUpdateLanguageByTwoCode(db.languageDao, primaryLang)
-            }
-            3 -> {
-                ContentScraperUtil.insertOrUpdateLanguageByThreeCode(db.languageDao, primaryLang)
-            }
-            else -> {
-                null
-            }
-        } ?: return
-
-        val variant = ContentScraperUtil.insertOrUpdateLanguageVariant(db.languageVariantDao, langVariant, lang)
-
-        val entry: ContentEntry?
-        if (entryTitle != null) {
-            entry = ContentScraperUtil.createOrUpdateContentEntry("", entryTitle, startingUrl,
-                    publisher, 0, lang.langUid, variant?.langVariantUid,
-                    "", false, "", "",
-                    "", "", 0, contentEntryDao)
-
-            println("EntryUid: ${entry.contentEntryUid}")
-            contentEntryDao.updateContentEntryInActive(entry.contentEntryUid, true)
-
-            if (parentEntry != null) {
-                ContentScraperUtil.insertOrUpdateParentChildJoin(db.contentEntryParentChildJoinDao, parentEntry, entry, 100)
-            }
-
-            exitProcess(1)
-        }
-    }
-
-    fun start(startingUrl: String, scraperType: String, parentUid: Long) {
-
+    fun start(startingUrl: String, scraperType: String, parentUid: Long, contentEntryUid: Long) {
         val runId = runDao.insert(ScrapeRun(scraperType,
                 ScrapeQueueItemDao.STATUS_PENDING)).toInt()
 
@@ -207,12 +149,12 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
             contentType = scraperType
             scrapeUrl = startingUrl
             sqiContentEntryParentUid = parentUid
+            sqiContentEntryUid = contentEntryUid
             status = ScrapeQueueItemDao.STATUS_PENDING
             itemType = ScrapeQueueItem.ITEM_TYPE_INDEX
             timeAdded = System.currentTimeMillis()
         }
         queueDao.insert(scrapeQueue)
-        ContentScraperUtil.waitForQueueToFinish(queueDao, runId)
     }
 
     suspend fun extractMetadata(url: String): ImportedContentEntryMetaData? {
