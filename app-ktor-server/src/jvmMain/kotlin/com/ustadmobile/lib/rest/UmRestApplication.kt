@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
@@ -30,8 +31,6 @@ import java.nio.file.Files
 import javax.naming.InitialContext
 
 const val TAG_UPLOAD_DIR = 10
-
-const val TAG_CONTAINER_DIR = 11
 
 const val CONF_DBMODE_VIRTUALHOST = "virtualhost"
 
@@ -93,13 +92,13 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             }
         }
 
-        bind<File>(tag = TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+        bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
             File(File(storageRoot, context.identifier(dbMode)), "container").also {
                 it.takeIf { !it.exists() }?.mkdirs()
             }
         }
 
-        bind<String>() with singleton {
+        bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
             apiKey
         }
 

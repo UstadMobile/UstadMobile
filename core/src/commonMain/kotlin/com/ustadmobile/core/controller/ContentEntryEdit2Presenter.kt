@@ -118,7 +118,7 @@ class ContentEntryEdit2Presenter(context: Any,
         view.fileImportErrorVisible = false
         GlobalScope.launch(doorMainDispatcher()) {
             val canCreate = entity.title != null && (!entity.leaf || entity.contentEntryUid != 0L ||
-                    (entity.contentEntryUid == 0L && view.selectedFileUri != null))
+                    (entity.contentEntryUid == 0L && (view.selectedFileUri != null || view.selectedUrl != null)))
 
             if (canCreate) {
                 entity.licenseName = view.licenceOptions?.firstOrNull { it.code == entity.licenseType }.toString()
@@ -167,6 +167,12 @@ class ContentEntryEdit2Presenter(context: Any,
 
                         containerUploadManager?.enqueue(uploadJob.cujUid)
                     }
+                }else if (view.selectedUrl != null){
+
+
+
+
+
                 }
                 view.finishWithResult(listOf(entity))
             } else {

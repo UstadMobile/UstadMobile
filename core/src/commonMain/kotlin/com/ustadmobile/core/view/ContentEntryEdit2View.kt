@@ -15,6 +15,8 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var selectedFileUri: String ?
 
+    var selectedUrl: String?
+
     var titleErrorEnabled: Boolean
 
     var fileImportErrorVisible: Boolean

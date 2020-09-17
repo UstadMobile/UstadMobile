@@ -89,6 +89,8 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             mBinding?.selectedFileUri = value
         }
 
+    override var selectedUrl: String? = null
+
     override var titleErrorEnabled: Boolean = false
         set(value) {
             entry_title.error = getString(R.string.field_required_prompt)
@@ -238,7 +240,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                     showSnackBar(getString(R.string.import_link_content_not_supported))
                 }
                 else -> {
-
+                    selectedUrl = metadata.uri
                 }
             }
             val entry = entryMetaData?.contentEntry

@@ -21,7 +21,8 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
     private var menuDoneItem: MenuItem? = null
 
     override fun showHideProgress(show: Boolean) {
-        mBinding?.entryImportLinkTextInput?.isEnabled = !show
+        mBinding?.entryImportLinkTextInput?.isEnabled = show
+        menuDoneItem?.isEnabled = show
     }
 
     override var validLink: Boolean = false
