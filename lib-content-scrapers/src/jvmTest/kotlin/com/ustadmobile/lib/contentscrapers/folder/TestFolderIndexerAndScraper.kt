@@ -1,7 +1,15 @@
 package com.ustadmobile.lib.contentscrapers.folder
 
+import com.nhaarman.mockitokotlin2.spy
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.junit.Assert
@@ -9,8 +17,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.kodein.di.*
 import java.io.File
 import java.nio.file.Files
+import javax.naming.InitialContext
 
 @ExperimentalStdlibApi
 class TestFolderIndexerAndScraper {
@@ -18,6 +28,11 @@ class TestFolderIndexerAndScraper {
     private lateinit var scooterFile: File
     private lateinit var englishFolder: File
     lateinit var db: UmAppDatabase
+
+
+    private lateinit var di: DI
+    private lateinit var endpointScope: EndpointScope
+    private val endpoint = Endpoint(TEST_ENDPOINT)
 
     @Rule
     @JvmField
@@ -28,7 +43,25 @@ class TestFolderIndexerAndScraper {
 
     @Before
     fun setup(){
-        db = UmAppDatabase.getInstance(Any())
+        endpointScope = EndpointScope()
+
+        di = DI {
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
+                val dbName = sanitizeDbNameFromUrl(context.url)
+                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
+                spy(UmAppDatabase.getInstance(Any(), dbName).also {
+                    it.clearAllTables()
+                })
+            }
+            bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+                containerDir
+            }
+            bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
+                "abc"
+            }
+        }
+
+        db = di.on(endpoint).direct.instance(tag = UmAppDatabase.TAG_DB)
 
         englishFolder = File(tmpDir, "english")
         englishFolder.mkdirs()
@@ -43,10 +76,10 @@ class TestFolderIndexerAndScraper {
     @Test
     fun givenAFolder_whenIndexed_thenCreateEntriesForFilesFound(){
 
-        val indexer = FolderIndexer(0, 0, db, 0, 0)
+        val indexer = FolderIndexer(0, 0, 0, 0, endpoint, di)
         indexer.indexUrl(tmpDir.path)
 
-        val englishEntry = db!!.contentEntryDao.findBySourceUrl(englishFolder.path)
+        val englishEntry = db.contentEntryDao.findBySourceUrl(englishFolder.path)
         Assert.assertEquals("English content exists", englishFolder.name, englishEntry!!.title)
 
         val filEntry = db!!.contentEntryDao.findBySourceUrl(scooterFile.path)
@@ -63,7 +96,7 @@ class TestFolderIndexerAndScraper {
     @Test
     fun givenAFile_whenScraped_thenCreateContainer(){
 
-        val scraper = FolderScraper(containerDir, db, 0, 0,0 )
+        val scraper = FolderScraper(0, 0,0, endpoint, di)
         scraper.scrapeUrl(scooterFile.path)
 
         val filEntry = db.contentEntryDao.findBySourceUrl(scooterFile.path)
@@ -74,6 +107,12 @@ class TestFolderIndexerAndScraper {
             val container = fileContainer[0]
             Assert.assertEquals("container is epub", "application/epub+zip", container.mimeType)
         }
+
+    }
+
+    companion object {
+
+        const val TEST_ENDPOINT = "http://test.localhost.com/"
 
     }
 

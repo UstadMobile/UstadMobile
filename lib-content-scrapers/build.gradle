@@ -28,6 +28,11 @@ kotlin {
             // Setup the Kotlin compiler options for the 'main' compilation:
             jvmTarget = "$version_kotlin_jvmTarget"
         }
+
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
     }
 
     sourceSets {

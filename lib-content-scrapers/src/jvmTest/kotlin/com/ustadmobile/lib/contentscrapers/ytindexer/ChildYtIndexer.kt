@@ -1,10 +1,11 @@
 package com.ustadmobile.lib.contentscrapers.ytindexer
 
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubePlaylistIndexer
+import org.kodein.di.DI
 
 @ExperimentalStdlibApi
-class ChildYtIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase) : YoutubePlaylistIndexer(parentContentEntry, runUid, db, 0, 0)  {
+class ChildYtIndexer(parentContentEntry: Long, runUid: Int, endpoint: Endpoint, di: DI) : YoutubePlaylistIndexer(parentContentEntry, runUid, 0, 0, endpoint, di) {
 
     override fun indexUrl(sourceUrl: String) {
     }

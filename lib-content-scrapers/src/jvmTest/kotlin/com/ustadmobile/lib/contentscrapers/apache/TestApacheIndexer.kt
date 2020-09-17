@@ -1,8 +1,15 @@
 package com.ustadmobile.lib.contentscrapers.apache
 
+import com.nhaarman.mockitokotlin2.spy
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.abztract.UrlScraper
+import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexerAndScraper
 import com.ustadmobile.lib.contentscrapers.globalDisptacher
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -10,7 +17,10 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.kodein.di.*
+import java.io.File
 import java.nio.file.Files
+import javax.naming.InitialContext
 
 @ExperimentalStdlibApi
 class TestApacheIndexer {
@@ -26,10 +36,33 @@ class TestApacheIndexer {
 
     lateinit var mockWebServer: MockWebServer
 
+    private lateinit var di: DI
+    private lateinit var endpointScope: EndpointScope
+    private val endpoint = Endpoint(TestFolderIndexerAndScraper.TEST_ENDPOINT)
+
 
     @Before
     fun setup() {
-        db = UmAppDatabase.getInstance(Any())
+        endpointScope = EndpointScope()
+
+        di = DI {
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
+                val dbName = sanitizeDbNameFromUrl(context.url)
+                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
+                spy(UmAppDatabase.getInstance(Any(), dbName).also {
+                    it.clearAllTables()
+                })
+            }
+            bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+                containerDir
+            }
+            bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
+                "abc"
+            }
+        }
+
+        db = di.on(endpoint).direct.instance(tag = UmAppDatabase.TAG_DB)
+
 
         mockWebServer = MockWebServer()
         mockWebServer.setDispatcher(globalDisptacher)
@@ -39,7 +72,7 @@ class TestApacheIndexer {
     @Test
     fun givenApacheFolder_whenIndexed_createEntries() {
 
-        val apacheIndexer = ApacheIndexer(0, 0, db, 0, 0)
+        val apacheIndexer = ApacheIndexer(0, 0, 0, 0, endpoint, di)
         apacheIndexer.indexUrl(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/apache/folder.txt").toString())
 
         val apacheFolderEntry = db.contentEntryDao.findBySourceUrl("http://localhost:${mockWebServer.port}/json/com/ustadmobile/lib/contentscrapers/apache/folder.txt")
@@ -56,7 +89,7 @@ class TestApacheIndexer {
     @Test
     fun givenApacheFile_whenScraped_createContainer(){
 
-        val scraper = UrlScraper(containerDir, db, 0, 0, 0)
+        val scraper = UrlScraper(0, 0, 0, endpoint, di)
         scraper.scrapeUrl(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/folder/314-my-very-own-scooter-EN.epub").toString())
 
         val filEntry = db.contentEntryDao.findBySourceUrl("http://localhost:${mockWebServer.port}/content/com/ustadmobile/lib/contentscrapers/folder/314-my-very-own-scooter-EN.epub")

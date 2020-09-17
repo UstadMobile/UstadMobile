@@ -4,7 +4,11 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.doReturn
 import com.nhaarman.mockitokotlin2.spy
 import com.nhaarman.mockitokotlin2.whenever
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
@@ -12,6 +16,7 @@ import com.ustadmobile.lib.contentscrapers.abztract.YoutubeChannelIndexer
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
 import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper
 import com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper
+import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexerAndScraper
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanArticleScraper
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanExerciseScraper
@@ -20,6 +25,7 @@ import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScrap
 import com.ustadmobile.lib.contentscrapers.ytindexer.ChildYoutubeScraper
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
@@ -32,12 +38,14 @@ import org.jsoup.Jsoup
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.kodein.di.*
 import org.mockito.Mockito
 import java.io.File
 import java.io.IOException
 import java.net.URISyntaxException
 import java.net.URL
 import java.nio.file.Files
+import javax.naming.InitialContext
 
 @ExperimentalStdlibApi
 class TestPrathamContentScraper {
@@ -45,9 +53,36 @@ class TestPrathamContentScraper {
 
     private lateinit var db: UmAppDatabase
 
+    private lateinit var di: DI
+    private lateinit var endpointScope: EndpointScope
+    private val endpoint = Endpoint(TestFolderIndexerAndScraper.TEST_ENDPOINT)
+
+    val tmpDir = Files.createTempDirectory("folder").toFile()
+    val containerDir = Files.createTempDirectory("container").toFile()
+
+
     @Before
     fun setup() {
         ContentScraperUtil.checkIfPathsToDriversExist()
+        endpointScope = EndpointScope()
+
+        di = DI {
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
+                val dbName = sanitizeDbNameFromUrl(context.url)
+                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
+                spy(UmAppDatabase.getInstance(Any(), dbName).also {
+                    it.clearAllTables()
+                })
+            }
+            bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+                containerDir
+            }
+            bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
+                "abc"
+            }
+        }
+
+        db = di.on(endpoint).direct.instance(tag = UmAppDatabase.TAG_DB)
     }
 
     internal val dispatcher: Dispatcher = object : Dispatcher() {
@@ -89,12 +124,6 @@ class TestPrathamContentScraper {
 
             return MockResponse().setResponseCode(404)
         }
-    }
-
-    @Before
-    fun clearDb() {
-        db = UmAppDatabase.getInstance(Any())
-        // db.clearAllTables()
     }
 
 
@@ -162,8 +191,7 @@ class TestPrathamContentScraper {
         val mockWebServer = MockWebServer()
         mockWebServer.setDispatcher(dispatcher)
 
-        val scraper = DdlContentScraper(
-                containerDir, db, 0, 0, 0)
+        val scraper = DdlContentScraper(0, 0, 0, endpoint, di)
         scraper.scrapeUrl(mockWebServer.url("json/com/ustadmobile/lib/contentscrapers/ddl/ddlcontent.txt").toString())
 
         val contentFolder = File(tmpDir, "ddlcontent")
@@ -189,20 +217,20 @@ class TestPrathamContentScraper {
         entry.sourceUrl = "https://bg.khanacademy.org/math/early-math/cc-early-math-counting-topic/cc-early-math-counting/e/counting-out-1-20-objects"
         entry.contentEntryUid = db.contentEntryDao.insert(entry)
 
-        /* val scraper = DdlContentScraper(
-                 containerDir, "en", db, entry.contentEntryUid)
-         scraper.scrapeUrl(entry.sourceUrl!!)*//*
+        val scraper = DdlContentScraper(entry.contentEntryUid, 0, 0, endpoint, di)
+        scraper.scrapeUrl(entry.sourceUrl!!)
 
-        val child = ChildYoutubeScraper(containerDir, db,  entry.contentEntryUid, 0)
-        child.scrapeYoutubeLink(entry.sourceUrl!!)
+        val child = ChildYoutubeScraper(entry.contentEntryUid, 0, endpoint, di)
+        child.scrapeUrl(entry.sourceUrl!!)
 
         val document = Jsoup.connect("https://ddl.af/fa/resource/9398/")
                 .header("X-Requested-With", "XMLHttpRequest").get()
 
-        var sourceUrl = "https://ddl.af/fa/resource/9398/"*/
+        var sourceUrl = "https://ddl.af/fa/resource/9398/"
+
 
         // val khan = KhanArticleScraper(containerDir, db, entry.contentEntryUid, 0)
-        val khan = KhanExerciseScraper(containerDir, db, entry.contentEntryUid, 0, 0)
+        val khan = KhanExerciseScraper(entry.contentEntryUid, 0, 0, endpoint, di)
         khan.scrapeUrl(entry.sourceUrl!!)
 
     }
@@ -218,7 +246,7 @@ class TestPrathamContentScraper {
         entry.contentEntryUid = db.contentEntryDao.insert(entry)
 
         runBlocking {
-            val khan = KhanExerciseScraper(containerDir, db, entry.contentEntryUid, 0,0)
+            val khan = KhanExerciseScraper(entry.contentEntryUid, 0, 0, endpoint, di)
             khan.scrapeUrl("https://www.khanacademy.org/math/cc-fourth-grade-math/imp-place-value-and-rounding-2/imp-intro-to-place-value/e/place-value-tables")
         }
 
@@ -235,7 +263,7 @@ class TestPrathamContentScraper {
         entry.contentEntryUid = db.contentEntryDao.insert(entry)
 
         runBlocking {
-            val khan = YoutubeScraper(containerDir, db, entry.contentEntryUid, 0,0)
+            val khan = ChildYoutubeScraper(entry.contentEntryUid, 0, endpoint, di)
             khan.scrapeUrl("https://www.youtube.com/watch?v=SGUJCVVryTU")
         }
 
