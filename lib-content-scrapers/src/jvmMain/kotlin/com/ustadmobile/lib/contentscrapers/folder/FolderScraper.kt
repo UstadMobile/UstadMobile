@@ -1,20 +1,20 @@
 package com.ustadmobile.lib.contentscrapers.folder
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper
-import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
 import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.exception.ExceptionUtils
+import org.kodein.di.DI
 import java.io.File
-import java.net.URI
 
 @ExperimentalStdlibApi
-class FolderScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : Scraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
+class FolderScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     override fun scrapeUrl(sourceUrl: String) {
 
@@ -56,7 +56,7 @@ class FolderScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
 
-                importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerDir.absolutePath, file.absolutePath, db, db, metadata.importMode, Any())
+                importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file.absolutePath, db, db, metadata.importMode, Any())
 
                 close()
                 UMLogUtil.logInfo("finished scrape for $sourceUrl")

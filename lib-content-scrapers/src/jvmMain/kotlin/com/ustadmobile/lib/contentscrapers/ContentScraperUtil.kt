@@ -545,7 +545,7 @@ object ContentScraperUtil {
         val newJoin = ContentEntryParentChildJoin()
         newJoin.cepcjParentContentEntryUid = parentEntry?.contentEntryUid ?: -4103245208651563007L
         newJoin.cepcjChildContentEntryUid = childEntry.contentEntryUid
-        newJoin.childIndex = index
+        newJoin.childIndex = if(index == 0) existingParentChildJoin?.childIndex ?: index else index
         return if (existingParentChildJoin == null) {
             newJoin.cepcjUid = dao.insert(newJoin)
             newJoin

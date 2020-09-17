@@ -13,6 +13,7 @@ import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeRun
 import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.googledrive.GoogleFile
@@ -52,9 +53,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
     private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
 
-    private val containerFolder: File by on(endpoint).instance(tag = 11)
-
-    private val apiKey: String by di.instance()
+    private val apiKey: String by di.instance(tag = DiTag.TAG_GOOGLE_API)
 
     init {
 
@@ -75,8 +74,8 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
             try {
 
                 val indexerClazz = ScraperTypes.indexerTypeMap[it.contentType]
-                val cons = indexerClazz?.clazz?.getConstructor(Long::class.java, Int::class.java, UmAppDatabase::class.java, Int::class.java, Long::class.java)
-                val obj = cons?.newInstance(it.sqiContentEntryParentUid, it.runId, db, it.sqiUid, it.sqiContentEntryUid) as Indexer?
+                val cons = indexerClazz?.clazz?.getConstructor(Long::class.java, Int::class.java, Int::class.java, Long::class.java, Endpoint::class.java, DI::class.java)
+                val obj = cons?.newInstance(it.sqiContentEntryParentUid, it.runId, it.sqiUid, it.sqiContentEntryUid, endpoint, di) as Indexer?
                 obj?.indexUrl(it.scrapeUrl!!)
             } catch (e: Exception) {
                 UMLogUtil.logError("Exception running indexer ${it.scrapeUrl}")
@@ -108,8 +107,8 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                 withTimeout(900000) {
 
                     val scraperClazz = ScraperTypes.scraperTypeMap[it.contentType]
-                    val cons = scraperClazz?.getConstructor(File::class.java, UmAppDatabase::class.java, Long::class.java, Int::class.java, Long::class.java)
-                    obj = cons?.newInstance(containerFolder, db, it.sqiContentEntryParentUid, it.sqiUid, it.sqiContentEntryUid)
+                    val cons = scraperClazz?.getConstructor(Long::class.java, Int::class.java, Long::class.java, Endpoint::class.java, DI::class.java)
+                    obj = cons?.newInstance(it.sqiContentEntryUid, it.sqiUid, it.sqiContentEntryParentUid, endpoint, di)
                     obj?.scrapeUrl(it.scrapeUrl!!)
                 }
             } catch (t: TimeoutCancellationException) {
@@ -213,12 +212,6 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
             timeAdded = System.currentTimeMillis()
         }
         queueDao.insert(scrapeQueue)
-
-        resume(runId)
-    }
-
-    fun resume(runId: Int) {
-
         ContentScraperUtil.waitForQueueToFinish(queueDao, runId)
     }
 
@@ -242,7 +235,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
         } else {
 
             when {
-                mimeType == "text/html" -> {
+                mimeType.contains("text/html") -> {
 
                     val data = FileUtils.readFileToString(contentFile, ScraperConstants.UTF_ENCODING)
                     tempDir.deleteRecursively()
@@ -271,13 +264,16 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                 }
                 url.startsWith("https://drive.google.com/") -> {
 
-                    var apiCall = url
+                    var apiCall: String
                     var fileId: String
                     if (url.startsWith("https://drive.google.com/file/d/")) {
                         val fileIdLookUp = url.substringAfter("https://drive.google.com/file/d/")
                         val char = fileIdLookUp.firstOrNull { it == '/' || it == '?' }
                         fileId = if (char == null) fileIdLookUp else fileIdLookUp.substringBefore(char)
                         apiCall = "https://www.googleapis.com/drive/v3/files/$fileId"
+                    } else {
+                        tempDir.deleteRecursively()
+                        return null
                     }
 
                     val statement = defaultHttpClient().get<HttpStatement>(apiCall) {

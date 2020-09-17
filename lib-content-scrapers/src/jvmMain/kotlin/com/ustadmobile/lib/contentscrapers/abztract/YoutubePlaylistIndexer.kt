@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
@@ -9,6 +10,7 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriv
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.YoutubeData
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import org.kodein.di.DI
 import java.io.File
 import java.io.IOException
 import java.lang.Exception
@@ -19,7 +21,7 @@ import kotlin.system.exitProcess
 
 
 @ExperimentalStdlibApi
-open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentContentEntry, runUid, db, sqiUid,contentEntryUid ) {
+open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntry, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     private val ytPath: String
     private val gson: Gson

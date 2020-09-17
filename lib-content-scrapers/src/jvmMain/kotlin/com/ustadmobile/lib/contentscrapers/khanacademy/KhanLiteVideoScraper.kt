@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.db.UmAppDatabase
@@ -11,6 +12,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
+import org.kodein.di.DI
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
@@ -18,7 +20,7 @@ import java.nio.file.Files
 
 
 @ExperimentalStdlibApi
-class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : YoutubeScraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
+class KhanLiteVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : YoutubeScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
 
     override fun scrapeUrl(sourceUrl: String) {
@@ -76,7 +78,7 @@ class KhanLiteVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUi
             FileUtils.copyURLToFile(url, tempFile)
 
             val container = createBaseContainer(headRequestValues.mimeType)
-            val containerManager = ContainerManager(container, db, db, containerDir.absolutePath)
+            val containerManager = ContainerManager(container, db, db, containerFolder.absolutePath)
             runBlocking {
                 containerManager.addEntries(ContainerManager.FileEntrySource(tempFile, tempFile.name))
             }

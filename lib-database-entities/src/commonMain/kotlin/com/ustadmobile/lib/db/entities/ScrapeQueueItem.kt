@@ -37,6 +37,8 @@ class ScrapeQueueItem() {
 
     var priority: Int = 0
 
+    var overrideEntry: Boolean = false
+
     companion object {
 
         const val ITEM_TYPE_INDEX = 1

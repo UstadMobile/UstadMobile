@@ -725,6 +725,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         database.execSQL("""ALTER TABLE StatementEntity RENAME COLUMN verbUid to statementVerbUid
                         """.trimMargin())
 
+
                         database.execSQL("CREATE TABLE IF NOT EXISTS SchoolMember (  schoolMemberPersonUid  BIGINT , schoolMemberSchoolUid  BIGINT , schoolMemberJoinDate  BIGINT , schoolMemberLeftDate  BIGINT , schoolMemberRole  INTEGER , schoolMemberActive  BOOL , schoolMemberLocalChangeSeqNum  BIGINT , schoolMemberMasterChangeSeqNum  BIGINT , schoolMemberLastChangedBy  INTEGER , schoolMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                         database.execSQL("CREATE SEQUENCE IF NOT EXISTS SchoolMember_mcsn_seq")
                         database.execSQL("CREATE SEQUENCE IF NOT EXISTS SchoolMember_lcsn_seq")
@@ -1313,10 +1314,13 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 if (database.dbType() == DoorDbType.SQLITE) {
 
                     database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN sqiContentEntryUid INTEGER DEFAULT 0 NOT NULL")
+                    database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN overrideEntry INTEGER DEFAULT 0 NOT NULL")
 
                 } else if (database.dbType() == DoorDbType.POSTGRES) {
 
                     database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN sqiContentEntryUid BIGINT DEFAULT 0 NOT NULL")
+                    database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN overrideEntry BOOL DEFAULT false NOT NULL")
+
                 }
 
             }

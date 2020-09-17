@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.ddl
 
 import ScraperTypes
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -8,12 +9,13 @@ import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.SeleniumIndexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import org.kodein.di.DI
 import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.net.URL
 
 @ExperimentalStdlibApi
-class DdlSubjectIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : SeleniumIndexer(parentContentEntryUid, runUid, db, sqiUid, contentEntryUid) {
+class DdlSubjectIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : SeleniumIndexer(parentContentEntryUid, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     override fun indexUrl(sourceUrl: String) {
 

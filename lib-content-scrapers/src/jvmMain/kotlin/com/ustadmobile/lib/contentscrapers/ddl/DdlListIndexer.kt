@@ -1,17 +1,18 @@
 package com.ustadmobile.lib.contentscrapers.ddl
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.contentscrapers.ddl.IndexDdlContent.Companion.DDL
-import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.jsoup.Jsoup
+import org.kodein.di.DI
 
 @ExperimentalStdlibApi
 // TOOO check ddl
-class DdlListIndexer(parentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentEntryUid, runUid, db, sqiUid, contentEntryUid) {
+class DdlListIndexer(parentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentEntryUid, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     override fun indexUrl(sourceUrl: String) {
 

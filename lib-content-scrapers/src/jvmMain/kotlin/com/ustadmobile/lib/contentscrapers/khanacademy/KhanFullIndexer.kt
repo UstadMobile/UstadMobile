@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import ScraperTypes.KHAN_TOPIC_INDEXER
 import com.google.gson.GsonBuilder
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -10,11 +11,12 @@ import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import net.lightbody.bmp.core.har.HarEntry
+import org.kodein.di.DI
 import java.lang.Exception
 import java.net.URL
 
 @ExperimentalStdlibApi
-class KhanFullIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : HarIndexer(parentContentEntry, runUid, db, sqiUid, contentEntryUid) {
+class KhanFullIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : HarIndexer(parentContentEntry, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     override fun indexUrl(sourceUrl: String) {
 

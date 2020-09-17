@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -9,9 +10,10 @@ import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.khanFullMap
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.khanLiteMap
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import org.kodein.di.DI
 
 @ExperimentalStdlibApi
-class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int,contentEntryUid: Long) : Indexer(parentContentEntry, runUid, db, 0, contentEntryUid) {
+class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntry, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     private lateinit var parentEntry: ContentEntry
 

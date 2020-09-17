@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.waitForJSandJQueryToLoad
@@ -7,13 +8,14 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import io.github.bonigarcia.wdm.WebDriverManager
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
+import org.kodein.di.DI
 import org.openqa.selenium.InvalidArgumentException
 import org.openqa.selenium.chrome.ChromeDriver
 import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.support.ui.WebDriverWait
 
 @ExperimentalStdlibApi
-abstract class SeleniumIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentContentEntry, runUid, db, sqiUid, contentEntryUid) {
+abstract class SeleniumIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntry, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     protected var chromeDriver: ChromeDriver
 

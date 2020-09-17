@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import ScraperTypes.KHAN_LITE_VIDEO_SCRAPER
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -10,12 +11,13 @@ import com.ustadmobile.lib.contentscrapers.abztract.SeleniumIndexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.jsoup.nodes.Document
+import org.kodein.di.DI
 import org.openqa.selenium.By
 import org.openqa.selenium.support.ui.ExpectedConditions
 import java.net.URL
 
 @ExperimentalStdlibApi
-class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : SeleniumIndexer(parentContentEntry, runUid, db, sqiUid, contentEntryUid) {
+class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : SeleniumIndexer(parentContentEntry, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     override fun indexUrl(sourceUrl: String) {
 

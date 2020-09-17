@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.google.gson.GsonBuilder
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.har.HarExtra
 import com.ustadmobile.core.contentformats.har.HarInterceptor.Companion.KHAN_PROBLEM
 import com.ustadmobile.core.contentformats.har.HarRegexPair
@@ -28,6 +29,7 @@ import net.lightbody.bmp.proxy.CaptureType
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
+import org.kodein.di.DI
 import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.chrome.ChromeDriver
@@ -44,7 +46,7 @@ import java.util.*
 import java.util.regex.Pattern
 
 @ExperimentalStdlibApi
-class KhanExerciseScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : HarScraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
+class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : HarScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     override fun scrapeUrl(sourceUrl: String) {
 

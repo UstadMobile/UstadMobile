@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.db.UmAppDatabase
@@ -14,7 +15,6 @@ import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
 import com.ustadmobile.lib.db.entities.Container
 import io.github.bonigarcia.wdm.WebDriverManager
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.InternalSerializationApi
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
 import net.lightbody.bmp.core.har.HarEntry
@@ -22,6 +22,7 @@ import net.lightbody.bmp.core.har.HarRequest
 import net.lightbody.bmp.core.har.HarResponse
 import net.lightbody.bmp.proxy.CaptureType
 import org.apache.http.client.utils.DateUtils
+import org.kodein.di.DI
 import org.openqa.selenium.InvalidArgumentException
 import org.openqa.selenium.JavascriptExecutor
 import org.openqa.selenium.chrome.ChromeDriver
@@ -40,7 +41,7 @@ typealias ScrapeFilterFn = (harEntry: HarEntry) -> HarEntry
 typealias WaitConditionFn = (waitCondition: WebDriverWait) -> Unit
 
 @ExperimentalStdlibApi
-abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : Scraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
+abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     protected var chromeDriver: ChromeDriver
     var proxy: BrowserMobProxyServer = BrowserMobProxyServer()
@@ -130,7 +131,7 @@ abstract class HarScraper(containerDir: File, db: UmAppDatabase, contentEntryUid
 
     private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>, regexes: List<HarRegexPair>, addHarContent: Boolean): ContainerManager {
 
-        val containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerDir.absolutePath)
+        val containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerFolder.absolutePath)
 
         entries.forEachIndexed { counter, it ->
 

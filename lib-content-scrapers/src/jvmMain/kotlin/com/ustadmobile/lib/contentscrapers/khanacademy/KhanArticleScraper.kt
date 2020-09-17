@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.google.gson.GsonBuilder
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.har.HarExtra
 import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.db.UmAppDatabase
@@ -22,6 +23,7 @@ import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.jsoup.Jsoup
+import org.kodein.di.DI
 import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
@@ -29,7 +31,7 @@ import java.io.File
 import java.net.URL
 
 @ExperimentalStdlibApi
-class KhanArticleScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid : Long) : HarScraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
+class KhanArticleScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid : Long, endpoint: Endpoint, di: DI) : HarScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
 
     override fun scrapeUrl(sourceUrl: String) {

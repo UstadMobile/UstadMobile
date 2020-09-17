@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.ddl
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerETagDao
 import com.ustadmobile.core.db.dao.ContentCategoryDao
@@ -26,6 +27,7 @@ import net.lightbody.bmp.core.har.HarEntry
 import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
+import org.kodein.di.DI
 import org.openqa.selenium.By
 import org.openqa.selenium.NoSuchElementException
 import org.openqa.selenium.TimeoutException
@@ -47,7 +49,7 @@ import java.util.*
  * Create the content entry
  */
 @ExperimentalStdlibApi
-class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : HarScraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
+class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : HarScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     private val categorySchemaDao: ContentCategorySchemaDao
     private val contentCategoryDao: ContentCategoryDao
@@ -338,7 +340,7 @@ class DdlContentScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: 
             UMLogUtil.logInfo(args[0])
             UMLogUtil.logInfo(args[1])
             try {
-                DdlContentScraper(File(args[1]), UmAppDatabase.Companion.getInstance(Any()), 0, 0, 0).scrapeUrl(args[0])
+                //DdlContentScraper(File(args[1]), UmAppDatabase.Companion.getInstance(Any()), 0, 0, 0).scrapeUrl(args[0])
             } catch (e: IOException) {
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
                 UMLogUtil.logError("$DDL Exception running scrapeContent ddl")

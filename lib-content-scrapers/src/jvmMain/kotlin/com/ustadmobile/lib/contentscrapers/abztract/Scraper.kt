@@ -1,7 +1,9 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETPYE_MPEG
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_EPUB
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_KHAN
@@ -12,13 +14,21 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEBM
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import kotlinx.coroutines.runBlocking
+import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
 @ExperimentalStdlibApi
-abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var contentEntryUid: Long, val sqiUid: Int, var parentContentEntryUid: Long) {
+abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentContentEntryUid: Long, endpoint: Endpoint, di: DI) {
+
+    val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+
+    val containerFolder: File by di.on(endpoint).instance(tag = DiTag.TAG_CONTAINER_DIR)
 
     val mimeTypeToContentFlag: Map<String, Int> = mapOf(
             MIMETYPE_PDF to ContentEntry.TYPE_DOCUMENT,
@@ -38,11 +48,13 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
 
     var contentEntry: ContentEntry? = null
     var parentContentEntry: ContentEntry? = null
+    var scrapeQueueItem: ScrapeQueueItem? = null
 
     init {
         runBlocking {
             contentEntry = contentEntryDao.findByUid(contentEntryUid)
             parentContentEntry = contentEntryDao.findByUid(parentContentEntryUid)
+            scrapeQueueItem = scrapeQueueDao.findByUid(sqiUid)
         }
     }
 
@@ -69,7 +81,7 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
         contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
     }
 
-    fun setScrapeDone(successful: Boolean, errorCode: Int){
+    fun setScrapeDone(successful: Boolean, errorCode: Int) {
         scrapeQueueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, errorCode)
     }
 
@@ -88,9 +100,9 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
         }
 
         if (isUpdated && eTagHeaderValue != null) {
-            val eTag = db.containerETagDao.getEtagOfContainer(container?.containerUid?: 0)
-            if(!eTag.isNullOrEmpty()){
-               isUpdated =  eTagHeaderValue != eTag
+            val eTag = db.containerETagDao.getEtagOfContainer(container?.containerUid ?: 0)
+            if (!eTag.isNullOrEmpty()) {
+                isUpdated = eTagHeaderValue != eTag
             }
         }
         conn.disconnect()
@@ -102,7 +114,7 @@ abstract class Scraper(val containerDir: File, val db: UmAppDatabase, var conten
         const val LAST_MODIFIED = "Last-Modified"
 
         const val ETAG = "ETag"
-        
+
         const val FILE_SIZE_LIMIT = 440401920
 
         const val ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED = 100

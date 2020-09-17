@@ -3,6 +3,7 @@ package com.ustadmobile.lib.contentscrapers.khanacademy
 import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.db.UmAppDatabase
@@ -26,6 +27,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
+import org.kodein.di.DI
 import java.io.File
 import java.lang.reflect.Type
 import java.net.HttpURLConnection
@@ -36,7 +38,7 @@ import java.util.*
 
 
 @ExperimentalStdlibApi
-class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : YoutubeScraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
+class KhanVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : YoutubeScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
 
     private var tempDir: File? = null
@@ -172,7 +174,7 @@ class KhanVideoScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: L
                 }
 
                 val container = createBaseContainer(mimetype)
-                val containerManager = ContainerManager(container, db, db, containerDir.absolutePath)
+                val containerManager = ContainerManager(container, db, db, containerFolder.absolutePath)
                 runBlocking {
 
                     val fileMap = HashMap<File, String>()

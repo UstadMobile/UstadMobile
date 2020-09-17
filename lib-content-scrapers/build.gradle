@@ -67,7 +67,9 @@ kotlin {
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
 
                 implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
-                implementation "org.kodein.di:kodein-di-conf-jvm:$version_kodein_di"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+
 
             }
         }

@@ -34,6 +34,9 @@ abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
     @Query("SELECT COUNT(*) FROM ScrapeQueueItem WHERE (status = $STATUS_PENDING OR status = $STATUS_RUNNING) AND runId = :runUid")
     abstract fun getQueueCount(runUid: Int): Int
 
+    @Query("SELECT * FROM ScrapeQueueItem where sqiUid = :sqiUid")
+    abstract fun findByUid(sqiUid: Int): ScrapeQueueItem?
+
     companion object {
 
         const val STATUS_PENDING = 1

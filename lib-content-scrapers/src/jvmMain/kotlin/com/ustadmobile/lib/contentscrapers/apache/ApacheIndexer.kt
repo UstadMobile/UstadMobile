@@ -1,8 +1,8 @@
 package com.ustadmobile.lib.contentscrapers.apache
 
 import ScraperTypes
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
@@ -12,11 +12,12 @@ import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.jsoup.Jsoup
+import org.kodein.di.DI
 import java.net.HttpURLConnection
 import java.net.URL
 
 @ExperimentalStdlibApi
-class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase, sqiUid: Int, contentEntryUid: Long) : Indexer(parentContentEntryUid, runUid, db, sqiUid, contentEntryUid) {
+class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntryUid, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     override fun indexUrl(sourceUrl: String) {
 
@@ -35,10 +36,27 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase,
 
         UMLogUtil.logInfo("folder Title ${huc.responseCode}")
 
-        val folderEntry = ContentScraperUtil.createOrUpdateContentEntry(folderTitle, folderTitle,
-                sourceUrl, folderTitle, ContentEntry.LICENSE_TYPE_PUBLIC_DOMAIN, englishLang.langUid, null,
-                ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                ScraperConstants.EMPTY_STRING, ContentEntry.TYPE_COLLECTION, contentEntryDao)
+        var folderEntry: ContentEntry
+        if (scrapeQueueItem?.overrideEntry == true) {
+
+            folderEntry = ContentScraperUtil.createOrUpdateContentEntry(contentEntry?.entryId.alternative(folderTitle), contentEntry?.title.alternative(folderTitle),
+                    sourceUrl, contentEntry?.publisher.alternative(""),
+                    contentEntry?.licenseType?.alternative(ContentEntry.LICENSE_TYPE_OTHER)
+                            ?: ContentEntry.LICENSE_TYPE_OTHER,
+                    contentEntry?.primaryLanguageUid?.alternative(englishLang.langUid)
+                            ?: englishLang.langUid,
+                    contentEntry?.languageVariantUid,
+                    ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                    ScraperConstants.EMPTY_STRING, ContentEntry.TYPE_COLLECTION, contentEntryDao)
+        } else {
+
+            folderEntry = ContentScraperUtil.createOrUpdateContentEntry(folderTitle, folderTitle,
+                    sourceUrl, parentcontentEntry?.publisher ?: "",
+                    ContentEntry.LICENSE_TYPE_OTHER, englishLang.langUid, null,
+                    ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING,
+                    ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                    ScraperConstants.EMPTY_STRING, ContentEntry.TYPE_COLLECTION, contentEntryDao)
+        }
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry, folderEntry, 0)
 
@@ -74,18 +92,18 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, db: UmAppDatabase,
                     if (supported != null) {
                         val childEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, hrefUrl.toString(), folderEntry.primaryLanguageUid, title)
                         createQueueItem(hrefUrl.toString(), childEntry, ScraperTypes.APACHE_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, folderEntry.contentEntryUid)
-                    }else{
+                    } else {
                         println("file: $title not supported with mimeType: $mimeType")
                         UMLogUtil.logInfo("file: $title not supported with mimeType: $mimeType")
                     }
-                }else{
+                } else {
                     println("unknown apache: $title not supported with alt: $alt")
                     UMLogUtil.logInfo("unknown apache: $title not supported with alt: $alt")
                 }
-            }catch (e : Exception){
+            } catch (e: Exception) {
                 UMLogUtil.logError("Error during directory search on $sourceUrl")
                 UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
-            }finally {
+            } finally {
                 conn?.disconnect()
             }
         }

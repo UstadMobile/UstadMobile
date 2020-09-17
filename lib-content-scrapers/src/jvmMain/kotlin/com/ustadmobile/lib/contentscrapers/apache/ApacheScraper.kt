@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.apache
 
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -11,13 +12,13 @@ import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
 import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
+import org.kodein.di.DI
 import java.io.File
-import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.file.Files
 
 @ExperimentalStdlibApi
-class ApacheScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long) : Scraper(containerDir, db, contentEntryUid, sqiUid, parentContentEntryUid) {
+class ApacheScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     var tempDir: File? = null
 
@@ -81,7 +82,7 @@ class ApacheScraper(containerDir: File, db: UmAppDatabase, contentEntryUid: Long
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
 
-            val container = importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerDir.absolutePath, file.absolutePath, db, db, metadata.importMode, Any())
+            val container = importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file.absolutePath, db, db, metadata.importMode, Any())
             if (!headRequestValues.etag.isNullOrEmpty()) {
                 val etagContainer = ContainerETag(container.containerUid, headRequestValues.etag)
                 db.containerETagDao.insert(etagContainer)
