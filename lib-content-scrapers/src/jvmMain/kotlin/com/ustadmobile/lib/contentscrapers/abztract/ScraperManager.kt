@@ -167,7 +167,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
         val supported = mimeTypeSupported.find { fileMimeType -> fileMimeType == mimeType }
         return if (supported != null) {
             val metaData = extractContentEntryMetadataFromFile(contentFile.toURI().path, db)
-            metaData.scraperType = ScraperTypes.URL_SCRAPER
+            metaData?.scraperType = ScraperTypes.URL_SCRAPER
             tempDir.deleteRecursively()
             metaData
         } else {
