@@ -43,7 +43,8 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return db.schoolDao.personHasPermissionWithSchool(account?.personUid ?: 0L,
-                arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L, Role.PERMISSION_SCHOOL_UPDATE)
+                arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0L,
+                Role.PERMISSION_SCHOOL_UPDATE)
     }
 
     private fun updateListOnView() {

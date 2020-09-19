@@ -127,10 +127,6 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         }
 
     override fun onClickClassCode(code: String?) {
-//        val codeStr = code ?: return
-//        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-//        clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("clazzcode", codeStr)))
-//        showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
         mPresenter?.handleGoToInviteViaLink()
     }
 

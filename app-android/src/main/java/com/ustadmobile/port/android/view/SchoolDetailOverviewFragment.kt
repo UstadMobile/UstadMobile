@@ -15,26 +15,22 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSchoolOverviewBinding
 import com.toughra.ustadmobile.databinding.ItemClazzSimpleDetailBinding
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.SchoolDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.SchoolDetailOverviewView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
 
-interface SchoolWithHolidayCalendarDetailFragmentEventHandler {}
+interface SchoolDetailOverviewEventListener {
+    fun onClickSchoolCode(code: String?)
+}
 
 class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalendar>(),
-        SchoolDetailOverviewView, SchoolWithHolidayCalendarDetailFragmentEventHandler,
+        SchoolDetailOverviewView, SchoolDetailOverviewEventListener,
         Observer<PagedList<Clazz>>{
 
     private var mBinding: FragmentSchoolOverviewBinding? = null
@@ -89,6 +85,7 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
         mBinding = FragmentSchoolOverviewBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
+            it.fragmentEventHandler = this
         }
 
         clazzRecyclerView = rootView.findViewById(R.id.fragment_school_detail_overview_detail_clazz_rv)
@@ -126,6 +123,11 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
             mBinding?.schoolWithHolidayCalendar = value
         }
 
+    override var schoolCodeVisible: Boolean
+        get() = mBinding?.schoolCodeVisible ?: false
+        set(value) {
+            mBinding?.schoolCodeVisible = value
+        }
 
     override fun onChanged(t: PagedList<Clazz>?) {
         clazzRecyclerAdapter?.submitList(t)
@@ -133,5 +135,9 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
+
+    override fun onClickSchoolCode(code: String?) {
+        mPresenter?.handleGoToInviteViaLink()
+    }
 
 }

@@ -78,7 +78,7 @@ open class Person() {
             l = lastName as String
         }
 
-        return f + " " + l
+        return "$f $l"
     }
 
     override fun equals(other: Any?): Boolean {

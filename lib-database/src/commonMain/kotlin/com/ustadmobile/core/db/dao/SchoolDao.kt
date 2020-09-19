@@ -24,7 +24,7 @@ abstract class SchoolDao : BaseDao<School> {
 
 
     @Query("SELECT * FROM School WHERE schoolCode = :code")
-    abstract fun findBySchoolCode(code: String): School?
+    abstract suspend fun findBySchoolCode(code: String): School?
 
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */

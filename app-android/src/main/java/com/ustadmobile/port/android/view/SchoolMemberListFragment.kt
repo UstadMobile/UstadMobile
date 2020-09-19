@@ -77,7 +77,6 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
                               savedInstanceState: Bundle?): View? {
 
         addPersonKeyName = "Person_${arguments?.get(UstadView.ARG_FILTER_BY_ROLE)}"
-        addMode = ListViewAddMode.FAB
 
         filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt()?:0
 
@@ -130,7 +129,6 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         }else{
             R.string.student
         }
-        addMode = ListViewAddMode.FAB
 
         mActivityWithFab?.activityFloatingActionButton?.text =
                 requireContext().getString(addNewStringId)

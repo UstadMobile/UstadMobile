@@ -1,6 +1,7 @@
 package com.ustadmobile.core.util.ext
 
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.controller.RoleEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -137,14 +138,15 @@ suspend fun UmAppDatabase.approvePendingClazzMember(member: ClazzMember, clazz: 
             effectiveClazz.clazzStudentsPersonGroupUid,
             effectiveClazz.clazzPendingStudentsPersonGroupUid)
     if(numGroupUpdates != 1) {
-        println("WTF: no group update?")
+        println("No group update?")
     }
 }
 
 /**
  * Inserts the person, sets its group and groupmember. Does not check if its an update
  */
-suspend fun UmAppDatabase.insertPersonAndGroup(entity: PersonWithAccount): PersonWithAccount{
+suspend fun UmAppDatabase.insertPersonAndGroup(entity: PersonWithAccount,
+                loggedInPerson: Person? = null): PersonWithAccount{
 
     val groupPerson = PersonGroup().apply {
         groupName = "Person individual group"
@@ -160,6 +162,34 @@ suspend fun UmAppDatabase.insertPersonAndGroup(entity: PersonWithAccount): Perso
     //Assign person to PersonGroup ie: Create PersonGroupMember
     personGroupMemberDao.insertAsync(
             PersonGroupMember(entity.personUid, entity.personGroupUid))
+
+    //Create a roleentity of select person role with this.
+
+    if(loggedInPerson != null) {
+        val viewPersonRoles = roleDao.findByPermissionAndNameAsync(Role.PERMISSION_PERSON_SELECT,
+                Role.ROLE_VIEW_STUDENTS_NAME)
+        val viewPersonRole = if (viewPersonRoles.isEmpty()) {
+            Role().apply {
+                roleName = Role.ROLE_VIEW_STUDENTS_NAME
+                roleActive = true
+                rolePermissions = Role.PERMISSION_PERSON_SELECT
+                roleUid = roleDao.insertAsync(this)
+            }
+        } else {
+            viewPersonRoles[0]
+        }
+
+        //TODO: Check if person has its own group?
+        EntityRole().apply {
+            erTableId = Person.TABLE_ID
+            erActive = true
+            erRoleUid = viewPersonRole.roleUid
+            erGroupUid = loggedInPerson?.personGroupUid ?: 0L
+            erEntityUid = entity.personUid
+            erUid = entityRoleDao.insertAsync(this)
+        }
+    }
+
 
     return entity
 
@@ -202,6 +232,8 @@ suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,
     school.schoolStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup(
             "${school.schoolName} - " +
             impl.getString(MessageID.students, context)))
+
+    school.takeIf { it.schoolCode == null }?.schoolCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
     school.schoolUid = schoolDao.insertAsync(school)
 

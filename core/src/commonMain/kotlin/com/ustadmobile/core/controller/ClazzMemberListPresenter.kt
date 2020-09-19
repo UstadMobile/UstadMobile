@@ -25,7 +25,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     : UstadListPresenter<ClazzMemberListView, ClazzMember>(context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
 
 
-    var filterByClazzUid: Long = -1
+    private var filterByClazzUid: Long = -1
 
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS

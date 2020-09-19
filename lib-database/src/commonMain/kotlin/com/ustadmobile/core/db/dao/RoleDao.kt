@@ -55,6 +55,9 @@ abstract class RoleDao : BaseDao<Role> {
     @Query("SELECT * FROM Role WHERE roleUid = :uid")
     abstract suspend fun findByUidListAsync(uid: Long): List<Role>
 
+    @Query("SELECT * FROM Role WHERE rolePermissions = :permission AND roleName = :name")
+    abstract suspend fun findByPermissionAndNameAsync(permission: Long, name: String): List<Role>
+
     @Query("SELECT * FROM Role WHERE roleUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Role?>
 

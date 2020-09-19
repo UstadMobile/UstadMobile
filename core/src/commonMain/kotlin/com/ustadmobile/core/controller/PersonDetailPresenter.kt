@@ -41,8 +41,11 @@ class PersonDetailPresenter(context: Any,
                 db.takeIf { entityUid != 0L }?.personDao?.findByUid(entityUid)
             } ?: PersonWithDisplayDetails()
 
+            //Reset password uses additional seeked permission
             view.changePasswordVisible = person.username != null
-                    && (activePersonUid == entityUid || activePerson.admin)
+                    && (activePersonUid == entityUid ||
+                    repo.personDao.personHasPermissionAsync(activePerson.personUid,
+                    person.personUid, Role.PERMISSION_RESET_PASSWORD))
 
             view.showCreateAccountVisible =  person.username == null && activePerson.admin
 
