@@ -3,6 +3,9 @@ package com.ustadmobile.door
 import com.github.aakira.napier.Napier
 import com.ustadmobile.door.DoorConstants.HEADER_DBVERSION
 import com.ustadmobile.door.DoorDatabaseRepository.Companion.STATUS_CONNECTED
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.DoorTag.Companion.LOG_TAG
+import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.sse.DoorEventListener
 import com.ustadmobile.door.sse.DoorEventSource
 import com.ustadmobile.door.sse.DoorServerSentEvent
@@ -35,13 +38,19 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
 
     val eventSourceLock = Mutex()
 
+    val logPrefix: String by lazy(LazyThreadSafetyMode.NONE) {
+        "[ClientSyncManager@${this.doorIdentityHashCode}]"
+    }
+
     var connectivityStatus: Int = initialConnectivityStatus
         set(value) {
             field = value
             GlobalScope.launch {
                 if(value == STATUS_CONNECTED) {
+                    Napier.d("$logPrefix connected - checking EventSource", tag = LOG_TAG)
                     checkEndpointEventSource()
                 }else {
+                    Napier.d("$logPrefix disconnected - closing EventSource", tag = LOG_TAG)
                     eventSourceLock.withLock {
                         val eventSourceVal = eventSource.value
                         if(eventSourceVal != null) {
@@ -59,18 +68,24 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
         for(tableId in channel) {
             try {
                 val startTime = systemTimeInMillis()
+                Napier.d("$logPrefix start repo sync for #$tableId", tag = LOG_TAG)
                 val syncResults = repo.sync(listOf(tableId))
+                Napier.d("$logPrefix finish repo sync for $tableId " +
+                        "received ${syncResults.firstOrNull()?.received} / " +
+                        "sent ${syncResults.firstOrNull()?.sent}", tag = LOG_TAG)
                 repo.takeIf { syncResults.any { it.tableId == tableId && it.status == SyncResult.STATUS_SUCCESS} }
                         ?.updateTableSyncStatusLastSynced(tableId, startTime)
+                pendingJobs -= tableId
                 checkQueue()
             }catch(e: Exception) {
-                Napier.e("Exception syncing tableid $id", e)
+                Napier.e("$logPrefix Exception syncing tableid #$id", e, tag = LOG_TAG)
             }
         }
     }
 
     init {
         GlobalScope.launch {
+            Napier.d("$logPrefix init", tag = LOG_TAG)
             repeat(maxProcessors) {
                 launchProcessor(it, channel)
             }
@@ -89,25 +104,32 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
             if(eventSource.value != null)
                 return
 
-            eventSource.value = DoorEventSource("${repo.endpoint}$syncDaoSubscribePath?deviceId=${repo.clientId}&$HEADER_DBVERSION=$dbVersion",
+            val url = "${repo.endpoint}$syncDaoSubscribePath?deviceId=${repo.clientId}&$HEADER_DBVERSION=$dbVersion"
+            Napier.v("$logPrefix subscribing to updates from $url", tag = LOG_TAG)
+            eventSource.value = DoorEventSource(url,
                     object : DoorEventListener {
                 override fun onOpen() {
 
                 }
 
                 override fun onMessage(message: DoorServerSentEvent) {
+                    Napier.v("$logPrefix : Message: ${message.event} - ${message.data}",
+                        tag = LOG_TAG)
                     if(message.event.equals("update", true)) {
                         val lineParts = message.data.split(REGEX_WHITESPACE)
                         GlobalScope.launch {
-                            repo.updateTableSyncStatusLastChanged(lineParts[0].toInt(),
-                                    lineParts[1].toLong())
+                            val tableId = lineParts[0].toInt()
+                            val lastModified = lineParts[1].toLong()
+                            Napier.v("$logPrefix - update last changed for $tableId to $lastModified",
+                                    tag = LOG_TAG)
+                            repo.updateTableSyncStatusLastChanged(tableId, systemTimeInMillis())
                             invalidate()
                         }
                     }
                 }
 
                 override fun onError(e: Exception) {
-
+                    Napier.e("$logPrefix EventSource onError", throwable = e, tag = LOG_TAG)
                 }
             })
         }
@@ -117,6 +139,7 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
     override fun onTableChanged(tableName: String) {
         val tableId = repo.tableIdMap[tableName] ?: -1
         GlobalScope.launch {
+            Napier.d("$logPrefix tableChanged: $tableName #$tableId", tag = LOG_TAG)
             repo.updateTableSyncStatusLastChanged(tableId, systemTimeInMillis())
             invalidate()
         }
@@ -134,7 +157,9 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
 
     fun checkQueue() {
         val newJobs = repo.findTablesToSync().filter { it.tsTableId !in pendingJobs }
+        Napier.v("$logPrefix checkQueue found ${newJobs.size} tables to sync", tag = LOG_TAG)
         newJobs.subList(0, min(maxProcessors, newJobs.size)).forEach {
+            Napier.d("$logPrefix send table id #${it.tsTableId} to sync fan-out", tag = LOG_TAG)
             pendingJobs += it.tsTableId
             channel.offer(it.tsTableId)
         }

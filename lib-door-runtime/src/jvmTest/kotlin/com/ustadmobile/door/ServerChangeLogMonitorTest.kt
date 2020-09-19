@@ -4,7 +4,7 @@ import com.nhaarman.mockitokotlin2.*
 import org.junit.Before
 import org.junit.Test
 
-class ChangeLogMonitorTest {
+class ServerChangeLogMonitorTest {
 
     lateinit var mockDb: DoorDatabase
 
@@ -21,7 +21,7 @@ class ChangeLogMonitorTest {
 
     @Test
     fun givenEmptyDb_whenChangeHappens_thenShouldDispatchToRepo(){
-        val changeLogMonitor = ChangeLogMonitor(mockDb, mockRepo)
+        val changeLogMonitor = ServerChangeLogMonitor(mockDb, mockRepo)
         changeLogMonitor.onTablesChanged(listOf("Test"))
 
         verifyBlocking(mockRepo, timeout(2000)) { dispatchUpdateNotifications(42)  }
@@ -29,7 +29,7 @@ class ChangeLogMonitorTest {
 
     @Test
     fun givenEmptyDb_whenMultipleChangesHappen_thenShouldBeBatched() {
-        val changeLogMonitor = ChangeLogMonitor(mockDb, mockRepo)
+        val changeLogMonitor = ServerChangeLogMonitor(mockDb, mockRepo)
 
         changeLogMonitor.onTablesChanged(listOf("Test"))
         changeLogMonitor.onTablesChanged(listOf("Test"))

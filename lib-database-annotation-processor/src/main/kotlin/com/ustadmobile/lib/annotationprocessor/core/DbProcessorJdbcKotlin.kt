@@ -31,6 +31,7 @@ import kotlin.math.absoluteValue
 import kotlin.random.Random
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.annotation.QueryLiveTables
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.TRACKER_SUFFIX
 import kotlin.RuntimeException
 
 val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
@@ -912,6 +913,9 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 .addCode("_stmt = _con!!.createStatement()\n")
         for(entityType in entityTypesOnDb(dbTypeElement, processingEnv)) {
             dropFunSpec.addCode("_stmt!!.executeUpdate(%S)\n", "DELETE FROM ${entityType.simpleName}")
+            if(entityType.getAnnotation(SyncableEntity::class.java) != null){
+                dropFunSpec.addCode("_stmt!!.executeUpdate(%S)\n", "DELETE FROM ${entityType.simpleName}$TRACKER_SUFFIX")
+            }
         }
 
         dropFunSpec.beginControlFlow("when(jdbcDbType)")

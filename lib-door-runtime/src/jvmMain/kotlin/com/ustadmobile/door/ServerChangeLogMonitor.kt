@@ -1,5 +1,8 @@
 package com.ustadmobile.door
 
+import com.github.aakira.napier.Napier
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.doorIdentityHashCode
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import java.util.concurrent.atomic.AtomicReference
@@ -14,8 +17,8 @@ import java.util.concurrent.atomic.AtomicReference
  * bulk changes take place). The dispatchUpdateNotifications function is called using a coroutine
  * fan-out pattern so that multiple tables can be processed concurrently.
  */
-class ChangeLogMonitor(val db: DoorDatabase, private val repo: DoorDatabaseRepository,
-    val numProcessors: Int = 5) {
+class ServerChangeLogMonitor(val db: DoorDatabase, private val repo: DoorDatabaseRepository,
+                             val numProcessors: Int = 5) {
 
     val tablesChangedChannel: Channel<Int> = Channel(capacity = Channel.UNLIMITED)
 
@@ -25,7 +28,10 @@ class ChangeLogMonitor(val db: DoorDatabase, private val repo: DoorDatabaseRepos
 
     val changeListenerRequest: DoorDatabase.ChangeListenerRequest
 
+    val logPrefix: String = "[ServerChangeLogMonitor@${this.doorIdentityHashCode}]"
+
     init {
+        Napier.d("$logPrefix init", tag = DoorTag.LOG_TAG)
         changeListenerRequest = DoorDatabase.ChangeListenerRequest(listOf(), this::onTablesChanged)
         db.addChangeListener(changeListenerRequest)
 
@@ -37,6 +43,8 @@ class ChangeLogMonitor(val db: DoorDatabase, private val repo: DoorDatabaseRepos
             //Find anything that was changed when the ChangeLogMonitor wasn't running (e.g. repo not
             // yet created or manually changed by SQL)
             (repo as? DoorDatabaseSyncRepository)?.findTablesWithPendingChangeLogs()?.also {
+                Napier.d("$logPrefix init: tables changed before: ${it.joinToString() }}",
+                        tag = DoorTag.LOG_TAG)
                 onTablesChangedInternal(it)
             }
 
@@ -46,6 +54,8 @@ class ChangeLogMonitor(val db: DoorDatabase, private val repo: DoorDatabaseRepos
 
     fun CoroutineScope.launchChangeLogProcessor(id: Int, channel: Channel<Int>) = launch {
         for(tableId in channel) {
+            Napier.d("$logPrefix Processor #$id dispatchUpdateNotifications for: $tableId",
+                    tag = DoorTag.LOG_TAG)
             repo.dispatchUpdateNotifications(tableId)
         }
     }
@@ -55,6 +65,8 @@ class ChangeLogMonitor(val db: DoorDatabase, private val repo: DoorDatabaseRepos
     }
 
     private fun onTablesChangedInternal(tablesChanged: List<Int>) {
+        Napier.d("$logPrefix tablesChanged: ${tablesChanged.joinToString()}",
+                tag = DoorTag.LOG_TAG)
         tablesChanged.forEach {table ->
             tablesChangedChannel.offer(table)
 
@@ -70,6 +82,8 @@ class ChangeLogMonitor(val db: DoorDatabase, private val repo: DoorDatabaseRepos
                         }
                     }while(tableId != null)
 
+                    Napier.d("$logPrefix send tables for processing: ${itemsToSend.joinToString()}",
+                            tag = DoorTag.LOG_TAG)
                     itemsToSend.forEach {
                         tablesToProcessChannel.send(it)
                     }
@@ -81,6 +95,7 @@ class ChangeLogMonitor(val db: DoorDatabase, private val repo: DoorDatabaseRepos
 
 
     fun close() {
+        Napier.d("$logPrefix close", tag = DoorTag.LOG_TAG)
         db.removeChangeListener(changeListenerRequest)
     }
 

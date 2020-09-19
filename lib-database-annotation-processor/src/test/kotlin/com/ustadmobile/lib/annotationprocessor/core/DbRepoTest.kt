@@ -1,11 +1,12 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
+import com.github.aakira.napier.DebugAntilog
+import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.door.*
 import com.ustadmobile.door.DoorDatabaseRepository.Companion.STATUS_CONNECTED
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.waitUntil
 import db2.AccessGrant
 import db2.ExampleDatabase2
@@ -29,6 +30,7 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.netty.handler.codec.http.HttpResponse
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -65,6 +67,12 @@ class DbRepoTest {
     @Before
     fun setup() {
         mockUpdateNotificationManager = mock {}
+
+        if(!Napier.isEnable(Napier.Level.DEBUG, null)) {
+            Napier.base(DebugAntilog())
+        }
+
+        Napier.i("Hello Napier")
     }
 
 
@@ -103,7 +111,7 @@ class DbRepoTest {
                     val db: ExampleDatabase2 = instance(tag = DoorTag.TAG_DB)
                     val repo = db.asRepository(Any(), "http://localhost/", "", httpClient,
                             tmpAttachmentsDir?.absolutePath, updateNotificationManager)
-                    ChangeLogMonitor(db, repo as DoorDatabaseRepository)
+                    ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
                     repo
                 }
 
@@ -342,35 +350,54 @@ class DbRepoTest {
 
     @Test
     fun givenEntityCreatedOnClient_whenUpdatedOnServerAndSyncCalled_thenShouldBeUpdatedOnClient() {
-        setupClientAndServerDb()
+        setupClientAndServerDb(ServerUpdateNotificationManagerImpl())
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
-        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/",
-                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
+        val clientRepo = clientDb.asRepository(Any(), "http://localhost:8089/",
+                "token", httpClient, useClientSyncManager = true).asConnectedRepository()
         runBlocking {
-            val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
-            exampleSyncableEntity.esUid = clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
+            Napier.i("=====Create Initial Entity on client======")
+            val exampleSyncableEntity = ExampleSyncableEntity(esUid = 420, esNumber = 42)
             serverDb.accessGrantDao().insert(AccessGrant().apply {
                 tableId = 42
                 deviceId = (clientRepo as DoorDatabaseSyncRepository).clientId
                 entityUid = exampleSyncableEntity.esUid
             })
+            clientRepo.exampleSyncableDao().insert(exampleSyncableEntity)
 
-            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+            //wait for the entity to hit the server
+            serverDb.waitUntil(5000, listOf("ExampleSyncableEntity")) {
+                serverDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid) != null
+            }
+
+            val updateNotificationsBefore = serverDb.exampleSyncableDao().findAllUpdateNotifications()
 
             val entityOnServerAfterSync = serverDb.exampleSyncableDao()
                     .findByUid(exampleSyncableEntity.esUid)
 
-            val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy",
-                    "token", httpClient) as ExampleDatabase2
-            serverRepo.exampleSyncableDao().updateNumberByUid(exampleSyncableEntity.esUid, 52)
+            Napier.i("=====Waited for entity on server: got $entityOnServerAfterSync======")
 
-            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+            delay(500)
+
+            val updateNotificationAfter = serverDb.exampleSyncableDao().findAllUpdateNotifications()
+
+            Napier.i("======= Performing update on server======")
+            serverDb.exampleSyncableDao().updateAsync(entityOnServerAfterSync!!.apply {
+                esNumber = 52
+                esLcb = 2
+            })
+
+            //(clientRepo as DoorDatabaseSyncRepository).sync(null)
+            clientDb.waitUntil(5000, listOf("ExampleSyncableEntity")) {
+                clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)?.esNumber == 52
+            }
+
+            Napier.i("======= Waited for entity update to occur on client ======")
 
             Assert.assertNotNull("Entity was synced to server after being created on client",
                     entityOnServerAfterSync)
             Assert.assertEquals("Syncing after change made on server, value on client is udpated",
-                    52, clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)!!.esNumber)
+                    52, clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)?.esNumber)
         }
     }
 

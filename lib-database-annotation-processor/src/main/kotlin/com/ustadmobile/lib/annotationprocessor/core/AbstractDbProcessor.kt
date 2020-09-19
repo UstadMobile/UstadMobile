@@ -1524,7 +1524,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                                                  syncHelperDaoVarName: String = "_syncHelper",
                                                  addReturnDaoResult: Boolean  = true,
                                                  generateGlobalScopeLaunchBlockForLiveDataTypes: Boolean = true,
-                                                 autoRetryEmptyMirrorResult: Boolean = false): CodeBlock {
+                                                 autoRetryEmptyMirrorResult: Boolean = false,
+                                                 receiveCountVarName: String? = null): CodeBlock {
         val codeBlock = CodeBlock.builder()
         val daoFunReturnType = daoFunSpec.returnType!!
         val resultType = resolveQueryResultType(daoFunReturnType)
@@ -1560,6 +1561,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 params = daoFunSpec.parameters))
         codeBlock.add("val _requestId = _httpResponseHeaders?.get(%S)?.toInt() ?: -1\n",
                 "X-reqid")
+
+        codeBlock.takeIf { receiveCountVarName != null }?.add("$receiveCountVarName += _httpResult.size\n")
 
         codeBlock.add(generateReplaceSyncableEntityCodeBlock("_httpResult",
                 afterInsertCode = {varName, entityTypeClassName, isList ->

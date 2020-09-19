@@ -62,6 +62,7 @@ kotlin {
                 implementation project(':lib-door-runtime')
                 implementation project(":lib-database-annotations")
                 compileOnly project(":lib-room-annotations")
+                implementation "com.github.aakira:napier:$version_napier"
 
             }
         }
@@ -82,6 +83,7 @@ kotlin {
 
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
             }
         }
         jsMain {
@@ -92,7 +94,7 @@ kotlin {
                 implementation "com.soywiz.korlibs.klock:klock-js:$version_klock"
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
-
+                implementation "com.github.aakira:napier-js:$version_napier"
             }
         }
 
@@ -138,6 +140,7 @@ dependencies {
     kapt "io.ktor:ktor-client-okhttp:$version_ktor"
     kapt "org.nanohttpd:nanohttpd:$version_nanohttpd"
     kapt "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+    kapt "com.github.aakira:napier-jvm:$version_napier"
 }
 
 compileKotlinJvm.dependsOn(":lib-database-annotation-processor:jar")

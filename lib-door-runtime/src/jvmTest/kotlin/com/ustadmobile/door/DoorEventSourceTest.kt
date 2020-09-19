@@ -1,5 +1,7 @@
 package com.ustadmobile.door
 
+import com.github.aakira.napier.DebugAntilog
+import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.argWhere
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.timeout
@@ -23,6 +25,11 @@ class DoorEventSourceTest {
 
     @Test
     fun givenEventSourceCreated_whenEventSent_thenOnMessageIsCalled() {
+        if(!Napier.isEnable(Napier.Level.DEBUG, null)) {
+            Napier.base(DebugAntilog())
+        }
+
+
         val eventChannel = Channel<DoorServerSentEvent>(Channel.UNLIMITED)
 
         val testServer = embeddedServer(Netty, 8089) {
@@ -53,13 +60,14 @@ class DoorEventSourceTest {
         verify(eventListener, timeout(5000)).onMessage(argWhere { it.id == "42" })
 
         GlobalScope.launch {
-            delay(1000)
+            delay(10000)
             eventChannel.offer(DoorServerSentEvent("50", "UPDATE", "Hello World"))
         }
 
-        verify(eventListener, timeout(2000)).onMessage(argWhere { it.id == "50" })
+        verify(eventListener, timeout(20000)).onMessage(argWhere { it.id == "50" })
+        eventSource.close()
 
-        testServer.stop(0, 5000)
+        testServer.stop(5000, 5000)
     }
 
 }

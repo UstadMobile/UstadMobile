@@ -11,4 +11,9 @@ class UpdateNotification(
         var pnUid: Long = 0,
         var pnDeviceId: Int = 0,
         var pnTableId: Int = 0,
-        var pnTimestamp: Long = 0)
+        var pnTimestamp: Long = 0) {
+
+        override fun toString(): String {
+                return "UpdateNotification: pnUid=$pnUid pnDeviceId=$pnDeviceId tableId=$pnTableId pnTimestamp=$pnTimestamp"
+        }
+}

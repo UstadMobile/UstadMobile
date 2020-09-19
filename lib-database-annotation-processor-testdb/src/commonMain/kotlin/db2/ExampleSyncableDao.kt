@@ -9,6 +9,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.SyncNode
 import com.ustadmobile.door.annotation.ParamName
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.entities.UpdateNotification
 
 
 @Dao
@@ -67,5 +68,9 @@ abstract class ExampleSyncableDao {
 
     @Query("SELECT SyncNode.* FROM SyncNode LIMIT 1")
     abstract fun getSyncNode(): SyncNode?
+
+    @Query("SELECT * FROM UpdateNotification")
+    abstract fun findAllUpdateNotifications(): List<UpdateNotification>
+
 
 }

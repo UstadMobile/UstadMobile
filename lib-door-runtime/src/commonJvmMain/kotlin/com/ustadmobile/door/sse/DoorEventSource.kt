@@ -1,5 +1,6 @@
 package com.ustadmobile.door.sse
 
+import com.ustadmobile.door.ext.doorIdentityHashCode
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.cancel
 import io.ktor.utils.io.jvm.javaio.toByteReadChannel
@@ -7,11 +8,15 @@ import java.net.HttpURLConnection
 import java.net.URL
 import kotlinx.coroutines.*
 import kotlin.coroutines.coroutineContext
-
+import com.github.aakira.napier.Napier
+import com.ustadmobile.door.ext.DoorTag
 
 actual class DoorEventSource actual constructor(var url: String, var listener: DoorEventListener) {
 
     val eventSourceJob: Job
+
+    val logPrefix: String
+        get() = "[DoorEventSource@${this.doorIdentityHashCode}]"
 
     init {
         eventSourceJob = GlobalScope.async {
@@ -20,6 +25,7 @@ actual class DoorEventSource actual constructor(var url: String, var listener: D
     }
 
     actual fun close() {
+        Napier.d("$logPrefix close", tag = DoorTag.LOG_TAG)
         eventSourceJob.cancel()
     }
 
@@ -30,6 +36,7 @@ actual class DoorEventSource actual constructor(var url: String, var listener: D
 
         while(coroutineContext.isActive) {
             try {
+                Napier.d("$logPrefix Connect to server side events from: $url", tag = DoorTag.LOG_TAG)
                 urlConnection = URL(url).openConnection() as HttpURLConnection
                 urlConnection.connectTimeout = CONNECT_TIMEOUT
                 urlConnection.readTimeout = READ_TIMEOUT
@@ -38,6 +45,9 @@ actual class DoorEventSource actual constructor(var url: String, var listener: D
                 urlConnection.setRequestProperty("door-dbversion", "2")
 
                 input = urlConnection.inputStream.toByteReadChannel()
+
+                listener.onOpen()
+                Napier.d("$logPrefix connected", tag = DoorTag.LOG_TAG)
 
                 var dataStr: String = ""
                 var id: String = ""
@@ -61,7 +71,9 @@ actual class DoorEventSource actual constructor(var url: String, var listener: D
                         }
 
                         lineVal.isBlank() -> {
-                            listener.onMessage(DoorServerSentEvent(id, event, dataStr))
+                            val eventObj = DoorServerSentEvent(id, event, dataStr)
+                            Napier.d("$logPrefix Event: $eventObj", tag = DoorTag.LOG_TAG)
+                            listener.onMessage(eventObj)
                             id = ""
                             event = ""
                             dataStr = ""
@@ -70,13 +82,18 @@ actual class DoorEventSource actual constructor(var url: String, var listener: D
                 }
 
             }catch(e: Exception) {
+                Napier.e(logPrefix, e, tag = DoorTag.LOG_TAG)
                 listener.onError(e)
             }finally {
+                Napier.d("$logPrefix disconnecting", tag = DoorTag.LOG_TAG)
                 input?.cancel()
                 urlConnection?.disconnect()
             }
 
-            delay(1000)
+            if(coroutineContext.isActive) {
+                Napier.d("$logPrefix waiting for reconnect", tag = DoorTag.LOG_TAG)
+                delay(1000)
+            }
         }
     }
 

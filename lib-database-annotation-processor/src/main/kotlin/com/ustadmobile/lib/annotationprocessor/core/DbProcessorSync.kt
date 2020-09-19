@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.*
+import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
@@ -444,6 +445,10 @@ class DbProcessorSync: AbstractDbProcessor() {
 
         repoTypeSpec.addFunction(FunSpec.builder("_replaceUpdateNotifications")
                 .addParameter("entities", List::class.parameterizedBy(UpdateNotification::class))
+                .addCode("%T.v(\"SyncRepo replaceUpdateNotifications: \${entities.%M()}\", tag = %T.LOG_TAG)\n",
+                        Napier::class,
+                        MemberName("kotlin.collections", "joinToString"),
+                        DoorTag::class)
                 .addCode(CodeBlock.of("_dao._replaceUpdateNotifications(entities)\n"))
                 .addModifiers(KModifier.OVERRIDE)
                 .build())
@@ -497,8 +502,10 @@ class DbProcessorSync: AbstractDbProcessor() {
                             .addMember(CodeBlock.of("%S", "SELECT * FROM ${entityType.simpleName}")).build())
 
             val entitySyncCodeBlock = CodeBlock.builder()
+                    .add("var _receiveCount = 0\n")
                     .add(generateRepositoryGetSyncableEntitiesFun(findMasterUnsentFnSpec.build(),
-                            syncDaoSimpleName, syncHelperDaoVarName = "_dao", addReturnDaoResult = false))
+                            syncDaoSimpleName, syncHelperDaoVarName = "_dao", addReturnDaoResult = false,
+                            receiveCountVarName = "_receiveCount"))
                     .add("_loadHelper.doRequest()\n")
 
             val findDevicesSql = syncableEntityInfo.notifyOnUpdate
@@ -507,15 +514,11 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .returns(List::class.asClassName().parameterizedBy(INT))
                         .addModifiers(KModifier.OVERRIDE)
                         .addCode(CodeBlock.builder()
-                                .add("val _devicesToNotify = _dao._findDevicesToNotify${entityType.simpleName}()\n")
-                                .add("val _timeNow = %M()\n",
-                                        MemberName("com.ustadmobile.door.util", "systemTimeInMillis"))
-                                .add("val _updateNotifications = _devicesToNotify.map·{·%T(pnDeviceId·=·it,·pnTableId·=·${syncableEntityInfo.tableId},·pnTimestamp·=·_timeNow)·}\n",
-                                    UpdateNotification::class)
-                                .add("_replaceUpdateNotifications(_updateNotifications)\n")
-                                .add("_updateNotificationManager?.onNewUpdateNotifications(_updateNotifications)\n")
-                                .add("_dao._updateChangeLogDispatched(${syncableEntityInfo.tableId}, true)\n")
-                                .add("return _devicesToNotify\n")
+                                .add("return %M(${syncableEntityInfo.tableId}, _updateNotificationManager, " +
+                                        "_dao::_findDevicesToNotify${entityType.simpleName}, " +
+                                        "::_replaceUpdateNotifications," +
+                                        "::_updateChangeLogDispatched)",
+                                MemberName("com.ustadmobile.door.ext", "sendUpdates"))
                                 .build())
                         .build())
             }
@@ -523,6 +526,10 @@ class DbProcessorSync: AbstractDbProcessor() {
             val hasAttachments = entityType.getAnnotation(EntityWithAttachment::class.java) != null
 
             entitySyncCodeBlock.add("val _entities = _findLocalUnsent${entityType.simpleName}(0, 100)\n")
+                    .add("var _sendCount = 0\n")
+                    .add("%T.v(\"SyncDao·-·${entityType.simpleName}·found·\${_entities.size}·local·changes·to·send\"," +
+                            "tag = %T.LOG_TAG)\n",
+                            Napier::class, DoorTag::class)
                     .beginControlFlow("if(!_entities.isEmpty())")
             var multipartPartsVarName: String? = null
             if(hasAttachments) {
@@ -568,10 +575,11 @@ class DbProcessorSync: AbstractDbProcessor() {
                     .add(generateReplaceSyncableEntitiesTrackerCodeBlock("_entities",
                             entityListTypeName, syncHelperDaoVarName = "_dao", clientIdVarName = "0",
                             reqIdVarName = "0", processingEnv = processingEnv, isPrimaryDb = false))
+                    .add("_sendCount += _entities.size\n")
                     .endControlFlow()
 
             entitySyncCodeBlock.add("""return %T(tableId = ${syncableEntityInfo.tableId},
-                |status = %T.STATUS_SUCCESS, timestamp = %M())
+                |status = %T.STATUS_SUCCESS, timestamp = %M(), sent = _sendCount, received = _receiveCount)
                 """.trimMargin(), SyncResult::class, SyncResult::class, SYSTEMTIME_MEMBER_NAME)
 
             entitySyncCodeBlock.add("\n")
@@ -585,6 +593,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                             entityType)
                     .beginControlFlow("try")
                     .add("val _syncResult = sync${entityType.simpleName}()\n")
+                    .add("_allResults += _syncResult\n")
                     .add("_insertSyncResult(_syncResult)\n")
                     .nextControlFlow("catch(e: %T)", Exception::class)
                     .add("""_insertSyncResult(%T(tableId = ${syncableEntityInfo.tableId}, 
@@ -942,6 +951,10 @@ class DbProcessorSync: AbstractDbProcessor() {
 
         const val SUFFIX_SYNC_ROUTE = "SyncDao_KtorRoute"
 
+        /**
+         * The Suffix of the generated tracker entity which is created for each entity annotated
+         * with SyncableEntity
+         */
         const val TRACKER_SUFFIX = "_trk"
 
         const val TRACKER_PK_FIELDNAME = "pk"
