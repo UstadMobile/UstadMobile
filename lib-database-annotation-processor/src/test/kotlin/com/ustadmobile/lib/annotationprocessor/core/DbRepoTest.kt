@@ -387,7 +387,6 @@ class DbRepoTest {
                 esLcb = 2
             })
 
-            //(clientRepo as DoorDatabaseSyncRepository).sync(null)
             clientDb.waitUntil(5000, listOf("ExampleSyncableEntity")) {
                 clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid)?.esNumber == 52
             }
@@ -463,27 +462,44 @@ class DbRepoTest {
 
     @Test
     fun givenBlankEntityInsertedAndSynced_whenLocallyUpdatedAndSynced_shouldUpdateServer() {
-        setupClientAndServerDb()
+        setupClientAndServerDb(ServerUpdateNotificationManagerImpl())
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
-        val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),"http://localhost:8089/",
-                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
+        val clientRepo = clientDb.asRepository(Any(),"http://localhost:8089/",
+                "token", httpClient, useClientSyncManager = true).asConnectedRepository()
         runBlocking {
             //1. Create a blank entity. Insert it.
-            val client1 = ExampleSyncableEntity()
-            client1.esUid = clientRepo.exampleSyncableDao().insert(client1)
+            val client1 = ExampleSyncableEntity().apply {
+                esUid = 420
+            }
+            serverDb.accessGrantDao().insert(AccessGrant().apply {
+                this.tableId = ExampleSyncableEntity.TABLE_ID
+                this.entityUid = 420
+                this.deviceId = (clientRepo as DoorDatabaseSyncRepository).clientId
+            })
+
+            clientRepo.exampleSyncableDao().insert(client1)
+
             //2. Lets sync happen  - Verify blank entity is on server
-            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+            serverDb.waitUntil(5000, listOf("ExampleSyncableEntity")) {
+                serverDb.exampleSyncableDao().findByUid(client1.esUid) != null
+            }
+
             val server1 = serverDb.exampleSyncableDao().findByUid(client1.esUid)
             Assert.assertEquals("Server got the entity OK", client1.esUid, server1!!.esUid)
+
             //3. Make changes and update entity.
             client1.esName = "Hello"
             client1.esNumber = 42
             clientRepo.exampleSyncableDao().updateAsync(client1)
             val client2 = clientDb.exampleSyncableDao().findByUid(client1.esUid)
             Assert.assertEquals("Client updated locally OK", "Hello", client2!!.esName)
+
+
             //4. Let sync happen - Verify update on server.
-            (clientRepo as DoorDatabaseSyncRepository).sync(null)
+            serverDb.waitUntil(5000, listOf("ExampleSyncableEntity")) {
+                serverDb.exampleSyncableDao().findByUid(client1.esUid)?.esName == "Hello"
+            }
             val server2 = serverDb.exampleSyncableDao().findByUid(client1.esUid)
             Assert.assertEquals("Name matches", "Hello", server2!!.esName)
         }
