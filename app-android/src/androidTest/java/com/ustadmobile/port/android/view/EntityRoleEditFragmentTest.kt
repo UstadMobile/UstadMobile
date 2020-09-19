@@ -106,17 +106,20 @@ class EntityRoleEditFragmentTest {
         })
 
 
-        val scenario = launchFragment(true)
-
+        launchFragment(true)
 
         onView(withId(R.id.fragment_entityrole_edit_role_tiet)).check(matches(isDisplayed()))
+
+
+
 
 
     }
 
 
-    private fun launchFragment(fillForm: Boolean = true,
-                               entityRoleUid: Long = 0, groupUid: Long = 0): FragmentScenario<EntityRoleEditFragment> {
+    private fun launchFragment(fillForm: Boolean = true, entityRoleUid: Long = 0,
+                               groupUid: Long = 0)
+            : FragmentScenario<EntityRoleEditFragment> {
 
         var args = mapOf(UstadView.ARG_ENTITY_UID to entityRoleUid.toString(),
                         UstadView.ARG_FILTER_BY_PERSONGROUPUID to groupUid.toString())
