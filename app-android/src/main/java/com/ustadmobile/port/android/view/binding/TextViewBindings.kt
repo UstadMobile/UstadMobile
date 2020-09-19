@@ -246,3 +246,25 @@ fun TextView.setResponseTextFilled(responseText: String?){
 fun TextView.setMemberRoleName(clazzMember: ClazzMember?) {
     text = clazzMember?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
 }
+
+
+@BindingAdapter("rolesAndPermissionsText")
+fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
+    val scopeType = when (entityRole.erTableId) {
+        School.TABLE_ID -> {
+            " (" +context.getString(R.string.school)+ ")"
+        }
+        Clazz.TABLE_ID -> {
+            " (" +context.getString(R.string.clazz) + ")"
+        }
+        Person.TABLE_ID -> {
+            " (" + context.getString(R.string.person) + ")"
+        }
+        else -> ""
+    }
+
+    val fullText =entityRole.entityRoleRole?.roleName +  " @ " +
+            entityRole.entityRoleScopeName + scopeType
+    text = fullText
+
+}

@@ -226,61 +226,6 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")
     abstract fun findByUidWithDisplayDetailsLive(personUid: Long): DoorLiveData<PersonWithDisplayDetails?>
 
-    private suspend fun createPersonCommon(person: Person, loggedInPersonUid: Long): PersonWithGroup{
-
-        //Always will be a new person. No need to user insertOrReplace()
-        val personUid = insertAsync(person)
-        person.personUid = personUid
-
-        val personGroup = PersonGroup()
-        personGroup.groupName = if (person.firstNames != null)
-            person.firstNames + " 's individual group"
-        else
-            "" + "Individual Person group"
-
-        personGroup.groupPersonUid = person.personUid
-        val personGroupUid = insertPersonGroup(personGroup)
-        personGroup.groupUid = personGroupUid
-
-        val personGroupMember = PersonGroupMember()
-        personGroupMember.groupMemberPersonUid = personUid
-        personGroupMember.groupMemberGroupUid = personGroupUid
-        personGroupMember.groupMemberActive = true
-        val personGroupMemberUid = insertPersonGroupMember(personGroupMember)
-        personGroupMember.groupMemberUid = personGroupMemberUid
-
-        createAuditLog(personUid, loggedInPersonUid)
-
-        val personWithGroup = PersonWithGroup(personUid, personGroupUid)
-        return personWithGroup
-    }
-
-    /**
-     * Creates actual person and assigns it to a group for permissions' sake. Use this
-     * instead of direct insert.
-     *
-     * @param person    The person entity
-     * @param callback  The callback.
-     */
-    suspend fun createPersonAsync(person: Person, loggedInPersonUid: Long):Long  {
-        val personWithGroup = createPersonCommon(person, loggedInPersonUid)
-        return personWithGroup.personUid
-    }
-
-    /**
-     * Insert the person given and create a PersonGroup for it and set it to individual.
-     * Note: this does not check if the person exists. The given person must not exist.
-     *
-     * @param person    The person object to persist. Must not already exist.
-     * @param callback  The callback that returns PersonWithGroup pojo object - basically
-     * Person Uids and PersonGroup Uids
-     */
-    suspend fun createPersonWithGroupAsync(person: Person): PersonWithGroup {
-        val personWithGroup = createPersonCommon(person, 0)
-        return personWithGroup
-
-    }
-
     private fun createAuditLog(toPersonUid: Long, fromPersonUid: Long) {
         if(fromPersonUid != 0L) {
             val auditLog = AuditLog(fromPersonUid, Person.TABLE_ID, toPersonUid)

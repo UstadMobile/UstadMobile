@@ -26,6 +26,8 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     private var filterAlreadySelectedList = listOf<Long>()
 
+    private var filterByPermission: Long = 0
+
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
@@ -37,6 +39,9 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         filterExcludeMemberOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
         filterAlreadySelectedList = arguments[ARG_EXCLUDE_PERSONUIDS_LIST]?.split(",")?.filter { it.isNotEmpty() }?.map { it.toLong() }
                 ?: listOf()
+
+        filterByPermission = arguments[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
+                ?: Role.PERMISSION_PERSON_SELECT
 
         selectedSortOption = SORT_OPTIONS[0]
         updateListOnView()

@@ -3,6 +3,7 @@ package com.ustadmobile.core.view
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
+import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 
@@ -13,6 +14,8 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
     var personPicturePath: String?
 
     var clazzList: DoorLiveData<List<ClazzMemberWithClazz>>?
+
+    var rolesAndPermissionsList: DoorLiveData<List<EntityRoleWithNameAndRole>>?
 
     var registrationMode: Boolean?
 
@@ -25,6 +28,8 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
     var confirmError: String?
 
     var dateOfBirthError: String?
+
+    var canDelegatePermissions: Boolean?
 
     fun navigateToNextDestination(account: UmAccount?, nextDestination: String)
 

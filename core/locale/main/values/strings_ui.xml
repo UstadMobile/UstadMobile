@@ -732,6 +732,14 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="question_type">Question type</string>
     <string name="add_option">Add option</string>
 
+    <string name="roles_and_permissions">Roles and permissions</string>
+    <string name="add_role_permission">Add Role \/ Permission</string>
+    <string name="scope">Scope</string>
+    <string name="scope_description">Select the scope(e.g. class, school or a specific person) over which permissions will be applied.</string>
+    <string name="role_description">A role(e.g. teacher, student, etc) gives a set of permissions (e.g. view person details, record attendance, etc) that apply to the scope selected above.</string>
+    <string name="assign_role">Assign role</string>
+    <string name="more_information">More information</string>
+
     <!-- This is a code that the teacher can give to students to allow them to join the class -->
     <string name="class_code">Class code</string>
 
@@ -758,5 +766,19 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="copy_code">Copy code</string>
     <string name="share_link">Share link</string>
     <string name="invite_with_link">Invite with link</string>
+
+    <string name="role_not_selected_error">Role must be selected</string>
+
+    <string name="permission_person_delegate">Delegate roles and permissions to others</string>
+
+    <string name="this_field_is_mandatory">This field is mandatory</string>
+
+    <string name="permission_role_select">View and select all roles </string>
+    <string name="permission_role_insert">Insert a new role</string>
+    <string name="permission_school_select">View and select schools</string>
+    <string name="permission_school_insert">Insert a new school</string>
+    <string name="permission_school_update">Update and edit existing schools</string>
+
+    <string name="permission_password_reset">Reset and update persons password</string>
 
 </resources>

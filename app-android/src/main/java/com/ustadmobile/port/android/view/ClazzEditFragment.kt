@@ -185,6 +185,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
                 School::class.java) {
             val school = it.firstOrNull() ?: return@observeResult
             entity?.clazzSchoolUid = school.schoolUid
+            entity?.school = school
             mDataBinding?.fragmentClazzEditSchoolText?.setText(school.schoolName)
             mDataBinding?.clazz = entity
         }

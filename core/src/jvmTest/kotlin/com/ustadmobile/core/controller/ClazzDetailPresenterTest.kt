@@ -7,6 +7,7 @@ import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -64,7 +65,8 @@ class ClazzDetailPresenterTest {
             firstNames = "Officer"
             lastName = "Jones"
             username = "officer"
-            personUid = db.personDao.insert(this)
+            personUid = db.insertPersonOnlyAndGroup(this).personUid
+
         }
 
         val roleWithAttendancePermission = Role().apply {
@@ -77,10 +79,10 @@ class ClazzDetailPresenterTest {
                 "", endpointUrl, activePerson.firstNames, activePerson.lastName)
 
         runBlocking { db.insertPersonWithRole(activePerson, roleWithAttendancePermission,
-            EntityRole().apply {
-                erTableId = Clazz.TABLE_ID
-                erEntityUid = testEntity.clazzUid
-            }) }
+                EntityRole().apply {
+                    erTableId = Clazz.TABLE_ID
+                    erEntityUid = testEntity.clazzUid
+                }) }
 
         val presenter = ClazzDetailPresenter(Any(),
                 mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString()), mockView, di,

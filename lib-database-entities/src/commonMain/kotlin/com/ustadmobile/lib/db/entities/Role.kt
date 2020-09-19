@@ -6,13 +6,14 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.lib.db.entities.Role.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 
 @Entity
-@SyncableEntity(tableId = 45)
+@SyncableEntity(tableId = TABLE_ID)
 @Serializable
-class Role() {
+open class Role() {
 
     @PrimaryKey(autoGenerate = true)
     var roleUid: Long = 0
@@ -32,7 +33,6 @@ class Role() {
 
     //bit flags made of up PERMISSION_ constants
     var rolePermissions: Long = 0
-
 
     constructor(roleName: String, rolePermissions: Long):this() {
         this.roleName = roleName
@@ -69,6 +69,8 @@ class Role() {
     }
 
     companion object {
+
+        const val TABLE_ID = 45
 
         const val PERMISSION_CLAZZ_SELECT: Long = 1
 
@@ -135,8 +137,16 @@ class Role() {
 
         const val PERMISSION_SCHOOL_UPDATE: Long = 2147483648L
 
+        const val PERMISSION_PERSON_DELEGATE: Long = 4294967296L
+
         //Permission to actually open and enter the class (eg. available to accept members, not those with pending requests)
-        const val PERMISSION_CLAZZ_OPEN: Long = 4294967296L
+        const val PERMISSION_CLAZZ_OPEN: Long = 8589934592L
+
+        const val PERMISSION_ROLE_SELECT : Long = 17179869184L
+
+        const val PERMISSION_ROLE_INSERT: Long = 34359738368L
+
+        const val PERMISSION_RESET_PASSWORD: Long = 68719476736L
 
         //Predefined roles that are added by the system
         const val ROLE_TEACHER_NAME = "Teacher"

@@ -103,7 +103,11 @@ interface UstadView {
 
         const val ARG_LISTADDMODE = "listAddMode"
 
+        const val ARG_FILTER_BY_PERMISSION = "filterByPermission"
+
         const val ARG_FILTER_BY_CLAZZUID = "filterByClazzUid"
+
+        const val ARG_FILTER_BY_PERSONGROUPUID = "filterByPersonGroupUid"
 
         const val ARG_CLAZZWORK_UID = "clazzworkUid"
 
