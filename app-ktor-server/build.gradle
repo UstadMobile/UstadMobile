@@ -230,7 +230,7 @@ task devModeWar(type: War) {
 task appRun(type: JavaExec) {
     classpath = files("$buildDir/libs/app-ktor-server-all.jar")
     main = 'io.ktor.server.netty.EngineMain'
-    args '-port=8087'
+    args '-port=8087', '-config=server.conf'
 }
 
 task appRunDebug(type: JavaExec) {
