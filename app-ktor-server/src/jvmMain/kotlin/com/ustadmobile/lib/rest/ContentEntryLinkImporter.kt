@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.rest
 
+import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
@@ -11,6 +12,7 @@ import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
+import org.apache.commons.lang3.exception.ExceptionUtils
 import org.apache.http.HttpStatus
 import org.kodein.di.instance
 import org.kodein.di.ktor.di
@@ -25,7 +27,12 @@ fun Route.ContentEntryLinkImporter() {
 
             val url = call.request.queryParameters["url"]?: ""
             val scraperManager: ScraperManager by di().on(call).instance()
-            val metadata = scraperManager.extractMetadata(url)
+            var metadata: ImportedContentEntryMetaData? = null
+            try{
+                metadata = scraperManager.extractMetadata(url)
+            }catch (e: Exception){
+                e.printStackTrace()
+            }
             if (metadata == null) {
                 call.respond(HttpStatusCode.BadRequest, "Unsupported")
             } else {
@@ -41,7 +48,10 @@ fun Route.ContentEntryLinkImporter() {
             val scraperType = call.request.queryParameters["scraperType"] ?: ""
 
             val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
-            db.contentEntryDao.insert(contentEntry)
+            val entryFromDb = db.contentEntryDao.findByUid(contentEntry.contentEntryUid)
+            if (entryFromDb == null) {
+                db.contentEntryDao.insertWithReplace(contentEntry)
+            }
 
             val scraperManager: ScraperManager by di().on(call).instance()
             try {
