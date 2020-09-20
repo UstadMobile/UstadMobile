@@ -219,3 +219,5 @@ build/
 tools/string_names.txt
 tools/string_ids.txt
 tools/unused_strings.txt
+app-ktor-server/server.conf
+app-ktor-server/devmode.conf
