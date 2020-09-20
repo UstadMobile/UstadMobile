@@ -14,9 +14,7 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var selectedStorageIndex: Int
 
-    var selectedFileUri: String ?
-
-    var selectedUrl: String?
+    var selectedUri: String?
 
     var titleErrorEnabled: Boolean
 
@@ -31,6 +29,8 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
     companion object {
 
         const val VIEW_NAME = "ContentEntryEdit2EditView"
+
+        const val ARG_IMPORTED_METADATA = "metadata"
 
     }
 

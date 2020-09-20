@@ -48,10 +48,10 @@ val importerMap = mapOf(ZIPPED to DefaultContainerImporter(isZipped = true),
 
 
 suspend fun importContainerFromFile(contentEntryUid: Long, mimeType: String?, containerBaseDir: String,
-                                    file: String, db: UmAppDatabase, dbRepo: UmAppDatabase, importMode: Int, context: Any): Container {
+                                    fileUri: String, db: UmAppDatabase, dbRepo: UmAppDatabase, importMode: Int, context: Any): Container {
     try {
         val importer = importerMap[importMode] ?: throw IllegalArgumentException("no file found")
-        return importer.importContentEntryFromFile(contentEntryUid, mimeType, containerBaseDir, file, db, dbRepo, importMode, context)
+        return importer.importContentEntryFromFile(contentEntryUid, mimeType, containerBaseDir, fileUri, db, dbRepo, importMode, context)
     } catch (e: ZipException) {
         e.printStackTrace()
     } catch (e: IOException) {

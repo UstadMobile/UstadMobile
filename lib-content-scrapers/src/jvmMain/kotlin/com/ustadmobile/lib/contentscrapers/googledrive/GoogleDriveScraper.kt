@@ -24,6 +24,7 @@ import org.apache.commons.io.FileUtils
 import org.kodein.di.DI
 import org.kodein.di.instance
 import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.nio.file.Files
 
@@ -77,9 +78,13 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
 
                     val contentFile = File(tempDir, file.name ?: file.id!!)
                     val stream = it.receive<InputStream>()
-                    FileUtils.writeByteArrayToFile(contentFile, stream.readBytes())
+                    FileOutputStream(contentFile).use { fileOut ->
+                        stream.copyTo(fileOut)
+                        fileOut.flush()
+                    }
+                    stream.close()
 
-                    val metadata = extractContentEntryMetadataFromFile(contentFile.path, db)
+                    val metadata = extractContentEntryMetadataFromFile(contentFile.toURI().toString(), db)
 
                     if (metadata == null) {
                         hideContentEntry()
@@ -132,7 +137,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
 
                     importContainerFromFile(fileEntry.contentEntryUid,
                             metadata.mimeType, containerFolder.absolutePath,
-                            contentFile.absolutePath, db, db, metadata.importMode, Any())
+                            contentFile.toURI().toString(), db, db, metadata.importMode, Any())
 
                     showContentEntry()
                     setScrapeDone(true, 0)

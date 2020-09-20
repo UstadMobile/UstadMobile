@@ -14,7 +14,7 @@ import org.kodein.di.DI
 import java.io.File
 
 @ExperimentalStdlibApi
-class FolderScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
+class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     override fun scrapeUrl(sourceUrl: String) {
 
@@ -28,7 +28,7 @@ class FolderScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: L
 
             try {
 
-                val metadata = extractContentEntryMetadataFromFile(file.absolutePath, db)
+                val metadata = extractContentEntryMetadataFromFile(file.toURI().toString(), db)
 
                 if (metadata == null) {
                     hideContentEntry()
@@ -56,7 +56,7 @@ class FolderScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: L
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
 
-                importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file.absolutePath, db, db, metadata.importMode, Any())
+                importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file.toURI().toString(), db, db, metadata.importMode, Any())
 
                 close()
                 UMLogUtil.logInfo("finished scrape for $sourceUrl")

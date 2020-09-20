@@ -37,7 +37,7 @@ class H5PTypeFilePlugin : H5PTypePlugin(), ContentTypeFilePlugin {
     override fun getContentEntry(uri: String): ContentEntryWithLanguage? {
         var contentEntry: ContentEntryWithLanguage? = null
         try {
-            val file = File(uri)
+            val file = File(URI(uri).path)
             ZipInputStream(FileInputStream(file)).use {
                 var zipEntry: ZipEntry? = null
                 while ({ zipEntry = it.nextEntry; zipEntry }() != null) {
@@ -72,6 +72,7 @@ class H5PTypeFilePlugin : H5PTypePlugin(), ContentTypeFilePlugin {
                                 file.nameWithoutExtension else json.jsonObject["title"]?.content
                             this.author = author
                             leaf = true
+                            entryId = file.name
                         }
                         break
                     }

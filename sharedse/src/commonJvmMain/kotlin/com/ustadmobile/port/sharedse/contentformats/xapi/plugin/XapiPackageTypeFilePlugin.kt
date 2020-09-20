@@ -20,7 +20,7 @@ class XapiPackageTypeFilePlugin : XapiPackageTypePlugin(), ContentTypeFilePlugin
     override fun getContentEntry(uri: String): ContentEntryWithLanguage? {
         var contentEntry: ContentEntryWithLanguage? = null
         try {
-            val file = File(uri)
+            val file = File(URI(uri).path)
             ZipInputStream(FileInputStream(file)).use {
                 var zipEntry: ZipEntry? = null
                 while ({ zipEntry = it.nextEntry; zipEntry }() != null) {

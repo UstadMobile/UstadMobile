@@ -12,19 +12,13 @@ import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ETAG_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.LAST_MODIFIED_TXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
-import com.ustadmobile.lib.contentscrapers.abztract.YoutubeChannelIndexer
-import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
 import com.ustadmobile.lib.contentscrapers.africanbooks.AsbScraper
 import com.ustadmobile.lib.contentscrapers.ddl.DdlContentScraper
-import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexerAndScraper
-import com.ustadmobile.lib.contentscrapers.khanacademy.KhanArticleScraper
-import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants
+import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexer
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanExerciseScraper
-import com.ustadmobile.lib.contentscrapers.khanacademy.KhanVideoScraper
 import com.ustadmobile.lib.contentscrapers.prathambooks.IndexPrathamContentScraper
 import com.ustadmobile.lib.contentscrapers.ytindexer.ChildYoutubeScraper
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.Dispatcher
@@ -55,7 +49,7 @@ class TestPrathamContentScraper {
 
     private lateinit var di: DI
     private lateinit var endpointScope: EndpointScope
-    private val endpoint = Endpoint(TestFolderIndexerAndScraper.TEST_ENDPOINT)
+    private val endpoint = Endpoint(TestFolderIndexer.TEST_ENDPOINT)
 
     val tmpDir = Files.createTempDirectory("folder").toFile()
     val containerDir = Files.createTempDirectory("container").toFile()

@@ -7,7 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.abztract.UrlScraper
-import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexerAndScraper
+import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexer
 import com.ustadmobile.lib.contentscrapers.globalDisptacher
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import kotlinx.coroutines.runBlocking
@@ -38,7 +38,7 @@ class TestApacheIndexer {
 
     private lateinit var di: DI
     private lateinit var endpointScope: EndpointScope
-    private val endpoint = Endpoint(TestFolderIndexerAndScraper.TEST_ENDPOINT)
+    private val endpoint = Endpoint(TestFolderIndexer.TEST_ENDPOINT)
 
 
     @Before

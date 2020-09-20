@@ -1,4 +1,4 @@
-package com.ustadmobile.lib.contentscrapers.googleDrive
+package com.ustadmobile.lib.contentscrapers.folder
 
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
@@ -6,16 +6,9 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexer
-import com.ustadmobile.lib.contentscrapers.googledrive.GoogleDriveScraper
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import kotlinx.coroutines.runBlocking
-import okhttp3.mockwebserver.MockResponse
-import okhttp3.mockwebserver.MockWebServer
-import okio.Buffer
-import okio.Okio
-import org.apache.commons.io.IOUtils
+import org.apache.commons.io.FileUtils
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -26,8 +19,16 @@ import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
 
-@ExperimentalStdlibApi
-class TestGoogleDriveScraper {
+class TestFileScraper {
+
+    private lateinit var scooterFile: File
+    private lateinit var englishFolder: File
+    lateinit var db: UmAppDatabase
+
+
+    private lateinit var di: DI
+    private lateinit var endpointScope: EndpointScope
+    private val endpoint = Endpoint(TestFolderIndexer.TEST_ENDPOINT)
 
     @Rule
     @JvmField
@@ -36,16 +37,9 @@ class TestGoogleDriveScraper {
     val tmpDir = Files.createTempDirectory("folder").toFile()
     val containerDir = Files.createTempDirectory("container").toFile()
 
-    lateinit var db: UmAppDatabase
-
-    lateinit var mockWebServer: MockWebServer
-
-    private lateinit var di: DI
-    private lateinit var endpointScope: EndpointScope
-    private val endpoint = Endpoint(TestFolderIndexer.TEST_ENDPOINT)
 
     @Before
-    fun setup() {
+    fun setup(){
         endpointScope = EndpointScope()
 
         di = DI {
@@ -66,35 +60,23 @@ class TestGoogleDriveScraper {
 
         db = di.on(endpoint).direct.instance(tag = UmAppDatabase.TAG_DB)
 
-        mockWebServer = MockWebServer()
+        englishFolder = File(tmpDir, "english")
+        englishFolder.mkdirs()
+
+        scooterFile = File(tmpDir, "scooter-en.epub")
+        FileUtils.copyToFile(javaClass.getResourceAsStream("/com/ustadmobile/lib/contentscrapers/folder/314-my-very-own-scooter-EN.epub"),
+                scooterFile)
 
     }
 
+
     @Test
-    fun givenGoogleDriveLink_whenScraped_createContainer(){
+    fun givenAFile_whenScraped_thenCreateContainer(){
 
-        val data = javaClass.getResourceAsStream(File("/com/ustadmobile/lib/contentscrapers/googleDrive/file.txt").toString())
-        val body = IOUtils.toString(data, ScraperConstants.UTF_ENCODING)
-        var response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json")
-        response.setBody(body)
+        val scraper = FileScraper(0, 0,0, endpoint, di)
+        scraper.scrapeUrl(scooterFile.path)
 
-        mockWebServer.enqueue(response)
-
-        val videoIn = javaClass.getResourceAsStream(File("/com/ustadmobile/lib/contentscrapers/folder/314-my-very-own-scooter-EN.epub").toString())
-        val source = Okio.buffer(Okio.source(videoIn))
-        val buffer = Buffer()
-        source.readAll(buffer)
-
-        response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/epub+zip")
-        response.body = buffer
-
-        mockWebServer.enqueue(response)
-
-        val scraper = GoogleDriveScraper(0,0,0, endpoint, di)
-        val url = mockWebServer.url("/https://www.googleapis.com/drive/v3/files/0B__cZKkvYaJvckpRSFEtSWFVRkk").toString()
-        scraper.scrapeUrl(url)
-
-        val filEntry = db.contentEntryDao.findBySourceUrl("https://www.googleapis.com/drive/v3/files/0B__cZKkvYaJvckpRSFEtSWFVRkk")
+        val filEntry = db.contentEntryDao.findBySourceUrl(scooterFile.path)
         Assert.assertEquals("Scooter content exists", "My Own Scooter", filEntry!!.title)
 
         runBlocking {
@@ -102,7 +84,6 @@ class TestGoogleDriveScraper {
             val container = fileContainer[0]
             Assert.assertEquals("container is epub", "application/epub+zip", container.mimeType)
         }
-
 
     }
 

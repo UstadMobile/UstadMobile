@@ -9,10 +9,13 @@ import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
+import org.apache.commons.io.FileUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.kodein.di.DI
 import java.io.File
 import java.lang.Exception
+import java.nio.file.Files
 
 @ExperimentalStdlibApi
 class FolderIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntryUid, runUid, sqiUid, contentEntryUid, endpoint, di) {
@@ -63,6 +66,11 @@ class FolderIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
             fileList.forEach { file ->
 
                 UMLogUtil.logInfo("found file ${file.name}")
+
+                val mimeType = Files.probeContentType(file.toPath())
+
+                mimeTypeSupported.find { fileMimeType -> fileMimeType == mimeType }
+                        ?: return@forEach
 
                 val childEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, file.path, folderEntry.primaryLanguageUid, file.name)
                 if (file.isDirectory) {

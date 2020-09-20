@@ -5,7 +5,7 @@ import com.ustadmobile.lib.contentscrapers.apache.ApacheIndexer
 import com.ustadmobile.lib.contentscrapers.abztract.UrlScraper
 import com.ustadmobile.lib.contentscrapers.ddl.*
 import com.ustadmobile.lib.contentscrapers.folder.FolderIndexer
-import com.ustadmobile.lib.contentscrapers.folder.FolderScraper
+import com.ustadmobile.lib.contentscrapers.folder.FileScraper
 import com.ustadmobile.lib.contentscrapers.googledrive.GoogleDriveScraper
 import com.ustadmobile.lib.contentscrapers.habaybna.HabFrontPageIndexer
 import com.ustadmobile.lib.contentscrapers.khanacademy.*
@@ -90,7 +90,7 @@ object ScraperTypes {
             KHAN_FULL_EXERCISE_SCRAPER to KhanExerciseScraper::class.java,
             KHAN_LITE_VIDEO_SCRAPER to KhanLiteVideoScraper::class.java,
             YOUTUBE_VIDEO_SCRAPER to YoutubeScraper::class.java,
-            FOLDER_SCRAPER to FolderScraper::class.java,
+            FOLDER_SCRAPER to FileScraper::class.java,
             URL_SCRAPER to UrlScraper::class.java,
             GOOGLE_DRIVE_SCRAPE to GoogleDriveScraper::class.java)
 

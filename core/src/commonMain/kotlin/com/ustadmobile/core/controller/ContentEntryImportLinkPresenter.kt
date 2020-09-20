@@ -2,11 +2,13 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
+import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.door.doorMainDispatcher
 import io.ktor.client.call.receive
+import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpStatement
@@ -24,36 +26,33 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
     private val currentHttpClient = defaultHttpClient()
 
     fun handleClickDone(link: String) {
-        view.showHideProgress(false)
+        GlobalScope.launch(doorMainDispatcher()) {
 
-        GlobalScope.launch {
+            view.showHideProgress(false)
+            try {
+                currentHttpClient.post<HttpStatement>() {
+                    url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl, "/import/validateLink/"))
+                    parameter("url", link)
+                }.execute() {
 
-            currentHttpClient.post<HttpStatement>() {
-                url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl, "/import/validateLink/"))
-                body = link
-            }.execute() {
-
-                val status = it.status
-
-                if (status.value != 200) {
-                    GlobalScope.launch(doorMainDispatcher()) {
+                    val status = it.status
+                    if (status.value != 200) {
                         view.validLink = false
                         view.showHideProgress(true)
+                        return@execute
                     }
-                    return@execute
-                }
 
-                val data = it.receive<ImportedContentEntryMetaData>()
-
-                GlobalScope.launch(doorMainDispatcher()) {
+                    val data = it.receive<ImportedContentEntryMetaData>()
                     view.showHideProgress(true)
                     view.finishWithResult(data)
+
                 }
 
+            }catch (e: Exception){
+                view.showHideProgress(true)
+                dumpException(e)
             }
-
         }
-
 
     }
 

@@ -54,7 +54,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
         runBlocking {
 
-            val metadata = extractContentEntryMetadataFromFile(file.absolutePath, db)
+            val metadata = extractContentEntryMetadataFromFile(file.toURI().toString(), db)
 
             if (metadata == null) {
                 hideContentEntry()

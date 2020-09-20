@@ -26,7 +26,7 @@ class XapiContentTypePluginTest {
         }
 
         val xapiPlugin = XapiPackageTypeFilePlugin()
-        val contentEntry = xapiPlugin.getContentEntry(tempFile)
+        val contentEntry = xapiPlugin.getContentEntry(tempFile.toURI().toString())
 
         Assert.assertEquals("Got expected title",
                 "Ustad Mobile", contentEntry?.title)

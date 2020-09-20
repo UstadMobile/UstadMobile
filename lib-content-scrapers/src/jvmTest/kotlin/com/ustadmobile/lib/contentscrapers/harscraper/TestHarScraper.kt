@@ -13,7 +13,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexerAndScraper
+import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import net.lightbody.bmp.core.har.Har
@@ -53,7 +53,7 @@ class TestHarScraper {
 
     private lateinit var di: DI
     private lateinit var endpointScope: EndpointScope
-    private val endpoint = Endpoint(TestFolderIndexerAndScraper.TEST_ENDPOINT)
+    private val endpoint = Endpoint(TestFolderIndexer.TEST_ENDPOINT)
 
     private val RESOURCE_PATH = "/com/ustadmobile/lib/contentscrapers/harcontent"
 

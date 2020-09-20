@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -12,6 +13,7 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
@@ -25,7 +27,6 @@ import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpStatement
-import io.ktor.http.contentType
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
@@ -118,6 +119,7 @@ class ContentEntryEdit2Presenter(context: Any,
         super.onSaveInstanceState(savedState)
         val entityVal = view.entity
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
+        savedState.putEntityAsJson(ARG_IMPORTED_METADATA, ImportedContentEntryMetaData.serializer(), view.entryMetaData)
     }
 
 
@@ -126,7 +128,7 @@ class ContentEntryEdit2Presenter(context: Any,
         view.fileImportErrorVisible = false
         GlobalScope.launch(doorMainDispatcher()) {
             val canCreate = entity.title != null && (!entity.leaf || entity.contentEntryUid != 0L ||
-                    (entity.contentEntryUid == 0L && (view.selectedFileUri != null || view.selectedUrl != null)))
+                    (entity.contentEntryUid == 0L && view.selectedUri != null))
 
             if (canCreate) {
                 entity.licenseName = view.licenceOptions?.firstOrNull { it.code == entity.licenseType }.toString()
@@ -146,56 +148,67 @@ class ContentEntryEdit2Presenter(context: Any,
                     repo.languageDao.insertAsync(language)
                 }
 
-                if (entity.leaf && view.selectedFileUri != null) {
-                    val container = view.saveContainerOnExit(entity.contentEntryUid,
-                            storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(), db, repo)
+                if (entity.leaf && view.selectedUri != null) {
 
-                    if (container != null && containerUploadManager != null) {
+                    if (view.selectedUri?.startsWith("file:/") == true) {
 
-                        val downloadJob = DownloadJob(entity.contentEntryUid, getSystemTimeInMillis())
-                        downloadJob.djStatus = JobStatus.COMPLETE
-                        downloadJob.timeRequested = getSystemTimeInMillis()
-                        downloadJob.bytesDownloadedSoFar = container.fileSize
-                        downloadJob.totalBytesToDownload = container.fileSize
-                        downloadJob.djUid = repo.downloadJobDao.insertAsync(downloadJob).toInt()
+                        val container = view.saveContainerOnExit(entity.contentEntryUid,
+                                storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(), db, repo)
 
-                        val downloadJobItem = DownloadJobItem(downloadJob, entity.contentEntryUid,
-                                container.containerUid, container.fileSize)
-                        downloadJobItem.djiUid = repo.downloadJobItemDao.insertAsync(downloadJobItem).toInt()
-                        downloadJobItem.djiStatus = JobStatus.COMPLETE
-                        downloadJobItem.downloadedSoFar = container.fileSize
+                        if (container != null && containerUploadManager != null) {
 
-                        containerDownloadManager?.handleDownloadJobItemUpdated(downloadJobItem)
+                            val downloadJob = DownloadJob(entity.contentEntryUid, getSystemTimeInMillis())
+                            downloadJob.djStatus = JobStatus.COMPLETE
+                            downloadJob.timeRequested = getSystemTimeInMillis()
+                            downloadJob.bytesDownloadedSoFar = container.fileSize
+                            downloadJob.totalBytesToDownload = container.fileSize
+                            downloadJob.djUid = repo.downloadJobDao.insertAsync(downloadJob).toInt()
 
-                        val uploadJob = ContainerUploadJob().apply {
-                            this.jobStatus = JobStatus.NOT_QUEUED
-                            this.cujContainerUid = container.containerUid
-                            this.cujUid = db.containerUploadJobDao.insertAsync(this)
+                            val downloadJobItem = DownloadJobItem(downloadJob, entity.contentEntryUid,
+                                    container.containerUid, container.fileSize)
+                            downloadJobItem.djiUid = repo.downloadJobItemDao.insertAsync(downloadJobItem).toInt()
+                            downloadJobItem.djiStatus = JobStatus.COMPLETE
+                            downloadJobItem.downloadedSoFar = container.fileSize
+
+                            containerDownloadManager?.handleDownloadJobItemUpdated(downloadJobItem)
+
+                            val uploadJob = ContainerUploadJob().apply {
+                                this.jobStatus = JobStatus.NOT_QUEUED
+                                this.cujContainerUid = container.containerUid
+                                this.cujUid = db.containerUploadJobDao.insertAsync(this)
+                            }
+
+                            containerUploadManager?.enqueue(uploadJob.cujUid)
+
+                            view.finishWithResult(listOf(entity))
+
                         }
 
-                        containerUploadManager?.enqueue(uploadJob.cujUid)
-                    }
-                }else if (view.selectedUrl != null){
+                    } else {
 
-                    GlobalScope.launch {
-
-                        defaultHttpClient().post<HttpStatement>() {
+                        val client = defaultHttpClient().post<HttpStatement>() {
                             url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl, "/import/downloadLink/"))
                             parameter("parentUid", parentEntryUid)
                             parameter("scraperType", view.entryMetaData?.scraperType)
-                            parameter("url", view.selectedUrl)
+                            parameter("url", view.selectedUri)
                             header("content-type", "application/json")
                             body = entity
                         }.execute()
 
-                    }
 
+                        if (client.status.value != 200) {
+                            return@launch
+                        }
+
+                        view.finishWithResult(listOf(entity))
+
+                    }
                 }
-                view.finishWithResult(listOf(entity))
+
             } else {
                 view.titleErrorEnabled = entity.title == null
                 view.fileImportErrorVisible = entity.title != null && entity.leaf
-                        && view.selectedFileUri == null
+                        && view.selectedUri == null
             }
         }
     }

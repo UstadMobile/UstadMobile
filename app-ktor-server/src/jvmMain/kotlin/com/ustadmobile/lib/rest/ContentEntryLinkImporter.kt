@@ -23,7 +23,7 @@ fun Route.ContentEntryLinkImporter() {
 
         post("validateLink") {
 
-            val url = call.receive<String>()
+            val url = call.request.queryParameters["url"]?: ""
             val scraperManager: ScraperManager by di().on(call).instance()
             val metadata = scraperManager.extractMetadata(url)
             if (metadata == null) {

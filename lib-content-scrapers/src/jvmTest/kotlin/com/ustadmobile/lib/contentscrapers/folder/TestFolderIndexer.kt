@@ -3,12 +3,10 @@ package com.ustadmobile.lib.contentscrapers.folder
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
@@ -23,7 +21,7 @@ import java.nio.file.Files
 import javax.naming.InitialContext
 
 @ExperimentalStdlibApi
-class TestFolderIndexerAndScraper {
+class TestFolderIndexer {
 
     private lateinit var scooterFile: File
     private lateinit var englishFolder: File
@@ -90,23 +88,6 @@ class TestFolderIndexerAndScraper {
 
         val file = db!!.scrapeQueueItemDao.findExistingQueueItem(0, filEntry.contentEntryUid)
         Assert.assertEquals(ScrapeQueueItem.ITEM_TYPE_SCRAPE, file!!.itemType)
-
-    }
-
-    @Test
-    fun givenAFile_whenScraped_thenCreateContainer(){
-
-        val scraper = FolderScraper(0, 0,0, endpoint, di)
-        scraper.scrapeUrl(scooterFile.path)
-
-        val filEntry = db.contentEntryDao.findBySourceUrl(scooterFile.path)
-        Assert.assertEquals("Scooter content exists", "My Own Scooter", filEntry!!.title)
-
-        runBlocking {
-            val fileContainer = db.containerDao.findRecentContainerToBeMonitoredWithEntriesUid(listOf(filEntry.contentEntryUid))
-            val container = fileContainer[0]
-            Assert.assertEquals("container is epub", "application/epub+zip", container.mimeType)
-        }
 
     }
 

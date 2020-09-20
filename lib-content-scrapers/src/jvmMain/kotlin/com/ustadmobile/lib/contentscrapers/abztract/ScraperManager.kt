@@ -33,6 +33,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
+import java.io.FileOutputStream
 import java.io.InputStream
 import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
@@ -173,12 +174,18 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
         val mimeType = huc.contentType
         val stream = huc.inputStream
-        FileUtils.writeByteArrayToFile(contentFile, stream.readBytes())
+        FileOutputStream(contentFile).use {
+            stream.copyTo(it)
+            it.flush()
+        }
+        stream.close()
 
         val supported = mimeTypeSupported.find { fileMimeType -> fileMimeType == mimeType }
         return if (supported != null) {
-            val metaData = extractContentEntryMetadataFromFile(contentFile.toURI().path, db)
+            val metaData = extractContentEntryMetadataFromFile(contentFile.toURI().toString(), db)
             metaData?.scraperType = ScraperTypes.URL_SCRAPER
+            metaData?.uri = url
+            metaData?.contentEntry?.sourceUrl = url
             tempDir.deleteRecursively()
             metaData
         } else {
@@ -224,9 +231,15 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     }.execute()
 
                     val googleStream = dataStatement.receive<InputStream>()
-                    val googleFile = File(tempDir, file.name ?: file.id!!)
-                    FileUtils.writeByteArrayToFile(googleFile, googleStream.readBytes())
-                    val metadata = extractContentEntryMetadataFromFile(googleFile.path, db)
+                    val googleFile = File(tempDir, file.name ?: file.id ?: fileId)
+
+                    FileOutputStream(googleFile).use {
+                        googleStream.copyTo(it)
+                        it.flush()
+                    }
+                    stream.close()
+
+                    val metadata = extractContentEntryMetadataFromFile(googleFile.toURI().toString(), db)
                     metadata?.scraperType = ScraperTypes.GOOGLE_DRIVE_SCRAPE
                     metadata?.uri = apiCall
                     metadata?.contentEntry?.sourceUrl = apiCall

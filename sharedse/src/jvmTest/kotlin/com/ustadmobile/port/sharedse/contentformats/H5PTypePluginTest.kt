@@ -40,7 +40,7 @@ class H5PTypePluginTest {
         tempH5pFile.copyInputStreamToFile(inputStream)
 
         val h5pPlugin = H5PTypeFilePlugin()
-        val contentEntry = h5pPlugin.getContentEntry(tempH5pFile)
+        val contentEntry = h5pPlugin.getContentEntry(tempH5pFile.toURI().toString())
         Assert.assertEquals("Got ContentEntry with expected entryId",
                 "dialog-cards-620.h5p",
                 contentEntry?.entryId)
@@ -70,7 +70,7 @@ class H5PTypePluginTest {
                 defaultHttpClient(), containerTmpDir.absolutePath)
 
         runBlocking {
-            val (contentEntry, container) = importContentEntryFromFile(tempH5pFile, db, dbRepo,
+            val (contentEntry, container) = importContentEntryFromFile(tempH5pFile.toURI().toString(), db, dbRepo,
                     containerTmpDir.absolutePath, Any())!!
             Assert.assertNotNull(contentEntry)
 

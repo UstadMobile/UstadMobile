@@ -27,7 +27,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.sharedse.contentformats.*
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
@@ -80,16 +79,14 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         }
 
 
-    override var selectedFileUri: String? = null
+    override var selectedUri: String? = null
         get() = field
         set(value) {
             field = value
-            mBinding?.fileImportInfoVisibility = if (selectedFileUri != null)
+            mBinding?.fileImportInfoVisibility = if (selectedUri != null)
                 View.VISIBLE else View.GONE
             mBinding?.selectedFileUri = value
         }
-
-    override var selectedUrl: String? = null
 
     override var titleErrorEnabled: Boolean = false
         set(value) {
@@ -161,7 +158,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                                 showSnackBar(getString(R.string.import_link_content_not_supported))
                             }
                             else -> {
-                                selectedFileUri = uri.toString()
+                                selectedUri = tmpFile.toURI().toString()
                             }
                         }
                         val entry = entryMetaData?.contentEntry
@@ -193,11 +190,11 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
 
     override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase): Container? {
-        val file = entryMetaData?.uri
+        val fileUri = entryMetaData?.uri
         val importMode = entryMetaData?.importMode
-        val container = if (file != null && importMode != null) {
+        val container = if (fileUri != null && importMode != null) {
             withContext(Dispatchers.IO) {
-                importContainerFromFile(entryUid, entryMetaData?.mimeType, selectedBaseDir, file, db, repo, importMode, requireContext())
+                importContainerFromFile(entryUid, entryMetaData?.mimeType, selectedBaseDir, fileUri, db, repo, importMode, requireContext())
             }
         } else null
         loading = true
@@ -235,18 +232,12 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             val metadata = it.firstOrNull() ?: return@observeResult
             // back from navigate import
             entryMetaData = metadata
-            when (entryMetaData) {
-                null -> {
-                    showSnackBar(getString(R.string.import_link_content_not_supported))
-                }
-                else -> {
-                    selectedUrl = metadata.uri
-                }
-            }
+            selectedUri = metadata.uri
             val entry = entryMetaData?.contentEntry
             val entryUid = arguments?.get(ARG_ENTITY_UID)
             if (entry != null) {
                 if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
+                fileImportErrorVisible = false
                 entity = entry
             }
         }
