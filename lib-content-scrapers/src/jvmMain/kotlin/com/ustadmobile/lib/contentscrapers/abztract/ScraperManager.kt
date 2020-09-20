@@ -193,15 +193,20 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
             when {
                 url.startsWith("https://drive.google.com/") -> {
 
-                    var apiCall: String
-                    var fileId: String
+                    tempDir.deleteRecursively()
+
+                    if(apiKey == "secret"){
+                        return null
+                    }
+
+                    val apiCall: String
+                    val fileId: String
                     if (url.startsWith("https://drive.google.com/file/d/")) {
                         val fileIdLookUp = url.substringAfter("https://drive.google.com/file/d/")
                         val char = fileIdLookUp.firstOrNull { it == '/' || it == '?' }
                         fileId = if (char == null) fileIdLookUp else fileIdLookUp.substringBefore(char)
                         apiCall = "https://www.googleapis.com/drive/v3/files/$fileId"
                     } else {
-                        tempDir.deleteRecursively()
                         return null
                     }
 
@@ -214,22 +219,19 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     val file = statement.receive<GoogleFile>()
 
                     if (file.mimeType.isNullOrEmpty()) {
-                        tempDir.deleteRecursively()
                         return null
                     }
 
-                    val mimeTypeSupport = mimeTypeSupported.find { fileMimeType -> fileMimeType == file.mimeType }
-
-                    if (mimeTypeSupport == null) {
-                        tempDir.deleteRecursively()
-                        return null
-                    }
+                    mimeTypeSupported.find { fileMimeType -> fileMimeType == file.mimeType }
+                            ?: return null
 
                     val dataStatement = defaultHttpClient().get<HttpStatement>(apiCall) {
                         parameter("alt", "media")
                         parameter("key", apiKey)
                     }.execute()
 
+                    tempDir = Files.createTempDirectory("folder").toFile()
+                    tempDir.mkdir()
                     val googleStream = dataStatement.receive<InputStream>()
                     val googleFile = File(tempDir, file.name ?: file.id ?: fileId)
 
@@ -257,7 +259,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                         return null
                     }
 
-                    var altElement = table.select("[alt]")
+                    val altElement = table.select("[alt]")
                     if (altElement.isNullOrEmpty() || altElement.attr("alt") != "[ICO]") {
                         return null
                     }
