@@ -11,7 +11,7 @@ import com.ustadmobile.core.db.dao.ScrapeRunDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
@@ -120,8 +120,8 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
                 val topicEntry = ContentScraperUtil.createOrUpdateContentEntry(domain.identifier!!,
                         domain.translatedTitle, topicUrl.toString(), KHAN,
-                        LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, EMPTY_STRING, false,
-                        EMPTY_STRING, domain.icon, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                        LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, "", false,
+                        "", domain.icon, "", "", 0, contentEntryDao!!)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parent, topicEntry,
                         topicCount++)
@@ -180,7 +180,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
                             val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(moduleItem.slug!!, moduleItem.title,
                                     subjectUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null,
-                                    moduleItem.description, false, EMPTY_STRING, moduleItem.icon, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                                    moduleItem.description, false, "", moduleItem.icon, "", "", 0, contentEntryDao!!)
 
                             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, topicEntry, subjectEntry, subjectCount++)
 
@@ -199,7 +199,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
                     val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(module.slug!!, module.title, subjectUrl.toString(),
                             KHAN, LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null,
-                            module.description, false, EMPTY_STRING, module.icon, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+                            module.description, false, "", module.icon, "", "", 0, contentEntryDao)
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, topicEntry, subjectEntry, subjectCount++)
 
@@ -224,8 +224,8 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
                         val tutorialUrl = URL(topicUrl, tutorial.url!!)
 
                         val tutorialEntry = ContentScraperUtil.createOrUpdateContentEntry(tutorial.slug!!, tutorial.title,
-                                tutorialUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, tutorial.description, false, EMPTY_STRING, EMPTY_STRING,
-                                EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                                tutorialUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang!!.langUid, null, tutorial.description, false, "", "",
+                                "", "", 0, contentEntryDao!!)
 
                         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, topicEntry,
                                 tutorialEntry, tutorialCount++)
@@ -269,8 +269,8 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
             val subjectUrl = URL(topicUrl, hrefLink)
 
             val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(hrefLink, title,
-                    subjectUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null, description, false, EMPTY_STRING, URL(topicUrl, imageSrc).toString(),
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+                    subjectUrl.toString(), KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null, description, false, "", URL(topicUrl, imageSrc).toString(),
+                    "", "", 0, contentEntryDao)
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, topicEntry,
                     subjectEntry, hourOfCode++)
@@ -308,8 +308,8 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
             newContentFolder.mkdirs()
 
             val entry = ContentScraperUtil.createOrUpdateContentEntry(contentItem.slug!!, contentItem.title,
-                    KHAN_PREFIX + contentItem.contentId!!, KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null, contentItem.description, true, EMPTY_STRING, contentItem.thumbnailUrl,
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+                    KHAN_PREFIX + contentItem.contentId!!, KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null, contentItem.description, true, "", contentItem.thumbnailUrl,
+                    "", "", 0, contentEntryDao)
 
             ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentParentChildJoinDao, tutorialEntry, entry, contentCount++)
 
@@ -398,14 +398,14 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
 
             val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                     ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang.langUid, null,
-                    EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+                    "", false, "", "",
+                    "", "", 0, contentEntryDao)
 
             val khanAcademyEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.khanacademy.org/", "Khan Academy",
                     "https://www.khanacademy.org/", KHAN, LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null,
-                    "You can learn anything.\n" + "For free. For everyone. Forever.", false, EMPTY_STRING,
+                    "You can learn anything.\n" + "For free. For everyone. Forever.", false, "",
                     "https://cdn.kastatic.org/images/khan-logo-dark-background.new.png",
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+                    "", "", 0, contentEntryDao)
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, khanAcademyEntry, 6)
 
@@ -491,7 +491,7 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
                             return data.substring(index, end)
                         } catch (e: IndexOutOfBoundsException) {
                             UMLogUtil.logError("Could not get json from the script for url $url")
-                            return EMPTY_STRING
+                            return ""
                         }
 
                     } else if (node.wholeData.contains("{\"initialState\"")) {
@@ -503,13 +503,13 @@ class KhanContentIndexer internal constructor(private val indexerUrl: URL, priva
                             return data.substring(index, end)
                         } catch (e: IndexOutOfBoundsException) {
                             UMLogUtil.logError("Could not get json from the script for url $url")
-                            return EMPTY_STRING
+                            return ""
                         }
 
                     }
                 }
             }
-            return EMPTY_STRING
+            return ""
 
         }
     }

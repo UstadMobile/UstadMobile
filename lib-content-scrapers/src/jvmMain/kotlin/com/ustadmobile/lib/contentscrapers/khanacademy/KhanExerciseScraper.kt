@@ -372,7 +372,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                     for (imageValue in imageList) {
                         var conn: HttpURLConnection? = null
                         try {
-                            val image = imageValue.replace(ScraperConstants.EMPTY_SPACE.toRegex(), ScraperConstants.EMPTY_STRING)
+                            val image = imageValue.replace(ScraperConstants.EMPTY_SPACE.toRegex(), "")
                             var imageUrlString = image
                             if (image.contains(ScraperConstants.GRAPHIE)) {
                                 imageUrlString = ScraperConstants.KHAN_GRAPHIE_PREFIX + image.substring(image.lastIndexOf("/") + 1) + ScraperConstants.SVG_EXT

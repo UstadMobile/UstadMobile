@@ -78,8 +78,8 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                                 parentcontentEntry!!.primaryLanguageUid,
                                 parentcontentEntry!!.languageVariantUid,
                                 tutorial.description, false,
-                                ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                                ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                                "", "",
+                                "", "",
                                 0, contentEntryDao)
 
                         ContentScraperUtil.insertOrUpdateParentChildJoin(
@@ -110,9 +110,9 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                                     parentcontentEntry!!.primaryLanguageUid,
                                     parentcontentEntry!!.languageVariantUid,
                                     contentItem.description,
-                                    true, ScraperConstants.EMPTY_STRING,
+                                    true, "",
                                     contentItem.thumbnailUrl,
-                                    ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                                    "", "",
                                     0, contentEntryDao)
 
                             ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(
@@ -145,8 +145,8 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                             parentcontentEntry!!.primaryLanguageUid,
                             parentcontentEntry!!.languageVariantUid,
                             module.description, false,
-                            ScraperConstants.EMPTY_STRING, module.imageUrl,
-                            ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                            "", module.imageUrl,
+                            "", "",
                             0, contentEntryDao)
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(
@@ -177,9 +177,9 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                                 parentcontentEntry!!.primaryLanguageUid,
                                 parentcontentEntry!!.languageVariantUid,
                                 contentItem.description,
-                                true, ScraperConstants.EMPTY_STRING,
+                                true, "",
                                 contentItem.thumbnailUrl,
-                                ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                                "", "",
                                 0, contentEntryDao)
 
                         ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(
@@ -216,9 +216,9 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                 module.title, subjectUrl.toString(), ScraperConstants.KHAN,
                 ContentEntry.LICENSE_TYPE_CC_BY_NC, parentcontentEntry!!.primaryLanguageUid,
                 parentcontentEntry!!.languageVariantUid, module.description,
-                false, ScraperConstants.EMPTY_STRING,
-                module.icon, ScraperConstants.EMPTY_STRING,
-                ScraperConstants.EMPTY_STRING,
+                false, "",
+                module.icon, "",
+                "",
                 0, contentEntryDao)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(

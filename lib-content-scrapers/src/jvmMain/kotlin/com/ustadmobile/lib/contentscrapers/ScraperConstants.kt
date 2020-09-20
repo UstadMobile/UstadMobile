@@ -263,7 +263,6 @@ object ScraperConstants {
     const val ENGLISH_LANG_CODE = "en"
     const val USTAD_MOBILE = "Ustad Mobile"
     const val ROOT = "root"
-    const val EMPTY_STRING = ""
     const val EMPTY_SPACE = " "
     const val FORWARD_SLASH = "/"
     const val KHAN = "Khan Academy"

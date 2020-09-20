@@ -75,7 +75,7 @@ import javax.xml.transform.dom.DOMSource
 import javax.xml.transform.stream.StreamResult
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_SPACE
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.FORWARD_SLASH
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.GRAPHIE
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_GRAPHIE_PREFIX
@@ -196,11 +196,11 @@ object ContentScraperUtil {
                 continue
             } else if (url.contains("youtube")) {
                 // content.parent().html("We cannot download youtube content, please watch using the link below <p></p><a href=" + url + "\"><img src=\"video-thumbnail.jpg\"/></a>");
-                content.parent().html(EMPTY_STRING)
+                content.parent().html("")
                 continue
             } else if (url.contains(ScraperConstants.slideShareLink)) {
                 // content.html("We cannot download slideshare content, please watch using the link below <p></p><img href=" + url + "\" src=\"video-thumbnail.jpg\"/>");
-                content.parent().html(EMPTY_STRING)
+                content.parent().html("")
                 continue
             }
 
@@ -500,7 +500,7 @@ object ContentScraperUtil {
 
         var eTag: String? = conn.getHeaderField("ETag")
         if (eTag != null) {
-            eTag = eTag.replace("\"".toRegex(), EMPTY_STRING)
+            eTag = eTag.replace("\"".toRegex(), "")
             val eTagFile = File(destinationDir, FilenameUtils.getBaseName(fileName) + ScraperConstants.ETAG_TXT)
             return isFileContentsUpdated(eTagFile, eTag)
         }
@@ -723,7 +723,7 @@ object ContentScraperUtil {
         if (!langAlpha3List.isEmpty()) {
             threeLetterCode = langAlpha3List[0].name
             val code = LanguageCode.getByCode(threeLetterCode)
-            twoLetterCode = if (code != null) LanguageCode.getByCode(threeLetterCode).name else EMPTY_STRING
+            twoLetterCode = if (code != null) LanguageCode.getByCode(threeLetterCode).name else ""
         }
         var langObj = getLanguageFromDao(langName, twoLetterCode, languageDao)
         if (langObj == null) {
@@ -1130,7 +1130,7 @@ object ContentScraperUtil {
                         if (key.equals("Accept-Encoding", ignoreCase = true)) {
                             continue
                         }
-                        conn.addRequestProperty(key.replace(":".toRegex(), EMPTY_STRING), value)
+                        conn.addRequestProperty(key.replace(":".toRegex(), ""), value)
                     }
                 }
                 if (cookies != null) {
@@ -1293,7 +1293,7 @@ object ContentScraperUtil {
         for (imageValue in images.keys) {
             var conn: HttpURLConnection? = null
             try {
-                var image = imageValue.replace(EMPTY_SPACE.toRegex(), EMPTY_STRING)
+                var image = imageValue.replace(EMPTY_SPACE.toRegex(), "")
                 var imageUrlString = image
                 if (image.contains(GRAPHIE)) {
                     imageUrlString = KHAN_GRAPHIE_PREFIX + image.substring(image.lastIndexOf("/") + 1) + SVG_EXT

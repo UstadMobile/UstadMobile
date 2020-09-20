@@ -39,8 +39,8 @@ class KhanYoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid
 
         val playlist = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl.substringAfter("="), title,
                 sourceUrl, ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC, parentEntry.primaryLanguageUid, null,
-                ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, 0, contentEntryDao)
+                "", false, "", "",
+                "", "", 0, contentEntryDao)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentEntry, playlist, playlistCount++)
 

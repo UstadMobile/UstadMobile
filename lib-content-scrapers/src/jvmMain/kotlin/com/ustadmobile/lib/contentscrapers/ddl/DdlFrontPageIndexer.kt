@@ -23,8 +23,8 @@ class DdlFrontPageIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int,
 
         val parentDdl = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, "Darakht-e Danesh",
                 sourceUrl, IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, englishLang.langUid, null,
-                "Free and open educational resources for Afghanistan", false, ScraperConstants.EMPTY_STRING,
-                "https://ddl.af/storage/files/logo-dd.png", ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, 0, contentEntryDao)
+                "Free and open educational resources for Afghanistan", false, "",
+                "https://ddl.af/storage/files/logo-dd.png", "", "", 0, contentEntryDao)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, parentDdl, 2)
 
@@ -41,8 +41,8 @@ class DdlFrontPageIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int,
 
         val langEntry = ContentScraperUtil.createOrUpdateContentEntry("${langEntity.iso_639_1_standard}/resources/list", langName,
                 url, IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, langEntity.langUid, null,
-                ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, 0, contentEntryDao)
+                "", false, "", "",
+                "", "", 0, contentEntryDao)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentDdl, langEntry, langCount++)
 

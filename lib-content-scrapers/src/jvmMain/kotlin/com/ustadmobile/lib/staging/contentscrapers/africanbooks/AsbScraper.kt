@@ -4,7 +4,7 @@ import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.contentscrapers.*
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -72,7 +72,7 @@ class AsbScraper {
         val africanBooksUrl = generateURL()
 
         val db = UmAppDatabase.getInstance(Any())
-        val repository = db //db.getRepository("https://localhost", EMPTY_STRING);
+        val repository = db //db.getRepository("https://localhost", "");
         val contentEntryDao = repository.contentEntryDao
         val contentParentChildJoinDao = repository.contentEntryParentChildJoinDao
         val categorySchemeDao = repository.contentCategorySchemaDao
@@ -107,7 +107,7 @@ class AsbScraper {
                         val id = lang.attr("value")
                         val value = StringUtils.capitalize(lang.text().toLowerCase())
 
-                        var variant = EMPTY_STRING
+                        var variant = ""
                         var langValue = value
                         if (value.contains("(")) {
                             variant = StringUtils.capitalize(value.substring(value.indexOf("(") + 1, value.indexOf(")")))
@@ -128,14 +128,14 @@ class AsbScraper {
         val englishLang = languageDao.findByTwoCode(ScraperConstants.ENGLISH_LANG_CODE)
 
         val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE, ScraperConstants.ROOT,
-                ScraperConstants.USTAD_MOBILE, ContentEntry.LICENSE_TYPE_CC_BY, englishLang!!.langUid, null, EMPTY_STRING,
-                false, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+                ScraperConstants.USTAD_MOBILE, ContentEntry.LICENSE_TYPE_CC_BY, englishLang!!.langUid, null, "",
+                false, "", "", "", "", 0, contentEntryDao)
 
 
         val asbParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.africanstorybook.org/", AFRICAN_STORY_BOOKS,
                 "https://www.africanstorybook.org/", AFRICAN_STORY_BOOKS, ContentEntry.LICENSE_TYPE_CC_BY,
-                englishLang.langUid, null, "Open access to picture storybooks in the languages of Africa. \n For children's literacy, enjoyment and imagination.", false, EMPTY_STRING,
-                "https://www.africanstorybook.org/img/asb120.png", EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+                englishLang.langUid, null, "Open access to picture storybooks in the languages of Africa. \n For children's literacy, enjoyment and imagination.", false, "",
+                "https://www.africanstorybook.org/img/asb120.png", "", "", 0, contentEntryDao)
 
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao, masterRootParent, asbParentEntry, 0)
@@ -174,7 +174,7 @@ class AsbScraper {
 
                 val langName = langMap[bookObj.lang!!]
 
-                var variant = EMPTY_STRING
+                var variant = ""
                 var langValue = langName
                 if (langName != null && langName.contains("(")) {
                     variant = StringUtils.capitalize(langName!!.substring(langName!!.indexOf("(") + 1, langName!!.indexOf(")")))
@@ -187,11 +187,11 @@ class AsbScraper {
                 if (language != null && variant.isNotEmpty()) {
                     languageVariant = ContentScraperUtil.insertOrUpdateLanguageVariant(variantDao, variant, language)
                 }
-                val sourceUrl = epubUrl.path + (if ((epubUrl.query != null && epubUrl.query.isNotEmpty())) "?" + epubUrl.query else EMPTY_STRING)
+                val sourceUrl = epubUrl.path + (if ((epubUrl.query != null && epubUrl.query.isNotEmpty())) "?" + epubUrl.query else "")
 
                 val childEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, bookObj.title, sourceUrl, AFRICAN_STORY_BOOKS, ContentEntry.LICENSE_TYPE_CC_BY,
                         if (language != null) language!!.langUid else 0L, if (languageVariant == null) null else languageVariant!!.langVariantUid, bookObj.summary, true, bookObj.author, getCoverUrl(bookId),
-                        EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+                        "", "", 0, contentEntryDao)
 
                 val readerDoc = Jsoup.connect(generateReaderUrl(africanBooksUrl, bookId)).get()
 
@@ -202,7 +202,7 @@ class AsbScraper {
                 val relatedEntries = ArrayList<ContentEntry>()
                 for (element in langList) {
 
-                    var lang = EMPTY_STRING
+                    var lang = ""
                     try {
                         var id = element.attr("onclickss")
                         id = id.substring(id.indexOf("(") + 1, id.lastIndexOf(")"))
@@ -214,7 +214,7 @@ class AsbScraper {
                         lang = StringUtils.remove(lang, "(Translation)").trim { it <= ' ' }.toLowerCase()
                         lang = StringUtils.capitalize(lang)
 
-                        var relatedVariant = EMPTY_STRING
+                        var relatedVariant = ""
                         var relatedLangValue = lang
                         if (lang.contains("(")) {
                             relatedVariant = StringUtils.capitalize(lang.substring(lang.indexOf("(") + 1, lang.indexOf(")")))
@@ -231,7 +231,7 @@ class AsbScraper {
                         }
 
                         val content = generateEPubUrl(africanBooksUrl, id)
-                        val relatedSourceUrl = content.getPath() + (if ((content.getQuery() != null && !content.getQuery().isEmpty())) "?" + content.getQuery() else EMPTY_STRING)
+                        val relatedSourceUrl = content.getPath() + (if ((content.getQuery() != null && !content.getQuery().isEmpty())) "?" + content.getQuery() else "")
                         var contentEntry = contentEntryDao.findBySourceUrl(relatedSourceUrl)
                         if (contentEntry == null) {
                             contentEntry = ContentEntry()

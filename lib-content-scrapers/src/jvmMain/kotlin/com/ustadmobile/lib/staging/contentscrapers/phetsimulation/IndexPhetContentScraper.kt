@@ -5,7 +5,7 @@ import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
@@ -95,14 +95,14 @@ class IndexPhetContentScraper {
 
         val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                 ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null,
-                EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                "", false, "", "",
+                "", "", 0, contentEntryDao!!)
 
 
         val phetParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://phet.colorado.edu/", "Phet Interactive Simulations",
                 "https://phet.colorado.edu/", PHET, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null,
-                "INTERACTIVE SIMULATIONS\nFOR SCIENCE AND MATH", false, EMPTY_STRING,
-                "https://phet.colorado.edu/images/phet-social-media-logo.png", EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                "INTERACTIVE SIMULATIONS\nFOR SCIENCE AND MATH", false, "",
+                "https://phet.colorado.edu/images/phet-social-media-logo.png", "", "", 0, contentEntryDao!!)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, phetParentEntry, 14)
 
@@ -119,8 +119,8 @@ class IndexPhetContentScraper {
                 scraper.scrapeContent()
                 val englishSimContentEntry = ContentScraperUtil.createOrUpdateContentEntry(path, title,
                         simulationUrl, PHET, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null,
-                        scraper.aboutDescription, true, EMPTY_STRING,
-                        thumbnail, EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                        scraper.aboutDescription, true, "",
+                        thumbnail, "", "", 0, contentEntryDao!!)
 
                 val isEnglishUpdated = scraper.languageUpdatedMap["en"]
                 val enLangLocation = File(destinationDirectory, "en")

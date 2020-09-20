@@ -25,7 +25,7 @@ class HabFrontPageIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, co
                 sourceUrl, HAB, ContentEntry.LICENSE_TYPE_OTHER, arabicLang.langUid, null,
                 "Free and open educational resources for Afghanistan", false, HAB,
                 "https://www.expo2020dubai.com/-/media/expo2020/expo-live/global-innovators/habaybna/habaybna-logo.png",
-                ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, 0, contentEntryDao)
+                "", "", 0, contentEntryDao)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, parentHab, 10)
 
@@ -45,8 +45,8 @@ class HabFrontPageIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, co
 
         val playlist = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl.substringAfter("="), title,
                 sourceUrl, HAB, ContentEntry.LICENSE_TYPE_OTHER, arabicLang.langUid, null,
-                ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, 0, contentEntryDao)
+                "", false, "", "",
+                "", "", 0, contentEntryDao)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentHab, playlist, playlistCount++)
 

@@ -9,7 +9,7 @@ import com.ustadmobile.core.db.dao.ScrapeRunDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
@@ -102,8 +102,8 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
 
                     val categoryEntry = ContentScraperUtil.createOrUpdateContentEntry(FilenameUtils.getBaseName(hrefLink),
                             title, lessonListUrl.toString(), VOA, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid,
-                            null, "", false, EMPTY_STRING, EMPTY_STRING,
-                            EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                            null, "", false, "", "",
+                            "", "", 0, contentEntryDao!!)
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentEntry, categoryEntry, categoryCount++)
 
@@ -139,8 +139,8 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
             val title = lessonElement.attr("title")
 
             val lessonEntry = ContentScraperUtil.createOrUpdateContentEntry(FilenameUtils.getBaseName(lessonHref),
-                    title, lesson.toString(), VOA, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null, "", true, EMPTY_STRING, EMPTY_STRING,
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                    title, lesson.toString(), VOA, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null, "", true, "", "",
+                    "", "", 0, contentEntryDao!!)
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, categoryEntry, lessonEntry, lessonCount++)
 
@@ -230,16 +230,16 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
 
             val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                     ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang!!.langUid, null,
-                    EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                    "", false, "", "",
+                    "", "", 0, contentEntryDao!!)
 
             val parentVoa = ContentScraperUtil.createOrUpdateContentEntry("https://learningenglish.voanews.com/", "Voice of America - Learning English",
                     "https://learningenglish.voanews.com/", VOA, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null,
                     "Learn American English with English language lessons from Voice of America. " +
                             "VOA Learning English helps you learn English with vocabulary, listening and " +
                             "comprehension lessons through daily news and interactive English learning activities.",
-                    false, EMPTY_STRING, "https://learningenglish.voanews.com/Content/responsive/VOA/img/top_logo_news.png",
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                    false, "", "https://learningenglish.voanews.com/Content/responsive/VOA/img/top_logo_news.png",
+                    "", "", 0, contentEntryDao!!)
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, parentVoa, 18)
 
@@ -249,20 +249,20 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
             val historyUrl = "https://learningenglish.voanews.com/p/6353.html"
 
             val beginningLevel = ContentScraperUtil.createOrUpdateContentEntry("5609", "Beginning Level",
-                    beginningUrl, VOA, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null, "", false, EMPTY_STRING, EMPTY_STRING,
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                    beginningUrl, VOA, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null, "", false, "", "",
+                    "", "", 0, contentEntryDao!!)
 
             val intermediateLevel = ContentScraperUtil.createOrUpdateContentEntry("5610", "Intermediate Level",
-                    intermediateUrl, VOA, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null, "", false, EMPTY_STRING, EMPTY_STRING,
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                    intermediateUrl, VOA, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null, "", false, "", "",
+                    "", "", 0, contentEntryDao!!)
 
             val advancedLevel = ContentScraperUtil.createOrUpdateContentEntry("5611", "Advanced Level",
-                    advancedUrl, VOA, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null, "", false, EMPTY_STRING, EMPTY_STRING,
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                    advancedUrl, VOA, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null, "", false, "", "",
+                    "", "", 0, contentEntryDao!!)
 
             val usHistory = ContentScraperUtil.createOrUpdateContentEntry("6353", "US History",
-                    historyUrl, VOA, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null, "", false, EMPTY_STRING, EMPTY_STRING,
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                    historyUrl, VOA, LICENSE_TYPE_PUBLIC_DOMAIN, englishLang!!.langUid, null, "", false, "", "",
+                    "", "", 0, contentEntryDao!!)
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentVoa, beginningLevel, 0)
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, parentVoa, intermediateLevel, 1)

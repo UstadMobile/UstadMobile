@@ -4,7 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.khanFullMap
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.khanLiteMap
@@ -21,9 +21,9 @@ class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, c
 
         parentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://www.khanacademy.org/", "Khan Academy",
                 sourceUrl, ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null,
-                "You can learn anything.\n" + "For free. For everyone. Forever.", false, EMPTY_STRING,
+                "You can learn anything.\n" + "For free. For everyone. Forever.", false, "",
                 "https://cdn.kastatic.org/images/khan-logo-dark-background.new.png",
-                EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+                "", "", 0, contentEntryDao)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, parentEntry, 12)
 

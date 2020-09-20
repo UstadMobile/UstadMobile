@@ -34,7 +34,7 @@ import java.util.ArrayList
 import java.util.HashMap
 
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.deleteETagOrModified
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.EPUB_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
@@ -98,14 +98,14 @@ class IndexPrathamContentScraper {
 
         val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
                 ROOT, USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang.langUid, null,
-                EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                "", false, "", "",
+                "", "", 0, contentEntryDao!!)
 
 
         prathamParentEntry = ContentScraperUtil.createOrUpdateContentEntry("https://storyweaver.org.in/", "Pratham Books",
                 "https://storyweaver.org.in/", PRATHAM, LICENSE_TYPE_CC_BY, englishLang.langUid, null,
-                "Every Child in School & Learning Well", false, EMPTY_STRING,
-                "https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png", EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                "Every Child in School & Learning Well", false, "",
+                "https://prathambooks.org/wp-content/uploads/2018/04/Logo-black.png", "", "", 0, contentEntryDao!!)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!, masterRootParent, prathamParentEntry!!, 16)
 
@@ -146,8 +146,8 @@ class IndexPrathamContentScraper {
                 resourceFolder.mkdirs()
                 val contentEntry = ContentScraperUtil.createOrUpdateContentEntry(data.slug!!, data.title,
                         epubUrl.toString(), PRATHAM, LICENSE_TYPE_CC_BY, langEntity.langUid, null,
-                        data.description, true, EMPTY_STRING, data.coverImage!!.sizes!![0].url,
-                        EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao!!)
+                        data.description, true, "", data.coverImage!!.sizes!![0].url,
+                        "", "", 0, contentEntryDao!!)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentParentChildJoinDao!!,
                         prathamParentEntry!!, contentEntry, contentCount)

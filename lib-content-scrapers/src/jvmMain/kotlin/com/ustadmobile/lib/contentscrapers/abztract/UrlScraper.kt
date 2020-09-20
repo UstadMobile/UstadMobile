@@ -78,7 +78,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
                         contentEntry?.description.alternative(metadataContentEntry.description ?: "")
                         , true, contentEntry?.author ?: "",
                         contentEntry?.thumbnailUrl.alternative(metadataContentEntry.thumbnailUrl ?: "")
-                        , ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                        , "", "",
                         metadataContentEntry.contentTypeFlag, contentEntryDao)
 
             } else {
@@ -93,8 +93,8 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
                         metadataContentEntry.description.alternative(contentEntry?.description ?: "")
                         , true, metadataContentEntry.author.alternative(contentEntry?.author ?: ""),
                         metadataContentEntry.thumbnailUrl.alternative(contentEntry?.thumbnailUrl ?: ""),
-                        ScraperConstants.EMPTY_STRING,
-                        ScraperConstants.EMPTY_STRING,
+                        "",
+                        "",
                         metadataContentEntry.contentTypeFlag, contentEntryDao)
 
             }

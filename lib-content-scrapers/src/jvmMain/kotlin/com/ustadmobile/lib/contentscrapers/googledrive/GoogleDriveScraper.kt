@@ -3,7 +3,6 @@ package com.ustadmobile.lib.contentscrapers.googledrive
 import com.soywiz.klock.DateFormat
 import com.soywiz.klock.parse
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
@@ -20,7 +19,6 @@ import io.ktor.client.request.get
 import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.runBlocking
-import org.apache.commons.io.FileUtils
 import org.kodein.di.DI
 import org.kodein.di.instance
 import java.io.File
@@ -62,8 +60,9 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                         ?: return@execute
 
                 val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
-                val modifiedTime: Long = googleDriveFormat.parse(file.modifiedTime!!).local.unixMillisLong
-                val isUpdated = modifiedTime > recentContainer?.cntLastModified ?: 0
+                val googleModifiedTime = file.modifiedTime
+                val parsedModifiedTime: Long = if(googleModifiedTime != null) googleDriveFormat.parse(googleModifiedTime).local.unixMillisLong else 1
+                val isUpdated = parsedModifiedTime > recentContainer?.cntLastModified ?: 0
                 if (!isUpdated) {
                     showContentEntry()
                     setScrapeDone(true, 0)
@@ -110,7 +109,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                                 contentEntry?.description.alternative(metadataContentEntry.description ?: file.description ?: "")
                                 , true, contentEntry?.author ?: "",
                                 contentEntry?.thumbnailUrl.alternative(metadataContentEntry.thumbnailUrl ?: file.thumbnailLink ?: "")
-                                , ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                                , "", "",
                                 metadataContentEntry.contentTypeFlag, contentEntryDao)
 
                     } else {
@@ -126,8 +125,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                                 metadataContentEntry.description.alternative(contentEntry?.description ?: file.description ?: "")
                                 , true, metadataContentEntry.author.alternative(contentEntry?.author ?: ""),
                                 metadataContentEntry.thumbnailUrl.alternative(contentEntry?.thumbnailUrl ?: file.thumbnailLink ?: ""),
-                                ScraperConstants.EMPTY_STRING,
-                                ScraperConstants.EMPTY_STRING,
+                                "", "",
                                 metadataContentEntry.contentTypeFlag, contentEntryDao)
 
                     }

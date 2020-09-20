@@ -54,9 +54,9 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
                     topic.slug!!, topic.translatedTitle,
                     topicUrl.toString(), ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
                     parentLangEntry.primaryLanguageUid, parentLangEntry.languageVariantUid,
-                    "", false, ScraperConstants.EMPTY_STRING,
-                    ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                    ScraperConstants.EMPTY_STRING,
+                    "", false, "",
+                    "", "",
+                    "",
                     0, contentEntryDao)
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao,
@@ -75,9 +75,9 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
                             childTopic.slug!!, childTopic.translatedTitle,
                             childTopicUrl.toString(), ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
                             topicEntry.primaryLanguageUid, topicEntry.languageVariantUid,
-                            "", false, ScraperConstants.EMPTY_STRING,
-                            ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                            ScraperConstants.EMPTY_STRING,
+                            "", false, "",
+                            "", "",
+                            "",
                             0, contentEntryDao)
 
 

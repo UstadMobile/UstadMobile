@@ -47,16 +47,16 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
                     contentEntry?.primaryLanguageUid?.alternative(englishLang.langUid)
                             ?: englishLang.langUid,
                     contentEntry?.languageVariantUid,
-                    ScraperConstants.EMPTY_STRING, false, contentEntry?.author ?: "", ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                    ScraperConstants.EMPTY_STRING, ContentEntry.TYPE_COLLECTION, contentEntryDao)
+                    "", false, contentEntry?.author ?: "", "", "",
+                    "", ContentEntry.TYPE_COLLECTION, contentEntryDao)
         } else {
 
             folderEntry = ContentScraperUtil.createOrUpdateContentEntry(folderTitle, folderTitle,
                     sourceUrl, parentcontentEntry?.publisher ?: "",
                     ContentEntry.LICENSE_TYPE_OTHER, englishLang.langUid, null,
-                    ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING,
-                    ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                    ScraperConstants.EMPTY_STRING, ContentEntry.TYPE_COLLECTION, contentEntryDao)
+                    "", false, "",
+                    "", "",
+                    "", ContentEntry.TYPE_COLLECTION, contentEntryDao)
         }
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry, folderEntry, 0)

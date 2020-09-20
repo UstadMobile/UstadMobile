@@ -43,9 +43,9 @@ fun getKhanEntry(englishLang: Language, contentEntryDao: ContentEntryDao): Conte
             "https://www.khanacademy.org/", ScraperConstants.KHAN,
             ContentEntry.LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null,
             "You can learn anything.\n" + "For free. For everyone. Forever.",
-            false, ScraperConstants.EMPTY_STRING,
+            false, "",
             "https://cdn.kastatic.org/images/khan-logo-dark-background.new.png",
-            ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+            "", "",
             0, contentEntryDao)
 }
 
@@ -75,8 +75,8 @@ fun createKangLangEntry(langCode: String, langName: String, url: String, db: UmA
     return ContentScraperUtil.createOrUpdateContentEntry(url, langName,
             url, ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
             langEntity.langUid, langVariantEntity?.langVariantUid ?: 0,
-            ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-            ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+            "", false, "", "",
+            "", "",
             0, db.contentEntryDao)
 
 }

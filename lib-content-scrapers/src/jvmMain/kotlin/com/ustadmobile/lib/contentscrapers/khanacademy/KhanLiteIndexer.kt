@@ -59,8 +59,8 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
             val headerEntry = ContentScraperUtil.createOrUpdateContentEntry(header, header, header,
                     ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
                     parentEntry.primaryLanguageUid, parentEntry.languageVariantUid,
-                    description, false, ScraperConstants.EMPTY_STRING, "",
-                    ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                    description, false, "", "",
+                    "", "",
                     0, contentEntryDao)
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentEntry, headerEntry, count)
@@ -85,8 +85,8 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
                         KhanContentIndexer.KHAN_PREFIX + contentId, ScraperConstants.KHAN,
                         ContentEntry.LICENSE_TYPE_CC_BY_NC, parentEntry.primaryLanguageUid,
                         parentEntry.languageVariantUid, "", true,
-                        ScraperConstants.EMPTY_STRING, "",
-                        ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
+                        "", "",
+                        "", "",
                         ContentEntry.TYPE_VIDEO, contentEntryDao)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, headerEntry, entry, contentCount)

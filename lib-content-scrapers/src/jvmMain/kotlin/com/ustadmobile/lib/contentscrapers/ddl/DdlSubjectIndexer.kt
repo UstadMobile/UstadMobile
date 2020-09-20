@@ -44,8 +44,8 @@ class DdlSubjectIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, c
 
             val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(subjectId, title,
                     subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, parentcontentEntry!!.primaryLanguageUid, null,
-                    ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                    ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, 0, contentEntryDao)
+                    "", false, "", "",
+                    "", "", 0, contentEntryDao)
             contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid, false)
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, subjectEntry, i)
@@ -84,8 +84,8 @@ class DdlSubjectIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, c
 
                 val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(subTopicId, title,
                         subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, parentcontentEntry!!.primaryLanguageUid, null,
-                        ScraperConstants.EMPTY_STRING, false, ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING,
-                        ScraperConstants.EMPTY_STRING, ScraperConstants.EMPTY_STRING, 0, contentEntryDao)
+                        "", false, "", "",
+                        "", "", 0, contentEntryDao)
                 contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid, false)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentEntry!!, subjectEntry, i)

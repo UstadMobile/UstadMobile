@@ -7,7 +7,7 @@ import com.ustadmobile.core.db.dao.ScrapeQueueItemDao.Companion.STATUS_RUNNING
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.GDL
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_EPUB
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_PDF
@@ -278,14 +278,14 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
 
             val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, ScraperConstants.USTAD_MOBILE,
                     ROOT, ScraperConstants.USTAD_MOBILE, LICENSE_TYPE_CC_BY, englishLang.langUid, null,
-                    EMPTY_STRING, false, EMPTY_STRING, EMPTY_STRING,
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+                    "", false, "", "",
+                    "", "", 0, contentEntryDao)
 
             gdlEntry = ContentScraperUtil.createOrUpdateContentEntry("https://digitallibrary.io/", GDL,
                     "https://opds.staging.digitallibrary.io/v1/en/root.xml/", GDL, LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null,
-                    "bringing books to every child in the world by 2030", false, EMPTY_STRING,
+                    "bringing books to every child in the world by 2030", false, "",
                     "https://www.ustadmobile.com/files/gdl-logo.webp",
-                    EMPTY_STRING, EMPTY_STRING, 0, contentEntryDao)
+                    "", "", 0, contentEntryDao)
 
             val englishFolder = File(destinationDir, "English")
             englishFolder.mkdirs()

@@ -49,9 +49,9 @@ class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Lon
                         metadataContentEntry.title ?: contentEntry?.title ?: name,
                         sourceUrl, metadataContentEntry.publisher ?: parentContentEntry?.publisher ?: "",
                         metadataContentEntry.licenseType, primaryLanguage, variant,
-                        metadataContentEntry.description, true, ScraperConstants.EMPTY_STRING,
-                        metadataContentEntry.thumbnailUrl, ScraperConstants.EMPTY_STRING,
-                        ScraperConstants.EMPTY_STRING,
+                        metadataContentEntry.description, true, "",
+                        metadataContentEntry.thumbnailUrl, "",
+                        "",
                         metadataContentEntry.contentTypeFlag, contentEntryDao)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)

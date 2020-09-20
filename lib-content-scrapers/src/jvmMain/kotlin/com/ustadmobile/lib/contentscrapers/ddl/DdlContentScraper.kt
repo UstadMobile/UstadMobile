@@ -6,7 +6,7 @@ import com.ustadmobile.core.db.dao.ContainerETagDao
 import com.ustadmobile.core.db.dao.ContentCategoryDao
 import com.ustadmobile.core.db.dao.ContentCategorySchemaDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ScraperConstants.EMPTY_STRING
+
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.HarScraper
@@ -147,13 +147,13 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
 
                 val doc = Jsoup.parse(entry.response.content.text)
 
-                val thumbnail = doc!!.selectFirst("aside img")?.attr("src") ?: EMPTY_STRING
+                val thumbnail = doc!!.selectFirst("aside img")?.attr("src") ?: ""
 
                 val description = doc.selectFirst("meta[name=description]")?.attr("content")
                 val author = doc.selectFirst("article.resource-view-details h3:contains(Author) ~ p")?.text()
                         ?: doc.selectFirst("article.resource-view-details h3:contains(نویسنده) ~ p")?.text()
                         ?: doc.selectFirst("article.resource-view-details h3:contains(لیکونکی) ~ p")?.text()
-                        ?: EMPTY_STRING
+                        ?: ""
 
                 val publisher = doc.selectFirst("article.resource-view-details a[href*=publisher]")?.text()
                         ?: DDL
@@ -165,7 +165,7 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
                 val licenseText = doc.selectFirst("article.resource-view-details h3:contains(جواز/ د چاپ حق لرونکی) ~ p")?.text()
                         ?: doc.selectFirst("article.resource-view-details h3:contains(License) ~ p")?.text()
                         ?: doc.selectFirst("article.resource-view-details h3:contains(جواز/ دارنده حق چاپ) ~ p")?.text()
-                        ?: EMPTY_STRING
+                        ?: ""
 
                 val foundMatch = licenseList.firstOrNull { pair ->
                     licenseText.contains(pair.first)
@@ -178,7 +178,7 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
 
                 contentEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, doc.title(),
                         sourceUrl, publisher, licenseType, langEntity.langUid, null, description, true, author,
-                        thumbnail, EMPTY_STRING, EMPTY_STRING, ContentEntry.TYPE_ARTICLE, contentEntryDao)
+                        thumbnail, "", "", ContentEntry.TYPE_ARTICLE, contentEntryDao)
 
                 if (licenseType == 0) {
                     hideContentEntry()
