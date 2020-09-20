@@ -114,7 +114,7 @@ class ContentEntryEdit2PresenterTest  {
         mockView = mock{
             onBlocking { saveContainerOnExit(any(), any(), any(), any())}.thenAnswer{container}
             on {selectedStorageIndex}.thenAnswer {0}
-            on{selectedUri}.thenAnswer{if(isUriNull) null else "Dummy Uri"}
+            on{selectedUri}.thenAnswer{if(isUriNull) null else "file:/Dummy Uri"}
         }
     }
 
