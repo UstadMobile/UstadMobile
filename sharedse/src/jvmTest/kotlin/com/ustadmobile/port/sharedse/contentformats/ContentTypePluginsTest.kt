@@ -36,7 +36,7 @@ class ContentTypePluginsTest {
 
         runBlocking {
             //TODO: Make this more rigorous
-            val (contentEntry, container) = importContentEntryFromFile(tempEpubFile.toURI().toString(), db, dbRepo,
+            val (contentEntry, container) = importContentEntryFromFile(tempEpubFile, db, dbRepo,
                     containerTmpDir.absolutePath, Any())!!
             Assert.assertNotNull(contentEntry)
             Assert.assertNotNull(container)
@@ -55,7 +55,7 @@ class ContentTypePluginsTest {
         db.clearAllTables()
 
         val contentEntry =  runBlocking {
-            extractContentEntryMetadataFromFile(emptyFile.toURI().toString(), db)
+            extractContentEntryMetadataFromFile(emptyFile, db)
         }
 
         Assert.assertNull("Given unsupported file, extractContentEntryMetaData returns null",

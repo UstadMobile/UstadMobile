@@ -54,7 +54,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
         runBlocking {
 
-            val metadata = extractContentEntryMetadataFromFile(file.toURI().toString(), db)
+            val metadata = extractContentEntryMetadataFromFile(file, db)
 
             if (metadata == null) {
                 hideContentEntry()
@@ -101,7 +101,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
             ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
 
-            val container = importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file.absolutePath, db, db, metadata.importMode, Any())
+            val container = importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file, db, db, metadata.importMode, Any())
             if (!headRequestValues.etag.isNullOrEmpty()) {
                 val etagContainer = ContainerETag(container.containerUid, headRequestValues.etag)
                 db.containerETagDao.insert(etagContainer)

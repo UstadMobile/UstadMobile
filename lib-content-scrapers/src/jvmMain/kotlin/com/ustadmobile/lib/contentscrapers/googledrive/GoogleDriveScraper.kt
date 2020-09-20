@@ -83,7 +83,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     }
                     stream.close()
 
-                    val metadata = extractContentEntryMetadataFromFile(contentFile.toURI().toString(), db)
+                    val metadata = extractContentEntryMetadataFromFile(contentFile, db)
 
                     if (metadata == null) {
                         hideContentEntry()
@@ -135,7 +135,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
 
                     importContainerFromFile(fileEntry.contentEntryUid,
                             metadata.mimeType, containerFolder.absolutePath,
-                            contentFile.toURI().toString(), db, db, metadata.importMode, Any())
+                            contentFile, db, db, metadata.importMode, Any())
 
                     showContentEntry()
                     setScrapeDone(true, 0)

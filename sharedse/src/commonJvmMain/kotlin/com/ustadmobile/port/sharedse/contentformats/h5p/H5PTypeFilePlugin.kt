@@ -34,10 +34,9 @@ val licenseMap = mapOf(
 
 class H5PTypeFilePlugin : H5PTypePlugin(), ContentTypeFilePlugin {
 
-    override fun getContentEntry(uri: String): ContentEntryWithLanguage? {
+    override fun getContentEntry(file: File): ContentEntryWithLanguage? {
         var contentEntry: ContentEntryWithLanguage? = null
         try {
-            val file = File(URI(uri).path)
             ZipInputStream(FileInputStream(file)).use {
                 var zipEntry: ZipEntry? = null
                 while ({ zipEntry = it.nextEntry; zipEntry }() != null) {

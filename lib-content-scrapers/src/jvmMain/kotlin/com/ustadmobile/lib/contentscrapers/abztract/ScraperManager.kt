@@ -182,7 +182,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
         val supported = mimeTypeSupported.find { fileMimeType -> fileMimeType == mimeType }
         return if (supported != null) {
-            val metaData = extractContentEntryMetadataFromFile(contentFile.toURI().toString(), db)
+            val metaData = extractContentEntryMetadataFromFile(contentFile, db)
             metaData?.scraperType = ScraperTypes.URL_SCRAPER
             metaData?.uri = url
             metaData?.contentEntry?.sourceUrl = url
@@ -241,7 +241,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     }
                     stream.close()
 
-                    val metadata = extractContentEntryMetadataFromFile(googleFile.toURI().toString(), db)
+                    val metadata = extractContentEntryMetadataFromFile(googleFile, db)
                     metadata?.scraperType = ScraperTypes.GOOGLE_DRIVE_SCRAPE
                     metadata?.uri = apiCall
                     metadata?.contentEntry?.sourceUrl = apiCall
@@ -401,6 +401,8 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
 
             val containerPath = cmd.getOptionValue(CONTAINER_ARGS)
+
+
 
 
             /*  val runner = ScraperManager(indexTotal, scraperTotal)

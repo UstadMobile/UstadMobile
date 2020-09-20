@@ -36,6 +36,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.instance
 import org.kodein.di.on
+import java.io.File
+import java.net.URI
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -151,7 +153,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                     GlobalScope.launch {
                         val accountManager: UstadAccountManager by instance()
                         val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
-                        val metaData = extractContentEntryMetadataFromFile(tmpFile.toURI().toString(), db)
+                        val metaData = extractContentEntryMetadataFromFile(tmpFile, db)
                         entryMetaData = metaData
                         when (entryMetaData) {
                             null -> {
@@ -194,7 +196,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         val importMode = entryMetaData?.importMode
         val container = if (fileUri != null && importMode != null) {
             withContext(Dispatchers.IO) {
-                importContainerFromFile(entryUid, entryMetaData?.mimeType, selectedBaseDir, fileUri, db, repo, importMode, requireContext())
+                importContainerFromFile(entryUid, entryMetaData?.mimeType, selectedBaseDir, File(URI(fileUri).path), db, repo, importMode, requireContext())
             }
         } else null
         loading = true

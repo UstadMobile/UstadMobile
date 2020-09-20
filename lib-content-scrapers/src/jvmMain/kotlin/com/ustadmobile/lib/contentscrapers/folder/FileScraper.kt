@@ -28,7 +28,7 @@ class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Lon
 
             try {
 
-                val metadata = extractContentEntryMetadataFromFile(file.toURI().toString(), db)
+                val metadata = extractContentEntryMetadataFromFile(file, db)
 
                 if (metadata == null) {
                     hideContentEntry()
@@ -56,7 +56,7 @@ class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Lon
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
 
-                importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file.toURI().toString(), db, db, metadata.importMode, Any())
+                importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file, db, db, metadata.importMode, Any())
 
                 close()
                 UMLogUtil.logInfo("finished scrape for $sourceUrl")

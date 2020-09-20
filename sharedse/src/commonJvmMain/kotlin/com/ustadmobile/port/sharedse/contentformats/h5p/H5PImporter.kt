@@ -15,11 +15,11 @@ import java.net.URI
 class H5PImporter(prefixContainer: String) : DefaultContainerImporter(prefixContainer, true) {
 
     override suspend fun importContentEntryFromFile(contentEntryUid: Long, mimeType: String?,
-                                                    containerBaseDir: String, fileUri: String,
+                                                    containerBaseDir: String, file: File,
                                                     db: UmAppDatabase, dbRepo: UmAppDatabase,
                                                     importMode: Int, context: Any): Container {
 
-        val container = super.importContentEntryFromFile(contentEntryUid, mimeType, containerBaseDir, fileUri, db, dbRepo, importMode, context)
+        val container = super.importContentEntryFromFile(contentEntryUid, mimeType, containerBaseDir, file, db, dbRepo, importMode, context)
         val entry = db.contentEntryDao.findByUid(contentEntryUid)
         val containerManager = ContainerManager(container, db, dbRepo, containerBaseDir)
 

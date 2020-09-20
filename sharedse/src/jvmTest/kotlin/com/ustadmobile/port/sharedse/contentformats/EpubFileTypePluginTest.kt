@@ -21,7 +21,7 @@ class EpubFileTypePluginTest {
         tempEpubFile.copyInputStreamToFile(inputStream)
 
         val epubPlugin = EpubTypeFilePlugin()
-        val contentEntry = epubPlugin.getContentEntry(tempEpubFile.toURI().toString())
+        val contentEntry = epubPlugin.getContentEntry(tempEpubFile)
         Assert.assertEquals("Got ContentEntry with expected title",
                 "A Textbook of Sources for Teachers and Teacher-Training Classes",
                 contentEntry?.title)

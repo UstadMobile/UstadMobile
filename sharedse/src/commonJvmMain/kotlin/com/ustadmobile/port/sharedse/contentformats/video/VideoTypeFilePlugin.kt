@@ -10,9 +10,7 @@ import java.net.URI
 
 class VideoTypeFilePlugin : VideoTypePlugin(), ContentTypeFilePlugin {
 
-    override fun getContentEntry(uri: String): ContentEntryWithLanguage? {
-
-        val file = File(URI(uri).path)
+    override fun getContentEntry(file: File): ContentEntryWithLanguage? {
 
         fileExtensions.find { file.name.endsWith(it) } ?: return null
 

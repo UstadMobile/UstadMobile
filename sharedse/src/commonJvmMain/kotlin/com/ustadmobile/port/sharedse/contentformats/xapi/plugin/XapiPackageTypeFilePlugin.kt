@@ -17,10 +17,9 @@ import java.util.zip.ZipInputStream
 
 class XapiPackageTypeFilePlugin : XapiPackageTypePlugin(), ContentTypeFilePlugin {
 
-    override fun getContentEntry(uri: String): ContentEntryWithLanguage? {
+    override fun getContentEntry(file: File): ContentEntryWithLanguage? {
         var contentEntry: ContentEntryWithLanguage? = null
         try {
-            val file = File(URI(uri).path)
             ZipInputStream(FileInputStream(file)).use {
                 var zipEntry: ZipEntry? = null
                 while ({ zipEntry = it.nextEntry; zipEntry }() != null) {
@@ -30,7 +29,7 @@ class XapiPackageTypeFilePlugin : XapiPackageTypePlugin(), ContentTypeFilePlugin
                         val xpp = UstadMobileSystemImpl.instance.newPullParser(it)
                         val activity = TinCanXML.loadFromXML(xpp).launchActivity
                         if(activity == null)
-                            throw IOException("TinCanXml from $uri has no launchActivity!")
+                            throw IOException("TinCanXml from ${file.name} has no launchActivity!")
 
                         contentEntry = ContentEntryWithLanguage().apply {
                             contentFlags = ContentEntry.FLAG_IMPORTED
