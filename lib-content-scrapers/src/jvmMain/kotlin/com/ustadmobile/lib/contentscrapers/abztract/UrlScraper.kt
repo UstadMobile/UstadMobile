@@ -16,6 +16,7 @@ import org.apache.commons.io.FilenameUtils
 import org.kodein.di.DI
 import java.io.File
 import java.net.URL
+import java.net.URLDecoder
 import java.nio.file.Files
 
 @ExperimentalStdlibApi
@@ -47,7 +48,8 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
             }
         }
 
-        val name = FilenameUtils.getName(url.path)
+        val urlName = URLDecoder.decode(url.path, ScraperConstants.UTF_ENCODING)
+        val name = FilenameUtils.getName(urlName)
         tempDir = Files.createTempDirectory("apache").toFile()
         var file = File(tempDir, name)
         FileUtils.copyURLToFile(url, file)
@@ -63,27 +65,12 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
             }
 
             val metadataContentEntry = metadata.contentEntry
-            var fileEntry: ContentEntry
-            if (scrapeQueueItem?.overrideEntry == true) {
-
-                fileEntry = ContentScraperUtil.createOrUpdateContentEntry(
-                        contentEntry?.entryId?.alternative(metadataContentEntry.entryId
-                                ?: name),
-                        contentEntry?.title.alternative(metadataContentEntry.title
-                                ?: name), sourceUrl,
-                        contentEntry?.publisher.alternative(metadataContentEntry.publisher ?: ""),
-                        contentEntry?.licenseType?.alternative(metadataContentEntry.licenseType) ?: ContentEntry.LICENSE_TYPE_OTHER,
-                        contentEntry?.primaryLanguageUid?.alternative(metadataContentEntry.primaryLanguageUid) ?: 0,
-                        contentEntry?.languageVariantUid?.alternative(metadataContentEntry.languageVariantUid) ?: 0,
-                        contentEntry?.description.alternative(metadataContentEntry.description ?: "")
-                        , true, contentEntry?.author ?: "",
-                        contentEntry?.thumbnailUrl.alternative(metadataContentEntry.thumbnailUrl ?: "")
-                        , "", "",
-                        metadataContentEntry.contentTypeFlag, contentEntryDao)
-
+            val fileEntry: ContentEntry
+            val dbEntry = contentEntry
+            fileEntry = if (dbEntry != null && scrapeQueueItem?.overrideEntry == true) {
+                dbEntry
             } else {
-
-                fileEntry = ContentScraperUtil.createOrUpdateContentEntry(
+               ContentScraperUtil.createOrUpdateContentEntry(
                         metadataContentEntry.entryId ?: contentEntry?.entryId ?: name,
                         metadataContentEntry.title ?: contentEntry?.title ?: name, sourceUrl,
                         metadataContentEntry.publisher ?: contentEntry?.publisher ?: "",
@@ -96,10 +83,9 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
                         "",
                         "",
                         metadataContentEntry.contentTypeFlag, contentEntryDao)
-
             }
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
+            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
 
             val container = importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file, db, db, metadata.importMode, Any())
             if (!headRequestValues.etag.isNullOrEmpty()) {

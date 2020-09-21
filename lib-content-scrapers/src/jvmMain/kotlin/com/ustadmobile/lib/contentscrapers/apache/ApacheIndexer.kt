@@ -4,7 +4,6 @@ import ScraperTypes
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -36,30 +35,20 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
 
         UMLogUtil.logInfo("folder Title ${huc.responseCode}")
 
-        var folderEntry: ContentEntry
-        if (scrapeQueueItem?.overrideEntry == true) {
-
-            folderEntry = ContentScraperUtil.createOrUpdateContentEntry(contentEntry?.entryId.alternative(folderTitle),
-                    contentEntry?.title.alternative(folderTitle),
-                    sourceUrl, contentEntry?.publisher.alternative(""),
-                    contentEntry?.licenseType?.alternative(ContentEntry.LICENSE_TYPE_OTHER)
-                            ?: ContentEntry.LICENSE_TYPE_OTHER,
-                    contentEntry?.primaryLanguageUid?.alternative(englishLang.langUid)
-                            ?: englishLang.langUid,
-                    contentEntry?.languageVariantUid,
-                    "", false, contentEntry?.author ?: "", "", "",
-                    "", ContentEntry.TYPE_COLLECTION, contentEntryDao)
-        } else {
-
-            folderEntry = ContentScraperUtil.createOrUpdateContentEntry(folderTitle, folderTitle,
-                    sourceUrl, parentcontentEntry?.publisher ?: "",
+        val folderEntry: ContentEntry
+        val dbEntry = contentEntry
+        folderEntry = if (dbEntry != null && scrapeQueueItem?.overrideEntry == true) {
+            dbEntry
+        }else{
+            ContentScraperUtil.createOrUpdateContentEntry(folderTitle, folderTitle,
+                    sourceUrl, parentContentEntry?.publisher ?: "",
                     ContentEntry.LICENSE_TYPE_OTHER, englishLang.langUid, null,
                     "", false, "",
                     "", "",
                     "", ContentEntry.TYPE_COLLECTION, contentEntryDao)
         }
+        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, folderEntry, 0)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry, folderEntry, 0)
 
         document.select("tr:has([alt])").forEach {
 

@@ -2,7 +2,6 @@ package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import ScraperTypes.KHAN_LITE_VIDEO_SCRAPER
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
@@ -23,7 +22,7 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
 
         val khanEntry = getKhanEntry(englishLang, contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, khanEntry, 12)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, khanEntry, 12)
 
         val lang = sourceUrl.substringBefore(".khan").substringAfter("://")
 

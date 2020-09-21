@@ -17,6 +17,10 @@
             type="com.ustadmobile.lib.db.entities.ContentEntryWithLanguage" />
 
         <variable
+            name="importedMetadata"
+            type="com.ustadmobile.core.contentformats.ImportedContentEntryMetaData"/>
+
+        <variable
             name="loading"
             type="boolean" />
 
@@ -43,10 +47,6 @@
         <variable
             name="isImportError"
             type="boolean" />
-
-        <variable
-            name="selectedFileUri"
-            type="String" />
 
         <variable
             name="activityEventHandler"
@@ -88,7 +88,7 @@
                 android:onClick="@{()-> activityEventHandler.onClickContentImportSourceSelection()}"
                 android:padding="@dimen/dimen_20dp"
                 android:text="@{contentEntry.contentEntryUid == 0 ? @string/import_content: @string/update_content}"
-                android:visibility="@{contentEntry.leaf ? View.VISIBLE: View.GONE}"
+                android:visibility="@{(contentEntry.leaf || importedMetadata.uri != null) ? View.VISIBLE: View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"

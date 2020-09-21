@@ -3,7 +3,6 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
@@ -100,9 +99,9 @@ open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, sqiUid:
 
         val contentEntry = ContentScraperUtil.createOrUpdateContentEntry(
                 youtubeData.id!!, youtubeData.title!!, sourceUrl,
-                parentcontentEntry?.publisher ?: "", parentcontentEntry?.licenseType ?: 0,
-                parentcontentEntry?.primaryLanguageUid ?: 0,
-                parentcontentEntry?.languageVariantUid ?: 0,
+                parentContentEntry?.publisher ?: "", parentContentEntry?.licenseType ?: 0,
+                parentContentEntry?.primaryLanguageUid ?: 0,
+                parentContentEntry?.languageVariantUid ?: 0,
                 youtubeData.description ?: "", false, "",
                 youtubeData.thumbnail ?: "",
                 "", "", 0, contentEntryDao)
@@ -118,11 +117,11 @@ open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, sqiUid:
 
             val youtubeEntry = ContentScraperUtil.insertTempYoutubeContentEntry(
                     contentEntryDao, youtubeUrl,
-                    parentcontentEntry?.primaryLanguageUid ?: 0, entry.title!!,
-                    parentcontentEntry?.publisher ?: "", parentcontentEntry?.licenseType ?: 0,
-                    parentcontentEntry?.languageVariantUid ?: 0)
+                    parentContentEntry?.primaryLanguageUid ?: 0, entry.title!!,
+                    parentContentEntry?.publisher ?: "", parentContentEntry?.licenseType ?: 0,
+                    parentContentEntry?.languageVariantUid ?: 0)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, youtubeEntry, counter)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry!!, youtubeEntry, counter)
 
             createQueueItem(youtubeUrl, youtubeEntry, ScraperTypes.YOUTUBE_VIDEO_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, parentContentEntryUid)
         }

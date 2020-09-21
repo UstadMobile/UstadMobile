@@ -3,7 +3,6 @@ package com.ustadmobile.lib.contentscrapers.khanacademy
 import ScraperTypes.KHAN_TOPIC_INDEXER
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.abztract.HarIndexer
@@ -22,7 +21,7 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
 
         val khanEntry = getKhanEntry(englishLang, contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, khanEntry, 12)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, khanEntry, 12)
 
         val lang = sourceUrl.substringBefore(".khan").substringAfter("://")
 

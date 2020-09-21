@@ -53,8 +53,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     private var mPresenter: ContentEntryEdit2Presenter? = null
 
-    override var entryMetaData: ImportedContentEntryMetaData? = null
-
     override val mEditPresenter: UstadEditPresenter<*, ContentEntryWithLanguage>?
         get() = mPresenter
 
@@ -64,6 +62,15 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         set(value) {
             field = value
             mBinding?.contentEntry = value
+        }
+
+    override var entryMetaData: ImportedContentEntryMetaData? = null
+        get() = field
+        set(value) {
+            mBinding?.fileImportInfoVisibility = if (value?.uri != null)
+                View.VISIBLE else View.GONE
+            mBinding?.importedMetadata = value
+            field = value
         }
 
     override var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>? = null
@@ -80,15 +87,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             mBinding?.selectedStorageIndex = value
         }
 
-
-    override var selectedUri: String? = null
-        get() = field
-        set(value) {
-            field = value
-            mBinding?.fileImportInfoVisibility = if (selectedUri != null)
-                View.VISIBLE else View.GONE
-            mBinding?.selectedFileUri = value
-        }
 
     override var titleErrorEnabled: Boolean = false
         set(value) {
@@ -136,7 +134,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     }
 
 
-
     internal fun handleFileSelection() {
         registerForActivityResult(ActivityResultContracts.GetContent(),
                 registry ?: requireActivity().activityResultRegistry) { uri: Uri? ->
@@ -158,9 +155,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                         when (entryMetaData) {
                             null -> {
                                 showSnackBar(getString(R.string.import_link_content_not_supported))
-                            }
-                            else -> {
-                                selectedUri = tmpFile.toURI().toString()
                             }
                         }
                         val entry = entryMetaData?.contentEntry
@@ -234,7 +228,6 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             val metadata = it.firstOrNull() ?: return@observeResult
             // back from navigate import
             entryMetaData = metadata
-            selectedUri = metadata.uri
             val entry = entryMetaData?.contentEntry
             val entryUid = arguments?.get(ARG_ENTITY_UID)
             if (entry != null) {

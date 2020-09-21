@@ -3,7 +3,6 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
-import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -13,14 +12,13 @@ import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.io.File
 
 @ExperimentalStdlibApi
 abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val sqiUid: Int, val contentEntryUid: Long, endpoint: Endpoint, di: DI) {
 
     val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
 
-    var parentcontentEntry: ContentEntry? = null
+    var parentContentEntry: ContentEntry? = null
     var contentEntry: ContentEntry? = null
     var scrapeQueueItem: ScrapeQueueItem? = null
     val contentEntryDao = db.contentEntryDao
@@ -37,7 +35,7 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val sqi
 
     init {
         runBlocking {
-            parentcontentEntry = db.contentEntryDao.findByUidAsync(parentContentEntryUid)
+            parentContentEntry = db.contentEntryDao.findByUidAsync(parentContentEntryUid)
             contentEntry = db.contentEntryDao.findByUidAsync(contentEntryUid)
             scrapeQueueItem = queueDao.findByUid(sqiUid)
         }

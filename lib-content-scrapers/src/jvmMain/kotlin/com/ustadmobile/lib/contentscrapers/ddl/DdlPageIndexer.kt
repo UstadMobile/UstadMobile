@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.ddl
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.jsoup.Jsoup
@@ -12,7 +11,7 @@ class DdlPageIndexer(parentContentEntryUid: Long, runId: Int, sqiUid: Int, conte
 
     override fun indexUrl(sourceUrl: String) {
 
-        val langEntry = db.languageDao.findByUid(parentcontentEntry?.primaryLanguageUid!!)
+        val langEntry = db.languageDao.findByUid(parentContentEntry?.primaryLanguageUid!!)
         val twoCodeLang = langEntry?.iso_639_1_standard
 
         val document = Jsoup.connect(sourceUrl)
@@ -39,7 +38,7 @@ class DdlPageIndexer(parentContentEntryUid: Long, runId: Int, sqiUid: Int, conte
         for (i in 1..maxNumber) {
 
             val url = "https://www.ddl.af/$twoCodeLang/resources/list?subject_area=${subjectId}&page=$i"
-            createQueueItem(url, parentcontentEntry!!, ScraperTypes.DDL_LIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentContentEntryUid)
+            createQueueItem(url, parentContentEntry!!, ScraperTypes.DDL_LIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentContentEntryUid)
         }
 
         setIndexerDone(true, 0)

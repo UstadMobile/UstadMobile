@@ -270,8 +270,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     entry.leaf = false
                     entry.contentTypeFlag = ContentEntry.TYPE_COLLECTION
 
-                    return ImportedContentEntryMetaData(entry, mimeType, url, 0, ScraperTypes.APACHE_INDEXER)
-
+                    return ImportedContentEntryMetaData(entry, "text/html", url, 0, ScraperTypes.APACHE_INDEXER)
 
                 }
 

@@ -61,7 +61,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
 
                 val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
                 val googleModifiedTime = file.modifiedTime
-                val parsedModifiedTime: Long = if(googleModifiedTime != null) googleDriveFormat.parse(googleModifiedTime).local.unixMillisLong else 1
+                val parsedModifiedTime: Long = if (googleModifiedTime != null) googleDriveFormat.parse(googleModifiedTime).local.unixMillisLong else 1
                 val isUpdated = parsedModifiedTime > recentContainer?.cntLastModified ?: 0
                 if (!isUpdated) {
                     showContentEntry()
@@ -93,41 +93,31 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     }
 
                     val metadataContentEntry = metadata.contentEntry
+                    var dbEntry = contentEntry
                     var fileEntry: ContentEntry
-                    if (scrapeQueueItem?.overrideEntry == true) {
 
-                        fileEntry = ContentScraperUtil.createOrUpdateContentEntry(
-                                contentEntry?.entryId?.alternative(metadataContentEntry.entryId
-                                        ?: file.id ?: ""),
-                                contentEntry?.title.alternative(metadataContentEntry.title
-                                        ?: file.name ?: ""),
-                                "https://www.googleapis.com/drive/v3/files/${file.id}",
-                                contentEntry?.publisher.alternative(metadataContentEntry.publisher ?: ""),
-                                contentEntry?.licenseType?.alternative(metadataContentEntry.licenseType) ?: ContentEntry.LICENSE_TYPE_OTHER,
-                                contentEntry?.primaryLanguageUid?.alternative(metadataContentEntry.primaryLanguageUid) ?: 0,
-                                contentEntry?.languageVariantUid?.alternative(metadataContentEntry.languageVariantUid) ?: 0,
-                                contentEntry?.description.alternative(metadataContentEntry.description ?: file.description ?: "")
-                                , true, contentEntry?.author ?: "",
-                                contentEntry?.thumbnailUrl.alternative(metadataContentEntry.thumbnailUrl ?: file.thumbnailLink ?: "")
-                                , "", "",
-                                metadataContentEntry.contentTypeFlag, contentEntryDao)
-
+                    if (dbEntry != null && scrapeQueueItem?.overrideEntry == true) {
+                        fileEntry = dbEntry
                     } else {
-
                         fileEntry = ContentScraperUtil.createOrUpdateContentEntry(
                                 metadataContentEntry.entryId ?: contentEntry?.entryId ?: file.id,
                                 metadataContentEntry.title ?: contentEntry?.title ?: file.name,
                                 "https://www.googleapis.com/drive/v3/files/${file.id}",
                                 metadataContentEntry.publisher ?: contentEntry?.publisher ?: "",
-                                metadataContentEntry.licenseType.alternative(contentEntry?.licenseType ?: ContentEntry.LICENSE_TYPE_OTHER),
-                                metadataContentEntry.primaryLanguageUid.alternative(contentEntry?.primaryLanguageUid ?: 0),
-                                metadataContentEntry.languageVariantUid.alternative(contentEntry?.languageVariantUid ?: 0),
-                                metadataContentEntry.description.alternative(contentEntry?.description ?: file.description ?: "")
-                                , true, metadataContentEntry.author.alternative(contentEntry?.author ?: ""),
-                                metadataContentEntry.thumbnailUrl.alternative(contentEntry?.thumbnailUrl ?: file.thumbnailLink ?: ""),
+                                metadataContentEntry.licenseType.alternative(contentEntry?.licenseType
+                                        ?: ContentEntry.LICENSE_TYPE_OTHER),
+                                metadataContentEntry.primaryLanguageUid.alternative(contentEntry?.primaryLanguageUid
+                                        ?: 0),
+                                metadataContentEntry.languageVariantUid.alternative(contentEntry?.languageVariantUid
+                                        ?: 0),
+                                metadataContentEntry.description.alternative(contentEntry?.description
+                                        ?: file.description ?: "")
+                                , true, metadataContentEntry.author.alternative(contentEntry?.author
+                                ?: ""),
+                                metadataContentEntry.thumbnailUrl.alternative(contentEntry?.thumbnailUrl
+                                        ?: file.thumbnailLink ?: ""),
                                 "", "",
                                 metadataContentEntry.contentTypeFlag, contentEntryDao)
-
                     }
 
 

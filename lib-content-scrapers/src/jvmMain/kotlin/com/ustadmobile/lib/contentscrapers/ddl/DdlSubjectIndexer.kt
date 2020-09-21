@@ -2,9 +2,7 @@ package com.ustadmobile.lib.contentscrapers.ddl
 
 import ScraperTypes
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.SeleniumIndexer
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -43,12 +41,12 @@ class DdlSubjectIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, c
             UMLogUtil.logInfo("with subject url $subjectUrl")
 
             val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(subjectId, title,
-                    subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, parentcontentEntry!!.primaryLanguageUid, null,
+                    subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, parentContentEntry!!.primaryLanguageUid, null,
                     "", false, "", "",
                     "", "", 0, contentEntryDao)
             contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid, false)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, subjectEntry, i)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry!!, subjectEntry, i)
 
             subjectSubTopicMap[subjectId] = subjectEntry
 
@@ -83,7 +81,7 @@ class DdlSubjectIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, c
                 UMLogUtil.logInfo("with subtopic url $subjectUrl")
 
                 val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(subTopicId, title,
-                        subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, parentcontentEntry!!.primaryLanguageUid, null,
+                        subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, parentContentEntry!!.primaryLanguageUid, null,
                         "", false, "", "",
                         "", "", 0, contentEntryDao)
                 contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid, false)

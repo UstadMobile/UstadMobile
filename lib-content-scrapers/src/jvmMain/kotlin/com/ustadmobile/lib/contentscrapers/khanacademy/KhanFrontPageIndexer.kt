@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 
@@ -25,14 +25,14 @@ class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, c
                 "https://cdn.kastatic.org/images/khan-logo-dark-background.new.png",
                 "", "", 0, contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, parentEntry, 12)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, parentEntry, 12)
 
         khanLiteMap.values.forEach{
-            createQueueItem(it.url, parentEntry, ScraperTypes.KHAN_LITE_INDEXER,  ScrapeQueueItem.ITEM_TYPE_INDEX, masterRootParent.contentEntryUid)
+            createQueueItem(it.url, parentEntry, ScraperTypes.KHAN_LITE_INDEXER,  ScrapeQueueItem.ITEM_TYPE_INDEX, parentContentEntryUid.alternative(-4103245208651563007L))
         }
 
         khanFullMap.values.forEach{
-            createQueueItem(it.url, parentEntry, ScraperTypes.KHAN_FULL_INDEXER,  ScrapeQueueItem.ITEM_TYPE_INDEX, masterRootParent.contentEntryUid)
+            createQueueItem(it.url, parentEntry, ScraperTypes.KHAN_FULL_INDEXER,  ScrapeQueueItem.ITEM_TYPE_INDEX, parentContentEntryUid.alternative(-4103245208651563007L))
         }
 
         setIndexerDone(true, 0)

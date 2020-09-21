@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
@@ -19,7 +18,7 @@ class KhanYoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid
 
         val khanEntry = getKhanEntry(englishLang, contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, khanEntry, 12)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, khanEntry, 12)
 
         parentEntry = createKangLangEntry("ps", "Pashto", "https://ps.khanacademy.org/", db)
         hideContentEntry(parentEntry.contentEntryUid)

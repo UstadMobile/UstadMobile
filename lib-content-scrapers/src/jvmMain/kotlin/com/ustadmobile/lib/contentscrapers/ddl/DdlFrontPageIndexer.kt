@@ -2,9 +2,7 @@ package com.ustadmobile.lib.contentscrapers.ddl
 
 import ScraperTypes.DDL_SUBJECT_INDEXER
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Language
@@ -26,7 +24,7 @@ class DdlFrontPageIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int,
                 "Free and open educational resources for Afghanistan", false, "",
                 "https://ddl.af/storage/files/logo-dd.png", "", "", 0, contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, parentDdl, 2)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, parentDdl, 2)
 
         createLangEntry("English", englishLang, parentDdl)
         createLangEntry("فارسی", farsiLang, parentDdl)

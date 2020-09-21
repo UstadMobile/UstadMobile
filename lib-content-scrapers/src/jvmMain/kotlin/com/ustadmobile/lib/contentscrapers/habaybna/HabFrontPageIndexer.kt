@@ -1,9 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.habaybna
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.HAB
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -27,7 +25,7 @@ class HabFrontPageIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, co
                 "https://www.expo2020dubai.com/-/media/expo2020/expo-live/global-innovators/habaybna/habaybna-logo.png",
                 "", "", 0, contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, masterRootParent, parentHab, 10)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, parentHab, 10)
 
         createEntryAndQueue("https://www.youtube.com/playlist?list=PLFhWybf5UzoxBVZtZc7tvt8ET5PnRtLYa", "سهى الطبال")
         createEntryAndQueue("https://www.youtube.com/playlist?list=PLFhWybf5Uzowd6hrJuumTVxaJJGRcBdzd", "رنا شعبان")

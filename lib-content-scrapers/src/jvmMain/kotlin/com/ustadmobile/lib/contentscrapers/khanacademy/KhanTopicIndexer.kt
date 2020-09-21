@@ -6,7 +6,6 @@ import ScraperTypes.KHAN_FULL_EXERCISE_SCRAPER
 import ScraperTypes.KHAN_FULL_VIDEO_SCRAPER
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
@@ -75,8 +74,8 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                         val tutorialEntry = ContentScraperUtil.createOrUpdateContentEntry(
                                 tutorial.slug!!, tutorial.title, subjectUrl.toString(),
                                 ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
-                                parentcontentEntry!!.primaryLanguageUid,
-                                parentcontentEntry!!.languageVariantUid,
+                                parentContentEntry!!.primaryLanguageUid,
+                                parentContentEntry!!.languageVariantUid,
                                 tutorial.description, false,
                                 "", "",
                                 "", "",
@@ -84,7 +83,7 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
 
                         ContentScraperUtil.insertOrUpdateParentChildJoin(
                                 contentEntryParentChildJoinDao,
-                                parentcontentEntry!!, tutorialEntry, tutorialCount)
+                                parentContentEntry!!, tutorialEntry, tutorialCount)
 
                         tutorial.contentItems?.forEachIndexed { contentCount, contentItem ->
 
@@ -107,8 +106,8 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                                     contentItem.slug!!, contentItem.title,
                                     "${ScraperConstants.KHAN_PREFIX}${contentItem.contentId!!}${if (lang.isNotEmpty()) ".$lang" else ""}",
                                     ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
-                                    parentcontentEntry!!.primaryLanguageUid,
-                                    parentcontentEntry!!.languageVariantUid,
+                                    parentContentEntry!!.primaryLanguageUid,
+                                    parentContentEntry!!.languageVariantUid,
                                     contentItem.description,
                                     true, "",
                                     contentItem.thumbnailUrl,
@@ -142,8 +141,8 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                     val tutorialEntry = ContentScraperUtil.createOrUpdateContentEntry(
                             module.slug!!, module.title, module.topicId!!,
                             ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
-                            parentcontentEntry!!.primaryLanguageUid,
-                            parentcontentEntry!!.languageVariantUid,
+                            parentContentEntry!!.primaryLanguageUid,
+                            parentContentEntry!!.languageVariantUid,
                             module.description, false,
                             "", module.imageUrl,
                             "", "",
@@ -151,7 +150,7 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(
                             contentEntryParentChildJoinDao,
-                            parentcontentEntry!!, tutorialEntry, moduleCount)
+                            parentContentEntry!!, tutorialEntry, moduleCount)
 
 
                     module.contentItems?.forEachIndexed { itemCount, contentItem ->
@@ -174,8 +173,8 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                                 contentItem.slug!!, contentItem.title,
                                 "${ScraperConstants.KHAN_PREFIX}${contentItem.contentId!!}${if (lang.isNotEmpty()) ".$lang" else ""}",
                                 ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
-                                parentcontentEntry!!.primaryLanguageUid,
-                                parentcontentEntry!!.languageVariantUid,
+                                parentContentEntry!!.primaryLanguageUid,
+                                parentContentEntry!!.languageVariantUid,
                                 contentItem.description,
                                 true, "",
                                 contentItem.thumbnailUrl,
@@ -214,8 +213,8 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
 
         val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(module.slug!!,
                 module.title, subjectUrl.toString(), ScraperConstants.KHAN,
-                ContentEntry.LICENSE_TYPE_CC_BY_NC, parentcontentEntry!!.primaryLanguageUid,
-                parentcontentEntry!!.languageVariantUid, module.description,
+                ContentEntry.LICENSE_TYPE_CC_BY_NC, parentContentEntry!!.primaryLanguageUid,
+                parentContentEntry!!.languageVariantUid, module.description,
                 false, "",
                 module.icon, "",
                 "",
@@ -223,7 +222,7 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(
                 contentEntryParentChildJoinDao,
-                parentcontentEntry!!, subjectEntry, count)
+                parentContentEntry!!, subjectEntry, count)
 
         createQueueItem(subjectUrl.toString(), subjectEntry,
                 ScraperTypes.KHAN_TOPIC_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentContentEntryUid)

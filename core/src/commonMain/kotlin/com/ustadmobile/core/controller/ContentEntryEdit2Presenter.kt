@@ -106,6 +106,10 @@ class ContentEntryEdit2Presenter(context: Any,
     override fun onLoadFromJson(bundle: Map<String, String>): ContentEntryWithLanguage? {
         super.onLoadFromJson(bundle)
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
+        val metaDataStr = bundle[ARG_IMPORTED_METADATA]
+        if(metaDataStr != null){
+            view.entryMetaData = Json.parse(ImportedContentEntryMetaData.serializer(), metaDataStr)
+        }
         var editEntity: ContentEntryWithLanguage? = null
         editEntity = if (entityJsonStr != null) {
             Json.parse(ContentEntryWithLanguage.serializer(), entityJsonStr)
@@ -128,7 +132,7 @@ class ContentEntryEdit2Presenter(context: Any,
         view.fileImportErrorVisible = false
         GlobalScope.launch(doorMainDispatcher()) {
             val canCreate = entity.title != null && (!entity.leaf || entity.contentEntryUid != 0L ||
-                    (entity.contentEntryUid == 0L && view.selectedUri != null))
+                    (entity.contentEntryUid == 0L && view.entryMetaData?.uri != null))
 
             if (canCreate) {
                 entity.licenseName = view.licenceOptions?.firstOrNull { it.code == entity.licenseType }.toString()
@@ -148,9 +152,9 @@ class ContentEntryEdit2Presenter(context: Any,
                     repo.languageDao.insertAsync(language)
                 }
 
-                if (entity.leaf && view.selectedUri != null) {
+                if (view.entryMetaData?.uri != null) {
 
-                    if (view.selectedUri?.startsWith("file:/") == true) {
+                    if (view.entryMetaData?.uri?.startsWith("file:/") == true) {
 
                         val container = view.saveContainerOnExit(entity.contentEntryUid,
                                 storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(), db, repo)
@@ -181,6 +185,7 @@ class ContentEntryEdit2Presenter(context: Any,
                             containerUploadManager?.enqueue(uploadJob.cujUid)
 
                             view.finishWithResult(listOf(entity))
+                            return@launch
 
                         }
 
@@ -190,7 +195,7 @@ class ContentEntryEdit2Presenter(context: Any,
                             url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl, "/import/downloadLink/"))
                             parameter("parentUid", parentEntryUid)
                             parameter("scraperType", view.entryMetaData?.scraperType)
-                            parameter("url", view.selectedUri)
+                            parameter("url", view.entryMetaData?.uri)
                             header("content-type", "application/json")
                             body = entity
                         }.execute()
@@ -201,14 +206,17 @@ class ContentEntryEdit2Presenter(context: Any,
                         }
 
                         view.finishWithResult(listOf(entity))
+                        return@launch
 
                     }
                 }
 
+                view.finishWithResult(listOf(entity))
+
             } else {
                 view.titleErrorEnabled = entity.title == null
                 view.fileImportErrorVisible = entity.title != null && entity.leaf
-                        && view.selectedUri == null
+                        && view.entryMetaData?.uri == null
             }
         }
     }

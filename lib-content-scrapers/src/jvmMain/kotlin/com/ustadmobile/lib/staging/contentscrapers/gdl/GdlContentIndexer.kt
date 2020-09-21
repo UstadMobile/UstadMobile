@@ -225,7 +225,7 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
                 val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao
 
 
-                scrapeFromRoot(File(args[0]), File(args[1]), runId)
+                scrapeFromRoot(File(args[0]), File(args[1]), 0)
             } catch (e: Exception) {
                 UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e))
                 UMLogUtil.logError("Main method exception catch khan")

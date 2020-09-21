@@ -568,23 +568,23 @@ object ContentScraperUtil {
      * @param index       count
      * @return the updated/created join
      */
-    fun insertOrUpdateChildWithMultipleParentsJoin(dao: ContentEntryParentChildJoinDao, parentEntry: ContentEntry, childEntry: ContentEntry, index: Int): ContentEntryParentChildJoin {
+    fun insertOrUpdateChildWithMultipleParentsJoin(dao: ContentEntryParentChildJoinDao, parentEntry: ContentEntry?, childEntry: ContentEntry, index: Int): ContentEntryParentChildJoin {
 
-        val existingParentChildJoin = dao.findJoinByParentChildUuids(parentEntry.contentEntryUid, childEntry.contentEntryUid)
+        val existingParentChildJoin = dao.findJoinByParentChildUuids(parentEntry?.contentEntryUid ?: -4103245208651563007L, childEntry.contentEntryUid)
 
         val newJoin = ContentEntryParentChildJoin()
-        newJoin.cepcjParentContentEntryUid = parentEntry.contentEntryUid
+        newJoin.cepcjParentContentEntryUid = parentEntry?.contentEntryUid ?: -4103245208651563007L
         newJoin.cepcjChildContentEntryUid = childEntry.contentEntryUid
-        newJoin.childIndex = index
-        if (existingParentChildJoin == null) {
+        newJoin.childIndex = if(index == 0) existingParentChildJoin?.childIndex ?: index else index
+        return if (existingParentChildJoin == null) {
             newJoin.cepcjUid = dao.insert(newJoin)
-            return newJoin
+            newJoin
         } else {
             newJoin.cepcjUid = existingParentChildJoin.cepcjUid
             if (newJoin != existingParentChildJoin) {
                 dao.update(newJoin)
             }
-            return newJoin
+            newJoin
         }
     }
 

@@ -3,7 +3,6 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
@@ -107,11 +106,11 @@ class YoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: In
 
             val playlistEntry = ContentScraperUtil.insertTempYoutubeContentEntry(
                     contentEntryDao, entry.url!!,
-                    parentcontentEntry?.primaryLanguageUid?: 0, "",
-                    parentcontentEntry?.publisher?: "", parentcontentEntry?.licenseType?: 0,
-                    parentcontentEntry?.languageVariantUid?: 0)
+                    parentContentEntry?.primaryLanguageUid?: 0, "",
+                    parentContentEntry?.publisher?: "", parentContentEntry?.licenseType?: 0,
+                    parentContentEntry?.languageVariantUid?: 0)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, playlistEntry, counter)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry!!, playlistEntry, counter)
 
             createQueueItem(entry.url!!, playlistEntry, ScraperTypes.YOUTUBE_PLAYLIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentContentEntryUid)
         }

@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.ddl
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
@@ -19,7 +18,7 @@ class DdlListIndexer(parentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntr
         val document = Jsoup.connect(sourceUrl)
                 .header("X-Requested-With", "XMLHttpRequest").get()
 
-        val langCode = languageDao.findByUid(parentcontentEntry?.primaryLanguageUid!!)?.iso_639_1_standard
+        val langCode = languageDao.findByUid(parentContentEntry?.primaryLanguageUid!!)?.iso_639_1_standard
 
         val resourceList = document.select("article a[href]")
 
@@ -39,9 +38,9 @@ class DdlListIndexer(parentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntr
 
                 val title = resource.selectFirst("div.resource-title")?.text()?: ""
 
-                val entry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, url, parentcontentEntry!!.primaryLanguageUid, title)
+                val entry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, url, parentContentEntry!!.primaryLanguageUid, title)
 
-                ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentcontentEntry!!, entry, counter++)
+                ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry!!, entry, counter++)
 
                 createQueueItem(url,  entry, ScraperTypes.DDL_ARTICLE_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, parentContentEntryUid)
             }
