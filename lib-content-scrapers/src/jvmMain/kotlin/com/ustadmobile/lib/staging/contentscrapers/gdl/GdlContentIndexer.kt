@@ -224,11 +224,6 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
             try {
                 val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao
 
-                var runId = runDao.findPendingRunIdByScraperType(ScrapeRunDao.SCRAPE_TYPE_GDL)
-                if (runId == 0) {
-                    runId = runDao.insert(ScrapeRun(ScrapeRunDao.SCRAPE_TYPE_GDL,
-                            ScrapeQueueItemDao.STATUS_PENDING)).toInt()
-                }
 
                 scrapeFromRoot(File(args[0]), File(args[1]), runId)
             } catch (e: Exception) {

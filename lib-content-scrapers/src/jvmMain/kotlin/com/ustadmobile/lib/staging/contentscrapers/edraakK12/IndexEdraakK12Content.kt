@@ -240,11 +240,6 @@ class IndexEdraakK12Content {
             try {
                 val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao
 
-                runId = runDao.findPendingRunIdByScraperType(ScrapeRunDao.SCRAPE_TYPE_EDRAAK)
-                if (runId == 0) {
-                    runId = runDao.insert(ScrapeRun(ScrapeRunDao.SCRAPE_TYPE_EDRAAK,
-                            ScrapeQueueItemDao.STATUS_PENDING)).toInt()
-                }
 
                 val index = IndexEdraakK12Content()
 

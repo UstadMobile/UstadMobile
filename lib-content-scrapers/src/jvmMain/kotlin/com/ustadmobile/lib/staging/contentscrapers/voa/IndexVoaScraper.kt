@@ -186,13 +186,7 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
             try {
                 val runDao = UmAppDatabase.getInstance(Any()).scrapeRunDao
 
-                var runId = runDao.findPendingRunIdByScraperType(ScrapeRunDao.SCRAPE_TYPE_VOA)
-                if (runId == 0) {
-                    runId = runDao.insert(ScrapeRun(ScrapeRunDao.SCRAPE_TYPE_VOA,
-                            ScrapeQueueItemDao.STATUS_PENDING)).toInt()
-                }
-
-                scrapeFromRoot(File(args[0]), File(args[1]), runId)
+                scrapeFromRoot(File(args[0]), File(args[1]), 0)
             } catch (e: Exception) {
                 UMLogUtil.logFatal(ExceptionUtils.getStackTrace(e))
                 UMLogUtil.logError("Main method exception catch khan")
