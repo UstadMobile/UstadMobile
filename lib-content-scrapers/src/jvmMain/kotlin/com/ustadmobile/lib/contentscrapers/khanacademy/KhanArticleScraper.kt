@@ -164,7 +164,7 @@ class KhanArticleScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                 if (navItem.nodeSlug == nodeSlug) {
                     continue
                 }
-                linksList.add(HarRegexPair(regexUrlPrefix + navItem.nodeSlug!!, KhanContentScraper.CONTENT_DETAIL_SOURCE_URL_KHAN_ID + navItem.id!!))
+                linksList.add(HarRegexPair(regexUrlPrefix + navItem.nodeSlug!!, ScraperConstants.CONTENT_DETAIL_SOURCE_URL_KHAN_ID + navItem.id!!))
             }
         } else {
             UMLogUtil.logError("Your related items are in another json for url $sourceUrl")

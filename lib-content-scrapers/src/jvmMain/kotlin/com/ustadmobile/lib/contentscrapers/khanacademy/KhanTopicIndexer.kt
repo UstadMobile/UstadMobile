@@ -43,13 +43,13 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
 
             tabModules.forEachIndexed { moduleCount, module ->
 
-                if (KhanContentIndexer.TABLE_OF_CONTENTS_ROW == module.kind) {
+                if (ScraperConstants.TABLE_OF_CONTENTS_ROW == module.kind) {
 
                     // for url kha.org/math
                     createModule(url, module, moduleCount)
 
 
-                } else if (KhanContentIndexer.SUBJECT_PROGRESS == module.kind) {
+                } else if (ScraperConstants.SUBJECT_PROGRESS == module.kind) {
 
                     val moduleItems = module.modules
 
@@ -59,7 +59,7 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
 
                     moduleItems.forEachIndexed { itemCount, moduleItem ->
 
-                        if (KhanContentIndexer.SUBJECT_PAGE_TOPIC_CARD == moduleItem.kind) {
+                        if (ScraperConstants.SUBJECT_PAGE_TOPIC_CARD == moduleItem.kind) {
 
                             // for url kha.org/math/early-math
                             createModule(url, moduleItem, itemCount)
@@ -105,7 +105,7 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
 
                             val entry = ContentScraperUtil.createOrUpdateContentEntry(
                                     contentItem.slug!!, contentItem.title,
-                                    "${KhanContentIndexer.KHAN_PREFIX}${contentItem.contentId!!}${if (lang.isNotEmpty()) ".$lang" else ""}",
+                                    "${ScraperConstants.KHAN_PREFIX}${contentItem.contentId!!}${if (lang.isNotEmpty()) ".$lang" else ""}",
                                     ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
                                     parentcontentEntry!!.primaryLanguageUid,
                                     parentcontentEntry!!.languageVariantUid,
@@ -131,7 +131,7 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                     }
 
 
-                }else if(KhanContentIndexer.CONTENT_LIST == module.kind){
+                }else if(ScraperConstants.CONTENT_LIST == module.kind){
 
                     val moduleItems = module.contentItems
 
@@ -172,7 +172,7 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
 
                         val entry = ContentScraperUtil.createOrUpdateContentEntry(
                                 contentItem.slug!!, contentItem.title,
-                                "${KhanContentIndexer.KHAN_PREFIX}${contentItem.contentId!!}${if (lang.isNotEmpty()) ".$lang" else ""}",
+                                "${ScraperConstants.KHAN_PREFIX}${contentItem.contentId!!}${if (lang.isNotEmpty()) ".$lang" else ""}",
                                 ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC,
                                 parentcontentEntry!!.primaryLanguageUid,
                                 parentcontentEntry!!.languageVariantUid,

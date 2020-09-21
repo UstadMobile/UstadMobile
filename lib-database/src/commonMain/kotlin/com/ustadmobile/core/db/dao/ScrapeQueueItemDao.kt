@@ -10,9 +10,6 @@ import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
 
 
-    @Query("SELECT * FROM ScrapeQueueItem")
-    abstract fun findAll(): List<ScrapeQueueItem>
-
     @Query("SELECT * FROM ScrapeQueueItem WHERE status = $STATUS_PENDING AND itemType = :itemType ORDER BY priority ASC LIMIT 10")
     abstract fun findNextQueueItems(itemType: Int): DoorLiveData<List<ScrapeQueueItem>>
 

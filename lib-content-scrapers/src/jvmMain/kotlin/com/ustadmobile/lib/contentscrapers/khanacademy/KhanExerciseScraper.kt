@@ -532,7 +532,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                 if (navItem.nodeSlug == nodeSlug) {
                     continue
                 }
-                linksList.add(HarRegexPair(regexUrlPrefix + navItem.nodeSlug!!, KhanContentScraper.CONTENT_DETAIL_SOURCE_URL_KHAN_ID + navItem.id!!))
+                linksList.add(HarRegexPair(regexUrlPrefix + navItem.nodeSlug!!, ScraperConstants.CONTENT_DETAIL_SOURCE_URL_KHAN_ID + navItem.id!!))
             }
         }
         harExtra.links = linksList

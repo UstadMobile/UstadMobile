@@ -4,9 +4,9 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_PREFIX
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
-import com.ustadmobile.lib.contentscrapers.khanacademy.KhanContentIndexer.Companion.KHAN_PREFIX
 import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported

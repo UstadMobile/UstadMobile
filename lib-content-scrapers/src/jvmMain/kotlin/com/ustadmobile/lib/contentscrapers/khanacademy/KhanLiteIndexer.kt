@@ -82,7 +82,7 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
                 }
 
                 val entry = ContentScraperUtil.createOrUpdateContentEntry(contentId, title,
-                        KhanContentIndexer.KHAN_PREFIX + contentId, ScraperConstants.KHAN,
+                        ScraperConstants.KHAN_PREFIX + contentId, ScraperConstants.KHAN,
                         ContentEntry.LICENSE_TYPE_CC_BY_NC, parentEntry.primaryLanguageUid,
                         parentEntry.languageVariantUid, "", true,
                         "", "",

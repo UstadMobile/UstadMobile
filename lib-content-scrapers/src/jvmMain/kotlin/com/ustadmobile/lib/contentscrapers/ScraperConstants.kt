@@ -269,6 +269,15 @@ object ScraperConstants {
     const val GDL = "Global Digital Library"
     const val CK12 = "CK12"
     const val HAB = "Habaybna"
+    const val KHAN_PREFIX = "khan-id://"
+
+    // khan stuff
+    const val TABLE_OF_CONTENTS_ROW = "TableOfContentsRow"
+    const val SUBJECT_PAGE_TOPIC_CARD = "SubjectPageTopicCard"
+    const val SUBJECT_CHALLENGE = "SubjectChallenge"
+    const val SUBJECT_PROGRESS = "SubjectProgress"
+    const val CONTENT_LIST= "ContentList"
+    const val CONTENT_DETAIL_SOURCE_URL_KHAN_ID = "content-detail?sourceUrl=khan-id://"
 
     const val TIME_OUT_SELENIUM = 120
 
