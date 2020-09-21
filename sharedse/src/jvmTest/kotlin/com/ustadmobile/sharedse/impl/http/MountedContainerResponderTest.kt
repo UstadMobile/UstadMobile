@@ -5,6 +5,7 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.port.sharedse.ext.dataInflatedIfRequired
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_CONTAINERUID_INDEX
@@ -41,15 +42,6 @@ class MountedContainerResponderTest {
     @JvmField
     @Rule
     var temporaryFolder = TemporaryFolder()
-
-    private fun NanoHTTPD.Response.dataInflatedIfRequired(): InputStream{
-        val gzipHeader = getHeader("Content-Encoding")
-        return if(gzipHeader == "gzip") {
-            GZIPInputStream(data)
-        }else {
-            data
-        }
-    }
 
     @Before
     @Throws(IOException::class)

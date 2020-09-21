@@ -30,7 +30,7 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0,
-            School.TABLE_ID, Role.PERMISSION_SCHOOL_INSERT)
+            Role.PERMISSION_SCHOOL_INSERT)
     }
 
     private fun updateListOnView() {
