@@ -52,7 +52,7 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
 
 
 
-        document.select("tr:has([alt])").forEach {
+        document.select("tr:has([alt])").forEachIndexed { counter, it ->
 
             val alt = it.select("td [alt]").attr("alt")
             var conn: HttpURLConnection? = null
@@ -69,6 +69,7 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
                     UMLogUtil.logInfo("it was a directory")
 
                     val childEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, hrefUrl.toString(), folderEntry.primaryLanguageUid, title)
+                    ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, folderEntry, childEntry, counter)
                     createQueueItem(hrefUrl.toString(), childEntry, ScraperTypes.APACHE_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, folderEntry.contentEntryUid)
 
                 } else if (alt == "[   ]") {
@@ -83,6 +84,7 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
 
                     if (supported != null) {
                         val childEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, hrefUrl.toString(), folderEntry.primaryLanguageUid, title)
+                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, folderEntry, childEntry, counter)
                         createQueueItem(hrefUrl.toString(), childEntry, ScraperTypes.URL_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, folderEntry.contentEntryUid)
                     } else {
                         println("file: $title not supported with mimeType: $mimeType")
