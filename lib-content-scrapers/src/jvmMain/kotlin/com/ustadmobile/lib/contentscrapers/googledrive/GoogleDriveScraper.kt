@@ -118,10 +118,10 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                                         ?: file.thumbnailLink ?: ""),
                                 "", "",
                                 metadataContentEntry.contentTypeFlag, contentEntryDao)
+                        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
                     }
 
 
-                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
 
                     importContainerFromFile(fileEntry.contentEntryUid,
                             metadata.mimeType, containerFolder.absolutePath,

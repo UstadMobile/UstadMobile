@@ -70,7 +70,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
             fileEntry = if (dbEntry != null && scrapeQueueItem?.overrideEntry == true) {
                 dbEntry
             } else {
-               ContentScraperUtil.createOrUpdateContentEntry(
+               val entry = ContentScraperUtil.createOrUpdateContentEntry(
                         metadataContentEntry.entryId ?: contentEntry?.entryId ?: name,
                         metadataContentEntry.title ?: contentEntry?.title ?: name, sourceUrl,
                         metadataContentEntry.publisher ?: contentEntry?.publisher ?: "",
@@ -83,9 +83,10 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
                         "",
                         "",
                         metadataContentEntry.contentTypeFlag, contentEntryDao)
+                ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, entry, 0)
+                entry
             }
 
-            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
 
             val container = importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file, db, db, metadata.importMode, Any())
             if (!headRequestValues.etag.isNullOrEmpty()) {

@@ -40,14 +40,16 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
         folderEntry = if (dbEntry != null && scrapeQueueItem?.overrideEntry == true) {
             dbEntry
         }else{
-            ContentScraperUtil.createOrUpdateContentEntry(folderTitle, folderTitle,
+            val entry = ContentScraperUtil.createOrUpdateContentEntry(folderTitle, folderTitle,
                     sourceUrl, parentContentEntry?.publisher ?: "",
                     ContentEntry.LICENSE_TYPE_OTHER, englishLang.langUid, null,
                     "", false, "",
                     "", "",
                     "", ContentEntry.TYPE_COLLECTION, contentEntryDao)
+            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, entry, 0)
+            entry
         }
-        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, folderEntry, 0)
+
 
 
         document.select("tr:has([alt])").forEach {
