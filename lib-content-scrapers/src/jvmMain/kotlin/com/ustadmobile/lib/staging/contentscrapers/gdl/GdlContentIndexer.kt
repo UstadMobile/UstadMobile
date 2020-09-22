@@ -330,7 +330,6 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
                 scrapeWorkQueue.start()
             }
 
-            ContentScraperUtil.waitForQueueToFinish(queueDao, runId)
             UMLogUtil.logInfo("Finished Indexer")
 
         }

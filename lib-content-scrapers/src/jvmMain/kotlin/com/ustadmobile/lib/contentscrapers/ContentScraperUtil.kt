@@ -1395,20 +1395,6 @@ object ContentScraperUtil {
         }
     }
 
-    fun getLastModifiedOfFileFromContentEntry(childEntry: ContentEntry, containerDao: ContainerDao): Long {
-        val container = containerDao.getMostRecentContainerForContentEntry(childEntry.contentEntryUid)
-        return container?.cntLastModified ?: -1
-
-    }
-
-    fun waitForQueueToFinish(queueDao: ScrapeQueueItemDao, runId: Int) {
-        var count: Int
-        do {
-            Thread.sleep(60000)
-            count = queueDao.getQueueCount(runId)
-        } while (count != 0)
-    }
-
     fun insertOrUpdateLanguageManual(langDao: LanguageDao, langName: String, langCode: String) {
         val lang = langDao.findByName(langName)
 

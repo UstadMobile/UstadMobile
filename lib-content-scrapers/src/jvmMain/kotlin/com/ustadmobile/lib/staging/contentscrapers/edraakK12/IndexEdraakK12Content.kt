@@ -165,7 +165,6 @@ class IndexEdraakK12Content {
             scrapeWorkQueue.start()
         }
 
-        ContentScraperUtil.waitForQueueToFinish(queueDao, runId)
 
     }
 

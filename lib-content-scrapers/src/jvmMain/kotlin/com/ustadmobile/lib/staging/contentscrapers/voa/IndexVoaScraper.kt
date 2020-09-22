@@ -321,7 +321,6 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
                 scrapeWorkQueue.start()
             }
 
-            ContentScraperUtil.waitForQueueToFinish(queueDao, runId)
 
         }
     }
