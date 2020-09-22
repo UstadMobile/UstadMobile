@@ -263,6 +263,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .getter(FunSpec.getterBuilder().addCode("return _db.master").build())
                     .build())
 
+
             val repoImplClassName = ClassName(dbTypeElement.asClassName().packageName,
                     "${syncableDaoClassName.simpleName}_$SUFFIX_REPOSITORY")
             dbRepoType.addProperty(PropertySpec
@@ -277,6 +278,28 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .addParameter("entities", List::class.asClassName().parameterizedBy(
                             KClass::class.asClassName().parameterizedBy(STAR)).copy(nullable = true))
                     .addCode("_${syncableDaoClassName.simpleName}.sync(entities)\n")
+                    .build())
+
+            dbRepoType.addFunction(FunSpec.builder("selectNextSqliteSyncablePk")
+                    .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                    .addParameter("tableId", INT)
+                    .returns(LONG)
+                    .addCode("return _${syncableDaoClassName.simpleName}.selectNextSqliteSyncablePk(tableId)\n")
+                    .build())
+
+            dbRepoType.addFunction(FunSpec.builder("incrementNextSqliteSyncablePk")
+                    .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                    .addParameter("tableId", INT)
+                    .addParameter("increment", INT)
+                    .addCode("_${syncableDaoClassName.simpleName}.incrementNextSqliteSyncablePk(tableId, increment)\n")
+                    .build())
+
+            dbRepoType.addFunction(FunSpec.builder("getAndIncrementSqlitePk")
+                    .addParameter("tableId", INT)
+                    .addParameter("increment", INT)
+                    .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                    .addCode("return _${syncableDaoClassName.simpleName}.getAndIncrementSqlitePk(tableId, increment)\n")
+                    .returns(LONG)
                     .build())
 
         }
@@ -534,14 +557,46 @@ class DbProcessorRepository: AbstractDbProcessor() {
             val entityType = resolveEntityFromResultType(daoFunSpec.parameters[0].type) as ClassName
             val lastChangedByField = processingEnv.elementUtils.getTypeElement(entityType.canonicalName)
                     .enclosedElements.firstOrNull { it.kind == ElementKind.FIELD && it.getAnnotation(LastChangedBy::class.java) != null}
+            val isListOrArrayParam = isListOrArray(entityParam.type)
 
             if(lastChangedByField != null) {
-                if(isListOrArray(entityParam.type)) {
+                if(isListOrArrayParam) {
                     codeBlock.add("${entityParam.name}.forEach { it.${lastChangedByField.simpleName} = _clientId }\n")
                 }else {
                     codeBlock.add("${entityParam.name}.${lastChangedByField.simpleName} = _clientId\n")
                 }
+
+
+                //Use the SQLite Primary key manager if this is an SQLite insert
+                if(daoFunSpec.annotations.any { it.className == Insert::class.asClassName() }) {
+                    codeBlock.beginControlFlow("if(_db.jdbcDbType == %T.SQLITE)",
+                            DoorDbType::class)
+                    val syncableEntityInfo = SyncableEntityInfo(entityType, processingEnv)
+                    val isSuspendFn = daoFunSpec.modifiers.contains(KModifier.SUSPEND)
+                    if(isListOrArrayParam) {
+                        codeBlock.add("var _nextPk = ")
+                                .apply { if(!isSuspendFn) beginControlFlow("runBlocking ") }
+                                .add("(_repo as %T).getAndIncrementSqlitePk(" +
+                                    "${syncableEntityInfo.tableId}, ${entityParam.name}.size)\n",
+                                        DoorDatabaseSyncRepository::class)
+                                .apply { if(!isSuspendFn) endControlFlow() }
+                                .beginControlFlow("${entityParam.name}.forEach")
+                                .add("it.takeIf { it.${syncableEntityInfo.entityPkField.name} == 0L}?.${syncableEntityInfo.entityPkField.name} = _nextPk++\n")
+                                .endControlFlow()
+                    }else {
+                        codeBlock.add("val _nextPk = ")
+                                .apply { if(!isSuspendFn) beginControlFlow("runBlocking ") }
+                                .add("(_repo as %T).getAndIncrementSqlitePk(" +
+                                    "${syncableEntityInfo.tableId}, 1)\n", DoorDatabaseSyncRepository::class)
+                                .apply { if (!isSuspendFn) endControlFlow() }
+                                .add("${entityParam.name}.takeIf { it.${syncableEntityInfo.entityPkField.name} == 0L }?.${syncableEntityInfo.entityPkField.name} = _nextPk\n ")
+                    }
+
+                    codeBlock.endControlFlow()
+                }
             }
+
+
         }
 
         if(daoFunSpec.returnType != UNIT)
