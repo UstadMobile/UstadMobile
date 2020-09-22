@@ -19,7 +19,7 @@ import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.junit.Rule
 import org.junit.Test
 
-@AdbScreenRecord("Class edit screen tests")
+@AdbScreenRecord("JoinWithCode Fragment Tests")
 class JoinWithCodeFragmentTest  {
 
     @JvmField

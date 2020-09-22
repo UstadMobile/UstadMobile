@@ -190,7 +190,7 @@ class JoinWithCodePresenterTest {
                                         "&${UstadView.ARG_CODE_TABLE}=${tableId}"+
                                         "&${UstadView.ARG_CODE}=${clazzToEnrolInto.clazzCode.toString()}",
                         Login2View.ARG_NO_GUEST to "true")
-                ), any())
+                ), any(), any())
 
     }
 
@@ -224,7 +224,7 @@ class JoinWithCodePresenterTest {
                                         "&${UstadView.ARG_CODE_TABLE}=${tableId}" +
                                         "&${UstadView.ARG_CODE}=${clazzToEnrolInto.clazzCode.toString()}",
                                 Login2View.ARG_NO_GUEST to "true")
-                ), any())
+                ), any(), any())
 
     }
 

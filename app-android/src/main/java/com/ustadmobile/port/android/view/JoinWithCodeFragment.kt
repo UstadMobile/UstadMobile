@@ -52,7 +52,7 @@ class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val tableId = arguments?.get(UstadView.ARG_CODE_TABLE).toString().toInt()
+        val tableId = arguments?.get(UstadView.ARG_CODE_TABLE)?:"0".toString().toInt()
         ustadFragmentTitle = if(tableId == Clazz.TABLE_ID){
             mBinding?.entityType = requireContext().getString(R.string.clazz)
             requireContext().getString(R.string.join_existing,
