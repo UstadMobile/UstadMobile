@@ -92,11 +92,11 @@ class UmAppDatabaseExtTest {
         testPerson.personUid = db.personDao.insert(testPerson)
 
         db.enrollPersonToSchool(testSchool.schoolUid, testPerson.personUid,
-                SchoolMember.SCHOOL_ROLE_TEACHER)
+                Role.SCHOOL_ROLE_TEACHER)
 
         val schoolMembers = db.schoolMemberDao.findBySchoolAndPersonAndRole(
                 testSchool.schoolUid,
-                testPerson.personUid, SchoolMember.SCHOOL_ROLE_TEACHER)
+                testPerson.personUid, Role.SCHOOL_ROLE_TEACHER)
 
         Assert.assertTrue("PersonMember was created", schoolMembers.any {
             it.schoolMemberSchoolUid == testSchool.schoolUid })
