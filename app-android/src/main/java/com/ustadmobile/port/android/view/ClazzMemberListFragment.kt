@@ -20,6 +20,7 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.ClazzMemberListView
+import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_NAME
@@ -220,10 +221,14 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
 
     private fun navigateToPickNewMember(keyName: String) {
 
+        val bundle = if(keyName == KEY_TEACHER_SELECTED){
+            bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString())
+        }else{
+            bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
+                    ARG_CODE_TABLE to Clazz.TABLE_ID.toString())
+        }
         navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest,
-                bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
-                        ARG_CODE_TABLE to Clazz.TABLE_ID.toString()),
-                keyName, true)
+                bundle, keyName, true)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

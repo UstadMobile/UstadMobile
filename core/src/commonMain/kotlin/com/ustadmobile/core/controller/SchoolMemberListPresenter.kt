@@ -3,13 +3,17 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.dao.SchoolMemberDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.approvePendingClazzMember
+import com.ustadmobile.core.util.ext.approvePendingSchoolMember
 import com.ustadmobile.core.util.ext.enrollPersonToSchool
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ROLE
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -45,11 +49,30 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
                 Role.PERMISSION_SCHOOL_UPDATE)
     }
 
+    override suspend fun onLoadFromDb() {
+        super.onLoadFromDb()
+
+        val addPermission = db.schoolDao.personHasPermissionWithSchool(
+                accountManager.activeAccount.personUid ?: 0L,
+                arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0L,
+                Role.PERMISSION_SCHOOL_UPDATE)
+        val schoolUid: Long = arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0L
+
+        if(addPermission && arguments[ARG_FILTER_BY_ROLE]?.toInt() == Role.SCHOOL_ROLE_STUDENT){
+            view.pendingStudentList = db.schoolMemberDao.findAllActiveMembersBySchoolAndRoleUid(
+                    schoolUid, Role.SCHOOL_ROLE_STUDENT_PENDING, selectedSortOption?.flag ?: 0,
+                    searchText.toQueryLikeParam())
+        }
+
+    }
+
     private fun updateListOnView() {
 
-        val schoolRole = arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() ?: 0
+        val schoolRole = arguments[ARG_FILTER_BY_ROLE]?.toInt() ?: 0
 
         val schoolUid: Long = arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0L
+
+
 
         view.list = repo.schoolMemberDao
                 .findAllActiveMembersBySchoolAndRoleUid(schoolUid, schoolRole,
@@ -70,6 +93,19 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
             ListViewMode.BROWSER -> systemImpl.go(PersonDetailView.VIEW_NAME,
                     mapOf(UstadView.ARG_ENTITY_UID to entry.schoolMemberPersonUid.toString()), context)
+        }
+
+    }
+
+    fun handleClickPendingRequest(member: SchoolMember, approved: Boolean) {
+        GlobalScope.launch {
+            if (approved) {
+                repo.approvePendingSchoolMember(member)
+            } else {
+                repo.schoolMemberDao.updateAsync(member.also {
+                    it.schoolMemberActive = false
+                })
+            }
         }
 
     }

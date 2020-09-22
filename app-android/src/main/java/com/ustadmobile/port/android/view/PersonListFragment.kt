@@ -13,7 +13,6 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
@@ -102,12 +101,11 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = PersonListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
-
+        
         inviteWithLinkRecyclerViewAdapter = InviteWithLinkRecyclerViewAdapter(this, mPresenter)
         inviteWithLinkRecyclerViewAdapter?.code = arguments?.get(UstadView.ARG_CODE)?.toString()
         inviteWithLinkRecyclerViewAdapter?.entityName = arguments?.get(UstadView.ARG_ENTITY_NAME)?.toString()
         inviteWithLinkRecyclerViewAdapter?.tableId = arguments?.get(UstadView.ARG_CODE_TABLE)?.toString()?.toInt()?:0
-
 
         mDataRecyclerViewAdapter = PersonListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_a_new,
