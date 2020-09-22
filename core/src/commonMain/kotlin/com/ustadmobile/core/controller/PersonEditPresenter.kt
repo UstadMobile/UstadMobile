@@ -4,6 +4,7 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
@@ -17,6 +18,7 @@ import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
@@ -202,7 +204,10 @@ class PersonEditPresenter(context: Any,
                     try {
                         val umAccount = accountManager.register(entity, serverUrl)
                         accountManager.activeAccount = umAccount
-                        view.navigateToNextDestination(umAccount, nextDestination)
+                        //view.navigateToNextDestination(umAccount, nextDestination)
+                        val goOptions = UstadMobileSystemCommon.UstadGoOptions("",
+                                true)
+                        impl.go(nextDestination, mapOf(), context, goOptions)
                     } catch (e: Exception) {
 
                         if (e is IllegalStateException) {

@@ -95,7 +95,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                     val umAccount = accountManager.login(username.trim(),
                             password.trim() ,serverUrl)
                     view.inProgress = false
-                    val goOptions = UstadMobileSystemCommon.UstadGoOptions(fromDestination,
+                    val goOptions = UstadMobileSystemCommon.UstadGoOptions("",
                             true)
                     impl.go(nextDestination, mapOf(), context, goOptions)
                 } catch (e: Exception) {
@@ -112,9 +112,12 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     }
 
     fun handleCreateAccount(){
+        val goOptions = UstadMobileSystemCommon.UstadGoOptions(Login2View.VIEW_NAME,
+                true)
         impl.go(PersonEditView.VIEW_NAME_REGISTER, mapOf(
                 PersonEditView.ARG_REGISTRATION_MODE to true.toString(),
-                ARG_SERVER_URL to serverUrl), context)
+                ARG_NEXT to arguments[ARG_NEXT],
+                ARG_SERVER_URL to serverUrl), context, goOptions)
     }
 
     fun handleConnectAsGuest(){
