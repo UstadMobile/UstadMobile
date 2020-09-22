@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzMemberDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.approvePendingClazzMember
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone

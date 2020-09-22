@@ -162,7 +162,7 @@ abstract class PersonDao : BaseDao<Person> {
      */
     @Query("SELECT EXISTS(SELECT 1 FROM Person WHERE " +
             "Person.personUid = :personUid AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_PERMISSION_PARAM))")
-    abstract suspend fun personHasPermissionAsync(accountPersonUid: Long, personUid: Long, permission: Long): Boolean
+    abstract suspend fun personHasPermissionAsync(accountPersonUid: Long, personUid: Long, permission: Long, excludesNameCheck: Int = 0): Boolean
 
     @Query("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0)")
     abstract suspend fun personIsAdmin(accountPersonUid: Long): Boolean
@@ -257,9 +257,10 @@ abstract class PersonDao : BaseDao<Person> {
             LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
             LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
             WHERE
-            CAST(Person_Perm.admin AS INTEGER) = 1
-            OR
-            (Person_Perm.personUid = Person.personUid)
+            CAST(Person_Perm.admin AS INTEGER) = 1 OR ( (
+            """
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 =  """
+            = 0) AND (Person_Perm.personUid = Person.personUid))
             OR
             (
             ((EntityRole.erTableId = ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid) OR 
@@ -274,11 +275,11 @@ abstract class PersonDao : BaseDao<Person> {
             AND (Role.rolePermissions & 
         """
 
-        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 = ") > 0)"
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT4 = ") > 0)"
 
-        const val ENTITY_PERSONS_WITH_SELECT_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT2"
+        const val ENTITY_PERSONS_WITH_SELECT_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
-        const val ENTITY_PERSONS_WITH_PERMISSION_PARAM = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :permission $ENTITY_PERSONS_WITH_PERMISSION_PT2"
+        const val ENTITY_PERSONS_WITH_PERMISSION_PARAM = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :excludesNameCheck $ENTITY_PERSONS_WITH_PERMISSION_PT2  :permission $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
 

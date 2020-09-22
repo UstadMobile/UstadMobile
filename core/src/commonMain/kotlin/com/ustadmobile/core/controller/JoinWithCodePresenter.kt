@@ -1,6 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -12,16 +11,11 @@ import com.ustadmobile.core.view.JoinWithCodeView
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzMember
-import com.ustadmobile.lib.db.entities.School
-import com.ustadmobile.lib.db.entities.SchoolMember
-import kotlinx.coroutines.Dispatchers
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -134,7 +128,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                         ?.findByUid(accountManager.activeAccount.personUid)
                 if(schoolToJoin  != null && personToEnrol != null) {
                     dbRepo.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol,
-                            schoolToJoin.schoolUid, SchoolMember.Companion.SCHOOL_ROLE_STUDENT_PENDING)
+                            schoolToJoin.schoolUid, Role.SCHOOL_ROLE_STUDENT_PENDING)
                     view.finish()
                 }else {
                     view.errorText = systemImpl.getString(MessageID.invalid_register_code,

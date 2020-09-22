@@ -8,6 +8,9 @@ import com.toughra.ustadmobile.databinding.FragmentJoinWithCodeBinding
 import com.ustadmobile.core.controller.JoinWithCodePresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.JoinWithCodeView
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.School
 
 class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
 
@@ -49,8 +52,20 @@ class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        ustadFragmentTitle = requireContext().getString(R.string.join_existing,
-                requireContext().getString(R.string.clazz))
+        val tableId = arguments?.get(UstadView.ARG_CODE_TABLE).toString().toInt()
+        ustadFragmentTitle = if(tableId == Clazz.TABLE_ID){
+            mBinding?.entityType = requireContext().getString(R.string.clazz)
+            requireContext().getString(R.string.join_existing,
+                    requireContext().getString(R.string.clazz))
+        }else if (tableId == School.TABLE_ID){
+            mBinding?.entityType = requireContext().getString(R.string.school)
+            requireContext().getString(R.string.join_existing,
+                    requireContext().getString(R.string.school))
+        }else{
+            mBinding?.entityType = ""
+            requireContext().getString(R.string.join_existing)
+        }
+
         mPresenter = JoinWithCodePresenter(requireContext(), arguments.toStringMap(), this,
             di)
         mPresenter?.onCreate(null)

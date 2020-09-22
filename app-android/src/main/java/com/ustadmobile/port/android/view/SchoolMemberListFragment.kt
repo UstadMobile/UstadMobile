@@ -16,10 +16,7 @@ import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.School
-import com.ustadmobile.lib.db.entities.SchoolMember
-import com.ustadmobile.lib.db.entities.SchoolMemberWithPerson
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -80,7 +77,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
         filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt()?:0
 
-        addNewStringId = if(filterByRole == SchoolMember.SCHOOL_ROLE_TEACHER){
+        addNewStringId = if(filterByRole == Role.SCHOOL_ROLE_TEACHER){
             R.string.teacher
         }else{
             R.string.student
@@ -124,7 +121,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
         filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt()?:0
 
-        addNewStringId = if(filterByRole == SchoolMember.SCHOOL_ROLE_TEACHER){
+        addNewStringId = if(filterByRole == Role.SCHOOL_ROLE_TEACHER){
             R.string.teacher
         }else{
             R.string.student

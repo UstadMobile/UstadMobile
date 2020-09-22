@@ -38,10 +38,10 @@ abstract class SchoolDao : BaseDao<School> {
     @Query("""SELECT School.*,
          (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND
          CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
-         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_STUDENT}) as numStudents,
+         AND SchoolMember.schoolMemberRole = ${Role.SCHOOL_ROLE_STUDENT}) as numStudents,
          (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND
          CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
-         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_TEACHER}) as numTeachers,
+         AND SchoolMember.schoolMemberRole = ${Role.SCHOOL_ROLE_TEACHER}) as numTeachers,
          '' as locationName,
           (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
          FROM School WHERE CAST(schoolActive AS INTEGER) = 1
@@ -58,10 +58,10 @@ abstract class SchoolDao : BaseDao<School> {
     @Query("""SELECT School.*, 
          (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
          CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
-         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_STUDENT}) as numStudents,
+         AND SchoolMember.schoolMemberRole = ${Role.SCHOOL_ROLE_STUDENT}) as numStudents,
          (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
          CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
-         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_TEACHER}) as numTeachers, 
+         AND SchoolMember.schoolMemberRole = ${Role.SCHOOL_ROLE_TEACHER}) as numTeachers, 
          '' as locationName,
           (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
          FROM School WHERE CAST(schoolActive AS INTEGER) = 1 

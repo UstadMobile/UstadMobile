@@ -3,7 +3,6 @@ package com.ustadmobile.core.impl
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView
 import kotlinx.io.InputStream
 import org.kmp.io.KMPSerializerParser

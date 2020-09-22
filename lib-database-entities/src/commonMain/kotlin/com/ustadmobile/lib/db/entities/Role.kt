@@ -185,6 +185,14 @@ open class Role() {
 
         const val ROLE_STUDENT_PENDING_UID = 1002
 
+        const val SCHOOL_ROLE_STUDENT = 1003
+        const val SCHOOL_ROLE_TEACHER = 1004
+        const val SCHOOL_ROLE_STUDENT_PENDING = 1005
+        const val SCHOOL_ROLE_STUDENT_PENDING_NAME = "School Student Pending"
+        const val SCHOOL_ROLE_TEACHER_NAME = "School Teacher"
+        const val SCHOOL_ROLE_STUDENT_NAME = "School Student"
+        const val SCHOOL_ROLE_STUDENT_PENDING_PERMISSION_DEFAULT = PERMISSION_SCHOOL_SELECT
+
         const val ROLE_STUDENT_PENDING_PERMISSION_DEFAULT: Long = PERMISSION_CLAZZ_SELECT
 
         const val ROLE_VIEW_STUDENTS_NAME = "View Students Only"

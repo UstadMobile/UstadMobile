@@ -36,8 +36,9 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0,
+        view.newSchoolListOptionVisible =  db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0,
             Role.PERMISSION_SCHOOL_INSERT)
+        return true
     }
 
     private fun updateListOnView() {
@@ -67,6 +68,12 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     override fun onSearchSubmitted(text: String?) {
         searchText = text
         updateListOnView()
+    }
+
+
+    fun handleClickJoinSchool() {
+        systemImpl.go(JoinWithCodeView.VIEW_NAME,
+                mapOf(UstadView.ARG_CODE_TABLE to School.TABLE_ID.toString()), context)
     }
 
     companion object {

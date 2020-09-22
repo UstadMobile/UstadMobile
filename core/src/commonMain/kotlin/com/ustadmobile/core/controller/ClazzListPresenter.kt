@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*

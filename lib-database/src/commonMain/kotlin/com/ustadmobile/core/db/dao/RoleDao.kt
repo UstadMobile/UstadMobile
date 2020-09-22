@@ -86,6 +86,28 @@ abstract class RoleDao : BaseDao<Role> {
                 roleUid = Role.ROLE_STUDENT_PENDING_UID.toLong()
             })
         }
+
+        val schoolTeacherRole = findByUidAsync(Role.SCHOOL_ROLE_TEACHER.toLong())
+        if(schoolTeacherRole == null) {
+            insertOrReplace(Role(Role.SCHOOL_ROLE_TEACHER_NAME, Role.ROLE_TEACHER_PERMISSIONS_DEFAULT).apply {
+                roleUid = Role.SCHOOL_ROLE_TEACHER.toLong()
+            })
+        }
+
+        val schoolStudentRole = findByUidAsync(Role.SCHOOL_ROLE_STUDENT.toLong())
+        if(schoolStudentRole == null) {
+            insertOrReplace(Role(Role.SCHOOL_ROLE_STUDENT_NAME, Role.ROLE_STUDENT_PERMISSIONS_DEFAULT).apply {
+                roleUid = Role.SCHOOL_ROLE_STUDENT.toLong()
+            })
+        }
+
+        //Added School Pending role:
+        val schoolStudentPendingRole = findByUidAsync(Role.SCHOOL_ROLE_STUDENT_PENDING.toLong())
+        if(schoolStudentPendingRole == null) {
+            insertOrReplace(Role(Role.SCHOOL_ROLE_STUDENT_PENDING_NAME, Role.SCHOOL_ROLE_STUDENT_PENDING_PERMISSION_DEFAULT).apply {
+                roleUid = Role.SCHOOL_ROLE_STUDENT_PENDING.toLong()
+            })
+        }
     }
 
 

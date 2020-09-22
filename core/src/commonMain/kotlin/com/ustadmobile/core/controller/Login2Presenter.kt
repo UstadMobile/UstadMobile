@@ -9,7 +9,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
 import com.ustadmobile.door.doorMainDispatcher

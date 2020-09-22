@@ -1,7 +1,6 @@
 package com.ustadmobile.core.util.ext
 
 import com.soywiz.klock.DateTime
-import com.ustadmobile.core.controller.RoleEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -108,9 +107,9 @@ suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Pe
     }
 
     val personGroupUid = when(role) {
-        SchoolMember.SCHOOL_ROLE_TEACHER -> schoolVal.schoolTeachersPersonGroupUid
-        SchoolMember.SCHOOL_ROLE_STUDENT -> schoolVal.schoolStudentsPersonGroupUid
-        SchoolMember.SCHOOL_ROLE_STUDENT_PENDING -> schoolVal.schoolPendingStudentsPersonGroupUid
+        Role.SCHOOL_ROLE_TEACHER -> schoolVal.schoolTeachersPersonGroupUid
+        Role.SCHOOL_ROLE_STUDENT -> schoolVal.schoolStudentsPersonGroupUid
+        Role.SCHOOL_ROLE_STUDENT_PENDING -> schoolVal.schoolPendingStudentsPersonGroupUid
         else -> null
     }
 
@@ -233,14 +232,21 @@ suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,
             "${school.schoolName} - " +
             impl.getString(MessageID.students, context)))
 
+    school.schoolPendingStudentsPersonGroupUid = personGroupDao.insertAsync(PersonGroup(
+            "${school.schoolName} - " +
+            impl.getString(MessageID.pending_requests, context)))
+
+
     school.takeIf { it.schoolCode == null }?.schoolCode = randomString(Clazz.CLAZZ_CODE_DEFAULT_LENGTH)
 
     school.schoolUid = schoolDao.insertAsync(school)
 
     entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-            school.schoolTeachersPersonGroupUid, Role.ROLE_TEACHER_UID.toLong()))
+            school.schoolTeachersPersonGroupUid, Role.SCHOOL_ROLE_TEACHER.toLong()))
     entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-            school.schoolStudentsPersonGroupUid, Role.ROLE_STUDENT_UID.toLong()))
+            school.schoolStudentsPersonGroupUid, Role.SCHOOL_ROLE_TEACHER.toLong()))
+    entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
+            school.schoolPendingStudentsPersonGroupUid, Role.SCHOOL_ROLE_STUDENT_PENDING.toLong()))
 
     return school.schoolUid
 }
@@ -265,8 +271,9 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
         schoolMember.schoolMemberUid = schoolMemberDao.insert(schoolMember)
 
         val personGroupUid = when(role) {
-            SchoolMember.SCHOOL_ROLE_TEACHER -> school.schoolTeachersPersonGroupUid
-            SchoolMember.SCHOOL_ROLE_STUDENT -> school.schoolStudentsPersonGroupUid
+            Role.SCHOOL_ROLE_TEACHER -> school.schoolTeachersPersonGroupUid
+            Role.SCHOOL_ROLE_STUDENT -> school.schoolStudentsPersonGroupUid
+            Role.SCHOOL_ROLE_STUDENT_PENDING -> school.schoolPendingStudentsPersonGroupUid
             else -> null
         }
 
