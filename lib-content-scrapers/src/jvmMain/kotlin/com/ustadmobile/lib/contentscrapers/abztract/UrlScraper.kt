@@ -1,10 +1,13 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.contentscrapers.apache.ApacheIndexer
 import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
@@ -24,17 +27,19 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
     var tempDir: File? = null
 
+    private val logPrefix = "[URLScraper SQI ID #$sqiUid] "
+
+
     override fun scrapeUrl(sourceUrl: String) {
 
         val url = URL(sourceUrl)
 
         val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
-
         val headRequestValues = isUrlContentUpdated(url, recentContainer)
-
         val supported = mimeTypeSupported.find { fileMimeType -> fileMimeType == headRequestValues.mimeType }
 
         if (supported == null) {
+            Napier.i("$logPrefix with sourceUrl $sourceUrl had mimeType ${headRequestValues.mimeType} which is not supported", tag = SCRAPER_TAG)
             hideContentEntry()
             setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
             return
@@ -42,6 +47,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
         if(recentContainer != null){
             if (!headRequestValues.isUpdated) {
+                Napier.i("$logPrefix with sourceUrl $sourceUrl already has this entry updated, close here", tag = SCRAPER_TAG)
                 showContentEntry()
                 setScrapeDone(true, 0)
                 return
@@ -59,8 +65,10 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
             val metadata = extractContentEntryMetadataFromFile(file, db)
 
             if (metadata == null) {
+                Napier.i("$logPrefix with sourceUrl $sourceUrl had no metadata found, not supported", tag = SCRAPER_TAG)
                 hideContentEntry()
                 setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
+                close()
                 return@runBlocking
             }
 
@@ -83,6 +91,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
                         "",
                         "",
                         metadataContentEntry.contentTypeFlag, contentEntryDao)
+                Napier.d("$logPrefix new entry created/updated with entryUid ${entry.contentEntryUid} with title $name", tag = SCRAPER_TAG)
                 ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, entry, 0)
                 entry
             }
@@ -94,6 +103,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
                 db.containerETagDao.insert(etagContainer)
             }
 
+            Napier.d("$logPrefix finished Indexing", tag = SCRAPER_TAG)
             showContentEntry()
             setScrapeDone(true, 0)
             close()
@@ -106,4 +116,5 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
         val deleted = tempDir?.deleteRecursively() ?: false
         UMLogUtil.logError("did it delete: $deleted for ${tempDir?.name} ")
     }
+
 }

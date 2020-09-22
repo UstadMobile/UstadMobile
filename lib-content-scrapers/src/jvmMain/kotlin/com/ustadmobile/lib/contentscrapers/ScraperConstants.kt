@@ -6,6 +6,8 @@ import java.util.*
 
 object ScraperConstants {
 
+    const val SCRAPER_TAG = "Scraper"
+
     const val CONTENT_JSON = "content.json"
     const val QUESTIONS_JSON = "questions.json"
     const val ETAG_TXT = "etag.txt"

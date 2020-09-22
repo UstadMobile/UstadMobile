@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers
 
+import com.github.aakira.napier.Napier
 import com.google.common.collect.Lists
 import com.google.gson.GsonBuilder
 import com.neovisionaries.i18n.CountryCode
@@ -30,6 +31,7 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.LanguageVariant
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_PASS
 
 import org.apache.commons.codec.digest.DigestUtils
@@ -83,6 +85,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_PASS
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_USERNAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.OPUS_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.REQUEST_HEAD
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.SVG_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TIME_OUT_SELENIUM
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME
@@ -570,20 +573,25 @@ object ContentScraperUtil {
      */
     fun insertOrUpdateChildWithMultipleParentsJoin(dao: ContentEntryParentChildJoinDao, parentEntry: ContentEntry?, childEntry: ContentEntry, index: Int): ContentEntryParentChildJoin {
 
-        val existingParentChildJoin = dao.findJoinByParentChildUuids(parentEntry?.contentEntryUid ?: -4103245208651563007L, childEntry.contentEntryUid)
+        val parentUid = parentEntry?.contentEntryUid ?: UstadView.MASTER_SERVER_ROOT_ENTRY_UID
+        val existingParentChildJoin = dao.findJoinByParentChildUuids(parentUid, childEntry.contentEntryUid)
+        Napier.d("Joining 2 entries, parent: ${parentEntry?.title ?: "root"} and child ${childEntry.title}", tag = SCRAPER_TAG)
 
         val newJoin = ContentEntryParentChildJoin()
-        newJoin.cepcjParentContentEntryUid = parentEntry?.contentEntryUid ?: -4103245208651563007L
+        newJoin.cepcjParentContentEntryUid = parentUid
         newJoin.cepcjChildContentEntryUid = childEntry.contentEntryUid
         newJoin.childIndex = if(index == 0) existingParentChildJoin?.childIndex ?: index else index
         return if (existingParentChildJoin == null) {
             newJoin.cepcjUid = dao.insert(newJoin)
+            Napier.d("didnt exist in db, make new one ${newJoin.cepcjUid} for parent ${parentEntry?.title ?: "root"}", tag = SCRAPER_TAG)
             newJoin
         } else {
             newJoin.cepcjUid = existingParentChildJoin.cepcjUid
             if (newJoin != existingParentChildJoin) {
                 dao.update(newJoin)
             }
+
+            Napier.d("updated db with uid ${newJoin.cepcjUid} for ${parentEntry?.title ?: "root"}", tag = SCRAPER_TAG)
             newJoin
         }
     }

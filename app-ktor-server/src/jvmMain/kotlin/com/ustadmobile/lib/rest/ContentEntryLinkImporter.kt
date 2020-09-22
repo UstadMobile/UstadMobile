@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -42,7 +43,7 @@ fun Route.ContentEntryLinkImporter() {
 
         post("downloadLink") {
 
-            val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: 0L
+            val parentUid = call.request.queryParameters["parentUid"]?.toLong() ?: UstadView.MASTER_SERVER_ROOT_ENTRY_UID
             val url = call.request.queryParameters["url"]?: ""
             val contentEntry = call.receive<ContentEntryWithLanguage>()
             val scraperType = call.request.queryParameters["scraperType"] ?: ""

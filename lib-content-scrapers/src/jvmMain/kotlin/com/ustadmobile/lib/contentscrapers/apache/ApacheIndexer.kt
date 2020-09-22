@@ -1,10 +1,10 @@
 package com.ustadmobile.lib.contentscrapers.apache
 
 import ScraperTypes
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
@@ -18,13 +18,13 @@ import java.net.URL
 @ExperimentalStdlibApi
 class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntryUid, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
+    private val logPrefix = "[ApacheIndexer SQI ID #$sqiUid] "
+
     override fun indexUrl(sourceUrl: String) {
 
         val url = URL(sourceUrl)
 
         val huc: HttpURLConnection = url.openConnection() as HttpURLConnection
-
-        UMLogUtil.logInfo("connection success ${huc.responseCode}")
 
         val data = String(huc.inputStream.readBytes())
         huc.disconnect()
@@ -33,7 +33,7 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
 
         val folderTitle = document.title().substringAfterLast("/")
 
-        UMLogUtil.logInfo("folder Title ${huc.responseCode}")
+        Napier.i("$logPrefix found folder title $folderTitle", tag = SCRAPER_TAG)
 
         val folderEntry: ContentEntry
         val dbEntry = contentEntry
@@ -46,10 +46,10 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
                     "", false, "",
                     "", "",
                     "", ContentEntry.TYPE_COLLECTION, contentEntryDao)
+            Napier.d("$logPrefix new entry created/updated with entryUid ${entry.contentEntryUid} with title $folderTitle", tag = SCRAPER_TAG)
             ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, entry, 0)
             entry
         }
-
 
 
         document.select("tr:has([alt])").forEachIndexed { counter, it ->
@@ -62,11 +62,9 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
                 val title = element.text()
                 val hrefUrl = URL(url, href)
 
-                UMLogUtil.logInfo("href $href with title $title")
-
                 if (alt == "[DIR]") {
 
-                    UMLogUtil.logInfo("it was a directory")
+                    Napier.i("$logPrefix found new directory with title $title for parent folder $folderTitle", tag = SCRAPER_TAG)
 
                     val childEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, hrefUrl.toString(), folderEntry.primaryLanguageUid, title)
                     ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, folderEntry, childEntry, counter)
@@ -74,7 +72,7 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
 
                 } else if (alt == "[   ]") {
 
-                    UMLogUtil.logInfo("it was a file")
+                    Napier.i("$logPrefix found new file with title $title for parent folder $folderTitle", tag = SCRAPER_TAG)
 
                     conn = hrefUrl.openConnection() as HttpURLConnection
                     conn.requestMethod = "HEAD"
@@ -83,31 +81,33 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
                     val supported = mimeTypeSupported.find { fileMimeType -> fileMimeType == mimeType }
 
                     if (supported != null) {
+                        Napier.d("$logPrefix file $title with $mimeType found", tag = SCRAPER_TAG)
+
                         val childEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, hrefUrl.toString(), folderEntry.primaryLanguageUid, title)
                         ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, folderEntry, childEntry, counter)
                         createQueueItem(hrefUrl.toString(), childEntry, ScraperTypes.URL_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, folderEntry.contentEntryUid)
                     } else {
-                        println("file: $title not supported with mimeType: $mimeType")
-                        UMLogUtil.logInfo("file: $title not supported with mimeType: $mimeType")
+                        Napier.i("$logPrefix file: $title not supported with mimeType: $mimeType", tag = SCRAPER_TAG)
                     }
                 } else {
-                    println("unknown apache: $title not supported with alt: $alt")
-                    UMLogUtil.logInfo("unknown apache: $title not supported with alt: $alt")
+                    Napier.i("$logPrefix found unknown apache: $title not supported with alt: $alt", tag = SCRAPER_TAG)
                 }
             } catch (e: Exception) {
-                UMLogUtil.logError("Error during directory search on $sourceUrl")
-                UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
+                Napier.e("$logPrefix Error during directory search on $sourceUrl", tag = SCRAPER_TAG)
+                Napier.e("$logPrefix ${ExceptionUtils.getStackTrace(e)}", tag = SCRAPER_TAG)
             } finally {
                 conn?.disconnect()
             }
         }
 
+        Napier.d("$logPrefix finished Indexing", tag = SCRAPER_TAG)
         setIndexerDone(true, 0)
         close()
     }
 
     override fun close() {
 
-
     }
+
+
 }

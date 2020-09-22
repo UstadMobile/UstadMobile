@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.googledrive
 
+import com.github.aakira.napier.Napier
 import com.soywiz.klock.DateFormat
 import com.soywiz.klock.parse
 import com.ustadmobile.core.account.Endpoint
@@ -7,7 +8,7 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
+import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -34,6 +35,9 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
     val googleDriveFormat: DateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ")
 
     val googleApiKey: String by di.instance(tag = DiTag.TAG_GOOGLE_API)
+
+    private val logPrefix = "[GoogleDriveScraper SQI ID #$sqiUid] "
+
 
     override fun scrapeUrl(sourceUrl: String) {
 
@@ -64,6 +68,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                 val parsedModifiedTime: Long = if (googleModifiedTime != null) googleDriveFormat.parse(googleModifiedTime).local.unixMillisLong else 1
                 val isUpdated = parsedModifiedTime > recentContainer?.cntLastModified ?: 0
                 if (!isUpdated) {
+                    Napier.i("$logPrefix with sourceUrl $sourceUrl already has this entry updated, close here", tag = SCRAPER_TAG)
                     showContentEntry()
                     setScrapeDone(true, 0)
                     close()
@@ -86,6 +91,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     val metadata = extractContentEntryMetadataFromFile(contentFile, db)
 
                     if (metadata == null) {
+                        Napier.i("$logPrefix with sourceUrl $sourceUrl had no metadata found, not supported", tag = SCRAPER_TAG)
                         hideContentEntry()
                         setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
                         close()
@@ -118,7 +124,8 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                                         ?: file.thumbnailLink ?: ""),
                                 "", "",
                                 metadataContentEntry.contentTypeFlag, contentEntryDao)
-                        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
+                        Napier.d("$logPrefix new entry created/updated with entryUid ${fileEntry.contentEntryUid} with title ${file.name}", tag = SCRAPER_TAG)
+                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
                     }
 
 
@@ -127,6 +134,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                             metadata.mimeType, containerFolder.absolutePath,
                             contentFile, db, db, metadata.importMode, Any())
 
+                    Napier.d("$logPrefix finished Scraping", tag = SCRAPER_TAG)
                     showContentEntry()
                     setScrapeDone(true, 0)
                     close()

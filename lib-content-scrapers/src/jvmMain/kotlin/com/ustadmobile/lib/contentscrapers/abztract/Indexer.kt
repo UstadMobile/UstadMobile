@@ -27,12 +27,6 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val sqi
     val languageDao = db.languageDao
     val englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English")
 
-    val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE,
-            ScraperConstants.ROOT, ScraperConstants.USTAD_MOBILE, ContentEntry.LICENSE_TYPE_CC_BY, englishLang.langUid, null,
-            "", false, "", "",
-            "", "", 0, contentEntryDao)
-
-
     init {
         runBlocking {
             parentContentEntry = db.contentEntryDao.findByUidAsync(parentContentEntryUid)
