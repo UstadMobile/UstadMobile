@@ -78,8 +78,8 @@ class ContentEntryList2FragmentTest  {
         })
     }
 
-    /*@AdbScreenRecord("Given Content entry present when user clicks on an entry then should navigate to entry")
-    @Test
+    @AdbScreenRecord("Given Content entry present when user clicks on an entry then should navigate to entry")
+    //@Test
     fun givenContentEntryPresent_whenClickOnContentEntry_thenShouldNavigateToContentEntryDetail() {
 
         runBlocking {
@@ -101,7 +101,6 @@ class ContentEntryList2FragmentTest  {
         assertEquals("After clicking on item, it navigates to detail view",
                 R.id.content_entry_details_dest, systemImplNavRule.navController.currentDestination?.id)
     }
-*/
 
 
     @AdbScreenRecord("Given content entry list in a picker mode when folder entry clicked should open it and allow entry selection")
@@ -127,8 +126,8 @@ class ContentEntryList2FragmentTest  {
 
     }
 
-   /* @AdbScreenRecord("Given content entry list in a picker mode when create new content is clicked should show content creation options")
-    @Test
+    @AdbScreenRecord("Given content entry list in a picker mode when create new content is clicked should show content creation options")
+   // @Test
     fun givenContentEntryListOpenedInPickerMode_whenCreateNewContentClicked_shouldShowContentCreationOptions(){
         runBlocking {
             dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3,parentEntryUid) }
@@ -143,7 +142,7 @@ class ContentEntryList2FragmentTest  {
 
         onView(withId(R.id.bottom_content_option_sheet)).check(matches(isDisplayed()))
 
-    }*/
+    }
 
 
     @AdbScreenRecord("Given content entry list in a picker mode when on back pressed while in a folder should show previous parent list")

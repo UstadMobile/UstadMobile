@@ -80,7 +80,7 @@ class ClazzLogEditAttendanceFragmentTest  {
     }
 
     @AdbScreenRecord("Given an existing class when mixed attendance is recorded should be saved to database")
-    @Test
+    //@Test
     fun givenExistingClazzWithMembesAndClazzLog_whenMixedStudentAttendanceRecorded_thenShouldBeSavedToDatabase() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
 
@@ -132,7 +132,7 @@ class ClazzLogEditAttendanceFragmentTest  {
     }
 
 
-    @Test
+    //@Test
     @AdbScreenRecord("Given an existing class when mark all is clicked and user saves, then should be saved to database")
     fun givenExistingClazzLog_whenClickMarkAll_thenShouldBeSavedToDatabase() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
@@ -175,7 +175,7 @@ class ClazzLogEditAttendanceFragmentTest  {
     }
 
 
-    @Test
+   // @Test
     @AdbScreenRecord("Given an existing class, the user can go to a previous day and fill in attendance for that day. Both are saved to database")
     fun givenExistingClazzLog_whenClickMarkAllAndClickToPrevClazzLog_willSaveToDatabaseAndCanMarkPrevDay() {
         IdlingRegistry.getInstance().register(recyclerViewIdlingResource)
