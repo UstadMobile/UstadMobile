@@ -134,7 +134,7 @@ ext {
     version_android_min_sdk = 18
     version_android_picasso = 2.71828
     version_android_desugar_jdk_libs = "1.0.10"
-    version_kaspresso = "1.2.0"
+    version_kaspresso = "1.1.0"
 
     //Androidx versions as per https://developer.android.com/jetpack/androidx/versions
     version_androidx_annotation = "1.1.0"

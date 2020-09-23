@@ -10,6 +10,8 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
+import com.agoda.kakao.recycler.KRecyclerView
+import com.kaspersky.kaspresso.kaspresso.Kaspresso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -76,7 +78,7 @@ class ContentEntryList2FragmentTest  {
         })
     }
 
-    @AdbScreenRecord("Given Content entry present when user clicks on an entry then should navigate to entry")
+    /*@AdbScreenRecord("Given Content entry present when user clicks on an entry then should navigate to entry")
     @Test
     fun givenContentEntryPresent_whenClickOnContentEntry_thenShouldNavigateToContentEntryDetail() {
 
@@ -99,6 +101,7 @@ class ContentEntryList2FragmentTest  {
         assertEquals("After clicking on item, it navigates to detail view",
                 R.id.content_entry_details_dest, systemImplNavRule.navController.currentDestination?.id)
     }
+*/
 
 
     @AdbScreenRecord("Given content entry list in a picker mode when folder entry clicked should open it and allow entry selection")
@@ -124,7 +127,7 @@ class ContentEntryList2FragmentTest  {
 
     }
 
-    @AdbScreenRecord("Given content entry list in a picker mode when create new content is clicked should show content creation options")
+   /* @AdbScreenRecord("Given content entry list in a picker mode when create new content is clicked should show content creation options")
     @Test
     fun givenContentEntryListOpenedInPickerMode_whenCreateNewContentClicked_shouldShowContentCreationOptions(){
         runBlocking {
@@ -140,7 +143,7 @@ class ContentEntryList2FragmentTest  {
 
         onView(withId(R.id.bottom_content_option_sheet)).check(matches(isDisplayed()))
 
-    }
+    }*/
 
 
     @AdbScreenRecord("Given content entry list in a picker mode when on back pressed while in a folder should show previous parent list")

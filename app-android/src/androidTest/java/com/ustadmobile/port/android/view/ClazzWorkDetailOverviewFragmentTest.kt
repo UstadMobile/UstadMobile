@@ -230,7 +230,7 @@ class ClazzWorkDetailOverviewFragmentTest {
 
     }
 
-    @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as student should " +
+  /*  @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as student should " +
             "show all fields")
     @Test
     fun givenValidClazzWorkUid_whenLoadedAsStudent_thenShouldShow() {
@@ -301,9 +301,9 @@ class ClazzWorkDetailOverviewFragmentTest {
         checkClazzWorkBasicDetailDisplayOk(clazzWork, contentList)
 
         checkQuizQuestionsDisplayOk(clazzWorkQuizStuff)
-    }
+    }*/
 
-    @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as teacher should" +
+  /*  @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as teacher should" +
             " show all relevant fields")
     @Test
     fun givenValidClazzWorkUid_whenLoadedAsTeacher_thenShouldShow() {
@@ -366,9 +366,9 @@ class ClazzWorkDetailOverviewFragmentTest {
         checkQuizQuestionsDisplayOk(clazzWorkQuizStuff, true)
 
 
-    }
+    }*/
 
-    @AdbScreenRecord("ClazzWorkDetailOverview: When student answers questions and " +
+   /* @AdbScreenRecord("ClazzWorkDetailOverview: When student answers questions and " +
             "hits submit, the view should be updated")
     @Test
     fun givenValidClazzWorkUid_whenQuestionAnsweredAsStudentAndSubmitted_thenShouldUpdateView() {
@@ -464,7 +464,7 @@ class ClazzWorkDetailOverviewFragmentTest {
                         click()))
 
 
-    }
+    }*/
 
     @AdbScreenRecord("ClazzWorkDetailOverview: When teacher marks a submitted " +
             "submission, the view should be updated accordingly.")
