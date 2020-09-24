@@ -35,7 +35,6 @@ import java.io.File
 
 
 @AdbScreenRecord("KAS Epub content screen test")
-@RunWith(AndroidJUnit4::class)
 class EpubContentActivityKasTest : TestCase() {
 
     private lateinit var container: Container
