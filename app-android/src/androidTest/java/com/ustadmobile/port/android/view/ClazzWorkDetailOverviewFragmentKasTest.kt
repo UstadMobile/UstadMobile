@@ -10,6 +10,7 @@ import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers
+import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
@@ -405,7 +406,9 @@ class ClazzWorkDetailOverviewFragmentKasTest : TestCase() {
 
         ClazzWorkDetailOverviewScreen {
             recycler {
-                scrollToStart()
+                scrollTo{
+                    hasDescendant(withText(clazzWork.clazzWorkInstructions))
+                }
                 childWith<ClazzWorkDetailOverviewScreen.ClazzWorkBasicDetail> {
                     withDescendant { withText(clazzWork.clazzWorkInstructions!!) }
                 } perform {
