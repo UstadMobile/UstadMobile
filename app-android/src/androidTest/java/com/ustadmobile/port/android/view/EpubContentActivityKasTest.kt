@@ -10,7 +10,6 @@ import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.internal.runner.junit4.AndroidJUnit4ClassRunner
 import com.agoda.kakao.text.KTextView
 import com.agoda.kakao.web.KWebView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -36,7 +35,7 @@ import java.io.File
 
 
 @AdbScreenRecord("KAS Epub content screen test")
-@RunWith(AndroidJUnit4ClassRunner::class)
+@RunWith(AndroidJUnit4::class)
 class EpubContentActivityKasTest : TestCase() {
 
     private lateinit var container: Container
