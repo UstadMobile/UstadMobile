@@ -469,6 +469,7 @@ class ClazzWorkDetailOverviewFragmentKasTest : TestCase() {
                         }
                     }
                 }
+                scrollToStart()
             }
         }
     }
@@ -584,6 +585,7 @@ class ClazzWorkDetailOverviewFragmentKasTest : TestCase() {
                         isDisplayed()
                     }
                 }
+                scrollToStart()
             }
 
         }
@@ -613,8 +615,7 @@ class ClazzWorkDetailOverviewFragmentKasTest : TestCase() {
                 it.arguments = bundleOf(UstadView.ARG_ENTITY_UID to
                         clazzWork.clazzWorkUid.toString())
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
 
     }
 
