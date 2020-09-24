@@ -6,6 +6,7 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.DoorSqlitePrimaryKeyManager
 import com.ustadmobile.door.SyncResult
 import com.ustadmobile.door.annotation.EntityWithAttachment
 import com.ustadmobile.door.annotation.SyncableEntity
@@ -320,6 +321,9 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
                         .build())
+                .addProperty(PropertySpec.builder("_sqlitePkManager", DoorSqlitePrimaryKeyManager::class)
+                    .initializer("%T(this)", DoorSqlitePrimaryKeyManager::class)
+                    .build())
                 .addRepositoryHelperDelegateCalls("_repo")
 
         val syncFnCodeBlock = CodeBlock.builder()
@@ -335,6 +339,28 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addParameter("result", SyncResult::class)
                 .addModifiers(KModifier.OVERRIDE)
                 .addCode("_dao._insertSyncResult(result)\n")
+                .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("selectNextSqliteSyncablePk")
+                .addParameter("tableId", INT)
+                .addModifiers(KModifier.SUSPEND, KModifier.OVERRIDE)
+                .addCode("return _dao.selectNextSqliteSyncablePk(tableId)\n")
+                .returns(LONG)
+                .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("incrementNextSqliteSyncablePk")
+                .addParameter("tableId", INT)
+                .addParameter("increment", INT)
+                .addCode("_dao.incrementNextSqliteSyncablePk(tableId, increment)\n")
+                .addModifiers(KModifier.SUSPEND, KModifier.OVERRIDE)
+                .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("getAndIncrementSqlitePk")
+                .addParameter("tableId", INT)
+                .addParameter("increment", INT)
+                .addCode("return _sqlitePkManager.getAndIncrementSqlitePk(tableId, increment)\n")
+                .addModifiers(KModifier.SUSPEND, KModifier.OVERRIDE)
+                .returns(LONG)
                 .build())
 
 
@@ -538,6 +564,32 @@ class DbProcessorSync: AbstractDbProcessor() {
         abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceInsertSyncResultFn)
         implDaoTypeSpec.addFunction(implInsertSyncResultFn)
 
+
+        val (abstractNextSqlitePkFn, implNextSqlitePkFn, abstractInterfaceNextSqlitePkFn) =
+                generateAbstractAndImplQueryFunSpecs(
+                        "SELECT COALESCE((SELECT sspNextPrimaryKey FROM SqliteSyncablePrimaryKey WHERE sspTableId = :tableId), 1)",
+                    "selectNextSqliteSyncablePk", LONG,
+                    listOf(ParameterSpec.builder("tableId", Int::class).build()),
+                    addReturnStmt = true, abstractFunIsOverride = true, suspended = true)
+        abstractDaoTypeSpec.addFunction(abstractNextSqlitePkFn)
+        implDaoTypeSpec.addFunction(implNextSqlitePkFn)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceNextSqlitePkFn)
+
+        val (abstractIncNextSqlitePkFn, implIncNextSqlitePkFn, abstractInterfaceIncNextSqlitePkFn) =
+                generateAbstractAndImplQueryFunSpecs(
+                        "UPDATE SqliteSyncablePrimaryKey " +
+                                "SET " +
+                                "sspNextPrimaryKey = sspNextPrimaryKey + :increment " +
+                                "WHERE sspTableId = :tableId",
+                        "incrementNextSqliteSyncablePk", UNIT,
+                        listOf(ParameterSpec.builder("tableId", INT).build(),
+                                ParameterSpec.builder("increment", INT).build()),
+                        addReturnStmt = false, abstractFunIsOverride = true, suspended = true)
+        abstractDaoTypeSpec.addFunction(abstractIncNextSqlitePkFn)
+        implDaoTypeSpec.addFunction(implIncNextSqlitePkFn)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceIncNextSqlitePkFn)
+
+
         syncableEntityTypesOnDb(dbType, processingEnv).forEach {entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
             val entityListClassName = List::class.asClassName().parameterizedBy(entityType.asClassName())
@@ -642,11 +694,13 @@ class DbProcessorSync: AbstractDbProcessor() {
                                              returnType: TypeName,
                                              params: List<ParameterSpec>,
                                              addReturnStmt: Boolean = true,
-                                             abstractFunIsOverride: Boolean = false): AbstractImplAndInterfaceFunSpecs {
+                                             abstractFunIsOverride: Boolean = false,
+                                             suspended: Boolean = false): AbstractImplAndInterfaceFunSpecs {
         val funBuilders = (0..2).map {
             FunSpec.builder(funName)
                     .returns(returnType)
                     .addParameters(params)
+                    .apply { takeIf { suspended }?.addModifiers(KModifier.SUSPEND) }
         }
 
         funBuilders[0].addModifiers(KModifier.ABSTRACT)
