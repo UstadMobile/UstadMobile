@@ -66,7 +66,6 @@ class ClazzWorkDetailOverviewFragmentKasTest : TestCase() {
             ScenarioIdlingResourceRule(CrudIdlingResource())
 
 
-
     @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as student should " +
             "show all fields")
     @Test
@@ -406,7 +405,14 @@ class ClazzWorkDetailOverviewFragmentKasTest : TestCase() {
 
         ClazzWorkDetailOverviewScreen {
             recycler {
-                scrollTo{
+                scrollTo {
+                    withDescendant { withText(contentList[1].title) }
+                }
+                scrollTo {
+                   withDescendant { withText(contentList[0].title) }
+                }
+                scrollToStart()
+                scrollTo {
                     hasDescendant(withText(clazzWork.clazzWorkInstructions))
                 }
                 childWith<ClazzWorkDetailOverviewScreen.ClazzWorkBasicDetail> {
