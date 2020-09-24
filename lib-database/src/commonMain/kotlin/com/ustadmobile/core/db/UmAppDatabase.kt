@@ -43,7 +43,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 39)
+], version = 40)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -1310,7 +1310,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_38_39 = object : DoorMigration(38, 39) {
+        val MIGRATION_39_40 = object : DoorMigration(39, 40) {
             override fun migrate(database: DoorSqlDatabase) {
 
                 if (database.dbType() == DoorDbType.SQLITE) {
@@ -1324,7 +1324,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN overrideEntry BOOL DEFAULT false NOT NULL")
 
                 }
-
             }
         }
 
@@ -1332,7 +1331,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
-                    MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39)
+                    MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_39_40)
 
             return builder
         }
