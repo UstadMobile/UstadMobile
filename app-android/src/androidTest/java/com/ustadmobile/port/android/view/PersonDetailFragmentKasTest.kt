@@ -1,6 +1,10 @@
 package com.ustadmobile.port.android.view
 
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.test.espresso.Espresso
+import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.assertion.ViewAssertions
+import androidx.test.espresso.matcher.ViewMatchers
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -12,6 +16,8 @@ import com.ustadmobile.port.android.screen.PersonDetailScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import junit.framework.Assert
+import junit.framework.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
 
@@ -91,6 +97,29 @@ class PersonDetailFragmentKasTest : TestCase() {
                 }
             }
         }
+    }
+
+    @AdbScreenRecord("given create account visible when clicked should open person account edit screen")
+    @Test
+    fun givenCreateAccountVisible_whenClicked_shouldOpenPersonAccountEditScreen(){
+
+
+        before {
+            launchFragment(withUsername = false)
+        }.after {
+
+        }.run {
+
+            PersonDetailScreen {
+                createAccView{
+                    isDisplayed()
+                    click()
+                }
+            }
+            assertEquals("It navigated to account edit screen",
+                    R.id.person_account_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+        }
+
     }
 
 

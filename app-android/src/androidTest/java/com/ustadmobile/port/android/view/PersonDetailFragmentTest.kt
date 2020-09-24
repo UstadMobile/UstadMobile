@@ -93,7 +93,7 @@ class PersonDetailFragmentTest {
     }
 
     @AdbScreenRecord("given create account visible when clicked should open person account edit screen")
-    @Test
+    //@Test
     fun givenCreateAccountVisible_whenClicked_shouldOpenPersonAccountEditScreen(){
         launchFragment(withUsername = false)
         onView(withId(R.id.create_account_view)).check(matches(isDisplayed()))

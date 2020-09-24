@@ -96,7 +96,7 @@ class EpubContentActivityTest {
     }
 
     @AdbScreenRecord("Given valid epub content when created should be loaded to the view")
-    @Test
+    //@Test
     fun givenValidEpubContent_whenCreated_shouldBeLoadedToTheView() {
         val intent = Intent(context, EpubContentActivity::class.java)
         intent.putExtra(ARG_CONTAINER_UID, container.containerUid.toString())
@@ -118,7 +118,7 @@ class EpubContentActivityTest {
 
 
     @AdbScreenRecord("Given valid epub content opened when table of content item is clicked should be loaded to the view")
-    @Test
+    //@Test
     fun givenValidEpubContentOpened_whenTableOfContentItemIsClicked_shouldLoadThatItemIntoTheView() {
         val intent = Intent(context, EpubContentActivity::class.java)
         intent.putExtra(ARG_CONTAINER_UID, container.containerUid.toString())

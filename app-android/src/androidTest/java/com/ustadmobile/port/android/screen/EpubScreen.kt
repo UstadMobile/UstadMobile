@@ -23,6 +23,8 @@ object EpubScreen:  KScreen<EpubScreen>() {
 
     val epubTitle: KTextView = KTextView { withId(R.id.item_basepoint_cover_title) }
 
+    val toolBarTitle: KView = KView { withId(R.id.toolbar)}
+
     val recycler: KRecyclerView = KRecyclerView({
         withId(R.id.container_epubrunner_pager)
     }, itemTypeBuilder = {

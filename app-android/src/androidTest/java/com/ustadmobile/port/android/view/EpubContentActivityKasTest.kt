@@ -4,8 +4,12 @@ import android.app.Application
 import android.content.Intent
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.espresso.Espresso
+import androidx.test.espresso.action.ViewActions
+import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.web.webdriver.Locator
+import com.agoda.kakao.text.KTextView
 import com.agoda.kakao.web.KWebView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
@@ -19,6 +23,8 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.screen.EpubScreen
 import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
+import org.hamcrest.CoreMatchers
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -100,6 +106,38 @@ class EpubContentActivityKasTest : TestCase() {
                     }
                 }
             }
+
+        }
+    }
+
+    @AdbScreenRecord("Given valid epub content opened when table of content item is clicked should be loaded to the view")
+    @Test
+    fun givenValidEpubContentOpened_whenTableOfContentItemIsClicked_shouldLoadThatItemIntoTheView() {
+        val intent = Intent(context, EpubContentActivity::class.java)
+        intent.putExtra(UstadView.ARG_CONTAINER_UID, container.containerUid.toString())
+        val activityScenario = ActivityScenario.launch<EpubContentActivity>(intent)
+        activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
+
+        EpubScreen {
+
+            epubTitle {
+                hasText("ರುಮ್ನಿಯಾ")
+                isDisplayed()
+            }
+
+            KTextView {
+                withId(R.id.expandedListItem)
+                withText("Page 7")
+            } perform {
+                isDisplayed()
+                click()
+            }
+
+            toolBarTitle{
+                hasDescendant { withText("Page 7") }
+                isDisplayed()
+            }
+
 
         }
     }
