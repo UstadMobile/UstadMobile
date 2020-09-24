@@ -487,6 +487,8 @@ fun defaultVal(typeName: TypeName) : CodeBlock {
 fun isListOrArray(typeName: TypeName) = (typeName is ClassName && typeName.canonicalName =="kotlin.Array")
         || (typeName is ParameterizedTypeName && typeName.rawType == List::class.asClassName())
 
+fun TypeName.isArrayType(): Boolean = (this is ParameterizedTypeName && this.rawType.canonicalName == "kotlin.Array")
+
 fun isDataSourceFactory(typeName: TypeName) = typeName is ParameterizedTypeName
         && typeName.rawType == androidx.paging.DataSource.Factory::class.asTypeName()
 
