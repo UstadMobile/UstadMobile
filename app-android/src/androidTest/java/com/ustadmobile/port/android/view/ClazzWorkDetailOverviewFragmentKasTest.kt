@@ -364,7 +364,7 @@ class ClazzWorkDetailOverviewFragmentKasTest : TestCase() {
                     childWith<ClazzWorkDetailOverviewScreen.SubmitSubmission> {
                         withDescendant { withText("Submit") }
                     } perform {
-                        submitButton{
+                        submitButton {
                             click()
                         }
                     }
@@ -389,10 +389,12 @@ class ClazzWorkDetailOverviewFragmentKasTest : TestCase() {
                         scheduleTimeToDate(clazzWork.clazzWorkDueTime.toInt()), ""))
 
         ClazzWorkDetailOverviewScreen {
-
             recycler {
                 scrollToStart()
-                childAt<ClazzWorkDetailOverviewScreen.ClazzWorkBasicDetail>(0) {
+
+                childWith<ClazzWorkDetailOverviewScreen.ClazzWorkBasicDetail> {
+                    withDescendant { withText(clazzWork.clazzWorkInstructions!!) }
+                } perform {
                     title {
                         isVisible()
                         hasText(clazzWork.clazzWorkInstructions!!)
@@ -401,8 +403,10 @@ class ClazzWorkDetailOverviewFragmentKasTest : TestCase() {
                     dueDate.hasText(dueDateString)
                 }
                 childAt<ClazzWorkDetailOverviewScreen.SimpleHeading>(1) {
-                    headingTitleTextView.hasText("Content")
-                    headingTitleTextView.isVisible()
+                    headingTitleTextView {
+                        hasText("Content")
+                        isVisible()
+                    }
                 }
                 if (contentList.isNotEmpty()) {
 
