@@ -183,7 +183,9 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         }
 
         override fun onBindViewHolder(holderContent: EpubContentViewHolder, position: Int) {
-            holderContent.mBinding.epubContentview.loadUrl(getItem(position))
+            val url = getItem(position)
+            holderContent.mBinding.epubContentview.loadUrl(url)
+            holderContent.mBinding.epubContentview.tag = url.substringAfterLast("/")
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

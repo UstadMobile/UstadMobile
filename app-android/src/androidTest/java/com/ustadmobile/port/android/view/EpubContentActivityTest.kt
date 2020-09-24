@@ -7,6 +7,7 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
+import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.espresso.web.assertion.WebViewAssertions.webMatches
 import androidx.test.espresso.web.sugar.Web.onWebView
@@ -37,6 +38,9 @@ import org.junit.rules.TemporaryFolder
 import org.junit.runner.RunWith
 import java.io.File
 import java.lang.Thread.sleep
+
+import com.agoda.kakao.screen.Screen.Companion.onScreen
+import com.ustadmobile.port.android.screen.EpubScreen
 
 
 @AdbScreenRecord("Epub content screen test")
@@ -70,7 +74,7 @@ class EpubContentActivityTest {
     private val context: Application = ApplicationProvider.getApplicationContext()
 
     @Before
-    fun setUp(){
+    fun setUp() {
         val contentEntry = ContentEntry().apply {
             leaf = true
             contentEntryUid = dbRule.db.contentEntryDao.insert(this)
@@ -78,7 +82,7 @@ class EpubContentActivityTest {
 
         container = Container().apply {
             containerContentEntryUid = contentEntry.contentEntryUid
-            containerUid  = 1000
+            containerUid = 1000
             dbRule.db.containerDao.insert(this)
         }
         containerTmpDir = tempFileRule.newFolder("epubContent${System.currentTimeMillis()}")
@@ -93,9 +97,9 @@ class EpubContentActivityTest {
 
     @AdbScreenRecord("Given valid epub content when created should be loaded to the view")
     @Test
-    fun givenValidEpubContent_whenCreated_shouldBeLoadedToTheView(){
+    fun givenValidEpubContent_whenCreated_shouldBeLoadedToTheView() {
         val intent = Intent(context, EpubContentActivity::class.java)
-        intent.putExtra(ARG_CONTAINER_UID , container.containerUid.toString())
+        intent.putExtra(ARG_CONTAINER_UID, container.containerUid.toString())
         val activityScenario = launch<EpubContentActivity>(intent)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
@@ -105,7 +109,7 @@ class EpubContentActivityTest {
 
         activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 
-        onView(allOf(withId(R.id.item_basepoint_cover_title),withText("ರುಮ್ನಿಯಾ"))).check(matches(isDisplayed()))
+        onView(allOf(withId(R.id.item_basepoint_cover_title), withText("ರುಮ್ನಿಯಾ"))).check(matches(isDisplayed()))
 
         onWebView(allOf(isDisplayed(), isJavascriptEnabled()))
                 .withElement(findElement(Locator.CLASS_NAME, "authors"))
@@ -115,15 +119,15 @@ class EpubContentActivityTest {
 
     @AdbScreenRecord("Given valid epub content opened when table of content item is clicked should be loaded to the view")
     @Test
-    fun givenValidEpubContentOpened_whenTableOfContentItemIsClicked_shouldLoadThatItemIntoTheView(){
+    fun givenValidEpubContentOpened_whenTableOfContentItemIsClicked_shouldLoadThatItemIntoTheView() {
         val intent = Intent(context, EpubContentActivity::class.java)
-        intent.putExtra(ARG_CONTAINER_UID , container.containerUid.toString())
+        intent.putExtra(ARG_CONTAINER_UID, container.containerUid.toString())
         val activityScenario = launch<EpubContentActivity>(intent)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
         activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 
-        onView(allOf(withId(R.id.item_basepoint_cover_title),withText("ರುಮ್ನಿಯಾ"))).check(matches(isDisplayed()))
+        onView(allOf(withId(R.id.item_basepoint_cover_title), withText("ರುಮ್ನಿಯಾ"))).check(matches(isDisplayed()))
 
         onView(allOf(withId(R.id.expandedListItem), withText("Page 7")))
                 .check(matches(isDisplayed())).perform(click())
