@@ -5,7 +5,11 @@ import com.github.aakira.napier.Napier
 import com.ustadmobile.door.DoorSyncCallback
 
 /**
+ * This extension function is used by the generated clearAllTables function on Android. It must
+ * be run after calling clearAllTables.
  *
+ * This is done automatically by the onOpen callback that is automatically generated and then added
+ * by DoorDatabaseBuilder on Android.
  */
 fun RoomDatabase.initSyncablePrimaryKeys() {
     try {

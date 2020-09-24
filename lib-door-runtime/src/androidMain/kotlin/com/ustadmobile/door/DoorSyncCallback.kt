@@ -7,6 +7,6 @@ interface DoorSyncCallback {
     /**
      *
      */
-    fun initSyncablePrimaryKeys(supportDb: SupportSQLiteDatabase)
+    fun initSyncablePrimaryKeys(db: SupportSQLiteDatabase)
 
 }
