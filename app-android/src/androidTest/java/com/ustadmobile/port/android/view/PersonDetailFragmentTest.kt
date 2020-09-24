@@ -83,7 +83,7 @@ class PersonDetailFragmentTest {
 
 
     @AdbScreenRecord("given change password visible when clicked should open person account screen")
-    @Test
+    //@Test
     fun givenChangePasswordVisible_whenClicked_shouldOpenPersonAccountSection(){
         launchFragment(true)
         onView(withId(R.id.change_account_password_view)).check(matches(isDisplayed()))

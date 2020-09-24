@@ -122,6 +122,27 @@ class PersonDetailFragmentKasTest : TestCase() {
 
     }
 
+    @AdbScreenRecord("given change password visible when clicked should open person account screen")
+    @Test
+    fun givenChangePasswordVisible_whenClicked_shouldOpenPersonAccountSection(){
+
+        before {
+            launchFragment(true)
+        }.after {
+
+        }.run {
+
+            PersonDetailScreen {
+                changePassView{
+                    isDisplayed()
+                    click()
+                }
+            }
+            assertEquals("It navigated to person account screen",
+                    R.id.person_account_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+        }
+    }
+
 
 
 
