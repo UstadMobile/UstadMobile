@@ -23,9 +23,13 @@ import com.ustadmobile.port.android.screen.ClazzWorkDetailOverviewScreen
 import com.ustadmobile.port.android.screen.ContentEntryListScreen
 import com.ustadmobile.port.android.view.binding.dateWithTimeFormat
 import com.ustadmobile.port.android.view.binding.dateWithTimeFormatWithPrepend
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.*
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Matchers
@@ -49,6 +53,17 @@ class ClazzWorkDetailOverviewFragmentKasTest : TestCase() {
     @JvmField
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule =
+            ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule =
+            ScenarioIdlingResourceRule(CrudIdlingResource())
+
 
 
     @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as student should " +
@@ -391,7 +406,6 @@ class ClazzWorkDetailOverviewFragmentKasTest : TestCase() {
         ClazzWorkDetailOverviewScreen {
             recycler {
                 scrollToStart()
-
                 childWith<ClazzWorkDetailOverviewScreen.ClazzWorkBasicDetail> {
                     withDescendant { withText(clazzWork.clazzWorkInstructions!!) }
                 } perform {
@@ -599,7 +613,8 @@ class ClazzWorkDetailOverviewFragmentKasTest : TestCase() {
                 it.arguments = bundleOf(UstadView.ARG_ENTITY_UID to
                         clazzWork.clazzWorkUid.toString())
             }
-        }
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
     }
 
