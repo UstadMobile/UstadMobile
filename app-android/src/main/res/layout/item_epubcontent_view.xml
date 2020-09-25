@@ -5,10 +5,13 @@
 
     </data>
 
+    <!-- minHeight is used to prevent the parent recyclerview from creating too many children.
+    The RecylerView will see the WebView as having a height of 0 until after it loads. This leads
+    to creating children for almost all pages simultaneously -->
     <WebView
         android:id="@+id/epub_contentview"
         android:scrollbars="none"
-        android:minHeight="@dimen/dimen_200dp"
+        android:minHeight="512dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
 </layout>
