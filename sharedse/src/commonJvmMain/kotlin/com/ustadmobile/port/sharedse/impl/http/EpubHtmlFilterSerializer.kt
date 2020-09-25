@@ -60,7 +60,6 @@ class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
                         serializer.text("""
                             img, video, audio {
                                 max-width: 95% !important;
-                                max-height: 95% !important;
                             }
 
                             body {
