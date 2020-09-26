@@ -549,8 +549,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                 .add("return _dataSource\n")
                     }else {
                         codeBlock.add(generateRepositoryDelegateToDaoFun(daoFunSpec.build(),
-                            daoMethodEl.getAnnotation(Query::class.java)?.value),
-                            isAlwaysSqlite = isAlwaysSqlite)
+                            daoMethodEl.getAnnotation(Query::class.java)?.value,
+                            isAlwaysSqlite = isAlwaysSqlite))
                     }
                 }
 
