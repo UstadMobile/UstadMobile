@@ -17,6 +17,7 @@ import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.GetAttachmentData
 import com.ustadmobile.door.annotation.SetAttachmentData
 import kotlinx.coroutines.newSingleThreadContext
+import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.util.*
 
@@ -104,7 +105,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
             writeFileSpecToOutputDirs(generateDaoRepositoryClass(daoTypeEl),
                     AnnotationProcessorWrapper.OPTION_JVM_DIRS)
             val androidRepoFileSpec = generateDaoRepositoryClass(daoTypeEl,
-                    pagingBoundaryCallbackEnabled = true)
+                    pagingBoundaryCallbackEnabled = true, isAlwaysSqlite = true)
             writeFileSpecToOutputDirs(androidRepoFileSpec,
                     AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
         }
@@ -142,7 +143,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addParameter(ParameterSpec.builder("_attachmentsDir", String::class).build())
                         .addParameter("_updateNotificationManager",
                             ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
-                        .addParameter("_useClientSyncManager", Boolean::class)   
+                        .addParameter("_useClientSyncManager", Boolean::class)
                         .build())
                 .addProperties(listOf(
                         PropertySpec.builder("_db",
@@ -307,6 +308,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .getter(FunSpec.getterBuilder().addCode("return _db.master").build())
                     .build())
 
+
             val repoImplClassName = ClassName(dbTypeElement.asClassName().packageName,
                     "${syncableDaoClassName.simpleName}_$SUFFIX_REPOSITORY")
             dbRepoType.addProperty(PropertySpec
@@ -354,6 +356,28 @@ class DbProcessorRepository: AbstractDbProcessor() {
                             .addParameter("lastChanged", LONG)
                             .addCode("_${syncableDaoClassName.simpleName}.updateTableSyncStatusLastSynced(tableId, lastChanged)")
                             .build())
+
+            dbRepoType.addFunction(FunSpec.builder("selectNextSqliteSyncablePk")
+                    .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                    .addParameter("tableId", INT)
+                    .returns(LONG)
+                    .addCode("return _${syncableDaoClassName.simpleName}.selectNextSqliteSyncablePk(tableId)\n")
+                    .build())
+
+            dbRepoType.addFunction(FunSpec.builder("incrementNextSqliteSyncablePk")
+                    .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                    .addParameter("tableId", INT)
+                    .addParameter("increment", INT)
+                    .addCode("_${syncableDaoClassName.simpleName}.incrementNextSqliteSyncablePk(tableId, increment)\n")
+                    .build())
+
+            dbRepoType.addFunction(FunSpec.builder("getAndIncrementSqlitePk")
+                    .addParameter("tableId", INT)
+                    .addParameter("increment", INT)
+                    .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                    .addCode("return _${syncableDaoClassName.simpleName}.getAndIncrementSqlitePk(tableId, increment)\n")
+                    .returns(LONG)
+                    .build())
 
         }
 
@@ -410,7 +434,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
 
     fun generateDaoRepositoryClass(daoTypeElement: TypeElement,
-                                   pagingBoundaryCallbackEnabled: Boolean = false): FileSpec{
+                                   pagingBoundaryCallbackEnabled: Boolean = false,
+                                   isAlwaysSqlite: Boolean = false): FileSpec{
         val repoImplFile = FileSpec.builder(pkgNameOfElement(daoTypeElement, processingEnv),
                 "${daoTypeElement.simpleName}_${SUFFIX_REPOSITORY}")
         repoImplFile.addImport("com.ustadmobile.door", "DoorDbType")
@@ -524,7 +549,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                                 .add("return _dataSource\n")
                     }else {
                         codeBlock.add(generateRepositoryDelegateToDaoFun(daoFunSpec.build(),
-                            daoMethodEl.getAnnotation(Query::class.java)?.value))
+                            daoMethodEl.getAnnotation(Query::class.java)?.value),
+                            isAlwaysSqlite = isAlwaysSqlite)
                     }
                 }
 
@@ -604,21 +630,59 @@ class DbProcessorRepository: AbstractDbProcessor() {
      * Update method and the parameter type is syncable, then the last changed by field on the
      * syncable entity will be updated
      */
-    fun generateRepositoryDelegateToDaoFun(daoFunSpec: FunSpec, querySql: String? = null): CodeBlock {
+    fun generateRepositoryDelegateToDaoFun(daoFunSpec: FunSpec, querySql: String? = null,
+        isAlwaysSqlite: Boolean = false): CodeBlock {
         val codeBlock = CodeBlock.builder()
+        var syncableEntityInfo: SyncableEntityInfo? = null
+        var isListOrArrayParam = false
+
         if(isUpdateDeleteOrInsertMethod(daoFunSpec)) {
             val entityParam = daoFunSpec.parameters[0]
             val entityType = resolveEntityFromResultType(daoFunSpec.parameters[0].type) as ClassName
             val lastChangedByField = processingEnv.elementUtils.getTypeElement(entityType.canonicalName)
                     .enclosedElements.firstOrNull { it.kind == ElementKind.FIELD && it.getAnnotation(LastChangedBy::class.java) != null}
+            isListOrArrayParam = isListOrArray(entityParam.type)
 
             if(lastChangedByField != null) {
-                if(isListOrArray(entityParam.type)) {
+                if(isListOrArrayParam) {
                     codeBlock.add("${entityParam.name}.forEach { it.${lastChangedByField.simpleName} = _clientId }\n")
                 }else {
                     codeBlock.add("${entityParam.name}.${lastChangedByField.simpleName} = _clientId\n")
                 }
+
+
+                //Use the SQLite Primary key manager if this is an SQLite insert
+                if(daoFunSpec.annotations.any { it.className == Insert::class.asClassName() }) {
+                    codeBlock.takeIf { !isAlwaysSqlite }?.beginControlFlow("if(_db.jdbcDbType == %T.SQLITE)",
+                            DoorDbType::class)
+                    syncableEntityInfo = SyncableEntityInfo(entityType, processingEnv)
+                    val isSuspendFn = daoFunSpec.modifiers.contains(KModifier.SUSPEND)
+                    if(isListOrArrayParam) {
+                        codeBlock.add("var _nextPk = ")
+                                .apply { if(!isSuspendFn) beginControlFlow("%M ",
+                                        MemberName("kotlinx.coroutines", "runBlocking")) }
+                                .add("(_repo as %T).getAndIncrementSqlitePk(" +
+                                    "${syncableEntityInfo.tableId}, ${entityParam.name}.size)\n",
+                                        DoorDatabaseSyncRepository::class)
+                                .apply { if(!isSuspendFn) endControlFlow() }
+                                .beginControlFlow("${entityParam.name}.forEach")
+                                .add("it.takeIf { it.${syncableEntityInfo.entityPkField.name} == 0L}?.${syncableEntityInfo.entityPkField.name} = _nextPk++\n")
+                                .endControlFlow()
+                    }else {
+                        codeBlock.add("val _nextPk = ")
+                                .apply { if(!isSuspendFn) beginControlFlow("%M ",
+                                        MemberName("kotlinx.coroutines", "runBlocking")) }
+                                .add("(_repo as %T).getAndIncrementSqlitePk(" +
+                                    "${syncableEntityInfo.tableId}, 1)\n", DoorDatabaseSyncRepository::class)
+                                .apply { if (!isSuspendFn) endControlFlow() }
+                                .add("${entityParam.name}.takeIf { it.${syncableEntityInfo.entityPkField.name} == 0L }?.${syncableEntityInfo.entityPkField.name} = _nextPk\n ")
+                    }
+
+                    codeBlock.takeIf { !isAlwaysSqlite }?.endControlFlow()
+                }
             }
+
+
         }
 
         if(daoFunSpec.returnType != UNIT)
@@ -628,6 +692,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 .add(daoFunSpec.parameters.filter { !isContinuationParam(it.type)}.joinToString { it.name })
                 .add(")\n")
 
+        //Generate a call to handleTableChanged for functions that
+        //are annotated with @Insert or @Update
         if(isUpdateDeleteOrInsertMethod(daoFunSpec)) {
             val isList = isListOrArray(daoFunSpec.parameters[0].type)
             codeBlock.add("_repo")
@@ -638,7 +704,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     (resolveEntityFromResultType(daoFunSpec.parameters[0].type) as ClassName).simpleName)
         }
 
-        //Check if this is a method annotated @Query that actually changes the database
+        //Generate a call to handleTableChanged for functions that
+        //are annotated by @Query and are UPDATE or DELETE queries
         val tableModifiedByQuery = if(querySql != null) {
             findEntityModifiedByQuery(querySql, allKnownEntityNames)
         }else {
@@ -649,8 +716,31 @@ class DbProcessorRepository: AbstractDbProcessor() {
             codeBlock.add("_repo.handleTableChanged(%S)\n", tableModifiedByQuery)
         }
 
-        if(daoFunSpec.returnType != UNIT)
+        //If this query is an @Insert query and it is running on SQLite
+        //then we need to use our own system to set the primary keys
+        //correctly.
+        val syncableEntityInfoVal = syncableEntityInfo
+        if((daoFunSpec.returnType != UNIT && daoFunSpec.returnType != null) &&
+                daoFunSpec.annotations.any { it.className == Insert::class.asClassName() } &&
+                syncableEntityInfoVal != null)  {
+            codeBlock.add("return ")
+                    .takeIf { !isAlwaysSqlite }?.beginControlFlow(
+                            "if(_db.jdbcDbType == %T.SQLITE)", DoorDbType::class)
+            if(isListOrArrayParam) {
+                codeBlock.add("${daoFunSpec.parameters[0].name}.map·{·it.${syncableEntityInfoVal.entityPkField.name}·}")
+                daoFunSpec.returnType?.takeIf { it.isArrayType() }?.also {
+                    codeBlock.add(".%M()", MemberName("kotlin.collections", "toTypedArray"))
+                }
+                codeBlock.add("\n")
+            }else {
+                codeBlock.add("${daoFunSpec.parameters[0].name}.${syncableEntityInfoVal.entityPkField.name}·\n")
+            }
+            codeBlock.takeIf { !isAlwaysSqlite }?.nextControlFlow("else")
+                    ?.add("return _result\n")
+                    ?.endControlFlow()
+        } else if(daoFunSpec.returnType != UNIT && daoFunSpec.returnType != null) {
             codeBlock.add("return _result\n")
+        }
 
         return codeBlock.build()
     }

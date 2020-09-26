@@ -4,13 +4,12 @@ import com.ustadmobile.port.sharedse.impl.http.EpubHtmlFilterSerializer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.provider
+import org.kodein.di.*
 import org.kxml2.io.KXmlParser
 import org.kxml2.io.KXmlSerializer
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
+import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 import java.io.IOException
 import java.nio.charset.Charset
@@ -28,8 +27,14 @@ class TestHtmlFilterSerializer {
     @Before
     fun setup() {
         di = DI {
+            bind<XmlPullParserFactory>() with singleton {
+                XmlPullParserFactory.newInstance().also {
+                    it.isNamespaceAware = true
+                }
+            }
+
             bind<XmlPullParser>() with provider {
-                KXmlParser()
+                instance<XmlPullParserFactory>().newPullParser()
             }
 
             bind<XmlSerializer>() with provider {

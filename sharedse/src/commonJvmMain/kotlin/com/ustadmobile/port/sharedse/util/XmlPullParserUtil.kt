@@ -71,6 +71,9 @@ fun passXmlThrough(xpp: XmlPullParser, xs: XmlSerializer,
             }
 
             XmlPullParser.START_TAG -> {
+                if(xpp.getNamespace() != null)
+                    xs.setPrefix(xpp.getPrefix(), xpp.getNamespace())
+
                 xs.startTag(xpp.getNamespace(), xpp.getName().toString())
                 for (i in 0 until xpp.getAttributeCount()) {
                     xs.attribute(xpp.getAttributeNamespace(i),

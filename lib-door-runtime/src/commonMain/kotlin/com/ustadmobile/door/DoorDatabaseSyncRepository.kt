@@ -51,6 +51,12 @@ interface DoorDatabaseSyncRepository: DoorDatabaseRepository {
      */
     suspend fun updateTableSyncStatusLastSynced(tableId: Int, lastSynced: Long)
 
+    suspend fun selectNextSqliteSyncablePk(tableId: Int): Long
+
+    suspend fun incrementNextSqliteSyncablePk(tableId: Int, increment: Int)
+
+    suspend fun getAndIncrementSqlitePk(tableId: Int, increment: Int): Long
+
 
     /**
      * Do not call this on the main thread: it might run a query

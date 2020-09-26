@@ -100,9 +100,6 @@ class EpubContentActivityTest {
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
                 .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
 
-        Thread.sleep(60000 * 6)
-
-
         activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 
         onView(allOf(withId(R.id.item_basepoint_cover_title),withText("ರುಮ್ನಿಯಾ"))).check(matches(isDisplayed()))
