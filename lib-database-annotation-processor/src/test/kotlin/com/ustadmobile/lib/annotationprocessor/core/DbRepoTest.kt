@@ -271,7 +271,7 @@ class DbRepoTest {
                     .asConnectedRepository()
 
 
-            clientDb.waitUntil(10000 * 5000, listOf("ExampleSyncableEntity")) {
+            clientDb.waitUntil(10000, listOf("ExampleSyncableEntity")) {
                 clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid) != null
             }
 
@@ -486,14 +486,14 @@ class DbRepoTest {
             }
 
             val server1 = serverDb.exampleSyncableDao().findByUid(client1.esUid)
-            Assert.assertEquals("Server got the entity OK", client1.esUid, server1!!.esUid)
+            Assert.assertEquals("Server got the entity OK", client1.esUid, server1?.esUid)
 
             //3. Make changes and update entity.
             client1.esName = "Hello"
             client1.esNumber = 42
             clientRepo.exampleSyncableDao().updateAsync(client1)
             val client2 = clientDb.exampleSyncableDao().findByUid(client1.esUid)
-            Assert.assertEquals("Client updated locally OK", "Hello", client2!!.esName)
+            Assert.assertEquals("Client updated locally OK", "Hello", client2?.esName)
 
 
             //4. Let sync happen - Verify update on server.
@@ -501,7 +501,7 @@ class DbRepoTest {
                 serverDb.exampleSyncableDao().findByUid(client1.esUid)?.esName == "Hello"
             }
             val server2 = serverDb.exampleSyncableDao().findByUid(client1.esUid)
-            Assert.assertEquals("Name matches", "Hello", server2!!.esName)
+            Assert.assertEquals("Name matches", "Hello", server2?.esName)
         }
     }
 
@@ -592,6 +592,45 @@ class DbRepoTest {
 
         Assert.assertNotNull("Entity udpated on server was automagically brought to client",
             clientDb.exampleSyncableDao().findByUid(testUid))
+    }
+
+    @Test
+    fun givenEntityPresentOnServerFirst_whenNewClientConnects_thenShouldBePresent() {
+        mockUpdateNotificationManager = spy(ServerUpdateNotificationManagerImpl())
+        setupClientAndServerDb(mockUpdateNotificationManager)
+
+        val serverDb: ExampleDatabase2 by serverDi.on("localhost").instance(tag = DoorTag.TAG_DB)
+
+        val testUid = 42L
+
+        val exampleEntity = ExampleSyncableEntity().apply {
+            esUid = testUid
+            esName = "Hello Notification"
+            publik = true
+            serverDb.exampleSyncableDao().insert(this)
+        }
+
+        Napier.i("==== Initializing client =====")
+
+        val clientDb = this.clientDb!!
+
+        //TODO: This should be closed to be sure that it does not interfere with the next test etc.
+        val clientRepo = clientDb.asRepository(Any(), "http://localhost:8089/",
+                "token", httpClient, useClientSyncManager = true)
+                .asConnectedRepository()
+
+        Napier.i("==== Waiting for entity to arrive on client =====")
+
+        runBlocking {
+            clientDb.waitUntil(10000, listOf("ExampleSyncableEntity")) {
+                clientDb.exampleSyncableDao().findByUid(exampleEntity.esUid) != null
+            }
+
+            Assert.assertNotNull("Entity is in client database after sync",
+                    clientDb.exampleSyncableDao().findByUid(exampleEntity.esUid))
+        }
+
+
     }
 
 

@@ -626,7 +626,7 @@ internal fun generateInsertTableSyncStatusCodeBlock(dbType: TypeElement,
     syncableEntityTypesOnDb(dbType, processingEnv).forEach {
         val syncableEntityInfo = SyncableEntityInfo(it.asClassName(), processingEnv)
         codeBlock.add("$execSqlFunName(\"INSERT·INTO·TableSyncStatus(tsTableId,·tsLastChanged,·tsLastSynced)·" +
-                    "VALUES(${syncableEntityInfo.tableId},·0,·\${systemTimeInMillis()})\")\n")
+                    "VALUES(${syncableEntityInfo.tableId},·\${systemTimeInMillis()},·0)\")\n")
     }
 
     return codeBlock.build()

@@ -17,14 +17,16 @@ import kotlinx.serialization.Serializable
                             AND tableId = 42""",
     syncFindAllQuery = """Select ExampleSyncableEntity.* 
                           FROM ExampleSyncableEntity
-                          JOIN AccessGrant ON AccessGrant.entityUid = ExampleSyncableEntity.esUid AND AccessGrant.tableId = 42 AND AccessGrant.deviceId = :clientId""")
+                          LEFT JOIN AccessGrant ON AccessGrant.entityUid = ExampleSyncableEntity.esUid AND AccessGrant.tableId = 42 AND AccessGrant.deviceId = :clientId
+                          WHERE CAST(ExampleSyncableEntity.publik AS INTEGER) = 1 OR AccessGrant.entityUid IS NOT NULL""")
 @Serializable
 open class ExampleSyncableEntity(@PrimaryKey(autoGenerate = true) var esUid: Long = 0,
                                  @LocalChangeSeqNum var esLcsn: Int = 0,
                                  @MasterChangeSeqNum var esMcsn: Int = 0,
                                  @LastChangedBy var esLcb: Int = 0,
                                  var esNumber: Int = 0,
-                                 var esName: String? = null) {
+                                 var esName: String? = null,
+                                 var publik: Boolean = false) {
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
