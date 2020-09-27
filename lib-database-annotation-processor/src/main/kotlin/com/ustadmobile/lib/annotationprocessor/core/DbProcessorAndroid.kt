@@ -208,6 +208,7 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                         .build())
                 .addProperty(PropertySpec.builder("master", BOOLEAN).initializer("false").build())
                 .addSuperinterface(DoorDatabaseCallback::class)
+                .addSuperinterface(ClassName("com.ustadmobile.door", "DoorSyncCallback"))
 
         val onCreateFunSpec = FunSpec.builder("onCreate")
                 .addParameter("db", ClassName("com.ustadmobile.door", "DoorSqlDatabase"))
@@ -218,9 +219,16 @@ class DbProcessorAndroid: AbstractDbProcessor() {
             codeBlock.add(generateSyncTriggersCodeBlock(it.asClassName(), "db.execSQL",
                     DoorDbType.SQLITE))
         }
+        codeBlock.add("initSyncablePrimaryKeys(db)\n")
 
-        codeBlock.add(generateInsertNodeIdFun(dbTypeEl, DoorDbType.SQLITE, "db.execSQL",
-                processingEnv))
+
+        callbackTypeSpec.addFunction(FunSpec.builder("initSyncablePrimaryKeys")
+                .addParameter("db",
+                        ClassName("androidx.sqlite.db","SupportSQLiteDatabase"))
+                .addModifiers(KModifier.OVERRIDE)
+                .addCode(generateInsertNodeIdFun(dbTypeEl, DoorDbType.SQLITE, "db.execSQL",
+                        processingEnv))
+                .build())
 
         onCreateFunSpec.addCode(codeBlock.build())
         callbackTypeSpec.addFunction(onCreateFunSpec.build())

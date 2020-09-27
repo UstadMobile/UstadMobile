@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.core.db.UmAppDatabase
 import org.junit.Rule
 import org.junit.Test
+import kotlin.random.Random
 
 
 class TestRoomMigration {
@@ -85,11 +86,23 @@ class TestRoomMigration {
     @Test
     fun migrate38to39() {
         helper.createDatabase(TEST_DB, 38).apply {
+            //The NodeClientId would always have been inserted by the onCreate callback in the previous version
+            execSQL("INSERT INTO SyncNode(nodeClientId,master) VALUES (${Random.nextInt(1, Int.MAX_VALUE)}, 0)")
             close()
         }
 
         helper.runMigrationsAndValidate(TEST_DB, 39, true,
                 UmAppDatabase.MIGRATION_38_39)
+    }
+
+    @Test
+    fun migrate39to40() {
+        helper.createDatabase(TEST_DB, 39).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 40, true,
+                UmAppDatabase.MIGRATION_39_40)
     }
 
 

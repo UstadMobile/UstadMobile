@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 39,
-    "identityHash": "e53b7ae3eeb77fea5340328906daeda1",
+    "identityHash": "d781ff23d6638cda626a24ff9e3ddb2a",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1145,7 +1145,7 @@
       },
       {
         "tableName": "Person",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "personUid",
@@ -1248,12 +1248,6 @@
             "columnName": "personOrgId",
             "affinity": "TEXT",
             "notNull": false
-          },
-          {
-            "fieldPath": "personGroupUid",
-            "columnName": "personGroupUid",
-            "affinity": "INTEGER",
-            "notNull": true
           },
           {
             "fieldPath": "personMasterChangeSeqNum",
@@ -2602,7 +2596,7 @@
       },
       {
         "tableName": "PersonGroup",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`groupUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupMasterCsn` INTEGER NOT NULL, `groupLocalCsn` INTEGER NOT NULL, `groupLastChangedBy` INTEGER NOT NULL, `groupName` TEXT, `groupActive` INTEGER NOT NULL, `personGroupFlag` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`groupUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupMasterCsn` INTEGER NOT NULL, `groupLocalCsn` INTEGER NOT NULL, `groupLastChangedBy` INTEGER NOT NULL, `groupName` TEXT, `groupActive` INTEGER NOT NULL, `groupPersonUid` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "groupUid",
@@ -2641,8 +2635,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "personGroupFlag",
-            "columnName": "personGroupFlag",
+            "fieldPath": "groupPersonUid",
+            "columnName": "groupPersonUid",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -5226,6 +5220,32 @@
             "cujUid"
           ],
           "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SqliteSyncablePrimaryKey",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sspTableId` INTEGER NOT NULL, `sspNextPrimaryKey` INTEGER NOT NULL, PRIMARY KEY(`sspTableId`))",
+        "fields": [
+          {
+            "fieldPath": "sspTableId",
+            "columnName": "sspTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sspNextPrimaryKey",
+            "columnName": "sspNextPrimaryKey",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "sspTableId"
+          ],
+          "autoGenerate": false
         },
         "indices": [],
         "foreignKeys": []
@@ -8702,7 +8722,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'e53b7ae3eeb77fea5340328906daeda1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd781ff23d6638cda626a24ff9e3ddb2a')"
     ]
   }
 }
