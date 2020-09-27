@@ -128,17 +128,19 @@ suspend fun UmAppDatabase.approvePendingClazzMember(member: ClazzMember, clazz: 
     val effectiveClazz = clazz ?: clazzDao.findByUidAsync(member.clazzMemberClazzUid)
         ?: throw IllegalStateException("Class does not exist")
 
-    //change the role
-    member.clazzMemberRole = ClazzMember.ROLE_STUDENT
-    clazzMemberDao.updateAsync(member)
-
     //find the group member and update that
     val numGroupUpdates = personGroupMemberDao.moveGroupAsync(member.clazzMemberPersonUid,
             effectiveClazz.clazzStudentsPersonGroupUid,
             effectiveClazz.clazzPendingStudentsPersonGroupUid)
+
     if(numGroupUpdates != 1) {
-        println("No group update?")
+        throw IllegalStateException("Approve pending clazz member - no membership of clazz's pending group!")
     }
+
+    //change the role
+    member.clazzMemberRole = ClazzMember.ROLE_STUDENT
+    clazzMemberDao.updateAsync(member)
+
 }
 
 suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, school: School? = null) {

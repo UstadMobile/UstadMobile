@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
@@ -82,9 +83,14 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     }
 
     fun handleClickPendingRequest(member: ClazzMember, approved: Boolean) {
-        GlobalScope.launch {
+        GlobalScope.launch(doorMainDispatcher()) {
             if (approved) {
-                repo.approvePendingClazzMember(member)
+                try {
+                    repo.approvePendingClazzMember(member)
+                }catch(e: IllegalStateException) {
+                    //did not have all entities present yet (e.g. sync race condition)
+                    view.showSnackBar(systemImpl.getString(MessageID.content_editor_save_error, context))
+                }
             } else {
                 repo.clazzMemberDao.updateAsync(member.also {
                     it.clazzMemberActive = false
