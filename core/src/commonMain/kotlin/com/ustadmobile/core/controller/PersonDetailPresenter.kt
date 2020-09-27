@@ -42,12 +42,12 @@ class PersonDetailPresenter(context: Any,
             } ?: PersonWithDisplayDetails()
 
             //Reset password uses additional seeked permission
+            val hasAuthPermission = repo.personDao.personHasPermissionAsync(activePerson.personUid,
+                    person.personUid, Role.PERMISSION_RESET_PASSWORD)
             view.changePasswordVisible = person.username != null
-                    && (activePersonUid == entityUid ||
-                    repo.personDao.personHasPermissionAsync(activePerson.personUid,
-                    person.personUid, Role.PERMISSION_RESET_PASSWORD))
+                    && (activePersonUid == entityUid || hasAuthPermission)
 
-            view.showCreateAccountVisible =  person.username == null && activePerson.admin
+            view.showCreateAccountVisible =  person.username == null && hasAuthPermission
 
             view.rolesAndPermissions = repo.entityRoleDao.filterByPersonWithExtra(
                     person.personGroupUid?:0L)

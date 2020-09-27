@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.dao.SchoolMemberDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.util.ext.approvePendingClazzMember
 import com.ustadmobile.core.util.ext.approvePendingSchoolMember
 import com.ustadmobile.core.util.ext.enrollPersonToSchool
 import com.ustadmobile.core.util.ext.toQueryLikeParam
@@ -13,7 +12,7 @@ import com.ustadmobile.core.view.SchoolMemberListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ROLE
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -46,24 +45,17 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return db.schoolDao.personHasPermissionWithSchool(account?.personUid ?: 0L,
                 arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0L,
-                Role.PERMISSION_SCHOOL_UPDATE)
+                if(arguments[ARG_FILTER_BY_ROLE]?.toInt() == Role.ROLE_SCHOOL_STUDENT_UID) {
+                    Role.PERMISSION_SCHOOL_ADD_STUDENT
+                }else {
+                    Role.PERMISSION_SCHOOL_ADD_STAFF
+                })
     }
 
     override suspend fun onLoadFromDb() {
         super.onLoadFromDb()
 
-        val addPermission = db.schoolDao.personHasPermissionWithSchool(
-                accountManager.activeAccount.personUid ?: 0L,
-                arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0L,
-                Role.PERMISSION_SCHOOL_UPDATE)
-        val schoolUid: Long = arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0L
-
-        if(addPermission && arguments[ARG_FILTER_BY_ROLE]?.toInt() == Role.SCHOOL_ROLE_STUDENT){
-            view.pendingStudentList = db.schoolMemberDao.findAllActiveMembersBySchoolAndRoleUid(
-                    schoolUid, Role.SCHOOL_ROLE_STUDENT_PENDING, selectedSortOption?.flag ?: 0,
-                    searchText.toQueryLikeParam())
-        }
-
+        updateListOnView()
     }
 
     private fun updateListOnView() {
@@ -72,18 +64,26 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
 
         val schoolUid: Long = arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0L
 
+        if(arguments[ARG_FILTER_BY_ROLE]?.toInt() == Role.ROLE_SCHOOL_STUDENT_UID) {
+            GlobalScope.launch(doorMainDispatcher()) {
+                val hasAddStudentPermission = db.schoolDao.personHasPermissionWithSchool(
+                        accountManager.activeAccount.personUid,
+                        arguments[UstadView.ARG_FILTER_BY_SCHOOLUID]?.toLong() ?: 0L,
+                        Role.PERMISSION_SCHOOL_ADD_STUDENT)
+                view.takeIf { hasAddStudentPermission }?.pendingStudentList = db.schoolMemberDao
+                        .findAllActiveMembersBySchoolAndRoleUid(
+                                schoolUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID, selectedSortOption?.flag ?: 0,
+                                searchText.toQueryLikeParam())
+            }
+        }
 
-
-        view.list = repo.schoolMemberDao
-                .findAllActiveMembersBySchoolAndRoleUid(schoolUid, schoolRole,
-                        selectedSortOption?.flag ?: 0,
-                       searchText.toQueryLikeParam())
+        view.list = repo.schoolMemberDao.findAllActiveMembersBySchoolAndRoleUid(schoolUid, schoolRole,
+                        selectedSortOption?.flag ?: 0, searchText.toQueryLikeParam())
     }
 
     fun handleEnrolMember(schoolUid: Long, personUid: Long, role: Int) {
-
         GlobalScope.launch {
-            db.enrollPersonToSchool(schoolUid, personUid, role)
+            repo.enrollPersonToSchool(schoolUid, personUid, role)
         }
     }
 

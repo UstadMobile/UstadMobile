@@ -66,46 +66,46 @@ abstract class RoleDao : BaseDao<Role> {
 
 
     suspend fun insertDefaultRolesIfRequired() {
-        val teacherRole = findByUidAsync(Role.ROLE_TEACHER_UID.toLong())
+        val teacherRole = findByUidAsync(Role.ROLE_CLAZZ_TEACHER_UID.toLong())
         if(teacherRole == null) {
-            insertOrReplace(Role(Role.ROLE_TEACHER_NAME, Role.ROLE_TEACHER_PERMISSIONS_DEFAULT).apply {
-                roleUid = Role.ROLE_TEACHER_UID.toLong()
+            insertOrReplace(Role(Role.ROLE_CLAZZ_TEACHER_NAME, Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT).apply {
+                roleUid = Role.ROLE_CLAZZ_TEACHER_UID.toLong()
             })
         }
 
-        val studentRole = findByUidAsync(Role.ROLE_STUDENT_UID.toLong())
+        val studentRole = findByUidAsync(Role.ROLE_CLAZZ_STUDENT_UID.toLong())
         if(studentRole == null) {
-            insertOrReplace(Role(Role.ROLE_STUDENT_NAME, Role.ROLE_STUDENT_PERMISSIONS_DEFAULT).apply {
-                roleUid = Role.ROLE_STUDENT_UID.toLong()
+            insertOrReplace(Role(Role.ROLE_CLAZZ_STUDENT_NAME, Role.ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT).apply {
+                roleUid = Role.ROLE_CLAZZ_STUDENT_UID.toLong()
             })
         }
 
-        val studentPendingRole = findByUidAsync(Role.ROLE_STUDENT_PENDING_UID.toLong())
+        val studentPendingRole = findByUidAsync(Role.ROLE_CLAZZ_STUDENT_PENDING_UID.toLong())
         if(studentPendingRole == null) {
-            insertOrReplace(Role(Role.ROLE_STUDENT_PENDING_NAME, Role.ROLE_STUDENT_PENDING_PERMISSION_DEFAULT).apply {
-                roleUid = Role.ROLE_STUDENT_PENDING_UID.toLong()
+            insertOrReplace(Role(Role.ROLE_CLAZZ_STUDENT_PENDING_NAME, Role.ROLE_CLAZZ_STUDENT_PENDING_PERMISSION_DEFAULT).apply {
+                roleUid = Role.ROLE_CLAZZ_STUDENT_PENDING_UID.toLong()
             })
         }
 
-        val schoolTeacherRole = findByUidAsync(Role.SCHOOL_ROLE_TEACHER.toLong())
+        val schoolTeacherRole = findByUidAsync(Role.ROLE_SCHOOL_STAFF_UID.toLong())
         if(schoolTeacherRole == null) {
-            insertOrReplace(Role(Role.SCHOOL_ROLE_TEACHER_NAME, Role.ROLE_TEACHER_PERMISSIONS_DEFAULT).apply {
-                roleUid = Role.SCHOOL_ROLE_TEACHER.toLong()
+            insertOrReplace(Role(Role.ROLE_SCHOOL_STAFF_NAME, Role.ROLE_SCHOOL_STAFF_PERMISSIONS_DEFAULT).apply {
+                roleUid = Role.ROLE_SCHOOL_STAFF_UID.toLong()
             })
         }
 
-        val schoolStudentRole = findByUidAsync(Role.SCHOOL_ROLE_STUDENT.toLong())
+        val schoolStudentRole = findByUidAsync(Role.ROLE_SCHOOL_STUDENT_UID.toLong())
         if(schoolStudentRole == null) {
-            insertOrReplace(Role(Role.SCHOOL_ROLE_STUDENT_NAME, Role.ROLE_STUDENT_PERMISSIONS_DEFAULT).apply {
-                roleUid = Role.SCHOOL_ROLE_STUDENT.toLong()
+            insertOrReplace(Role(Role.ROLE_SCHOOL_STUDENT_NAME, Role.ROLE_SCHOOL_STUDENT_PERMISSION_DEFAULT).apply {
+                roleUid = Role.ROLE_SCHOOL_STUDENT_UID.toLong()
             })
         }
 
         //Added School Pending role:
-        val schoolStudentPendingRole = findByUidAsync(Role.SCHOOL_ROLE_STUDENT_PENDING.toLong())
+        val schoolStudentPendingRole = findByUidAsync(Role.ROLE_SCHOOL_STUDENT_PENDING_UID.toLong())
         if(schoolStudentPendingRole == null) {
-            insertOrReplace(Role(Role.SCHOOL_ROLE_STUDENT_PENDING_NAME, Role.SCHOOL_ROLE_STUDENT_PENDING_PERMISSION_DEFAULT).apply {
-                roleUid = Role.SCHOOL_ROLE_STUDENT_PENDING.toLong()
+            insertOrReplace(Role(Role.ROLE_SCHOOL_STUDENT_PENDING_NAME, Role.ROLE_SCHOOL_STUDENT_PENDING_PERMISSION_DEFAULT).apply {
+                roleUid = Role.ROLE_SCHOOL_STUDENT_PENDING_UID.toLong()
             })
         }
     }

@@ -116,8 +116,10 @@ class RoleEditPresenter(context: Any,
             BitmaskFlag(Role.PERMISSION_ROLE_INSERT, MessageID.permission_role_insert),
             BitmaskFlag(Role.PERMISSION_SCHOOL_SELECT, MessageID.permission_school_select),
             BitmaskFlag(Role.PERMISSION_SCHOOL_INSERT, MessageID.permission_school_insert),
-            BitmaskFlag(Role.PERMISSION_SCHOOL_UPDATE, MessageID.permission_school_update)
-            , BitmaskFlag(Role.PERMISSION_RESET_PASSWORD, MessageID.permission_password_reset)
+            BitmaskFlag(Role.PERMISSION_SCHOOL_UPDATE, MessageID.permission_school_update),
+            BitmaskFlag(Role.PERMISSION_SCHOOL_ADD_STUDENT, MessageID.add_student_to_school),
+            BitmaskFlag(Role.PERMISSION_SCHOOL_ADD_STAFF, MessageID.add_staff_to_school),
+            BitmaskFlag(Role.PERMISSION_RESET_PASSWORD, MessageID.permission_password_reset)
 
 
 

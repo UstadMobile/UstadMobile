@@ -132,7 +132,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
         filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt() ?: 0
 
-        addNewStringId = if (filterByRole == Role.SCHOOL_ROLE_TEACHER) {
+        addNewStringId = if (filterByRole == Role.ROLE_SCHOOL_STAFF_UID) {
             R.string.teacher
         } else {
             R.string.student
@@ -188,7 +188,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
         filterByRole = arguments?.get(UstadView.ARG_FILTER_BY_ROLE)?.toString()?.toInt() ?: 0
 
-        addNewStringId = if (filterByRole == Role.SCHOOL_ROLE_TEACHER) {
+        addNewStringId = if (filterByRole == Role.ROLE_SCHOOL_STAFF_UID) {
             R.string.teacher
         } else {
             R.string.student
@@ -251,7 +251,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
     }
 
     override fun addMember() {
-        val bundle = if (addPersonKeyName == "Person_" + Role.SCHOOL_ROLE_TEACHER.toString()) {
+        val bundle = if (addPersonKeyName == "Person_" + Role.ROLE_SCHOOL_STAFF_UID.toString()) {
             bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to filterBySchoolUid.toString())
         } else {
             bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL to filterBySchoolUid.toString(),

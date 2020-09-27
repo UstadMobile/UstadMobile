@@ -89,19 +89,6 @@ class ClazzWorkDetailOverviewFragmentTest {
     }
 
     private fun reloadFragment(clazzWork: ClazzWork){
-
-//        val fragmentScenario = launchFragmentInContainer(
-//                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to
-//                        clazzWork.clazzWorkUid.toString()),
-//                themeResId = R.style.UmTheme_App) {
-//            ClazzWorkDetailOverviewFragment(). also {
-//                it.installNavController(systemImplNavRule.navController)
-//                it.arguments = bundleOf(UstadView.ARG_ENTITY_UID to
-//                        clazzWork.clazzWorkUid.toString())
-//            }
-//        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-//                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
-
         val fragmentScenario = launchFragmentInContainer(
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to clazzWork.clazzWorkUid.toString()),
                 themeResId = R.style.UmTheme_App

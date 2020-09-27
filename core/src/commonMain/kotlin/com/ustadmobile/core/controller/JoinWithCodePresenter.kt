@@ -133,7 +133,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                         ?.findByUid(accountManager.activeAccount.personUid)
                 if(schoolToJoin  != null && personToEnrol != null) {
                     dbRepo.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol,
-                            schoolToJoin.schoolUid, Role.SCHOOL_ROLE_STUDENT_PENDING)
+                            schoolToJoin.schoolUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID)
                     view.finish()
                 }else {
                     view.errorText = systemImpl.getString(MessageID.invalid_register_code,

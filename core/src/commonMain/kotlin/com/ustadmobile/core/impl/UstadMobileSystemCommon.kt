@@ -34,8 +34,22 @@ abstract class UstadMobileSystemCommon {
 
     internal data class LastGoToDest(val viewName: String, val args: Map<String, String?>)
 
-    data class UstadGoOptions(val popUpToViewName: String? = null,
-                              val popUpToInclusive: Boolean = false)
+    /**
+     * Options that are used to control navigation
+     */
+    data class UstadGoOptions(
+            /**
+             * If not null, this functions the same as popUpTo on Android's NavController. E.g.
+             * it will pop any view between the top of the stack and the given view name. If a
+             * blank string is provided ( UstadView.CURRENT_DEST ), this means popup off the
+             * current destination
+             */
+            val popUpToViewName: String? = null,
+
+            /**
+             * If true, then popup include popUpToViewName.
+             */
+            val popUpToInclusive: Boolean = false)
 
     /**
      * The last destination that was called via the go method. This is used for testing purposes.

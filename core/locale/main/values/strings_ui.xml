@@ -779,6 +779,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="permission_school_insert">Insert a new school</string>
     <string name="permission_school_update">Update and edit existing schools</string>
 
+    <string name="add_student_to_school">Add student to school</string>
+    <string name="add_staff_to_school">Add staff to school</string>
     <string name="permission_password_reset">Reset and update persons password</string>
 
     <string name="school_code">School code</string>
