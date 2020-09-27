@@ -4,7 +4,7 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.timeout
 import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -62,7 +62,7 @@ class ContentEntryImportLinkPresenterTest {
 
         var importedContentEntryMetaData = ImportedContentEntryMetaData(
                 ContentEntryWithLanguage(), "application/epub+zip",
-                "file://abc.zip" , 1, "googleDriveScraper")
+                "file://abc.zip", 1, "googleDriveScraper")
 
         var response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json")
         response.body = Buffer().write(Json.stringify(ImportedContentEntryMetaData.serializer(),

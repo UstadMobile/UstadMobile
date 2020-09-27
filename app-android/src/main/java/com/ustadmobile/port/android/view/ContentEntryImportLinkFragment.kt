@@ -1,11 +1,10 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.os.Handler
 import android.view.*
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentEntryImportLinkBinding
-import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryImportLinkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap

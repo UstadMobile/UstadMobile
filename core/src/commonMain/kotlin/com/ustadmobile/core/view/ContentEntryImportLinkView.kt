@@ -1,6 +1,6 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 
 interface ContentEntryImportLinkView : UstadView {
 

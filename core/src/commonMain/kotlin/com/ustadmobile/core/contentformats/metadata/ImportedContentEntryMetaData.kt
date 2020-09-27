@@ -1,4 +1,4 @@
-package com.ustadmobile.core.contentformats
+package com.ustadmobile.core.contentformats.metadata
 
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.serialization.Serializable

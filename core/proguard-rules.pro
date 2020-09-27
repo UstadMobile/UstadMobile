@@ -5,7 +5,7 @@
     <fields>;
 }
 
--keep public class com.ustadmobile.core.contentformats.ImportedContentEntryMetaData.*{
+-keep public class com.ustadmobile.core.contentformats.metadata.*{
     *;
 }
 

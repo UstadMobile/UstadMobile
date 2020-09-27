@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.DoorTag
@@ -13,8 +13,6 @@ import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
-import org.apache.commons.lang3.exception.ExceptionUtils
-import org.apache.http.HttpStatus
 import org.kodein.di.instance
 import org.kodein.di.ktor.di
 import org.kodein.di.on

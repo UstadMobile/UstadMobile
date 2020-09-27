@@ -18,7 +18,7 @@
 
         <variable
             name="importedMetadata"
-            type="com.ustadmobile.core.contentformats.ImportedContentEntryMetaData"/>
+            type="com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData"/>
 
         <variable
             name="loading"

@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UMStorageDir
@@ -118,7 +118,8 @@ class ContentEntryEdit2PresenterTest {
             onBlocking { saveContainerOnExit(any(), any(), any(), any()) }.thenAnswer { container }
             on { selectedStorageIndex }.thenAnswer { 0 }
             on { entryMetaData }.thenAnswer { if (isUriNull) null else
-                ImportedContentEntryMetaData(ContentEntryWithLanguage(), "application/epub+zip", "file:/Dummy", 1) }
+                ImportedContentEntryMetaData(ContentEntryWithLanguage(), "application/epub+zip", "file:/Dummy", 1)
+            }
         }
     }
 
