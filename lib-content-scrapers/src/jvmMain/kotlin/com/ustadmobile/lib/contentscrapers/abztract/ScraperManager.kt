@@ -12,7 +12,7 @@ import com.ustadmobile.lib.contentscrapers.abztract.Scraper.Companion.ERROR_TYPE
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeRun
-import com.ustadmobile.core.contentformats.ImportedContentEntryMetaData
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
