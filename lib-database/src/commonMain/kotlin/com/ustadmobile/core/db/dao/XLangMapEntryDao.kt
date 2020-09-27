@@ -13,10 +13,6 @@ import kotlin.js.JsName
 @UmRepository
 abstract class XLangMapEntryDao : BaseDao<XLangMapEntry> {
 
-    @JsName("insertListAsync")
-    @Insert
-    abstract suspend fun insertListAsync(entityList: List<XLangMapEntry>)
-
     @JsName("getValuesWithListOfId")
     @Query("SELECT * FROM XLangMapEntry WHERE objectLangMapUid IN (:ids)")
     abstract suspend fun getValuesWithListOfId(ids: List<Int>): List<XLangMapEntry>
