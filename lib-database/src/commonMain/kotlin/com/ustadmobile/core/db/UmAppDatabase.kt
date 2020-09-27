@@ -4,6 +4,7 @@ import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.MinSyncVersion
+import com.ustadmobile.door.entities.SqliteSyncablePrimaryKey
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.*
@@ -36,12 +37,13 @@ import kotlin.jvm.Volatile
     ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
     Report::class, ReportFilter::class,
-    DeviceSession::class, WorkSpace::class, ContainerUploadJob::class
+    DeviceSession::class, WorkSpace::class, ContainerUploadJob::class,
+    SqliteSyncablePrimaryKey::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 38)
+], version = 39)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -1304,11 +1306,72 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+        val MIGRATION_38_39 = object: DoorMigration(38, 39) {
+            override fun migrate(db: DoorSqlDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS SqliteSyncablePrimaryKey (sspTableId INTEGER NOT NULL PRIMARY KEY, sspNextPrimaryKey INTEGER NOT NULL)")
+
+                if(db.dbType() != DoorDbType.SQLITE)
+                    return
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (14, (SELECT COALESCE((SELECT MAX(clazzLogUid) FROM ClazzLog WHERE clazzLogUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (15, (SELECT COALESCE((SELECT MAX(clazzLogAttendanceRecordUid) FROM ClazzLogAttendanceRecord WHERE clazzLogAttendanceRecordUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (20, (SELECT COALESCE((SELECT MAX(personCustomFieldUid) FROM PersonField WHERE personCustomFieldUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (19, (SELECT COALESCE((SELECT MAX(personDetailPresenterFieldUid) FROM PersonDetailPresenterField WHERE personDetailPresenterFieldUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (21, (SELECT COALESCE((SELECT MAX(scheduleUid) FROM Schedule WHERE scheduleUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (17, (SELECT COALESCE((SELECT MAX(dateRangeUid) FROM DateRange WHERE dateRangeUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (28, (SELECT COALESCE((SELECT MAX(umCalendarUid) FROM HolidayCalendar WHERE umCalendarUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (99, (SELECT COALESCE((SELECT MAX(holUid) FROM Holiday WHERE holUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (173, (SELECT COALESCE((SELECT MAX(scheduledCheckUid) FROM ScheduledCheck WHERE scheduledCheckUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (53, (SELECT COALESCE((SELECT MAX(auditLogUid) FROM AuditLog WHERE auditLogUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (56, (SELECT COALESCE((SELECT MAX(customFieldUid) FROM CustomField WHERE customFieldUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (57, (SELECT COALESCE((SELECT MAX(customFieldValueUid) FROM CustomFieldValue WHERE customFieldValueUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (55, (SELECT COALESCE((SELECT MAX(customFieldValueOptionUid) FROM CustomFieldValueOption WHERE customFieldValueOptionUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (9, (SELECT COALESCE((SELECT MAX(personUid) FROM Person WHERE personUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (6, (SELECT COALESCE((SELECT MAX(clazzUid) FROM Clazz WHERE clazzUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (65, (SELECT COALESCE((SELECT MAX(clazzMemberUid) FROM ClazzMember WHERE clazzMemberUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (178, (SELECT COALESCE((SELECT MAX(personCustomFieldValueUid) FROM PersonCustomFieldValue WHERE personCustomFieldValueUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (42, (SELECT COALESCE((SELECT MAX(contentEntryUid) FROM ContentEntry WHERE contentEntryUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (3, (SELECT COALESCE((SELECT MAX(ceccjUid) FROM ContentEntryContentCategoryJoin WHERE ceccjUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (7, (SELECT COALESCE((SELECT MAX(cepcjUid) FROM ContentEntryParentChildJoin WHERE cepcjUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (8, (SELECT COALESCE((SELECT MAX(cerejUid) FROM ContentEntryRelatedEntryJoin WHERE cerejUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (2, (SELECT COALESCE((SELECT MAX(contentCategorySchemaUid) FROM ContentCategorySchema WHERE contentCategorySchemaUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (1, (SELECT COALESCE((SELECT MAX(contentCategoryUid) FROM ContentCategory WHERE contentCategoryUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (13, (SELECT COALESCE((SELECT MAX(langUid) FROM Language WHERE langUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (10, (SELECT COALESCE((SELECT MAX(langVariantUid) FROM LanguageVariant WHERE langVariantUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (45, (SELECT COALESCE((SELECT MAX(roleUid) FROM Role WHERE roleUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (47, (SELECT COALESCE((SELECT MAX(erUid) FROM EntityRole WHERE erUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (43, (SELECT COALESCE((SELECT MAX(groupUid) FROM PersonGroup WHERE groupUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (44, (SELECT COALESCE((SELECT MAX(groupMemberUid) FROM PersonGroupMember WHERE groupMemberUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (50, (SELECT COALESCE((SELECT MAX(personPictureUid) FROM PersonPicture WHERE personPictureUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (51, (SELECT COALESCE((SELECT MAX(containerUid) FROM Container WHERE containerUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (62, (SELECT COALESCE((SELECT MAX(verbUid) FROM VerbEntity WHERE verbUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (64, (SELECT COALESCE((SELECT MAX(xObjectUid) FROM XObjectEntity WHERE xObjectUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (60, (SELECT COALESCE((SELECT MAX(statementUid) FROM StatementEntity WHERE statementUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (66, (SELECT COALESCE((SELECT MAX(contextXObjectStatementJoinUid) FROM ContextXObjectStatementJoin WHERE contextXObjectStatementJoinUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (68, (SELECT COALESCE((SELECT MAX(agentUid) FROM AgentEntity WHERE agentUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (70, (SELECT COALESCE((SELECT MAX(stateUid) FROM StateEntity WHERE stateUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (72, (SELECT COALESCE((SELECT MAX(stateContentUid) FROM StateContentEntity WHERE stateContentUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (74, (SELECT COALESCE((SELECT MAX(statementLangMapUid) FROM XLangMapEntry WHERE statementLangMapUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (164, (SELECT COALESCE((SELECT MAX(schoolUid) FROM School WHERE schoolUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (200, (SELECT COALESCE((SELECT MAX(schoolMemberUid) FROM SchoolMember WHERE schoolMemberUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (201, (SELECT COALESCE((SELECT MAX(clazzWorkUid) FROM ClazzWork WHERE clazzWorkUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (204, (SELECT COALESCE((SELECT MAX(clazzWorkContentJoinUid) FROM ClazzWorkContentJoin WHERE clazzWorkContentJoinUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (208, (SELECT COALESCE((SELECT MAX(commentsUid) FROM Comments WHERE commentsUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (202, (SELECT COALESCE((SELECT MAX(clazzWorkQuestionUid) FROM ClazzWorkQuestion WHERE clazzWorkQuestionUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (203, (SELECT COALESCE((SELECT MAX(clazzWorkQuestionOptionUid) FROM ClazzWorkQuestionOption WHERE clazzWorkQuestionOptionUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (206, (SELECT COALESCE((SELECT MAX(clazzWorkSubmissionUid) FROM ClazzWorkSubmission WHERE clazzWorkSubmissionUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (209, (SELECT COALESCE((SELECT MAX(clazzWorkQuestionResponseUid) FROM ClazzWorkQuestionResponse WHERE clazzWorkQuestionResponseUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (210, (SELECT COALESCE((SELECT MAX(contentEntryProgressUid) FROM ContentEntryProgress WHERE contentEntryProgressUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (101, (SELECT COALESCE((SELECT MAX(reportUid) FROM Report WHERE reportUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (102, (SELECT COALESCE((SELECT MAX(reportFilterUid) FROM ReportFilter WHERE reportFilterUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
-                    MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38)
+                    MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39)
 
 
 
