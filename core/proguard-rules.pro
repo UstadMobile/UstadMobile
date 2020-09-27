@@ -6,7 +6,7 @@
 }
 
 -keep public class com.ustadmobile.core.contentformats.ImportedContentEntryMetaData.*{
-    <fields>;
+    *;
 }
 
 # Prevent proguard from stripping interface information from TypeAdapter, TypeAdapterFactory,
