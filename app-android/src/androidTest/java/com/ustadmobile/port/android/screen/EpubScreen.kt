@@ -26,7 +26,7 @@ object EpubScreen:  KScreen<EpubScreen>() {
     val toolBarTitle: KView = KView { withId(R.id.toolbar)}
 
     val recycler: KRecyclerView = KRecyclerView({
-        withId(R.id.container_epubrunner_pager)
+        withId(R.id.epub_page_recycler_view)
     }, itemTypeBuilder = {
         itemType(::EpubPage)
     })

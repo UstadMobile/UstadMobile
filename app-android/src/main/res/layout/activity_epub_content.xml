@@ -30,7 +30,7 @@
                 layout="@layout/appbar_material_with_progress"/>
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/container_epubrunner_pager"
+                android:id="@+id/epub_page_recycler_view"
                 android:layout_below="@+id/appbar"
                 android:layout_alignParentBottom="true"
                 android:layout_width="match_parent"

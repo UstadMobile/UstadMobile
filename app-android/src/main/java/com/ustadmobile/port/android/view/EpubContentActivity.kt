@@ -48,6 +48,8 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
     private lateinit var mBinding: ActivityEpubContentBinding
 
+    private lateinit var recyclerViewLinearLayout: LinearLayoutManager
+
     override var containerTitle: String? = null
         set(value) {
             field = value
@@ -107,7 +109,10 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
     override var spinePosition: Int = 0
         set(value) {
-            mBinding.containerEpubrunnerPager.scrollToPosition(spinePosition)
+            mBinding.epubPageRecyclerView.post {
+                recyclerViewLinearLayout.scrollToPositionWithOffset(spinePosition, 0)
+            }
+
             field = value
         }
 
@@ -250,8 +255,10 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         }
 
         mContentPagerAdapter = EpubContentPagerAdapter()
-        mBinding.containerEpubrunnerPager.layoutManager = LinearLayoutManager(this)
-        mBinding.containerEpubrunnerPager.adapter = mContentPagerAdapter
+        recyclerViewLinearLayout = LinearLayoutManager(this)
+
+        mBinding.epubPageRecyclerView.layoutManager = recyclerViewLinearLayout
+        mBinding.epubPageRecyclerView.adapter = mContentPagerAdapter
 
         mPresenter = EpubContentPresenter(this, bundleToMap(intent.extras),
                 this, di)
@@ -281,7 +288,7 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
     override fun onDestroy() {
         mPresenter?.onDestroy()
-        mBinding.containerEpubrunnerPager.adapter = null
+        mBinding.epubPageRecyclerView.adapter = null
         mSavedInstanceState = null
         mPresenter = null
         mContentPagerAdapter = null
