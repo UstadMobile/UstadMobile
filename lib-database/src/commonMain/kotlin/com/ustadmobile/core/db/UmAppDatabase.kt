@@ -1458,53 +1458,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("ALTER TABLE Person ADD COLUMN personGroupUid BIGINT DEFAULT 0 NOT NULL")
 
                     //PersonGroup
-                    database.execSQL("ALTER TABLE PersonGroup RENAME to PersonGroup_OLD")
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup (  " +
-                            "groupMasterCsn  BIGINT , groupLocalCsn  BIGINT , " +
-                            "groupLastChangedBy  INTEGER , groupName  TEXT , " +
-                            "groupActive  BOOL , personGroupFlag  INTEGER , " +
-                            "groupUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-                    database.execSQL("INSERT INTO PersonGroup (groupUid, " +
-                            "groupMasterCsn, groupLocalCsn, groupLastChangedBy, groupName, " +
-                            "groupActive) SELECT groupUid, groupMasterCsn, groupLocalCsn, " +
-                            "groupLastChangedBy, groupName, groupActive FROM PersonGroup_OLD")
-                    database.execSQL("DROP TABLE PersonGroup_OLD")
-
-                    //Triggers
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonGroup_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS PersonGroup_lcsn_seq")
-                    database.execSQL("""
-                      |CREATE OR REPLACE FUNCTION 
-                      | inccsn_43_fn() RETURNS trigger AS ${'$'}${'$'}
-                      | BEGIN  
-                      | UPDATE PersonGroup SET groupLocalCsn =
-                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLocalCsn 
-                      | ELSE NEXTVAL('PersonGroup_lcsn_seq') END),
-                      | groupMasterCsn = 
-                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-                      | THEN NEXTVAL('PersonGroup_mcsn_seq') 
-                      | ELSE NEW.groupMasterCsn END)
-                      | WHERE groupUid = NEW.groupUid;
-                      | RETURN null;
-                      | END ${'$'}${'$'}
-                      | LANGUAGE plpgsql
-                      """.trimMargin())
-                    database.execSQL("""
-                      |CREATE TRIGGER inccsn_43_trig 
-                      |AFTER UPDATE OR INSERT ON PersonGroup 
-                      |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
-                      |EXECUTE PROCEDURE inccsn_43_fn()
-                      """.trimMargin())
-                    /* START MIGRATION:
-                    _stmt.executeUpdate("DROP FUNCTION IF EXISTS inc_csn_43_fn")
-                    _stmt.executeUpdate("DROP SEQUENCE IF EXISTS spk_seq_43")
-                    END MIGRATION*/
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
-          |CREATE 
-          | INDEX index_PersonGroup_trk_clientId_epk_rx_csn 
-          |ON PersonGroup_trk (clientId, epk, rx, csn)
-          """.trimMargin())
+                    database.execSQL("ALTER TABLE PersonGroup ADD COLUMN personGroupFlag INTEGER DEFAULT 0 NOT NULL")
+                    database.execSQL("ALTER TABLE PersonGroup DROP COLUMN IF EXISTS groupPersonUid")
                 }
             }
         }
