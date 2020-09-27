@@ -51,6 +51,10 @@
        *;
 }
 
+-keep public class com.ustadmobile.core.contentformats.ImportedContentEntryMetaData.*{
+    *;
+}
+
  #
  ###################################################################################################
  #### OKHttp3 rules as per
