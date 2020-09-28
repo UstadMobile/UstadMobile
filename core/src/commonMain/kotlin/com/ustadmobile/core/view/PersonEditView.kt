@@ -49,6 +49,12 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
          */
         const val ARG_REGISTRATION_MODE = "RegMode"
 
+        /**
+         * If this is set then this means that the person registering has come from a link. Since someone in the system has invited another person
+         * we use this flag to remove the age restrictions of being under 13 to sign up.
+         */
+        const val REGISTER_VIA_LINK = "RegViaLink"
+
     }
 
 }

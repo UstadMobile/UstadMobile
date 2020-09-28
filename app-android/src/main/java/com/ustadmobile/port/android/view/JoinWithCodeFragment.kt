@@ -40,9 +40,11 @@ class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
         findNavController().navigateUp()
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentJoinWithCodeBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentJoinWithCodeBinding.inflate(inflater, container,
+                false).also {
             rootView = it.root
         }
 
@@ -52,7 +54,7 @@ class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val tableId = arguments?.get(UstadView.ARG_CODE_TABLE)?:"0".toString().toInt()
+        val tableId = arguments?.get(UstadView.ARG_CODE_TABLE).toString().toInt()
         ustadFragmentTitle = if(tableId == Clazz.TABLE_ID){
             mBinding?.entityType = requireContext().getString(R.string.clazz)
             requireContext().getString(R.string.join_existing,
@@ -63,7 +65,7 @@ class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
                     requireContext().getString(R.string.school))
         }else{
             mBinding?.entityType = ""
-            requireContext().getString(R.string.join_existing)
+            requireContext().getString(R.string.join_existing, "")
         }
 
         mPresenter = JoinWithCodePresenter(requireContext(), arguments.toStringMap(), this,

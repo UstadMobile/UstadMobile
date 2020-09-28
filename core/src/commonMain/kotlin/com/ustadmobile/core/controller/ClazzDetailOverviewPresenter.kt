@@ -52,19 +52,5 @@ class ClazzDetailOverviewPresenter(context: Any,
     }
 
 
-    fun handleGoToInviteViaLink(){
-        GlobalScope.launch {
-            val clazz = repo.clazzDao.findByUid(arguments[ARG_ENTITY_UID]?.toLong() ?: 0L)
-            view.runOnUiThread(Runnable {
-                systemImpl.go(InviteViaLinkView.VIEW_NAME, mapOf(
-                        UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString(),
-                        UstadView.ARG_CODE to clazz?.clazzCode.toString(),
-                        UstadView.ARG_ENTITY_NAME to clazz?.clazzName.toString()
-                ), context)
-            })
-        }
-
-    }
-
 
 }

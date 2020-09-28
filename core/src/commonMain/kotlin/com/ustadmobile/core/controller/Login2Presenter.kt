@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_VIA_LINK
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
@@ -117,6 +118,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         impl.go(PersonEditView.VIEW_NAME_REGISTER, mapOf(
                 PersonEditView.ARG_REGISTRATION_MODE to true.toString(),
                 ARG_NEXT to arguments[ARG_NEXT],
+                REGISTER_VIA_LINK to arguments[REGISTER_VIA_LINK],
                 ARG_SERVER_URL to serverUrl), context, goOptions)
     }
 

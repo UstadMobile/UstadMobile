@@ -50,6 +50,8 @@ class PersonEditPresenter(context: Any,
 
     private var loggedInPerson: Person? = null
 
+    private var regViaLink: Boolean = false
+
     private val clazzMemberJoinEditHelper =
             DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
             "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
@@ -87,6 +89,7 @@ class PersonEditPresenter(context: Any,
         view.rolesAndPermissionsList = rolesAndPermissionEditHelper.liveList
 
         registrationMode = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toBoolean()?:false
+        regViaLink = arguments[PersonEditView.REGISTER_VIA_LINK]?.toBoolean()?:false
 
         serverUrl = if (arguments.containsKey(UstadView.ARG_SERVER_URL)) {
             arguments.getValue(UstadView.ARG_SERVER_URL)
@@ -138,11 +141,9 @@ class PersonEditPresenter(context: Any,
                 arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
                 Role.PERMISSION_PERSON_DELEGATE, excludesNameCheck = 1)
 
-        if(loggedInPerson?.admin == false){
+        if(loggedInPerson != null && loggedInPerson?.admin == false){
             view.canDelegatePermissions = canDelegate
-        }else{
-            view.canDelegatePermissions = true
-        }
+        }else view.canDelegatePermissions = loggedInPerson != null && loggedInPerson?.admin == true
 
         return person
     }
@@ -196,7 +197,7 @@ class PersonEditPresenter(context: Any,
                     } else if (dateToday.month0 == dateOfBirth.month0 && dateOfBirth.dayOfYear > dateToday.dayOfYear) {
                         age--
                     }
-                    if (age < 13) {
+                    if (age < 13 && !regViaLink) {
                         view.dateOfBirthError = impl.getString(MessageID.underRegistrationAgeError, context)
                         return@launch
                     }
@@ -219,34 +220,44 @@ class PersonEditPresenter(context: Any,
                     }
                 }
             }else{
+                //Create/Update person group
                 if(entity.personUid == 0L) {
-
                     val personWithGroup = repo.insertPersonAndGroup(entity, loggedInPerson)
                     entity.personGroupUid = personWithGroup.personGroupUid
                     entity.personUid = personWithGroup.personUid
-
                 }else {
                     repo.personDao.updateAsync(entity)
                 }
 
+                //Insert any roles and permissions
+                repo.entityRoleDao.insertListAsync(
+                        rolesAndPermissionEditHelper.entitiesToInsert.also {
+                            it.forEach {
+                                it.erUid = 0
+                                it.erGroupUid = entity.personGroupUid
+                                it.erActive = true
+                            }
+                        }
+                )
+                //Update any roles and permissions
+                repo.entityRoleDao.updateListAsync(
+                        rolesAndPermissionEditHelper.entitiesToUpdate.also {
+                            it.forEach{
+                                it.erGroupUid = entity.personGroupUid
+                            }
+                        }
+                )
 
-                repo.entityRoleDao.insertListAsync(rolesAndPermissionEditHelper.entitiesToInsert.also { it.forEach {
-                    it.erUid = 0
-                    it.erGroupUid = entity.personGroupUid
-                    it.erActive = true
-                }  })
-                repo.entityRoleDao.updateListAsync(rolesAndPermissionEditHelper.entitiesToUpdate.also { it.forEach{
-                    it.erGroupUid = entity.personGroupUid
-                } })
+                //Remove any roles and permissions
+                repo.entityRoleDao.deactivateByUids(
+                        rolesAndPermissionEditHelper.primaryKeysToDeactivate)
 
-                repo.entityRoleDao.deactivateByUids(rolesAndPermissionEditHelper.primaryKeysToDeactivate)
-
-
-
+                //Insert any Clazz enrollments
                 clazzMemberJoinEditHelper.entitiesToInsert.forEach {
                     repo.enrolPersonIntoClazzAtLocalTimezone(entity, it.clazzMemberClazzUid,
                             it.clazzMemberRole)
                 }
+                //Update any clazz enrollments
                 repo.clazzMemberDao.updateDateLeft(clazzMemberJoinEditHelper.primaryKeysToDeactivate,
                         getSystemTimeInMillis())
 

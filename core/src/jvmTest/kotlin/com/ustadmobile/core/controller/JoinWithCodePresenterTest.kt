@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.view.JoinWithCodeView
 import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzMember
@@ -184,6 +185,7 @@ class JoinWithCodePresenterTest {
         verify(systemImpl, timeout(5000)).go(eq(Login2View.VIEW_NAME),
                 eq(
                         mapOf(UstadView.ARG_SERVER_URL to apiUrl,
+                                PersonEditView.REGISTER_VIA_LINK to "true",
                                 UstadView.ARG_NEXT to
                                         JoinWithCodeView.VIEW_NAME +
                                         "?${UstadView.ARG_SERVER_URL}=${apiUrl}" +
@@ -218,6 +220,7 @@ class JoinWithCodePresenterTest {
         verify(systemImpl, timeout(5000)).go(eq(Login2View.VIEW_NAME),
                 eq(
                         mapOf(UstadView.ARG_SERVER_URL to endpointUrl,
+                                PersonEditView.REGISTER_VIA_LINK to "true",
                                 UstadView.ARG_NEXT to
                                         "${JoinWithCodeView.VIEW_NAME}" +
                                         "?${UstadView.ARG_SERVER_URL}=$endpointUrl" +

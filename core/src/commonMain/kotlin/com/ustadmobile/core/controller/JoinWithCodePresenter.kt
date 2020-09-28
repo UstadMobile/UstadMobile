@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.enrolPersonIntoSchoolAtLocalTimezone
 import com.ustadmobile.core.view.JoinWithCodeView
 import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
@@ -83,6 +84,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                 view.runOnUiThread(Runnable {
 
                     systemImpl.go(Login2View.VIEW_NAME, mapOf(UstadView.ARG_SERVER_URL to apiUrl,
+                            PersonEditView.REGISTER_VIA_LINK to "true",
                         UstadView.ARG_NEXT to
                                 "${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_SERVER_URL}=${apiUrl}" +
                                 "&${UstadView.ARG_CODE_TABLE}=${tableId}&${UstadView.ARG_CODE}=$code",
@@ -103,6 +105,7 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
                 view.runOnUiThread(Runnable {
 
                     systemImpl.go(Login2View.VIEW_NAME, mapOf(UstadView.ARG_SERVER_URL to apiUrl,
+                            PersonEditView.REGISTER_VIA_LINK to "true",
                             UstadView.ARG_NEXT to
                                     "${JoinWithCodeView.VIEW_NAME}?${UstadView.ARG_SERVER_URL}=${apiUrl}" +
                                     "&${UstadView.ARG_CODE_TABLE}=${tableId}&${UstadView.ARG_CODE}=$code",

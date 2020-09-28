@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -42,9 +43,11 @@ class InviteViaLinkFragment: UstadBaseFragment(), InviteViaLinkView, InvitationL
 
     private var mPresenter: InviteViaLinkPresenter? = null
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentInviteViaLinkBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentInviteViaLinkBinding.inflate(inflater, container,
+                false).also {
             rootView = it.root
         }
         mBinding?.activityEventHandler = this
@@ -69,19 +72,24 @@ class InviteViaLinkFragment: UstadBaseFragment(), InviteViaLinkView, InvitationL
     }
 
     override fun handleClickCopyLink(link: String) {
-        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
+                as? ClipboardManager
         clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("link", link)))
         showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
     }
 
     override fun handleClickCopyCode(code: String) {
-        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
+        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
+                as? ClipboardManager
         clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("link", code)))
         showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
     }
 
     override fun handleClickShareLink(link: String) {
-        //TODO
+        val intent = Intent(Intent.ACTION_SEND)
+        intent.type = "text/plain"
+        intent.putExtra(Intent.EXTRA_TEXT, link)
+        startActivity(Intent.createChooser(intent, getString(R.string.share_link)))
     }
 
 

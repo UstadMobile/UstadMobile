@@ -181,34 +181,6 @@ suspend fun UmAppDatabase.insertPersonAndGroup(entity: PersonWithAccount,
     personGroupMemberDao.insertAsync(
             PersonGroupMember(entity.personUid, entity.personGroupUid))
 
-    //Create a roleentity of select person role with this.
-
-    if(loggedInPerson != null) {
-        val viewPersonRoles = roleDao.findByPermissionAndNameAsync(Role.PERMISSION_PERSON_SELECT,
-                Role.ROLE_VIEW_STUDENTS_NAME)
-        val viewPersonRole = if (viewPersonRoles.isEmpty()) {
-            Role().apply {
-                roleName = Role.ROLE_VIEW_STUDENTS_NAME
-                roleActive = true
-                rolePermissions = Role.PERMISSION_PERSON_SELECT
-                roleUid = roleDao.insertAsync(this)
-            }
-        } else {
-            viewPersonRoles[0]
-        }
-
-        //TODO: Check if person has its own group?
-        EntityRole().apply {
-            erTableId = Person.TABLE_ID
-            erActive = true
-            erRoleUid = viewPersonRole.roleUid
-            erGroupUid = loggedInPerson?.personGroupUid ?: 0L
-            erEntityUid = entity.personUid
-            erUid = entityRoleDao.insertAsync(this)
-        }
-    }
-
-
     return entity
 
 }

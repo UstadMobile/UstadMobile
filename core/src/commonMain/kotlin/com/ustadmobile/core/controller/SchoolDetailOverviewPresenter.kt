@@ -53,20 +53,7 @@ class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>
 
     fun handleClickClazz(clazz: Clazz) {
         systemImpl.go(ClazzDetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to clazz.clazzUid.toString()),
-            context)
-    }
-
-    fun handleGoToInviteViaLink() {
-        GlobalScope.launch {
-            val school = repo.schoolDao.findByUidAsync(arguments[ARG_ENTITY_UID]?.toLong() ?: 0L)
-            view.runOnUiThread(Runnable {
-                systemImpl.go(InviteViaLinkView.VIEW_NAME, mapOf(
-                        UstadView.ARG_CODE_TABLE to School.TABLE_ID.toString(),
-                        UstadView.ARG_CODE to school?.schoolCode.toString(),
-                        UstadView.ARG_ENTITY_NAME to school?.schoolCode.toString()
-                ), context)
-            })
-        }
+                context)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
