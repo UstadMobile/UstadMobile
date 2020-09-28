@@ -47,12 +47,15 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
      */
     private enum class OnBoardScreen(val headlineStringResId: Int, val subHeadlineStringResId: Int,
                                      val layoutResId: Int, val drawableResId: Int) {
-        SCREEN_1(R.string.onboarding_no_internet_headline,
-                R.string.onboarding_no_internet_subheadline,
-                R.layout.onboard_screen_view, R.drawable.downloading_data),
-        SCREEN_2(R.string.onboarding_offline_sharing,
-                R.string.onboarding_offline_sharing_subheading,
-                R.layout.onboard_screen_view, R.drawable.sharing_data)
+        SCREEN_1(R.string.onboarding_cok1_headline,
+                R.string.onboarding_cok1_subtext,
+                R.layout.onboard_screen_view, R.drawable.onboarding_cok1),
+        SCREEN_2(R.string.onboarding_cok2_headline,
+                R.string.onboarding_cok2_subtext,
+                R.layout.onboard_screen_view, R.drawable.onboarding_cok2),
+        SCREEN_3(R.string.onboarding_cok3_headline,
+                R.string.onboarding_cok3_subtext,
+                R.layout.onboard_screen_view, R.drawable.onboarding_cok3)
     }
 
 

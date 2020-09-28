@@ -2,7 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="MissingTranslation"
     >
-    <string name="app_name">Ustad Mobile</string>
+    <string name="app_name">Ustad Amal</string>
     <string name='login'>Login</string>
     <string name='error'>Error</string>
     <string name='err_registering_new_user'>Error registering new user:</string>
@@ -752,5 +752,16 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="ask_your_teacher_for_code">Ask your teacher for the class code, then enter it below:</string>
 
     <string name="copied_to_clipboard">Copied to clipboard</string>
+
+
+
+    <string name="onboarding_cok1_headline">Audio Instruction</string>
+    <string name="onboarding_cok1_subtext">Listen to complete lessons on social emotional learning</string>
+
+    <string name="onboarding_cok2_headline">Activities &amp; Games</string>
+    <string name="onboarding_cok2_subtext">Each lesson comes with activities and games to play</string>
+
+    <string name="onboarding_cok3_headline">Track Learner Progress</string>
+    <string name="onboarding_cok3_subtext">Automatic logging of user progress</string>
 
 </resources>
