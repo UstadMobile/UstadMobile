@@ -420,6 +420,8 @@
     <string name="teacher">Teacher</string>
     <string name="partial">Partial</string>
     <string name="teachers_literal">Teachers</string>
+    <string name="participant">Participant</string>
+    <string name="primary_user">Primary user</string>
     <string name="up">up</string>
     <string name="down">down</string>
     <string name="activity_went_good">Activity went good</string>

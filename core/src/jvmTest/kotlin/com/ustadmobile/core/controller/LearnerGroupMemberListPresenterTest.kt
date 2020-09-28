@@ -1,0 +1,150 @@
+package com.ustadmobile.core.controller
+
+import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ClazzMemberDao
+import com.ustadmobile.core.db.dao.LearnerGroupMemberDao
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.view.ClazzMemberListView
+import com.ustadmobile.core.view.LearnerGroupMemberListView
+import com.ustadmobile.core.view.LearnerGroupMemberListView.Companion.ARG_LEARNER_GROUP_UID
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.door.DoorLifecycleObserver
+import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.LearnerGroup
+import com.ustadmobile.lib.db.entities.LearnerGroupMember
+import com.ustadmobile.lib.db.entities.Person
+import junit.framework.Assert.assertEquals
+import kotlinx.coroutines.runBlocking
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
+
+class LearnerGroupMemberListPresenterTest {
+
+
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
+
+    private lateinit var mockView: LearnerGroupMemberListView
+
+    private lateinit var context: Any
+
+    private lateinit var mockLifecycleOwner: DoorLifecycleOwner
+
+    private lateinit var repoLearnerGroupMemberDaoSpy: LearnerGroupMemberDao
+
+    private lateinit var di: DI
+
+    private lateinit var accountManager: UstadAccountManager
+
+    private lateinit var db: UmAppDatabase
+
+    private lateinit var repo: UmAppDatabase
+
+    @Before
+    fun setup() {
+        mockView = mock { }
+        mockLifecycleOwner = mock {
+            on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
+        }
+        context = Any()
+
+        di = DI {
+            import(ustadTestRule.diModule)
+        }
+
+        accountManager = di.direct.instance()
+
+        db = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
+        repo = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
+
+        repoLearnerGroupMemberDaoSpy = spy(repo.learnerGroupMemberDao)
+        whenever(repo.learnerGroupMemberDao).thenReturn(repoLearnerGroupMemberDaoSpy)
+
+        ContentEntry().apply {
+            contentEntryUid = 1
+            db.contentEntryDao.insert(this)
+        }
+
+        LearnerGroup().apply {
+            learnerGroupUid = 1
+            learnerGroupName = "Test"
+            db.learnerGroupDao.insert(this)
+        }
+
+        LearnerGroupMember().apply {
+            learnerGroupMemberLgUid = 1
+            learnerGroupMemberPersonUid = 1
+            learnerGroupMemberRole = LearnerGroupMember.TEACHER_ROLE
+            db.learnerGroupMemberDao.insert(this)
+        }
+
+    }
+
+    @Test
+    fun givenPresenterNotCreated_whenOnCreate_thenShowListOfMembers() {
+
+        val presenterArgs = mapOf<String, String>(ARG_LEARNER_GROUP_UID to "1", ARG_CONTENT_ENTRY_UID to "1")
+        val presenter = LearnerGroupMemberListPresenter(context,
+                presenterArgs, mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        runBlocking {
+            verify(repoLearnerGroupMemberDaoSpy, timeout(5000))
+                    .findLearnerGroupMembersByGroupIdAndEntryAsync(1, 1)
+        }
+
+        verify(mockView, timeout(5000)).list = any()
+
+    }
+
+    @Test
+    fun givenUserIsTeacher_whenAddingNewMember_thenAddedToList() {
+
+        val presenterArgs = mapOf<String, String>(ARG_LEARNER_GROUP_UID to "1", ARG_CONTENT_ENTRY_UID to "1")
+        val presenter = LearnerGroupMemberListPresenter(context,
+                presenterArgs, mockView, di, mockLifecycleOwner)
+
+        val person = Person().apply {
+            personUid = 2
+            firstNames = "ustad"
+            lastName = "mobile"
+        }
+
+        val newMember = LearnerGroupMember().apply {
+            learnerGroupMemberRole = LearnerGroupMember.STUDENT_ROLE
+            learnerGroupMemberPersonUid = 1
+            learnerGroupMemberLgUid = 1
+        }
+        presenter.onCreate(null)
+
+        runBlocking {
+            verify(repoLearnerGroupMemberDaoSpy, timeout(5000))
+                    .findLearnerGroupMembersByGroupIdAndEntryAsync(1, 1)
+        }
+
+        verify(mockView, timeout(5000)).list = any()
+
+        presenter.handleNewMemberToGroup(person)
+
+        runBlocking {
+            verify(repoLearnerGroupMemberDaoSpy, timeout(5000)).insertAsync(newMember)
+        }
+
+        val list = db.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntry(1, 1)
+        assertEquals("member added", 2, list.size)
+        assertEquals("new member in the list", "ustad mobile", list[1].person!!.fullName())
+
+    }
+
+
+}

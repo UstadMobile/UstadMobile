@@ -38,12 +38,13 @@ import kotlin.jvm.Volatile
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
     Report::class, ReportFilter::class,
     DeviceSession::class, WorkSpace::class, ContainerUploadJob::class,
-    SqliteSyncablePrimaryKey::class
+    SqliteSyncablePrimaryKey::class, LearnerGroup::class, LearnerGroupMember::class,
+    GroupLearningSession::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 39)
+], version = 41)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -196,6 +197,15 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("agentDao")
     abstract val agentDao: AgentDao
+
+    @JsName("learnerGroupDao")
+    abstract val learnerGroupDao: LearnerGroupDao
+
+    @JsName("learnerGroupMemberDao")
+    abstract val learnerGroupMemberDao: LearnerGroupMemberDao
+
+    @JsName("groupLearningSessionDao")
+    abstract val groupLearningSessionDao: GroupLearningSessionDao
 
     @JsName("contentEntryProgressDao")
     abstract val contentEntryProgressDao: ContentEntryProgressDao
