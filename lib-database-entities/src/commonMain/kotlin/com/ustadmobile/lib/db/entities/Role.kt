@@ -6,13 +6,14 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.lib.db.entities.Role.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 
 @Entity
-@SyncableEntity(tableId = 45)
+@SyncableEntity(tableId = TABLE_ID)
 @Serializable
-class Role() {
+open class Role() {
 
     @PrimaryKey(autoGenerate = true)
     var roleUid: Long = 0
@@ -32,7 +33,6 @@ class Role() {
 
     //bit flags made of up PERMISSION_ constants
     var rolePermissions: Long = 0
-
 
     constructor(roleName: String, rolePermissions: Long):this() {
         this.roleName = roleName
@@ -69,6 +69,8 @@ class Role() {
     }
 
     companion object {
+
+        const val TABLE_ID = 45
 
         const val PERMISSION_CLAZZ_SELECT: Long = 1
 
@@ -135,15 +137,27 @@ class Role() {
 
         const val PERMISSION_SCHOOL_UPDATE: Long = 2147483648L
 
+        const val PERMISSION_PERSON_DELEGATE: Long = 4294967296L
+
         //Permission to actually open and enter the class (eg. available to accept members, not those with pending requests)
-        const val PERMISSION_CLAZZ_OPEN: Long = 4294967296L
+        const val PERMISSION_CLAZZ_OPEN: Long = 8589934592L
+
+        const val PERMISSION_ROLE_SELECT : Long = 17179869184L
+
+        const val PERMISSION_ROLE_INSERT: Long = 34359738368L
+
+        const val PERMISSION_RESET_PASSWORD: Long = 68719476736L
+
+        const val PERMISSION_SCHOOL_ADD_STAFF: Long = 137438953472L
+
+        const val PERMISSION_SCHOOL_ADD_STUDENT: Long = 274877906944L
 
         //Predefined roles that are added by the system
-        const val ROLE_TEACHER_NAME = "Teacher"
+        const val ROLE_CLAZZ_TEACHER_NAME = "Teacher"
 
-        const val ROLE_TEACHER_UID = 1001
+        const val ROLE_CLAZZ_TEACHER_UID = 1001
 
-        const val ROLE_TEACHER_PERMISSIONS_DEFAULT: Long =
+        const val ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT: Long =
                 PERMISSION_CLAZZ_SELECT or
                 PERMISSION_CLAZZ_UPDATE or
                 PERMISSION_CLAZZ_OPEN or
@@ -161,21 +175,60 @@ class Role() {
                 PERMISSION_CLAZZ_ASSIGNMENT_UPDATE
 
 
-        const val ROLE_STUDENT_NAME = "Student"
+        const val ROLE_CLAZZ_STUDENT_NAME = "Class Student"
 
-        const val ROLE_STUDENT_UID = 1000
+        const val ROLE_CLAZZ_STUDENT_UID = 1000
 
-        const val ROLE_STUDENT_PERMISSIONS_DEFAULT: Long =
+        const val ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT: Long =
                 PERMISSION_CLAZZ_SELECT or
                 PERMISSION_CLAZZ_OPEN or
                 PERMISSION_PERSON_SELECT or
                 PERMISSION_CLAZZ_ASSIGNMENT_VIEW
 
-        const val ROLE_STUDENT_PENDING_NAME = "Student Pending"
+        const val ROLE_CLAZZ_STUDENT_PENDING_NAME = "Student Pending"
 
-        const val ROLE_STUDENT_PENDING_UID = 1002
+        const val ROLE_CLAZZ_STUDENT_PENDING_UID = 1002
 
-        const val ROLE_STUDENT_PENDING_PERMISSION_DEFAULT: Long = PERMISSION_CLAZZ_SELECT
+        const val ROLE_CLAZZ_STUDENT_PENDING_PERMISSION_DEFAULT: Long = PERMISSION_CLAZZ_SELECT
+
+        const val ROLE_SCHOOL_STUDENT_UID = 1003
+
+        const val ROLE_SCHOOL_STUDENT_NAME = "School Student"
+
+        const val ROLE_SCHOOL_STUDENT_PERMISSION_DEFAULT: Long = PERMISSION_SCHOOL_SELECT
+
+        const val ROLE_SCHOOL_STAFF_UID = 1004
+
+        const val ROLE_SCHOOL_STAFF_NAME = "School Staff"
+
+        /**
+         * Default permissions for a staff member at school
+         */
+        const val ROLE_SCHOOL_STAFF_PERMISSIONS_DEFAULT: Long = PERMISSION_CLAZZ_SELECT or
+                PERMISSION_CLAZZ_UPDATE or
+                PERMISSION_CLAZZ_OPEN or
+                PERMISSION_CLAZZ_ADD_STUDENT or
+                PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT or
+                PERMISSION_PERSON_SELECT or
+                PERMISSION_PERSON_UPDATE or
+                PERMISSION_PERSON_INSERT or
+                PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT or
+                PERMISSION_CLAZZ_ASSIGNMENT_VIEW or
+                PERMISSION_SCHOOL_SELECT or
+                PERMISSION_SCHOOL_ADD_STUDENT
+
+
+        const val ROLE_SCHOOL_STUDENT_PENDING_UID = 1005
+
+        const val ROLE_SCHOOL_STUDENT_PENDING_NAME = "School Student Pending"
+
+        const val ROLE_SCHOOL_STUDENT_PENDING_PERMISSION_DEFAULT = PERMISSION_SCHOOL_SELECT
+
+        @Deprecated("will be replace with creator field")
+        const val ROLE_VIEW_STUDENTS_NAME = "View Students Only"
+
+        @Deprecated("will be replace with creator field")
+        const val ROLE_VIEW_CLAZZ_NAME = "View Class Only"
 
 
     }

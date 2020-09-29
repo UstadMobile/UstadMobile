@@ -56,6 +56,8 @@ open class Person() {
      */
     var personOrgId: String? = null
 
+    //This person's groupUid
+    var personGroupUid: Long = 0L
 
     @MasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0
@@ -76,7 +78,7 @@ open class Person() {
             l = lastName as String
         }
 
-        return f + " " + l
+        return "$f $l"
     }
 
     override fun equals(other: Any?): Boolean {

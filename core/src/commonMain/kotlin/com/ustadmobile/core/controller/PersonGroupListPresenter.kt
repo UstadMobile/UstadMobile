@@ -52,7 +52,7 @@ class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, vie
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
             ListViewMode.BROWSER -> systemImpl.go(PersonGroupEditView.VIEW_NAME,
-                    mapOf(UstadView.ARG_ENTITY_UID to entry.groupPersonUid.toString()), context)
+                    mapOf(UstadView.ARG_ENTITY_UID to entry.groupUid.toString()), context)
         }
     }
 

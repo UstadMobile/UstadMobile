@@ -1,9 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzWorkDao
-import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
@@ -12,8 +10,6 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, String>,

@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.HolidayCalendarWithNumEntries
         insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 @Dao
-abstract class HolidayCalendarDao : BaseDao<HolidayCalendar> {
+abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
 
     @Insert
     abstract override fun insert(entity: HolidayCalendar): Long

@@ -53,8 +53,6 @@ open class SchoolMember {
 
     companion object {
 
-        const val SCHOOL_ROLE_STUDENT = 1
-        const val SCHOOL_ROLE_TEACHER = 2
 
     }
 }

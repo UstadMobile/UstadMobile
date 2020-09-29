@@ -89,15 +89,13 @@ class ClazzWorkDetailOverviewFragmentTest {
     }
 
     private fun reloadFragment(clazzWork: ClazzWork){
-
         val fragmentScenario = launchFragmentInContainer(
-                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to
-                        clazzWork.clazzWorkUid.toString()),
-                themeResId = R.style.UmTheme_App) {
-            ClazzWorkDetailOverviewFragment(). also {
+                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to clazzWork.clazzWorkUid.toString()),
+                themeResId = R.style.UmTheme_App
+        ) {
+            ClazzWorkDetailOverviewFragment().also {
                 it.installNavController(systemImplNavRule.navController)
-                it.arguments = bundleOf(UstadView.ARG_ENTITY_UID to
-                        clazzWork.clazzWorkUid.toString())
+                it.arguments = bundleOf(UstadView.ARG_ENTITY_UID to clazzWork.clazzWorkUid.toString())
             }
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
@@ -110,7 +108,8 @@ class ClazzWorkDetailOverviewFragmentTest {
 
     }
 
-    private fun checkClazzWorkBasicDetailDisplayOk(clazzWork: ClazzWork, contentList: List<ContentEntry>,
+    private fun checkClazzWorkBasicDetailDisplayOk(clazzWork: ClazzWork,
+                                                   contentList: List<ContentEntry>,
                                                    teacher: Boolean = false){
         //Scroll to top
         onView(withId(R.id.fragment_clazz_work_with_submission_detail_rv)).perform(

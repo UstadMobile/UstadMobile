@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzMemberDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.approvePendingClazzMember
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
@@ -12,6 +11,7 @@ import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
@@ -25,7 +25,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     : UstadListPresenter<ClazzMemberListView, ClazzMember>(context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
 
 
-    var filterByClazzUid: Long = -1
+    private var filterByClazzUid: Long = -1
 
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
@@ -83,9 +83,14 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     }
 
     fun handleClickPendingRequest(member: ClazzMember, approved: Boolean) {
-        GlobalScope.launch {
+        GlobalScope.launch(doorMainDispatcher()) {
             if (approved) {
-                repo.approvePendingClazzMember(member)
+                try {
+                    repo.approvePendingClazzMember(member)
+                }catch(e: IllegalStateException) {
+                    //did not have all entities present yet (e.g. sync race condition)
+                    view.showSnackBar(systemImpl.getString(MessageID.content_editor_save_error, context))
+                }
             } else {
                 repo.clazzMemberDao.updateAsync(member.also {
                     it.clazzMemberActive = false

@@ -12,8 +12,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScheduleEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.lib.db.entities.TimeZoneEntity
+import com.ustadmobile.lib.db.entities.*
 import java.text.MessageFormat
 import java.util.*
 
@@ -65,6 +64,29 @@ fun TextView.setTimeZoneText(timeZone: TimeZone) {
 fun TextView.setTimeZoneTextEntity(timeZoneEntity: TimeZoneEntity) {
     text = "${mkGmtOffsetString(timeZoneEntity.rawOffset)} ${timeZoneEntity.id}"
 }
+
+
+@SuppressLint("SetTextI18n")
+@BindingAdapter("entityRoleText")
+fun TextView.setTimeZoneTextEntity(entityRole: EntityRoleWithNameAndRole?) {
+
+    val scopeText = when (entityRole?.erTableId) {
+        Clazz.TABLE_ID -> {
+            " (" + context.getString(R.string.clazz) + ")"
+        }
+        School.TABLE_ID -> {
+            " (" + context.getString(R.string.school) + ")"
+        }
+        Person.TABLE_ID -> {
+            " (" + context.getString(R.string.person) + ")"
+        }
+        else -> {
+            ""
+        }
+    }
+    text = entityRole?.entityRoleScopeName?:"" + scopeText
+}
+
 
 
 @BindingAdapter(value = ["createNewFormatText", "createNewFormatArg"], requireAll = true)

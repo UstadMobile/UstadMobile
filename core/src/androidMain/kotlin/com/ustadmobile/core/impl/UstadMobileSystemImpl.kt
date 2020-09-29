@@ -198,7 +198,17 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int, ustadGoOptions: UstadGoOptions) {
-        val ustadDestination = destinationProvider.lookupDestinationName(viewName)
+
+        val destinationQueryPos = viewName!!.indexOf('?')
+        val viewNameOnly = if (destinationQueryPos == -1) {
+            viewName
+        }else {
+            viewName.substring(0, destinationQueryPos)
+        }
+        val allArgs = args + UMFileUtil.parseURLQueryString(viewName)
+
+
+        val ustadDestination = destinationProvider.lookupDestinationName(viewNameOnly)
         if(ustadDestination != null) {
             val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
 
@@ -224,8 +234,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 }
             }
 
-            navController.navigate(ustadDestination.destinationId, args.toBundleWithNullableValues(),
-                options)
+            navController.navigate(ustadDestination.destinationId,
+                    allArgs.toBundleWithNullableValues(), options)
 
             return
         }

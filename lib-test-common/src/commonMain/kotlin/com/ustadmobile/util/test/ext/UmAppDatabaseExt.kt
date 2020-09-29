@@ -689,7 +689,23 @@ suspend fun UmAppDatabase.insertPersonWithRole(person: Person, role: Role,
     entityRole: EntityRole = EntityRole()) {
     person.also {
         if(it.personUid == 0L) {
+
+            val groupPerson = PersonGroup().apply {
+                groupName = "Person individual group"
+                personGroupFlag = PersonGroup.PERSONGROUP_FLAG_PERSONGROUP
+            }
+            //Create person's group
+            groupPerson.groupUid = personGroupDao.insertAsync(groupPerson)
+
+            //Assign to person
+            it.personGroupUid = groupPerson.groupUid
             it.personUid = personDao.insertAsync(it)
+
+            //Assign person to PersonGroup ie: Create PersonGroupMember
+            personGroupMemberDao.insertAsync(
+                    PersonGroupMember(it.personUid, it.personGroupUid))
+
+
         }else {
             personDao.insertOrReplace(it)
         }
@@ -703,23 +719,8 @@ suspend fun UmAppDatabase.insertPersonWithRole(person: Person, role: Role,
         }
     }
 
-    //Create and insert PersonGroup and PersonGroupmember
-    val personGroup = PersonGroup().also {
-        it.groupActive = true
-        it.groupName = "${person.firstNames} group"
-        it.groupPersonUid = person.personUid
-        it.groupUid = personGroupDao.insert(it)
-    }
-
-    val personGroupMember = PersonGroupMember().also {
-        it.groupMemberGroupUid = personGroup.groupUid
-        it.groupMemberActive = true
-        it.groupMemberPersonUid = person.personUid
-        it.groupMemberPersonUid = personGroupMemberDao.insertAsync(it)
-    }
-
     entityRole.also {
-        it.erGroupUid = personGroup.groupUid
+        it.erGroupUid = person.personGroupUid
         it.erRoleUid = role.roleUid
         it.erActive = true
         if(it.erUid == 0L) {
