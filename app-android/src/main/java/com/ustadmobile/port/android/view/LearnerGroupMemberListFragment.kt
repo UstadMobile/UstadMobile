@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -20,8 +21,11 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.LearnerGroupMemberListView
+import com.ustadmobile.core.view.PersonListView
+import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
+import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -67,6 +71,7 @@ class LearnerGroupMemberListFragment : UstadListViewFragment<LearnerGroupMember,
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         mPresenter = LearnerGroupMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter()
         mDataRecyclerViewAdapter = LearnerGroupMemberListRecyclerAdapter()
 
         return view
@@ -77,7 +82,13 @@ class LearnerGroupMemberListFragment : UstadListViewFragment<LearnerGroupMember,
         fabManager?.text = requireContext().getText(R.string.member)
 
         fabManager?.onClickListener = {
-            navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest)
+
+            val list = mDataRecyclerViewAdapter?.currentList?.map { it.person?.personUid }
+            navigateToPickEntityFromList(Person::class.java,
+                    R.id.person_list_dest,
+                    bundleOf(
+                            PersonListView.ARG_EXCLUDE_PERSONUIDS_LIST to list?.joinToString()))
+
         }
 
         val navController = findNavController()

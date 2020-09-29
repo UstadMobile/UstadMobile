@@ -53,7 +53,8 @@ class ViewNameToDestMap: DestinationProvider {
             JoinWithCodeView.VIEW_NAME to UstadDestination(R.id.join_with_code_dest),
             InviteViaLinkView.VIEW_NAME to UstadDestination(R.id.invite_via_link_dest),
             EntityRoleEditView.VIEW_NAME to UstadDestination(R.id.entityrole_edit_dest),
-            JoinWithCodeView.VIEW_NAME to UstadDestination(R.id.join_with_code_dest)
+            JoinWithCodeView.VIEW_NAME to UstadDestination(R.id.join_with_code_dest),
+            LearnerGroupMemberListView.VIEW_NAME to UstadDestination(R.id.learner_group_member_list_dest)
     )
 
     override val navControllerViewId: Int
