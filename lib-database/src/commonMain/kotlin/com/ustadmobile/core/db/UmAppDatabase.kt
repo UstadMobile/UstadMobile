@@ -1445,12 +1445,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       |WHERE groupUid = NEW.groupUid
                       |; END
                     """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-                    database.execSQL("""
-                      |CREATE 
-                      | INDEX index_PersonGroup_trk_clientId_epk_rx_csn 
-                      |ON PersonGroup_trk (clientId, epk, rx, csn)
-                      """.trimMargin())
 
 
                 } else if (database.dbType() == DoorDbType.POSTGRES){
