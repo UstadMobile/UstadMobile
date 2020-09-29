@@ -21,7 +21,7 @@ abstract class LearnerGroupMemberDao : BaseDao<LearnerGroupMember> {
     AND GroupLearningSession.groupLearningSessionContentUid = :contentEntryUid 
     ORDER BY learnerGroupMemberRole ASC
     """)
-    abstract suspend fun findLearnerGroupMembersByGroupIdAndEntryAsync(learnerGroupUid: Long, contentEntryUid: Long): DataSource.Factory<Int, LearnerGroupMemberWithPerson>
+    abstract fun findLearnerGroupMembersByGroupIdAndEntry(learnerGroupUid: Long, contentEntryUid: Long): DataSource.Factory<Int, LearnerGroupMemberWithPerson>
 
     @Query("""SELECT LearnerGroupMember.*, Person.* FROM LearnerGroupMember 
         LEFT JOIN Person ON LearnerGroupMember.learnerGroupMemberPersonUid = Person.personUid 
@@ -31,7 +31,7 @@ abstract class LearnerGroupMemberDao : BaseDao<LearnerGroupMember> {
     AND GroupLearningSession.groupLearningSessionContentUid = :contentEntryUid 
     ORDER BY learnerGroupMemberRole ASC
     """)
-    abstract fun findLearnerGroupMembersByGroupIdAndEntry(learnerGroupUid: Long, contentEntryUid: Long): List<LearnerGroupMemberWithPerson>
+    abstract fun findLearnerGroupMembersByGroupIdAndEntryList(learnerGroupUid: Long, contentEntryUid: Long): List<LearnerGroupMemberWithPerson>
 
     @Insert
     abstract override suspend fun insertAsync(entity: LearnerGroupMember): Long

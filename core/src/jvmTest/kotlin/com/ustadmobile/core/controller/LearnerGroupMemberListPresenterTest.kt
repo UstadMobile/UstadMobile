@@ -112,7 +112,7 @@ class LearnerGroupMemberListPresenterTest {
 
         runBlocking {
             verify(repoLearnerGroupMemberDaoSpy, timeout(5000))
-                    .findLearnerGroupMembersByGroupIdAndEntryAsync(1, 1)
+                    .findLearnerGroupMembersByGroupIdAndEntry(1, 1)
         }
 
         verify(mockView, timeout(5000)).list = any()
@@ -137,7 +137,7 @@ class LearnerGroupMemberListPresenterTest {
 
         runBlocking {
             verify(repoLearnerGroupMemberDaoSpy, timeout(5000))
-                    .findLearnerGroupMembersByGroupIdAndEntryAsync(1, 1)
+                    .findLearnerGroupMembersByGroupIdAndEntry(1, 1)
         }
 
         verify(mockView, timeout(5000)).list = any()
@@ -148,7 +148,7 @@ class LearnerGroupMemberListPresenterTest {
             verify(repoLearnerGroupMemberDaoSpy, timeout(5000)).insertAsync(any())
         }
 
-        val list = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntry(1, 1)
+        val list = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(1, 1)
         assertEquals("member added", 2, list.size)
         assertEquals("new member in the list", "ustad mobile", list[1].person!!.fullName())
 

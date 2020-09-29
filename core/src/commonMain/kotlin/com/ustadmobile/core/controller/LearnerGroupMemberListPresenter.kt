@@ -31,7 +31,7 @@ class LearnerGroupMemberListPresenter(context: Any, arguments: Map<String, Strin
 
     private fun updateList() {
         GlobalScope.launch(doorMainDispatcher()) {
-            view.list = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryAsync(learnerGroupUid, contentEntryUid)
+            view.list = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntry(learnerGroupUid, contentEntryUid)
         }
     }
 
