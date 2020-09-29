@@ -24,7 +24,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     abstract fun findByUidLive(uid: Long): DoorLiveData<Clazz?>
 
     @Query("SELECT * FROM Clazz WHERE clazzCode = :code")
-    abstract fun findByClazzCode(code: String): Clazz?
+    abstract suspend fun findByClazzCode(code: String): Clazz?
 
     @Query(SELECT_ACTIVE_CLAZZES)
     abstract fun findAllLive(): DoorLiveData<List<Clazz>>
@@ -89,7 +89,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
         AND :personUid IN (
-        $ENTITY_PERSON_WITH_SELECT_PERMISSION
+        $ENTITY_PERSONS_WITH_PERMISSION
         )
         ORDER BY CASE :sortOrder
             WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
@@ -108,7 +108,9 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
             ELSE ''
         END DESC
     """)
-    abstract fun findClazzesWithPermission(searchQuery: String, personUid: Long, excludeSchoolUid: Long, sortOrder: Int): DataSource.Factory<Int, ClazzWithListDisplayDetails>
+    abstract fun findClazzesWithPermission(searchQuery: String, personUid: Long,
+                           excludeSchoolUid: Long, sortOrder: Int, permission: Long)
+            : DataSource.Factory<Int, ClazzWithListDisplayDetails>
 
     @Query("SELECT * FROM Clazz WHERE clazzName = :name and CAST(isClazzActive AS INTEGER) = 1")
     abstract fun findByClazzName(name: String): List<Clazz>

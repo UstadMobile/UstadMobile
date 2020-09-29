@@ -6,6 +6,8 @@ interface JoinWithCodeView: UstadView {
 
     var errorText: String?
 
+    var code: String?
+
     fun finish()
 
     companion object {

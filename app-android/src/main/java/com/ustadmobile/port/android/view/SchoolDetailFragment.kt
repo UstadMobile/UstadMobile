@@ -16,8 +16,8 @@ import com.ustadmobile.core.controller.SchoolDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.*
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
-import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
@@ -88,11 +88,11 @@ class SchoolDetailFragment: UstadDetailFragment<School>(), SchoolDetailView {
                         entityUidValue
                 ,
                 SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_FILTER_BY_ROLE}=" +
-                        SchoolMember.SCHOOL_ROLE_TEACHER +
+                        Role.ROLE_SCHOOL_STAFF_UID +
                         "&${UstadView.ARG_FILTER_BY_SCHOOLUID}=" + entityUidValue
                 ,
                 SchoolMemberListView.VIEW_NAME + "?${UstadView.ARG_FILTER_BY_ROLE}=" +
-                        SchoolMember.SCHOOL_ROLE_STUDENT +
+                        Role.ROLE_SCHOOL_STUDENT_UID +
                         "&${UstadView.ARG_FILTER_BY_SCHOOLUID}=" + entityUidValue
         )
         val viewNameToTitle = mapOf(

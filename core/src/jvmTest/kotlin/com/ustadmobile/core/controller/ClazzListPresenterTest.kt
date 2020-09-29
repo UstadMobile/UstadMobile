@@ -11,6 +11,8 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.*
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -56,12 +58,10 @@ class ClazzListPresenterTest {
         whenever(repo.clazzDao).thenReturn(repoClazzDaoSpy)
 
 
-        //TODO: insert any entities required for all tests
     }
 
     @Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
-        //TODO: insert any entities that are used only in this test
         val db: UmAppDatabase by di.activeDbInstance()
         val accountManager: UstadAccountManager by di.instance<UstadAccountManager>()
 
@@ -70,18 +70,16 @@ class ClazzListPresenterTest {
             clazzUid = db.clazzDao.insert(this)
         }
 
-        //TODO: add any arguments required for the presenter here e.g.
-        // ClazzList2View.ARG_SOME_FILTER to "filterValue"
         val presenterArgs = mapOf<String,String>()
         val presenter = ClazzListPresenter(context, presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
-                eq("%"), eq(accountManager.activeAccount.personUid), eq(0), any())
+                eq("%"), eq(accountManager.activeAccount.personUid), eq(0), any(),
+                any())
         verify(mockView, timeout(5000)).list = any()
 
-        //TODO: verify any other properties that the presenter should set on the view
     }
 
     //Example Note: It is NOT required to have separate tests for filters when they are all simply passed to the same DAO method
@@ -97,7 +95,8 @@ class ClazzListPresenterTest {
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
-                eq("%"), eq(accountManager.activeAccount.personUid), eq(excludeFromSchool), any())
+                eq("%"), eq(accountManager.activeAccount.personUid), eq(excludeFromSchool),
+                any(), any())
         verify(mockView, timeout(5000)).list = any()
     }
 
@@ -111,7 +110,7 @@ class ClazzListPresenterTest {
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
-            personUid = db.personDao.insert(this)
+            personUid = db.insertPersonOnlyAndGroup(this).personUid
         }
 
         val presenterArgs = mapOf<String,String>()

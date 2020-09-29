@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 40,
-    "identityHash": "b88b070e2ab64bff167cb57050ae6d2c",
+    "identityHash": "4717d13baddb9e699c4ec6179383c27f",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1145,7 +1145,7 @@
       },
       {
         "tableName": "Person",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "personUid",
@@ -1248,6 +1248,12 @@
             "columnName": "personOrgId",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "personGroupUid",
+            "columnName": "personGroupUid",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "personMasterChangeSeqNum",
@@ -2596,7 +2602,7 @@
       },
       {
         "tableName": "PersonGroup",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`groupUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupMasterCsn` INTEGER NOT NULL, `groupLocalCsn` INTEGER NOT NULL, `groupLastChangedBy` INTEGER NOT NULL, `groupName` TEXT, `groupActive` INTEGER NOT NULL, `groupPersonUid` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`groupUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupMasterCsn` INTEGER NOT NULL, `groupLocalCsn` INTEGER NOT NULL, `groupLastChangedBy` INTEGER NOT NULL, `groupName` TEXT, `groupActive` INTEGER NOT NULL, `personGroupFlag` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "groupUid",
@@ -2635,8 +2641,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "groupPersonUid",
-            "columnName": "groupPersonUid",
+            "fieldPath": "personGroupFlag",
+            "columnName": "personGroupFlag",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -2793,7 +2799,7 @@
       },
       {
         "tableName": "ScrapeQueueItem",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sqiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sqiContentEntryParentUid` INTEGER NOT NULL, `sqiContentEntryUid` INTEGER NOT NULL, `destDir` TEXT, `scrapeUrl` TEXT, `status` INTEGER NOT NULL, `runId` INTEGER NOT NULL, `itemType` INTEGER NOT NULL, `errorCode` INTEGER NOT NULL, `contentType` TEXT, `timeAdded` INTEGER NOT NULL, `timeStarted` INTEGER NOT NULL, `timeFinished` INTEGER NOT NULL, `priority` INTEGER NOT NULL, `overrideEntry` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sqiUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sqiContentEntryParentUid` INTEGER NOT NULL, `destDir` TEXT, `scrapeUrl` TEXT, `status` INTEGER NOT NULL, `runId` INTEGER NOT NULL, `itemType` INTEGER NOT NULL, `errorCode` INTEGER NOT NULL, `contentType` TEXT, `timeAdded` INTEGER NOT NULL, `timeStarted` INTEGER NOT NULL, `timeFinished` INTEGER NOT NULL, `priority` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "sqiUid",
@@ -2804,12 +2810,6 @@
           {
             "fieldPath": "sqiContentEntryParentUid",
             "columnName": "sqiContentEntryParentUid",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sqiContentEntryUid",
-            "columnName": "sqiContentEntryUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -2876,12 +2876,6 @@
           {
             "fieldPath": "priority",
             "columnName": "priority",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "overrideEntry",
-            "columnName": "overrideEntry",
             "affinity": "INTEGER",
             "notNull": true
           }
@@ -8734,7 +8728,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b88b070e2ab64bff167cb57050ae6d2c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4717d13baddb9e699c4ec6179383c27f')"
     ]
   }
 }

@@ -230,7 +230,7 @@ class ClazzWorkEditPresenter(context: Any,
             repo.clazzWorkQuestionOptionDao.updateListAsync(splitList.second)
 
             val deactivateOptions = allQuestions.flatMap { it.optionsToDeactivate }
-            db.clazzWorkQuestionOptionDao.deactivateByUids(deactivateOptions)
+            repo.clazzWorkQuestionOptionDao.deactivateByUids(deactivateOptions)
 
             repo.clazzWorkQuestionDao.deactivateByUids(questionAndOptionsEditHelper.primaryKeysToDeactivate)
 

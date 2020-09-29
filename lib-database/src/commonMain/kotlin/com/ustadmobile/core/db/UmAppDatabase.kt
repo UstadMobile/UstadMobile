@@ -43,11 +43,16 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 40)
+], version = 41)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     /*
+        Changes from 38-39:
+        1. Added personGroupUid to Person
+        2. Added personGroupFlag to PersonGroup
+        3. Removed groupPersonUid from PersonGroup
+
         Changes from 36:
         1. Added school uid to Clazz
         2. Added school Phone number to School
@@ -1370,7 +1375,99 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        /**
+         * Add fields required for class and school codes for students to join a class or school
+         *  Changes from 39-40:
+        1. Added personGroupUid to Person
+        2. Added personGroupFlag to PersonGroup
+        3. Removed groupPersonUid from PersonGroup
+         */
         val MIGRATION_39_40 = object : DoorMigration(39, 40) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+                    //Person
+                    database.execSQL("ALTER TABLE Person ADD COLUMN personGroupUid BIGINT DEFAULT 0 NOT NULL")
+
+                    //PersonGroup
+                    database.execSQL("ALTER TABLE PersonGroup RENAME to PersonGroup_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup (  " +
+                            "groupMasterCsn  BIGINT NOT NULL , groupLocalCsn  BIGINT NOT NULL, " +
+                            "groupLastChangedBy  INTEGER NOT NULL, groupName  TEXT , " +
+                            "groupActive  INTEGER NOT NULL , personGroupFlag  INTEGER NOT NULL, " +
+                            "groupUid  INTEGER NOT NULL PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("INSERT INTO PersonGroup (" +
+                            "groupUid, groupMasterCsn, groupLocalCsn, groupLastChangedBy, " +
+                            "groupName, groupActive) SELECT groupUid, groupMasterCsn, " +
+                            "groupLocalCsn, groupLastChangedBy, groupName, groupActive " +
+                            "FROM PersonGroup_OLD")
+                    database.execSQL("DROP TABLE PersonGroup_OLD")
+
+                    //Triggers for PersonGroup
+                    database.execSQL("""
+                      |CREATE TRIGGER UPD_43
+                      |AFTER UPDATE ON PersonGroup FOR EACH ROW WHEN
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(NEW.groupMasterCsn = 0 
+                      |OR OLD.groupMasterCsn = NEW.groupMasterCsn
+                      |)
+                      |ELSE
+                      |(NEW.groupLocalCsn = 0  
+                      |OR OLD.groupLocalCsn = NEW.groupLocalCsn
+                      |) END)
+                      |BEGIN 
+                      |UPDATE PersonGroup SET groupLocalCsn = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLocalCsn 
+                      |ELSE (SELECT MAX(MAX(groupLocalCsn), OLD.groupLocalCsn) + 1 FROM PersonGroup) END),
+                      |groupMasterCsn = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(SELECT MAX(MAX(groupMasterCsn), OLD.groupMasterCsn) + 1 FROM PersonGroup)
+                      |ELSE NEW.groupMasterCsn END)
+                      |WHERE groupUid = NEW.groupUid
+                      |; END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER INS_43
+                      |AFTER INSERT ON PersonGroup FOR EACH ROW WHEN
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(NEW.groupMasterCsn = 0 
+                      |
+                      |)
+                      |ELSE
+                      |(NEW.groupLocalCsn = 0  
+                      |
+                      |) END)
+                      |BEGIN 
+                      |UPDATE PersonGroup SET groupLocalCsn = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLocalCsn 
+                      |ELSE (SELECT MAX(groupLocalCsn) + 1 FROM PersonGroup) END),
+                      |groupMasterCsn = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(SELECT MAX(groupMasterCsn) + 1 FROM PersonGroup)
+                      |ELSE NEW.groupMasterCsn END)
+                      |WHERE groupUid = NEW.groupUid
+                      |; END
+                    """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE 
+                      | INDEX index_PersonGroup_trk_clientId_epk_rx_csn 
+                      |ON PersonGroup_trk (clientId, epk, rx, csn)
+                      """.trimMargin())
+
+
+                } else if (database.dbType() == DoorDbType.POSTGRES){
+                    //Person
+                    database.execSQL("ALTER TABLE Person ADD COLUMN personGroupUid BIGINT DEFAULT 0 NOT NULL")
+
+                    //PersonGroup
+                    database.execSQL("ALTER TABLE PersonGroup ADD COLUMN personGroupFlag INTEGER DEFAULT 0 NOT NULL")
+                    database.execSQL("ALTER TABLE PersonGroup DROP COLUMN IF EXISTS groupPersonUid")
+                }
+            }
+        }
+
+        val MIGRATION_40_41 = object : DoorMigration(40, 41) {
             override fun migrate(database: DoorSqlDatabase) {
 
                 if (database.dbType() == DoorDbType.SQLITE) {
@@ -1388,10 +1485,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
 
+
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
-                    MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39, MIGRATION_39_40)
+                    MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39, MIGRATION_39_40, MIGRATION_40_41)
 
 
 

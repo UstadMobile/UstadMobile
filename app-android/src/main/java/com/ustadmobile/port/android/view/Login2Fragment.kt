@@ -84,20 +84,6 @@ class Login2Fragment : UstadBaseFragment(), Login2View {
         mBinding?.username = ""
     }
 
-    override fun navigateToNextDestination(account: UmAccount?,fromDestination: String, nextDestination: String) {
-        val impl: UstadMobileSystemImpl by instance()
-        val navController = findNavController()
-        val umNextDestination = impl.destinationProvider.lookupDestinationName(nextDestination)
-        val umFromDestination = impl.destinationProvider.lookupDestinationName(fromDestination)
-        navController.currentBackStackEntry?.savedStateHandle?.set(UstadView.ARG_SNACK_MESSAGE,
-                String.format(getString(R.string.logged_in_as),account?.username,account?.endpointUrl))
-        if(umNextDestination != null && umFromDestination != null){
-            val navOptions = NavOptions.Builder().setPopUpTo(umFromDestination.destinationId, true).build()
-            navController.navigate(umNextDestination.destinationId,null, navOptions)
-        }
-    }
-
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView: View
