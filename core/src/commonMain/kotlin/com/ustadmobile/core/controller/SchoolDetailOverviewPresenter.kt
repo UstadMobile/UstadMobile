@@ -1,15 +1,13 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.view.ClazzDetailView
-import com.ustadmobile.core.view.SchoolDetailOverviewView
-import com.ustadmobile.core.view.SchoolEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 
@@ -25,6 +23,13 @@ class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+
+        GlobalScope.launch {
+            view.schoolCodeVisible = repo.schoolDao.personHasPermissionWithSchool(
+                    accountManager.activeAccount.personUid, entityUid,
+                    Role.PERMISSION_SCHOOL_UPDATE)
+        }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): SchoolWithHolidayCalendar? {
@@ -48,7 +53,7 @@ class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>
 
     fun handleClickClazz(clazz: Clazz) {
         systemImpl.go(ClazzDetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to clazz.clazzUid.toString()),
-            context)
+                context)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {

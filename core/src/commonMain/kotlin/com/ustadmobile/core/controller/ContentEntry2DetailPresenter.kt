@@ -29,7 +29,6 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 import org.kodein.di.on
-import kotlin.jvm.Volatile
 
 
 class ContentEntry2DetailPresenter(context: Any,

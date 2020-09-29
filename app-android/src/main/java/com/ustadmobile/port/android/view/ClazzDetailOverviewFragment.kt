@@ -54,7 +54,8 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
 
     private var mScheduleListRecyclerAdapter: ScheduleRecyclerViewAdapter? = null
 
-    class ScheduleRecyclerViewAdapter: PagedListAdapter<Schedule, ScheduleRecyclerViewAdapter.ScheduleViewHolder>(SCHEDULE_DIFF_UTIL) {
+    class ScheduleRecyclerViewAdapter: PagedListAdapter<Schedule,
+            ScheduleRecyclerViewAdapter.ScheduleViewHolder>(SCHEDULE_DIFF_UTIL) {
 
         class ScheduleViewHolder(val binding: ItemScheduleSimpleBinding): RecyclerView.ViewHolder(binding.root)
 
@@ -81,10 +82,12 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         mScheduleListRecyclerAdapter?.submitList(t)
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView: View
         mScheduleListRecyclerAdapter = ScheduleRecyclerViewAdapter()
-        mBinding = FragmentClazzDetailOverviewBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentClazzDetailOverviewBinding.inflate(inflater, container,
+                false).also {
             rootView = it.root
             it.fragmentClazzDetailOverviewScheduleRecyclerview.apply {
                 adapter = mScheduleListRecyclerAdapter
@@ -127,9 +130,9 @@ class ClazzDetailOverviewFragment: UstadDetailFragment<ClazzWithDisplayDetails>(
         }
 
     override fun onClickClassCode(code: String?) {
-        val codeStr = code ?: return
-        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE) as? ClipboardManager
-        clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("clazzcode", codeStr)))
+        val clipboard = requireContext().getSystemService(Context.CLIPBOARD_SERVICE)
+                as? ClipboardManager
+        clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("link", code)))
         showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
     }
 

@@ -18,6 +18,7 @@ interface PersonListView: UstadListView<Person, PersonWithDisplayDetails> {
         const val ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL = "excludeFromSchool"
 
         const val ARG_EXCLUDE_PERSONUIDS_LIST = "excludeAlreadySelectedList"
+
     }
 
 }

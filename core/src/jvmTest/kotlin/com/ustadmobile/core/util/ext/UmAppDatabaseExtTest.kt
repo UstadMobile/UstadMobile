@@ -52,12 +52,12 @@ class UmAppDatabaseExtTest {
         Assert.assertEquals("Teacher group has entity role", 1,
                 db.entityRoleDao.findByEntitiyAndPersonGroupAndRole(
                         Clazz.TABLE_ID, testClazz.clazzUid, teacherGroup!!.groupUid,
-                        Role.ROLE_TEACHER_UID.toLong()).size)
+                        Role.ROLE_CLAZZ_TEACHER_UID.toLong()).size)
 
         Assert.assertEquals("Student group has entity role", 1,
                 db.entityRoleDao.findByEntitiyAndPersonGroupAndRole(
                         Clazz.TABLE_ID, testClazz.clazzUid, studentGroup!!.groupUid,
-                        Role.ROLE_STUDENT_UID.toLong()).size)
+                        Role.ROLE_CLAZZ_STUDENT_UID.toLong()).size)
     }
 
     @Test
@@ -92,11 +92,11 @@ class UmAppDatabaseExtTest {
         testPerson.personUid = db.personDao.insert(testPerson)
 
         db.enrollPersonToSchool(testSchool.schoolUid, testPerson.personUid,
-                SchoolMember.SCHOOL_ROLE_TEACHER)
+                Role.ROLE_SCHOOL_STAFF_UID)
 
         val schoolMembers = db.schoolMemberDao.findBySchoolAndPersonAndRole(
                 testSchool.schoolUid,
-                testPerson.personUid, SchoolMember.SCHOOL_ROLE_TEACHER)
+                testPerson.personUid, Role.ROLE_SCHOOL_STAFF_UID)
 
         Assert.assertTrue("PersonMember was created", schoolMembers.any {
             it.schoolMemberSchoolUid == testSchool.schoolUid })
