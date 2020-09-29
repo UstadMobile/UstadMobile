@@ -13,10 +13,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.LearnerGroup
-import com.ustadmobile.lib.db.entities.LearnerGroupMember
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.*
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.runBlocking
 import org.junit.Before
@@ -70,22 +67,37 @@ class LearnerGroupMemberListPresenterTest {
         repoLearnerGroupMemberDaoSpy = spy(repo.learnerGroupMemberDao)
         whenever(repo.learnerGroupMemberDao).thenReturn(repoLearnerGroupMemberDaoSpy)
 
+        Person().apply {
+            personUid = 1
+            admin = true
+            firstNames = "Test"
+            lastName = "Teacher"
+            repo.personDao.insert(this)
+        }
+
         ContentEntry().apply {
             contentEntryUid = 1
-            db.contentEntryDao.insert(this)
+            repo.contentEntryDao.insert(this)
         }
 
         LearnerGroup().apply {
             learnerGroupUid = 1
             learnerGroupName = "Test"
-            db.learnerGroupDao.insert(this)
+            repo.learnerGroupDao.insert(this)
         }
 
         LearnerGroupMember().apply {
             learnerGroupMemberLgUid = 1
             learnerGroupMemberPersonUid = 1
             learnerGroupMemberRole = LearnerGroupMember.TEACHER_ROLE
-            db.learnerGroupMemberDao.insert(this)
+            repo.learnerGroupMemberDao.insert(this)
+        }
+
+        GroupLearningSession().apply {
+            groupLearningSessionUid = 1
+            groupLearningSessionContentUid = 1
+            groupLearningSessionLearnerGroupUid = 1
+            repo.groupLearningSessionDao.insert(this)
         }
 
     }
@@ -118,13 +130,9 @@ class LearnerGroupMemberListPresenterTest {
             personUid = 2
             firstNames = "ustad"
             lastName = "mobile"
+            repo.personDao.insert(this)
         }
 
-        val newMember = LearnerGroupMember().apply {
-            learnerGroupMemberRole = LearnerGroupMember.STUDENT_ROLE
-            learnerGroupMemberPersonUid = 1
-            learnerGroupMemberLgUid = 1
-        }
         presenter.onCreate(null)
 
         runBlocking {
@@ -137,10 +145,10 @@ class LearnerGroupMemberListPresenterTest {
         presenter.handleNewMemberToGroup(person)
 
         runBlocking {
-            verify(repoLearnerGroupMemberDaoSpy, timeout(5000)).insertAsync(newMember)
+            verify(repoLearnerGroupMemberDaoSpy, timeout(5000)).insertAsync(any())
         }
 
-        val list = db.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntry(1, 1)
+        val list = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntry(1, 1)
         assertEquals("member added", 2, list.size)
         assertEquals("new member in the list", "ustad mobile", list[1].person!!.fullName())
 

@@ -7,7 +7,6 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.LearnerGroupMember
 import com.ustadmobile.lib.db.entities.LearnerGroupMember.Companion.STUDENT_ROLE
-import com.ustadmobile.lib.db.entities.LearnerGroupMemberWithPerson
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
