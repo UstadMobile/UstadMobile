@@ -1,7 +1,8 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.dao.RoleDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.RoleEditView
 import com.ustadmobile.core.view.RoleListView
@@ -17,33 +18,37 @@ class RoleListPresenter(context: Any, arguments: Map<String, String>, view: Role
                         di: DI, lifecycleOwner: DoorLifecycleOwner)
     : UstadListPresenter<RoleListView, Role>(context, arguments, view, di, lifecycleOwner) {
 
-    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
-
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
-    }
-
-    class RoleListSortOption(val sortOrder: SortOrder, context: Any)
-        : MessageIdOption(sortOrder.messageId, context)
+    override val sortOptions: List<SortOrderOption>
+        get() = SORT_OPTIONS
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         updateListOnView()
-        view.sortOptions = SortOrder.values().toList().map { RoleListSortOption(it, context) }
+        selectedSortOption = SORT_OPTIONS[0]
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        //TODO: Get permission for this access.
-        return true
+
+        return db.entityRoleDao.userHasAnySinglePermission(
+                account?.personUid ?: 0, Role.PERMISSION_ROLE_INSERT)
+
     }
 
-    private fun updateListOnView() {
-        view.list = when(currentSortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.roleDao.findAllActiveRoles()
-            SortOrder.ORDER_NAME_DSC -> repo.roleDao.findAllActiveRoles()
-        }
+    override fun onClickSort(sortOption: SortOrderOption) {
+        super.onClickSort(sortOption)
+        updateListOnView()
     }
+
+    override fun onSearchSubmitted(text: String?) {
+        updateListOnView(text)
+    }
+
+    private fun updateListOnView(searchText: String? = null) {
+        view.list = repo.roleDao.findAllActiveRolesSorted(
+                selectedSortOption?.flag ?: 0,
+                if(searchText.isNullOrEmpty()) "%%" else "%${searchText}%")
+    }
+
 
     override fun handleClickEntry(entry: Role) {
         when(mListMode) {
@@ -57,18 +62,18 @@ class RoleListPresenter(context: Any, arguments: Map<String, String>, view: Role
         systemImpl.go(RoleEditView.VIEW_NAME, mapOf(), context)
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? RoleListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            updateListOnView()
-        }
-    }
 
     fun handleRemoveRole(role:Role){
         GlobalScope.launch {
             role.roleActive = false
             repo.roleDao.updateAsync(role)
         }
+    }
+
+    companion object{
+        val SORT_OPTIONS = listOf(
+                SortOrderOption(MessageID.name, RoleDao.SORT_NAME_ASC, true),
+                SortOrderOption(MessageID.name, RoleDao.SORT_NAME_DESC, false)
+        )
     }
 }

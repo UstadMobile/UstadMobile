@@ -3,6 +3,7 @@ package com.ustadmobile.core.view
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazz
+import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 
@@ -13,6 +14,8 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
     var personPicturePath: String?
 
     var clazzList: DoorLiveData<List<ClazzMemberWithClazz>>?
+
+    var rolesAndPermissionsList: DoorLiveData<List<EntityRoleWithNameAndRole>>?
 
     var registrationMode: Boolean?
 
@@ -25,6 +28,8 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
     var confirmError: String?
 
     var dateOfBirthError: String?
+
+    var canDelegatePermissions: Boolean?
 
     fun navigateToNextDestination(account: UmAccount?, nextDestination: String)
 
@@ -43,6 +48,12 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
          * The presenter will then register the new user with the server (provided via ARG_SERVER_URL)
          */
         const val ARG_REGISTRATION_MODE = "RegMode"
+
+        /**
+         * If this is set then this means that the person registering has come from a link. Since someone in the system has invited another person
+         * we use this flag to remove the age restrictions of being under 13 to sign up.
+         */
+        const val REGISTER_VIA_LINK = "RegViaLink"
 
     }
 
