@@ -148,7 +148,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 ContentEntry.TYPE_DOCUMENT to R.drawable.text_doc_24px,
                 ContentEntry.TYPE_ARTICLE to R.drawable.article_24px,
                 ContentEntry.TYPE_COLLECTION to R.drawable.collections_24px,
-                ContentEntry.TYPE_INTERACTIVE_EXERCISE to 0,
+                ContentEntry.TYPE_INTERACTIVE_EXERCISE to R.drawable.ic_baseline_touch_app_24,
                 ContentEntry.TYPE_AUDIO to R.drawable.ic_audiotrack_24px
         )
 
