@@ -8,6 +8,7 @@
     <string name='err_registering_new_user'>Error registering new user:</string>
     <string name="register_empty_fields">Please fill out all required fields</string>
     <string name="register_incorrect_email">Wrong email address</string>
+    <string name="group_activity">Group\nActivity</string>
 
     <string name='wrong_user_pass_combo'>Wrong username/password: try again.</string>
     <string name='login_network_error'>Network error: please check you are online.</string>

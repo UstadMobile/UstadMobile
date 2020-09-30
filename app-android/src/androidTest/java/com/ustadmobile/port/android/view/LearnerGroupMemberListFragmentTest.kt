@@ -59,7 +59,7 @@ class LearnerGroupMemberListFragmentTest : TestCase() {
         }
 
         LearnerGroupMember().apply {
-            learnerGroupMemberRole = LearnerGroupMember.TEACHER_ROLE
+            learnerGroupMemberRole = LearnerGroupMember.PRIMARY_ROLE
             learnerGroupMemberLgUid = 1
             learnerGroupMemberPersonUid = dbRule.account.personUid
             dbRule.db.learnerGroupMemberDao.insert(this)
@@ -80,7 +80,7 @@ class LearnerGroupMemberListFragmentTest : TestCase() {
 
         init {
             val args = bundleOf(UstadView.ARG_CONTENT_ENTRY_UID to "1",
-                    LearnerGroupMemberListView.ARG_LEARNER_GROUP_UID to "1")
+                    UstadView.ARG_LEARNER_GROUP_UID to "1")
 
             launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                     fragmentArgs = args) {

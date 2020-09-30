@@ -159,12 +159,25 @@
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
                 tools:text="BY_SA" />
 
+            <TextView
+                android:id="@+id/entry_detail_content_size"
+                android:layout_width="@dimen/dimen_0dp"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dimen_8dp"
+                android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+                app:fileSize="@{contentEntry.container.fileSize}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
+                app:layout_constraintTop_toBottomOf="@id/entry_detail_license_label"
+                tools:text="50 MB" />
+
+
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/labelBarrier"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="entry_detail_license,entry_detail_thumbnail" />
+                app:constraint_referenced_ids="entry_detail_content_size,entry_detail_thumbnail" />
 
             <LinearLayout
                 android:id="@+id/entry_detail_anchor_download"
@@ -223,7 +236,6 @@
                 app:constraint_referenced_ids="ic_locally_available,entry_detail_anchor_download"
                 app:barrierDirection="bottom"/>
 
-
             <View
                 android:id="@+id/library_size_divider"
                 android:layout_width="@dimen/dimen_0dp"
@@ -235,32 +247,49 @@
                 app:layout_constraintTop_toBottomOf="@id/locally_available_bottom_barrier" />
 
 
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/image_content_size"
-                android:layout_width="@dimen/dimen_16dp"
-                android:layout_height="@dimen/dimen_16dp"
-                android:layout_marginTop="@dimen/dimen_8dp"
-                android:tint="?colorOnIconTint"
-                android:visibility="@{contentEntry.container == null ? View.GONE: View.VISIBLE}"
-                app:layout_constraintEnd_toEndOf="@id/entry_detail_content_size"
-                app:layout_constraintStart_toStartOf="@id/entry_detail_content_size"
-                app:layout_constraintTop_toBottomOf="@id/library_size_divider"
-                app:srcCompat="@drawable/download_archive_tray" />
-
-
             <TextView
-                android:id="@+id/entry_detail_content_size"
+                android:id='@+id/entry_detail_delete_button'
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="@dimen/dimen_8dp"
-                android:textAppearance="@style/UmTheme.TextAppearance.Caption"
-                app:fileSize="@{contentEntry.container.fileSize}"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.1"
+                android:text="@string/delete"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                android:textColor="@color/colorPrimary"
+                android:tint="@color/colorPrimary"
+                app:drawableTint="@color/colorPrimary"
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:onClick="@{()-> fragmentEventHandler.handleOnClickDeleteButton()}"
+                android:visibility="@{DownloadJobExtKt.isStatusCompletedSuccessfully(downloadJobItem) ? View.VISIBLE : View.GONE}"
+                app:drawableTopCompat="@drawable/ic_delete_black_24dp"
+                app:layout_constraintBottom_toTopOf="@id/description_divider"
+                app:layout_constraintEnd_toStartOf="@+id/entry_detail_group_activity_button"
+                app:layout_constraintHorizontal_chainStyle="spread"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/image_content_size"
-                tools:text="50 mb" />
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/library_size_divider" />
+
+            <TextView
+                android:id='@+id/entry_detail_group_activity_button'
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/group_activity"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                android:textColor="@color/colorPrimary"
+                android:tint="@color/colorPrimary"
+                android:gravity="center"
+                android:textAllCaps="true"
+                android:onClick="@{()-> fragmentEventHandler.handleOnClickGroupActivityButton()}"
+                app:drawableTint="@color/colorPrimary"
+                android:visibility="@{DownloadJobExtKt.isStatusCompletedSuccessfully(downloadJobItem) ? View.VISIBLE : View.GONE}"
+                app:layout_constraintBaseline_toBaselineOf="@id/entry_detail_delete_button"
+                app:drawableTopCompat="@drawable/ic_group_white_24dp"
+                app:layout_constraintBottom_toTopOf="@id/description_divider"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintStart_toEndOf="@id/entry_detail_delete_button"
+                app:layout_constraintTop_toBottomOf="@id/library_size_divider" />
+
+
 
             <androidx.appcompat.widget.AppCompatImageView
                 android:id="@+id/content_status_icon"
@@ -285,7 +314,6 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.973"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/image_content_size"
                 tools:text="Locally Available" />
 
             <View
@@ -296,7 +324,7 @@
                 android:background="?colorOnIconTint"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_content_size" />
+                app:layout_constraintTop_toBottomOf="@id/entry_detail_group_activity_button" />
 
             <TextView
                 android:id="@+id/entry_detail_description_label"

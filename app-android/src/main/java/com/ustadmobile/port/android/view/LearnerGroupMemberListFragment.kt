@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -98,8 +96,28 @@ class LearnerGroupMemberListFragment : UstadListViewFragment<LearnerGroupMember,
             mPresenter?.handleNewMemberToGroup(student)
         }
 
-
     }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_group_selection, menu)
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_selection_done -> {
+                mPresenter?.handleClickGroupSelectionDone()
+                return super.onOptionsItemSelected(item)
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
 
     companion object {
         val DIFF_CALLBACK: DiffUtil.ItemCallback<LearnerGroupMemberWithPerson> = object

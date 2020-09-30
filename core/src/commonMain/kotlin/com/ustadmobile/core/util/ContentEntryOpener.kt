@@ -9,6 +9,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -45,7 +46,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
      *
      */
     suspend fun openEntry(context: Any, contentEntryUid: Long, downloadRequired: Boolean,
-                          goToContentEntryDetailViewIfNotDownloaded: Boolean, noIframe: Boolean) {
+                          goToContentEntryDetailViewIfNotDownloaded: Boolean, noIframe: Boolean, learnerGroupUid: Long = 0) {
 
         val containerToOpen = if (downloadRequired) {
             umAppDatabase.downloadJobItemDao.findMostRecentContainerDownloaded(contentEntryUid)
@@ -59,7 +60,8 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
                 if(viewName != null) {
                     val args = mapOf(ARG_NO_IFRAMES to noIframe.toString(),
                             ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
-                            ARG_CONTAINER_UID to containerToOpen.containerUid.toString())
+                            ARG_CONTAINER_UID to containerToOpen.containerUid.toString(),
+                            ARG_LEARNER_GROUP_UID to learnerGroupUid.toString())
 
                     systemImpl.go(viewName, args, context)
                 }else {

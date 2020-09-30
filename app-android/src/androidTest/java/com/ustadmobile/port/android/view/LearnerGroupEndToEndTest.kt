@@ -2,21 +2,15 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.content.Intent
-import androidx.core.os.bundleOf
-import androidx.fragment.app.testing.launchFragment
-import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.LearnerGroupMemberListScreen
 import com.ustadmobile.port.android.screen.MainActivityScreen
 import com.ustadmobile.port.android.screen.PersonListScreen
-import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import org.junit.Before
@@ -64,7 +58,7 @@ class LearnerGroupEndToEndTest : TestCase() {
         }
 
         LearnerGroupMember().apply {
-            learnerGroupMemberRole = LearnerGroupMember.TEACHER_ROLE
+            learnerGroupMemberRole = LearnerGroupMember.PRIMARY_ROLE
             learnerGroupMemberLgUid = 1
             learnerGroupMemberPersonUid = dbRule.account.personUid
             dbRule.db.learnerGroupMemberDao.insert(this)
@@ -87,7 +81,7 @@ class LearnerGroupEndToEndTest : TestCase() {
             val context = ApplicationProvider.getApplicationContext<Context>()
             val launchIntent = Intent(context, MainActivity::class.java).also {
                 it.putExtra(UstadView.ARG_NEXT,
-                        "${LearnerGroupMemberListView.VIEW_NAME}?${UstadView.ARG_CONTENT_ENTRY_UID}=1&${LearnerGroupMemberListView.ARG_LEARNER_GROUP_UID}=1")
+                        "${LearnerGroupMemberListView.VIEW_NAME}?${UstadView.ARG_CONTENT_ENTRY_UID}=1&${UstadView.ARG_LEARNER_GROUP_UID}=1")
             }
             launchActivity<MainActivity>(intent = launchIntent)
         }.run {

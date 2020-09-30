@@ -3,14 +3,11 @@ package com.ustadmobile.core.controller
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzMemberDao
 import com.ustadmobile.core.db.dao.LearnerGroupMemberDao
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.LearnerGroupMemberListView
-import com.ustadmobile.core.view.LearnerGroupMemberListView.Companion.ARG_LEARNER_GROUP_UID
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
@@ -89,7 +86,7 @@ class LearnerGroupMemberListPresenterTest {
         LearnerGroupMember().apply {
             learnerGroupMemberLgUid = 1
             learnerGroupMemberPersonUid = 1
-            learnerGroupMemberRole = LearnerGroupMember.TEACHER_ROLE
+            learnerGroupMemberRole = LearnerGroupMember.PRIMARY_ROLE
             repo.learnerGroupMemberDao.insert(this)
         }
 

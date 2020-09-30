@@ -8,8 +8,6 @@ interface LearnerGroupMemberListView : UstadListView<LearnerGroupMember, Learner
 
     companion object {
 
-        const val ARG_LEARNER_GROUP_UID = "learnerGroupUid"
-
         const val VIEW_NAME = "LearnerGroupMemberList"
     }
 

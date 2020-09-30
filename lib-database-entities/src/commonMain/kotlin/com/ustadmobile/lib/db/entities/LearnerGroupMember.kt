@@ -1,6 +1,5 @@
 package com.ustadmobile.lib.db.entities
 
-import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.LastChangedBy
@@ -22,7 +21,7 @@ open class LearnerGroupMember {
 
     var learnerGroupMemberLgUid: Long = 0
 
-    var learnerGroupMemberRole: Int = STUDENT_ROLE
+    var learnerGroupMemberRole: Int = PARTICIPANT_ROLE
 
     var learnerGroupMemberActive: Boolean = true
 
@@ -39,9 +38,9 @@ open class LearnerGroupMember {
 
         const val TABLE_ID = 300
 
-        const val TEACHER_ROLE = 1
+        const val PRIMARY_ROLE = 1
 
-        const val STUDENT_ROLE = 2
+        const val PARTICIPANT_ROLE = 2
 
     }
 
