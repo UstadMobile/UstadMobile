@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.content.Intent
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import com.agoda.kakao.common.views.KView
@@ -20,6 +21,7 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.test.port.android.util.clickOptionMenu
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -59,6 +61,7 @@ class LearnerGroupEndToEndTest : TestCase() {
 
         val container = Container().apply {
             containerContentEntryUid = 1
+            mimeType = "application/tincan+zip"
             containerUid = dbRule.db.containerDao.insert(this)
         }
         val containerTmpDir = UmFileUtilSe.makeTempDir("xapicontent", "${System.currentTimeMillis()}")
@@ -80,14 +83,14 @@ class LearnerGroupEndToEndTest : TestCase() {
 
     @Test
     fun givenLearnerGroup_whenAddingNewMember_showInList() {
-
+        var activityScenario: ActivityScenario<MainActivity>? = null
         init {
             val context = ApplicationProvider.getApplicationContext<Context>()
             val launchIntent = Intent(context, MainActivity::class.java).also {
                 it.putExtra(UstadView.ARG_NEXT,
                         "${ContentEntry2DetailView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=1")
             }
-            launchActivity<MainActivity>(intent = launchIntent)
+            activityScenario =  launchActivity(intent = launchIntent)
         }.run {
 
             ContentEntryDetailScreen{
@@ -144,14 +147,8 @@ class LearnerGroupEndToEndTest : TestCase() {
                         }
                     }
                 }
-                KView{
-                    withId(R.id.action_selection_done)
-                } perform {
-                    click()
-                }
+                activityScenario?.clickOptionMenu(R.id.action_selection_done)
             }
-
-
 
         }
 
