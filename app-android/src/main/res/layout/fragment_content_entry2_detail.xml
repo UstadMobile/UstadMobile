@@ -258,6 +258,7 @@
                 app:drawableTint="@color/colorPrimary"
                 android:gravity="center"
                 android:textAllCaps="true"
+                android:layout_margin="@dimen/dimen_8dp"
                 android:onClick="@{()-> fragmentEventHandler.handleOnClickDeleteButton()}"
                 android:visibility="@{DownloadJobExtKt.isStatusCompletedSuccessfully(downloadJobItem) ? View.VISIBLE : View.GONE}"
                 app:drawableTopCompat="@drawable/ic_delete_black_24dp"
@@ -265,7 +266,6 @@
                 app:layout_constraintEnd_toStartOf="@+id/entry_detail_group_activity_button"
                 app:layout_constraintHorizontal_chainStyle="spread"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/library_size_divider" />
 
             <TextView
@@ -278,15 +278,15 @@
                 android:tint="@color/colorPrimary"
                 android:gravity="center"
                 android:textAllCaps="true"
+                android:layout_margin="@dimen/dimen_8dp"
                 android:onClick="@{()-> fragmentEventHandler.handleOnClickGroupActivityButton()}"
                 app:drawableTint="@color/colorPrimary"
                 android:visibility="@{DownloadJobExtKt.isStatusCompletedSuccessfully(downloadJobItem) ? View.VISIBLE : View.GONE}"
-                app:layout_constraintBaseline_toBaselineOf="@id/entry_detail_delete_button"
                 app:drawableTopCompat="@drawable/ic_group_white_24dp"
                 app:layout_constraintBottom_toTopOf="@id/description_divider"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_chainStyle="spread"
                 app:layout_constraintStart_toEndOf="@id/entry_detail_delete_button"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/library_size_divider" />
 
 
@@ -316,6 +316,13 @@
                 app:layout_constraintStart_toStartOf="parent"
                 tools:text="Locally Available" />
 
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/description_barrier"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="entry_detail_group_activity_button,entry_detail_delete_button"
+                app:barrierDirection="bottom"/>
+
             <View
                 android:id="@+id/description_divider"
                 android:layout_width="@dimen/dimen_0dp"
@@ -324,7 +331,7 @@
                 android:background="?colorOnIconTint"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/entry_detail_group_activity_button" />
+                app:layout_constraintTop_toBottomOf="@id/description_barrier" />
 
             <TextView
                 android:id="@+id/entry_detail_description_label"
