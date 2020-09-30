@@ -77,6 +77,7 @@ class LearnerGroupMemberListFragment : UstadListViewFragment<LearnerGroupMember,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        ustadFragmentTitle = getString(R.string.select_group_members)
         fabManager?.text = requireContext().getText(R.string.member)
 
         fabManager?.onClickListener = {

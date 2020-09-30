@@ -167,23 +167,26 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     fun handleOnClickGroupActivityButton() {
-        val learnerGroup = LearnerGroup().apply {
-            learnerGroupUid = repo.learnerGroupDao.insert(this)
+        GlobalScope.launch(doorMainDispatcher()) {
+            val learnerGroup = LearnerGroup().apply {
+                learnerGroupUid = repo.learnerGroupDao.insertAsync(this)
+            }
+            GroupLearningSession().apply {
+                groupLearningSessionContentUid = contentEntryUid
+                groupLearningSessionLearnerGroupUid = learnerGroup.learnerGroupUid
+                groupLearningSessionLearnerGroupUid = repo.groupLearningSessionDao.insertAsync(this)
+            }
+            LearnerGroupMember().apply {
+                learnerGroupMemberRole = LearnerGroupMember.PRIMARY_ROLE
+                learnerGroupMemberLgUid = learnerGroup.learnerGroupUid
+                learnerGroupMemberPersonUid = accountManager.activeAccount.personUid
+                learnerGroupMemberUid = repo.learnerGroupMemberDao.insertAsync(this)
+            }
+            systemImpl.go(LearnerGroupMemberListView.VIEW_NAME,
+                    mapOf(ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
+                            ARG_LEARNER_GROUP_UID to learnerGroup.learnerGroupUid.toString()),
+                    context)
         }
-        GroupLearningSession().apply {
-            groupLearningSessionContentUid = contentEntryUid
-            groupLearningSessionLearnerGroupUid = learnerGroup.learnerGroupUid
-            groupLearningSessionLearnerGroupUid = repo.groupLearningSessionDao.insert(this)
-        }
-        LearnerGroupMember().apply {
-            learnerGroupMemberRole = LearnerGroupMember.PRIMARY_ROLE
-            learnerGroupMemberLgUid = learnerGroup.learnerGroupUid
-            learnerGroupMemberPersonUid = accountManager.activeAccount.personUid
-            learnerGroupMemberUid = repo.learnerGroupMemberDao.insert(this)
-        }
-        systemImpl.go(LearnerGroupMemberListView.VIEW_NAME,
-                mapOf(ARG_CONTENT_ENTRY_UID to contentEntryUid,
-                        ARG_LEARNER_GROUP_UID to learnerGroup.learnerGroupUid))
     }
 
 }

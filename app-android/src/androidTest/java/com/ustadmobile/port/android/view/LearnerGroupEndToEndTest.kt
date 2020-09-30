@@ -4,18 +4,26 @@ import android.content.Context
 import android.content.Intent
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
+import com.agoda.kakao.common.views.KView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
-import com.ustadmobile.core.view.LearnerGroupMemberListView
+import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.screen.ContentEntryDetailScreen
 import com.ustadmobile.port.android.screen.LearnerGroupMemberListScreen
 import com.ustadmobile.port.android.screen.MainActivityScreen
 import com.ustadmobile.port.android.screen.PersonListScreen
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.toughra.ustadmobile.R
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import java.io.File
 
 class LearnerGroupEndToEndTest : TestCase() {
 
@@ -49,28 +57,24 @@ class LearnerGroupEndToEndTest : TestCase() {
             dbRule.db.contentEntryDao.insert(this)
         }
 
-
-        LearnerGroup().apply {
-            learnerGroupName = "Test"
-            learnerGroupDescription = "New Group"
-            learnerGroupUid = 1
-            dbRule.db.learnerGroupDao.insert(this)
+        val container = Container().apply {
+            containerContentEntryUid = 1
+            containerUid = dbRule.db.containerDao.insert(this)
         }
+        val containerTmpDir = UmFileUtilSe.makeTempDir("xapicontent", "${System.currentTimeMillis()}")
+        val testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)
+        val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/XapiPackage-JsTetris_TCAPI.zip")
+        testFile.outputStream().use { input?.copyTo(it) }
 
-        LearnerGroupMember().apply {
-            learnerGroupMemberRole = LearnerGroupMember.PRIMARY_ROLE
-            learnerGroupMemberLgUid = 1
-            learnerGroupMemberPersonUid = dbRule.account.personUid
-            dbRule.db.learnerGroupMemberDao.insert(this)
+        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,containerTmpDir.absolutePath)
+        addEntriesFromZipToContainer(testFile.absolutePath, containerManager)
+
+        DownloadJobItem().apply {
+            djiContentEntryUid = 1
+            djiContainerUid = container.containerUid
+            djiStatus = JobStatus.COMPLETE
+            djiUid = dbRule.db.downloadJobItemDao.insert(this).toInt()
         }
-
-        GroupLearningSession().apply {
-            groupLearningSessionUid = 1
-            groupLearningSessionContentUid = 1
-            groupLearningSessionLearnerGroupUid = 1
-            dbRule.db.groupLearningSessionDao.insert(this)
-        }
-
 
     }
 
@@ -81,10 +85,16 @@ class LearnerGroupEndToEndTest : TestCase() {
             val context = ApplicationProvider.getApplicationContext<Context>()
             val launchIntent = Intent(context, MainActivity::class.java).also {
                 it.putExtra(UstadView.ARG_NEXT,
-                        "${LearnerGroupMemberListView.VIEW_NAME}?${UstadView.ARG_CONTENT_ENTRY_UID}=1&${UstadView.ARG_LEARNER_GROUP_UID}=1")
+                        "${ContentEntry2DetailView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=1")
             }
             launchActivity<MainActivity>(intent = launchIntent)
         }.run {
+
+            ContentEntryDetailScreen{
+                groupActivityButton{
+                    click()
+                }
+            }
 
             LearnerGroupMemberListScreen {
                 recycler {
@@ -134,7 +144,14 @@ class LearnerGroupEndToEndTest : TestCase() {
                         }
                     }
                 }
+                KView{
+                    withId(R.id.action_selection_done)
+                } perform {
+                    click()
+                }
             }
+
+
 
         }
 

@@ -4,6 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
@@ -53,6 +54,11 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
         } else {
             umAppDatabase.containerDao.getMostRecentContaineUidAndMimeType(contentEntryUid)
         }
+        val goToOptions = if(learnerGroupUid != 0L){
+            UstadMobileSystemCommon.UstadGoOptions("", true)
+        }else{
+            UstadMobileSystemCommon.UstadGoOptions("", false)
+        }
 
         when {
             containerToOpen != null -> {
@@ -63,7 +69,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
                             ARG_CONTAINER_UID to containerToOpen.containerUid.toString(),
                             ARG_LEARNER_GROUP_UID to learnerGroupUid.toString())
 
-                    systemImpl.go(viewName, args, context)
+                    systemImpl.go(viewName, args, context, goToOptions)
                 }else {
                     val container = umAppDatabase.containerEntryDao.findByContainerAsync(containerToOpen.containerUid)
                     require(container.isNotEmpty()) { "No file found" }
@@ -80,7 +86,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
 
             goToContentEntryDetailViewIfNotDownloaded -> {
                 systemImpl.go(ContentEntry2DetailView.VIEW_NAME,
-                        mapOf(ARG_ENTITY_UID to contentEntryUid.toString()), context)
+                        mapOf(ARG_ENTITY_UID to contentEntryUid.toString()), context, goToOptions)
             }
 
             else -> {
