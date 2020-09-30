@@ -10,16 +10,13 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.screen.ContentEntryDetailScreen
-import com.ustadmobile.port.android.screen.LearnerGroupMemberListScreen
-import com.ustadmobile.port.android.screen.MainActivityScreen
-import com.ustadmobile.port.android.screen.PersonListScreen
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.port.android.screen.*
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.port.android.util.clickOptionMenu
 import org.junit.Before
@@ -33,11 +30,6 @@ class LearnerGroupEndToEndTest : TestCase() {
     @JvmField
     @Rule
     var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
-
-    @JvmField
-    @Rule
-    var systemImplNavRule = SystemImplTestNavHostRule()
-
 
     @Before
     fun setup() {
@@ -69,7 +61,7 @@ class LearnerGroupEndToEndTest : TestCase() {
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/XapiPackage-JsTetris_TCAPI.zip")
         testFile.outputStream().use { input?.copyTo(it) }
 
-        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,containerTmpDir.absolutePath)
+        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
         addEntriesFromZipToContainer(testFile.absolutePath, containerManager)
 
         DownloadJobItem().apply {
@@ -90,11 +82,11 @@ class LearnerGroupEndToEndTest : TestCase() {
                 it.putExtra(UstadView.ARG_NEXT,
                         "${ContentEntry2DetailView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=1")
             }
-            activityScenario =  launchActivity(intent = launchIntent)
+            activityScenario = launchActivity(intent = launchIntent)
         }.run {
 
-            ContentEntryDetailScreen{
-                groupActivityButton{
+            ContentEntryDetailScreen {
+                groupActivityButton {
                     click()
                 }
             }
@@ -117,8 +109,8 @@ class LearnerGroupEndToEndTest : TestCase() {
                 }
             }
 
-            PersonListScreen{
-                recycler{
+            PersonListScreen {
+                recycler {
                     childWith<PersonListScreen.Person> {
                         withDescendant { withText("New Student") }
                     } perform {
@@ -126,14 +118,15 @@ class LearnerGroupEndToEndTest : TestCase() {
                     }
                 }
             }
-
-            LearnerGroupMemberListScreen{
-                recycler{
+            LearnerGroupMemberListScreen {
+                recycler {
                     hasSize(2)
                     childAt<LearnerGroupMemberListScreen.LearnerGroupMember>(0) {
                         memberName {
                             isDisplayed()
                             hasText("Test Teacher")
+                        }
+                        memberRole {
                             hasText("Primary user")
                         }
                     }
@@ -142,12 +135,17 @@ class LearnerGroupEndToEndTest : TestCase() {
                             isDisplayed()
                             hasText("New Student")
                         }
-                        memberRole{
+                        memberRole {
                             hasText("Participant")
                         }
                     }
                 }
                 activityScenario?.clickOptionMenu(R.id.action_selection_done)
+            }
+            XapiContentScreen {
+                webView{
+
+                }
             }
 
         }

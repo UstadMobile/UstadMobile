@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
+import com.ustadmobile.core.tincan.UmAccountGroupActor
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.UMUUID
@@ -83,7 +84,8 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
             }else{
                 val memberList = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(
                         learnerGroupUid,contentEntryUid)
-                Json.stringify(Actor.serializer(),accountManager.activeAccount.toXapiGroupJsonObject(memberList))
+                Json.stringify(UmAccountGroupActor.serializer(),
+                        accountManager.activeAccount.toXapiGroupJsonObject(memberList))
             }
             val launchMethodParams = mapOf(
                     "actor" to actorJsonStr,
