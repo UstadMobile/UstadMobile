@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.xapi.Actor
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.TinCanXML
@@ -10,6 +11,7 @@ import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
+import com.ustadmobile.core.util.ext.toXapiGroupJsonObject
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
@@ -79,8 +81,9 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                 Json.stringify(UmAccountActor.serializer(),
                         accountManager.activeAccount.toXapiActorJsonObject(context))
             }else{
-                
-                ""
+                val memberList = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(
+                        learnerGroupUid,contentEntryUid)
+                Json.stringify(Actor.serializer(),accountManager.activeAccount.toXapiGroupJsonObject(memberList))
             }
             val launchMethodParams = mapOf(
                     "actor" to actorJsonStr,
