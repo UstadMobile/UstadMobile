@@ -2,25 +2,22 @@ package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.Espresso.onIdle
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.port.android.screen.JoinWithCodeScreen
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.junit.Rule
 import org.junit.Test
 
 @AdbScreenRecord("JoinWithCode Fragment Tests")
-class JoinWithCodeFragmentTest  {
+class JoinWithCodeFragmentTest : TestCase() {
 
     @JvmField
     @Rule
@@ -34,58 +31,49 @@ class JoinWithCodeFragmentTest  {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule =
-            ScenarioIdlingResourceRule(DataBindingIdlingResource())
 
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule =
-            ScenarioIdlingResourceRule(CrudIdlingResource())
-
-
-    @AdbScreenRecord("")
+    @AdbScreenRecord("given Fragment Loaded when Clazz Code Given then Show On Screen")
     @Test
-    fun givenLoadedIncorrect_whenLoaded_shouldShowError() {
+    fun givenFragmentLoaded_whenClazzCodeGiven_thenShowOnScreen() {
 
+        init{
 
-        val clazz = Clazz().apply{
-            clazzCode="lulz42"
-            clazzName = "Class A"
-            clazzUid = dbRule.db.clazzDao.insert(this)
-        }
-
-        val person = Person().apply{
-            firstNames = "Test"
-            lastName = "One"
-            personUid = dbRule.db.personDao.insert(this)
-        }
-
-        //dbRule.account.personUid = person.personUid
-        dbRule.insertPersonForActiveUser(Person().apply {
-            admin = true
-            firstNames = "Test"
-            lastName = "User"
-        })
-
-
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
-            JoinWithCodeFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-                it.arguments = bundleOf(
-                        UstadView.ARG_CODE to clazz.clazzCode.toString(),
-                        UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID
-                )
+            val clazz = Clazz().apply{
+                clazzCode="lulz42"
+                clazzName = "Class A"
+                clazzUid = dbRule.db.clazzDao.insert(this)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        onIdle()
+            val person = Person().apply{
+                firstNames = "Test"
+                lastName = "One"
+                personUid = dbRule.db.personDao.insert(this)
+            }
 
-        //fragmentScenario.clickOptionMenu(R.id.menu_done)
+            dbRule.insertPersonForActiveUser(Person().apply {
+                admin = true
+                firstNames = "Test"
+                lastName = "User"
+            })
+            val bundle = bundleOf(
+                    UstadView.ARG_CODE to clazz.clazzCode.toString(),
+                    UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString())
 
-        println("")
+            launchFragmentInContainer(themeResId = R.style.UmTheme_App, fragmentArgs = bundle) {
+                JoinWithCodeFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }
+
+        }.run{
+            JoinWithCodeScreen{
+                codeEditLayout{
+                    edit{
+                        hasText("lulz42")
+                    }
+                }
+            }
+        }
 
     }
 
