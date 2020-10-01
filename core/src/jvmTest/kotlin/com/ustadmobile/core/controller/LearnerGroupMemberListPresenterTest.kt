@@ -1,9 +1,12 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.LearnerGroupMemberDao
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
@@ -16,13 +19,11 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
+import org.kodein.di.*
 
 class LearnerGroupMemberListPresenterTest {
 
+    private lateinit var entryOpener: ContentEntryOpener
 
     @JvmField
     @Rule
@@ -52,10 +53,11 @@ class LearnerGroupMemberListPresenterTest {
         }
         context = Any()
 
+        entryOpener = mock()
         di = DI {
             import(ustadTestRule.diModule)
+            bind<ContentEntryOpener>() with singleton { entryOpener }
         }
-
         accountManager = di.direct.instance()
 
         db = di.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
@@ -148,6 +150,33 @@ class LearnerGroupMemberListPresenterTest {
         val list = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(1, 1)
         assertEquals("member added", 2, list.size)
         assertEquals("new member in the list", "ustad mobile", list[1].person!!.fullName())
+
+    }
+
+    @Test
+    fun givenMembersSelected_whenClickedDone_thenNavigateToContentScreen() {
+
+        val presenterArgs = mapOf<String, String>(ARG_LEARNER_GROUP_UID to "1", ARG_CONTENT_ENTRY_UID to "1")
+        val presenter = LearnerGroupMemberListPresenter(context,
+                presenterArgs, mockView, di, mockLifecycleOwner)
+
+        presenter.onCreate(null)
+
+        runBlocking {
+            verify(repoLearnerGroupMemberDaoSpy, timeout(5000))
+                    .findLearnerGroupMembersByGroupIdAndEntry(1, 1)
+        }
+
+        verify(mockView, timeout(5000)).list = any()
+
+        presenter.handleClickGroupSelectionDone()
+
+        runBlocking {
+            verify(entryOpener, timeout(5000)).openEntry(context, 1,
+                    true, false, false,
+                    1)
+        }
+
 
     }
 
