@@ -105,5 +105,15 @@ class TestRoomMigration {
                 UmAppDatabase.MIGRATION_39_40)
     }
 
+    @Test
+    fun migrate42to43() {
+        helper.createDatabase(TEST_DB, 42).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 43, true,
+                UmAppDatabase.MIGRATION_42_43)
+    }
+
 
 }

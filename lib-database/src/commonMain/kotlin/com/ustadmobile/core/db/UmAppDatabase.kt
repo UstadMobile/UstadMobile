@@ -13,8 +13,7 @@ import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
-    ClazzLog::class, ClazzLogAttendanceRecord::class, PersonField::class,
-    PersonDetailPresenterField::class,
+    ClazzLog::class, ClazzLogAttendanceRecord::class,
     Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
     ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
@@ -44,7 +43,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 42)
+], version = 43)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -223,8 +222,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val customFieldDao: CustomFieldDao
     abstract val customFieldValueDao: CustomFieldValueDao
     abstract val customFieldValueOptionDao: CustomFieldValueOptionDao
-
-    abstract val personDetailPresenterFieldDao: PersonDetailPresenterFieldDao
 
     abstract val scheduleDao: ScheduleDao
 
@@ -1469,12 +1466,23 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
 
+        val MIGRATION_42_43 = object : DoorMigration(42, 43) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("DROP TABLE PersonDetailPresenterField")
+                database.execSQL("DROP TABLE PersonDetailPresenterField_trk")
+                database.execSQL("DROP TABLE PersonField")
+                database.execSQL("DROP TABLE PersonField_trk")
+
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
-                    MIGRATION_39_40)
+                    MIGRATION_39_40, MIGRATION_42_43)
 
 
 
