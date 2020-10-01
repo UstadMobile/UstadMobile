@@ -13,6 +13,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
@@ -24,6 +25,8 @@ import org.junit.Rule
 import org.junit.Test
 import java.io.File
 
+
+@AdbScreenRecord("Learner Group End To End")
 class LearnerGroupEndToEndTest : TestCase() {
 
 
@@ -73,8 +76,9 @@ class LearnerGroupEndToEndTest : TestCase() {
 
     }
 
+    @AdbScreenRecord("given Downloaded Entry when GroupActivity Clicked then Learner Group Created And Content Viewed As Group")
     @Test
-    fun givenLearnerGroup_whenAddingNewMember_showInList() {
+    fun givenDownloadedEntry_whenGroupActivityClicked_thenLearnerGroupCreatedAndContentViewedAsGroup() {
         var activityScenario: ActivityScenario<MainActivity>? = null
         init {
             val context = ApplicationProvider.getApplicationContext<Context>()
@@ -139,14 +143,28 @@ class LearnerGroupEndToEndTest : TestCase() {
                             hasText("Participant")
                         }
                     }
+                    KView{
+                        withId(R.id.action_selection_done)
+                    } perform {
+                        click()
+                    }
                 }
-                activityScenario?.clickOptionMenu(R.id.action_selection_done)
             }
-            XapiContentScreen {
-                webView{
+            // XapiContentScreen
+            MainActivityScreen{
+                toolBarTitle{
+                    hasDescendant { withText("Tin Can Tetris Example") }
+                    isDisplayed()
+                }
+                pressBack()
+            }
+            ContentEntryDetailScreen {
+                groupActivityButton {
+                    isVisible()
+                    isDisplayed()
+                }
+            }
 
-                }
-            }
 
         }
 

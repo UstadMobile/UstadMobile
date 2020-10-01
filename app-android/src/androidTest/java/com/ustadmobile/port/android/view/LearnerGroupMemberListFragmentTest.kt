@@ -75,6 +75,7 @@ class LearnerGroupMemberListFragmentTest : TestCase() {
 
     }
 
+    @AdbScreenRecord("Given learner group when loaded show list of members")
     @Test
     fun givenLearnerGroupWithEntry_whenLoaded_showListOfMembers() {
 

@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.screen
 
 import com.agoda.kakao.common.views.KView
+import com.agoda.kakao.text.KButton
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
@@ -17,5 +18,6 @@ object MainActivityScreen : KScreen<MainActivityScreen>() {
         withId(R.id.activity_listfragmelayout_behaviornt_fab)
     }
 
+    val toolBarTitle: KView = KView { withId(R.id.toolbar)}
 
 }
