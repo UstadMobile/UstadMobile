@@ -234,7 +234,7 @@ suspend fun UmAppDatabase.createNewSchoolAndGroups(school: School,
     entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
             school.schoolTeachersPersonGroupUid, Role.ROLE_SCHOOL_STAFF_UID.toLong()))
     entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
-            school.schoolStudentsPersonGroupUid, Role.ROLE_SCHOOL_STAFF_UID.toLong()))
+            school.schoolStudentsPersonGroupUid, Role.ROLE_SCHOOL_STUDENT_UID.toLong()))
     entityRoleDao.insertAsync(EntityRole(School.TABLE_ID, school.schoolUid,
             school.schoolPendingStudentsPersonGroupUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID.toLong()))
 
