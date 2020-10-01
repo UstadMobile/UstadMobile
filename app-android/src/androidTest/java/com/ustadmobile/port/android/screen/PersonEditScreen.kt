@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.screen
 
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.agoda.kakao.common.views.KSwipeView
+import com.agoda.kakao.common.views.KView
 import com.agoda.kakao.recycler.KRecyclerView
 import com.agoda.kakao.scroll.KScrollView
 import com.agoda.kakao.text.KTextView
@@ -15,10 +17,10 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
     override val viewClass: Class<*>?
         get() = PersonEditFragment::class.java
 
-    val nestedView = KScrollView { withId(R.id.nested_view) }
+    val nestedView = KSwipeView { withId(R.id.nested_view) }
 
     fun scrollToBottom(){
-        nestedView.scrollToEnd()
+        nestedView.swipeUp()
     }
 
     val ClazzListRecyclerView: KRecyclerView = KRecyclerView({ withId(R.id.clazzlist_recyclerview) },

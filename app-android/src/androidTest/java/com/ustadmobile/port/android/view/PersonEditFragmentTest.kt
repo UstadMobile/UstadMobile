@@ -86,18 +86,14 @@ class PersonEditFragmentTest : TestCase() {
     @Test
     fun givenPersonEditOpened_whenInNoRegistrationMode_thenClassesShouldBeShown() {
 
-
-        init {
-            launchFragment(false, fillForm = false)
-        }.run {
-            PersonEditScreen {
-                scrollToBottom()
-                ClazzListRecyclerView {
-                    isDisplayed()
-                }
-                clazzListHeaderTextView {
-                    isDisplayed()
-                }
+        launchFragment(false, fillForm = false)
+        PersonEditScreen {
+            scrollToBottom()
+            ClazzListRecyclerView {
+                isDisplayed()
+            }
+            clazzListHeaderTextView {
+                isDisplayed()
             }
         }
     }
@@ -149,7 +145,7 @@ class PersonEditFragmentTest : TestCase() {
 
     @AdbScreenRecord("given person edit for existing opened in normal mode and admin, " +
             "roles and permissions should be shown")
-    //@Test
+//@Test
     fun givenPersonEditOpenedDoeExistingAsAdmin_whenInNoRegistrationMode_thenRolesShouldBeShown() {
 
 
@@ -181,13 +177,13 @@ class PersonEditFragmentTest : TestCase() {
         val scenario = launchFragment(false, fillForm = false, leftOutUsername = true,
                 leftOutPassword = true, entityRoles = entityRoles, personUid = person.personUid)
 
-        PersonEditScreen{
+        PersonEditScreen {
 
             scrollToBottom()
-            rolesList{
+            rolesList {
                 isDisplayed()
             }
-            roleHeaderTextView{
+            roleHeaderTextView {
                 isDisplayed()
             }
 
@@ -217,6 +213,7 @@ class PersonEditFragmentTest : TestCase() {
     @Test
     fun givenPersonEditOpened_whenInRegistrationMode_thenClassesShouldBeHidden() {
         launchFragment(true, fillForm = false)
+
 
         scrollToBottom()
 
