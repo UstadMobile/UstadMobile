@@ -108,6 +108,14 @@ abstract class RoleDao : BaseDao<Role> {
                 roleUid = Role.ROLE_SCHOOL_STUDENT_PENDING_UID.toLong()
             })
         }
+
+        //Add Principal role
+        val principalRole = findByUidAsync(Role.ROLE_PRINCIPAL_UID.toLong())
+        if(principalRole == null) {
+            insertOrReplace(Role(Role.ROLE_PRINCIPAL_NAME, Role.ROLE_PRINCIPAL_PERMISSIONS_DEFAULT).apply {
+                roleUid = Role.ROLE_PRINCIPAL_UID.toLong()
+            })
+        }
     }
 
 

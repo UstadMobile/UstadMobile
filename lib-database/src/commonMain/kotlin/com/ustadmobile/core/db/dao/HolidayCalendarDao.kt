@@ -42,7 +42,7 @@ abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
     abstract suspend fun updateAsync(entity: HolidayCalendar):Int
 
     @Query("SELECT * FROM HolidayCalendar WHERE umCalendarUid = :uid")
-    abstract fun findByUid(uid: Long): HolidayCalendar?
+    abstract suspend fun findByUid(uid: Long): HolidayCalendar?
 
     @Query("SELECT * FROM HolidayCalendar WHERE umCalendarUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): HolidayCalendar?

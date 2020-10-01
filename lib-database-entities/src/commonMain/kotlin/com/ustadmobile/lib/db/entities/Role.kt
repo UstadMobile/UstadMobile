@@ -224,12 +224,52 @@ open class Role() {
 
         const val ROLE_SCHOOL_STUDENT_PENDING_PERMISSION_DEFAULT = PERMISSION_SCHOOL_SELECT
 
-        @Deprecated("will be replace with creator field")
-        const val ROLE_VIEW_STUDENTS_NAME = "View Students Only"
 
-        @Deprecated("will be replace with creator field")
-        const val ROLE_VIEW_CLAZZ_NAME = "View Class Only"
+        const val ROLE_PRINCIPAL_UID = 1006
 
+        const val ROLE_PRINCIPAL_NAME = "Principal"
+
+        //All permissionss so far
+        const val ROLE_PRINCIPAL_PERMISSIONS_DEFAULT : Long =
+                PERMISSION_CLAZZ_SELECT or
+                        PERMISSION_CLAZZ_INSERT or
+                        PERMISSION_CLAZZ_UPDATE or
+                        PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT or
+                        PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT or
+                        PERMISSION_SEL_QUESTION_RESPONSE_INSERT or
+                        PERMISSION_PERSON_SELECT or
+                        PERMISSION_PERSON_INSERT or
+                        PERMISSION_PERSON_UPDATE or
+                        PERMISSION_CLAZZ_ADD_TEACHER or
+                        PERMISSION_CLAZZ_ADD_STUDENT or
+                        PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT or
+                        PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE or
+                        PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE or
+                        PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT or
+                        PERMISSION_SEL_QUESTION_RESPONSE_SELECT or
+                        PERMISSION_SEL_QUESTION_RESPONSE_UPDATE or
+                        PERMISSION_SEL_QUESTION_SELECT or
+                        PERMISSION_SEL_QUESTION_INSERT or
+                        PERMISSION_SEL_QUESTION_UPDATE or
+                        PERMISSION_PERSON_PICTURE_SELECT or
+                        PERMISSION_PERSON_PICTURE_INSERT or
+                        PERMISSION_PERSON_PICTURE_UPDATE or
+                        PERMISSION_CLAZZ_ASSIGNMENT_VIEW  or
+                        PERMISSION_CLAZZ_ASSIGNMENT_UPDATE  or
+                        PERMISSION_CLAZZ_ASSIGNMENT_VIEWSTUDENTPROGRESS or
+                        PERMISSION_CONTENT_SELECT or
+                        PERMISSION_CONTENT_INSERT or
+                        PERMISSION_CONTENT_UPDATE or
+                        PERMISSION_SCHOOL_SELECT or
+                        PERMISSION_SCHOOL_INSERT or
+                        PERMISSION_SCHOOL_UPDATE or
+                        PERMISSION_PERSON_DELEGATE or
+                        PERMISSION_CLAZZ_OPEN or
+                        PERMISSION_ROLE_SELECT  or
+                        PERMISSION_ROLE_INSERT or
+                        PERMISSION_RESET_PASSWORD or
+                        PERMISSION_SCHOOL_ADD_STAFF or
+                        PERMISSION_SCHOOL_ADD_STUDENT
 
     }
 }
