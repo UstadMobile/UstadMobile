@@ -32,6 +32,8 @@ abstract class  HolidayCalendarDao : BaseDao<HolidayCalendar> {
     @Query("SELECT * FROM HolidayCalendar WHERE umCalendarUid = :uid AND CAST(umCalendarActive AS INTEGER) = 1")
     abstract fun findByUidLive(uid: Long): DoorLiveData<HolidayCalendar?>
 
+    @Update
+    abstract suspend fun updateAsync(entity: HolidayCalendar):Int
 
     @Query("SELECT * FROM HolidayCalendar WHERE umCalendarUid = :uid")
     abstract fun findByUid(uid: Long): HolidayCalendar?
