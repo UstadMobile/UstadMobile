@@ -87,6 +87,15 @@ interface EpubContentView : UstadView {
     @JsName("goToLinearSpinePosition")
     var spinePosition: Int
 
+    /**
+     * Scroll to the given page as per the spinePosition with an optional hash anchor
+     *
+     * @param spinePosition as per the spine position property
+     * @param hashAnchor the anchor (if any)
+     */
+    fun scrollToSpinePosition(spinePosition: Int, hashAnchor: String? = null)
+
+
     companion object {
 
         const val VIEW_NAME = "EpubContent"

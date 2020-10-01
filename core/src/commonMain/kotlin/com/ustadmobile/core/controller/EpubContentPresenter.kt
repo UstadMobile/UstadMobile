@@ -69,6 +69,8 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
@@ -115,6 +117,8 @@ class EpubContentPresenter(context: Any,
     private val accountManager: UstadAccountManager by instance()
 
     private val mountHandler: ContainerMounter by instance()
+
+    private val systemImpl: UstadMobileSystemImpl by instance()
 
     //The time that the
     private var startTime: Long = 0L
@@ -254,10 +258,14 @@ class EpubContentPresenter(context: Any,
     fun handleClickNavItem(navItem: EpubNavItem) {
         val opfUrl = opfBaseUrl
         if (opfUrl != null && linearSpineUrls.isNotEmpty()) {
-            val navItemUrl = navItem.href?.let { UMFileUtil.resolveLink(opfUrl, it) }
+            val navItemUrl = navItem.href?.let { UMFileUtil.resolveLink(opfUrl, it.substringBeforeLast("#")) }
             val hrefIndex = listOf(*linearSpineUrls).indexOf(navItemUrl)
             if (hrefIndex != -1) {
+                epubContentView.scrollToSpinePosition(hrefIndex, navItem.href?.substringAfterLast("#", ""))
                 epubContentView.spinePosition = hrefIndex
+            }else {
+                epubContentView.showSnackBar(systemImpl.getString(MessageID.error_message_load_page,
+                    context))
             }
         }
     }

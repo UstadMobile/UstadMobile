@@ -32,6 +32,8 @@ import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.appbar_material_with_progress.view.*
 import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.runBlocking
 
 class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnItemClickListener, TocListView.OnItemClickListener {
 
@@ -109,12 +111,19 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
     override var spinePosition: Int = 0
         set(value) {
-            mBinding.epubPageRecyclerView.post {
-                recyclerViewLinearLayout.scrollToPositionWithOffset(spinePosition, 0)
-            }
+            scrollToSpinePosition(value, "")
 
             field = value
         }
+
+    override fun scrollToSpinePosition(spinePosition: Int, hashAnchor: String?) {
+        mBinding.epubPageRecyclerView.post {
+            recyclerViewLinearLayout.scrollToPositionWithOffset(spinePosition, 0)
+        }
+
+
+
+    }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (item.itemId == R.id.menu_epub_content_showtoc) {
@@ -166,8 +175,22 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
         private var gestureDetector: GestureDetectorCompat? = null
 
+        private val boundHolders = mutableListOf<EpubContentViewHolder>()
+
+        //This is a map of any anchors that should be scrolled to.
+        private val anchorsToScrollTo = mutableMapOf<Int, String?>()
+
         inner class EpubContentViewHolder internal constructor(val mBinding: ItemEpubcontentViewBinding) :
-                RecyclerView.ViewHolder(mBinding.root)
+                RecyclerView.ViewHolder(mBinding.root) {
+
+            var pageIndex: Int = -1
+
+            fun scrollToAnchor(anchor: String) {
+                //mBinding.epubContentview.evaluateJavascript()
+            }
+
+
+        }
 
         @SuppressLint("SetJavaScriptEnabled", "ObsoleteSdkInt", "ClickableViewAccessibility")
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EpubContentViewHolder {
@@ -189,6 +212,22 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
         override fun onBindViewHolder(holderContent: EpubContentViewHolder, position: Int) {
             holderContent.mBinding.epubContentview.loadUrl(getItem(position))
+            holderContent.pageIndex = position
+
+            val scrollToAnchor = anchorsToScrollTo[position]
+            if(scrollToAnchor != null) {
+                holderContent.scrollToAnchor(scrollToAnchor)
+                anchorsToScrollTo[position] = null
+            }
+        }
+
+        fun scrollToAnchor(position: Int, anchorName: String) {
+            val boundHolder = boundHolders.filter { it.pageIndex == position }.firstOrNull()
+            if(boundHolder != null) {
+                boundHolder.scrollToAnchor(anchorName)
+            }else {
+                anchorsToScrollTo[position] = anchorName
+            }
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
