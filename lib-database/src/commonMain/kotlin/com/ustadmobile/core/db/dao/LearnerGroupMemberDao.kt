@@ -33,7 +33,4 @@ abstract class LearnerGroupMemberDao : BaseDao<LearnerGroupMember> {
     """)
     abstract fun findLearnerGroupMembersByGroupIdAndEntryList(learnerGroupUid: Long, contentEntryUid: Long): List<LearnerGroupMemberWithPerson>
 
-    @Insert
-    abstract override suspend fun insertAsync(entity: LearnerGroupMember): Long
-
 }

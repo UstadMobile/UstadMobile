@@ -14,9 +14,6 @@ import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 @Dao
 abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
-    @Insert
-    abstract override fun insert(entity: Clazz): Long
-
     @Query("SELECT * FROM Clazz WHERE clazzUid = :uid")
     abstract fun findByUid(uid: Long): Clazz?
 

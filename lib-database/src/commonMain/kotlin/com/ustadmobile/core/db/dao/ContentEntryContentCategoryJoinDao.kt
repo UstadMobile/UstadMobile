@@ -20,7 +20,4 @@ abstract class ContentEntryContentCategoryJoinDao : BaseDao<ContentEntryContentC
     @Query("SELECT * from ContentEntryContentCategoryJoin WHERE " + "ceccjContentCategoryUid = :categoryUid AND ceccjContentEntryUid = :contentEntry")
     abstract fun findJoinByParentChildUuids(categoryUid: Long, contentEntry: Long): ContentEntryContentCategoryJoin?
 
-    @Update
-    abstract override fun update(entity: ContentEntryContentCategoryJoin)
-
 }

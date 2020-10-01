@@ -17,9 +17,6 @@ import com.ustadmobile.lib.db.entities.Role
 @Dao
 abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
-    @Insert
-    abstract override fun insert(entity: ClazzLog): Long
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replace(entity: ClazzLog): Long
 
