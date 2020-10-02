@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
@@ -122,7 +123,6 @@ class EpubContentPresenterTest {
 
     @Suppress("UNCHECKED_CAST")
     @Test
-    @Throws(IOException::class)
     fun givenValidEpub_whenCreated_shouldSetTitleAndSpineHrefsAndRecordProgress() {
         val args = HashMap<String, String>()
         args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
@@ -163,6 +163,25 @@ class EpubContentPresenterTest {
             client.close()
         }
 
+    }
+
+
+    @Test
+    fun givenValidEpubAndNavItemExists_whenHandleClickNavItemCalled_thenShouldCallScrollToSpinePosition() {
+        val args = HashMap<String, String>()
+        args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
+        args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+
+        val presenter = EpubContentPresenter(Any(), args, mockEpubView, di)
+        presenter.onCreate(args)
+        presenter.onStart()
+
+
+        verify(mockEpubView, timeout(15000)).containerTitle = opf!!.title!!
+
+        presenter.handleClickNavItem(EpubNavItem("Link with #", "4.xhtml#anchor", null, 0))
+
+        verify(mockEpubView).scrollToSpinePosition(3, "anchor")
     }
 
 }
