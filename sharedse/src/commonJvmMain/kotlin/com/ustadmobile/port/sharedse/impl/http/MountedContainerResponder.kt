@@ -41,8 +41,13 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
 
             val filterList = uriResource.initParameter(PARAM_FILTERS_INDEX, List::class.java)
                     as List<MountedContainerFilter>
-            var response = newResponseFromFile(uriResource, session,
-                    FileSource(File(entryFile.containerEntryFile!!.cefPath!!)))
+
+            var responseFile = entryFile.containerEntryFile?.cefPath?.let { File(it) }
+                    ?: return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
+                    "text/plain", "Entry found but does not have containerEntryFile/cefPath: $pathInContainer uriResource.uri=${uriResource.uri}\n" +
+                    "requestUri=${requestUri}")
+
+            var response = newResponseFromFile(uriResource, session, FileSource(responseFile))
 
             if (entryFile.containerEntryFile!!.compression == COMPRESSION_GZIP)
                 response.addHeader("Content-Encoding", "gzip")
@@ -50,6 +55,7 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
             for (filter in filterList) {
                 response = filter.filterResponse(response, uriResource, urlParams, session)
             }
+
             return response
         } catch (e: URISyntaxException) {
             e.printStackTrace()

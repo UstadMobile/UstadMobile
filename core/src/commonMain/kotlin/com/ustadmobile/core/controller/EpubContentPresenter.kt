@@ -92,6 +92,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.js.JsName
+import kotlin.jvm.Volatile
 import kotlin.math.max
 
 /**
@@ -128,6 +129,13 @@ class EpubContentPresenter(context: Any,
     var contentEntryUid: Long = 0L
 
     var maxPageReached: Int = 0
+
+    var mCurrentPage: Int = 0
+
+    private val pageTitles = mutableMapOf<Int, String?>()
+
+    @Volatile
+    private var mNavDocument: EpubNavDocument? = null
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -237,7 +245,10 @@ class EpubContentPresenter(context: Any,
             if(navUrlToLoad != null) {
                 val navContent = client.get<String>(navUrlToLoad)
 
-                val navDocument = EpubNavDocument()
+                val navDocument = EpubNavDocument().also {
+                    mNavDocument = it
+                }
+
                 val navParser = KMPXmlParser()
                 navParser.setInput(ByteArrayInputStream(navContent.toByteArray()), "UTF-8")
                 navDocument.load(navParser)
@@ -261,8 +272,8 @@ class EpubContentPresenter(context: Any,
             val navItemUrl = navItem.href?.let { UMFileUtil.resolveLink(opfUrl, it.substringBeforeLast("#")) }
             val hrefIndex = listOf(*linearSpineUrls).indexOf(navItemUrl)
             if (hrefIndex != -1) {
-                epubContentView.scrollToSpinePosition(hrefIndex, navItem.href?.substringAfterLast("#", ""))
-                epubContentView.spinePosition = hrefIndex
+                epubContentView.scrollToSpinePosition(hrefIndex,
+                        navItem.href?.substringAfterLast("#", ""))
             }else {
                 epubContentView.showSnackBar(systemImpl.getString(MessageID.error_message_load_page,
                     context))
@@ -271,7 +282,21 @@ class EpubContentPresenter(context: Any,
     }
 
     fun handlePageChanged(index: Int) {
+        mCurrentPage = index
         maxPageReached = max(index, maxPageReached)
+        updateWindowTitle()
+    }
+
+    fun handlePageTitleChanged(index: Int, title: String?) {
+        pageTitles[index] = title
+        updateWindowTitle()
+    }
+
+    private fun updateWindowTitle() {
+        val relativeHref = opfBaseUrl?.let { linearSpineUrls[mCurrentPage].substringAfter(it, "") } ?: ""
+        if(mCurrentPage == mCurrentPage)
+            view.windowTitle = pageTitles[mCurrentPage] ?:  mNavDocument?.getNavByHref(relativeHref)?.title
+                    ?: view.containerTitle ?: ""
     }
 
 
