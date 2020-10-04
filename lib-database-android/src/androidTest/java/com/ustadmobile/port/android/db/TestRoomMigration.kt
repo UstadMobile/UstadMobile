@@ -106,7 +106,7 @@ class TestRoomMigration {
     }
 
     @Test
-    fun migrate42to43() {
+    fun migrate40to41() {
         helper.createDatabase(TEST_DB, 40).apply {
             close()
         }
