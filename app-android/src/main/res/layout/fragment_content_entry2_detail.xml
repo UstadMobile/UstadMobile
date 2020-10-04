@@ -9,6 +9,8 @@
 
         <import type="com.ustadmobile.core.util.ext.DownloadJobExtKt" />
 
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+
         <import type="com.ustadmobile.lib.db.entities.ContentEntryProgress" />
 
         <variable
@@ -117,6 +119,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_8dp"
                 android:text="@{contentEntry.author}"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(contentEntry.author)}"
                 android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
@@ -129,6 +132,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_8dp"
                 android:text="@{contentEntry.publisher}"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(contentEntry.publisher)}"
                 android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
@@ -142,7 +146,7 @@
                 android:layout_margin="@dimen/dimen_8dp"
                 android:text="@{@string/entry_details_license + contentEntry.licenseName}"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body2"
-                android:visibility="@{contentEntry.licenseName == null ? View.GONE: View.VISIBLE}"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(contentEntry.licenseName)}"
                 app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
                 tools:text="BY_SA" />
@@ -154,6 +158,7 @@
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_8dp"
                 android:textAppearance="@style/UmTheme.TextAppearance.Subtitle2"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(contentEntry.licenseName)}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/entry_detail_license_label"
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_publisher"
@@ -166,6 +171,7 @@
                 android:layout_margin="@dimen/dimen_8dp"
                 android:textAppearance="@style/UmTheme.TextAppearance.Caption"
                 app:fileSize="@{contentEntry.container.fileSize}"
+                android:visibility="@{contentEntry.container.fileSize != 0 ? View.VISIBLE : View.GONE}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/entry_detail_thumbnail"
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_license_label"
@@ -246,7 +252,6 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/locally_available_bottom_barrier" />
 
-
             <TextView
                 android:id='@+id/entry_detail_delete_button'
                 android:layout_width="wrap_content"
@@ -283,6 +288,7 @@
                 android:background="?attr/selectableItemBackground"
                 android:onClick="@{()-> fragmentEventHandler.handleOnClickGroupActivityButton()}"
                 app:drawableTint="@color/colorPrimary"
+                app:layout_constraintBaseline_toBaselineOf="@id/entry_detail_delete_button"
                 android:visibility="@{DownloadJobExtKt.isStatusCompletedSuccessfully(downloadJobItem) ? View.VISIBLE : View.GONE}"
                 app:drawableTopCompat="@drawable/ic_group_white_24dp"
                 app:layout_constraintBottom_toTopOf="@id/description_divider"
@@ -290,7 +296,6 @@
                 app:layout_constraintHorizontal_chainStyle="spread"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/library_size_divider" />
-
 
 
             <androidx.appcompat.widget.AppCompatImageView

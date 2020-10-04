@@ -62,6 +62,7 @@ class LearnerGroupEndToEndTest : TestCase() {
         }
 
         ContentEntry().apply {
+            title = "Hello World Example"
             contentEntryUid = 1
             dbRule.repo.contentEntryDao.insert(this)
         }
