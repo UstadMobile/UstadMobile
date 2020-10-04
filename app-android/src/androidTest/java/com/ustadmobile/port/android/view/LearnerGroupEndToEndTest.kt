@@ -6,6 +6,7 @@ import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.pressBack
+import androidx.test.espresso.web.webdriver.Locator
 import com.agoda.kakao.common.views.KView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.ustadmobile.core.view.ContentEntry2DetailView
@@ -72,7 +73,7 @@ class LearnerGroupEndToEndTest : TestCase() {
         }
         val containerTmpDir = UmFileUtilSe.makeTempDir("xapicontent", "${System.currentTimeMillis()}")
         val testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)
-        val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/XapiPackage-JsTetris_TCAPI.zip")
+        val input = javaClass.getResourceAsStream("/com/ustadmobile/port/android/view/tincan-group.zip")
         testFile.outputStream().use { input?.copyTo(it) }
 
         val containerManager = ContainerManager(container, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
@@ -163,11 +164,16 @@ class LearnerGroupEndToEndTest : TestCase() {
             }
             MainActivityScreen{
                 toolBarTitle{
-                    hasDescendant { withText("Tin Can Tetris Example") }
+                    hasDescendant { withText("Hello World Example") }
                     isDisplayed()
                 }
             }
             XapiContentScreen{
+                webView{
+                    withElement(Locator.CSS_SELECTOR, "h2"){
+                        hasText("Hello World")
+                    }
+                }
                 val statement = dbRule.repo.statementDao.getOneStatement()
                         .waitUntilWithActivityScenario(activityScenario!!){
                             it?.fullStatement?.contains("Group") == true
