@@ -1,8 +1,5 @@
 package com.ustadmobile.core.contentformats.xapi
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 class Actor {
 
     var name: String? = null
@@ -19,7 +16,6 @@ class Actor {
 
     var account: Account? = null
 
-    @Serializable
     inner class Account {
 
         var name: String? = null

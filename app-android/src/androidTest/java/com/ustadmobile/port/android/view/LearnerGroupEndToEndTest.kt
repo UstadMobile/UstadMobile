@@ -5,6 +5,7 @@ import android.content.Intent
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
+import androidx.test.espresso.Espresso.pressBack
 import com.agoda.kakao.common.views.KView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.ustadmobile.core.view.ContentEntry2DetailView
@@ -21,6 +22,9 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.port.android.screen.*
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.port.android.util.clickOptionMenu
+import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
+import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -46,17 +50,19 @@ class LearnerGroupEndToEndTest : TestCase() {
             admin = true
             firstNames = "Test"
             lastName = "Teacher"
+            username = "Ms Teach"
         })
 
         Person().apply {
             firstNames = "New"
             lastName = "Student"
-            personUid = dbRule.db.personDao.insert(this)
+            username = "Star"
+            personUid = dbRule.repo.personDao.insert(this)
         }
 
         ContentEntry().apply {
             contentEntryUid = 1
-            dbRule.db.contentEntryDao.insert(this)
+            dbRule.repo.contentEntryDao.insert(this)
         }
 
         val container = Container().apply {
@@ -155,14 +161,22 @@ class LearnerGroupEndToEndTest : TestCase() {
                     }
                 }
             }
-            // XapiContentScreen
             MainActivityScreen{
                 toolBarTitle{
                     hasDescendant { withText("Tin Can Tetris Example") }
                     isDisplayed()
                 }
-                pressBack()
             }
+            XapiContentScreen{
+                val statement = dbRule.repo.statementDao.getOneStatement()
+                        .waitUntilWithActivityScenario(activityScenario!!){
+                            it?.fullStatement?.contains("Group") == true
+                        }
+                val groupActor = dbRule.repo.agentDao.getAgentByAnyId(account = "group:1", homepage = "http://localhost/")
+                Assert.assertEquals("Agent id matches on statement", groupActor!!.agentUid, statement!!.agentUid)
+                Assert.assertEquals("group id is same account name", "group:1", groupActor!!.agentAccountName)
+            }
+            pressBack()
             ContentEntryDetailScreen {
                 groupActivityButton {
                     isVisible()
