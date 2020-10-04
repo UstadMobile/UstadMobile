@@ -14,6 +14,7 @@ import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
@@ -33,6 +34,10 @@ class LearnerGroupEndToEndTest : TestCase() {
     @JvmField
     @Rule
     var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
 
     @Before
     fun setup() {
@@ -164,7 +169,6 @@ class LearnerGroupEndToEndTest : TestCase() {
                     isDisplayed()
                 }
             }
-
 
         }
 

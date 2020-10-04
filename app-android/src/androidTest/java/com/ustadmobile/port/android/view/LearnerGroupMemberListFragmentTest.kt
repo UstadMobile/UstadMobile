@@ -6,6 +6,7 @@ import androidx.test.core.app.launchActivity
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
@@ -29,6 +30,9 @@ class LearnerGroupMemberListFragmentTest : TestCase() {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
 
     @Before
     fun setup() {

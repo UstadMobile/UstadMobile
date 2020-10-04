@@ -35,14 +35,12 @@ import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
 import com.ustadmobile.test.port.android.util.*
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.hamcrest.Matchers.not
 import org.junit.*
-import java.lang.Thread.sleep
 
 
 @AdbScreenRecord("PersonEdit screen Test")
@@ -89,7 +87,7 @@ class PersonEditFragmentTest : TestCase() {
         launchFragment(false, fillForm = false)
         PersonEditScreen {
             scrollToBottom()
-            ClazzListRecyclerView {
+            clazzListRecyclerView {
                 isDisplayed()
             }
             clazzListHeaderTextView {
@@ -204,9 +202,17 @@ class PersonEditFragmentTest : TestCase() {
     fun givenPersonEditOpened_whenInNoRegistrationMode_thenUsernameAndPasswordShouldBeHidden() {
         launchFragment(false, fillForm = false)
 
-        onView(withId(R.id.username_textinputlayout)).check(matches(not(isDisplayed())))
-        onView(withId(R.id.password_textinputlayout)).check(matches(not(isDisplayed())))
-        onView(withId(R.id.confirm_password_textinputlayout)).check(matches(not(isDisplayed())))
+        PersonEditScreen{
+            usernameTextInput{
+                isNotDisplayed()
+            }
+            passwordTextInput{
+                isNotDisplayed()
+            }
+            confirmPassTextInput{
+                isNotDisplayed()
+            }
+        }
     }
 
     @AdbScreenRecord("given person edit opened in registration mode classes should be hidden")
@@ -214,11 +220,15 @@ class PersonEditFragmentTest : TestCase() {
     fun givenPersonEditOpened_whenInRegistrationMode_thenClassesShouldBeHidden() {
         launchFragment(true, fillForm = false)
 
-
-        scrollToBottom()
-
-        onView(withId(R.id.clazzlist_recyclerview)).check(matches(not(isDisplayed())))
-        onView(withId(R.id.clazzlist_header_textview)).check(matches(not(isDisplayed())))
+        PersonEditScreen{
+            scrollToBottom()
+            clazzListRecyclerView{
+                isNotDisplayed()
+            }
+            clazzListHeaderTextView{
+                isNotDisplayed()
+            }
+        }
     }
 
     @AdbScreenRecord("given person edit opened in registration mode when username and " +
@@ -227,13 +237,15 @@ class PersonEditFragmentTest : TestCase() {
     fun givenPersonEditOpenedInRegistrationMode_whenUserNameAndPasswordAreNotFilled_thenShouldShowErrors() {
         launchFragment(registrationMode = true, leftOutPassword = true, leftOutUsername = true)
 
-        scrollToBottom()
-
-        onView(withId(R.id.username_textinputlayout)).check(matches(
-                hasInputLayoutError(context.getString(R.string.field_required_prompt))))
-
-        onView(withId(R.id.password_textinputlayout)).check(matches(
-                hasInputLayoutError(context.getString(R.string.field_required_prompt))))
+        PersonEditScreen{
+            scrollToBottom()
+            usernameTextInput{
+                hasInputLayoutError(context.getString(R.string.field_required_prompt))
+            }
+            passwordTextInput{
+                hasInputLayoutError(context.getString(R.string.field_required_prompt))
+            }
+        }
     }
 
     @AdbScreenRecord("given person edit opened in registration mode when dateOfBirth " +
@@ -241,8 +253,12 @@ class PersonEditFragmentTest : TestCase() {
     @Test
     fun givenPersonEditOpenedInRegistrationMode_whenDateOfBirthAreNotFilled_thenShouldShowErrors() {
         launchFragment(registrationMode = true, leftOutDateOfBirth = true)
-        onView(withId(R.id.birthday_textinputlayout)).check(matches(
-                hasInputLayoutError(context.getString(R.string.field_required_prompt))))
+
+        PersonEditScreen{
+            birthdayTextInput{
+                hasInputLayoutError(context.getString(R.string.field_required_prompt))
+            }
+        }
     }
 
     @AdbScreenRecord("given person edit opened in registration mode when dateOfBirth " +
@@ -251,8 +267,12 @@ class PersonEditFragmentTest : TestCase() {
     fun givenPersonEditOpenedInRegistrationMode_whenDateOfBirthIsLessThan13YearsOfAge_thenShouldShowErrors() {
         launchFragment(registrationMode = true,
                 selectedDateOfBirth = DateTime(2010, 10, 24).unixMillisLong)
-        onView(withId(R.id.birthday_textinputlayout)).check(matches(
-                hasInputLayoutError(context.getString(R.string.underRegistrationAgeError))))
+
+        PersonEditScreen{
+            birthdayTextInput{
+                hasInputLayoutError(context.getString(R.string.underRegistrationAgeError))
+            }
+        }
     }
 
 
@@ -262,13 +282,15 @@ class PersonEditFragmentTest : TestCase() {
     fun givenPersonEditOpenedInRegistrationMode_whenPasswordDoNotMatch_thenShouldShowErrors() {
         launchFragment(registrationMode = true, misMatchPassword = true)
 
-        scrollToBottom()
-
-        onView(withId(R.id.password_textinputlayout)).check(matches(
-                hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
-
-        onView(withId(R.id.confirm_password_textinputlayout)).check(matches(
-                hasInputLayoutError(context.getString(R.string.filed_password_no_match))))
+        PersonEditScreen{
+            scrollToBottom()
+            passwordTextInput{
+                hasInputLayoutError(context.getString(R.string.filed_password_no_match))
+            }
+            confirmPassTextInput{
+                hasInputLayoutError(context.getString(R.string.filed_password_no_match))
+            }
+        }
     }
 
     @AdbScreenRecord("given person edit opened in registration mode when try to register " +
@@ -278,11 +300,12 @@ class PersonEditFragmentTest : TestCase() {
         mockWebServer.enqueue(MockResponse().setResponseCode(409))
         launchFragment(registrationMode = true, misMatchPassword = false, leftOutUsername = false)
 
-        sleep(5000)
-
-        scrollToBottom()
-        onView(withId(R.id.username_textinputlayout)).check(matches(
-                hasInputLayoutError(context.getString(R.string.person_exists))))
+        PersonEditScreen{
+            scrollToBottom()
+            usernameTextInput{
+                hasInputLayoutError(context.getString(R.string.person_exists))
+            }
+        }
     }
 
 
