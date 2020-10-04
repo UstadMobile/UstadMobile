@@ -36,7 +36,6 @@ import kotlinx.coroutines.CompletableDeferred
 class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnItemClickListener,
         TocListView.OnItemClickListener {
 
-
     /**
      * Javascript interface that is used as part of the system to manage scrolling to a hash link
      * e.g. #anchor
@@ -127,16 +126,10 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
             field = value
         }
 
-    private var spinePosition: Int = 0
-        set(value) {
-            field = value
-
-            //mContentPagerAdapter?.updateTitleFromPosition(spinePosition)
-        }
-
     override fun scrollToSpinePosition(spinePosition: Int, hashAnchor: String?) {
         mBinding.epubPageRecyclerView.post {
             recyclerViewLinearLayout.scrollToPositionWithOffset(spinePosition, 0)
+            mContentPagerAdapter?.focusChildPosition(spinePosition)
             mPresenter?.handlePageChanged(spinePosition)
         }
 
@@ -196,7 +189,6 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
             loaded = false
-            view?.adjustHeightToDisplayHeight()
         }
 
         override fun onPageFinished(view: WebView?, url: String?) {
@@ -237,7 +229,6 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
                 mPresenter?.handlePageTitleChanged(pageIndex, pageTitleVal)
             }
-
     }
 
     inner class EpubContentPagerAdapter(var scrollDownInterface: ScrollDownJavascriptInterface?) :
@@ -251,6 +242,8 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
         //This is a map of any anchors that should be scrolled to.
         private val anchorsToScrollTo = mutableMapOf<Int, String?>()
+
+        private var nextFocus: Int = -1
 
         @SuppressLint("SetJavaScriptEnabled", "ObsoleteSdkInt", "ClickableViewAccessibility")
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): EpubContentViewHolder {
@@ -292,12 +285,19 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
                 holderContent.epubWebViewClient.targetAnchor = scrollToAnchor
             }
 
+            if(nextFocus == position) {
+                holderContent.mBinding.root.requestFocus()
+                nextFocus = -1
+            }
+
             boundHolders += holderContent
         }
 
         override fun onViewRecycled(holder: EpubContentViewHolder) {
             super.onViewRecycled(holder)
 
+            holder.mBinding.epubContentview.adjustHeightToDisplayHeight()
+            holder.mBinding.epubContentview.loadUrl("about:blank")
             boundHolders -= holder
         }
 
@@ -318,6 +318,33 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
             }
         }
 
+        /**
+         * Move the focus to the given child. This will ensure that the primary page (e.g. the
+         * first visible item that takes up at least half the screen) will stay in place when other
+         * views move around as WebViews load and heights are changed.
+         *
+         * Otherwise the first (even slightly) visible item will be given focus. When scrolling up,
+         * the previous page would load, get taller, and then suddenly what the user was reading
+         * would no longer be visible.
+         */
+        fun focusChildPosition(position: Int) {
+            val boundHolder = boundHolders.filter { it.pageIndex == position }.firstOrNull()
+
+            if(boundHolder != null) {
+                val posOnWindow = IntArray(2).apply {
+                    boundHolder.mBinding.root.getLocationInWindow(this)
+                }
+
+                if(posOnWindow[1] + boundHolder.mBinding.root.height < (window.decorView.height / 2)) {
+                    focusChildPosition(position + 1)
+                }else {
+                    boundHolder.mBinding.root.requestFocus()
+                    nextFocus = -1
+                }
+            }else {
+                nextFocus = position
+            }
+        }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
             super.onDetachedFromRecyclerView(recyclerView)
@@ -331,7 +358,11 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
     private val mOnScrollListener = object: RecyclerView.OnScrollListener() {
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             if(newState == RecyclerView.SCROLL_STATE_IDLE) {
-                mPresenter?.handlePageChanged(recyclerViewLinearLayout.findFirstVisibleItemPosition())
+                val firstVisiblePosition = recyclerViewLinearLayout.findFirstVisibleItemPosition()
+                mPresenter?.handlePageChanged(firstVisiblePosition)
+
+                //if the first position bottom is above the middle of the screen, choose the next one
+                mContentPagerAdapter?.focusChildPosition(firstVisiblePosition)
             }
         }
     }
@@ -382,8 +413,9 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         }
 
         mContentPagerAdapter = EpubContentPagerAdapter(mScrollDownInterface)
-        recyclerViewLinearLayout = LinearLayoutManager(this)
+        recyclerViewLinearLayout = NoFocusScrollLinearLayoutManager(this)
 
+        mBinding.epubPageRecyclerView.setItemViewCacheSize(2)
         mBinding.epubPageRecyclerView.layoutManager = recyclerViewLinearLayout
         mBinding.epubPageRecyclerView.addItemDecoration(DividerItemDecoration(this,
             DividerItemDecoration.VERTICAL))
