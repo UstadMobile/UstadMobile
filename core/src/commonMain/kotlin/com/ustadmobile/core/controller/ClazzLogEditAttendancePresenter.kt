@@ -135,10 +135,13 @@ class ClazzLogEditAttendancePresenter(context: Any,
         entity.clazzLogNumPresent = clazzLogAttendanceRecords.count { it.attendanceStatus == STATUS_ATTENDED }
         entity.clazzLogNumAbsent = clazzLogAttendanceRecords.count { it.attendanceStatus == STATUS_ABSENT }
         entity.clazzLogNumPartial = clazzLogAttendanceRecords.count { it.attendanceStatus == STATUS_PARTIAL }
-        repo.clazzLogDao.update(entity)
+        GlobalScope.launch() {
+            repo.clazzLogDao.update(entity)
+            //now update the average attendance for the class
+            repo.clazzDao.updateClazzAttendanceAverage(entity.clazzLogClazzUid)
+        }
 
-        //now update the average attendance for the class
-        repo.clazzDao.updateClazzAttendanceAverage(entity.clazzLogClazzUid)
+
     }
 
     override fun handleClickSave(entity: ClazzLog) {
