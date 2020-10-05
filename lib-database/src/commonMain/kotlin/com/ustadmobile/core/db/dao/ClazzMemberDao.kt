@@ -18,9 +18,6 @@ import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson
 abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
     @Insert
-    abstract override fun insert(entity: ClazzMember): Long
-
-    @Insert
     abstract fun insertListAsync(entityList: List<ClazzMember>)
 
     open suspend fun updateDateLeft(clazzMemberUidList: List<Long>, endDate: Long) {
@@ -34,9 +31,6 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 
     @Query("UPDATE ClazzMember SET clazzMemberDateLeft = :endDate WHERE clazzMemberUid = :clazzMemberUid")
     abstract suspend fun updateDateLeftByUid(clazzMemberUid: Long, endDate: Long)
-
-    @Update
-    abstract override fun update(entity: ClazzMember)
 
     @Update
     abstract suspend fun updateAsync(entity: ClazzMember): Int

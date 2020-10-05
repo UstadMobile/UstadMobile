@@ -13,8 +13,7 @@ import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
-    ClazzLog::class, ClazzLogAttendanceRecord::class, PersonField::class,
-    PersonDetailPresenterField::class,
+    ClazzLog::class, ClazzLogAttendanceRecord::class,
     Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
     ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
@@ -38,12 +37,13 @@ import kotlin.jvm.Volatile
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
     Report::class, ReportFilter::class,
     DeviceSession::class, WorkSpace::class, ContainerUploadJob::class,
-    SqliteSyncablePrimaryKey::class
+    SqliteSyncablePrimaryKey::class, LearnerGroup::class, LearnerGroupMember::class,
+    GroupLearningSession::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 40)
+], version = 41)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -202,6 +202,15 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("agentDao")
     abstract val agentDao: AgentDao
 
+    @JsName("learnerGroupDao")
+    abstract val learnerGroupDao: LearnerGroupDao
+
+    @JsName("learnerGroupMemberDao")
+    abstract val learnerGroupMemberDao: LearnerGroupMemberDao
+
+    @JsName("groupLearningSessionDao")
+    abstract val groupLearningSessionDao: GroupLearningSessionDao
+
     @JsName("contentEntryProgressDao")
     abstract val contentEntryProgressDao: ContentEntryProgressDao
 
@@ -213,8 +222,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val customFieldDao: CustomFieldDao
     abstract val customFieldValueDao: CustomFieldValueDao
     abstract val customFieldValueOptionDao: CustomFieldValueOptionDao
-
-    abstract val personDetailPresenterFieldDao: PersonDetailPresenterFieldDao
 
     abstract val scheduleDao: ScheduleDao
 
@@ -1312,11 +1319,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-        val MIGRATION_38_39 = object: DoorMigration(38, 39) {
+        val MIGRATION_38_39 = object : DoorMigration(38, 39) {
             override fun migrate(db: DoorSqlDatabase) {
                 db.execSQL("CREATE TABLE IF NOT EXISTS SqliteSyncablePrimaryKey (sspTableId INTEGER NOT NULL PRIMARY KEY, sspNextPrimaryKey INTEGER NOT NULL)")
 
-                if(db.dbType() != DoorDbType.SQLITE)
+                if (db.dbType() != DoorDbType.SQLITE)
                     return
                 db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (14, (SELECT COALESCE((SELECT MAX(clazzLogUid) FROM ClazzLog WHERE clazzLogUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
                 db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (15, (SELECT COALESCE((SELECT MAX(clazzLogAttendanceRecordUid) FROM ClazzLogAttendanceRecord WHERE clazzLogAttendanceRecordUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
@@ -1447,7 +1454,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     """.trimMargin())
 
 
-                } else if (database.dbType() == DoorDbType.POSTGRES){
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
                     //Person
                     database.execSQL("ALTER TABLE Person ADD COLUMN personGroupUid BIGINT DEFAULT 0 NOT NULL")
 
@@ -1459,12 +1466,344 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
 
+        val MIGRATION_40_41 = object : DoorMigration(40, 41) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("DROP TABLE PersonDetailPresenterField")
+                database.execSQL("DROP TABLE PersonDetailPresenterField_trk")
+                database.execSQL("DROP TABLE PersonField")
+                database.execSQL("DROP TABLE PersonField_trk")
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN statementLearnerGroupUid INTEGER DEFAULT 0 NOT NULL")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroup (`learnerGroupUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `learnerGroupName` TEXT, `learnerGroupDescription` TEXT, `learnerGroupActive` INTEGER NOT NULL, `learnerGroupMCSN` INTEGER NOT NULL, `learnerGroupCSN` INTEGER NOT NULL, `learnerGroupLCB` INTEGER NOT NULL)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroup_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_LearnerGroup_trk_clientId_epk_rx_csn` ON LearnerGroup_trk (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_301
+          |AFTER UPDATE ON LearnerGroup FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.learnerGroupMCSN = 0 
+          |OR OLD.learnerGroupMCSN = NEW.learnerGroupMCSN
+          |)
+          |ELSE
+          |(NEW.learnerGroupCSN = 0  
+          |OR OLD.learnerGroupCSN = NEW.learnerGroupCSN
+          |) END)
+          |BEGIN 
+          |UPDATE LearnerGroup SET learnerGroupCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupCSN 
+          |ELSE (SELECT MAX(MAX(learnerGroupCSN), OLD.learnerGroupCSN) + 1 FROM LearnerGroup) END),
+          |learnerGroupMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(learnerGroupMCSN), OLD.learnerGroupMCSN) + 1 FROM LearnerGroup)
+          |ELSE NEW.learnerGroupMCSN END)
+          |WHERE learnerGroupUid = NEW.learnerGroupUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_301
+          |AFTER INSERT ON LearnerGroup FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.learnerGroupMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.learnerGroupCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE LearnerGroup SET learnerGroupCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupCSN 
+          |ELSE (SELECT MAX(learnerGroupCSN) + 1 FROM LearnerGroup) END),
+          |learnerGroupMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(learnerGroupMCSN) + 1 FROM LearnerGroup)
+          |ELSE NEW.learnerGroupMCSN END)
+          |WHERE learnerGroupUid = NEW.learnerGroupUid
+          |; END
+          """.trimMargin())
+
+
+                    database.execSQL( "CREATE TABLE IF NOT EXISTS LearnerGroupMember (`learnerGroupMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `learnerGroupMemberPersonUid` INTEGER NOT NULL, `learnerGroupMemberLgUid` INTEGER NOT NULL, `learnerGroupMemberRole` INTEGER NOT NULL, `learnerGroupMemberActive` INTEGER NOT NULL, `learnerGroupMemberMCSN` INTEGER NOT NULL, `learnerGroupMemberCSN` INTEGER NOT NULL, `learnerGroupMemberLCB` INTEGER NOT NULL)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroupMember_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_LearnerGroupMember_trk_clientId_epk_rx_csn` ON LearnerGroupMember_trk (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_300
+          |AFTER UPDATE ON LearnerGroupMember FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.learnerGroupMemberMCSN = 0 
+          |OR OLD.learnerGroupMemberMCSN = NEW.learnerGroupMemberMCSN
+          |)
+          |ELSE
+          |(NEW.learnerGroupMemberCSN = 0  
+          |OR OLD.learnerGroupMemberCSN = NEW.learnerGroupMemberCSN
+          |) END)
+          |BEGIN 
+          |UPDATE LearnerGroupMember SET learnerGroupMemberCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupMemberCSN 
+          |ELSE (SELECT MAX(MAX(learnerGroupMemberCSN), OLD.learnerGroupMemberCSN) + 1 FROM LearnerGroupMember) END),
+          |learnerGroupMemberMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(learnerGroupMemberMCSN), OLD.learnerGroupMemberMCSN) + 1 FROM LearnerGroupMember)
+          |ELSE NEW.learnerGroupMemberMCSN END)
+          |WHERE learnerGroupMemberUid = NEW.learnerGroupMemberUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_300
+          |AFTER INSERT ON LearnerGroupMember FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.learnerGroupMemberMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.learnerGroupMemberCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE LearnerGroupMember SET learnerGroupMemberCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupMemberCSN 
+          |ELSE (SELECT MAX(learnerGroupMemberCSN) + 1 FROM LearnerGroupMember) END),
+          |learnerGroupMemberMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(learnerGroupMemberMCSN) + 1 FROM LearnerGroupMember)
+          |ELSE NEW.learnerGroupMemberMCSN END)
+          |WHERE learnerGroupMemberUid = NEW.learnerGroupMemberUid
+          |; END
+          """.trimMargin())
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS GroupLearningSession (`groupLearningSessionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupLearningSessionContentUid` INTEGER NOT NULL, `groupLearningSessionLearnerGroupUid` INTEGER NOT NULL, `groupLearningSessionInactive` INTEGER NOT NULL, `groupLearningSessionMCSN` INTEGER NOT NULL, `groupLearningSessionCSN` INTEGER NOT NULL, `groupLearningSessionLCB` INTEGER NOT NULL)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS GroupLearningSession_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_GroupLearningSession_trk_clientId_epk_rx_csn` ON GroupLearningSession_trk (`clientId`, `epk`, `rx`, `csn`)")
+
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_302
+          |AFTER UPDATE ON GroupLearningSession FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.groupLearningSessionMCSN = 0 
+          |OR OLD.groupLearningSessionMCSN = NEW.groupLearningSessionMCSN
+          |)
+          |ELSE
+          |(NEW.groupLearningSessionCSN = 0  
+          |OR OLD.groupLearningSessionCSN = NEW.groupLearningSessionCSN
+          |) END)
+          |BEGIN 
+          |UPDATE GroupLearningSession SET groupLearningSessionCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLearningSessionCSN 
+          |ELSE (SELECT MAX(MAX(groupLearningSessionCSN), OLD.groupLearningSessionCSN) + 1 FROM GroupLearningSession) END),
+          |groupLearningSessionMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(groupLearningSessionMCSN), OLD.groupLearningSessionMCSN) + 1 FROM GroupLearningSession)
+          |ELSE NEW.groupLearningSessionMCSN END)
+          |WHERE groupLearningSessionUid = NEW.groupLearningSessionUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_302
+          |AFTER INSERT ON GroupLearningSession FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.groupLearningSessionMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.groupLearningSessionCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE GroupLearningSession SET groupLearningSessionCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLearningSessionCSN 
+          |ELSE (SELECT MAX(groupLearningSessionCSN) + 1 FROM GroupLearningSession) END),
+          |groupLearningSessionMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(groupLearningSessionMCSN) + 1 FROM GroupLearningSession)
+          |ELSE NEW.groupLearningSessionMCSN END)
+          |WHERE groupLearningSessionUid = NEW.groupLearningSessionUid
+          |; END
+          """.trimMargin())
+
+
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN statementLearnerGroupUid BIGINT DEFAULT 0 NOT NULL")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroup (  learnerGroupName  TEXT , learnerGroupDescription  TEXT , learnerGroupActive  BOOL , learnerGroupMCSN  BIGINT , learnerGroupCSN  BIGINT , learnerGroupLCB  INTEGER , learnerGroupUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_301
+          |AFTER UPDATE ON LearnerGroup FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.learnerGroupMCSN = 0 
+          |OR OLD.learnerGroupMCSN = NEW.learnerGroupMCSN
+          |)
+          |ELSE
+          |(NEW.learnerGroupCSN = 0  
+          |OR OLD.learnerGroupCSN = NEW.learnerGroupCSN
+          |) END)
+          |BEGIN 
+          |UPDATE LearnerGroup SET learnerGroupCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupCSN 
+          |ELSE (SELECT MAX(MAX(learnerGroupCSN), OLD.learnerGroupCSN) + 1 FROM LearnerGroup) END),
+          |learnerGroupMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(learnerGroupMCSN), OLD.learnerGroupMCSN) + 1 FROM LearnerGroup)
+          |ELSE NEW.learnerGroupMCSN END)
+          |WHERE learnerGroupUid = NEW.learnerGroupUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_301
+          |AFTER INSERT ON LearnerGroup FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.learnerGroupMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.learnerGroupCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE LearnerGroup SET learnerGroupCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupCSN 
+          |ELSE (SELECT MAX(learnerGroupCSN) + 1 FROM LearnerGroup) END),
+          |learnerGroupMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(learnerGroupMCSN) + 1 FROM LearnerGroup)
+          |ELSE NEW.learnerGroupMCSN END)
+          |WHERE learnerGroupUid = NEW.learnerGroupUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroup_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_LearnerGroup_trk_clientId_epk_rx_csn 
+          |ON LearnerGroup_trk (clientId, epk, rx, csn)
+          """.trimMargin())
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroupMember (  learnerGroupMemberPersonUid  BIGINT , learnerGroupMemberLgUid  BIGINT , learnerGroupMemberRole  INTEGER , learnerGroupMemberActive  BOOL , learnerGroupMemberMCSN  BIGINT , learnerGroupMemberCSN  BIGINT , learnerGroupMemberLCB  INTEGER , learnerGroupMemberUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_300
+          |AFTER UPDATE ON LearnerGroupMember FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.learnerGroupMemberMCSN = 0 
+          |OR OLD.learnerGroupMemberMCSN = NEW.learnerGroupMemberMCSN
+          |)
+          |ELSE
+          |(NEW.learnerGroupMemberCSN = 0  
+          |OR OLD.learnerGroupMemberCSN = NEW.learnerGroupMemberCSN
+          |) END)
+          |BEGIN 
+          |UPDATE LearnerGroupMember SET learnerGroupMemberCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupMemberCSN 
+          |ELSE (SELECT MAX(MAX(learnerGroupMemberCSN), OLD.learnerGroupMemberCSN) + 1 FROM LearnerGroupMember) END),
+          |learnerGroupMemberMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(learnerGroupMemberMCSN), OLD.learnerGroupMemberMCSN) + 1 FROM LearnerGroupMember)
+          |ELSE NEW.learnerGroupMemberMCSN END)
+          |WHERE learnerGroupMemberUid = NEW.learnerGroupMemberUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_300
+          |AFTER INSERT ON LearnerGroupMember FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.learnerGroupMemberMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.learnerGroupMemberCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE LearnerGroupMember SET learnerGroupMemberCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupMemberCSN 
+          |ELSE (SELECT MAX(learnerGroupMemberCSN) + 1 FROM LearnerGroupMember) END),
+          |learnerGroupMemberMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(learnerGroupMemberMCSN) + 1 FROM LearnerGroupMember)
+          |ELSE NEW.learnerGroupMemberMCSN END)
+          |WHERE learnerGroupMemberUid = NEW.learnerGroupMemberUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroupMember_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_LearnerGroupMember_trk_clientId_epk_rx_csn 
+          |ON LearnerGroupMember_trk (clientId, epk, rx, csn)
+          """.trimMargin())
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS GroupLearningSession (  groupLearningSessionContentUid  BIGINT , groupLearningSessionLearnerGroupUid  BIGINT , groupLearningSessionInactive  BOOL , groupLearningSessionMCSN  BIGINT , groupLearningSessionCSN  BIGINT , groupLearningSessionLCB  INTEGER , groupLearningSessionUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_302
+          |AFTER UPDATE ON GroupLearningSession FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.groupLearningSessionMCSN = 0 
+          |OR OLD.groupLearningSessionMCSN = NEW.groupLearningSessionMCSN
+          |)
+          |ELSE
+          |(NEW.groupLearningSessionCSN = 0  
+          |OR OLD.groupLearningSessionCSN = NEW.groupLearningSessionCSN
+          |) END)
+          |BEGIN 
+          |UPDATE GroupLearningSession SET groupLearningSessionCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLearningSessionCSN 
+          |ELSE (SELECT MAX(MAX(groupLearningSessionCSN), OLD.groupLearningSessionCSN) + 1 FROM GroupLearningSession) END),
+          |groupLearningSessionMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(groupLearningSessionMCSN), OLD.groupLearningSessionMCSN) + 1 FROM GroupLearningSession)
+          |ELSE NEW.groupLearningSessionMCSN END)
+          |WHERE groupLearningSessionUid = NEW.groupLearningSessionUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_302
+          |AFTER INSERT ON GroupLearningSession FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.groupLearningSessionMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.groupLearningSessionCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE GroupLearningSession SET groupLearningSessionCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLearningSessionCSN 
+          |ELSE (SELECT MAX(groupLearningSessionCSN) + 1 FROM GroupLearningSession) END),
+          |groupLearningSessionMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(groupLearningSessionMCSN) + 1 FROM GroupLearningSession)
+          |ELSE NEW.groupLearningSessionMCSN END)
+          |WHERE groupLearningSessionUid = NEW.groupLearningSessionUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS GroupLearningSession_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_GroupLearningSession_trk_clientId_epk_rx_csn 
+          |ON GroupLearningSession_trk (clientId, epk, rx, csn)
+          """.trimMargin())
+
+
+                }
+
+
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
-                    MIGRATION_39_40)
+                    MIGRATION_39_40, MIGRATION_40_41)
 
 
 

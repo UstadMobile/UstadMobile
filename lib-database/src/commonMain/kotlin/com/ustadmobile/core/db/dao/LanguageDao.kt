@@ -36,6 +36,4 @@ abstract class LanguageDao : BaseDao<Language> {
     @Query("SELECT COUNT(*) FROM LANGUAGE")
     abstract fun totalLanguageCount(): Int
 
-    @Update
-    abstract override fun update(entity: Language)
 }

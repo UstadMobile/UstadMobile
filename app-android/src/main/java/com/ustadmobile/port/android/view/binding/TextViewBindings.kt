@@ -47,13 +47,6 @@ fun TextView.setBitmaskListText(textBitmaskValue: Long?, textBitmaskFlags: List<
             .joinToString { systemImpl.getString(it.messageId, context) }
 }
 
-@BindingAdapter("presenterFieldHeader")
-fun TextView.setPresenterFieldHeader(presenterField: PersonDetailPresenterField) {
-    if (presenterField.headerMessageId != 0) {
-        text = UstadMobileSystemImpl.instance.getString(presenterField.headerMessageId, context)
-    }
-}
-
 /**
  * This binder will handle situations where a there is a fixed list of flags, each of which
  * corresponds to a given messageId.

@@ -11,6 +11,6 @@ abstract class AgentDao :BaseDao<AgentEntity> {
 
     @Query("SELECT * FROM AgentEntity WHERE agentOpenId = :openId OR agentMbox = :mbox " +
             "OR agentMbox_sha1sum = :sha1 OR (agentAccountName = :account AND agentHomePage = :homepage)")
-    abstract fun getAgentByAnyId(openId: String?, mbox: String?, account: String?, homepage: String?, sha1: String?): AgentEntity?
+    abstract fun getAgentByAnyId(openId: String? = "", mbox: String? = "", account: String? = "", homepage: String? = "", sha1: String? = ""): AgentEntity?
 
 }

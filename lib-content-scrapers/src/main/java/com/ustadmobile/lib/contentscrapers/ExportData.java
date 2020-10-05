@@ -100,10 +100,10 @@ public class ExportData {
         UMLogUtil.logDebug("size of categoryJoinList is " + categoryJoinList.size());
 
         List<Language> langList = languageDao.getPublicLanguages();
-        List<LanguageVariant> langVariantList = variantDao.getPublicLanguageVariants();
+        //List<LanguageVariant> langVariantList = variantDao.getPublicLanguageVariants();
 
         UMLogUtil.logDebug("size of langList is " + langList.size());
-        UMLogUtil.logDebug("size of langVariantList is " + langVariantList.size());
+        //UMLogUtil.logDebug("size of langVariantList is " + langVariantList.size());
 
         List<Container> containerList = repository.getContainerDao().findAllPublikContainers();
 

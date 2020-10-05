@@ -8,6 +8,8 @@
     <string name='err_registering_new_user'>Error registering new user:</string>
     <string name="register_empty_fields">Please fill out all required fields</string>
     <string name="register_incorrect_email">Wrong email address</string>
+    <string name="group_activity">Group\nActivity</string>
+    <string name="select_group_members">Select group members</string>
 
     <string name='wrong_user_pass_combo'>Wrong username/password: try again.</string>
     <string name='login_network_error'>Network error: please check you are online.</string>
@@ -420,6 +422,8 @@
     <string name="teacher">Teacher</string>
     <string name="partial">Partial</string>
     <string name="teachers_literal">Teachers</string>
+    <string name="participant">Participant</string>
+    <string name="primary_user">Primary user</string>
     <string name="up">up</string>
     <string name="down">down</string>
     <string name="activity_went_good">Activity went good</string>
