@@ -54,7 +54,7 @@ class HolidayCalendarEditPresenter(context: Any,
         } ?: HolidayCalendar()
 
         val holidayList = withTimeoutOrNull(2000) {
-            db.holidayDao.findByHolidayCalendaUid(entityUid)
+            db.holidayDao.findByHolidayCalendaUidAsync(entityUid)
         } ?: listOf()
         holidayOneToManyJoinEditHelper.liveList.sendValue(holidayList)
 

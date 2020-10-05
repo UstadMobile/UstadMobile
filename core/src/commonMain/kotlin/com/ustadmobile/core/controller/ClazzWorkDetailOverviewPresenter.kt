@@ -65,8 +65,11 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         if(loggedInPerson?.admin == true){
             view.isStudent = false
         }else{
-            view.isStudent = (clazzMember != null &&
-                    clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+            if(clazzMember == null){
+                view.isStudent = false
+            }else {
+                view.isStudent = (clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER)
+            }
         }
 
         //If Submission object doesnt exist, create it.

@@ -85,6 +85,8 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
             field = value
             if(value) {
                 mBinding?.root?.tabs?.visibility = View.GONE
+            }else{
+                mBinding?.root?.tabs?.visibility = View.VISIBLE
             }
 
             val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
