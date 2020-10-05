@@ -1476,6 +1476,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 if (database.dbType() == DoorDbType.SQLITE) {
 
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN statementLearnerGroupUid INTEGER DEFAULT 0 NOT NULL")
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroup (`learnerGroupUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `learnerGroupName` TEXT, `learnerGroupDescription` TEXT, `learnerGroupActive` INTEGER NOT NULL, `learnerGroupMCSN` INTEGER NOT NULL, `learnerGroupCSN` INTEGER NOT NULL, `learnerGroupLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroup_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
@@ -1629,6 +1630,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
 
                 } else if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN statementLearnerGroupUid BIGINT DEFAULT 0 NOT NULL")
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroup (  learnerGroupName  TEXT , learnerGroupDescription  TEXT , learnerGroupActive  BOOL , learnerGroupMCSN  BIGINT , learnerGroupCSN  BIGINT , learnerGroupLCB  INTEGER , learnerGroupUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
