@@ -55,7 +55,7 @@ class ClazzEditFragmentTest  {
 
 
     @AdbScreenRecord("")
-    @Test
+    //@Test
     fun givenNoClazzPresentYet_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
         val existingHolidayCal = HolidayCalendar().apply {
             umCalendarName = "Demo Calendar"
