@@ -14,6 +14,8 @@ import java.util.regex.Pattern
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMURLEncoder
 import java.io.ByteArrayInputStream
+import com.ustadmobile.lib.util.parseAcceptedEncoding
+
 
 class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
 
@@ -47,9 +49,21 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
                     "text/plain", "Entry found but does not have containerEntryFile/cefPath: $pathInContainer uriResource.uri=${uriResource.uri}\n" +
                     "requestUri=${requestUri}")
 
-            var response = newResponseFromFile(uriResource, session, FileSource(responseFile))
+            //Look at the accept-encoding header to see if we can use gzip.
+            val acceptsGzip = parseAcceptedEncoding(session.getHeaders().get("accept-encoding"))
+                    .isEncodingAcceptable("gzip")
 
-            if (entryFile.containerEntryFile!!.compression == COMPRESSION_GZIP)
+            val fileIsGzipped = entryFile.containerEntryFile?.compression == COMPRESSION_GZIP
+
+            var fileSource = if(!fileIsGzipped || acceptsGzip) {
+                FileSource(responseFile)
+            }else {
+                InflateFileSource(responseFile, entryFile.containerEntryFile?.ceTotalSize ?: throw IllegalStateException("no total size"))
+            }
+
+            var response = newResponseFromFile(uriResource, session, fileSource)
+
+            if (acceptsGzip && fileIsGzipped)
                 response.addHeader("Content-Encoding", "gzip")
 
             for (filter in filterList) {
