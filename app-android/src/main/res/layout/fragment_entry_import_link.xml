@@ -23,7 +23,7 @@
             android:padding="@dimen/dimen_16dp"
             app:errorEnabled="true"
             app:hintEnabled="true"
-            app:helperText="@string/Supported_link"
+            app:helperText="@string/supported_link"
             app:layout_constraintStart_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
