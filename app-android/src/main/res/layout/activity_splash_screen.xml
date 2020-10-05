@@ -9,29 +9,45 @@
 
 
    <androidx.appcompat.widget.AppCompatImageView
-       android:id="@+id/background"
-       android:layout_width="match_parent"
-       android:layout_height="match_parent"
-       app:srcCompat="@drawable/cok_splashscreen"
-       android:scaleType="centerCrop"
+       android:id="@+id/amal_logo"
+       android:layout_width="128dp"
+       android:layout_height="128dp"
+       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
        app:layout_constraintStart_toStartOf="parent"
        app:layout_constraintTop_toTopOf="parent"
-       app:layout_constraintEnd_toEndOf="parent"
-       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintVertical_bias="0.16000003"
+       app:srcCompat="@drawable/amal_logo"
        tools:ignore="ContentDescription" />
 
    <TextView
        android:layout_width="match_parent"
        android:layout_height="wrap_content"
-       android:text="@string/app_name"
+       android:text="Amal Alliance"
        android:gravity="center"
        app:layout_constraintStart_toStartOf="parent"
-       app:layout_constraintTop_toTopOf="parent"
-       app:layout_constraintBottom_toBottomOf="parent"
+       app:layout_constraintTop_toBottomOf="@+id/amal_logo"
        android:layout_marginTop="@dimen/dimen_8dp"
        android:textColor="@color/primaryColor"
        android:textSize="30sp"/>
 
 
+   <TextView
+       android:layout_width="match_parent"
+       android:layout_height="wrap_content"
+       android:text="Powered By:"
+       android:gravity="center"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintBottom_toTopOf="@id/ustad_logo"
+       />
+   <androidx.appcompat.widget.AppCompatImageView
+       android:id="@+id/ustad_logo"
+       android:layout_width="@dimen/dimen_256dp"
+       android:layout_height="@dimen/dimen_64dp"
+       app:layout_constraintStart_toStartOf="parent"
+       app:layout_constraintEnd_toEndOf="parent"
+       app:layout_constraintBottom_toBottomOf="parent"
+       android:layout_marginBottom="@dimen/dimen_16dp"
+       app:srcCompat="@drawable/ic_ustad_logo_poweredby"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
