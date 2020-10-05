@@ -15,7 +15,6 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
-import com.ustadmobile.core.util.MimeType
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -88,7 +87,7 @@ class HarContentFragmentTest {
         targetEntry.contentEntryUid = dbRule.db.contentEntryDao.insert(targetEntry)
 
         container = Container()
-        container?.mimeType = MimeType.HAR
+        container?.mimeType =  "application/har+zip"
         container?.containerContentEntryUid = targetEntry.contentEntryUid
         container?.containerUid = dbRule.db.containerDao.insert(container!!)
 
