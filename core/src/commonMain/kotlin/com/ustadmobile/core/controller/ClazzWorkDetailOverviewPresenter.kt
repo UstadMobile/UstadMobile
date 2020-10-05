@@ -66,7 +66,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
             view.isStudent = false
         }else{
             if(clazzMember == null){
-                view.isStudent = true
+                view.isStudent = false
             }else {
                 view.isStudent = (clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER)
             }

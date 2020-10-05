@@ -46,7 +46,7 @@ class ClazzWorkDetailPresenter(context: Any,
             view.isStudent = false
         }else {
             if(clazzMember == null){
-                view.isStudent = true
+                view.isStudent = false
             }else {
                 view.isStudent = (clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER)
             }
@@ -62,7 +62,7 @@ class ClazzWorkDetailPresenter(context: Any,
                     db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                             entity?.clazzWorkClazzUid?: 0L)
             if(clazzMember == null){
-                view.isStudent = true
+                view.isStudent = false
             }else{
                 view.isStudent = clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER
             }
@@ -87,10 +87,11 @@ class ClazzWorkDetailPresenter(context: Any,
             db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                     entity?.clazzWorkClazzUid?: 0L)
         }
-        if(clazzMember == null){
-            return true
+
+        return if(clazzMember == null){
+            false
         }else{
-            return clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER
+            clazzMember.clazzMemberRole == ClazzMember.ROLE_TEACHER
         }
 
 
