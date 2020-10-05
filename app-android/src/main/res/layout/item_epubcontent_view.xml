@@ -11,7 +11,6 @@
     <WebView
         android:id="@+id/epub_contentview"
         android:scrollbars="none"
-        android:minHeight="512dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="512dp"/>
 </layout>
