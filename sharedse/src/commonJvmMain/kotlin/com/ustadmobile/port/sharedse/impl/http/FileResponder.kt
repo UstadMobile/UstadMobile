@@ -6,6 +6,7 @@ import fi.iki.elonen.router.RouterNanoHTTPD
 import java.io.*
 import com.ustadmobile.lib.util.RangeResponse
 import com.ustadmobile.lib.util.parseRangeRequestHeader
+import java.util.zip.GZIPInputStream
 
 /**
  * This is a RouterNanoHTTPD Responder that can be used to serve files from the file system or
@@ -99,6 +100,31 @@ abstract class FileResponder {
             get() = null
     }
 
+    /**
+     * A file source that needs to be inflated (e.g. when the client will not accept gzip
+     * encoding)
+     */
+    class InflateFileSource(private val src: File, private val sizeInflated: Long) : IFileSource {
+        override val length: Long
+            get() = sizeInflated
+
+        override val lastModifiedTime: Long
+            get() = src.lastModified()
+
+        override val inputStream: InputStream
+            get() = BufferedInputStream(GZIPInputStream(FileInputStream(src)))
+
+        override val name: String
+            get() = src.name
+
+        override val exists: Boolean = src.exists()
+
+        override val eTag: String?
+            get() = null
+
+    }
+
+
     companion object {
 
 
@@ -147,7 +173,7 @@ abstract class FileResponder {
                     return r
                 }
 
-                val rangeHeader = session.headers["range"] as String?
+                val rangeHeader = session.headers["content-range"] as String?
                 range = if(rangeHeader != null) {
                     parseRangeRequestHeader(rangeHeader, totalLength)
                 }else {

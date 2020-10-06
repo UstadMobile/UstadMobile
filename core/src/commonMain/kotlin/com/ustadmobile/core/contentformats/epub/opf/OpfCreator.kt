@@ -20,6 +20,6 @@ class OpfCreator {
 
 
     override fun toString(): String {
-        return creator ?: super.toString()
+        return creator ?: ""
     }
 }

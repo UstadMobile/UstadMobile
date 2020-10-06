@@ -6,9 +6,13 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.DoorSqlitePrimaryKeyManager
 import com.ustadmobile.door.SyncResult
 import com.ustadmobile.door.annotation.EntityWithAttachment
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_INSTANCE_MEMBER
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_ON_MEMBER
 import io.ktor.client.HttpClient
 import io.ktor.client.request.forms.InputProvider
 import io.ktor.content.TextContent
@@ -16,6 +20,7 @@ import io.ktor.http.Headers
 import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.routing.Route
+import org.kodein.type.TypeToken
 import java.io.File
 import java.io.FileInputStream
 import javax.annotation.processing.ProcessingEnvironment
@@ -187,14 +192,16 @@ class DbProcessorSync: AbstractDbProcessor() {
         specs.ktorRoute.fileSpec.addImport("io.ktor.response", "header")
 
 
+        val ktorHelperDaoClassName = ClassName(packageName, "$abstractDaoClassName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}")
         val daoRouteFn = FunSpec.builder("${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
                 .receiver(Route::class)
-                .addParameter("_dao", abstractDaoClassName)
-                .addParameter("_db", DoorDatabase::class)
-                .addParameter("_gson", Gson::class)
-                .addParameter("_attachmentsDir", String::class)
-                .addParameter("_ktorHelperDao",
-                        ClassName(packageName, "$abstractDaoClassName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}"))
+                .addTypeVariable(TypeVariableName.invoke("T", DoorDatabase::class))
+                .addParameter("_typeToken", TypeToken::class.asClassName().parameterizedBy(TypeVariableName("T")))
+                .addParameter("_daoFn", LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
+                    returnType = abstractDaoClassName))
+                .addParameter("_ktorHelperDaoFn", LambdaTypeName.get(
+                        parameters = *arrayOf(TypeVariableName("T")),
+                        returnType = ktorHelperDaoClassName))
 
         val codeBlock = CodeBlock.builder()
         codeBlock.beginControlFlow("%M(%S)",
@@ -212,6 +219,9 @@ class DbProcessorSync: AbstractDbProcessor() {
                     .build()
             codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER,
                     "_findMasterUnsent${entityType.simpleName}")
+                    .addRequestDi()
+                    .add("val _dao = _daoFn(_db)\n")
+                    .add("val _ktorHelperDao = _ktorHelperDaoFn(_db)\n")
                 .add(generateKtorRouteSelectCodeBlock(getAllFunSpec, syncHelperDaoVarName = "_dao"))
                 .endControlFlow()
             val helperFunSpec = getAllFunSpec.toBuilder()
@@ -226,12 +236,17 @@ class DbProcessorSync: AbstractDbProcessor() {
 
             codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.POST_MEMBER,
                     "_replace${entityType.simpleName}")
+                    .addRequestDi()
+                    .add("val _dao = _daoFn(_db)\n")
+                    .add("val _gson: %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
             val hasAttachments = findEntitiesWithAnnotation(entityType.asClassName(), EntityWithAttachment::class.java,
                     processingEnv).isNotEmpty()
 
             if(hasAttachments) {
                 val multipartHelperVarName = "_multipartHelper"
-                codeBlock.add("val $multipartHelperVarName = %T()\n",
+                codeBlock.add("val _attachmentsDir: String by _di.%M(call).%M(tag = %T.TAG_ATTACHMENT_DIR)\n",
+                                DI_ON_MEMBER, DI_INSTANCE_MEMBER, DoorTag::class)
+                        .add("val $multipartHelperVarName = %T()\n",
                         ClassName("com.ustadmobile.door", "DoorAttachmentsMultipartHelper"))
                         .add("_multipartHelper.digestMultipart(%M.%M())\n",
                                 DbProcessorKtorServer.CALL_MEMBER,
@@ -261,7 +276,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             }
 
             codeBlock.add(generateUpdateTrackerReceivedKtorRoute(syncableEntityInfo.tracker,
-                    syncHelperVarName = "_dao"))
+                    syncHelperVarName = "_dao", syncHelperFnName = "_daoFn"))
 
         }
         codeBlock.endControlFlow()
@@ -306,6 +321,9 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
                         .build())
+                .addProperty(PropertySpec.builder("_sqlitePkManager", DoorSqlitePrimaryKeyManager::class)
+                    .initializer("%T(this)", DoorSqlitePrimaryKeyManager::class)
+                    .build())
                 .addRepositoryHelperDelegateCalls("_repo")
 
         val syncFnCodeBlock = CodeBlock.builder()
@@ -321,6 +339,28 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addParameter("result", SyncResult::class)
                 .addModifiers(KModifier.OVERRIDE)
                 .addCode("_dao._insertSyncResult(result)\n")
+                .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("selectNextSqliteSyncablePk")
+                .addParameter("tableId", INT)
+                .addModifiers(KModifier.SUSPEND, KModifier.OVERRIDE)
+                .addCode("return _dao.selectNextSqliteSyncablePk(tableId)\n")
+                .returns(LONG)
+                .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("incrementNextSqliteSyncablePk")
+                .addParameter("tableId", INT)
+                .addParameter("increment", INT)
+                .addCode("_dao.incrementNextSqliteSyncablePk(tableId, increment)\n")
+                .addModifiers(KModifier.SUSPEND, KModifier.OVERRIDE)
+                .build())
+
+        repoTypeSpec.addFunction(FunSpec.builder("getAndIncrementSqlitePk")
+                .addParameter("tableId", INT)
+                .addParameter("increment", INT)
+                .addCode("return _sqlitePkManager.getAndIncrementSqlitePk(tableId, increment)\n")
+                .addModifiers(KModifier.SUSPEND, KModifier.OVERRIDE)
+                .returns(LONG)
                 .build())
 
 
@@ -418,7 +458,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                             useMultipartPartsVarName = multipartPartsVarName))
                     .add(generateReplaceSyncableEntitiesTrackerCodeBlock("_entities",
                             entityListTypeName, syncHelperDaoVarName = "_dao", clientIdVarName = "0",
-                            reqIdVarName = "0", processingEnv = processingEnv))
+                            reqIdVarName = "0", processingEnv = processingEnv, isPrimaryDb = false))
                     .endControlFlow()
 
             entitySyncCodeBlock.add("""return %T(tableId = ${syncableEntityInfo.tableId},
@@ -524,6 +564,32 @@ class DbProcessorSync: AbstractDbProcessor() {
         abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceInsertSyncResultFn)
         implDaoTypeSpec.addFunction(implInsertSyncResultFn)
 
+
+        val (abstractNextSqlitePkFn, implNextSqlitePkFn, abstractInterfaceNextSqlitePkFn) =
+                generateAbstractAndImplQueryFunSpecs(
+                        "SELECT COALESCE((SELECT sspNextPrimaryKey FROM SqliteSyncablePrimaryKey WHERE sspTableId = :tableId), 1)",
+                    "selectNextSqliteSyncablePk", LONG,
+                    listOf(ParameterSpec.builder("tableId", Int::class).build()),
+                    addReturnStmt = true, abstractFunIsOverride = true, suspended = true)
+        abstractDaoTypeSpec.addFunction(abstractNextSqlitePkFn)
+        implDaoTypeSpec.addFunction(implNextSqlitePkFn)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceNextSqlitePkFn)
+
+        val (abstractIncNextSqlitePkFn, implIncNextSqlitePkFn, abstractInterfaceIncNextSqlitePkFn) =
+                generateAbstractAndImplQueryFunSpecs(
+                        "UPDATE SqliteSyncablePrimaryKey " +
+                                "SET " +
+                                "sspNextPrimaryKey = sspNextPrimaryKey + :increment " +
+                                "WHERE sspTableId = :tableId",
+                        "incrementNextSqliteSyncablePk", UNIT,
+                        listOf(ParameterSpec.builder("tableId", INT).build(),
+                                ParameterSpec.builder("increment", INT).build()),
+                        addReturnStmt = false, abstractFunIsOverride = true, suspended = true)
+        abstractDaoTypeSpec.addFunction(abstractIncNextSqlitePkFn)
+        implDaoTypeSpec.addFunction(implIncNextSqlitePkFn)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceIncNextSqlitePkFn)
+
+
         syncableEntityTypesOnDb(dbType, processingEnv).forEach {entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
             val entityListClassName = List::class.asClassName().parameterizedBy(entityType.asClassName())
@@ -628,11 +694,13 @@ class DbProcessorSync: AbstractDbProcessor() {
                                              returnType: TypeName,
                                              params: List<ParameterSpec>,
                                              addReturnStmt: Boolean = true,
-                                             abstractFunIsOverride: Boolean = false): AbstractImplAndInterfaceFunSpecs {
+                                             abstractFunIsOverride: Boolean = false,
+                                             suspended: Boolean = false): AbstractImplAndInterfaceFunSpecs {
         val funBuilders = (0..2).map {
             FunSpec.builder(funName)
                     .returns(returnType)
                     .addParameters(params)
+                    .apply { takeIf { suspended }?.addModifiers(KModifier.SUSPEND) }
         }
 
         funBuilders[0].addModifiers(KModifier.ABSTRACT)

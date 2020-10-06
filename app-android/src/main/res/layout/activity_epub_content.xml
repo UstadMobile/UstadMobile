@@ -29,8 +29,8 @@
                 android:id="@+id/appbar"
                 layout="@layout/appbar_material_with_progress"/>
 
-            <androidx.viewpager2.widget.ViewPager2
-                android:id="@+id/container_epubrunner_pager"
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/epub_page_recycler_view"
                 android:layout_below="@+id/appbar"
                 android:layout_alignParentBottom="true"
                 android:layout_width="match_parent"

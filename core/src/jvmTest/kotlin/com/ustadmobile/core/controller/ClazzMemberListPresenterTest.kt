@@ -15,6 +15,7 @@ import com.ustadmobile.core.db.dao.ClazzMemberDao
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
+import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
@@ -92,9 +93,9 @@ class ClazzMemberListPresenterTest {
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzMemberDaoSpy, timeout(5000)).findByClazzUidAndRole(42L,
-            ClazzMember.ROLE_STUDENT)
+            ClazzMember.ROLE_STUDENT,1, "%")
         verify(repoClazzMemberDaoSpy, timeout(5000)).findByClazzUidAndRole(42L,
-                ClazzMember.ROLE_TEACHER)
+                ClazzMember.ROLE_TEACHER,1,"%")
 
         verify(mockView, timeout(5000)).list = any()
         verify(mockView, timeout(5000)).studentList = any()
@@ -113,7 +114,7 @@ class ClazzMemberListPresenterTest {
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
-            personUid = db.personDao.insert(this)
+            personUid = db.insertPersonOnlyAndGroup(this).personUid
         }
 
         runBlocking {
@@ -148,14 +149,14 @@ class ClazzMemberListPresenterTest {
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
-            personUid = db.personDao.insert(this)
+            personUid = db.insertPersonOnlyAndGroup(this).personUid
         }
 
         val pendingPerson = Person().apply {
             firstNames = "Pending"
             lastName = "Student"
             username = "pending"
-            personUid = db.personDao.insert(this)
+            personUid = db.insertPersonOnlyAndGroup(this).personUid
         }
 
         var pendingMember: ClazzMember? = null
@@ -188,8 +189,8 @@ class ClazzMemberListPresenterTest {
 
         runBlocking {
             db.waitUntil(5000, listOf("ClazzMember", "PersonGroupMember")) {
-                db.clazzMemberDao.findByPersonUidAndClazzUid(pendingMember!!.clazzMemberPersonUid,
-                    testClazz.clazzUid)?.clazzMemberRole == ClazzMember.ROLE_STUDENT
+                runBlocking { db.clazzMemberDao.findByPersonUidAndClazzUidAsync(pendingMember!!.clazzMemberPersonUid,
+                    testClazz.clazzUid)?.clazzMemberRole == ClazzMember.ROLE_STUDENT }
                 && runBlocking {
                     db.personGroupMemberDao.findAllGroupWherePersonIsIn(pendingMember!!.clazzMemberPersonUid).any {
                         it.groupMemberGroupUid == testClazz.clazzStudentsPersonGroupUid
@@ -198,8 +199,8 @@ class ClazzMemberListPresenterTest {
             }
         }
 
-        val clazzMember = db.clazzMemberDao.findByPersonUidAndClazzUid(pendingMember!!.clazzMemberPersonUid,
-                testClazz.clazzUid)
+        val clazzMember = runBlocking { db.clazzMemberDao.findByPersonUidAndClazzUidAsync(pendingMember!!.clazzMemberPersonUid,
+                testClazz.clazzUid) }
         Assert.assertEquals("Clazz member approved is now a student", ClazzMember.ROLE_STUDENT,
             clazzMember?.clazzMemberRole)
 

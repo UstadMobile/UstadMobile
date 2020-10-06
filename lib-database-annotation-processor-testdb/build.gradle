@@ -57,6 +57,8 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
+
                 implementation project(':lib-door-runtime')
                 implementation project(":lib-database-annotations")
                 compileOnly project(":lib-room-annotations")
@@ -74,6 +76,9 @@ kotlin {
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
+
+                implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"

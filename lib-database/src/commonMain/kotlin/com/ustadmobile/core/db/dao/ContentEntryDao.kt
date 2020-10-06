@@ -60,7 +60,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "WHERE ContentEntry.contentEntryUid=:entryUuid"
     )
     @JsName("findEntryWithLanguageByEntryId")
-    abstract suspend fun findEntryWithLanguageByEntryId(entryUuid: Long): ContentEntryWithLanguage?
+    abstract suspend fun findEntryWithLanguageByEntryIdAsync(entryUuid: Long): ContentEntryWithLanguage?
 
     @Query("SELECT ContentEntry.*, Container.* FROM ContentEntry LEFT JOIN Container ON Container.containerUid = (SELECT containerUid FROM Container "+
             "WHERE containerContentEntryUid =  ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1) WHERE ContentEntry.contentEntryUid=:entryUuid")
@@ -72,7 +72,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun findBySourceUrl(sourceUrl: String): ContentEntry?
 
     @Query("SELECT title FROM ContentEntry WHERE contentEntryUid = :contentEntryUid")
-    abstract fun findTitleByUidAsync(contentEntryUid: Long): String?
+    abstract suspend fun findTitleByUidAsync(contentEntryUid: Long): String?
 
     @Query("SELECT ContentEntry.* FROM ContentEntry LEFT Join ContentEntryParentChildJoin " +
             "ON ContentEntryParentChildJoin.cepcjChildContentEntryUid = ContentEntry.contentEntryUid " +
@@ -165,7 +165,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             AND (ContentEntry.publik OR :personUid != 0)
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
-            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntry.title ASC , ContentEntryParentChildJoin.childIndex, ContentEntry.contentEntryUid""")
+            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntryParentChildJoin.childIndex, ContentEntry.title ASC , ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameAsc")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
@@ -184,7 +184,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             AND (ContentEntry.publik OR :personUid != 0)
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
-            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntry.title DESC , ContentEntryParentChildJoin.childIndex, ContentEntry.contentEntryUid""")
+            WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY  ContentEntryParentChildJoin.childIndex, ContentEntry.title DESC, ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameDesc")
     abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameDesc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
@@ -206,6 +206,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("SELECT contentEntryUid FROM ContentEntry WHERE entryId = :objectId LIMIT 1")
     @JsName("getContentEntryUidFromXapiObjectId")
     abstract fun getContentEntryUidFromXapiObjectId(objectId: String): Long
+
+
+    @Query("SELECT * FROM ContentEntry WHERE sourceUrl LIKE :sourceUrl")
+    @JsName("findSimilarIdEntryForKhan")
+    abstract fun findSimilarIdEntryForKhan(sourceUrl: String): List<ContentEntry>
 
     /**
      * This query is used to tell the client how big a download job is, even if the client does
@@ -252,8 +257,19 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     SELECT * FROM ContentEntry_recursive""")
     abstract fun getAllEntriesRecursively(contentEntryUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndMostRecentContainer>
 
+    @Query("UPDATE ContentEntry SET ceInactive = :ceInactive WHERE ContentEntry.contentEntryUid = :contentEntryUid")
+    @JsName("updateContentEntryInActive")
+    abstract fun updateContentEntryInActive(contentEntryUid: Long, ceInactive: Boolean)
+
+    @Query("UPDATE ContentEntry SET  contentTypeFlag = :contentFlag WHERE ContentEntry.contentEntryUid = :contentEntryUid")
+    @JsName("updateContentEntryContentFlag")
+    abstract fun updateContentEntryContentFlag(contentFlag: Int, contentEntryUid: Long)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<ContentEntry>)
+
+    @Query("""Select * from ContentEntry WHERE contentEntryUid IN (:contentEntryUids)""")
+    abstract fun getContentEntryFromUids(contentEntryUids: List<Long>): List<ContentEntry>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertWithReplace(entry: ContentEntry)

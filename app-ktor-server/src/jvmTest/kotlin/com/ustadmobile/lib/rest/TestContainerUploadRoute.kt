@@ -39,7 +39,6 @@ class TestContainerUploadRoute {
         db = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase").build()
         db.clearAllTables()
 
-        tmpFolder = UmFileUtilSe.makeTempDir("upload", "")
 
         db.containerEntryFileDao.insertList(listOf(ContainerEntryFile().apply {
             this.cefMd5 = "1"
@@ -53,7 +52,7 @@ class TestContainerUploadRoute {
                 }
             }
             install(Routing) {
-                ContainerUpload(db, tmpFolder)
+                ContainerUpload()
             }
         }.start(wait = false)
     }

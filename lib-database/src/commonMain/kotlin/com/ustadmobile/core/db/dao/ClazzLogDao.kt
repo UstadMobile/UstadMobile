@@ -17,9 +17,6 @@ import com.ustadmobile.lib.db.entities.Role
 @Dao
 abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
-    @Insert
-    abstract override fun insert(entity: ClazzLog): Long
-
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replace(entity: ClazzLog): Long
 
@@ -56,9 +53,19 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         ORDER BY ClazzLog.logDate DESC
         LIMIT :limit
     """)
-    abstract fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long, excludeStatusFilter: Int, limit: Int): List<ClazzLog>
+    abstract suspend fun findByClazzUidWithinTimeRangeAsync(clazzUid: Long, fromTime: Long, toTime: Long, excludeStatusFilter: Int, limit: Int): List<ClazzLog>
 
-    fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long) = findByClazzUidWithinTimeRange(clazzUid, fromTime, toTime, 0, Int.MAX_VALUE)
+
+    @Query("""SELECT ClazzLog.* FROM ClazzLog 
+        WHERE 
+        ClazzLog.clazzLogClazzUid = :clazzUid 
+        AND ClazzLog.logDate BETWEEN :fromTime AND :toTime
+        AND (:excludeStatusFilter = 0 OR ((ClazzLog.clazzLogStatusFlag & :excludeStatusFilter) = 0))
+        ORDER BY ClazzLog.logDate DESC
+        LIMIT :limit
+    """)
+    abstract fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long, excludeStatusFilter: Int = 0, limit: Int = Int.MAX_VALUE): List<ClazzLog>
+
 
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
         WHERE 

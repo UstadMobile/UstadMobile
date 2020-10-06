@@ -41,9 +41,6 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
     @Query("SELECT * FROM ContentEntryParentChildJoin WHERE " + "cepcjParentContentEntryUid = :parentUid AND cepcjChildContentEntryUid = :childUid LIMIT 1")
     abstract fun findJoinByParentChildUuids(parentUid: Long, childUid: Long): ContentEntryParentChildJoin?
 
-    @Update
-    abstract override fun update(entity: ContentEntryParentChildJoin)
-
     @Query("WITH RECURSIVE ContentEntryRecursive(contentEntryUid,containerSize) AS " +
             "(VALUES (:contentEntryUid,  " +
             "(SELECT Container.fileSize FROM Container WHERE Container.containerContentEntryUid = :contentEntryUid " +

@@ -103,13 +103,15 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
             return
         }
 
-        val progress = (position.toFloat() / videoLength * 100).toInt()
-        val flag = if (progress == 100) ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED or ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED else 0
-        repo.contentEntryProgressDao.updateProgress(entryUuid, accountManager.activeAccount.personUid, progress, flag)
+        GlobalScope.launch {
+            val progress = (position.toFloat() / videoLength * 100).toInt()
+            val flag = if (progress == 100) ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED or ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED else 0
+            repo.contentEntryProgressDao.updateProgress(entryUuid, accountManager.activeAccount.personUid, progress, flag)
 
-        entry?.also {
-            statementEndpoint.storeProgressStatement(accountManager.activeAccount, it, progress,
-                    playerPlayedVideoDuration)
+            entry?.also {
+                statementEndpoint.storeProgressStatement(accountManager.activeAccount, it, progress,
+                        playerPlayedVideoDuration)
+            }
         }
     }
 

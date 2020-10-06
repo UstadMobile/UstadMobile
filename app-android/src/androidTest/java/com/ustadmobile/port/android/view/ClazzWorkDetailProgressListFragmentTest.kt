@@ -3,11 +3,9 @@ package com.ustadmobile.port.android.view
 import android.widget.TextView
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
@@ -493,7 +491,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
     private fun checkProgressList(testClazzWork: TestClazzWork){
         val list: List<ClazzMemberWithClazzWorkProgress> = runBlocking {
             dbRule.db.clazzWorkDao.findStudentProgressByClazzWorkTest(
-                    testClazzWork.clazzWork.clazzWorkUid)
+                    testClazzWork.clazzWork.clazzWorkUid, 0, "%")
         }
         for(item in list){
             //Scroll to Member
@@ -522,7 +520,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
             }
 
             val hasContent = runBlocking {
-                dbRule.db.clazzWorkContentJoinDao.findAllContentByClazzWorkUid(
+                dbRule.db.clazzWorkContentJoinDao.findAllContentByClazzWorkUidAsync(
                         testClazzWork.clazzWork.clazzWorkUid, dbRule.account.personUid)
             }
 

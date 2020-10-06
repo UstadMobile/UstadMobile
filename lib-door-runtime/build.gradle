@@ -80,6 +80,9 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+
+                compileOnly "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                compileOnly "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
             }
         }
 
@@ -94,6 +97,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-server-core:$version_ktor"
                 implementation "com.github.aakira:napier-jvm:$version_napier"
+                compileOnly "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
             }
         }
 

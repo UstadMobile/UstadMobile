@@ -14,10 +14,6 @@ import kotlin.js.JsName
 @UmRepository
 abstract class VerbDao : BaseDao<VerbEntity> {
 
-    @JsName("insertListAsync")
-    @Insert
-    abstract suspend fun insertListAsync(entityList: List<VerbEntity>)
-
     @Query("SELECT * FROM VerbEntity WHERE urlId = :urlId")
     abstract fun findByUrl(urlId: String?): VerbEntity?
 

@@ -15,8 +15,8 @@ import com.toughra.ustadmobile.databinding.FragmentXapiPackageContentBinding
 import com.ustadmobile.core.controller.XapiPackageContentPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.XapiPackageContentView
-import com.ustadmobile.sharedse.network.NetworkManagerBle
 
 class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
 
@@ -44,8 +44,6 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
     private var mBinding: FragmentXapiPackageContentBinding? = null
 
     private var mPresenter: XapiPackageContentPresenter? = null
-
-    private var networkManagerBle: NetworkManagerBle ? = null
 
     @SuppressLint("SetJavaScriptEnabled")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -99,7 +97,6 @@ class XapiPackageContentFragment : UstadBaseFragment(), XapiPackageContentView {
 
     override fun onDestroy() {
         super.onDestroy()
-        networkManagerBle = null
         mPresenter?.onDestroy()
         mPresenter = null
         mBinding = null

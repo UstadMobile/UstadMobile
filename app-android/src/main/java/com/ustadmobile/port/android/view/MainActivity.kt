@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -31,6 +32,7 @@ import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
+import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
@@ -60,6 +62,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private var mIsAdmin: Boolean? = null
 
+    private var searchView: SearchView? = null
+
     //Observe the active account to show/hide the settings based on whether or not the user is admin
     private val mActiveUserObserver = Observer<UmAccount> {account ->
         GlobalScope.launch(Dispatchers.Main) {
@@ -70,6 +74,20 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
                 invalidateOptionsMenu()
             }
         }
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+
+        val uri = intent?.data?.toString()
+        loadFromUriString(uri)
+
+    }
+
+    private fun loadFromUriString(uri: String?){
+
+        UstadMobileSystemImpl.instance.go(uri, getActivityContext())
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -90,6 +108,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
         accountManager.activeAccountLive.observe(this, mActiveUserObserver)
+
     }
 
     override fun onDestinationChanged(controller: NavController, destination: NavDestination,
@@ -126,6 +145,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val mainScreenItemsVisible = BOTTOM_NAV_DEST.contains(currentFrag)
         menu.findItem(R.id.menu_main_settings).isVisible = (mainScreenItemsVisible && mIsAdmin == true)
         menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
+        searchView = menu.findItem(R.id.menu_search).actionView as SearchView
 
         mBinding.bottomNavView.visibility = if (DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag))
             View.GONE else View.VISIBLE
@@ -148,13 +168,29 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     override fun onBackPressed() {
         val fragment = supportFragmentManager.primaryNavigationFragment?.childFragmentManager?.fragments?.get(0)
-        if ((fragment as? FragmentBackHandler)?.onHostBackPressed() != true) {
-            super.onBackPressed()
+        when {
+            searchView?.isIconified == false -> {
+                searchView?.setQuery("",true)
+                searchView?.isIconified = true
+                return
+            }
+            (fragment as? FragmentBackHandler)?.onHostBackPressed() == true -> {
+                return
+            }
+            else -> {
+                super.onBackPressed()
+            }
         }
+
     }
 
     override val viewContext: Any
         get() = this
+
+    override fun onDestroy() {
+        super.onDestroy()
+        searchView = null
+    }
 
     /**
      * When settings gear clicked in the menu options - Goes to the settings activity.

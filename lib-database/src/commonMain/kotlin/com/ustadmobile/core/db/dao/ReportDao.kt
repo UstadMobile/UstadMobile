@@ -24,10 +24,10 @@ abstract class ReportDao : BaseDao<Report> {
     abstract fun findAllActiveReportByUserDesc(loggedInPersonUid: Long): DataSource.Factory<Int, Report>
 
     @Query("SELECT * FROM Report WHERE reportUid = :entityUid")
-    abstract fun findByUid(entityUid: Long): Report?
+    abstract suspend fun findByUid(entityUid: Long): Report?
 
     @Update
-    abstract fun updateAsync(entity: Report)
+    abstract suspend fun updateAsync(entity: Report)
 
     @Query("SELECT * From Report WHERE  reportUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Report?>

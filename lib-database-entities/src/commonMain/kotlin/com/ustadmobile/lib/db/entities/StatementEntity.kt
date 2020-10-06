@@ -43,7 +43,7 @@ open class StatementEntity {
 
     var resultSuccess: Byte = RESULT_UNSET
 
-    var resultScoreScaled: Long = 0
+    var resultScoreScaled: Float = 0f
 
     var resultScoreRaw: Long = 0
 
@@ -83,6 +83,9 @@ open class StatementEntity {
      * here to simplify queries used to check on student progress and avoid an extra join
      */
     var statementContentEntryUid: Long = 0
+
+
+    var statementLearnerGroupUid: Long = 0
 
     companion object {
 

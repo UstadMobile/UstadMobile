@@ -81,7 +81,7 @@ class ContentEntryOpenerTest {
         runBlocking {
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                 true, false, false)
-            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
+            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any(), any())
         }
     }
 
@@ -107,7 +107,7 @@ class ContentEntryOpenerTest {
 
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                 true, true, false)
-            verify(impl).go(eq(ContentEntry2DetailView.VIEW_NAME), any(), eq(context))
+            verify(impl).go(eq(ContentEntry2DetailView.VIEW_NAME), any(), eq(context), any())
         }
     }
 
@@ -117,7 +117,7 @@ class ContentEntryOpenerTest {
         runBlocking {
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)
-            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
+            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any(), any())
         }
     }
 
@@ -126,9 +126,10 @@ class ContentEntryOpenerTest {
         runBlocking {
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)
-            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
+            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any(), any())
         }
     }
+
 
     @Test
     fun givenDownloadNotRequired_whenEntryDownloadedAndMimeTypeDoesNotMatch_openInDefaultViewer(){

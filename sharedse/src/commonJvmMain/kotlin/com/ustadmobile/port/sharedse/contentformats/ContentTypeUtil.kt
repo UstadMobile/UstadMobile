@@ -1,11 +1,9 @@
 package com.ustadmobile.port.sharedse.contentformats
 
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.FILE
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.H5P
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil.ZIPPED
@@ -14,11 +12,8 @@ import com.ustadmobile.port.sharedse.contentformats.h5p.H5PImporter
 import com.ustadmobile.port.sharedse.contentformats.h5p.H5PTypeFilePlugin
 import com.ustadmobile.port.sharedse.contentformats.video.VideoTypeFilePlugin
 import com.ustadmobile.port.sharedse.contentformats.xapi.plugin.XapiPackageTypeFilePlugin
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import java.io.File
 import java.io.IOException
-import java.lang.IllegalArgumentException
 import java.util.zip.ZipException
 
 /**
@@ -28,7 +23,10 @@ import java.util.zip.ZipException
  */
 
 
+
 internal val CONTENT_PLUGINS = listOf(EpubTypeFilePlugin(), XapiPackageTypeFilePlugin(), VideoTypeFilePlugin(), H5PTypeFilePlugin())
+
+val mimeTypeSupported: List<String> = CONTENT_PLUGINS.flatMap { it.mimeTypes.asList() }
 
 suspend fun extractContentEntryMetadataFromFile(file: File, db: UmAppDatabase, plugins: List<ContentTypeFilePlugin> = CONTENT_PLUGINS): ImportedContentEntryMetaData? {
     plugins.forEach {
@@ -39,7 +37,7 @@ suspend fun extractContentEntryMetadataFromFile(file: File, db: UmAppDatabase, p
         }
         if (pluginResult != null) {
             pluginResult.contentFlags = ContentEntry.FLAG_IMPORTED
-            return ImportedContentEntryMetaData(pluginResult, it.mimeTypes[0], file, it.importMode())
+            return ImportedContentEntryMetaData(pluginResult, it.mimeTypes[0], file.toURI().toString(), it.importMode())
         }
     }
 
@@ -66,7 +64,7 @@ suspend fun importContainerFromFile(contentEntryUid: Long, mimeType: String?, co
 
 suspend fun importContentEntryFromFile(file: File, db: UmAppDatabase, dbRepo: UmAppDatabase,
                                        containerBaseDir: String, context: Any, plugins: List<ContentTypeFilePlugin> = CONTENT_PLUGINS): Pair<ContentEntry, Container>? {
-    val (contentEntry, mimeType, file, importMode) = extractContentEntryMetadataFromFile(file, db, plugins)
+    val (contentEntry, mimeType, fileUri, importMode) = extractContentEntryMetadataFromFile(file, db, plugins)
             ?: return null
 
     contentEntry.contentEntryUid = dbRepo.contentEntryDao.insert(contentEntry)
@@ -76,10 +74,6 @@ suspend fun importContentEntryFromFile(file: File, db: UmAppDatabase, dbRepo: Um
     return Pair(contentEntry, container)
 }
 
-/**
- *
- */
-data class ImportedContentEntryMetaData(var contentEntry: ContentEntryWithLanguage, var mimeType: String, var file: File, var importMode: Int)
 
 object ContentTypeUtil {
 
@@ -88,4 +82,5 @@ object ContentTypeUtil {
     const val FILE = 2
 
     const val H5P = 3
+
 }

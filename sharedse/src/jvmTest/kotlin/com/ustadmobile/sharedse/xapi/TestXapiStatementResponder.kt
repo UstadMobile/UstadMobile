@@ -14,7 +14,10 @@ import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
@@ -24,7 +27,6 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatement
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder.Companion.URI_PARAM_ENDPOINT
 import com.ustadmobile.util.test.checkJndiSetup
-import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.util.test.extractTestResourceToFile
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
@@ -79,6 +81,11 @@ class TestXapiStatementResponder {
                     it.preload()
                 })
             }
+
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
+                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
+            }
+
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 
             bind<XapiStatementEndpoint>() with scoped(endpointScope).singleton {

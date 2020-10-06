@@ -2,8 +2,8 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContainerWithContainerEntryWithMd5
 import com.ustadmobile.sharedse.container.addEntriesFromConcatenatedInputStream
 import com.ustadmobile.sharedse.io.ConcatenatedInputStream
@@ -14,18 +14,18 @@ import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.post
 import io.ktor.routing.route
-import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.parseList
+import org.kodein.di.instance
+import org.kodein.di.ktor.di
+import org.kodein.di.on
 import java.io.File
 import java.io.FileInputStream
-import javax.naming.InitialContext
 
-fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
+fun Route.ContainerUpload() {
 
     route("ContainerUpload") {
 
         post("checkExistingMd5/") {
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
             val md5sumListStr = call.receive<String>()
             if (md5sumListStr.isEmpty()) {
                 call.respond(HttpStatusCode.BadRequest, "md5sum list not provided")
@@ -40,11 +40,12 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
         }
 
         post("finalizeEntries/") {
-
+            val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
             val sessionId = call.parameters["sessionId"] ?: ""
 
             val skipSessionFile = sessionId.isNullOrEmpty()
 
+            val folder: File by di().on(call).instance(tag = TAG_UPLOAD_DIR)
             val sessionFile = File(folder, sessionId)
             val containerWithContainerEntryWithMd5 = call.receive<ContainerWithContainerEntryWithMd5>()
             val containerEntriesList = containerWithContainerEntryWithMd5.containerEntries
@@ -57,12 +58,7 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
             if (!sessionFile.exists() && !skipSessionFile) {
                 call.respond(HttpStatusCode.InternalServerError, "session file not found")
             } else {
-
-                val iContext = InitialContext()
-                val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as? String
-                        ?: "./build/container"
-                val containerDir = File(containerDirPath)
-                containerDir.mkdirs()
+                val containerDir: File by di().on(call).instance(tag = DiTag.TAG_CONTAINER_DIR)
 
                 var containerFromDb = db.containerDao.findByUid(container.containerUid)
                 if (containerFromDb == null) {
@@ -88,9 +84,7 @@ fun Route.ContainerUpload(db: UmAppDatabase, folder: File) {
                 }
                 sessionFile.delete()
             }
-
         }
-
     }
 
 }

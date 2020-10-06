@@ -38,6 +38,17 @@ class TestOpfDocument {
     }
 
     @Test
+    fun givenValidEpub2Opf_whenLoaded_thenShouldHavePropertiesFromFileIncNcxNav() {
+        val opfIn = javaClass.getResourceAsStream("TestOpfDocument-v2.opf")
+        val parser = UstadMobileSystemImpl.instance.newPullParser()
+        parser.setInput(opfIn, "UTF-8")
+        val opf = OpfDocument()
+        opf.loadFromOPF(parser)
+        Assert.assertEquals("Title as expected", "Tabiatshinosi s 1", opf.title)
+        Assert.assertEquals("Loaded NCX item", "toc.ncx", opf.ncxItem?.href)
+    }
+
+    @Test
     @Throws(IOException::class, KMPPullParserException::class)
     fun givenOpfLoaded_whenSerializedThenLoaded_shouldBeEqual() {
         val opfIn = javaClass.getResourceAsStream("TestOpfDocument-valid.opf")

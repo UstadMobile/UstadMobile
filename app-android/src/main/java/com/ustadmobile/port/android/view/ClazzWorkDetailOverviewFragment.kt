@@ -55,8 +55,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     val accountManager: UstadAccountManager by instance()
 
     private var contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
-    private var contentLiveData: LiveData<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
-    private val contentObserver = Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> {
+    private var contentLiveData: LiveData<PagedList<
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
+    private val contentObserver = Observer<PagedList<
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> {
         t ->
         run {
             if (t?.size ?: 0 > 0) {
@@ -67,7 +69,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     }
 
     private var quizQuestionsRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseRA? = null
-    private val quizQuestionAndResponseObserver = Observer<List<ClazzWorkQuestionAndOptionWithResponse>?> {
+    private val quizQuestionAndResponseObserver = Observer<List<
+            ClazzWorkQuestionAndOptionWithResponse>?> {
         t -> quizQuestionsRecyclerAdapter?.submitList(t)
     }
 
@@ -97,13 +100,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private var detailMergerRecyclerAdapter: MergeAdapter? = null
     private var detailMergerRecyclerView: RecyclerView? = null
 
-
-
     override fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String,
                                 public: Boolean, to: Long, from: Long) {
         (view.parent as View).findViewById<EditText>(R.id.item_comment_new_comment_et).setText("")
         mPresenter?.addComment(entityType, entityUid, comment, public, to, from)
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -119,17 +119,16 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
-        //fragment_list_recyclerview
-        detailMergerRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_with_submission_detail_rv)
+        detailMergerRecyclerView =
+                rootView.findViewById(R.id.fragment_clazz_work_with_submission_detail_rv)
 
-        
         //Main Merger:PP
         detailRecyclerAdapter = ClazzWorkBasicDetailsRecyclerAdapter(entity)
         detailRecyclerAdapter?.visible = false
 
         contentRecyclerAdapter = ContentEntryListRecyclerAdapter(
                 DefaultContentEntryListItemListener(context = requireContext(), di = di),
-                ListViewMode.BROWSER.toString())
+                ListViewMode.BROWSER.toString(), viewLifecycleOwner, di)
 
         quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRA(
                 isStudent)
@@ -202,7 +201,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         detailMergerRecyclerAdapter = MergeAdapter(
                 detailRecyclerAdapter,
-                contentHeadingRecyclerAdapter, contentRecyclerAdapter,
+                contentHeadingRecyclerAdapter,
+                contentRecyclerAdapter,
                 submissionHeadingRecyclerAdapter,
                 submissionResultRecyclerAdapter, submissionFreeTextRecyclerAdapter,
                 questionsHeadingRecyclerAdapter,

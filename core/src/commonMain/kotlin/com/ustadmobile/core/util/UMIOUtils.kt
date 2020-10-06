@@ -48,11 +48,11 @@ import kotlin.reflect.KClass
  */
 object UMIOUtils {
 
-    val HTTP_SIZE_NOT_GIVEN = -1
+    const val HTTP_SIZE_NOT_GIVEN = -1
 
-    val HTTP_SIZE_IO_EXCEPTION = -2
+    const val HTTP_SIZE_IO_EXCEPTION = -2
 
-    val DEFAULT_BUFFER_SIZE = 8 * 1024
+    const val DEFAULT_BUFFER_SIZE = 8 * 1024
 
     /**
      * Close the given input stream if not null

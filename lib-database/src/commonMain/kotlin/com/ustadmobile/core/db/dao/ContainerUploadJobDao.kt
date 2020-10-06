@@ -22,9 +22,6 @@ abstract class ContainerUploadJobDao : BaseDao<ContainerUploadJob> {
     @Query("SELECT * FROM ContainerUploadJob where cujUid = :uploadId")
     abstract fun findByUid(uploadId: Long): ContainerUploadJob?
 
-    @Update
-    abstract override fun update(entity: ContainerUploadJob)
-
     @Query("""SELECT * FROM ContainerUploadJob WHERE jobStatus = $QUEUED
            AND (SELECT connectivityState from ConnectivityStatus WHERE connectivityState IN
             ($STATE_METERED, $STATE_UNMETERED))
@@ -32,7 +29,7 @@ abstract class ContainerUploadJobDao : BaseDao<ContainerUploadJob> {
     abstract fun findJobs(): DoorLiveData<List<ContainerUploadJob>>
 
     @Query("UPDATE ContainerUploadJob SET jobStatus = $QUEUED WHERE cujUid = :uploadJobId AND jobStatus = $NOT_QUEUED")
-    abstract fun setStatusToQueue(uploadJobId: Long)
+    abstract suspend fun setStatusToQueueAsync(uploadJobId: Long)
 
     @Query("UPDATE ContainerUploadJob SET bytesSoFar = :progress, contentLength = :contentLength WHERE cujUid = :uploadJobId")
     abstract fun updateProgress(progress: Long, contentLength: Long, uploadJobId: Long)

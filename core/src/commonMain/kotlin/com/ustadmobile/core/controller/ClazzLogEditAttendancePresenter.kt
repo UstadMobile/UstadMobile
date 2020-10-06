@@ -52,7 +52,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzLog? {
         val clazzLog = withTimeoutOrNull(2000) {
-             db.takeIf { currentClazzLogUid != 0L }?.clazzLogDao?.findByUid(currentClazzLogUid)
+             db.takeIf { currentClazzLogUid != 0L }?.clazzLogDao?.findByUidAsync(currentClazzLogUid)
         } ?: ClazzLog()
 
         val clazzWithSchool = withTimeoutOrNull(2000) {
@@ -62,7 +62,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
         view.clazzLogTimezone = clazzWithSchool.effectiveTimeZone()
 
         //Find all those who are members of the class at the corresponding class schedule.
-        val clazzMembersAtTime = db.clazzMemberDao.getAllClazzMembersAtTime(clazzLog.clazzLogClazzUid,
+        val clazzMembersAtTime = db.clazzMemberDao.getAllClazzMembersAtTimeAsync(clazzLog.clazzLogClazzUid,
             clazzLog.logDate, ClazzMember.ROLE_STUDENT)
         val clazzAttendanceLogsInDb = db.clazzLogAttendanceRecordDao.findByClazzLogUid(currentClazzLogUid)
 
@@ -135,10 +135,13 @@ class ClazzLogEditAttendancePresenter(context: Any,
         entity.clazzLogNumPresent = clazzLogAttendanceRecords.count { it.attendanceStatus == STATUS_ATTENDED }
         entity.clazzLogNumAbsent = clazzLogAttendanceRecords.count { it.attendanceStatus == STATUS_ABSENT }
         entity.clazzLogNumPartial = clazzLogAttendanceRecords.count { it.attendanceStatus == STATUS_PARTIAL }
-        repo.clazzLogDao.update(entity)
+        GlobalScope.launch() {
+            repo.clazzLogDao.update(entity)
+            //now update the average attendance for the class
+            repo.clazzDao.updateClazzAttendanceAverage(entity.clazzLogClazzUid)
+        }
 
-        //now update the average attendance for the class
-        repo.clazzDao.updateClazzAttendanceAverage(entity.clazzLogClazzUid)
+
     }
 
     override fun handleClickSave(entity: ClazzLog) {

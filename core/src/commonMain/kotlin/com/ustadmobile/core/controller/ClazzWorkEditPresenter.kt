@@ -113,7 +113,7 @@ class ClazzWorkEditPresenter(context: Any,
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val contentList = withTimeoutOrNull(2000) {
-            db.clazzWorkContentJoinDao.findAllContentByClazzWorkUid(
+            db.clazzWorkContentJoinDao.findAllContentByClazzWorkUidAsync(
                     clazzWork.clazzWorkUid, loggedInPersonUid
             )
          }?: listOf()
@@ -184,20 +184,15 @@ class ClazzWorkEditPresenter(context: Any,
             }
 
             val contentToInsert = contentJoinEditHelper.entitiesToInsert
-            val contentToUpdate = contentJoinEditHelper.entitiesToUpdate
             val contentToDelete = contentJoinEditHelper.primaryKeysToDeactivate
 
-            contentToInsert.forEach {
-                val newLink = ClazzWorkContentJoin().apply {
+            repo.clazzWorkContentJoinDao.insertListAsync(contentToInsert.map {
+                ClazzWorkContentJoin().apply {
                     clazzWorkContentJoinContentUid = it.contentEntryUid
                     clazzWorkContentJoinClazzWorkUid = entity?.clazzWorkUid?:0L
                     clazzWorkContentJoinDateAdded = systemTimeInMillis()
                 }
-                newLink.clazzWorkContentJoinUid = repo.clazzWorkContentJoinDao.insert(newLink)
-            }
-            contentToUpdate.forEach {
-
-            }
+            })
 
             repo.clazzWorkContentJoinDao.deactivateByUids(contentToDelete)
 
@@ -231,11 +226,11 @@ class ClazzWorkEditPresenter(context: Any,
             val allQuestions: List<ClazzWorkQuestionAndOptions> = (eti + etu)
             val allOptions = allQuestions.flatMap { it.options }
             val splitList = allOptions.partition { it.clazzWorkQuestionOptionUid == 0L }
-            repo.clazzWorkQuestionOptionDao.insertList(splitList.first)
-            repo.clazzWorkQuestionOptionDao.updateList(splitList.second)
+            repo.clazzWorkQuestionOptionDao.insertListAsync(splitList.first)
+            repo.clazzWorkQuestionOptionDao.updateListAsync(splitList.second)
 
             val deactivateOptions = allQuestions.flatMap { it.optionsToDeactivate }
-            db.clazzWorkQuestionOptionDao.deactivateByUids(deactivateOptions)
+            repo.clazzWorkQuestionOptionDao.deactivateByUids(deactivateOptions)
 
             repo.clazzWorkQuestionDao.deactivateByUids(questionAndOptionsEditHelper.primaryKeysToDeactivate)
 

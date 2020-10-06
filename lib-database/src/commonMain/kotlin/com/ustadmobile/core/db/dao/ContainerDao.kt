@@ -32,7 +32,7 @@ abstract class ContainerDao : BaseDao<Container> {
 
     @Query(SELECT_ACTIVE_RECENT_CONTAINER)
     @JsName("getMostRecentContainerForContentEntry")
-    abstract suspend fun getMostRecentContainerForContentEntry(contentEntry: Long): Container?
+    abstract fun getMostRecentContainerForContentEntry(contentEntry: Long): Container?
 
     @Query(SELECT_ACTIVE_RECENT_CONTAINER)
     abstract fun getMostRecentContainerForContentEntryLive(contentEntry: Long) : DoorLiveData<Container?>
@@ -121,12 +121,6 @@ abstract class ContainerDao : BaseDao<Container> {
             "WHERE Container.containerContentEntryUid = :contentEntry " +
             "ORDER BY Container.cntLastModified DESC LIMIT 1")
     abstract suspend fun getMostRecentContaineUidAndMimeType(contentEntry: Long): ContainerUidAndMimeType?
-
-    @Query("SELECT cetag from ContainerEtag WHERE ceContainerUid = :containerUid")
-    abstract fun getEtagOfContainer(containerUid: Long): String?
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    abstract fun insertEtag(container: ContainerETag)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<Container>)

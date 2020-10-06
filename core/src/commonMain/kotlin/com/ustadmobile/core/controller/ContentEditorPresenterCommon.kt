@@ -182,7 +182,7 @@ abstract class ContentEditorPresenterCommon(context: Any, arguments: Map<String,
         contentEntryUid = arguments.getOrElse(UstadView.ARG_CONTENT_ENTRY_UID, {"0"})!!.toLong()
 
         GlobalScope.launch {
-            contentEntry = umDatabase.contentEntryDao.findEntryWithLanguageByEntryId(contentEntryUid)
+            contentEntry = umDatabase.contentEntryDao.findEntryWithLanguageByEntryIdAsync(contentEntryUid)
             if(contentEntry != null){
                val container = umDatabase.containerDao.getMostRecentDownloadedContainerForContentEntryAsync(contentEntry!!.contentEntryUid)
 

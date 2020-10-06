@@ -9,13 +9,17 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.ext.DoorTag.Companion.TAG_DB
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUploadJob
 import com.ustadmobile.lib.rest.ContainerUpload
 import com.ustadmobile.lib.rest.ResumableUploadRoute
+import com.ustadmobile.lib.rest.TAG_UPLOAD_DIR
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.ext.TestContainer.assertContainersHaveSameContent
@@ -23,13 +27,14 @@ import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader.Comp
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
 import com.ustadmobile.sharedse.network.containeruploader.UploadJobRunner
-import com.ustadmobile.util.test.ext.bindNewSqliteDataSourceIfNotExisting
+import io.ktor.application.ApplicationCall
 import io.ktor.application.install
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
+import io.ktor.request.header
 import io.ktor.routing.Routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
@@ -37,11 +42,10 @@ import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.junit.After
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import org.junit.*
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import org.kodein.di.ktor.DIFeature
 import java.io.File
 import java.util.*
 import javax.naming.InitialContext
@@ -73,6 +77,10 @@ class UploadJobRunnerTest {
 
     private lateinit var containerUploadJob: ContainerUploadJob
 
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
+
     @Before
     fun setup() {
         repo = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase").build()
@@ -90,6 +98,9 @@ class UploadJobRunnerTest {
             on { connectivityStatus }.thenReturn(connectivityStatusLiveData)
         }
 
+        clientFolder = temporaryFolder.newFolder("upload")
+        serverFolder = temporaryFolder.newFolder("server")
+
         di = DI {
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
@@ -104,8 +115,6 @@ class UploadJobRunnerTest {
 
         connectivityStatusLiveData.sendValue(ConnectivityStatus(ConnectivityStatus.STATE_METERED, true, null))
 
-        clientFolder = UmFileUtilSe.makeTempDir("upload", "")
-        serverFolder = UmFileUtilSe.makeTempDir("server", "")
 
         server = embeddedServer(Netty, port = defaultPort) {
             install(ContentNegotiation) {
@@ -114,10 +123,30 @@ class UploadJobRunnerTest {
                     register(ContentType.Any, GsonConverter())
                 }
             }
+
             install(Routing) {
-                ContainerUpload(repo, serverFolder)
-                ResumableUploadRoute(serverFolder)
+                ContainerUpload()
+                ResumableUploadRoute()
             }
+
+
+            val serverEndpointScope = EndpointScope()
+            install(DIFeature) {
+                bind<UmAppDatabase>(tag = TAG_DB) with scoped(serverEndpointScope).singleton {
+                    repo
+                }
+
+                bind<File>(tag = TAG_UPLOAD_DIR) with scoped(serverEndpointScope).singleton {
+                    serverFolder
+                }
+
+                bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(serverEndpointScope).singleton {
+                    temporaryFolder.newFolder("servercontainerdir")
+                }
+
+                registerContextTranslator { call: ApplicationCall -> Endpoint(call.request.header("Host") ?: "nohost") }
+            }
+
         }.start(wait = false)
 
         fileToUpload = File(clientFolder, "tincan.zip")

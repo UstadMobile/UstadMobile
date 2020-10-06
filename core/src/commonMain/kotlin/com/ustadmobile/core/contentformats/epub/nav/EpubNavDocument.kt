@@ -35,7 +35,8 @@ import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
 
 /**
- * This class represents an EPUB navigation document as indicated by the OPF
+ * This class represents an EPUB navigation document as indicated by the OPF. It can be used to
+ * load an EPUB3 XHTML navigation document or an EPUB2 NCX file.
  *
  * @author mike
  */
@@ -45,6 +46,9 @@ class EpubNavDocument {
      * Table of nav tags
      */
     private val navItems: MutableMap<String, EpubNavItem> = mutableMapOf()
+
+    var ncxNavMap: EpubNavItem? = null
+        private set
 
     /**
      * Vector of all navigation elements found
@@ -100,22 +104,39 @@ class EpubNavDocument {
                         }
 
                         navElements.add(currentNav)
+                    } else if(tagName == "navMap") {
+                        currentNav = EpubNavItem(null, null, null, 0)
+                        ncxNavMap = currentNav
                     } else if (tagName == "li") {
                         currentItem = EpubNavItem(currentItem ?: currentNav, itemDepth)
                         itemDepth++
                     } else if (tagName == "a") {
-                        currentItem!!.href = xpp.getAttributeValue(null, "href")
+                        currentItem?.href = xpp.getAttributeValue(null, "href")
                         if (xpp.next() == KMPPullParser.TEXT) {
-                            currentItem.title = xpp.getText()
+                            currentItem?.title = xpp.getText()
                         }
+                    }else if(tagName == "navPoint") {
+                        //Epub 2.0 NCX navPoint also starts a new item
+                        currentItem = EpubNavItem(currentItem ?: currentNav, itemDepth)
+                    }else if(tagName =="text") {
+                        if(xpp.next() == KMPPullParser.TEXT) {
+                            currentItem?.title = xpp.getText()
+                        }
+                    }else if(tagName =="content") {
+                        currentItem?.href = xpp.getAttributeValue(null, "src")
                     }
                 }
 
-                KMPPullParser.END_TAG -> if (xpp.getName() == "nav") {
-                    currentNav = null
-                } else if (xpp.getName() == "li") {
-                    currentItem = currentItem!!.parent
-                    itemDepth--
+                KMPPullParser.END_TAG -> {
+                    if (xpp.getName() == "nav") {
+                        currentNav = null
+                    } else if (xpp.getName() == "li") {
+                        currentItem = currentItem?.parent
+                        itemDepth--
+                    }else if(xpp.getName() == "navPoint") {
+                        currentItem = currentItem?.parent
+                        itemDepth--
+                    }
                 }
             }
         }
@@ -181,6 +202,19 @@ class EpubNavDocument {
         } else {
             null
         }
+    }
+
+    fun EpubNavItem.findByHref(href: String): EpubNavItem? {
+        if(this.href == href)
+            return this
+
+        return getChildren()?.asSequence()?.map { it.findByHref(href) }?.firstOrNull { it != null}
+    }
+
+    fun getNavByHref(href: String): EpubNavItem? {
+        val result = navItems.values.asSequence().map { it.findByHref(href) }.firstOrNull { it != null }
+                ?: ncxNavMap?.findByHref(href)
+        return result
     }
 
     companion object {
