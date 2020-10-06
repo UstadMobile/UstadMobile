@@ -96,7 +96,7 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$version_kotlin"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization_runtime"
 
     implementation project(':lib-util')
 

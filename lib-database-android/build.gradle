@@ -109,7 +109,7 @@ dependencies {
     //ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
     kapt "androidx.lifecycle:lifecycle-common-java8:$version_androidx_lifecycle"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization_runtime"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
     //Room persistence
