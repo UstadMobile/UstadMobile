@@ -1,18 +1,27 @@
 package com.ustadmobile.sharedse.network
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.util.test.extractTestResourceToFile
 import kotlinx.coroutines.runBlocking
+import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
+import org.kodein.di.*
 import java.io.File
+import javax.naming.InitialContext
 
 class DeleteDownloadJobTest{
 
@@ -40,11 +49,35 @@ class DeleteDownloadJobTest{
 
     lateinit var dwchildofparent: DownloadJobItem
 
+    private lateinit var clientDi: DI
+
     @Before
     fun setup(){
+        val endpointScope = EndpointScope()
 
-        db = UmAppDatabase.getInstance(Any())
-        db.clearAllTables()
+        clientDi = DI {
+            bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl.instance }
+            bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
+            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
+                val dbName = sanitizeDbNameFromUrl(context.url)
+                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
+                spy(UmAppDatabase.getInstance(Any(), dbName).also {
+                    it.clearAllTables()
+                })
+            }
+
+            bind<ContainerDownloadManager>() with scoped(endpointScope).singleton {
+                mock<ContainerDownloadManager>()
+            }
+            registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+        }
+        val cloudMockWebServer = MockWebServer()
+        val accountManager: UstadAccountManager by clientDi.instance()
+        accountManager.activeAccount = UmAccount(0, "guest", "",
+                cloudMockWebServer.url("/").toString())
+
+        db =  clientDi.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
+        containerDownloadManager = clientDi.on(accountManager.activeAccount).direct.instance()
 
         containerTmpDir = UmFileUtilSe.makeTempDir("clientContainerDir", "" + System.currentTimeMillis())
 
@@ -170,7 +203,7 @@ class DeleteDownloadJobTest{
     @Test
     fun givenRootEntry_whenDeleted_checkAllChildrenDeleted(){
         runBlocking {
-            val successful = deleteDownloadJob(db, downloadJob.djUid, containerDownloadManager) {
+            val successful = containerDownloadManager.deleteDownloadJob(downloadJob.djUid) {
                 println(it)
             }
 
@@ -188,8 +221,9 @@ class DeleteDownloadJobTest{
 
     @Test
     fun givenSingleEntry_whenDeleted_checkDeleted(){
+
         runBlocking {
-            val successful = deleteDownloadJob(db, downloadJob.djUid, containerDownloadManager) {
+            val successful = containerDownloadManager.deleteDownloadJob(downloadJob.djUid) {
                 println(it)
             }
 
