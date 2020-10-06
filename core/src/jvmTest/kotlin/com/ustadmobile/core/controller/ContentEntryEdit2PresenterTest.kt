@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.impl.UMStorageDir
@@ -16,11 +17,9 @@ import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
 import junit.framework.Assert.assertTrue
 import org.junit.After
@@ -33,7 +32,7 @@ import org.kodein.di.instance
 import org.kodein.di.singleton
 
 
-class ContentEntryEdit2PresenterTest  {
+class ContentEntryEdit2PresenterTest {
 
     @JvmField
     @Rule
@@ -59,7 +58,7 @@ class ContentEntryEdit2PresenterTest  {
 
     private val timeoutInMill: Long = 5000
 
-    private lateinit var mockEntryDao:ContentEntryDao
+    private lateinit var mockEntryDao: ContentEntryDao
 
     private val errorMessage: String = "Dummy error"
 
@@ -74,15 +73,15 @@ class ContentEntryEdit2PresenterTest  {
         container = createMockContainer()
         contentEntry = createMockEntryWithLanguage()
         mockLifecycleOwner = mock { }
-        containerManager = spy{}
+        containerManager = spy {}
 
-        systemImpl = mock{
+        systemImpl = mock {
             on { getStorageDirs(any(), any()) }.thenAnswer {
                 (it.getArgument(1) as UmResultCallback<List<UMStorageDir>>).onDone(
                         mutableListOf(UMStorageDir("", "", removableMedia = false,
-                        isAvailable = false, isUserSpecific = false)))
+                                isAvailable = false, isUserSpecific = false)))
             }
-            on { getString(any(), any()) }.thenAnswer{errorMessage}
+            on { getString(any(), any()) }.thenAnswer { errorMessage }
         }
 
 
@@ -111,16 +110,20 @@ class ContentEntryEdit2PresenterTest  {
     }
 
     @After
-    fun tearDown() {}
-    private fun createMockView(isUriNull: Boolean = false){
-        mockView = mock{
-            onBlocking { saveContainerOnExit(any(), any(), any(), any())}.thenAnswer{container}
-            on {selectedStorageIndex}.thenAnswer {0}
-            on{selectedFileUri}.thenAnswer{if(isUriNull) null else "Dummy Uri"}
+    fun tearDown() {
+    }
+
+    private fun createMockView(isUriNull: Boolean = false) {
+        mockView = mock {
+            onBlocking { saveContainerOnExit(any(), any(), any(), any()) }.thenAnswer { container }
+            on { selectedStorageIndex }.thenAnswer { 0 }
+            on { entryMetaData }.thenAnswer { if (isUriNull) null else
+                ImportedContentEntryMetaData(ContentEntryWithLanguage(), "application/epub+zip", "file:/Dummy", 1)
+            }
         }
     }
 
-    private fun createMockEntryWithLanguage(): ContentEntryWithLanguage{
+    private fun createMockEntryWithLanguage(): ContentEntryWithLanguage {
         val language = Language()
         language.iso_639_2_standard = "en"
         language.langUid = 23
@@ -146,7 +149,7 @@ class ContentEntryEdit2PresenterTest  {
     fun givenPresenterCreatedAndEntryNotCreated_whenClickSave_shouldCreateAnEntry() {
         createMockView()
         val presenter = ContentEntryEdit2Presenter(context, mapOf(UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString())
-                ,mockView,mockLifecycleOwner, di)
+                , mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)
 
@@ -155,14 +158,14 @@ class ContentEntryEdit2PresenterTest  {
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao, timeout(5000)){
+            verifyBlocking(mockEntryDao, timeout(5000)) {
                 insertAsync(capture())
             }
-            assertEquals("Got expected content entry title",contentEntry.title, firstValue.title)
+            assertEquals("Got expected content entry title", contentEntry.title, firstValue.title)
         }
 
         argumentCaptor<Long>().apply {
-            verifyBlocking(mockView, timeout(timeoutInMill)){
+            verifyBlocking(mockView, timeout(timeoutInMill)) {
                 mockView.saveContainerOnExit(capture(), any(), eq(db), eq(repo))
             }
             assertEquals("Got expected content entry uid", contentEntry.contentEntryUid, firstValue)
@@ -176,21 +179,21 @@ class ContentEntryEdit2PresenterTest  {
         createMockView()
         contentEntry.leaf = false
         val presenter = ContentEntryEdit2Presenter(context, mapOf(UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString())
-                ,mockView,mockLifecycleOwner,di)
+                , mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)
         mockView.captureLastEntityValue()
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao, timeout(5000)){
+            verifyBlocking(mockEntryDao, timeout(5000)) {
                 insertAsync(capture())
             }
-            assertEquals("Got expected folder title",contentEntry.title, firstValue.title)
+            assertEquals("Got expected folder title", contentEntry.title, firstValue.title)
         }
 
         //verify that container was not created
-        verifyBlocking(mockView, times(0)){
+        verifyBlocking(mockView, times(0)) {
             mockView.saveContainerOnExit(any(), any(), eq(db), eq(repo))
         }
     }
@@ -203,7 +206,7 @@ class ContentEntryEdit2PresenterTest  {
         val presenter = ContentEntryEdit2Presenter(context,
                 mapOf(ARG_ENTITY_UID to contentEntry.contentEntryUid.toString(),
                         UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString())
-                ,mockView, mockLifecycleOwner, di)
+                , mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)
         val entrySetOnView = mockView.captureLastEntityValue()
@@ -211,18 +214,18 @@ class ContentEntryEdit2PresenterTest  {
         presenter.handleClickSave(entrySetOnView)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
-            verifyBlocking(mockEntryDao, timeout(5000)){
+            verifyBlocking(mockEntryDao, timeout(5000)) {
                 updateAsync(capture())
             }
             assertEquals("Got expected content entry title", "Updated Title", firstValue.title)
         }
 
         argumentCaptor<Long>().apply {
-            verifyBlocking(mockView, timeout(5000)){
+            verifyBlocking(mockView, timeout(5000)) {
                 mockView.saveContainerOnExit(capture(), any(), eq(db), eq(repo))
             }
 
-            assertEquals("Got expected content entry uid",contentEntry.contentEntryUid,
+            assertEquals("Got expected content entry uid", contentEntry.contentEntryUid,
                     firstValue)
         }
     }
@@ -230,7 +233,7 @@ class ContentEntryEdit2PresenterTest  {
     @Test
     fun givenPresenterCreatedAndEntryTitleIsNotFilled_whenClickSave_shouldShowErrorMessage() {
         createMockView()
-        val presenter = ContentEntryEdit2Presenter(context, mapOf() ,mockView,mockLifecycleOwner, di)
+        val presenter = ContentEntryEdit2Presenter(context, mapOf(), mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)
         val entityOnView = mockView.captureLastEntityValue()

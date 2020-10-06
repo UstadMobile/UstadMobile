@@ -5,8 +5,8 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeFilePlugin
 import com.ustadmobile.port.sharedse.contentformats.ContentTypeUtil
-
 import java.io.File
+import java.net.URI
 
 class VideoTypeFilePlugin : VideoTypePlugin(), ContentTypeFilePlugin {
 
@@ -15,8 +15,7 @@ class VideoTypeFilePlugin : VideoTypePlugin(), ContentTypeFilePlugin {
         fileExtensions.find { file.name.endsWith(it) } ?: return null
 
         return ContentEntryWithLanguage().apply {
-            this.title = ""
-            this.description = ""
+            this.title = file.nameWithoutExtension
             this.leaf = true
             this.contentTypeFlag = ContentEntry.TYPE_VIDEO
         }

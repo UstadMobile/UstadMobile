@@ -58,6 +58,7 @@ data class TestApplicationHolder(var proxyPort: Int, var appPort: Int, var token
                                  var mockWebServer: MockWebServer,
                                  var reverseProxy: ReverseProxyDispatcher)
 
+@ExperimentalStdlibApi
 fun Application.testServerManager() {
     var proxyHost = "localhost"
     val env = this.environment

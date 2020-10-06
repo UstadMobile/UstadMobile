@@ -207,6 +207,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @JsName("getContentEntryUidFromXapiObjectId")
     abstract fun getContentEntryUidFromXapiObjectId(objectId: String): Long
 
+
+    @Query("SELECT * FROM ContentEntry WHERE sourceUrl LIKE :sourceUrl")
+    @JsName("findSimilarIdEntryForKhan")
+    abstract fun findSimilarIdEntryForKhan(sourceUrl: String): List<ContentEntry>
+
     /**
      * This query is used to tell the client how big a download job is, even if the client does
      * not yet have the indexes
@@ -252,8 +257,19 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     SELECT * FROM ContentEntry_recursive""")
     abstract fun getAllEntriesRecursively(contentEntryUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndMostRecentContainer>
 
+    @Query("UPDATE ContentEntry SET ceInactive = :ceInactive WHERE ContentEntry.contentEntryUid = :contentEntryUid")
+    @JsName("updateContentEntryInActive")
+    abstract fun updateContentEntryInActive(contentEntryUid: Long, ceInactive: Boolean)
+
+    @Query("UPDATE ContentEntry SET  contentTypeFlag = :contentFlag WHERE ContentEntry.contentEntryUid = :contentEntryUid")
+    @JsName("updateContentEntryContentFlag")
+    abstract fun updateContentEntryContentFlag(contentFlag: Int, contentEntryUid: Long)
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<ContentEntry>)
+
+    @Query("""Select * from ContentEntry WHERE contentEntryUid IN (:contentEntryUids)""")
+    abstract fun getContentEntryFromUids(contentEntryUids: List<Long>): List<ContentEntry>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertWithReplace(entry: ContentEntry)

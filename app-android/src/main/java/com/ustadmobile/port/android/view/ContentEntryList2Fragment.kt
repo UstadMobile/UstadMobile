@@ -38,8 +38,6 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         get() = mPresenter
 
 
-
-
     override fun onHostBackPressed() = mPresenter?.handleOnBackPressed() ?: false
 
     private var localAvailabilityCallback: ContentEntryLocalAvailabilityPagedListCallback? = null

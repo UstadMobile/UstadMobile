@@ -41,6 +41,8 @@ class EpubContentActivityKasTest : TestCase() {
 
     private lateinit var containerTmpDir: File
 
+    private lateinit var contentEntry: ContentEntry
+
     @JvmField
     @Rule
     val tempFileRule = TemporaryFolder()
@@ -57,7 +59,7 @@ class EpubContentActivityKasTest : TestCase() {
 
     @Before
     fun setUp() {
-        val contentEntry = ContentEntry().apply {
+        contentEntry = ContentEntry().apply {
             leaf = true
             contentEntryUid = dbRule.db.contentEntryDao.insert(this)
         }
@@ -69,7 +71,7 @@ class EpubContentActivityKasTest : TestCase() {
         }
         containerTmpDir = tempFileRule.newFolder("epubContent${System.currentTimeMillis()}")
         val testFile = tempFileRule.newFile("test${System.currentTimeMillis()}.epub")
-        val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/test.epub")
+        val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/test2.epub")
         testFile.outputStream().use { input?.copyTo(it) }
 
         val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,
@@ -82,6 +84,7 @@ class EpubContentActivityKasTest : TestCase() {
     fun givenValidEpubContent_whenCreated_shouldBeLoadedToTheView() {
         val intent = Intent(context, EpubContentActivity::class.java)
         intent.putExtra(UstadView.ARG_CONTAINER_UID, container.containerUid.toString())
+        intent.putExtra(UstadView.ARG_CONTENT_ENTRY_UID, contentEntry.contentEntryUid.toString())
         val activityScenario = ActivityScenario.launch<EpubContentActivity>(intent)
         activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 
@@ -117,6 +120,7 @@ class EpubContentActivityKasTest : TestCase() {
     fun givenValidEpubContentOpened_whenTableOfContentItemIsClicked_shouldLoadThatItemIntoTheView() {
         val intent = Intent(context, EpubContentActivity::class.java)
         intent.putExtra(UstadView.ARG_CONTAINER_UID, container.containerUid.toString())
+        intent.putExtra(UstadView.ARG_CONTENT_ENTRY_UID, contentEntry.contentEntryUid.toString())
         val activityScenario = ActivityScenario.launch<EpubContentActivity>(intent)
         activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 

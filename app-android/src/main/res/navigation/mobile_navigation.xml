@@ -236,6 +236,12 @@
         />
 
     <fragment
+        android:id="@+id/import_link_view"
+        android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkFragment"
+        android:label=""
+        />
+
+    <fragment
         android:id="@+id/webchunk_view"
         android:name="com.ustadmobile.port.android.view.WebChunkFragment"
         android:label="" />
