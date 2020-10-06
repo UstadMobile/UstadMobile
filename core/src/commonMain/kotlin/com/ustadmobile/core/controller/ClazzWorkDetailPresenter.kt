@@ -45,7 +45,11 @@ class ClazzWorkDetailPresenter(context: Any,
         if(loggedInPerson?.admin == true){
             view.isStudent = false
         }else {
-            view.isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+            if(clazzMember == null){
+                view.isStudent = false
+            }else {
+                view.isStudent = (clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER)
+            }
         }
 
         return clazzWork
@@ -57,8 +61,12 @@ class ClazzWorkDetailPresenter(context: Any,
             val clazzMember: ClazzMember? =
                     db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                             entity?.clazzWorkClazzUid?: 0L)
-            1
-            view.isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
+            if(clazzMember == null){
+                view.isStudent = false
+            }else{
+                view.isStudent = clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER
+            }
+
         }
 
         super.onCreate(savedState)
@@ -79,8 +87,13 @@ class ClazzWorkDetailPresenter(context: Any,
             db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                     entity?.clazzWorkClazzUid?: 0L)
         }
-        val isStudent = (clazzMember != null && clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
-        return !isStudent
+
+        return if(clazzMember == null){
+            false
+        }else{
+            clazzMember.clazzMemberRole == ClazzMember.ROLE_TEACHER
+        }
+
 
     }
 

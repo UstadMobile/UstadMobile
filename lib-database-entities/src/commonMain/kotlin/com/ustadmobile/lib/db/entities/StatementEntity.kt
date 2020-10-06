@@ -84,6 +84,9 @@ open class StatementEntity {
      */
     var statementContentEntryUid: Long = 0
 
+
+    var statementLearnerGroupUid: Long = 0
+
     companion object {
 
         const val TABLE_ID = 60

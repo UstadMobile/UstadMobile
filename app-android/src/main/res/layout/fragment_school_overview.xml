@@ -16,7 +16,15 @@
             type="com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar" />
 
         <variable
+            name="fragmentEventHandler"
+            type="com.ustadmobile.port.android.view.SchoolDetailOverviewEventListener" />
+
+        <variable
             name="loading"
+            type="boolean" />
+
+        <variable
+            name="schoolCodeVisible"
             type="boolean" />
 
     </data>
@@ -86,12 +94,76 @@
 
 
 
+
+            <androidx.constraintlayout.widget.Barrier
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/school_code_barrier"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="fragment_school_overview_gender,school_overview_desc_tv"
+                />
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/fragment_school_detail_schoolcode_layout"
+                android:layout_width="match_parent"
+                android:background="?attr/selectableItemBackground"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/school_code_barrier"
+                android:onClick="@{() -> fragmentEventHandler.onClickSchoolCode(schoolWithHolidayCalendar.schoolCode)}"
+                android:visibility="@{(schoolWithHolidayCalendar.schoolCode != null &amp;&amp; schoolCodeVisible )? View.VISIBLE : View.GONE}"
+                >
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/fragment_school_detail_join_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:tint="?colorOnIconTint"
+                    android:layout_marginStart="@dimen/dimen_16dp"
+                    android:layout_marginTop="@dimen/dimen_10dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_login_24px" />
+
+                <TextView
+                    android:id="@+id/fragment_school_detail_schoolcode_text"
+                    android:text="@{schoolWithHolidayCalendar.schoolCode}"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginEnd="@dimen/dimen_16dp"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_join_icon"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="abc123" />
+
+                <TextView
+                    android:id="@+id/fragment_school_detail_schoolcode_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+
+
+                    android:text="@string/school_code"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_school_detail_schoolcode_text"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_school_detail_join_icon"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    />
+
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/barrier2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:barrierDirection="bottom"
-                app:constraint_referenced_ids="fragment_school_overview_gender,school_overview_desc_tv"
+                app:constraint_referenced_ids="fragment_school_detail_schoolcode_layout,school_code_barrier"
                 />
 
             <androidx.appcompat.widget.AppCompatImageView

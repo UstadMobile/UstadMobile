@@ -15,12 +15,6 @@ import com.ustadmobile.lib.db.entities.ClazzWorkQuestionOption
 abstract class ClazzWorkQuestionOptionDao : BaseDao<ClazzWorkQuestionOption>,
         OneToManyJoinDao<ClazzWorkQuestionOption>{
 
-    @Insert
-    abstract override fun insert(entity: ClazzWorkQuestionOption): Long
-
-    @Update
-    abstract override fun update(entity: ClazzWorkQuestionOption)
-
     @Update
     abstract suspend fun updateAsync(entity: ClazzWorkQuestionOption) : Int
 

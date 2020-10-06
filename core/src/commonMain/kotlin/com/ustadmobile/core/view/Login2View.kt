@@ -16,8 +16,6 @@ interface Login2View : UstadView {
 
     fun clearFields()
 
-    fun navigateToNextDestination(account: UmAccount?,fromDestination: String, nextDestination: String)
-
     var errorMessage: String
 
     var versionInfo: String?
@@ -25,6 +23,8 @@ interface Login2View : UstadView {
     companion object {
 
         const val VIEW_NAME = "Login2View"
+
+        const val ARG_NO_GUEST = "NoGuest"
 
     }
 

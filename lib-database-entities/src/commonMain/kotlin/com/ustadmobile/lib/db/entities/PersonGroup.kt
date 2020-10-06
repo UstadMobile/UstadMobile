@@ -28,15 +28,18 @@ open class PersonGroup() {
     var groupName: String? = null
 
     var groupActive : Boolean = true
+
     /**
-     * If this was created as a group for one person, this is the uid for that Person object.
-     * Single member groups are used to avoid queries having to look things up from another table.
      *
-     * @return person UID if this group is created for one user only, otherwise 0
      */
-    var groupPersonUid: Long = 0
+    var personGroupFlag: Int = 0
 
     constructor(name: String) : this() {
         this.groupName = name
+    }
+
+    companion object{
+        const val PERSONGROUP_FLAG_DEFAULT = 0
+        const val PERSONGROUP_FLAG_PERSONGROUP = 1
     }
 }

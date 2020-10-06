@@ -47,13 +47,6 @@ fun TextView.setBitmaskListText(textBitmaskValue: Long?, textBitmaskFlags: List<
             .joinToString { systemImpl.getString(it.messageId, context) }
 }
 
-@BindingAdapter("presenterFieldHeader")
-fun TextView.setPresenterFieldHeader(presenterField: PersonDetailPresenterField) {
-    if (presenterField.headerMessageId != 0) {
-        text = UstadMobileSystemImpl.instance.getString(presenterField.headerMessageId, context)
-    }
-}
-
 /**
  * This binder will handle situations where a there is a fixed list of flags, each of which
  * corresponds to a given messageId.
@@ -245,4 +238,26 @@ fun TextView.setResponseTextFilled(responseText: String?){
 @BindingAdapter("memberRoleName")
 fun TextView.setMemberRoleName(clazzMember: ClazzMember?) {
     text = clazzMember?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
+}
+
+
+@BindingAdapter("rolesAndPermissionsText")
+fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
+    val scopeType = when (entityRole.erTableId) {
+        School.TABLE_ID -> {
+            " (" +context.getString(R.string.school)+ ")"
+        }
+        Clazz.TABLE_ID -> {
+            " (" +context.getString(R.string.clazz) + ")"
+        }
+        Person.TABLE_ID -> {
+            " (" + context.getString(R.string.person) + ")"
+        }
+        else -> ""
+    }
+
+    val fullText =entityRole.entityRoleRole?.roleName +  " @ " +
+            entityRole.entityRoleScopeName + scopeType
+    text = fullText
+
 }

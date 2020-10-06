@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.*
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.annotation.ParamName
@@ -18,8 +19,8 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     @Insert
     abstract suspend fun insertListAsync(entityList: List<StatementEntity>)
 
-    @Query("SELECT * From StatementEntity")
-    abstract fun all(): List<StatementEntity>
+    @Query("SELECT * From StatementEntity LIMIT 1")
+    abstract fun getOneStatement(): DoorLiveData<StatementEntity?>
 
     @Query("SELECT * FROM StatementEntity WHERE statementId = :id LIMIT 1")
     abstract fun findByStatementId(id: String): StatementEntity?

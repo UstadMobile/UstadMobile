@@ -87,6 +87,8 @@ interface UstadView {
 
         const val ARG_CONTENT_ENTRY_UID = "entryid"
 
+        const val ARG_LEARNER_GROUP_UID = "learnerGroupUid"
+
         const val ARG_NO_IFRAMES = "noiframe"
 
         const val ARG_SCHOOL_UID = "schoolUid"
@@ -103,7 +105,11 @@ interface UstadView {
 
         const val ARG_LISTADDMODE = "listAddMode"
 
+        const val ARG_FILTER_BY_PERMISSION = "filterByPermission"
+
         const val ARG_FILTER_BY_CLAZZUID = "filterByClazzUid"
+
+        const val ARG_FILTER_BY_PERSONGROUPUID = "filterByPersonGroupUid"
 
         const val ARG_CLAZZWORK_UID = "clazzworkUid"
 
@@ -115,9 +121,17 @@ interface UstadView {
 
         const val ARG_SERVER_URL = "serverUrl"
 
+        const val ARG_INTENT = "argIntent"
+
         const val ARG_FROM = "from"
 
         const val ARG_SNACK_MESSAGE = "snack_message"
+
+        const val ARG_CODE = "argCode"
+
+        const val ARG_CODE_TABLE = "argCodeTable"
+
+        const val ARG_ENTITY_NAME = "argEntityName"
 
         const val CURRENT_DEST = ""
 
