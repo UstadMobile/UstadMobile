@@ -124,6 +124,11 @@ open class UstadApp : BaseUstadApp(), DIAware {
             DownloadPreparationRequesterAndroidImpl(applicationContext, context)
         }
 
+        bind<DeletePreparationRequester>() with scoped(EndpointScope.Default).singleton {
+            DeletePreparationRequesterAndroidImpl(applicationContext, context)
+        }
+
+
         bind<ContainerDownloadRunner>() with factory { arg: DownloadJobItemRunnerDIArgs ->
             DownloadJobItemRunner(arg.downloadJobItem,
                     arg.endpoint.url, di = di)

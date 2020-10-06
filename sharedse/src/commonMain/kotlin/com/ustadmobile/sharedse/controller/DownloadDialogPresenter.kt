@@ -25,8 +25,8 @@ import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobSizeInfo
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
+import com.ustadmobile.sharedse.network.DeletePreparationRequester
 import com.ustadmobile.sharedse.network.DownloadPreparationRequester
-import com.ustadmobile.sharedse.network.requestDelete
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -248,7 +248,7 @@ class DownloadDialogPresenter(context: Any,
         val currentDownloadJobItemVal = currentDownloadJobItem
         when {
             currentDownloadJobItem.isStatusCompletedSuccessfully() && currentDownloadJobItemVal != null ->
-                requestDelete(currentDownloadJobItemVal.djiDjUid, containerDownloadManager, context)
+                createDeleteJobAndRequestPreparation(currentDownloadJobItemVal.djiDjUid)
 
             currentDownloadJobItem.isStatusPaused() && currentDownloadJobItemVal != null -> GlobalScope.launch {
                 containerDownloadManager.enqueue(currentDownloadJobItemVal.djiDjUid)
@@ -258,6 +258,11 @@ class DownloadDialogPresenter(context: Any,
                 createDownloadJobAndRequestPreparation()
             }
         }
+    }
+
+    private fun createDeleteJobAndRequestPreparation(downloadUid: Int) {
+        val deleteRequester: DeletePreparationRequester by on(accountManager.activeAccount).instance()
+        deleteRequester.requestDelete(downloadUid)
     }
 
     /**

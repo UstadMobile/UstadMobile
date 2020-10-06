@@ -163,7 +163,8 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     fun handleOnClickDeleteButton() {
-
+        view.showDownloadDialog(mapOf(ARG_CONTENT_ENTRY_UID to (entity?.contentEntryUid?.toString()
+                ?: "0")))
     }
 
     fun handleOnClickGroupActivityButton() {
