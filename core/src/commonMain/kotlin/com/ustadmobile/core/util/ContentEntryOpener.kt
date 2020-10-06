@@ -21,7 +21,8 @@ private val mimeTypeToViewNameMap = mapOf(
         "application/tincan+zip" to XapiPackageContentView.VIEW_NAME,
         "application/khan-video+zip" to VideoPlayerView.VIEW_NAME,
         "application/webchunk+zip" to WebChunkView.VIEW_NAME,
-        "application/epub+zip" to EpubContentView.VIEW_NAME
+        "application/epub+zip" to EpubContentView.VIEW_NAME,
+        "application/har+zip" to HarView.VIEW_NAME
 ) + VideoContentPresenterCommon.VIDEO_MIME_MAP.keys.map { it to VideoPlayerView.VIEW_NAME }.toMap()
 
 

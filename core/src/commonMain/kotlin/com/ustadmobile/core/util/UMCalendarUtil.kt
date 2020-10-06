@@ -1,6 +1,7 @@
 package com.ustadmobile.core.util
 
 import com.soywiz.klock.*
+import com.soywiz.klock.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 /**
@@ -12,8 +13,10 @@ object UMCalendarUtil {
     private val httpDateFormat: DateFormat = DateFormat("EEE, dd MMM yyyy HH:mm:ss z")
     private val httpDateFormat2: DateFormat = DateFormat("EEE, dd-MMM-yyyy HH:mm:ss z")
     private val iso8601DateFormat: DateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX")
+    private val opdsDateFormat: DateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
+    private val otherOpdsFormat: DateFormat = DateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'")
 
-    private val listOfFormats = listOf(httpDateFormat, httpDateFormat2, iso8601DateFormat)
+    private val listOfFormats = listOf(httpDateFormat, httpDateFormat2, iso8601DateFormat, opdsDateFormat, otherOpdsFormat)
 
     /**
      * Make a String for the date given by time as an HTTP Date as per
@@ -28,6 +31,17 @@ object UMCalendarUtil {
     fun makeHTTPDate(time: Long): String {
         val cal = DateTime(time)
         return cal.format(httpDateFormat)
+    }
+
+    fun parseOpdsDate(data: String): DateTime? {
+        listOfFormats.forEach {
+            try {
+                return it.parse(data).local
+            } catch (e: DateException) {
+
+            }
+        }
+        throw IllegalArgumentException("no date format found for the following date: $data")
     }
 
     /**

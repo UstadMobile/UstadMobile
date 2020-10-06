@@ -4,6 +4,7 @@ import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 
 import java.io.File
+import java.net.URI
 
 /**
  * @author kileha3

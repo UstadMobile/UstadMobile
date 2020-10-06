@@ -43,7 +43,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 41)
+], version = 42)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -171,6 +171,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("containerEntryFileDao")
     abstract val containerEntryFileDao: ContainerEntryFileDao
+
+    @JsName("containerETagDao")
+    abstract val containerETagDao: ContainerETagDao
 
     @JsName("verbDao")
     abstract val verbDao: VerbDao
@@ -1319,7 +1322,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-        val MIGRATION_38_39 = object : DoorMigration(38, 39) {
+        val MIGRATION_38_39 = object: DoorMigration(38, 39) {
             override fun migrate(db: DoorSqlDatabase) {
                 db.execSQL("CREATE TABLE IF NOT EXISTS SqliteSyncablePrimaryKey (sspTableId INTEGER NOT NULL PRIMARY KEY, sspNextPrimaryKey INTEGER NOT NULL)")
 
@@ -1798,12 +1801,29 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_41_42 = object : DoorMigration(41, 42) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN sqiContentEntryUid INTEGER DEFAULT 0 NOT NULL")
+                    database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN overrideEntry INTEGER DEFAULT 0 NOT NULL")
+
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN sqiContentEntryUid BIGINT DEFAULT 0 NOT NULL")
+                    database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN overrideEntry BOOL DEFAULT false NOT NULL")
+
+                }
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
-                    MIGRATION_39_40, MIGRATION_40_41)
+                    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42)
 
 
 

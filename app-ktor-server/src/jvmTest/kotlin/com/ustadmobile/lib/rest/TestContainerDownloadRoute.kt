@@ -62,7 +62,7 @@ class TestContainerDownloadRoute {
             }
 
             install(Routing) {
-                ContainerDownload(db)
+                ContainerDownload()
             }
         }.start(wait = false)
 

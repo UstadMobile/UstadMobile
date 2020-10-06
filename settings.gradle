@@ -29,8 +29,8 @@ include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':lib-
         ':lib-database',
         ':lib-database-android',
         ':lib-room-annotations',
-        ':lib-content-editor'
-        //':lib-content-scrapers'
+        ':lib-content-editor',
+        ':lib-content-scrapers'
 
 rootProject.name = "UstadMobile"
 enableFeaturePreview("GRADLE_METADATA")

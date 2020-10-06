@@ -5,8 +5,10 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.rest.ext.ktorInit
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
@@ -24,18 +26,17 @@ import io.ktor.request.header
 import io.ktor.routing.Routing
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
-import org.kodein.type.TypeToken
 import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
 
 const val TAG_UPLOAD_DIR = 10
 
-const val TAG_CONTAINER_DIR = 11
-
 const val CONF_DBMODE_VIRTUALHOST = "virtualhost"
 
 const val CONF_DBMODE_SINGLETON = "singleton"
+
+const val CONF_GOOGLE_API = "secret"
 
 /**
  *
@@ -46,6 +47,7 @@ private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBM
     sanitizeDbNameFromUrl(url)
 }
 
+@ExperimentalStdlibApi
 fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: String? = null,
                                   singletonDbName: String = "UmAppDatabase") {
 
@@ -81,6 +83,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     val storageRoot = File(environment.config.propertyOrNull("ktor.ustad.storagedir")?.getString() ?: "build/storage")
     storageRoot.takeIf { !it.exists() }?.mkdirs()
 
+    val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
+
     install(DIFeature) {
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
             File(tmpRootDir, context.identifier(dbMode)).also {
@@ -88,10 +92,14 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             }
         }
 
-        bind<File>(tag = TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+        bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
             File(File(storageRoot, context.identifier(dbMode)), "container").also {
                 it.takeIf { !it.exists() }?.mkdirs()
             }
+        }
+
+        bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
+            apiKey
         }
 
         bind<Gson>() with singleton { Gson() }
@@ -110,6 +118,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             }
         }
 
+        bind<ScraperManager>() with scoped(EndpointScope.Default).singleton {
+            ScraperManager(endpoint = context, di = di)
+        }
+
         registerContextTranslator { call: ApplicationCall -> Endpoint(call.request.header("Host") ?: "nohost") }
     }
 
@@ -121,7 +133,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ContainerUpload()
         UmAppDatabase_KtorRoute(true)
         WorkSpaceRoute()
-
+        ContentEntryLinkImporter()
         if (devMode) {
             DevModeRoute()
         }
