@@ -272,14 +272,15 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                         return null
                     }
 
+                    val urlWithEndingSlash = if(url.endsWith("/")) url else "$url/"
                     val entry = ContentEntryWithLanguage()
                     entry.title = document.title().substringAfterLast("/")
-                    entry.sourceUrl = url
+                    entry.sourceUrl = urlWithEndingSlash
                     entry.leaf = false
                     entry.contentTypeFlag = ContentEntry.TYPE_COLLECTION
                     Napier.e("$logPrefix metadata uri for apacheIndexer: $url", tag = SCRAPER_TAG)
 
-                    return ImportedContentEntryMetaData(entry, "text/html", url, 0, ScraperTypes.APACHE_INDEXER)
+                    return ImportedContentEntryMetaData(entry, "text/html", urlWithEndingSlash, 0, ScraperTypes.APACHE_INDEXER)
 
                 }
 
