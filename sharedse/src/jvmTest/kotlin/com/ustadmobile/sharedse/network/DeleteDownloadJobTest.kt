@@ -9,11 +9,15 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.util.test.extractTestResourceToFile
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
@@ -51,9 +55,12 @@ class DeleteDownloadJobTest{
 
     private lateinit var clientDi: DI
 
+    lateinit var mockNetworkManager: NetworkManagerBle
+
     @Before
     fun setup(){
         val endpointScope = EndpointScope()
+        mockNetworkManager = mock{}
 
         clientDi = DI {
             bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl.instance }
@@ -65,9 +72,10 @@ class DeleteDownloadJobTest{
                     it.clearAllTables()
                 })
             }
+            bind<NetworkManagerBle>() with singleton { mockNetworkManager }
 
             bind<ContainerDownloadManager>() with scoped(endpointScope).singleton {
-                mock<ContainerDownloadManager>()
+                ContainerDownloadManagerImpl(endpoint = context, di = di)
             }
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
@@ -91,7 +99,6 @@ class DeleteDownloadJobTest{
         var entryDao = db.contentEntryDao
         var dwItemDao = db.downloadJobItemDao
         var dwJoinDao = db.downloadJobItemParentChildJoinDao
-        var statusDao = db.contentEntryStatusDao
         var dwDao = db.downloadJobDao
 
         downloadJob = DownloadJob()
@@ -135,10 +142,6 @@ class DeleteDownloadJobTest{
         rootContentEntry.contentEntryUid = 1
         entryDao.insert(rootContentEntry)
 
-        var rootStatus = ContentEntryStatus()
-        rootStatus.cesUid = rootContentEntry.contentEntryUid
-        statusDao.insert(rootStatus)
-
         var dwparent = DownloadJobItem()
         dwparent.djiUid = 2
         dwparent.timeStarted = 54446
@@ -150,9 +153,6 @@ class DeleteDownloadJobTest{
         parentEntry.contentEntryUid = 2
         entryDao.insert(parentEntry)
 
-        var parentEntryStatus = ContentEntryStatus()
-        parentEntryStatus.cesUid = parentEntry.contentEntryUid
-        statusDao.insert(parentEntryStatus)
 
         var rootParentJoin = DownloadJobItemParentChildJoin()
         rootParentJoin.djiParentDjiUid = dwroot.djiUid
@@ -171,10 +171,6 @@ class DeleteDownloadJobTest{
         var childOfParent = ContentEntry()
         childOfParent.contentEntryUid = 5
         entryDao.insert(childOfParent)
-
-        var childOfparentStatus = ContentEntryStatus()
-        childOfparentStatus.cesUid = childOfParent.contentEntryUid
-        statusDao.insert(childOfparentStatus)
 
         var childOfParentJoin = DownloadJobItemParentChildJoin()
         childOfParentJoin.djiParentDjiUid = dwparent.djiUid
@@ -196,8 +192,6 @@ class DeleteDownloadJobTest{
         commonFileContainerEntry = parentContainerManager.getEntry("testfile1.png")!!
         zombieFileContainerEntry = parentContainerManager.getEntry("testfile2.png")!!
 
-
-        containerDownloadManager = mock()
     }
 
     @Test
@@ -207,11 +201,7 @@ class DeleteDownloadJobTest{
                 println(it)
             }
 
-            verifyBlocking(containerDownloadManager, timeout(5000)) {
-                handleDownloadJobItemUpdated(argThat {
-                    djiUid == dwchildofparent.djiUid && djiStatus == JobStatus.DELETED
-                }, eq(false))
-            }
+            
 
             Assert.assertTrue("Delete job reports success", successful)
             Assert.assertTrue(File(commonFileContainerEntry.containerEntryFile!!.cefPath!!).exists())
@@ -227,15 +217,14 @@ class DeleteDownloadJobTest{
                 println(it)
             }
 
-
             Assert.assertTrue("Delete job reports success", successful)
             Assert.assertTrue(File(commonFileContainerEntry.containerEntryFile!!.cefPath!!).exists())
             Assert.assertFalse(File(zombieFileContainerEntry.containerEntryFile!!.cefPath!!).exists())
 
         }
-
-
     }
+
+
 
 
 }
