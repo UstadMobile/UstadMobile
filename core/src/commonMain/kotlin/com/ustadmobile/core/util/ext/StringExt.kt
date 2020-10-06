@@ -11,6 +11,6 @@ fun String?.toQueryLikeParam() = if(this.isNullOrEmpty()) "%" else "%$this%"
 
 const val forwardSlash = "/"
 
-fun String.requirePostfix(postFix: String = forwardSlash) = if(this.endsWith(postFix)) this else "$this$postFix"
+fun String.requirePostfix(postFix: String) = if(this.endsWith(postFix)) this else "$this$postFix"
 
 fun String?.alternative(alternative: String) = if(this.isNullOrEmpty()) alternative else this
