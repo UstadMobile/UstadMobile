@@ -793,4 +793,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="entity_code">%1$s code</string>
     <string name="join_code_instructions">Ask your teacher for the %1$s code, then enter it below:</string>
 
+    <string name="record_for_student">Record for student</string>
+
 </resources>

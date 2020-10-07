@@ -9,13 +9,26 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 
-class ClazzWorkQuestionAndOptionsWithResponseRA(var studentMode: Boolean)
+class ClazzWorkQuestionAndOptionsWithResponseRA()
     : ListAdapter<ClazzWorkQuestionAndOptionWithResponse,
         ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder>(
         ClazzWorkDetailOverviewFragment.DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE) {
 
+    var studentMode: Boolean = false
+        set(value){
+            if(field == value)
+                return
+            field = value
+            if(studentMode){
+                viewHolder?.binding?.studentMode = value
+            }
+
+        }
+
     class ClazzWorkQuestionViewHolder(val binding: ItemClazzworkquestionandoptionswithresponseBinding)
         : RecyclerView.ViewHolder(binding.root)
+
+    private var viewHolder: ClazzWorkQuestionViewHolder? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkQuestionViewHolder {
         val viewHolder = ClazzWorkQuestionViewHolder(
@@ -34,5 +47,10 @@ class ClazzWorkQuestionAndOptionsWithResponseRA(var studentMode: Boolean)
         holder.itemView.tag = getItem(position).clazzWorkQuestion.clazzWorkQuestionUid
         holder.binding.itemClazzworkquestionandoptionswithresponseAnswerEt.tag =
                 getItem(position).clazzWorkQuestion.clazzWorkQuestionUid
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        viewHolder = null
     }
 }
