@@ -4,7 +4,6 @@ import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import org.xmlpull.v1.XmlPullParserException
-import java.io.ByteArrayInputStream
 import java.io.File
 import java.io.IOException
 import java.io.InputStream
@@ -14,6 +13,9 @@ import java.util.*
 import java.util.regex.Pattern
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMURLEncoder
+import java.io.ByteArrayInputStream
+import com.ustadmobile.lib.util.parseAcceptedEncoding
+
 
 class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder {
 
@@ -25,53 +27,6 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
                            session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response
 
     }
-
-    @Deprecated("")
-    class MountedZipFilter(var pattern: Pattern, var replacement: String)
-
-    class FilteredHtmlSource(private val src: IFileSource, private val scriptPath: String) : IFileSource {
-
-        private var sourceLength: Long = -1
-
-        override val lastModifiedTime: Long
-            get() = src.lastModifiedTime
-
-        override val name: String?
-            get() = src.name
-
-        override val inputStream: InputStream by lazy {
-            //init and filter
-            val srcIn = src.inputStream
-            try {
-                val filterSerializer = EpubHtmlFilterSerializer()
-                filterSerializer.scriptSrcToAdd = scriptPath
-                filterSerializer.setIntput(srcIn)
-                val filteredBytes = filterSerializer.output
-                sourceLength = filteredBytes.size.toLong()
-                ByteArrayInputStream(filteredBytes)
-            } catch (x: XmlPullParserException) {
-                throw IOException(x)
-            }
-        }
-
-        override val length: Long
-            get() {
-                try {
-                    inputStream
-                } catch (e: IOException) {
-                }
-
-                return sourceLength
-            }
-
-
-        override val exists: Boolean
-            get() = src.exists
-
-        override val eTag: String?
-            get() = null
-    }
-
 
     override fun get(uriResource: RouterNanoHTTPD.UriResource, urlParams: Map<String, String>, session: NanoHTTPD.IHTTPSession): NanoHTTPD.Response {
         try {
@@ -88,15 +43,33 @@ class MountedContainerResponder : FileResponder(), RouterNanoHTTPD.UriResponder 
 
             val filterList = uriResource.initParameter(PARAM_FILTERS_INDEX, List::class.java)
                     as List<MountedContainerFilter>
-            var response = newResponseFromFile(uriResource, session,
-                    FileSource(File(entryFile.containerEntryFile!!.cefPath!!)))
 
-            if (entryFile.containerEntryFile!!.compression == COMPRESSION_GZIP)
+            var responseFile = entryFile.containerEntryFile?.cefPath?.let { File(it) }
+                    ?: return NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND,
+                    "text/plain", "Entry found but does not have containerEntryFile/cefPath: $pathInContainer uriResource.uri=${uriResource.uri}\n" +
+                    "requestUri=${requestUri}")
+
+            //Look at the accept-encoding header to see if we can use gzip.
+            val acceptsGzip = parseAcceptedEncoding(session.getHeaders().get("accept-encoding"))
+                    .isEncodingAcceptable("gzip")
+
+            val fileIsGzipped = entryFile.containerEntryFile?.compression == COMPRESSION_GZIP
+
+            var fileSource = if(!fileIsGzipped || acceptsGzip) {
+                FileSource(responseFile)
+            }else {
+                InflateFileSource(responseFile, entryFile.containerEntryFile?.ceTotalSize ?: throw IllegalStateException("no total size"))
+            }
+
+            var response = newResponseFromFile(uriResource, session, fileSource)
+
+            if (acceptsGzip && fileIsGzipped)
                 response.addHeader("Content-Encoding", "gzip")
 
             for (filter in filterList) {
                 response = filter.filterResponse(response, uriResource, urlParams, session)
             }
+
             return response
         } catch (e: URISyntaxException) {
             e.printStackTrace()

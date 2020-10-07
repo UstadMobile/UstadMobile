@@ -81,18 +81,19 @@ class SortListFragmentTest {
 
         fragmentScenario.onFragment {
             val sortOption = it.mNewItemRecyclerViewAdapter!!.sortOptionSelected
-            Assert.assertEquals("order set to default ascending", PersonDao.SORT_NAME_ASC, sortOption!!.flag)
+            Assert.assertEquals("order set to default ascending",
+                    PersonDao.SORT_FIRST_NAME_ASC, sortOption!!.flag)
         }
 
         onView(withId(R.id.item_sort_selected_layout)).perform(click())
 
         onView(withId(R.id.fragment_sort_order_list)).perform(
-                RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(withTagValue(Matchers.equalTo(PersonDao.SORT_NAME_DESC)),
+                RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(withTagValue(Matchers.equalTo(PersonDao.SORT_FIRST_NAME_ASC)),
                         click()))
 
         fragmentScenario.onFragment {
             val sortOption = it.mNewItemRecyclerViewAdapter!!.sortOptionSelected
-            Assert.assertEquals("order changed to descending", PersonDao.SORT_NAME_DESC, sortOption!!.flag)
+            Assert.assertEquals("order changed to descending", PersonDao.SORT_FIRST_NAME_ASC, sortOption!!.flag)
         }
 
     }

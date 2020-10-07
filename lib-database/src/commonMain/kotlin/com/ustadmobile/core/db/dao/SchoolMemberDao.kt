@@ -3,6 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
@@ -16,6 +17,9 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
     @Query("SELECT * FROM SchoolMember WHERE schoolMemberUid = :schoolMemberUid " +
             " AND CAST(schoolMemberActive AS INTEGER) = 1")
     abstract fun findByUidAsync(schoolMemberUid: Long): SchoolMember?
+
+    @Update
+    abstract suspend fun updateAsync(entity: SchoolMember): Int
 
 
     @Query("""

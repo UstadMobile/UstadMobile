@@ -29,7 +29,18 @@
         android:theme="@style/UmTheme.App"
         android:usesCleartextTraffic="true">
         <activity android:name="com.ustadmobile.port.android.view.MainActivity"
-            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale">
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
+            android:launchMode="singleTask">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:host="*" android:pathPattern="..*umclient/.*"
+                    android:scheme="http" />
+            </intent-filter>
+
+
         </activity>
 
         <!-- previously used: android:theme="@style/UmTheme.App.OnBoarding"  -->

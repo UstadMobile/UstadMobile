@@ -22,9 +22,6 @@ abstract class ContainerUploadJobDao : BaseDao<ContainerUploadJob> {
     @Query("SELECT * FROM ContainerUploadJob where cujUid = :uploadId")
     abstract fun findByUid(uploadId: Long): ContainerUploadJob?
 
-    @Update
-    abstract override fun update(entity: ContainerUploadJob)
-
     @Query("""SELECT * FROM ContainerUploadJob WHERE jobStatus = $QUEUED
            AND (SELECT connectivityState from ConnectivityStatus WHERE connectivityState IN
             ($STATE_METERED, $STATE_UNMETERED))

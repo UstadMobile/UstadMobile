@@ -487,6 +487,8 @@ fun defaultVal(typeName: TypeName) : CodeBlock {
 fun isListOrArray(typeName: TypeName) = (typeName is ClassName && typeName.canonicalName =="kotlin.Array")
         || (typeName is ParameterizedTypeName && typeName.rawType == List::class.asClassName())
 
+fun TypeName.isArrayType(): Boolean = (this is ParameterizedTypeName && this.rawType.canonicalName == "kotlin.Array")
+
 fun isDataSourceFactory(typeName: TypeName) = typeName is ParameterizedTypeName
         && typeName.rawType == androidx.paging.DataSource.Factory::class.asTypeName()
 
@@ -602,6 +604,7 @@ internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
                 codeBlock.add("$execSqlFunName(%S)\n",
                         "INSERT OR REPLACE INTO sqlite_sequence(name,seq) VALUES('${it.simpleName}', ((SELECT nodeClientId FROM SyncNode) << 32)) ")
             }
+            codeBlock.addGenerateSqlitePrimaryKeyInsert(execSqlFunName, syncableEntityInfo)
         }else if(jdbcDbType == DoorDbType.POSTGRES){
             codeBlock.add("$execSqlFunName(\"ALTER·SEQUENCE·" +
                     "${it.simpleName}_${syncableEntityInfo.entityPkField.name}_seq·RESTART·WITH·\${_nodeId·shl·32}\")\n")
@@ -609,6 +612,22 @@ internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
     }
 
     return codeBlock.build()
+}
+
+/**
+ * Add to the codeblock to create a line that will set the SqliteSyncablePrimaryKey for the given
+ * SyncableEntity.
+ *
+ * See DoorSqlitePrimaryKeyManager for more information.
+ */
+internal fun CodeBlock.Builder.addGenerateSqlitePrimaryKeyInsert(execSqlFn: String,
+                                                        syncableEntityInfo: SyncableEntityInfo) : CodeBlock.Builder{
+    return add("$execSqlFn(%S)\n",
+            "REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) " +
+            "VALUES (${syncableEntityInfo.tableId}, (SELECT COALESCE((SELECT MAX(${syncableEntityInfo.entityPkField.name}) + 1 " +
+            "FROM ${syncableEntityInfo.syncableEntity.simpleName} WHERE " +
+            "${syncableEntityInfo.entityPkField.name} & (SELECT nodeClientId << 32 FROM SyncNode) = " +
+            "(SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
 }
 
 /**

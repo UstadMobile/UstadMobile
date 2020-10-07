@@ -232,6 +232,10 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
         val verbEntity = insertOrUpdateVerb(repo.verbDao, statement.verb!!)
         val person = getPerson(repo.personDao, statement.actor!!)
         val agentEntity = getAgent(repo.agentDao, repo.personDao, statement.actor!!)
+        var learnerGroupUid: Long = 0
+        if(agentEntity.agentAccountName?.contains("group:") == true){
+            learnerGroupUid = agentEntity.agentAccountName?.substringAfter(":")?.toLong() ?: 0L
+        }
         val agentUid = agentEntity.agentUid
 
         insertOrUpdateVerbLangMap(repo.xLangMapEntryDao, statement.verb!!, verbEntity,
@@ -319,7 +323,8 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
                 contextStatementId, instructorUid,
                 agentUid, authorityUid, teamUid,
                 subActorUid, subVerbUid, subObjectUid,
-                contentEntryUid = contentEntryUid)
+                contentEntryUid = contentEntryUid,
+                learnerGroupUid = learnerGroupUid)
 
         //ContentEntry should be available locally
         val entry = db.contentEntryDao.findByUid(contentEntryUid)

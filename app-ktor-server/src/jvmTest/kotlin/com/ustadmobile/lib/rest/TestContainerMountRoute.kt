@@ -71,7 +71,7 @@ class TestContainerMountRoute {
             }
 
             install(Routing) {
-                ContainerMountRoute(db)
+                ContainerMountRoute()
             }
         }.start(wait = false)
 

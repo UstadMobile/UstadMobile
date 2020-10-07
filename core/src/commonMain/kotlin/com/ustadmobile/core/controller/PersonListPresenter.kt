@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
@@ -10,10 +9,11 @@ import com.ustadmobile.core.view.PersonListView.Companion.ARG_EXCLUDE_PERSONUIDS
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class PersonListPresenter(context: Any, arguments: Map<String, String>, view: PersonListView,
@@ -25,6 +25,8 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     private var filterExcludeMemberOfSchool: Long = 0
 
     private var filterAlreadySelectedList = listOf<Long>()
+
+    private var filterByPermission: Long = 0
 
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
@@ -38,6 +40,9 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         filterAlreadySelectedList = arguments[ARG_EXCLUDE_PERSONUIDS_LIST]?.split(",")?.filter { it.isNotEmpty() }?.map { it.toLong() }
                 ?: listOf()
 
+        filterByPermission = arguments[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
+                ?: Role.PERMISSION_PERSON_SELECT
+
         selectedSortOption = SORT_OPTIONS[0]
         updateListOnView()
 
@@ -45,7 +50,7 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0L,
-                Person.TABLE_ID, Role.PERMISSION_PERSON_INSERT)
+                Role.PERMISSION_PERSON_INSERT)
     }
 
     private fun updateListOnView() {
@@ -77,6 +82,45 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     override fun onSearchSubmitted(text: String?) {
         searchText = text
         updateListOnView()
+    }
+
+
+    fun handleClickInviteWithLink(){
+
+        GlobalScope.launch {
+
+            val code: String?
+            val entityName: String?
+            val tableId: Int
+            when {
+                filterExcludeMembersOfClazz != 0L -> {
+                    val clazz = db.clazzDao.findByUidAsync(filterExcludeMembersOfClazz)
+                    code = clazz?.clazzCode
+                    entityName = clazz?.clazzName
+                    tableId = Clazz.TABLE_ID
+                }
+                filterExcludeMemberOfSchool != 0L -> {
+                    val school = db.schoolDao.findByUidAsync(filterExcludeMemberOfSchool)
+                    code = school?.schoolCode
+                    entityName = school?.schoolName
+                    tableId = School.TABLE_ID
+                }
+                else -> {
+                    code = ""
+                    entityName = ""
+                    tableId = 0
+                }
+            }
+
+            view.runOnUiThread(Runnable {
+                systemImpl.go(InviteViaLinkView.VIEW_NAME, mapOf(
+                        UstadView.ARG_CODE_TABLE to tableId.toString(),
+                        UstadView.ARG_CODE to code,
+                        UstadView.ARG_ENTITY_NAME to entityName
+                ), context)
+            })
+        }
+
     }
 
     companion object {

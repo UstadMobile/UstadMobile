@@ -13,6 +13,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RedirectView
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.port.android.util.ext.getActivityContext
 import org.kodein.di.instance
 
 
@@ -36,8 +38,14 @@ class RedirectFragment : UstadBaseFragment(), RedirectView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        val intentData = requireActivity().intent.data
+        val intentMap: Map<String, String> = if (intentData == null || intentData.toString().isEmpty()) {
+            mapOf()
+        } else {
+            mapOf(UstadView.ARG_INTENT to intentData.toString())
+        }
         mPresenter = RedirectPresenter(requireContext(),
-                arguments.toStringMap() + requireActivity().intent.extras.toStringMap(),
+                arguments.toStringMap() + requireActivity().intent.extras.toStringMap() + intentMap,
                 this, di)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
     }

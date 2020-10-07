@@ -2,13 +2,13 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_INSERT
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
@@ -23,6 +23,8 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     private var filterExcludeMembersOfSchool: Long = 0
 
+    private var filterByPermission: Long = 0
+
     private var searchText: String? = null
 
     override val sortOptions: List<SortOrderOption>
@@ -34,6 +36,9 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
         filterExcludeMembersOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
         clazzList2ItemListener.listViewMode = mListMode
 
+        filterByPermission = arguments[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
+                ?: Role.PERMISSION_CLAZZ_SELECT
+
         loggedInPersonUid = accountManager.activeAccount.personUid
         selectedSortOption = SORT_OPTIONS[0]
         updateList()
@@ -41,12 +46,14 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     private fun updateList() {
         view.list = repo.clazzDao.findClazzesWithPermission(searchText.toQueryLikeParam(),
-                loggedInPersonUid, filterExcludeMembersOfSchool, selectedSortOption?.flag ?: 0)
+                loggedInPersonUid, filterExcludeMembersOfSchool,
+                selectedSortOption?.flag ?: 0, filterByPermission)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         //All user should be able to see the plus button - but only those with permission can create a new class
-        view.newClazzListOptionVisible = repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
+        view.newClazzListOptionVisible = repo.entityRoleDao.userHasTableLevelPermission(
+                loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
         return true
     }
 
@@ -55,7 +62,7 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
     }
 
     fun handleClickJoinClazz() {
-        systemImpl.go(JoinWithCodeView.VIEW_NAME, mapOf(), context)
+        systemImpl.go(JoinWithCodeView.VIEW_NAME, mapOf(UstadView.ARG_CODE_TABLE to Clazz.TABLE_ID.toString()), context)
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {

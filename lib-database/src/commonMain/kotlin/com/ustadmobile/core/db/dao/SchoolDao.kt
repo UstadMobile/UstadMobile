@@ -2,7 +2,6 @@ package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.Dao
-import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
@@ -23,6 +22,8 @@ abstract class SchoolDao : BaseDao<School> {
     abstract suspend fun findByUidWithHolidayCalendarAsync(uid: Long): SchoolWithHolidayCalendar?
 
 
+    @Query("SELECT * FROM School WHERE schoolCode = :code")
+    abstract suspend fun findBySchoolCode(code: String): School?
 
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
@@ -33,18 +34,39 @@ abstract class SchoolDao : BaseDao<School> {
                                                        schoolUid: Long,
                                                       permission: Long) : Boolean
 
+    @Query("""SELECT School.*,
+         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND
+         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
+         AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STUDENT_UID}) as numStudents,
+         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND
+         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
+         AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STAFF_UID}) as numTeachers,
+         '' as locationName,
+          (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
+         FROM School WHERE CAST(schoolActive AS INTEGER) = 1
+             AND schoolName LIKE :searchBit
+             
+             AND :personUid IN (${ENTITY_PERSONS_WITH_PERMISSION} )
+
+             """)
+    abstract fun findAllActiveSchoolWithMemberCountAndLocation(searchBit: String,
+                        permission: Long, personUid: Long)
+            : DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
+
+
     @Query("""SELECT School.*, 
          (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
          CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
-         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_STUDENT}) as numStudents,
+         AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STUDENT_UID}) as numStudents,
          (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
          CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
-         AND SchoolMember.schoolMemberRole = ${SchoolMember.SCHOOL_ROLE_TEACHER}) as numTeachers, 
+         AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STAFF_UID}) as numTeachers, 
          '' as locationName,
           (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
          FROM School WHERE CAST(schoolActive AS INTEGER) = 1 
              AND schoolName LIKE :searchBit 
-                ORDER BY CASE(:sortOrder)
+             AND :personUid IN (${ENTITY_PERSONS_WITH_PERMISSION} )
+            ORDER BY CASE(:sortOrder)
                 WHEN $SORT_NAME_ASC THEN School.schoolName
                 ELSE ''
             END ASC,
@@ -53,7 +75,9 @@ abstract class SchoolDao : BaseDao<School> {
                 ELSE ''
             END DESC
             """)
-    abstract fun findAllActiveSchoolWithMemberCountAndLocationName(searchBit: String, sortOrder: Int): DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
+    abstract fun findAllActiveSchoolWithMemberCountAndLocationName(searchBit: String,
+                    personUid: Long, permission: Long, sortOrder: Int)
+            : DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
 
 
     @Update

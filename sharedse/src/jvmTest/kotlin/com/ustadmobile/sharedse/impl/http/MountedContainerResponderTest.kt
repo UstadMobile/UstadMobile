@@ -5,6 +5,7 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.port.sharedse.ext.dataInflatedIfRequired
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_CONTAINERUID_INDEX
@@ -41,15 +42,6 @@ class MountedContainerResponderTest {
     @JvmField
     @Rule
     var temporaryFolder = TemporaryFolder()
-
-    private fun NanoHTTPD.Response.dataInflatedIfRequired(): InputStream{
-        val gzipHeader = getHeader("Content-Encoding")
-        return if(gzipHeader == "gzip") {
-            GZIPInputStream(data)
-        }else {
-            data
-        }
-    }
 
     @Before
     @Throws(IOException::class)
@@ -152,5 +144,34 @@ class MountedContainerResponderTest {
         Assert.assertEquals("Response is 404", NanoHTTPD.Response.Status.NOT_FOUND,
                 response.getStatus())
     }
+
+    @Test
+    fun givenContainerMountedWithExistingPath_whenGetCalledNotAcceptingGzip_thenShouldInflateContents() {
+        val responder = MountedContainerResponder()
+        val mountPath = "container/${container.containerUid}/"
+
+        val mockSession = mock<NanoHTTPD.IHTTPSession> {
+            on {uri}.thenReturn("${mountPath}subfolder/testfile1.png")
+            on { headers }.thenReturn(mapOf("accept-encoding" to "identity"))
+        }
+
+        val mockUriResource = mock<RouterNanoHTTPD.UriResource> {
+            on { initParameter(PARAM_CONTAINERUID_INDEX, String::class.java) }.thenReturn(container.containerUid.toString())
+            on { initParameter(PARAM_DB_INDEX, UmAppDatabase::class.java)}.thenReturn(db)
+            on { initParameter(PARAM_FILTERS_INDEX, MutableList::class.java)}.thenReturn(mutableListOf<Any>())
+            on { uri }.thenReturn(mountPath + MountedContainerResponder.URI_ROUTE_POSTFIX)
+        }
+
+        val response = responder.get(mockUriResource, mutableMapOf(), mockSession)
+
+        val containerIn = containerManager!!.getInputStream(
+                containerManager!!.getEntry("subfolder/testfile1.png")!!)
+        Assert.assertArrayEquals("Data returned by URI responder matches actual container entry",
+                containerIn.use { it.readBytes() },
+                response.data.use { it.readBytes() })
+    }
+
+
+
 
 }

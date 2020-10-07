@@ -27,7 +27,7 @@ abstract class ReportFilterDao : BaseDao<ReportFilter>, OneToManyJoinDao<ReportF
     abstract suspend fun findByReportUid(reportUid: Long): List<ReportFilterWithDisplayDetails>
 
     @Update
-    abstract fun updateAsyncList(reportFilterList: List<ReportFilter>)
+    abstract suspend fun updateAsyncList(reportFilterList: List<ReportFilter>)
 
 
     @Query("UPDATE ReportFilter SET filterInactive = :active WHERE reportFilterUid = :holidayUid")

@@ -154,7 +154,7 @@ abstract class DownloadJobDao {
     @Query("SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid")
     abstract fun getLiveMeteredNetworkAllowed(djUid: Int): DoorLiveData<Boolean>
 
-    @Query("SELECT COALESCE((SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid), 0)")
+    @Query("SELECT COALESCE((SELECT meteredNetworkAllowed FROM DownloadJob WHERE djUid = :djUid), 1)")
     abstract suspend fun getMeteredNetworkAllowed(djUid: Int): Boolean
 
     @Query("SELECT (SELECT COUNT(*) FROM DownloadJobItem WHERE djiDjUid = :downloadJobId) AS numEntries, " +

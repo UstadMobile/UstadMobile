@@ -1,9 +1,7 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.db.dao.SchoolDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
@@ -18,24 +16,34 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     : UstadListPresenter<SchoolListView, School>(context, arguments, view, di, lifecycleOwner),
         OnSortOptionSelected, OnSearchSubmitted{
 
+
     var searchText: String? = null
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
+    var loggedInPersonUid = 0L
+    private var filterByPermission: Long = 0
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         selectedSortOption = SORT_OPTIONS[0]
+        loggedInPersonUid = accountManager.activeAccount.personUid
+
+        filterByPermission = arguments[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
+                ?: Role.PERMISSION_SCHOOL_SELECT
+
         updateListOnView()
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0,
-            School.TABLE_ID, Role.PERMISSION_SCHOOL_INSERT)
+        view.newSchoolListOptionVisible =  db.entityRoleDao.userHasTableLevelPermission(account?.personUid ?: 0,
+            Role.PERMISSION_SCHOOL_INSERT)
+        return true
     }
 
     private fun updateListOnView() {
         view.list = repo.schoolDao.findAllActiveSchoolWithMemberCountAndLocationName(
-                searchText.toQueryLikeParam(),
+                searchText.toQueryLikeParam(), loggedInPersonUid, filterByPermission,
                 selectedSortOption?.flag ?: SchoolDao.SORT_NAME_ASC)
     }
 
@@ -60,6 +68,12 @@ class SchoolListPresenter(context: Any, arguments: Map<String, String>, view: Sc
     override fun onSearchSubmitted(text: String?) {
         searchText = text
         updateListOnView()
+    }
+
+
+    fun handleClickJoinSchool() {
+        systemImpl.go(JoinWithCodeView.VIEW_NAME,
+                mapOf(UstadView.ARG_CODE_TABLE to School.TABLE_ID.toString()), context)
     }
 
     companion object {

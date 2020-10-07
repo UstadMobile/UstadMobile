@@ -40,7 +40,8 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
                 this, di, viewLifecycleOwner)
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
             requireContext().getString(R.string.add_a_new,
-                    requireContext().getString(R.string.clazz)),  onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
+                    requireContext().getString(R.string.clazz)),  onClickSort = this,
+                sortOrderOption = mPresenter?.sortOptions?.get(0))
         mDataRecyclerViewAdapter = ClazzListRecyclerAdapter(mPresenter)
 
         return view

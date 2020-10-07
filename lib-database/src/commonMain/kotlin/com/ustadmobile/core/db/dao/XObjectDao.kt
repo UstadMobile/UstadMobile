@@ -14,10 +14,6 @@ abstract class XObjectDao : BaseDao<XObjectEntity> {
     @Query("SELECT * from XObjectEntity WHERE objectId = :id")
     abstract fun findByObjectId(id: String?): XObjectEntity?
 
-    @JsName("findListOfObjectUidFromContentEntryUid")
-    @Query("SELECT xObjectUid FROM XObjectEntity WHERE objectContentEntryUid IN (:contentEntryUid)")
-    abstract suspend fun findListOfObjectUidFromContentEntryUid(contentEntryUid: List<Long>): List<Long>
-
     @JsName("findByXobjectUid")
     @Query("SELECT * from XObjectEntity WHERE xObjectUid = :xObjectUid")
     abstract fun findByXobjectUid(xObjectUid: Long): XObjectEntity?

@@ -4,6 +4,7 @@ import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.MinSyncVersion
+import com.ustadmobile.door.entities.SqliteSyncablePrimaryKey
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.*
@@ -12,8 +13,7 @@ import kotlin.jvm.Synchronized
 import kotlin.jvm.Volatile
 
 @Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
-    ClazzLog::class, ClazzLogAttendanceRecord::class, PersonField::class,
-    PersonDetailPresenterField::class,
+    ClazzLog::class, ClazzLogAttendanceRecord::class,
     Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
     ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
@@ -36,16 +36,23 @@ import kotlin.jvm.Volatile
     ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
     Report::class, ReportFilter::class,
-    DeviceSession::class, WorkSpace::class, ContainerUploadJob::class
+    DeviceSession::class, WorkSpace::class, ContainerUploadJob::class,
+    SqliteSyncablePrimaryKey::class, LearnerGroup::class, LearnerGroupMember::class,
+    GroupLearningSession::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 38)
+], version = 42)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     /*
+        Changes from 38-39:
+        1. Added personGroupUid to Person
+        2. Added personGroupFlag to PersonGroup
+        3. Removed groupPersonUid from PersonGroup
+
         Changes from 36:
         1. Added school uid to Clazz
         2. Added school Phone number to School
@@ -165,6 +172,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("containerEntryFileDao")
     abstract val containerEntryFileDao: ContainerEntryFileDao
 
+    @JsName("containerETagDao")
+    abstract val containerETagDao: ContainerETagDao
+
     @JsName("verbDao")
     abstract val verbDao: VerbDao
 
@@ -195,6 +205,15 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("agentDao")
     abstract val agentDao: AgentDao
 
+    @JsName("learnerGroupDao")
+    abstract val learnerGroupDao: LearnerGroupDao
+
+    @JsName("learnerGroupMemberDao")
+    abstract val learnerGroupMemberDao: LearnerGroupMemberDao
+
+    @JsName("groupLearningSessionDao")
+    abstract val groupLearningSessionDao: GroupLearningSessionDao
+
     @JsName("contentEntryProgressDao")
     abstract val contentEntryProgressDao: ContentEntryProgressDao
 
@@ -206,8 +225,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val customFieldDao: CustomFieldDao
     abstract val customFieldValueDao: CustomFieldValueDao
     abstract val customFieldValueOptionDao: CustomFieldValueOptionDao
-
-    abstract val personDetailPresenterFieldDao: PersonDetailPresenterFieldDao
 
     abstract val scheduleDao: ScheduleDao
 
@@ -491,20 +508,198 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzMember_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzMember_trk_clientId_epk_rx_csn` ON `ClazzMember_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_65
+          |AFTER UPDATE ON ClazzMember FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzMemberMasterChangeSeqNum = 0 
+          |OR OLD.clazzMemberMasterChangeSeqNum = NEW.clazzMemberMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.clazzMemberLocalChangeSeqNum = 0  
+          |OR OLD.clazzMemberLocalChangeSeqNum = NEW.clazzMemberLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzMember SET clazzMemberLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzMemberLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(clazzMemberLocalChangeSeqNum), OLD.clazzMemberLocalChangeSeqNum) + 1 FROM ClazzMember) END),
+          |clazzMemberMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(clazzMemberMasterChangeSeqNum), OLD.clazzMemberMasterChangeSeqNum) + 1 FROM ClazzMember)
+          |ELSE NEW.clazzMemberMasterChangeSeqNum END)
+          |WHERE clazzMemberUid = NEW.clazzMemberUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_65
+          |AFTER INSERT ON ClazzMember FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzMemberMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.clazzMemberLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzMember SET clazzMemberLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzMemberLocalChangeSeqNum 
+          |ELSE (SELECT MAX(clazzMemberLocalChangeSeqNum) + 1 FROM ClazzMember) END),
+          |clazzMemberMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(clazzMemberMasterChangeSeqNum) + 1 FROM ClazzMember)
+          |ELSE NEW.clazzMemberMasterChangeSeqNum END)
+          |WHERE clazzMemberUid = NEW.clazzMemberUid
+          |; END
+          """.trimMargin())
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzLog` (`clazzLogUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzLogClazzUid` INTEGER NOT NULL, `logDate` INTEGER NOT NULL, `timeRecorded` INTEGER NOT NULL, `clazzLogDone` INTEGER NOT NULL, `clazzLogCancelled` INTEGER NOT NULL, `clazzLogNumPresent` INTEGER NOT NULL, `clazzLogNumAbsent` INTEGER NOT NULL, `clazzLogNumPartial` INTEGER NOT NULL, `clazzLogScheduleUid` INTEGER NOT NULL, `clazzLogMSQN` INTEGER NOT NULL, `clazzLogLCSN` INTEGER NOT NULL, `clazzLogLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzLog_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzLog_trk_clientId_epk_rx_csn` ON `ClazzLog_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_14
+          |AFTER UPDATE ON ClazzLog FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzLogMSQN = 0 
+          |OR OLD.clazzLogMSQN = NEW.clazzLogMSQN
+          |)
+          |ELSE
+          |(NEW.clazzLogLCSN = 0  
+          |OR OLD.clazzLogLCSN = NEW.clazzLogLCSN
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzLog SET clazzLogLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogLCSN 
+          |ELSE (SELECT MAX(MAX(clazzLogLCSN), OLD.clazzLogLCSN) + 1 FROM ClazzLog) END),
+          |clazzLogMSQN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(clazzLogMSQN), OLD.clazzLogMSQN) + 1 FROM ClazzLog)
+          |ELSE NEW.clazzLogMSQN END)
+          |WHERE clazzLogUid = NEW.clazzLogUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_14
+          |AFTER INSERT ON ClazzLog FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzLogMSQN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.clazzLogLCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzLog SET clazzLogLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogLCSN 
+          |ELSE (SELECT MAX(clazzLogLCSN) + 1 FROM ClazzLog) END),
+          |clazzLogMSQN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(clazzLogMSQN) + 1 FROM ClazzLog)
+          |ELSE NEW.clazzLogMSQN END)
+          |WHERE clazzLogUid = NEW.clazzLogUid
+          |; END
+          """.trimMargin())
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzLogAttendanceRecord` (`clazzLogAttendanceRecordUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzLogAttendanceRecordClazzLogUid` INTEGER NOT NULL, `clazzLogAttendanceRecordClazzMemberUid` INTEGER NOT NULL, `attendanceStatus` INTEGER NOT NULL, `clazzLogAttendanceRecordMasterChangeSeqNum` INTEGER NOT NULL, `clazzLogAttendanceRecordLocalChangeSeqNum` INTEGER NOT NULL, `clazzLogAttendanceRecordLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzLogAttendanceRecord_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn` ON `ClazzLogAttendanceRecord_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
 
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_15
+          |AFTER UPDATE ON ClazzLogAttendanceRecord FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzLogAttendanceRecordMasterChangeSeqNum = 0 
+          |OR OLD.clazzLogAttendanceRecordMasterChangeSeqNum = NEW.clazzLogAttendanceRecordMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.clazzLogAttendanceRecordLocalChangeSeqNum = 0  
+          |OR OLD.clazzLogAttendanceRecordLocalChangeSeqNum = NEW.clazzLogAttendanceRecordLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzLogAttendanceRecord SET clazzLogAttendanceRecordLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogAttendanceRecordLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(clazzLogAttendanceRecordLocalChangeSeqNum), OLD.clazzLogAttendanceRecordLocalChangeSeqNum) + 1 FROM ClazzLogAttendanceRecord) END),
+          |clazzLogAttendanceRecordMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(clazzLogAttendanceRecordMasterChangeSeqNum), OLD.clazzLogAttendanceRecordMasterChangeSeqNum) + 1 FROM ClazzLogAttendanceRecord)
+          |ELSE NEW.clazzLogAttendanceRecordMasterChangeSeqNum END)
+          |WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_15
+          |AFTER INSERT ON ClazzLogAttendanceRecord FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzLogAttendanceRecordMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.clazzLogAttendanceRecordLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzLogAttendanceRecord SET clazzLogAttendanceRecordLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogAttendanceRecordLocalChangeSeqNum 
+          |ELSE (SELECT MAX(clazzLogAttendanceRecordLocalChangeSeqNum) + 1 FROM ClazzLogAttendanceRecord) END),
+          |clazzLogAttendanceRecordMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(clazzLogAttendanceRecordMasterChangeSeqNum) + 1 FROM ClazzLogAttendanceRecord)
+          |ELSE NEW.clazzLogAttendanceRecordMasterChangeSeqNum END)
+          |WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid
+          |; END
+          """.trimMargin())
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS `School` (`schoolUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `schoolName` TEXT, `schoolDesc` TEXT, `schoolAddress` TEXT, `schoolActive` INTEGER NOT NULL, `schoolFeatures` INTEGER NOT NULL, `schoolLocationLong` REAL NOT NULL, `schoolLocationLatt` REAL NOT NULL, `schoolMasterChangeSeqNum` INTEGER NOT NULL, `schoolLocalChangeSeqNum` INTEGER NOT NULL, `schoolLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `School_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_School_trk_clientId_epk_rx_csn` ON `School_trk` (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_164
+          |AFTER UPDATE ON School FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.schoolMasterChangeSeqNum = 0 
+          |OR OLD.schoolMasterChangeSeqNum = NEW.schoolMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.schoolLocalChangeSeqNum = 0  
+          |OR OLD.schoolLocalChangeSeqNum = NEW.schoolLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE School SET schoolLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.schoolLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(schoolLocalChangeSeqNum), OLD.schoolLocalChangeSeqNum) + 1 FROM School) END),
+          |schoolMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(schoolMasterChangeSeqNum), OLD.schoolMasterChangeSeqNum) + 1 FROM School)
+          |ELSE NEW.schoolMasterChangeSeqNum END)
+          |WHERE schoolUid = NEW.schoolUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_164
+          |AFTER INSERT ON School FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.schoolMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.schoolLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE School SET schoolLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.schoolLocalChangeSeqNum 
+          |ELSE (SELECT MAX(schoolLocalChangeSeqNum) + 1 FROM School) END),
+          |schoolMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(schoolMasterChangeSeqNum) + 1 FROM School)
+          |ELSE NEW.schoolMasterChangeSeqNum END)
+          |WHERE schoolUid = NEW.schoolUid
+          |; END
+          """.trimMargin())
 
 
                     database.execSQL("ALTER TABLE PersonCustomFieldValue RENAME to PersonCustomFieldValue_OLD")
@@ -515,26 +710,299 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_PersonCustomFieldValue_trk_clientId_epk_rx_csn` ON `PersonCustomFieldValue_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
 
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_178
+          |AFTER UPDATE ON PersonCustomFieldValue FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.personCustomFieldValueMasterChangeSeqNum = 0 
+          |OR OLD.personCustomFieldValueMasterChangeSeqNum = NEW.personCustomFieldValueMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.personCustomFieldValueLocalChangeSeqNum = 0  
+          |OR OLD.personCustomFieldValueLocalChangeSeqNum = NEW.personCustomFieldValueLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE PersonCustomFieldValue SET personCustomFieldValueLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personCustomFieldValueLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(personCustomFieldValueLocalChangeSeqNum), OLD.personCustomFieldValueLocalChangeSeqNum) + 1 FROM PersonCustomFieldValue) END),
+          |personCustomFieldValueMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(personCustomFieldValueMasterChangeSeqNum), OLD.personCustomFieldValueMasterChangeSeqNum) + 1 FROM PersonCustomFieldValue)
+          |ELSE NEW.personCustomFieldValueMasterChangeSeqNum END)
+          |WHERE personCustomFieldValueUid = NEW.personCustomFieldValueUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_178
+          |AFTER INSERT ON PersonCustomFieldValue FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.personCustomFieldValueMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.personCustomFieldValueLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE PersonCustomFieldValue SET personCustomFieldValueLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personCustomFieldValueLocalChangeSeqNum 
+          |ELSE (SELECT MAX(personCustomFieldValueLocalChangeSeqNum) + 1 FROM PersonCustomFieldValue) END),
+          |personCustomFieldValueMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(personCustomFieldValueMasterChangeSeqNum) + 1 FROM PersonCustomFieldValue)
+          |ELSE NEW.personCustomFieldValueMasterChangeSeqNum END)
+          |WHERE personCustomFieldValueUid = NEW.personCustomFieldValueUid
+          |; END
+          """.trimMargin())
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS `AuditLog` (`auditLogUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `auditLogMasterChangeSeqNum` INTEGER NOT NULL, `auditLogLocalChangeSeqNum` INTEGER NOT NULL, `auditLogLastChangedBy` INTEGER NOT NULL, `auditLogActorPersonUid` INTEGER NOT NULL, `auditLogTableUid` INTEGER NOT NULL, `auditLogEntityUid` INTEGER NOT NULL, `auditLogDate` INTEGER NOT NULL, `notes` TEXT)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `AuditLog_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_AuditLog_trk_clientId_epk_rx_csn` ON `AuditLog_trk` (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_53
+          |AFTER UPDATE ON AuditLog FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.auditLogMasterChangeSeqNum = 0 
+          |OR OLD.auditLogMasterChangeSeqNum = NEW.auditLogMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.auditLogLocalChangeSeqNum = 0  
+          |OR OLD.auditLogLocalChangeSeqNum = NEW.auditLogLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE AuditLog SET auditLogLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.auditLogLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(auditLogLocalChangeSeqNum), OLD.auditLogLocalChangeSeqNum) + 1 FROM AuditLog) END),
+          |auditLogMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(auditLogMasterChangeSeqNum), OLD.auditLogMasterChangeSeqNum) + 1 FROM AuditLog)
+          |ELSE NEW.auditLogMasterChangeSeqNum END)
+          |WHERE auditLogUid = NEW.auditLogUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_53
+          |AFTER INSERT ON AuditLog FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.auditLogMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.auditLogLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE AuditLog SET auditLogLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.auditLogLocalChangeSeqNum 
+          |ELSE (SELECT MAX(auditLogLocalChangeSeqNum) + 1 FROM AuditLog) END),
+          |auditLogMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(auditLogMasterChangeSeqNum) + 1 FROM AuditLog)
+          |ELSE NEW.auditLogMasterChangeSeqNum END)
+          |WHERE auditLogUid = NEW.auditLogUid
+          |; END
+          """.trimMargin())
 
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS `CustomField` (`customFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `customFieldName` TEXT, `customFieldNameAlt` TEXT, `customFieldLabelMessageID` INTEGER NOT NULL, `customFieldIcon` TEXT, `customFieldType` INTEGER NOT NULL,  `customFieldActive` INTEGER NOT NULL, `customFieldDefaultValue` TEXT, `customFieldMCSN` INTEGER NOT NULL, `customFieldLCSN` INTEGER NOT NULL, `customFieldLCB` INTEGER NOT NULL, customFieldEntityType INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `CustomField_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_CustomField_trk_clientId_epk_rx_csn` ON `CustomField_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_56
+          |AFTER UPDATE ON CustomField FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.customFieldMCSN = 0 
+          |OR OLD.customFieldMCSN = NEW.customFieldMCSN
+          |)
+          |ELSE
+          |(NEW.customFieldLCSN = 0  
+          |OR OLD.customFieldLCSN = NEW.customFieldLCSN
+          |) END)
+          |BEGIN 
+          |UPDATE CustomField SET customFieldLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldLCSN 
+          |ELSE (SELECT MAX(MAX(customFieldLCSN), OLD.customFieldLCSN) + 1 FROM CustomField) END),
+          |customFieldMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(customFieldMCSN), OLD.customFieldMCSN) + 1 FROM CustomField)
+          |ELSE NEW.customFieldMCSN END)
+          |WHERE customFieldUid = NEW.customFieldUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_56
+          |AFTER INSERT ON CustomField FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.customFieldMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.customFieldLCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE CustomField SET customFieldLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldLCSN 
+          |ELSE (SELECT MAX(customFieldLCSN) + 1 FROM CustomField) END),
+          |customFieldMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(customFieldMCSN) + 1 FROM CustomField)
+          |ELSE NEW.customFieldMCSN END)
+          |WHERE customFieldUid = NEW.customFieldUid
+          |; END
+          """.trimMargin())
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS `CustomFieldValue` (`customFieldValueUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `customFieldValueFieldUid` INTEGER NOT NULL, `customFieldValueEntityUid` INTEGER NOT NULL, `customFieldValueValue` TEXT, `customFieldValueMCSN` INTEGER NOT NULL, `customFieldValueLCSN` INTEGER NOT NULL, `customFieldValueLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `CustomFieldValue_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_CustomFieldValue_trk_clientId_epk_rx_csn` ON `CustomFieldValue_trk` (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_57
+          |AFTER UPDATE ON CustomFieldValue FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.customFieldValueMCSN = 0 
+          |OR OLD.customFieldValueMCSN = NEW.customFieldValueMCSN
+          |)
+          |ELSE
+          |(NEW.customFieldValueLCSN = 0  
+          |OR OLD.customFieldValueLCSN = NEW.customFieldValueLCSN
+          |) END)
+          |BEGIN 
+          |UPDATE CustomFieldValue SET customFieldValueLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueLCSN 
+          |ELSE (SELECT MAX(MAX(customFieldValueLCSN), OLD.customFieldValueLCSN) + 1 FROM CustomFieldValue) END),
+          |customFieldValueMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(customFieldValueMCSN), OLD.customFieldValueMCSN) + 1 FROM CustomFieldValue)
+          |ELSE NEW.customFieldValueMCSN END)
+          |WHERE customFieldValueUid = NEW.customFieldValueUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_57
+          |AFTER INSERT ON CustomFieldValue FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.customFieldValueMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.customFieldValueLCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE CustomFieldValue SET customFieldValueLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueLCSN 
+          |ELSE (SELECT MAX(customFieldValueLCSN) + 1 FROM CustomFieldValue) END),
+          |customFieldValueMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(customFieldValueMCSN) + 1 FROM CustomFieldValue)
+          |ELSE NEW.customFieldValueMCSN END)
+          |WHERE customFieldValueUid = NEW.customFieldValueUid
+          |; END
+          """.trimMargin())
+
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS `CustomFieldValueOption` (`customFieldValueOptionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `customFieldValueOptionName` TEXT, `customFieldValueOptionFieldUid` INTEGER NOT NULL, `customFieldValueOptionIcon` TEXT, `customFieldValueOptionMessageId` INTEGER NOT NULL, `customFieldValueOptionActive` INTEGER NOT NULL, `customFieldValueOptionMCSN` INTEGER NOT NULL, `customFieldValueOptionLCSN` INTEGER NOT NULL, `customFieldValueOptionLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `CustomFieldValueOption_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_CustomFieldValueOption_trk_clientId_epk_rx_csn` ON `CustomFieldValueOption_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_55
+          |AFTER UPDATE ON CustomFieldValueOption FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.customFieldValueOptionMCSN = 0 
+          |OR OLD.customFieldValueOptionMCSN = NEW.customFieldValueOptionMCSN
+          |)
+          |ELSE
+          |(NEW.customFieldValueOptionLCSN = 0  
+          |OR OLD.customFieldValueOptionLCSN = NEW.customFieldValueOptionLCSN
+          |) END)
+          |BEGIN 
+          |UPDATE CustomFieldValueOption SET customFieldValueOptionLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueOptionLCSN 
+          |ELSE (SELECT MAX(MAX(customFieldValueOptionLCSN), OLD.customFieldValueOptionLCSN) + 1 FROM CustomFieldValueOption) END),
+          |customFieldValueOptionMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(customFieldValueOptionMCSN), OLD.customFieldValueOptionMCSN) + 1 FROM CustomFieldValueOption)
+          |ELSE NEW.customFieldValueOptionMCSN END)
+          |WHERE customFieldValueOptionUid = NEW.customFieldValueOptionUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_55
+          |AFTER INSERT ON CustomFieldValueOption FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.customFieldValueOptionMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.customFieldValueOptionLCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE CustomFieldValueOption SET customFieldValueOptionLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueOptionLCSN 
+          |ELSE (SELECT MAX(customFieldValueOptionLCSN) + 1 FROM CustomFieldValueOption) END),
+          |customFieldValueOptionMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(customFieldValueOptionMCSN) + 1 FROM CustomFieldValueOption)
+          |ELSE NEW.customFieldValueOptionMCSN END)
+          |WHERE customFieldValueOptionUid = NEW.customFieldValueOptionUid
+          |; END
+          """.trimMargin())
+
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS `DateRange` (`dateRangeUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dateRangeLocalChangeSeqNum` INTEGER NOT NULL, `dateRangeMasterChangeSeqNum` INTEGER NOT NULL, `dateRangLastChangedBy` INTEGER NOT NULL, `dateRangeFromDate` INTEGER NOT NULL, `dateRangeToDate` INTEGER NOT NULL, `dateRangeUMCalendarUid` INTEGER NOT NULL, `dateRangeName` TEXT, `dateRangeDesc` TEXT, `dateRangeActive` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `DateRange_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_DateRange_trk_clientId_epk_rx_csn` ON `DateRange_trk` (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_17
+          |AFTER UPDATE ON DateRange FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.dateRangeMasterChangeSeqNum = 0 
+          |OR OLD.dateRangeMasterChangeSeqNum = NEW.dateRangeMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.dateRangeLocalChangeSeqNum = 0  
+          |OR OLD.dateRangeLocalChangeSeqNum = NEW.dateRangeLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE DateRange SET dateRangeLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.dateRangeLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(dateRangeLocalChangeSeqNum), OLD.dateRangeLocalChangeSeqNum) + 1 FROM DateRange) END),
+          |dateRangeMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(dateRangeMasterChangeSeqNum), OLD.dateRangeMasterChangeSeqNum) + 1 FROM DateRange)
+          |ELSE NEW.dateRangeMasterChangeSeqNum END)
+          |WHERE dateRangeUid = NEW.dateRangeUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_17
+          |AFTER INSERT ON DateRange FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.dateRangeMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.dateRangeLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE DateRange SET dateRangeLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.dateRangeLocalChangeSeqNum 
+          |ELSE (SELECT MAX(dateRangeLocalChangeSeqNum) + 1 FROM DateRange) END),
+          |dateRangeMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(dateRangeMasterChangeSeqNum) + 1 FROM DateRange)
+          |ELSE NEW.dateRangeMasterChangeSeqNum END)
+          |WHERE dateRangeUid = NEW.dateRangeUid
+          |; END
+          """.trimMargin())
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS `PersonField` (`personCustomFieldUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `fieldName` TEXT, `labelMessageId` INTEGER NOT NULL, `fieldIcon` TEXT, `personFieldMasterChangeSeqNum` INTEGER NOT NULL, `personFieldLocalChangeSeqNum` INTEGER NOT NULL, `personFieldLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `PersonField_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
@@ -549,9 +1017,101 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE TABLE IF NOT EXISTS `Schedule_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_Schedule_trk_clientId_epk_rx_csn` ON `Schedule_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_21
+          |AFTER UPDATE ON Schedule FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.scheduleMasterChangeSeqNum = 0 
+          |OR OLD.scheduleMasterChangeSeqNum = NEW.scheduleMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.scheduleLocalChangeSeqNum = 0  
+          |OR OLD.scheduleLocalChangeSeqNum = NEW.scheduleLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE Schedule SET scheduleLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduleLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(scheduleLocalChangeSeqNum), OLD.scheduleLocalChangeSeqNum) + 1 FROM Schedule) END),
+          |scheduleMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(scheduleMasterChangeSeqNum), OLD.scheduleMasterChangeSeqNum) + 1 FROM Schedule)
+          |ELSE NEW.scheduleMasterChangeSeqNum END)
+          |WHERE scheduleUid = NEW.scheduleUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_21
+          |AFTER INSERT ON Schedule FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.scheduleMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.scheduleLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE Schedule SET scheduleLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduleLocalChangeSeqNum 
+          |ELSE (SELECT MAX(scheduleLocalChangeSeqNum) + 1 FROM Schedule) END),
+          |scheduleMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(scheduleMasterChangeSeqNum) + 1 FROM Schedule)
+          |ELSE NEW.scheduleMasterChangeSeqNum END)
+          |WHERE scheduleUid = NEW.scheduleUid
+          |; END
+          """.trimMargin())
+
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ScheduledCheck` (`scheduledCheckUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `checkTime` INTEGER NOT NULL, `checkType` INTEGER NOT NULL, `checkUuid` TEXT, `checkParameters` TEXT, `scClazzLogUid` INTEGER NOT NULL, `scheduledCheckMasterCsn` INTEGER NOT NULL, `scheduledCheckLocalCsn` INTEGER NOT NULL, `scheduledCheckLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ScheduledCheck_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ScheduledCheck_trk_clientId_epk_rx_csn` ON `ScheduledCheck_trk` (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_173
+          |AFTER UPDATE ON ScheduledCheck FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.scheduledCheckMasterCsn = 0 
+          |OR OLD.scheduledCheckMasterCsn = NEW.scheduledCheckMasterCsn
+          |)
+          |ELSE
+          |(NEW.scheduledCheckLocalCsn = 0  
+          |OR OLD.scheduledCheckLocalCsn = NEW.scheduledCheckLocalCsn
+          |) END)
+          |BEGIN 
+          |UPDATE ScheduledCheck SET scheduledCheckLocalCsn = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduledCheckLocalCsn 
+          |ELSE (SELECT MAX(MAX(scheduledCheckLocalCsn), OLD.scheduledCheckLocalCsn) + 1 FROM ScheduledCheck) END),
+          |scheduledCheckMasterCsn = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(scheduledCheckMasterCsn), OLD.scheduledCheckMasterCsn) + 1 FROM ScheduledCheck)
+          |ELSE NEW.scheduledCheckMasterCsn END)
+          |WHERE scheduledCheckUid = NEW.scheduledCheckUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_173
+          |AFTER INSERT ON ScheduledCheck FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.scheduledCheckMasterCsn = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.scheduledCheckLocalCsn = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ScheduledCheck SET scheduledCheckLocalCsn = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduledCheckLocalCsn 
+          |ELSE (SELECT MAX(scheduledCheckLocalCsn) + 1 FROM ScheduledCheck) END),
+          |scheduledCheckMasterCsn = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(scheduledCheckMasterCsn) + 1 FROM ScheduledCheck)
+          |ELSE NEW.scheduledCheckMasterCsn END)
+          |WHERE scheduledCheckUid = NEW.scheduledCheckUid
+          |; END
+          """.trimMargin())
+
 
 
                 }
@@ -637,25 +1197,301 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzWork_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzWork_trk_clientId_epk_rx_csn` ON `ClazzWork_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_201
+          |AFTER UPDATE ON ClazzWork FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzWorkMasterChangeSeqNum = 0 
+          |OR OLD.clazzWorkMasterChangeSeqNum = NEW.clazzWorkMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.clazzWorkLocalChangeSeqNum = 0  
+          |OR OLD.clazzWorkLocalChangeSeqNum = NEW.clazzWorkLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzWork SET clazzWorkLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(clazzWorkLocalChangeSeqNum), OLD.clazzWorkLocalChangeSeqNum) + 1 FROM ClazzWork) END),
+          |clazzWorkMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(clazzWorkMasterChangeSeqNum), OLD.clazzWorkMasterChangeSeqNum) + 1 FROM ClazzWork)
+          |ELSE NEW.clazzWorkMasterChangeSeqNum END)
+          |WHERE clazzWorkUid = NEW.clazzWorkUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_201
+          |AFTER INSERT ON ClazzWork FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzWorkMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.clazzWorkLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzWork SET clazzWorkLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkLocalChangeSeqNum 
+          |ELSE (SELECT MAX(clazzWorkLocalChangeSeqNum) + 1 FROM ClazzWork) END),
+          |clazzWorkMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(clazzWorkMasterChangeSeqNum) + 1 FROM ClazzWork)
+          |ELSE NEW.clazzWorkMasterChangeSeqNum END)
+          |WHERE clazzWorkUid = NEW.clazzWorkUid
+          |; END
+          """.trimMargin())
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzWorkQuestion` (`clazzWorkQuestionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkQuestionText` TEXT, `clazzWorkQuestionClazzWorkUid` INTEGER NOT NULL, `clazzWorkQuestionIndex` INTEGER NOT NULL, `clazzWorkQuestionType` INTEGER NOT NULL, `clazzWorkQuestionActive` INTEGER NOT NULL, `clazzWorkQuestionMCSN` INTEGER NOT NULL, `clazzWorkQuestionLCSN` INTEGER NOT NULL, `clazzWorkQuestionLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzWorkQuestion_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzWorkQuestion_trk_clientId_epk_rx_csn` ON `ClazzWorkQuestion_trk` (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_202
+          |AFTER UPDATE ON ClazzWorkQuestion FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzWorkQuestionMCSN = 0 
+          |OR OLD.clazzWorkQuestionMCSN = NEW.clazzWorkQuestionMCSN
+          |)
+          |ELSE
+          |(NEW.clazzWorkQuestionLCSN = 0  
+          |OR OLD.clazzWorkQuestionLCSN = NEW.clazzWorkQuestionLCSN
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzWorkQuestion SET clazzWorkQuestionLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkQuestionLCSN 
+          |ELSE (SELECT MAX(MAX(clazzWorkQuestionLCSN), OLD.clazzWorkQuestionLCSN) + 1 FROM ClazzWorkQuestion) END),
+          |clazzWorkQuestionMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(clazzWorkQuestionMCSN), OLD.clazzWorkQuestionMCSN) + 1 FROM ClazzWorkQuestion)
+          |ELSE NEW.clazzWorkQuestionMCSN END)
+          |WHERE clazzWorkQuestionUid = NEW.clazzWorkQuestionUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_202
+          |AFTER INSERT ON ClazzWorkQuestion FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzWorkQuestionMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.clazzWorkQuestionLCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzWorkQuestion SET clazzWorkQuestionLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkQuestionLCSN 
+          |ELSE (SELECT MAX(clazzWorkQuestionLCSN) + 1 FROM ClazzWorkQuestion) END),
+          |clazzWorkQuestionMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(clazzWorkQuestionMCSN) + 1 FROM ClazzWorkQuestion)
+          |ELSE NEW.clazzWorkQuestionMCSN END)
+          |WHERE clazzWorkQuestionUid = NEW.clazzWorkQuestionUid
+          |; END
+          """.trimMargin())
+
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzWorkQuestionOption` (`clazzWorkQuestionOptionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkQuestionOptionText` TEXT, `clazzWorkQuestionOptionQuestionUid` INTEGER NOT NULL, `clazzWorkQuestionOptionMasterChangeSeqNum` INTEGER NOT NULL, `clazzWorkQuestionOptionLocalChangeSeqNum` INTEGER NOT NULL, `clazzWorkQuestionOptionLastChangedBy` INTEGER NOT NULL, `clazzWorkQuestionOptionActive` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzWorkQuestionOption_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzWorkQuestionOption_trk_clientId_epk_rx_csn` ON `ClazzWorkQuestionOption_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_203
+          |AFTER UPDATE ON ClazzWorkQuestionOption FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzWorkQuestionOptionMasterChangeSeqNum = 0 
+          |OR OLD.clazzWorkQuestionOptionMasterChangeSeqNum = NEW.clazzWorkQuestionOptionMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.clazzWorkQuestionOptionLocalChangeSeqNum = 0  
+          |OR OLD.clazzWorkQuestionOptionLocalChangeSeqNum = NEW.clazzWorkQuestionOptionLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzWorkQuestionOption SET clazzWorkQuestionOptionLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkQuestionOptionLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(clazzWorkQuestionOptionLocalChangeSeqNum), OLD.clazzWorkQuestionOptionLocalChangeSeqNum) + 1 FROM ClazzWorkQuestionOption) END),
+          |clazzWorkQuestionOptionMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(clazzWorkQuestionOptionMasterChangeSeqNum), OLD.clazzWorkQuestionOptionMasterChangeSeqNum) + 1 FROM ClazzWorkQuestionOption)
+          |ELSE NEW.clazzWorkQuestionOptionMasterChangeSeqNum END)
+          |WHERE clazzWorkQuestionOptionUid = NEW.clazzWorkQuestionOptionUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_203
+          |AFTER INSERT ON ClazzWorkQuestionOption FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzWorkQuestionOptionMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.clazzWorkQuestionOptionLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzWorkQuestionOption SET clazzWorkQuestionOptionLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkQuestionOptionLocalChangeSeqNum 
+          |ELSE (SELECT MAX(clazzWorkQuestionOptionLocalChangeSeqNum) + 1 FROM ClazzWorkQuestionOption) END),
+          |clazzWorkQuestionOptionMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(clazzWorkQuestionOptionMasterChangeSeqNum) + 1 FROM ClazzWorkQuestionOption)
+          |ELSE NEW.clazzWorkQuestionOptionMasterChangeSeqNum END)
+          |WHERE clazzWorkQuestionOptionUid = NEW.clazzWorkQuestionOptionUid
+          |; END
+          """.trimMargin())
+
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzWorkQuestionResponse` (`clazzWorkQuestionResponseUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkQuestionResponseClazzWorkUid` INTEGER NOT NULL, `clazzWorkQuestionResponseQuestionUid` INTEGER NOT NULL, `clazzWorkQuestionResponseText` TEXT, `clazzWorkQuestionResponseOptionSelected` INTEGER NOT NULL, `clazzWorkQuestionResponsePersonUid` INTEGER NOT NULL, `clazzWorkQuestionResponseClazzMemberUid` INTEGER NOT NULL, `clazzWorkQuestionResponseInactive` INTEGER NOT NULL, `clazzWorkQuestionResponseDateResponded` INTEGER NOT NULL, `clazzWorkQuestionResponseMCSN` INTEGER NOT NULL, `clazzWorkQuestionResponseLCSN` INTEGER NOT NULL, `clazzWorkQuestionResponseLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzWorkQuestionResponse_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzWorkQuestionResponse_trk_clientId_epk_rx_csn` ON `ClazzWorkQuestionResponse_trk` (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_209
+          |AFTER UPDATE ON ClazzWorkQuestionResponse FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzWorkQuestionResponseMCSN = 0 
+          |OR OLD.clazzWorkQuestionResponseMCSN = NEW.clazzWorkQuestionResponseMCSN
+          |)
+          |ELSE
+          |(NEW.clazzWorkQuestionResponseLCSN = 0  
+          |OR OLD.clazzWorkQuestionResponseLCSN = NEW.clazzWorkQuestionResponseLCSN
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzWorkQuestionResponse SET clazzWorkQuestionResponseLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkQuestionResponseLCSN 
+          |ELSE (SELECT MAX(MAX(clazzWorkQuestionResponseLCSN), OLD.clazzWorkQuestionResponseLCSN) + 1 FROM ClazzWorkQuestionResponse) END),
+          |clazzWorkQuestionResponseMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(clazzWorkQuestionResponseMCSN), OLD.clazzWorkQuestionResponseMCSN) + 1 FROM ClazzWorkQuestionResponse)
+          |ELSE NEW.clazzWorkQuestionResponseMCSN END)
+          |WHERE clazzWorkQuestionResponseUid = NEW.clazzWorkQuestionResponseUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_209
+          |AFTER INSERT ON ClazzWorkQuestionResponse FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzWorkQuestionResponseMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.clazzWorkQuestionResponseLCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzWorkQuestionResponse SET clazzWorkQuestionResponseLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkQuestionResponseLCSN 
+          |ELSE (SELECT MAX(clazzWorkQuestionResponseLCSN) + 1 FROM ClazzWorkQuestionResponse) END),
+          |clazzWorkQuestionResponseMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(clazzWorkQuestionResponseMCSN) + 1 FROM ClazzWorkQuestionResponse)
+          |ELSE NEW.clazzWorkQuestionResponseMCSN END)
+          |WHERE clazzWorkQuestionResponseUid = NEW.clazzWorkQuestionResponseUid
+          |; END
+          """.trimMargin())
+
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzWorkSubmission` (`clazzWorkSubmissionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzWorkSubmissionClazzWorkUid` INTEGER NOT NULL, `clazzWorkSubmissionClazzMemberUid` INTEGER NOT NULL, `clazzWorkSubmissionMarkerClazzMemberUid` INTEGER NOT NULL, `clazzWorkSubmissionMarkerPersonUid` INTEGER NOT NULL, `clazzWorkSubmissionPersonUid` INTEGER NOT NULL, `clazzWorkSubmissionInactive` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeStarted` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeUpdated` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeFinished` INTEGER NOT NULL, `clazzWorkSubmissionDateTimeMarked` INTEGER NOT NULL, `clazzWorkSubmissionText` TEXT, `clazzWorkSubmissionScore` INTEGER NOT NULL, `clazzWorkSubmissionMCSN` INTEGER NOT NULL, `clazzWorkSubmissionLCSN` INTEGER NOT NULL, `clazzWorkSubmissionLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzWorkSubmission_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzWorkSubmission_trk_clientId_epk_rx_csn` ON `ClazzWorkSubmission_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_206
+          |AFTER UPDATE ON ClazzWorkSubmission FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzWorkSubmissionMCSN = 0 
+          |OR OLD.clazzWorkSubmissionMCSN = NEW.clazzWorkSubmissionMCSN
+          |)
+          |ELSE
+          |(NEW.clazzWorkSubmissionLCSN = 0  
+          |OR OLD.clazzWorkSubmissionLCSN = NEW.clazzWorkSubmissionLCSN
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzWorkSubmission SET clazzWorkSubmissionLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkSubmissionLCSN 
+          |ELSE (SELECT MAX(MAX(clazzWorkSubmissionLCSN), OLD.clazzWorkSubmissionLCSN) + 1 FROM ClazzWorkSubmission) END),
+          |clazzWorkSubmissionMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(clazzWorkSubmissionMCSN), OLD.clazzWorkSubmissionMCSN) + 1 FROM ClazzWorkSubmission)
+          |ELSE NEW.clazzWorkSubmissionMCSN END)
+          |WHERE clazzWorkSubmissionUid = NEW.clazzWorkSubmissionUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_206
+          |AFTER INSERT ON ClazzWorkSubmission FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzWorkSubmissionMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.clazzWorkSubmissionLCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzWorkSubmission SET clazzWorkSubmissionLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkSubmissionLCSN 
+          |ELSE (SELECT MAX(clazzWorkSubmissionLCSN) + 1 FROM ClazzWorkSubmission) END),
+          |clazzWorkSubmissionMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(clazzWorkSubmissionMCSN) + 1 FROM ClazzWorkSubmission)
+          |ELSE NEW.clazzWorkSubmissionMCSN END)
+          |WHERE clazzWorkSubmissionUid = NEW.clazzWorkSubmissionUid
+          |; END
+          """.trimMargin())
+
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS `Comments` (`commentsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `commentsText` TEXT, `commentsEntityType` INTEGER NOT NULL, `commentsEntityUid` INTEGER NOT NULL, `commentsPublic` INTEGER NOT NULL, `commentsStatus` INTEGER NOT NULL, `commentsPersonUid` INTEGER NOT NULL, `commentsToPersonUid` INTEGER NOT NULL, `commentsFlagged` INTEGER NOT NULL, `commentsInActive` INTEGER NOT NULL, `commentsDateTimeAdded` INTEGER NOT NULL, `commentsDateTimeUpdated` INTEGER NOT NULL, `commentsMCSN` INTEGER NOT NULL, `commentsLCSN` INTEGER NOT NULL, `commentsLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `Comments_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_Comments_trk_clientId_epk_rx_csn` ON `Comments_trk` (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_208
+          |AFTER UPDATE ON Comments FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.commentsMCSN = 0 
+          |OR OLD.commentsMCSN = NEW.commentsMCSN
+          |)
+          |ELSE
+          |(NEW.commentsLCSN = 0  
+          |OR OLD.commentsLCSN = NEW.commentsLCSN
+          |) END)
+          |BEGIN 
+          |UPDATE Comments SET commentsLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.commentsLCSN 
+          |ELSE (SELECT MAX(MAX(commentsLCSN), OLD.commentsLCSN) + 1 FROM Comments) END),
+          |commentsMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(commentsMCSN), OLD.commentsMCSN) + 1 FROM Comments)
+          |ELSE NEW.commentsMCSN END)
+          |WHERE commentsUid = NEW.commentsUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_208
+          |AFTER INSERT ON Comments FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.commentsMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.commentsLCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE Comments SET commentsLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.commentsLCSN 
+          |ELSE (SELECT MAX(commentsLCSN) + 1 FROM Comments) END),
+          |commentsMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(commentsMCSN) + 1 FROM Comments)
+          |ELSE NEW.commentsMCSN END)
+          |WHERE commentsUid = NEW.commentsUid
+          |; END
+          """.trimMargin())
+
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ContainerUploadJob` (`cujUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cujContainerUid` INTEGER NOT NULL, `sessionId` TEXT, `jobStatus` INTEGER NOT NULL, `bytesSoFar` INTEGER NOT NULL, `contentLength` INTEGER NOT NULL, `containerEntryFileUids` TEXT)")
 
@@ -665,9 +1501,102 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE TABLE IF NOT EXISTS `SchoolMember_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_SchoolMember_trk_clientId_epk_rx_csn` ON `SchoolMember_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_200
+          |AFTER UPDATE ON SchoolMember FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.schoolMemberMasterChangeSeqNum = 0 
+          |OR OLD.schoolMemberMasterChangeSeqNum = NEW.schoolMemberMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.schoolMemberLocalChangeSeqNum = 0  
+          |OR OLD.schoolMemberLocalChangeSeqNum = NEW.schoolMemberLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE SchoolMember SET schoolMemberLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.schoolMemberLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(schoolMemberLocalChangeSeqNum), OLD.schoolMemberLocalChangeSeqNum) + 1 FROM SchoolMember) END),
+          |schoolMemberMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(schoolMemberMasterChangeSeqNum), OLD.schoolMemberMasterChangeSeqNum) + 1 FROM SchoolMember)
+          |ELSE NEW.schoolMemberMasterChangeSeqNum END)
+          |WHERE schoolMemberUid = NEW.schoolMemberUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_200
+          |AFTER INSERT ON SchoolMember FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.schoolMemberMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.schoolMemberLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE SchoolMember SET schoolMemberLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.schoolMemberLocalChangeSeqNum 
+          |ELSE (SELECT MAX(schoolMemberLocalChangeSeqNum) + 1 FROM SchoolMember) END),
+          |schoolMemberMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(schoolMemberMasterChangeSeqNum) + 1 FROM SchoolMember)
+          |ELSE NEW.schoolMemberMasterChangeSeqNum END)
+          |WHERE schoolMemberUid = NEW.schoolMemberUid
+          |; END
+          """.trimMargin())
+
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ContentEntryProgress` (`contentEntryProgressUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `contentEntryProgressActive` INTEGER NOT NULL, `contentEntryProgressContentEntryUid` INTEGER NOT NULL, `contentEntryProgressPersonUid` INTEGER NOT NULL, `contentEntryProgressProgress` INTEGER NOT NULL, `contentEntryProgressStatusFlag` INTEGER NOT NULL, `contentEntryProgressLocalChangeSeqNum` INTEGER NOT NULL, `contentEntryProgressMasterChangeSeqNum` INTEGER NOT NULL, `contentEntryProgressLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ContentEntryProgress_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ContentEntryProgress_trk_clientId_epk_rx_csn` ON `ContentEntryProgress_trk` (`clientId`, `epk`, `rx`, `csn`)")
+
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_210
+          |AFTER UPDATE ON ContentEntryProgress FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.contentEntryProgressMasterChangeSeqNum = 0 
+          |OR OLD.contentEntryProgressMasterChangeSeqNum = NEW.contentEntryProgressMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.contentEntryProgressLocalChangeSeqNum = 0  
+          |OR OLD.contentEntryProgressLocalChangeSeqNum = NEW.contentEntryProgressLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE ContentEntryProgress SET contentEntryProgressLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentEntryProgressLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(contentEntryProgressLocalChangeSeqNum), OLD.contentEntryProgressLocalChangeSeqNum) + 1 FROM ContentEntryProgress) END),
+          |contentEntryProgressMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(contentEntryProgressMasterChangeSeqNum), OLD.contentEntryProgressMasterChangeSeqNum) + 1 FROM ContentEntryProgress)
+          |ELSE NEW.contentEntryProgressMasterChangeSeqNum END)
+          |WHERE contentEntryProgressUid = NEW.contentEntryProgressUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_210
+          |AFTER INSERT ON ContentEntryProgress FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.contentEntryProgressMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.contentEntryProgressLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ContentEntryProgress SET contentEntryProgressLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentEntryProgressLocalChangeSeqNum 
+          |ELSE (SELECT MAX(contentEntryProgressLocalChangeSeqNum) + 1 FROM ContentEntryProgress) END),
+          |contentEntryProgressMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(contentEntryProgressMasterChangeSeqNum) + 1 FROM ContentEntryProgress)
+          |ELSE NEW.contentEntryProgressMasterChangeSeqNum END)
+          |WHERE contentEntryProgressUid = NEW.contentEntryProgressUid
+          |; END
+          """.trimMargin())
+
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS `DeviceSession` (`deviceSessionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `dsDeviceId` INTEGER NOT NULL, `dsPersonUid` INTEGER NOT NULL, `expires` INTEGER NOT NULL)")
 
@@ -678,9 +1607,99 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_HolidayCalendar_trk_clientId_epk_rx_csn` ON `HolidayCalendar_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
 
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_28
+          |AFTER UPDATE ON HolidayCalendar FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.umCalendarMasterChangeSeqNum = 0 
+          |OR OLD.umCalendarMasterChangeSeqNum = NEW.umCalendarMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.umCalendarLocalChangeSeqNum = 0  
+          |OR OLD.umCalendarLocalChangeSeqNum = NEW.umCalendarLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE HolidayCalendar SET umCalendarLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.umCalendarLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(umCalendarLocalChangeSeqNum), OLD.umCalendarLocalChangeSeqNum) + 1 FROM HolidayCalendar) END),
+          |umCalendarMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(umCalendarMasterChangeSeqNum), OLD.umCalendarMasterChangeSeqNum) + 1 FROM HolidayCalendar)
+          |ELSE NEW.umCalendarMasterChangeSeqNum END)
+          |WHERE umCalendarUid = NEW.umCalendarUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_28
+          |AFTER INSERT ON HolidayCalendar FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.umCalendarMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.umCalendarLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE HolidayCalendar SET umCalendarLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.umCalendarLocalChangeSeqNum 
+          |ELSE (SELECT MAX(umCalendarLocalChangeSeqNum) + 1 FROM HolidayCalendar) END),
+          |umCalendarMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(umCalendarMasterChangeSeqNum) + 1 FROM HolidayCalendar)
+          |ELSE NEW.umCalendarMasterChangeSeqNum END)
+          |WHERE umCalendarUid = NEW.umCalendarUid
+          |; END
+          """.trimMargin())
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS `Holiday` (`holUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `holMasterCsn` INTEGER NOT NULL, `holLocalCsn` INTEGER NOT NULL, `holLastModBy` INTEGER NOT NULL, `holActive` INTEGER NOT NULL, `holHolidayCalendarUid` INTEGER NOT NULL, `holStartTime` INTEGER NOT NULL, `holEndTime` INTEGER NOT NULL, `holName` TEXT)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `Holiday_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_Holiday_trk_clientId_epk_rx_csn` ON `Holiday_trk` (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_99
+          |AFTER UPDATE ON Holiday FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.holMasterCsn = 0 
+          |OR OLD.holMasterCsn = NEW.holMasterCsn
+          |)
+          |ELSE
+          |(NEW.holLocalCsn = 0  
+          |OR OLD.holLocalCsn = NEW.holLocalCsn
+          |) END)
+          |BEGIN 
+          |UPDATE Holiday SET holLocalCsn = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.holLocalCsn 
+          |ELSE (SELECT MAX(MAX(holLocalCsn), OLD.holLocalCsn) + 1 FROM Holiday) END),
+          |holMasterCsn = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(holMasterCsn), OLD.holMasterCsn) + 1 FROM Holiday)
+          |ELSE NEW.holMasterCsn END)
+          |WHERE holUid = NEW.holUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_99
+          |AFTER INSERT ON Holiday FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.holMasterCsn = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.holLocalCsn = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE Holiday SET holLocalCsn = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.holLocalCsn 
+          |ELSE (SELECT MAX(holLocalCsn) + 1 FROM Holiday) END),
+          |holMasterCsn = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(holMasterCsn) + 1 FROM Holiday)
+          |ELSE NEW.holMasterCsn END)
+          |WHERE holUid = NEW.holUid
+          |; END
+          """.trimMargin())
 
                     database.execSQL("CREATE TABLE IF NOT EXISTS `WorkSpace` (`uid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `guestLogin` INTEGER NOT NULL, `registrationAllowed` INTEGER NOT NULL)")
 
@@ -688,13 +1707,150 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ClazzWorkContentJoin_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ClazzWorkContentJoin_trk_clientId_epk_rx_csn` ON `ClazzWorkContentJoin_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_204
+          |AFTER UPDATE ON ClazzWorkContentJoin FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzWorkContentJoinMCSN = 0 
+          |OR OLD.clazzWorkContentJoinMCSN = NEW.clazzWorkContentJoinMCSN
+          |)
+          |ELSE
+          |(NEW.clazzWorkContentJoinLCSN = 0  
+          |OR OLD.clazzWorkContentJoinLCSN = NEW.clazzWorkContentJoinLCSN
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzWorkContentJoin SET clazzWorkContentJoinLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkContentJoinLCSN 
+          |ELSE (SELECT MAX(MAX(clazzWorkContentJoinLCSN), OLD.clazzWorkContentJoinLCSN) + 1 FROM ClazzWorkContentJoin) END),
+          |clazzWorkContentJoinMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(clazzWorkContentJoinMCSN), OLD.clazzWorkContentJoinMCSN) + 1 FROM ClazzWorkContentJoin)
+          |ELSE NEW.clazzWorkContentJoinMCSN END)
+          |WHERE clazzWorkContentJoinUid = NEW.clazzWorkContentJoinUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_204
+          |AFTER INSERT ON ClazzWorkContentJoin FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.clazzWorkContentJoinMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.clazzWorkContentJoinLCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ClazzWorkContentJoin SET clazzWorkContentJoinLCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkContentJoinLCSN 
+          |ELSE (SELECT MAX(clazzWorkContentJoinLCSN) + 1 FROM ClazzWorkContentJoin) END),
+          |clazzWorkContentJoinMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(clazzWorkContentJoinMCSN) + 1 FROM ClazzWorkContentJoin)
+          |ELSE NEW.clazzWorkContentJoinMCSN END)
+          |WHERE clazzWorkContentJoinUid = NEW.clazzWorkContentJoinUid
+          |; END
+          """.trimMargin())
+
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS `Report` (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `chartType` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `yAxis` INTEGER NOT NULL, `subGroup` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `reportTitle` TEXT, `reportInactive` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `Report_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_Report_trk_clientId_epk_rx_csn` ON `Report_trk` (`clientId`, `epk`, `rx`, `csn`)")
 
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_101
+          |AFTER UPDATE ON Report FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.reportMasterChangeSeqNum = 0 
+          |OR OLD.reportMasterChangeSeqNum = NEW.reportMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.reportLocalChangeSeqNum = 0  
+          |OR OLD.reportLocalChangeSeqNum = NEW.reportLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE Report SET reportLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.reportLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(reportLocalChangeSeqNum), OLD.reportLocalChangeSeqNum) + 1 FROM Report) END),
+          |reportMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(reportMasterChangeSeqNum), OLD.reportMasterChangeSeqNum) + 1 FROM Report)
+          |ELSE NEW.reportMasterChangeSeqNum END)
+          |WHERE reportUid = NEW.reportUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_101
+          |AFTER INSERT ON Report FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.reportMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.reportLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE Report SET reportLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.reportLocalChangeSeqNum 
+          |ELSE (SELECT MAX(reportLocalChangeSeqNum) + 1 FROM Report) END),
+          |reportMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(reportMasterChangeSeqNum) + 1 FROM Report)
+          |ELSE NEW.reportMasterChangeSeqNum END)
+          |WHERE reportUid = NEW.reportUid
+          |; END
+          """.trimMargin())
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ReportFilter` (`reportFilterUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportFilterReportUid` INTEGER NOT NULL, `entityUid` INTEGER NOT NULL, `entityType` INTEGER NOT NULL, `filterInactive` INTEGER NOT NULL, `reportFilterMasterChangeSeqNum` INTEGER NOT NULL, `reportFilterLocalChangeSeqNum` INTEGER NOT NULL, `reportFilterLastChangedBy` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS `ReportFilter_trk` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_ReportFilter_trk_clientId_epk_rx_csn` ON `ReportFilter_trk` (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_102
+          |AFTER UPDATE ON ReportFilter FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.reportFilterMasterChangeSeqNum = 0 
+          |OR OLD.reportFilterMasterChangeSeqNum = NEW.reportFilterMasterChangeSeqNum
+          |)
+          |ELSE
+          |(NEW.reportFilterLocalChangeSeqNum = 0  
+          |OR OLD.reportFilterLocalChangeSeqNum = NEW.reportFilterLocalChangeSeqNum
+          |) END)
+          |BEGIN 
+          |UPDATE ReportFilter SET reportFilterLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.reportFilterLocalChangeSeqNum 
+          |ELSE (SELECT MAX(MAX(reportFilterLocalChangeSeqNum), OLD.reportFilterLocalChangeSeqNum) + 1 FROM ReportFilter) END),
+          |reportFilterMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(reportFilterMasterChangeSeqNum), OLD.reportFilterMasterChangeSeqNum) + 1 FROM ReportFilter)
+          |ELSE NEW.reportFilterMasterChangeSeqNum END)
+          |WHERE reportFilterUid = NEW.reportFilterUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_102
+          |AFTER INSERT ON ReportFilter FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.reportFilterMasterChangeSeqNum = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.reportFilterLocalChangeSeqNum = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE ReportFilter SET reportFilterLocalChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.reportFilterLocalChangeSeqNum 
+          |ELSE (SELECT MAX(reportFilterLocalChangeSeqNum) + 1 FROM ReportFilter) END),
+          |reportFilterMasterChangeSeqNum = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(reportFilterMasterChangeSeqNum) + 1 FROM ReportFilter)
+          |ELSE NEW.reportFilterMasterChangeSeqNum END)
+          |WHERE reportFilterUid = NEW.reportFilterUid
+          |; END
+          """.trimMargin())
+
 
                 } else
                     if (database.dbType() == DoorDbType.POSTGRES) {
@@ -1304,11 +2460,449 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
+        val MIGRATION_38_39 = object: DoorMigration(38, 39) {
+            override fun migrate(db: DoorSqlDatabase) {
+                db.execSQL("CREATE TABLE IF NOT EXISTS SqliteSyncablePrimaryKey (sspTableId INTEGER NOT NULL PRIMARY KEY, sspNextPrimaryKey INTEGER NOT NULL)")
+
+                if (db.dbType() != DoorDbType.SQLITE)
+                    return
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (14, (SELECT COALESCE((SELECT MAX(clazzLogUid) FROM ClazzLog WHERE clazzLogUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (15, (SELECT COALESCE((SELECT MAX(clazzLogAttendanceRecordUid) FROM ClazzLogAttendanceRecord WHERE clazzLogAttendanceRecordUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (20, (SELECT COALESCE((SELECT MAX(personCustomFieldUid) FROM PersonField WHERE personCustomFieldUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (19, (SELECT COALESCE((SELECT MAX(personDetailPresenterFieldUid) FROM PersonDetailPresenterField WHERE personDetailPresenterFieldUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (21, (SELECT COALESCE((SELECT MAX(scheduleUid) FROM Schedule WHERE scheduleUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (17, (SELECT COALESCE((SELECT MAX(dateRangeUid) FROM DateRange WHERE dateRangeUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (28, (SELECT COALESCE((SELECT MAX(umCalendarUid) FROM HolidayCalendar WHERE umCalendarUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (99, (SELECT COALESCE((SELECT MAX(holUid) FROM Holiday WHERE holUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (173, (SELECT COALESCE((SELECT MAX(scheduledCheckUid) FROM ScheduledCheck WHERE scheduledCheckUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (53, (SELECT COALESCE((SELECT MAX(auditLogUid) FROM AuditLog WHERE auditLogUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (56, (SELECT COALESCE((SELECT MAX(customFieldUid) FROM CustomField WHERE customFieldUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (57, (SELECT COALESCE((SELECT MAX(customFieldValueUid) FROM CustomFieldValue WHERE customFieldValueUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (55, (SELECT COALESCE((SELECT MAX(customFieldValueOptionUid) FROM CustomFieldValueOption WHERE customFieldValueOptionUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (9, (SELECT COALESCE((SELECT MAX(personUid) FROM Person WHERE personUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (6, (SELECT COALESCE((SELECT MAX(clazzUid) FROM Clazz WHERE clazzUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (65, (SELECT COALESCE((SELECT MAX(clazzMemberUid) FROM ClazzMember WHERE clazzMemberUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (178, (SELECT COALESCE((SELECT MAX(personCustomFieldValueUid) FROM PersonCustomFieldValue WHERE personCustomFieldValueUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (42, (SELECT COALESCE((SELECT MAX(contentEntryUid) FROM ContentEntry WHERE contentEntryUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (3, (SELECT COALESCE((SELECT MAX(ceccjUid) FROM ContentEntryContentCategoryJoin WHERE ceccjUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (7, (SELECT COALESCE((SELECT MAX(cepcjUid) FROM ContentEntryParentChildJoin WHERE cepcjUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (8, (SELECT COALESCE((SELECT MAX(cerejUid) FROM ContentEntryRelatedEntryJoin WHERE cerejUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (2, (SELECT COALESCE((SELECT MAX(contentCategorySchemaUid) FROM ContentCategorySchema WHERE contentCategorySchemaUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (1, (SELECT COALESCE((SELECT MAX(contentCategoryUid) FROM ContentCategory WHERE contentCategoryUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (13, (SELECT COALESCE((SELECT MAX(langUid) FROM Language WHERE langUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (10, (SELECT COALESCE((SELECT MAX(langVariantUid) FROM LanguageVariant WHERE langVariantUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (45, (SELECT COALESCE((SELECT MAX(roleUid) FROM Role WHERE roleUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (47, (SELECT COALESCE((SELECT MAX(erUid) FROM EntityRole WHERE erUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (43, (SELECT COALESCE((SELECT MAX(groupUid) FROM PersonGroup WHERE groupUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (44, (SELECT COALESCE((SELECT MAX(groupMemberUid) FROM PersonGroupMember WHERE groupMemberUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (50, (SELECT COALESCE((SELECT MAX(personPictureUid) FROM PersonPicture WHERE personPictureUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (51, (SELECT COALESCE((SELECT MAX(containerUid) FROM Container WHERE containerUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (62, (SELECT COALESCE((SELECT MAX(verbUid) FROM VerbEntity WHERE verbUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (64, (SELECT COALESCE((SELECT MAX(xObjectUid) FROM XObjectEntity WHERE xObjectUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (60, (SELECT COALESCE((SELECT MAX(statementUid) FROM StatementEntity WHERE statementUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (66, (SELECT COALESCE((SELECT MAX(contextXObjectStatementJoinUid) FROM ContextXObjectStatementJoin WHERE contextXObjectStatementJoinUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (68, (SELECT COALESCE((SELECT MAX(agentUid) FROM AgentEntity WHERE agentUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (70, (SELECT COALESCE((SELECT MAX(stateUid) FROM StateEntity WHERE stateUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (72, (SELECT COALESCE((SELECT MAX(stateContentUid) FROM StateContentEntity WHERE stateContentUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (74, (SELECT COALESCE((SELECT MAX(statementLangMapUid) FROM XLangMapEntry WHERE statementLangMapUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (164, (SELECT COALESCE((SELECT MAX(schoolUid) FROM School WHERE schoolUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (200, (SELECT COALESCE((SELECT MAX(schoolMemberUid) FROM SchoolMember WHERE schoolMemberUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (201, (SELECT COALESCE((SELECT MAX(clazzWorkUid) FROM ClazzWork WHERE clazzWorkUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (204, (SELECT COALESCE((SELECT MAX(clazzWorkContentJoinUid) FROM ClazzWorkContentJoin WHERE clazzWorkContentJoinUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (208, (SELECT COALESCE((SELECT MAX(commentsUid) FROM Comments WHERE commentsUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (202, (SELECT COALESCE((SELECT MAX(clazzWorkQuestionUid) FROM ClazzWorkQuestion WHERE clazzWorkQuestionUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (203, (SELECT COALESCE((SELECT MAX(clazzWorkQuestionOptionUid) FROM ClazzWorkQuestionOption WHERE clazzWorkQuestionOptionUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (206, (SELECT COALESCE((SELECT MAX(clazzWorkSubmissionUid) FROM ClazzWorkSubmission WHERE clazzWorkSubmissionUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (209, (SELECT COALESCE((SELECT MAX(clazzWorkQuestionResponseUid) FROM ClazzWorkQuestionResponse WHERE clazzWorkQuestionResponseUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (210, (SELECT COALESCE((SELECT MAX(contentEntryProgressUid) FROM ContentEntryProgress WHERE contentEntryProgressUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (101, (SELECT COALESCE((SELECT MAX(reportUid) FROM Report WHERE reportUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+                db.execSQL("REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) VALUES (102, (SELECT COALESCE((SELECT MAX(reportFilterUid) FROM ReportFilter WHERE reportFilterUid & (SELECT nodeClientId << 32 FROM SyncNode) = (SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
+            }
+        }
+
+        /**
+         * Add fields required for class and school codes for students to join a class or school
+         *  Changes from 39-40:
+        1. Added personGroupUid to Person
+        2. Added personGroupFlag to PersonGroup
+        3. Removed groupPersonUid from PersonGroup
+         */
+        val MIGRATION_39_40 = object : DoorMigration(39, 40) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+                    //Person
+                    database.execSQL("ALTER TABLE Person ADD COLUMN personGroupUid BIGINT DEFAULT 0 NOT NULL")
+
+                    //PersonGroup
+                    database.execSQL("ALTER TABLE PersonGroup RENAME to PersonGroup_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS PersonGroup (  " +
+                            "groupMasterCsn  BIGINT NOT NULL , groupLocalCsn  BIGINT NOT NULL, " +
+                            "groupLastChangedBy  INTEGER NOT NULL, groupName  TEXT , " +
+                            "groupActive  INTEGER NOT NULL , personGroupFlag  INTEGER NOT NULL, " +
+                            "groupUid  INTEGER NOT NULL PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("INSERT INTO PersonGroup (" +
+                            "groupUid, groupMasterCsn, groupLocalCsn, groupLastChangedBy, " +
+                            "groupName, groupActive) SELECT groupUid, groupMasterCsn, " +
+                            "groupLocalCsn, groupLastChangedBy, groupName, groupActive " +
+                            "FROM PersonGroup_OLD")
+                    database.execSQL("DROP TABLE PersonGroup_OLD")
+
+                    //Triggers for PersonGroup
+                    database.execSQL("""
+                      |CREATE TRIGGER UPD_43
+                      |AFTER UPDATE ON PersonGroup FOR EACH ROW WHEN
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(NEW.groupMasterCsn = 0 
+                      |OR OLD.groupMasterCsn = NEW.groupMasterCsn
+                      |)
+                      |ELSE
+                      |(NEW.groupLocalCsn = 0  
+                      |OR OLD.groupLocalCsn = NEW.groupLocalCsn
+                      |) END)
+                      |BEGIN 
+                      |UPDATE PersonGroup SET groupLocalCsn = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLocalCsn 
+                      |ELSE (SELECT MAX(MAX(groupLocalCsn), OLD.groupLocalCsn) + 1 FROM PersonGroup) END),
+                      |groupMasterCsn = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(SELECT MAX(MAX(groupMasterCsn), OLD.groupMasterCsn) + 1 FROM PersonGroup)
+                      |ELSE NEW.groupMasterCsn END)
+                      |WHERE groupUid = NEW.groupUid
+                      |; END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER INS_43
+                      |AFTER INSERT ON PersonGroup FOR EACH ROW WHEN
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(NEW.groupMasterCsn = 0 
+                      |
+                      |)
+                      |ELSE
+                      |(NEW.groupLocalCsn = 0  
+                      |
+                      |) END)
+                      |BEGIN 
+                      |UPDATE PersonGroup SET groupLocalCsn = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLocalCsn 
+                      |ELSE (SELECT MAX(groupLocalCsn) + 1 FROM PersonGroup) END),
+                      |groupMasterCsn = 
+                      |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+                      |(SELECT MAX(groupMasterCsn) + 1 FROM PersonGroup)
+                      |ELSE NEW.groupMasterCsn END)
+                      |WHERE groupUid = NEW.groupUid
+                      |; END
+                    """.trimMargin())
+
+
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
+                    //Person
+                    database.execSQL("ALTER TABLE Person ADD COLUMN personGroupUid BIGINT DEFAULT 0 NOT NULL")
+
+                    //PersonGroup
+                    database.execSQL("ALTER TABLE PersonGroup ADD COLUMN personGroupFlag INTEGER DEFAULT 0 NOT NULL")
+                    database.execSQL("ALTER TABLE PersonGroup DROP COLUMN IF EXISTS groupPersonUid")
+                }
+            }
+        }
+
+
+        val MIGRATION_40_41 = object : DoorMigration(40, 41) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("DROP TABLE PersonDetailPresenterField")
+                database.execSQL("DROP TABLE PersonDetailPresenterField_trk")
+                database.execSQL("DROP TABLE PersonField")
+                database.execSQL("DROP TABLE PersonField_trk")
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN statementLearnerGroupUid INTEGER DEFAULT 0 NOT NULL")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroup (`learnerGroupUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `learnerGroupName` TEXT, `learnerGroupDescription` TEXT, `learnerGroupActive` INTEGER NOT NULL, `learnerGroupMCSN` INTEGER NOT NULL, `learnerGroupCSN` INTEGER NOT NULL, `learnerGroupLCB` INTEGER NOT NULL)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroup_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_LearnerGroup_trk_clientId_epk_rx_csn` ON LearnerGroup_trk (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_301
+          |AFTER UPDATE ON LearnerGroup FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.learnerGroupMCSN = 0 
+          |OR OLD.learnerGroupMCSN = NEW.learnerGroupMCSN
+          |)
+          |ELSE
+          |(NEW.learnerGroupCSN = 0  
+          |OR OLD.learnerGroupCSN = NEW.learnerGroupCSN
+          |) END)
+          |BEGIN 
+          |UPDATE LearnerGroup SET learnerGroupCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupCSN 
+          |ELSE (SELECT MAX(MAX(learnerGroupCSN), OLD.learnerGroupCSN) + 1 FROM LearnerGroup) END),
+          |learnerGroupMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(learnerGroupMCSN), OLD.learnerGroupMCSN) + 1 FROM LearnerGroup)
+          |ELSE NEW.learnerGroupMCSN END)
+          |WHERE learnerGroupUid = NEW.learnerGroupUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_301
+          |AFTER INSERT ON LearnerGroup FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.learnerGroupMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.learnerGroupCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE LearnerGroup SET learnerGroupCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupCSN 
+          |ELSE (SELECT MAX(learnerGroupCSN) + 1 FROM LearnerGroup) END),
+          |learnerGroupMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(learnerGroupMCSN) + 1 FROM LearnerGroup)
+          |ELSE NEW.learnerGroupMCSN END)
+          |WHERE learnerGroupUid = NEW.learnerGroupUid
+          |; END
+          """.trimMargin())
+
+
+                    database.execSQL( "CREATE TABLE IF NOT EXISTS LearnerGroupMember (`learnerGroupMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `learnerGroupMemberPersonUid` INTEGER NOT NULL, `learnerGroupMemberLgUid` INTEGER NOT NULL, `learnerGroupMemberRole` INTEGER NOT NULL, `learnerGroupMemberActive` INTEGER NOT NULL, `learnerGroupMemberMCSN` INTEGER NOT NULL, `learnerGroupMemberCSN` INTEGER NOT NULL, `learnerGroupMemberLCB` INTEGER NOT NULL)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroupMember_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_LearnerGroupMember_trk_clientId_epk_rx_csn` ON LearnerGroupMember_trk (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_300
+          |AFTER UPDATE ON LearnerGroupMember FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.learnerGroupMemberMCSN = 0 
+          |OR OLD.learnerGroupMemberMCSN = NEW.learnerGroupMemberMCSN
+          |)
+          |ELSE
+          |(NEW.learnerGroupMemberCSN = 0  
+          |OR OLD.learnerGroupMemberCSN = NEW.learnerGroupMemberCSN
+          |) END)
+          |BEGIN 
+          |UPDATE LearnerGroupMember SET learnerGroupMemberCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupMemberCSN 
+          |ELSE (SELECT MAX(MAX(learnerGroupMemberCSN), OLD.learnerGroupMemberCSN) + 1 FROM LearnerGroupMember) END),
+          |learnerGroupMemberMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(learnerGroupMemberMCSN), OLD.learnerGroupMemberMCSN) + 1 FROM LearnerGroupMember)
+          |ELSE NEW.learnerGroupMemberMCSN END)
+          |WHERE learnerGroupMemberUid = NEW.learnerGroupMemberUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_300
+          |AFTER INSERT ON LearnerGroupMember FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.learnerGroupMemberMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.learnerGroupMemberCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE LearnerGroupMember SET learnerGroupMemberCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupMemberCSN 
+          |ELSE (SELECT MAX(learnerGroupMemberCSN) + 1 FROM LearnerGroupMember) END),
+          |learnerGroupMemberMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(learnerGroupMemberMCSN) + 1 FROM LearnerGroupMember)
+          |ELSE NEW.learnerGroupMemberMCSN END)
+          |WHERE learnerGroupMemberUid = NEW.learnerGroupMemberUid
+          |; END
+          """.trimMargin())
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS GroupLearningSession (`groupLearningSessionUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `groupLearningSessionContentUid` INTEGER NOT NULL, `groupLearningSessionLearnerGroupUid` INTEGER NOT NULL, `groupLearningSessionInactive` INTEGER NOT NULL, `groupLearningSessionMCSN` INTEGER NOT NULL, `groupLearningSessionCSN` INTEGER NOT NULL, `groupLearningSessionLCB` INTEGER NOT NULL)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS GroupLearningSession_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_GroupLearningSession_trk_clientId_epk_rx_csn` ON GroupLearningSession_trk (`clientId`, `epk`, `rx`, `csn`)")
+
+                    database.execSQL("""
+          |CREATE TRIGGER UPD_302
+          |AFTER UPDATE ON GroupLearningSession FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.groupLearningSessionMCSN = 0 
+          |OR OLD.groupLearningSessionMCSN = NEW.groupLearningSessionMCSN
+          |)
+          |ELSE
+          |(NEW.groupLearningSessionCSN = 0  
+          |OR OLD.groupLearningSessionCSN = NEW.groupLearningSessionCSN
+          |) END)
+          |BEGIN 
+          |UPDATE GroupLearningSession SET groupLearningSessionCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLearningSessionCSN 
+          |ELSE (SELECT MAX(MAX(groupLearningSessionCSN), OLD.groupLearningSessionCSN) + 1 FROM GroupLearningSession) END),
+          |groupLearningSessionMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(MAX(groupLearningSessionMCSN), OLD.groupLearningSessionMCSN) + 1 FROM GroupLearningSession)
+          |ELSE NEW.groupLearningSessionMCSN END)
+          |WHERE groupLearningSessionUid = NEW.groupLearningSessionUid
+          |; END
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER INS_302
+          |AFTER INSERT ON GroupLearningSession FOR EACH ROW WHEN
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(NEW.groupLearningSessionMCSN = 0 
+          |
+          |)
+          |ELSE
+          |(NEW.groupLearningSessionCSN = 0  
+          |
+          |) END)
+          |BEGIN 
+          |UPDATE GroupLearningSession SET groupLearningSessionCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLearningSessionCSN 
+          |ELSE (SELECT MAX(groupLearningSessionCSN) + 1 FROM GroupLearningSession) END),
+          |groupLearningSessionMCSN = 
+          |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
+          |(SELECT MAX(groupLearningSessionMCSN) + 1 FROM GroupLearningSession)
+          |ELSE NEW.groupLearningSessionMCSN END)
+          |WHERE groupLearningSessionUid = NEW.groupLearningSessionUid
+          |; END
+          """.trimMargin())
+
+
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN statementLearnerGroupUid BIGINT DEFAULT 0 NOT NULL")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroup (  learnerGroupName  TEXT , learnerGroupDescription  TEXT , learnerGroupActive  BOOL , learnerGroupMCSN  BIGINT , learnerGroupCSN  BIGINT , learnerGroupLCB  INTEGER , learnerGroupUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS LearnerGroup_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS LearnerGroup_lcsn_seq")
+                    database.execSQL("""
+          |CREATE OR REPLACE FUNCTION 
+          | inccsn_301_fn() RETURNS trigger AS ${'$'}${'$'}
+          | BEGIN  
+          | UPDATE LearnerGroup SET learnerGroupCSN =
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupCSN 
+          | ELSE NEXTVAL('LearnerGroup_lcsn_seq') END),
+          | learnerGroupMCSN = 
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+          | THEN NEXTVAL('LearnerGroup_mcsn_seq') 
+          | ELSE NEW.learnerGroupMCSN END)
+          | WHERE learnerGroupUid = NEW.learnerGroupUid;
+          | RETURN null;
+          | END ${'$'}${'$'}
+          | LANGUAGE plpgsql
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER inccsn_301_trig 
+          |AFTER UPDATE OR INSERT ON LearnerGroup 
+          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+          |EXECUTE PROCEDURE inccsn_301_fn()
+          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroup_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_LearnerGroup_trk_clientId_epk_rx_csn 
+          |ON LearnerGroup_trk (clientId, epk, rx, csn)
+          """.trimMargin())
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroupMember (  learnerGroupMemberPersonUid  BIGINT , learnerGroupMemberLgUid  BIGINT , learnerGroupMemberRole  INTEGER , learnerGroupMemberActive  BOOL , learnerGroupMemberMCSN  BIGINT , learnerGroupMemberCSN  BIGINT , learnerGroupMemberLCB  INTEGER , learnerGroupMemberUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS LearnerGroupMember_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS LearnerGroupMember_lcsn_seq")
+                    database.execSQL("""
+          |CREATE OR REPLACE FUNCTION 
+          | inccsn_300_fn() RETURNS trigger AS ${'$'}${'$'}
+          | BEGIN  
+          | UPDATE LearnerGroupMember SET learnerGroupMemberCSN =
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupMemberCSN 
+          | ELSE NEXTVAL('LearnerGroupMember_lcsn_seq') END),
+          | learnerGroupMemberMCSN = 
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+          | THEN NEXTVAL('LearnerGroupMember_mcsn_seq') 
+          | ELSE NEW.learnerGroupMemberMCSN END)
+          | WHERE learnerGroupMemberUid = NEW.learnerGroupMemberUid;
+          | RETURN null;
+          | END ${'$'}${'$'}
+          | LANGUAGE plpgsql
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER inccsn_300_trig 
+          |AFTER UPDATE OR INSERT ON LearnerGroupMember 
+          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+          |EXECUTE PROCEDURE inccsn_300_fn()
+          """.trimMargin())
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroupMember_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_LearnerGroupMember_trk_clientId_epk_rx_csn 
+          |ON LearnerGroupMember_trk (clientId, epk, rx, csn)
+          """.trimMargin())
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS GroupLearningSession (  groupLearningSessionContentUid  BIGINT , groupLearningSessionLearnerGroupUid  BIGINT , groupLearningSessionInactive  BOOL , groupLearningSessionMCSN  BIGINT , groupLearningSessionCSN  BIGINT , groupLearningSessionLCB  INTEGER , groupLearningSessionUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS GroupLearningSession_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS GroupLearningSession_lcsn_seq")
+                    database.execSQL("""
+          |CREATE OR REPLACE FUNCTION 
+          | inccsn_302_fn() RETURNS trigger AS ${'$'}${'$'}
+          | BEGIN  
+          | UPDATE GroupLearningSession SET groupLearningSessionCSN =
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLearningSessionCSN 
+          | ELSE NEXTVAL('GroupLearningSession_lcsn_seq') END),
+          | groupLearningSessionMCSN = 
+          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+          | THEN NEXTVAL('GroupLearningSession_mcsn_seq') 
+          | ELSE NEW.groupLearningSessionMCSN END)
+          | WHERE groupLearningSessionUid = NEW.groupLearningSessionUid;
+          | RETURN null;
+          | END ${'$'}${'$'}
+          | LANGUAGE plpgsql
+          """.trimMargin())
+                    database.execSQL("""
+          |CREATE TRIGGER inccsn_302_trig 
+          |AFTER UPDATE OR INSERT ON GroupLearningSession 
+          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+          |EXECUTE PROCEDURE inccsn_302_fn()
+          """.trimMargin())
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS GroupLearningSession_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+          |CREATE 
+          | INDEX index_GroupLearningSession_trk_clientId_epk_rx_csn 
+          |ON GroupLearningSession_trk (clientId, epk, rx, csn)
+          """.trimMargin())
+
+
+                }
+
+
+            }
+        }
+
+        val MIGRATION_41_42 = object : DoorMigration(41, 42) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN sqiContentEntryUid INTEGER DEFAULT 0 NOT NULL")
+                    database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN overrideEntry INTEGER DEFAULT 0 NOT NULL")
+
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN sqiContentEntryUid BIGINT DEFAULT 0 NOT NULL")
+                    database.execSQL("ALTER TABLE ScrapeQueueItem ADD COLUMN overrideEntry BOOL DEFAULT false NOT NULL")
+
+                }
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
-                    MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38)
+                    MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
+                    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42)
 
 
 

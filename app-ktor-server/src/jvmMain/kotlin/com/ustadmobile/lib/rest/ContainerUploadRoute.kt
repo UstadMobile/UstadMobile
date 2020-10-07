@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContainerWithContainerEntryWithMd5
 import com.ustadmobile.sharedse.container.addEntriesFromConcatenatedInputStream
@@ -57,7 +58,7 @@ fun Route.ContainerUpload() {
             if (!sessionFile.exists() && !skipSessionFile) {
                 call.respond(HttpStatusCode.InternalServerError, "session file not found")
             } else {
-                val containerDir: File by di().on(call).instance(tag = TAG_CONTAINER_DIR)
+                val containerDir: File by di().on(call).instance(tag = DiTag.TAG_CONTAINER_DIR)
 
                 var containerFromDb = db.containerDao.findByUid(container.containerUid)
                 if (containerFromDb == null) {

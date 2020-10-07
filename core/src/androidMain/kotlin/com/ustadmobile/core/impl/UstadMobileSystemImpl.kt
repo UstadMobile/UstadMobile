@@ -96,6 +96,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
             AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
+            HarView.VIEW_NAME to "${PACKAGE_NAME}HarActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
@@ -198,7 +199,17 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int, ustadGoOptions: UstadGoOptions) {
-        val ustadDestination = destinationProvider.lookupDestinationName(viewName)
+
+        val destinationQueryPos = viewName!!.indexOf('?')
+        val viewNameOnly = if (destinationQueryPos == -1) {
+            viewName
+        }else {
+            viewName.substring(0, destinationQueryPos)
+        }
+        val allArgs = args + UMFileUtil.parseURLQueryString(viewName)
+
+
+        val ustadDestination = destinationProvider.lookupDestinationName(viewNameOnly)
         if(ustadDestination != null) {
             val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
 
@@ -224,8 +235,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 }
             }
 
-            navController.navigate(ustadDestination.destinationId, args.toBundleWithNullableValues(),
-                options)
+            navController.navigate(ustadDestination.destinationId,
+                    allArgs.toBundleWithNullableValues(), options)
 
             return
         }
@@ -606,7 +617,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-
     actual companion object {
 
         const val TAG = "UstadMobileImplAndroid"
@@ -627,7 +637,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
     }
-
 
 
 }

@@ -491,7 +491,7 @@ class ClazzWorkDetailProgressListFragmentTest  {
     private fun checkProgressList(testClazzWork: TestClazzWork){
         val list: List<ClazzMemberWithClazzWorkProgress> = runBlocking {
             dbRule.db.clazzWorkDao.findStudentProgressByClazzWorkTest(
-                    testClazzWork.clazzWork.clazzWorkUid)
+                    testClazzWork.clazzWork.clazzWorkUid, 0, "%")
         }
         for(item in list){
             //Scroll to Member

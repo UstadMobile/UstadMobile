@@ -39,6 +39,10 @@ import org.kodein.di.on
 interface ContentEntryDetailFragmentEventHandler {
 
     fun handleOnClickOpenDownloadButton()
+
+    fun handleOnClickGroupActivityButton()
+
+    fun handleOnClickDeleteButton()
 }
 
 class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecentContainer>(), ContentEntry2DetailView, ContentEntryDetailFragmentEventHandler{
@@ -100,6 +104,14 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
 
     override fun handleOnClickOpenDownloadButton() {
         mPresenter?.handleOnClickOpenDownloadButton()
+    }
+
+    override fun handleOnClickGroupActivityButton() {
+        mPresenter?.handleOnClickGroupActivityButton()
+    }
+
+    override fun handleOnClickDeleteButton() {
+        mPresenter?.handleOnClickDeleteButton()
     }
 
     override var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null
