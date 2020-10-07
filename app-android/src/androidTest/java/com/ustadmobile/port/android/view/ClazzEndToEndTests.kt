@@ -18,6 +18,7 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.port.android.screen.MainActivityScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.rules.*
@@ -39,14 +40,6 @@ class ClazzEndToEndTests {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
     @AdbScreenRecord("Given an empty class list, when the user clicks add class and " +
             "fills in form, then it should go to the new class")
     @Test
@@ -62,9 +55,7 @@ class ClazzEndToEndTests {
         })
 
 
-        val activityScenario = launchActivity<MainActivity>()
-                .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        launchActivity<MainActivity>()
 
         val context = ApplicationProvider.getApplicationContext<Context>()
         val newClazzText = context.getString(R.string.add_a_new,

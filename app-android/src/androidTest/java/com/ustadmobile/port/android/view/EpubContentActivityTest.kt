@@ -34,8 +34,8 @@ import org.junit.runner.RunWith
 import java.io.File
 
 
-@AdbScreenRecord("KAS Epub content screen test")
-class EpubContentActivityKasTest : TestCase() {
+@AdbScreenRecord("Epub content screen test")
+class EpubContentActivityTest : TestCase() {
 
     private lateinit var container: Container
 
@@ -71,7 +71,7 @@ class EpubContentActivityKasTest : TestCase() {
         }
         containerTmpDir = tempFileRule.newFolder("epubContent${System.currentTimeMillis()}")
         val testFile = tempFileRule.newFile("test${System.currentTimeMillis()}.epub")
-        val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/test2.epub")
+        val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/test.epub")
         testFile.outputStream().use { input?.copyTo(it) }
 
         val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,

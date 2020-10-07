@@ -25,6 +25,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.port.android.screen.ContentEntryDetailScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
@@ -50,20 +51,11 @@ class ContentEntry2DetailFragmentTest {
     @JvmField
     @Rule
     var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true,
-        controlServerUrl = "http://${BuildConfig.TEST_HOST}:${BuildConfig.TEST_PORT}")
+            controlServerUrl = "http://${BuildConfig.TEST_HOST}:${BuildConfig.TEST_PORT}")
 
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
-
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
 
     @JvmField
     @Rule
@@ -106,13 +98,21 @@ class ContentEntry2DetailFragmentTest {
             ContentEntry2DetailFragment().also { fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
 
-        onView(withText(entryTitle)).check(matches(isDisplayed()))
+        ContentEntryDetailScreen {
 
-        onView(withId(R.id.entry_detail_progress_bar)).check(matches(isDisplayed()))
-        onView(withId(R.id.content_progress_fail_correct)).check(matches(isDisplayed()))
+            entryTitleTextView {
+                isDisplayed()
+                hasText(entryTitle)
+            }
+            progress{
+                isDisplayed()
+            }
+            progressCheck{
+                isDisplayed()
+            }
+        }
     }
 
     @AdbScreenRecord("Given content entry exists should show user selected content entry with no progress")
@@ -133,13 +133,22 @@ class ContentEntry2DetailFragmentTest {
             ContentEntry2DetailFragment().also { fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
 
-        onView(withText(entryTitle)).check(matches(isDisplayed()))
+        ContentEntryDetailScreen{
 
-        onView(withId(R.id.entry_detail_progress_bar)).check(matches(not(isDisplayed())))
-        onView(withId(R.id.content_progress_fail_correct)).check(matches(not(isDisplayed())))
+            entryTitleTextView{
+                isDisplayed()
+                hasText(entryTitle)
+            }
+            progress{
+                isNotDisplayed()
+            }
+            progressCheck{
+                isNotDisplayed()
+            }
+
+        }
     }
 
 
@@ -157,14 +166,20 @@ class ContentEntry2DetailFragmentTest {
             ContentEntry2DetailFragment().also { fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
 
-        onView(withText(testEntry.title)).check(matches(isDisplayed()))
+        ContentEntryDetailScreen{
 
-        onView(withId(R.id.availableTranslationView)).check(matches(isDisplayed()))
+            entryTitleTextView{
+                isDisplayed()
+                hasText(testEntry.title!!)
+            }
+            translationsList{
+                isDisplayed()
+                hasChildCount(totalTranslations)
+            }
 
-        onView(withId(R.id.availableTranslationView)).check(matches(hasChildCount(totalTranslations)))
+        }
     }
 
 
@@ -182,15 +197,19 @@ class ContentEntry2DetailFragmentTest {
             ContentEntry2DetailFragment().also { fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
 
-        onView(withId(R.id.availableTranslationView)).check(matches(isDisplayed()))
+        ContentEntryDetailScreen{
 
-        onView(withId(R.id.availableTranslationView)).check(matches(hasChildCount(totalTranslations)))
+            translationsList{
+                isDisplayed()
+                hasChildCount(totalTranslations)
+                emptyChildAt(1){
+                    click()
+                }
+            }
 
-        onView(withId(R.id.availableTranslationView))
-                .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(1, click()))
+        }
 
         assertEquals("After clicking on item, it navigates to translated detail view",
                 R.id.content_entry_details_dest, systemImplNavRule.navController.currentDestination?.id)
@@ -230,8 +249,6 @@ class ContentEntry2DetailFragmentTest {
 
 
         val activityScenario = launchActivity<MainActivity>(intent = launchIntent)
-                .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         //TODO: Replace this with IdlingResources
         Thread.sleep(1000)

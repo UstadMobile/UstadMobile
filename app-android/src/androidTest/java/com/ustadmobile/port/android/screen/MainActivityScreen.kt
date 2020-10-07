@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.screen
 
+import com.agoda.kakao.bottomnav.KBottomNavigationView
 import com.agoda.kakao.common.views.KView
 import com.agoda.kakao.text.KButton
 import com.agoda.kakao.text.KTextView
@@ -19,5 +20,7 @@ object MainActivityScreen : KScreen<MainActivityScreen>() {
     }
 
     val toolBarTitle: KView = KView { withId(R.id.toolbar)}
+
+    val bottomNav = KBottomNavigationView { withId(R.id.bottom_nav_view)}
 
 }

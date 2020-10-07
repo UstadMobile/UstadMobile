@@ -45,14 +45,6 @@ class ClazzEditFragmentTest  {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
 
     @AdbScreenRecord("")
     //@Test
@@ -67,8 +59,7 @@ class ClazzEditFragmentTest  {
                 it.installNavController(systemImplNavRule.navController)
                 it.arguments = bundleOf()
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
 
         onIdle()
 
@@ -125,7 +116,7 @@ class ClazzEditFragmentTest  {
                 it.installNavController(systemImplNavRule.navController)
             }
         }
-        dataBindingIdlingResourceRule.idlingResource.monitorFragment(fragmentScenario)
+
 
         val editIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it })
         IdlingRegistry.getInstance().register(editIdlingResource)

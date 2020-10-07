@@ -18,6 +18,7 @@ import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.android.screen.HarContentScreen
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
@@ -45,14 +46,6 @@ class HarContentFragmentTest {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
-
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val screenRecordRule = AdbScreenRecordRule()
 
     @JvmField
     @Rule
@@ -87,7 +80,7 @@ class HarContentFragmentTest {
         targetEntry.contentEntryUid = dbRule.db.contentEntryDao.insert(targetEntry)
 
         container = Container()
-        container?.mimeType =  "application/har+zip"
+        container?.mimeType = "application/har+zip"
         container?.containerContentEntryUid = targetEntry.contentEntryUid
         container?.containerUid = dbRule.db.containerDao.insert(container!!)
 
@@ -101,29 +94,22 @@ class HarContentFragmentTest {
     @Test
     fun givenContentEntry_whenWebViewLoads_thenShowHarContent() {
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_CONTENT_ENTRY_UID to container!!.containerContentEntryUid, UstadView.ARG_CONTAINER_UID to container!!.containerUid)) {
             HarContentFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
 
-
-        var count = 0
-        repeat(5) {
-            try {
-                onWebView(allOf(isDisplayed(), isJavascriptEnabled()))
-                        .withElement(findElement(Locator.CSS_SELECTOR, "div.main"))
-            } catch (io: RuntimeException) {
-                count++
-                Thread.sleep(2000)
+        HarContentScreen {
+            harWebView {
+                isDisplayed()
+                isJavascriptEnabled()
+                withElement(Locator.CSS_SELECTOR, "div.main") {
+                }
             }
         }
 
-        if (count == 5) {
-            throw Exception()
-        }
 
     }
 
