@@ -273,7 +273,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                         return null
                     }
 
-                    val urlWithEndingSlash =  url.requirePostfix()
+                    val urlWithEndingSlash =  url.requirePostfix("/")
                     val entry = ContentEntryWithLanguage()
                     entry.title = document.title().substringAfterLast("/")
                     entry.sourceUrl = urlWithEndingSlash

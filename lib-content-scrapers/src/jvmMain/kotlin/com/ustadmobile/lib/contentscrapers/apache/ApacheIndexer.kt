@@ -23,7 +23,7 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
 
     override fun indexUrl(sourceUrl: String) {
         
-        val srcUrl = sourceUrl.requirePostfix()
+        val srcUrl = sourceUrl.requirePostfix("/")
         val url = URL(srcUrl)
 
         val huc: HttpURLConnection = url.openConnection() as HttpURLConnection
