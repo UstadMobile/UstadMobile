@@ -8,7 +8,7 @@
     <string name="edit_holiday_calendar">ছুটির ক্যালেন্ডার সম্পাদনা করুন</string>
     <string name="primary_user">প্রাথমিক ব্যবহারকারী</string>
     <string name="role_description">একটি ভূমিকা (উদাঃ শিক্ষক, শিক্ষার্থী, ইত্যাদি) উপরের নির্বাচিত সুযোগগুলিতে প্রযোজ্য এমন কিছু অনুমতিের (যেমন ব্যক্তির বিবরণ দেখুন, রেকর্ড উপস্থিতি ইত্যাদি) দেয়।</string>
-    <string name="invite_link_desc">এই লিঙ্কটি সহ যে কেউ যোগ দিতে এবং %1$s এ যোগদানের জন্য আবেদন করতে পারেন। তারপরে আপনি যোগদানের অনুরোধটি অনুমোদিত বা বাতিল করতে পারেন।</string>
+    <string name="invite_link_desc">এই লিঙ্কটি সহ যে কেউ যোগ দিতে এবং% 1 $ s এ যোগদানের জন্য আবেদন করতে পারেন। তারপরে আপনি যোগদানের অনুরোধটি অনুমোদিত বা বাতিল করতে পারেন।</string>
     <string name="permission_role_select">সমস্ত ভূমিকা দেখুন এবং নির্বাচন করুন</string>
     <string name="permission_school_insert">একটি নতুন স্কুল প্রবেশ করান</string>
     <string name="over">শেষ</string>
@@ -65,7 +65,7 @@
     <string name="location_permission_title">অবস্থানের অনুমতি প্রয়োজন</string>
     <string name="age">গড়</string>
     <string name="role_name">নামভূমিকা</string>
-    <string name="download_downloading_placeholder">%2$s এর %1$s ডাউনলোড হচ্ছে</string>
+    <string name="download_downloading_placeholder">% 2 $ s এর% 1 $ s ডাউনলোড হচ্ছে</string>
     <string name="download_cancel_label">ডাউনলোড বাতিল করুন</string>
     <string name="download_pause_download">বিরতি দিন</string>
     <string name="download_locally_availability">কাছাকাছি পাওয়া যায়</string>
@@ -183,8 +183,8 @@
     <string name="content_editor_save_error">সংরক্ষণের হচ্ছে না, আবার চেষ্টা করুন</string>
     <string name="supported_files">সমর্থিত ফাইল: <b>" ভিডিও, অডিও, ইপিইউবি,এক্সএপিআই  জিপ, এইচফাইভপি "</b>
     </string>
-    <string name="download_state_downloading">আপনার ডিভাইস স্টোরেজে মোট %2$s ব্যবহার করা হবে এমন মোট %1$s টি আইটেম <b> ডাউনলোড করা হচ্ছে </b>।</string>
-    <string name="content_entry_export_message">আপনি আপনার ডিভাইস স্টোরেজে %1$s রফতানি করতে চলেছেন। আপনি কি অবিরত করতে চান\?</string>
+    <string name="download_state_downloading">আপনার ডিভাইস স্টোরেজে মোট %2$s ব্যবহার করা হবে এমন মোট %1$s টি আইটেম &lt;b&gt; ডাউনলোড করা হচ্ছে &lt;/ b&gt;।<b> ডাউনলোড করা হচ্ছে </b>।</string>
+    <string name="content_entry_export_message">আপনি আপনার ডিভাইস স্টোরেজে% 1 $ s রফতানি করতে চলেছেন। আপনি কি অবিরত করতে চান\?</string>
     <string name="bar_chart" value="100">বার চার্ট</string>
     <string name="line_graph" value="101">লাইন গ্রাফ</string>
     <string name="content_entry_export_inprogress">রফতানি হচ্ছে</string>
@@ -199,7 +199,7 @@
     <string name="done">সম্পন্ন</string>
     <string name="xapi_options_general">সাধারণ</string>
     <string name="xapi_options_report_title">প্রতিবেদনের শিরোনাম</string>
-    <string name="download_state_downloaded">আপনার ডিভাইস স্টোরেজটির প্রায় %2$s ব্যবহার করছে এমন মোট %1$s আইটেমগুলিতে <b> ডাউনলোড </b>।</string>
+    <string name="download_state_downloaded">আপনার ডিভাইস স্টোরেজটির প্রায় %2$s ব্যবহার করছে এমন মোট %1$s আইটেমগুলিতে &lt;b&gt; ডাউনলোড &lt;/ b&gt;।<b> ডাউনলোড </b>।</string>
     <string name="xapi_options_visual_type">প্রতিবেদনের শিরোনাম</string>
     <string name="xapi_options_axes">অক্ষ</string>
     <string name="xapi_options_x_axes">এক্স-এক্সিস</string>
@@ -222,7 +222,7 @@
     <string name="import_title_not_entered">শিরোনাম প্রবেশ করানো হয়নি</string>
     <string name="no_account">আপনার একাউন্ট নেই\?</string>
     <string name="enter_url">ইউআরএল দিন</string>
-    <string name="download_summary_title">%1s সক্রিয় ডাউনলোডসমূহ</string>
+    <string name="download_summary_title">% 1 $ s সক্রিয় ডাউনলোডসমূহ</string>
     <string name="download_cloud_availability">মেঘে উপলব্ধ</string>
     <string name="content_insert_options">ভিতরে স্থাপন করা</string>
     <string name="content_media_photo">ছবি</string>
@@ -370,7 +370,7 @@
     <string name="permission_person_update">লোকেদের আপডেট করুন</string>
     <string name="permission_person_picture_select">প্রোফাইল ছবি দেখুন</string>
     <string name="permission_person_picture_insert">প্রোফাইল ছবি যুক্ত করুন</string>
-    <string name="download_storage_option_device">%1$s - %2$s বিনামূল্যে ব্যবহার করুন</string>
+    <string name="download_storage_option_device">% 1 $ s -% 2 $ s বিনামূল্যে ব্যবহার করুন</string>
     <string name="permission_person_picture_update">প্রোফাইল ছবি আপডেট করুন</string>
     <string name="permission_clazz_select">ক্লাস দেখুন</string>
     <string name="no_app_found">ফাইল খোলার জন্য কোনও অ্যাপ্লিকেশন পাওয়া যায় নি</string>
@@ -421,8 +421,8 @@
     <string name="instructions_for_students">শিক্ষার্থীদের জন্য নির্দেশাবলী</string>
     <string name="not_started">শুরু না</string>
     <string name="error_message_update_document">দস্তাবেজ আপডেট করতে ব্যর্থ</string>
-    <string name="percentage_complete" formatted="false">%1$s% সম্পূর্ণ</string>
-    <string name="started_date" formatted="false">%1$s% শুরু হয়েছে</string>
+    <string name="percentage_complete" formatted="false">% 1 $ s% সম্পূর্ণ</string>
+    <string name="started_date" formatted="false">% 1 $ s% শুরু হয়েছে</string>
     <string name="started">শুরু হয়েছে</string>
     <string name="invalid_register_code">অবৈধ নিবন্ধকরণ কোড</string>
     <string name="mixed">মিশ্রিত</string>
@@ -472,14 +472,14 @@
     <string name="student_progress">শিক্ষার্থীদের অগ্রগতি</string>
     <string name="log">লগ</string>
     <string name="use_device_language">ডিভাইসের ভাষা ব্যবহার করুন</string>
-    <string name="select_item">%1$s নির্বাচন করুন</string>
+    <string name="select_item">% 1 $ s নির্বাচন করুন</string>
     <string name="mark_all_absent">সমস্ত অনুপস্থিত চিহ্নিত করুন</string>
-    <string name="from_to_date">%1$s - %2$s</string>
+    <string name="from_to_date">% 1 $ s -% 2 $ s</string>
     <string name="num_items_with_name">% 1 $ d% 2 $ s</string>
     <string name="questions">প্রশ্ন</string>
     <string name="num_items_with_name_with_comma">% 1 $ d% 2 $ s,% 3 $ d% 4 $ s</string>
-    <string name="add_to">%1$s এ যুক্ত করুন</string>
-    <string name="remove_from">%1$s থেকে সরান</string>
+    <string name="add_to">% 1 $ s এ যুক্ত করুন</string>
+    <string name="remove_from">% 1 $ s থেকে সরান</string>
     <string name="items_selected">% 1 $ d নির্বাচিত</string>
     <string name="change_photo">ছবি পরিবর্তন</string>
     <string name="holiday_calendar">ছুটির পঞ্জিকা</string>
@@ -543,7 +543,7 @@
     <string name="return_and_mark_next">ফিরে এসে চিহ্নিত করুন</string>
     <string name="return_only">ফিরে এবং শেষ</string>
     <string name="workspace">কর্মক্ষেত্র</string>
-    <string name="organisation">সংস্থা %1$s</string>
+    <string name="organisation">সংস্থা% 1 $ s</string>
     <string name="use_public_library">পাবলিক লাইব্রেরি ব্যবহার করুন</string>
     <string name="access_open_education">ব্যক্তিগতভাবে হাজার হাজার মুক্ত শিক্ষার সংস্থান অ্যাক্সেস করুন</string>
     <string name="join_existing_workspace">বিদ্যমান প্রতিষ্ঠানের কর্মক্ষেত্রে যোগদান করুন</string>
@@ -554,9 +554,9 @@
     <string name="connect_as_guest">অতিথি হিসাবে সংযুক্ত হন</string>
     <string name="create_account">হিসাব তৈরি কর</string>
     <string name="member">সদস্য</string>
-    <string name="my">আমার %1$s</string>
-    <string name="add_another">অন্য %1$s যোগ করুন</string>
-    <string name="logged_in_as">%2$s তে %1$s হিসাবে লগ ইন হয়েছে</string>
+    <string name="my">আমার% 1 $ s</string>
+    <string name="add_another">অন্য% 1 $ s যোগ করুন</string>
+    <string name="logged_in_as">% 2 $ s তে% 1 $ s হিসাবে লগ ইন হয়েছে</string>
     <string name="person_exists">ব্যক্তি ইতিমধ্যে বিদ্যমান, অন্য ব্যবহারকারীর নাম চয়ন করুন</string>
     <string name="incorrect_current_password">বর্তমান পাসওয়ার্ড ভুল</string>
     <string name="sel_question_type_free_text">বিনামূল্যে টেক্সট</string>
@@ -627,7 +627,7 @@
     <string name="permission_school_update">বিদ্যমান স্কুলগুলি আপডেট এবং সম্পাদনা করুন</string>
     <string name="add_student_to_school">স্কুলে ছাত্র যুক্ত করুন</string>
     <string name="school_code">স্কুল কোড</string>
-    <string name="entity_code">%1$s কোড</string>
+    <string name="entity_code">% 1 $ s কোড</string>
     <string name="join_code_instructions">কোডটির জন্য আপনার শিক্ষককে জিজ্ঞাসা করুন, তারপরে এটি নীচে প্রবেশ করুন:</string>
     <string name="due_date">নির্দিষ্ট তারিখ</string>
     <string name="description">বর্ণনা</string>
