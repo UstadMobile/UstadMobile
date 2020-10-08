@@ -54,9 +54,8 @@ class VerbEntityListFragment() : UstadListViewFragment<VerbDisplay, VerbDisplay>
         mPresenter = VerbEntityListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
         mDataRecyclerViewAdapter = VerbEntityListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.add_a_new,
-                requireContext().getString(R.string.verb))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+                requireContext().getString(R.string.add_a_new_verb))
         return view
     }
 

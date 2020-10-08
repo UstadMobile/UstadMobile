@@ -100,7 +100,7 @@ class HolidayCalendarEditFragment() : UstadEditFragment<HolidayCalendar>(), Holi
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.holiday_calendar)
+        setEditFragmentTitle(R.string.add_a_new_holiday_calendar, R.string.edit_holiday_calendar)
         val navController = findNavController()
 
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())

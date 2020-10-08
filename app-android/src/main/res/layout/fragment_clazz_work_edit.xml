@@ -289,7 +289,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:onClickNew="@{() -> activityEventHandler.onClickNewContent()}"
-                app:createNewText="@{@string/add_a(@string/content)}"
+                app:createNewText="@{@string/add_content}"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_work_edit_content_title"
                 app:layout_constraintStart_toStartOf="parent"
                 />
@@ -321,7 +321,7 @@
                android:layout_width="match_parent"
                android:layout_height="wrap_content"
                app:onClickNew="@{() -> activityEventHandler.onClickNewQuestion()}"
-               app:createNewText="@{@string/add_a(@string/question)}"
+               app:createNewText="@{@string/add_question}"
                app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_work_edit_questions_title"
                app:layout_constraintStart_toStartOf="parent"
                android:visibility="@{questionsVisibility}"

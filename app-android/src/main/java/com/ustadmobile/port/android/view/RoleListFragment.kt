@@ -80,8 +80,7 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
                 this,  di, viewLifecycleOwner)
         mDataBinding?.presenter = mPresenter
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
-                requireContext().getString(R.string.add_a_new,
-                        requireContext().getString(R.string.role)),
+                requireContext().getString(R.string.add_a_new_role),
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         mDataRecyclerViewAdapter = RoleListRecyclerAdapter(mPresenter)
         return view

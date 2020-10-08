@@ -94,7 +94,7 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.role)
+        setEditFragmentTitle(R.string.add_a_new_role, R.string.edit_role)
 
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 

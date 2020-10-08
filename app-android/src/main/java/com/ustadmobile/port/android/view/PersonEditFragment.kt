@@ -345,7 +345,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.person)
+        setEditFragmentTitle(R.string.add_a_new_person, R.string.edit_person)
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
 
         CLAZZ_ROLE_KEY_MAP.forEach {roleOption ->

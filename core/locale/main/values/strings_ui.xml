@@ -54,6 +54,7 @@
     <string name="unset">Unset</string>
     <string name='settings'>Settings</string>
     <string name='language'>Language</string>
+    <string name='add_a_new_language'>Add a new language</string>
     <string name='select_language'>Pick Language</string>
     <string name='advanced'>Advanced</string>
     <string name='optional'>Optional</string>
@@ -67,6 +68,7 @@
     <string name='reports'>Reports</string>
     <string name='contents'>Contents</string>
     <string name='students'>Students</string>
+    <string name='add_a_student'>Add a student</string>
     <string name='forgot_password'>Forgot password</string>
     <string name='notifications'>Notifications</string>
     <string name='account'>Account</string>
@@ -290,11 +292,20 @@
     <string name="xapi_options_where">Where</string>>
 
     <string name="report">Report</string>
+    <string name="create_a_new_report">Create a new report</string>
+    <string name="edit_report">Edit report</string>
     <string name="verb">Verb</string>
+    <string name="add_a_new_verb">Add a new verb</string>
     <string name="id_verbentity_urlid">ID: %s</string>
-    <string name="x_filter">%1$s filter</string>
 
+    <!-- Report filter option - filter report results by person -->
+    <string name="add_person_filter">Add person filter</string>
 
+    <!-- Report filter option - filter report results by Experience API Verb (eg. what the user did - answered, passsed, failed, etc) -->
+    <string name="add_verb_filter">Add verb filter</string>
+
+    <!-- Report filter option - filter report results by the content that they were using e.g. the video, ebook, etc-->
+    <string name='add_content_filter'>Add content filter</string>
 
     <string name="dashboard">Dashboard</string>
     <string name="activity_import_link">Import Link</string>
@@ -352,7 +363,10 @@
     <string name="today">Today</string>
     <string name="sort_by">Sort by</string>
     <string name="log">Log</string>
+    <!-- Schedule generally refers to the schedule for a class e.g. every monday at 2pm -->
     <string name="schedule">Schedule</string>
+    <string name="add_a_schedule">Add a schedule</string>
+    <string name="edit_schedule">Edit schedule</string>
     <string name="first">first</string>
     <string name="last">last</string>
     <string name="last_week">Last week</string>
@@ -371,9 +385,15 @@
     <string name="add_person_to_class">Add person to class</string>
     <string name="edit">Edit</string>
     <string name="clazz">Class</string>
+    <string name="add_a_new_class">Add a new class</string>
+    <string name="edit_clazz">Edit class</string>
+    <string name="add_a_class">Add a class</string>
+    <string name="join_existing_class">Join existing class</string>
     <string name="student_image">Student image</string>
 
     <string name="question">question</string>
+    <string name="add_question">Add question</string>
+    <string name="edit_question">Edit question</string>
     <string name="questions">Questions</string>
     <string name="add_person">Add Person</string>
     <string name="add_class">Add Class</string>
@@ -381,8 +401,12 @@
     <string name="class_description">Class description</string>
     <string name="to">to</string>
     <string name="holiday">Holiday</string>
+    <string name="add_a_holiday">Add a holiday</string>
+    <string name="edit_holiday">Edit holiday</string>
     <string name="holidays">Holidays</string>
     <string name="holiday_calendar">Holiday Calendar</string>
+    <string name="add_a_new_holiday_calendar">Add a new holiday calendar</string>
+    <string name="edit_holiday_calendar">Edit holiday calendar</string>
     <string name="features_enabled">Features enabled</string>
     <string name="weekly">Weekly</string>
     <string name="once">Once</string>
@@ -421,6 +445,7 @@
     <string name="attendance_high_to_low">Attendance (high to low)</string>
     <string name="attendance_low_to_high">Attendance (low to high)</string>
     <string name="teacher">Teacher</string>
+    <string name="add_a_teacher">Add a teacher</string>
     <string name="partial">Partial</string>
     <string name="teachers_literal">Teachers</string>
     <string name="participant">Participant</string>
@@ -471,6 +496,8 @@
     <string name="group_setting_desc">Add, remove or modify groups</string>
     <string name="roles">Roles</string>
     <string name="role">Role</string>
+    <string name="add_a_new_role">Add a new role</string>
+    <string name='edit_role'>Edit role</string>
     <string name="roles_setting_desc">Manage permissions given to roles</string>
     <string name="rols_assignment">Roles assignment</string>
     <string name="role_assignment_setting_desc">Assign roles to a user or a group</string>
@@ -487,6 +514,8 @@
     <string name="scope_by">Scope by</string>
     <string name="assign_to">Assign to</string>
     <string name="person">Person</string>
+    <string name="add_a_new_person">Add a new person</string>
+    <string name="edit_person">Edit person</string>
     <string name="permission_person_select">View people</string>
     <string name="permission_person_insert" >Add People</string>
     <string name="permission_person_update">Update People</string>
@@ -534,6 +563,9 @@
     <string name="refresh">Refresh</string>
 
     <string name="school">School</string>
+    <string name="add_a_new_school">Add a new school</string>
+    <string name="edit_school">Edit school</string>
+    <string name="join_existing_school">Join existing school</string>
     <string name="schools">Schools</string>
 
     <!-- Assignments e.g. homework for a class -->
@@ -585,7 +617,10 @@ Voice of America\n
 Content is provided under license by external content providers. Ustad Mobile, unless explicitly mentioned otherwise, is not endorsed by any such content provider.</string>
 
     <string name="due_date">Due date</string>
+    <!-- Content refers to content section of the app where users find educational content such as interactive quizzes, videos, ebooks, etc -->
     <string name="content">Content</string>
+    <string name="add_new_content">Add new content</string>
+    <string name="add_content">Add content</string>
     <string name="student_progress">Student progress</string>
     <string name="status">Status</string>
 
@@ -593,10 +628,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <!-- The title shown when we ask the user to select a specific type of item. E.g. "Select class", or "select person".-->
     <string name="select_item">Select %1$s</string>
-
-    <!-- Allow the user to add a new item - e.g. when the user is selecting a class it would say
-    "Add a new class", "Add a new person", etc -->
-    <string name="add_a_new">Add a new %1$s</string>
 
     <!-- This is used to display a duration - e.g. "04/Apr/2020 - 03/May/2020". %1$s and %1$2s will
     be replaced with the from and to date respectively and will be formatted according to the
@@ -611,17 +642,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     and %2$s will be replaced with the name of the item-->
     <string name="num_items_with_name_with_comma">%1$d %2$s, %3$d %4$s</string>
 
-    <!-- Used to create a prompt to the user to add something e.g. "Add a Holiday". %1$s will be
-    replaced with the name of the item (e.g. Holiday)-->
-    <string name="add_a">Add a %1$s</string>
-
-    <!-- Used to set the title on an edit screen where the user is creating a new entity e.g.
-    new class, new assignment, etc. %1$s will be replaced with the name of the item.-->
-    <string name="new_entity">New %1$s</string>
-
-    <!-- Used to set the title on an edit screen where the user is editing an existing entity
-     e.g. Edit Class, Edit Assignment, etc -->
-    <string name="edit_entity">Edit %1$s</string>
 
     <string name="add_to">Add to %1$s</string>
     <string name="remove_from">Remove from %1$s</string>
@@ -676,7 +696,10 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="not_answered">Not answered</string>
 
 
-    <string name="clazz_work">Class work</string>
+    <string name="clazz_work">Classwork</string>
+    <string name="add_a_new_clazzwork">Add a new classwork</string>
+    <string name="edit_clazzwork">Edit classwork</string>
+
     <string name="marked">marked</string>
     <string name="submitted">submitted</string>
     <string name="not_submitted">not submitted</string>
@@ -754,10 +777,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <!-- Used to indicate that something is pending e.g. "Student (Pending)" when the student has not yet been approved -->
     <string name="pending">Pending</string>
 
-    <!-- Substitution to show users the choice to join an existing entity. %1$s will be replaced by the app.
-    e.g. "Join existing class". -->
-    <string name="join_existing">Join existing %1$s</string>
-
     <string name="please_wait_for_approval">Please wait for your request to be approved by your teacher or admin.</string>
 
     <string name="reject">Reject</string>
@@ -791,6 +810,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="school_code">School code</string>
 
     <string name="entity_code">%1$s code</string>
-    <string name="join_code_instructions">Ask your teacher for the %1$s code, then enter it below:</string>
+    <string name="join_code_instructions">Ask your teacher for the code, then enter it below:</string>
 
 </resources>

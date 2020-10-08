@@ -126,7 +126,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
 
         questionRecyclerAdapter?.presenter = mPresenter
 
-        setEditFragmentTitle(R.string.clazz_work)
+        setEditFragmentTitle(R.string.add_a_new_clazzwork, R.string.edit_clazzwork)
 
         return rootView
     }
@@ -250,7 +250,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.clazz_work)
+        setEditFragmentTitle(R.string.add_a_new_clazzwork, R.string.edit_clazzwork)
     }
 
     override fun handleRemoveClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions) {
