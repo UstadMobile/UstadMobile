@@ -15,6 +15,7 @@ import com.ustadmobile.lib.db.entities.ScrapeRun
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.googledrive.GoogleFile
@@ -272,14 +273,15 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                         return null
                     }
 
+                    val urlWithEndingSlash =  url.requirePostfix("/")
                     val entry = ContentEntryWithLanguage()
                     entry.title = document.title().substringAfterLast("/")
-                    entry.sourceUrl = url
+                    entry.sourceUrl = urlWithEndingSlash
                     entry.leaf = false
                     entry.contentTypeFlag = ContentEntry.TYPE_COLLECTION
-                    Napier.e("$logPrefix metadata uri for apacheIndexer: $url", tag = SCRAPER_TAG)
+                    Napier.e("$logPrefix metadata uri for apacheIndexer: $urlWithEndingSlash", tag = SCRAPER_TAG)
 
-                    return ImportedContentEntryMetaData(entry, "text/html", url, 0, ScraperTypes.APACHE_INDEXER)
+                    return ImportedContentEntryMetaData(entry, "text/html", urlWithEndingSlash, 0, ScraperTypes.APACHE_INDEXER)
 
                 }
 
