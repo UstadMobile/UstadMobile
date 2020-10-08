@@ -58,7 +58,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
 
         if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid ==
                 clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid ){
-            view.isMarkingFinished == false
+            !view.isMarkingFinished
         }else if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid !=
                 clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid){
             view.isMarkingFinished = true
@@ -178,14 +178,16 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             }
 
             val loggedInPersonUid = accountManager.activeAccount.personUid
-            val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
-                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
+
+            val studentClazzMember: ClazzMember? = withTimeoutOrNull(2000){
+                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(
+                        entity?.person?.personUid?:0L,
                         entity?.clazzWork?.clazzWorkClazzUid?:0L)
             }
 
             var submission = entity?.submission ?: ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWork?.clazzWorkUid ?: 0L
-                clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid ?: 0L
+                clazzWorkSubmissionClazzMemberUid = studentClazzMember?.clazzMemberUid ?: 0L
                 clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
                 clazzWorkSubmissionInactive = false
                 clazzWorkSubmissionPersonUid = loggedInPersonUid

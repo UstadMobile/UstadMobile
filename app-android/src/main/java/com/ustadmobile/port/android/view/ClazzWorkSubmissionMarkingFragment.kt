@@ -290,7 +290,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
     //On click "Record for student" button
     override fun onClickButton(view: View) {
-        //TODO ing: This
 
         simpleTwoButtonRecyclerAdapter?.visible = true
         recordForStudentButtonRecyclerAdapter?.visible = false
@@ -313,7 +312,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             quizQuestionsEditRecyclerAdapter?.submitList(
                     submissionQuestionAndOptionsWithResponse?.value)
             quizQuestionsEditRecyclerAdapter?.notifyDataSetChanged()
-
         }else{
             submissionFreeTextRecyclerAdapter?.visible = false
         }
@@ -324,12 +322,17 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         quizQuestionsEditRecyclerAdapter?.studentMode = false
         quizQuestionsEditRecyclerAdapter?.submitList(listOf())
         quizQuestionsEditRecyclerAdapter?.notifyDataSetChanged()
+
+        simpleTwoButtonRecyclerAdapter?.visible = false
+        recordForStudentButtonRecyclerAdapter?.visible = false
+        submissionFreeTextRecyclerAdapter?.markingMode = true
+        submissionFreeTextRecyclerAdapter?.visible = false
+
         mPresenter?.handleClickSubmitOnBehalf()
     }
 
     //On click cancel for student recording on their behalf
     override fun onClickSecondary(view: View) {
-        //TODO ing: this
 
         simpleTwoButtonRecyclerAdapter?.visible = false
         recordForStudentButtonRecyclerAdapter?.visible = true
