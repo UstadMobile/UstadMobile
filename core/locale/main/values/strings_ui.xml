@@ -812,4 +812,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="entity_code">%1$s code</string>
     <string name="join_code_instructions">Ask your teacher for the code, then enter it below:</string>
 
+    <!-- This is a button that shows when teachers are viewing a student's work that allows them to
+    enter the answers on behalf of a student e.g. when the student is not using the phone/tablet
+    directly -->
+    <string name="record_for_student">Record for student</string>
+
 </resources>
