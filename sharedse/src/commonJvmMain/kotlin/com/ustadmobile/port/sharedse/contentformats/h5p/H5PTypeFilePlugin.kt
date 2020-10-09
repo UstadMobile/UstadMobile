@@ -70,7 +70,6 @@ class H5PTypeFilePlugin : H5PTypePlugin(), ContentTypeFilePlugin {
                             this.author = author
                             description = ""
                             leaf = true
-                            entryId = file.name
                         }
                         break
                     }

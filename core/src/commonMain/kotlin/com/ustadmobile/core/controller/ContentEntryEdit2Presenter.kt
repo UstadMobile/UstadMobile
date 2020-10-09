@@ -3,11 +3,13 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.networkmanager.ContainerUploadManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -124,6 +126,12 @@ class ContentEntryEdit2Presenter(context: Any,
                 entity.licenseName = view.licenceOptions?.firstOrNull { it.code == entity.licenseType }.toString()
                 if (entity.contentEntryUid == 0L) {
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
+
+                    if(entity.entryId == null){
+                        entity.entryId = "${systemImpl.getAppConfigString(AppConfig.KEY_API_URL, null, context)}" +
+                                "${entity.contentEntryUid}/${UMUUID.randomUUID()}"
+                        repo.contentEntryDao.updateAsync(entity)
+                    }
                     val contentEntryJoin = ContentEntryParentChildJoin().apply {
                         cepcjChildContentEntryUid = entity.contentEntryUid
                         cepcjParentContentEntryUid = parentEntryUid

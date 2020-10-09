@@ -77,10 +77,11 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                     "endpoint" to UMFileUtil.resolveLink(mountedPath,
                             "/${UMURLEncoder.encodeUTF8(activeEndpoint)}/xapi/$contentEntryUid/"),
                     "auth" to "OjFjMGY4NTYxNzUwOGI4YWY0NjFkNzU5MWUxMzE1ZGQ1",
+                    "registration" to registrationUUID,
                     "activity_id" to (tinCanXml?.launchActivity?.id ?: "xapi_id"))
             if(launchHref != null) {
                 val launchUrl = UMFileUtil.joinPaths(mountedPath, launchHref) + "?"  +
-                        launchMethodParams.toQueryString()
+                        (launchMethodParams as Map<String, String>).toQueryString()
                 view.runOnUiThread(Runnable {
                     view.contentTitle = tinCanXml?.launchActivity?.name ?: ""
                     view.url = launchUrl
