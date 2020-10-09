@@ -62,9 +62,8 @@ class TimeZoneEntityListFragment(): UstadListViewFragment<TimeZoneEntity, TimeZo
                 this,  di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = TimeZoneEntityListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.add_a_new,
-                requireContext().getString(R.string.timezone))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        //It is not possible to add a new timezone
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, "")
         return view
     }
 

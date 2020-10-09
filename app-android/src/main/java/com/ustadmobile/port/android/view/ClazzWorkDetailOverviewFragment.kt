@@ -43,8 +43,13 @@ interface SimpleButtonHandler{
     fun onClickButton(view: View)
 }
 
+interface SimpleTwoButtonHandler{
+    fun onClickPrimary(view:View)
+    fun onClickSecondary(view:View)
+}
+
 class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmission>(),
-        ClazzWorkDetailOverviewView, NewCommentHandler, SimpleButtonHandler{
+        ClazzWorkDetailOverviewView, NewCommentHandler, SimpleButtonHandler, SimpleTwoButtonHandler{
 
     internal var mBinding: FragmentClazzWorkWithSubmissionDetailBinding? = null
 
@@ -130,8 +135,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 DefaultContentEntryListItemListener(context = requireContext(), di = di),
                 ListViewMode.BROWSER.toString(), viewLifecycleOwner, di)
 
-        quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRA(
-                isStudent)
+        quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRA()
+        quizQuestionsRecyclerAdapter?.studentMode = isStudent
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.submission).toString())
         submissionHeadingRecyclerAdapter?.visible = false
@@ -438,5 +443,13 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 return oldItem == newItem
             }
         }
+    }
+
+    override fun onClickPrimary(view: View) {
+        //TODO
+    }
+
+    override fun onClickSecondary(view: View) {
+        //TODO
     }
 }

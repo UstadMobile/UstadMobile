@@ -62,7 +62,7 @@
             <include layout="@layout/item_createnew"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:createNewText="@{@string/add_a(@string/holiday)}"
+                app:createNewText="@{@string/add_a_holiday}"
                 app:onClickNew="@{() -> activityEventHandler.onClickNewHoliday()}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_holiday_calendar_name_text"
                 app:layout_constraintStart_toStartOf="parent"

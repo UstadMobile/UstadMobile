@@ -108,9 +108,8 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
         inviteWithLinkRecyclerViewAdapter?.tableId = arguments?.get(UstadView.ARG_CODE_TABLE)?.toString()?.toInt()?:0
 
         mDataRecyclerViewAdapter = PersonListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.add_a_new,
-                requireContext().getString(R.string.person))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+                requireContext().getString(R.string.add_a_new_person),
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
 
         mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)

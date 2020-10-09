@@ -11,6 +11,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -57,7 +58,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
 
         if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid ==
                 clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid ){
-            view.isMarkingFinished == false
+            !view.isMarkingFinished
         }else if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid !=
                 clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid){
             view.isMarkingFinished = true
@@ -74,8 +75,9 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         }?: ClazzWorkWithSubmission()
 
         val submission = clazzMemberWithSubmission?.submission
-        if(submission != null && submission.clazzWorkSubmissionUid != 0L &&
-                clazzMemberWithSubmission.clazzWork?.clazzWorkSubmissionType
+        if(
+                //submission != null && submission.clazzWorkSubmissionUid != 0L &&
+                clazzMemberWithSubmission?.clazzWork?.clazzWorkSubmissionType
                 == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
             val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
                     withTimeoutOrNull(2000) {
@@ -154,6 +156,57 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         val entityVal = entity
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
+    }
+
+    fun handleClickSubmitOnBehalf(){
+        val questionsWithOptionsAndResponse =
+                view.submissionQuestionAndOptionsWithResponse?.getValue()?: listOf()
+        val newOptionsAndResponse = mutableListOf<ClazzWorkQuestionAndOptionWithResponse>()
+
+        val clazzWorkWithSubmission = entity
+        GlobalScope.launch {
+            for (everyResult in questionsWithOptionsAndResponse) {
+                val response = everyResult.clazzWorkQuestionResponse
+                if(response.clazzWorkQuestionResponseUid == 0L) {
+                    response.clazzWorkQuestionResponseUid =
+                            db.clazzWorkQuestionResponseDao.insertAsync(response)
+                }else{
+                    db.clazzWorkQuestionResponseDao.updateAsync(response)
+                }
+                everyResult.clazzWorkQuestionResponse = response
+                newOptionsAndResponse.add(everyResult)
+            }
+
+            val loggedInPersonUid = accountManager.activeAccount.personUid
+
+            val studentClazzMember: ClazzMember? = withTimeoutOrNull(2000){
+                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(
+                        entity?.person?.personUid?:0L,
+                        entity?.clazzWork?.clazzWorkClazzUid?:0L)
+            }
+
+            var submission = entity?.submission ?: ClazzWorkSubmission().apply {
+                clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWork?.clazzWorkUid ?: 0L
+                clazzWorkSubmissionClazzMemberUid = studentClazzMember?.clazzMemberUid ?: 0L
+                clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
+                clazzWorkSubmissionInactive = false
+                clazzWorkSubmissionPersonUid = loggedInPersonUid
+            }
+
+            submission.clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
+
+            if(submission.clazzWorkSubmissionUid == 0L) {
+                submission.clazzWorkSubmissionUid = db.clazzWorkSubmissionDao.insertAsync(submission)
+            }else{
+                db.clazzWorkSubmissionDao.updateAsync(submission)
+            }
+            clazzWorkWithSubmission?.submission = submission
+            view.runOnUiThread(Runnable {
+                view.entity = clazzWorkWithSubmission
+                view.submissionQuestionAndOptionsWithResponse = DoorMutableLiveData(newOptionsAndResponse)
+            })
+
+        }
     }
 
     fun handleClickSaveAndMarkNext(showNext: Boolean?){

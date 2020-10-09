@@ -3,6 +3,7 @@ package com.ustadmobile.lib.contentscrapers.apache
 import ScraperTypes
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
@@ -21,8 +22,9 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
     private val logPrefix = "[ApacheIndexer SQI ID #$sqiUid] "
 
     override fun indexUrl(sourceUrl: String) {
-
-        val url = URL(sourceUrl)
+        
+        val srcUrl = sourceUrl.requirePostfix("/")
+        val url = URL(srcUrl)
 
         val huc: HttpURLConnection = url.openConnection() as HttpURLConnection
 
@@ -41,7 +43,7 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
             dbEntry
         }else{
             val entry = ContentScraperUtil.createOrUpdateContentEntry(folderTitle, folderTitle,
-                    sourceUrl, parentContentEntry?.publisher ?: "",
+                    srcUrl, parentContentEntry?.publisher ?: "",
                     ContentEntry.LICENSE_TYPE_OTHER, englishLang.langUid, null,
                     "", false, "",
                     "", "",
@@ -93,7 +95,7 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
                     Napier.i("$logPrefix found unknown apache: $title not supported with alt: $alt", tag = SCRAPER_TAG)
                 }
             } catch (e: Exception) {
-                Napier.e("$logPrefix Error during directory search on $sourceUrl", tag = SCRAPER_TAG)
+                Napier.e("$logPrefix Error during directory search on $srcUrl", tag = SCRAPER_TAG)
                 Napier.e("$logPrefix ${ExceptionUtils.getStackTrace(e)}", tag = SCRAPER_TAG)
             } finally {
                 conn?.disconnect()
