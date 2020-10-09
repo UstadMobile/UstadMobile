@@ -44,7 +44,7 @@ abstract class AbstractImportLinkTest {
         var secondEntry = ContentEntry()
         secondEntry.title = "Ustad Mobile 2"
         secondEntry.sourceUrl = "secondUrl"
-        secondEntry.contentEntryUid = -102
+        secondEntry.contentEntryUid = -105
         db.contentEntryDao.insert(secondEntry)
 
 

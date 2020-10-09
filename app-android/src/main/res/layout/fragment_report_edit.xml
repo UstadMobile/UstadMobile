@@ -241,7 +241,7 @@
                 layout="@layout/item_createnew"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:createNewText="@{@string/add_a(@string/x_filter(@string/person))}"
+                app:createNewText="@{@string/add_person_filter}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_who_filter_list"
                 app:onClickNew="@{() -> activityEventHandler.onClickNewPerson()}" />
@@ -272,7 +272,7 @@
                 layout="@layout/item_createnew"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:createNewText="@{@string/add_a(@string/x_filter(@string/verb))}"
+                app:createNewText="@{@string/add_verb_filter}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_did_filter_list"
                 app:onClickNew="@{() -> activityEventHandler.onClickNewVerbDisplay()}" />
@@ -304,7 +304,7 @@
                 layout="@layout/item_createnew"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:createNewText="@{@string/add_a(@string/x_filter(@string/content))}"
+                app:createNewText="@{@string/add_content_filter}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_content_filter_list"
                 app:onClickNew="@{() -> activityEventHandler.onClickAddNewContentFilter()}" />

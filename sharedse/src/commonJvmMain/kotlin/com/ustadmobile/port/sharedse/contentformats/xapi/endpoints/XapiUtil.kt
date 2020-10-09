@@ -6,7 +6,6 @@ import com.neovisionaries.i18n.LanguageCode
 import com.ustadmobile.core.contentformats.xapi.*
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.*
 import java.util.*
 import com.ustadmobile.core.util.parse8601Duration
@@ -261,7 +260,8 @@ object XapiUtil {
                                       contextStatementUid: String,
                                       instructorUid: Long, agentUid: Long, authorityUid: Long, teamUid: Long,
                                       subActorUid: Long, subVerbUid: Long, subObjectUid: Long,
-                                      contentEntryUid: Long = 0L): StatementEntity {
+                                      contentEntryUid: Long = 0L,
+                                      learnerGroupUid: Long): StatementEntity {
 
         val statementId = statement.id
                 ?: throw IllegalArgumentException("Statement $statement to be stored has no id!")
@@ -284,6 +284,7 @@ object XapiUtil {
                 it.timestamp = UMCalendarUtil.parse8601TimestampOrDefault(statement.timestamp)
                 it.stored = UMCalendarUtil.parse8601TimestampOrDefault(statement.stored)
                 it.statementContentEntryUid = contentEntryUid
+                it.statementLearnerGroupUid = learnerGroupUid
                 it.fullStatement = gson.toJson(statement)
             }
 

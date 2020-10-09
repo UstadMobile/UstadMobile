@@ -1,14 +1,18 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.contentformats.xapi.Actor
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
+import com.ustadmobile.core.tincan.UmAccountGroupActor
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
+import com.ustadmobile.core.util.ext.toXapiGroupJsonObject
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
@@ -23,6 +27,7 @@ import kotlinx.serialization.json.Json
 import org.kmp.io.KMPXmlParser
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.on
 
 /**
  * Created by mike on 9/13/17.
@@ -52,11 +57,14 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
     private lateinit var mountedEndpoint: String
 
+    val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         registrationUUID = UMUUID.randomUUID().toString()
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLongOrNull() ?: 0L
         val contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLongOrNull() ?: 0L
+        val learnerGroupUid = arguments[UstadView.ARG_LEARNER_GROUP_UID]?.toLongOrNull() ?: 0L
         val activeEndpoint = accountManager.activeAccount.endpointUrl.also {
             mountedEndpoint = it
         } ?: return
@@ -70,8 +78,15 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
             xpp.setInput(ByteArrayInputStream(tincanContent.toByteArray()), "UTF-8")
             tinCanXml = TinCanXML.loadFromXML(xpp)
             val launchHref = tinCanXml?.launchActivity?.launchUrl
-            val actorJsonStr = Json.stringify(UmAccountActor.serializer(),
-                    accountManager.activeAccount.toXapiActorJsonObject(context))
+            val actorJsonStr: String = if(learnerGroupUid == 0L){
+                Json.stringify(UmAccountActor.serializer(),
+                        accountManager.activeAccount.toXapiActorJsonObject(context))
+            }else{
+                val memberList = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(
+                        learnerGroupUid,contentEntryUid)
+                Json.stringify(UmAccountGroupActor.serializer(),
+                        accountManager.activeAccount.toXapiGroupJsonObject(memberList))
+            }
             val launchMethodParams = mapOf(
                     "actor" to actorJsonStr,
                     "endpoint" to UMFileUtil.resolveLink(mountedPath,

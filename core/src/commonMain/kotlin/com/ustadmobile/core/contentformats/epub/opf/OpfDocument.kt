@@ -31,7 +31,6 @@
 package com.ustadmobile.core.contentformats.epub.opf
 
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import org.kmp.io.KMPPullParser
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser

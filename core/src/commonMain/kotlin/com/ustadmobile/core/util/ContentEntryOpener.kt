@@ -4,11 +4,13 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -19,7 +21,8 @@ private val mimeTypeToViewNameMap = mapOf(
         "application/tincan+zip" to XapiPackageContentView.VIEW_NAME,
         "application/khan-video+zip" to VideoPlayerView.VIEW_NAME,
         "application/webchunk+zip" to WebChunkView.VIEW_NAME,
-        "application/epub+zip" to EpubContentView.VIEW_NAME
+        "application/epub+zip" to EpubContentView.VIEW_NAME,
+        "application/har+zip" to HarView.VIEW_NAME
 ) + VideoContentPresenterCommon.VIDEO_MIME_MAP.keys.map { it to VideoPlayerView.VIEW_NAME }.toMap()
 
 
@@ -45,12 +48,17 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
      *
      */
     suspend fun openEntry(context: Any, contentEntryUid: Long, downloadRequired: Boolean,
-                          goToContentEntryDetailViewIfNotDownloaded: Boolean, noIframe: Boolean) {
+                          goToContentEntryDetailViewIfNotDownloaded: Boolean, noIframe: Boolean, learnerGroupUid: Long = 0) {
 
         val containerToOpen = if (downloadRequired) {
             umAppDatabase.downloadJobItemDao.findMostRecentContainerDownloaded(contentEntryUid)
         } else {
             umAppDatabase.containerDao.getMostRecentContaineUidAndMimeType(contentEntryUid)
+        }
+        val goToOptions = if(learnerGroupUid != 0L){
+            UstadMobileSystemCommon.UstadGoOptions("", true)
+        }else{
+            UstadMobileSystemCommon.UstadGoOptions("", false)
         }
 
         when {
@@ -59,9 +67,10 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
                 if(viewName != null) {
                     val args = mapOf(ARG_NO_IFRAMES to noIframe.toString(),
                             ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
-                            ARG_CONTAINER_UID to containerToOpen.containerUid.toString())
+                            ARG_CONTAINER_UID to containerToOpen.containerUid.toString(),
+                            ARG_LEARNER_GROUP_UID to learnerGroupUid.toString())
 
-                    systemImpl.go(viewName, args, context)
+                    systemImpl.go(viewName, args, context, goToOptions)
                 }else {
                     val container = umAppDatabase.containerEntryDao.findByContainerAsync(containerToOpen.containerUid)
                     require(container.isNotEmpty()) { "No file found" }
@@ -78,7 +87,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
 
             goToContentEntryDetailViewIfNotDownloaded -> {
                 systemImpl.go(ContentEntry2DetailView.VIEW_NAME,
-                        mapOf(ARG_ENTITY_UID to contentEntryUid.toString()), context)
+                        mapOf(ARG_ENTITY_UID to contentEntryUid.toString()), context, goToOptions)
             }
 
             else -> {

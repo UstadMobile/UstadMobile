@@ -13,7 +13,6 @@ import com.ustadmobile.lib.util.randomString
 fun UmAppDatabase.runPreload() {
     preload()
     timeZoneEntityDao.insertSystemTimezones()
-    personDetailPresenterFieldDao.preloadCoreFields()
 }
 
 /**

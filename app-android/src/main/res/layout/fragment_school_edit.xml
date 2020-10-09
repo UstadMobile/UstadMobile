@@ -242,7 +242,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:onClickNew="@{() -> activityEventHandler.onClickAddClazz()}"
-                app:createNewText="@{@string/add_a(@string/clazz)}"
+                app:createNewText="@{@string/add_a_class}"
                 app:layout_constraintTop_toBottomOf=
                     "@+id/fragment_school_edit_classes_heading"
                 app:layout_constraintStart_toStartOf="parent"

@@ -10,17 +10,14 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContextXObjectStatementJoinDao
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.UMTinCanUtil
-import com.ustadmobile.lib.db.entities.AgentEntity
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
-import com.ustadmobile.lib.db.entities.VerbEntity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.parse8601Duration
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
@@ -47,6 +44,7 @@ class TestStatementEndpoint {
     val fullstatement = "/com/ustadmobile/port/sharedse/xapi/fullstatement"
     val simpleStatement = "/com/ustadmobile/port/sharedse/xapi/simpleStatement"
     val subStatement = "/com/ustadmobile/port/sharedse/xapi/substatement"
+    val statementWithLearnerGroup =  "/com/ustadmobile/port/sharedse/xapi/statementWithLearnerGroup"
 
     val statementWithProgress = "/com/ustadmobile/port/sharedse/xapi/statementWithProgress.json"
 
@@ -301,6 +299,49 @@ class TestStatementEndpoint {
         Assert.assertEquals("joined to substatement object", subobject?.xObjectUid, entity?.subStatementObjectUid)
         Assert.assertEquals("with substatment, object should be null", 0L, entity?.xObjectUid)
 
+
+
+
+    }
+
+    @ExperimentalStdlibApi
+    @Test
+    fun givenValidStatementWithLearnerGroup_whenParsed_thenDbAndStatementShouldMatch(){
+
+        val entry = ContentEntry().apply {
+            entryId = "http://demo.com/"
+            contentEntryUid = repo.contentEntryDao.insert(this)
+        }
+
+        val entryProgress = ContentEntryProgress().apply {
+            contentEntryProgressProgress = 10
+            contentEntryProgressContentEntryUid = entry.contentEntryUid
+            contentEntryProgressPersonUid = 0
+            contentEntryProgressStatusFlag = 0
+            contentEntryProgressActive = true
+            contentEntryProgressUid = repo.contentEntryProgressDao.insert(this)
+        }
+
+        val learnerGroup = LearnerGroup().apply{
+            learnerGroupUid = 1
+            repo.learnerGroupDao.insert(this)
+        }
+
+        val statement = gson.fromJson(UMIOUtils.readStreamToString(javaClass.getResourceAsStream(statementWithLearnerGroup)), Statement::class.java)
+        endpoint.storeStatements(listOf(statement), "", entry.contentEntryUid)
+
+        val entity = repo.statementDao.findByStatementId("442f1133-bcd0-42b5-957e-4ad36f9414e0")
+        val agent = repo.agentDao.getAgentByAnyId("", "", "group:1", "http://localhost/", "")
+
+        Assert.assertEquals("group registered as accountName ","group:1", agent?.agentAccountName)
+        Assert.assertEquals("entity has learnerGroupUid", learnerGroup.learnerGroupUid, entity!!.statementLearnerGroupUid)
+        Assert.assertEquals("Statement entity has progress set as per JSON",
+                17, entity?.extensionProgress)
+        Assert.assertEquals("Statement has preset Verb UID as expected",
+                VerbEntity.FIXED_UIDS["http://adlnet.gov/expapi/verbs/progressed"],
+                entity?.statementVerbUid)
+        Assert.assertEquals("Statement has contentEntryUid set", entry.contentEntryUid,
+                entity?.statementContentEntryUid)
 
     }
 

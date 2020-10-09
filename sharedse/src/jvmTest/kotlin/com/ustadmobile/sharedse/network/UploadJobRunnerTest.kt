@@ -9,6 +9,7 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_DB
@@ -18,7 +19,6 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerUploadJob
 import com.ustadmobile.lib.rest.ContainerUpload
 import com.ustadmobile.lib.rest.ResumableUploadRoute
-import com.ustadmobile.lib.rest.TAG_CONTAINER_DIR
 import com.ustadmobile.lib.rest.TAG_UPLOAD_DIR
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -140,7 +140,7 @@ class UploadJobRunnerTest {
                     serverFolder
                 }
 
-                bind<File>(tag = TAG_CONTAINER_DIR) with scoped(serverEndpointScope).singleton {
+                bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(serverEndpointScope).singleton {
                     temporaryFolder.newFolder("servercontainerdir")
                 }
 

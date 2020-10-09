@@ -30,6 +30,7 @@
  */
 package com.ustadmobile.core.util
 
+import com.soywiz.klock.DateFormat
 import com.soywiz.klock.ISO8601
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.content
@@ -155,7 +156,7 @@ object UMTinCanUtil {
     }
 
     fun parse8601Duration(duration: String): Long {
-        val time = ISO8601.INTERVAL_COMPLETE0.tryParse(duration, false)
+        val time = ISO8601.IsoIntervalFormat("PTnnHnnMnnS").tryParse(duration, doThrow = false)
         return time?.totalMilliseconds?.toLong() ?: 0L
     }
 

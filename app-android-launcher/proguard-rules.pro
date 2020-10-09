@@ -51,6 +51,10 @@
        *;
 }
 
+-keep public class com.ustadmobile.core.contentformats.metadata.*{
+    *;
+}
+
  #
  ###################################################################################################
  #### OKHttp3 rules as per

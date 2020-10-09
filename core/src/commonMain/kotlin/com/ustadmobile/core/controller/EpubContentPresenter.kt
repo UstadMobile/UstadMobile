@@ -69,6 +69,8 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
@@ -90,6 +92,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.js.JsName
+import kotlin.jvm.Volatile
 import kotlin.math.max
 
 /**
@@ -116,6 +119,8 @@ class EpubContentPresenter(context: Any,
 
     private val mountHandler: ContainerMounter by instance()
 
+    private val systemImpl: UstadMobileSystemImpl by instance()
+
     //The time that the
     private var startTime: Long = 0L
 
@@ -124,6 +129,15 @@ class EpubContentPresenter(context: Any,
     var contentEntryUid: Long = 0L
 
     var maxPageReached: Int = 0
+
+    var mCurrentPage: Int = 0
+
+    private val pageTitles = mutableMapOf<Int, String?>()
+
+    @Volatile
+    private var mNavDocument: EpubNavDocument? = null
+
+    private val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -151,7 +165,6 @@ class EpubContentPresenter(context: Any,
             return //no one is really logged in
 
         GlobalScope.launch {
-            val db: UmAppDatabase = on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
             val contentEntry =  db.contentEntryDao.findByUid(contentEntryUid) ?: return@launch
             val progress = ((maxPageReached + 1) * 100) / max(linearSpineUrls.size, 1)
             xapiStatementEndpoint.storeProgressStatement(accountManager.activeAccount,
@@ -203,8 +216,14 @@ class EpubContentPresenter(context: Any,
             val position : Int = if(arguments.containsKey(EpubContentView.ARG_INITIAL_PAGE_HREF))
                 opf.getLinearSpinePositionByHREF(arguments.getValue(EpubContentView.ARG_INITIAL_PAGE_HREF)) else 0
 
+            val containerTitle = if(!opf.title.isNullOrBlank()) {
+                opf.title
+            } else {
+                db.contentEntryDao.findTitleByUidAsync(contentEntryUid)
+            }
+
             epubContentView.runOnUiThread(Runnable {
-                epubContentView.containerTitle = opf.title
+                epubContentView.containerTitle = containerTitle
                 epubContentView.spineUrls = linearSpineUrls.toList()
                 if (opfCoverImageItem != null) {
                     epubContentView.coverImageUrl = opfCoverImageItem.href?.let {
@@ -233,7 +252,10 @@ class EpubContentPresenter(context: Any,
             if(navUrlToLoad != null) {
                 val navContent = client.get<String>(navUrlToLoad)
 
-                val navDocument = EpubNavDocument()
+                val navDocument = EpubNavDocument().also {
+                    mNavDocument = it
+                }
+
                 val navParser = KMPXmlParser()
                 navParser.setInput(ByteArrayInputStream(navContent.toByteArray()), "UTF-8")
                 navDocument.load(navParser)
@@ -254,16 +276,34 @@ class EpubContentPresenter(context: Any,
     fun handleClickNavItem(navItem: EpubNavItem) {
         val opfUrl = opfBaseUrl
         if (opfUrl != null && linearSpineUrls.isNotEmpty()) {
-            val navItemUrl = navItem.href?.let { UMFileUtil.resolveLink(opfUrl, it) }
+            val navItemUrl = navItem.href?.let { UMFileUtil.resolveLink(opfUrl, it.substringBeforeLast("#")) }
             val hrefIndex = listOf(*linearSpineUrls).indexOf(navItemUrl)
             if (hrefIndex != -1) {
-                epubContentView.spinePosition = hrefIndex
+                epubContentView.scrollToSpinePosition(hrefIndex,
+                        navItem.href?.substringAfterLast("#", ""))
+            }else {
+                epubContentView.showSnackBar(systemImpl.getString(MessageID.error_message_load_page,
+                    context))
             }
         }
     }
 
     fun handlePageChanged(index: Int) {
+        mCurrentPage = index
         maxPageReached = max(index, maxPageReached)
+        updateWindowTitle()
+    }
+
+    fun handlePageTitleChanged(index: Int, title: String?) {
+        pageTitles[index] = title
+        updateWindowTitle()
+    }
+
+    private fun updateWindowTitle() {
+        val relativeHref = opfBaseUrl?.let { linearSpineUrls[mCurrentPage].substringAfter(it, "") } ?: ""
+        if(mCurrentPage == mCurrentPage)
+            view.windowTitle =  mNavDocument?.getNavByHref(relativeHref)?.title ?: pageTitles[mCurrentPage]
+                    ?: view.containerTitle ?: ""
     }
 
 

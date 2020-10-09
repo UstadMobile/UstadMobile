@@ -167,7 +167,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.clazz)
+        setEditFragmentTitle(R.string.add_a_new_class, R.string.edit_clazz)
 
         val navController = findNavController()
 

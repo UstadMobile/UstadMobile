@@ -65,9 +65,8 @@ class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAn
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = SchoolListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.add_a_new,
-                requireContext().getString(R.string.schools))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+                requireContext().getString(R.string.add_a_new_school),
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         return view
     }
@@ -79,13 +78,11 @@ class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAn
         fabManager?.onClickListener = {
             val optionList = if(newSchoolListOptionVisible) {
                 listOf(BottomSheetOption(R.drawable.ic_add_black_24dp,
-                        requireContext().getString(R.string.add_a_new,
-                                requireContext().getString(R.string.school).toLowerCase()), NEW_SCHOOL))
+                        requireContext().getString(R.string.add_a_new_school), NEW_SCHOOL))
             }else {
                 listOf()
             } + listOf(BottomSheetOption(R.drawable.ic_login_24px,
-                    requireContext().getString(R.string.join_existing,
-                            requireContext().getString(R.string.school).toLowerCase()), JOIN_SCHOOL))
+                    requireContext().getString(R.string.join_existing_school), JOIN_SCHOOL))
 
             val sheet = OptionsBottomSheetFragment(optionList, this)
             sheet.show(childFragmentManager, sheet.tag)

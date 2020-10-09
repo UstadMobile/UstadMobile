@@ -12,12 +12,7 @@ import com.ustadmobile.lib.db.entities.LanguageVariant
 @UmRepository
 abstract class LanguageVariantDao : BaseDao<LanguageVariant> {
 
-    @Query("SELECT * FROM LanguageVariant")
-    abstract fun publicLanguageVariants(): List<LanguageVariant>
-
     @Query("SELECT * FROM LanguageVariant WHERE countryCode = :countryCode LIMIT 1")
     abstract fun findByCode(countryCode: String): LanguageVariant?
 
-    @Update
-    abstract override fun update(entity: LanguageVariant)
 }

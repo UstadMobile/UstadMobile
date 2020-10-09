@@ -236,6 +236,12 @@
         />
 
     <fragment
+        android:id="@+id/import_link_view"
+        android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkFragment"
+        android:label=""
+        />
+
+    <fragment
         android:id="@+id/webchunk_view"
         android:name="com.ustadmobile.port.android.view.WebChunkFragment"
         android:label="" />
@@ -258,6 +264,11 @@
     <fragment
         android:id="@+id/invite_via_link_dest"
         android:name="com.ustadmobile.port.android.view.InviteViaLinkFragment"
+        android:label=""/>
+
+    <fragment
+        android:id="@+id/learner_group_member_list_dest"
+        android:name="com.ustadmobile.port.android.view.LearnerGroupMemberListFragment"
         android:label=""/>
 
 </navigation>

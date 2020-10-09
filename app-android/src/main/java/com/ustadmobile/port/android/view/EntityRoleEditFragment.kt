@@ -108,7 +108,7 @@ class EntityRoleEditFragment() : UstadEditFragment<EntityRoleWithNameAndRole>(),
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.assign_role)
+        setEditFragmentTitle(R.string.assign_role, R.string.assign_role)
 
         val navController = findNavController()
 

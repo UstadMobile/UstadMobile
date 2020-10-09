@@ -51,7 +51,7 @@ class TestWorkSpaceRoute {
             }
 
             install(Routing) {
-                LoginRoute(db)
+                WorkSpaceRoute()
             }
         }.start(wait = false)
 
