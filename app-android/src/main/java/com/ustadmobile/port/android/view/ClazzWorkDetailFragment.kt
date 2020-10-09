@@ -83,6 +83,11 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         get() = field
         set(value) {
             field = value
+
+            if(context == null)
+                //the fragment is already detached and we cannot continue
+                return
+
             if(value) {
                 mBinding?.root?.tabs?.visibility = View.GONE
             }else{

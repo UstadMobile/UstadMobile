@@ -29,6 +29,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -363,7 +364,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             contentLiveData?.removeObserver(contentObserver)
             contentLiveData = value?.asRepositoryLiveData(ClazzWorkDao)
             field = value
-            contentLiveData?.observe(viewLifecycleOwner, contentObserver)
+            contentLiveData?.observeIfFragmentViewIsReady(this, contentObserver)
         }
 
 
@@ -372,7 +373,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         set(value) {
             field?.removeObserver(quizQuestionAndResponseObserver)
             field = value
-            value?.observe(viewLifecycleOwner, quizQuestionAndResponseObserver)
+            value?.observeIfFragmentViewIsReady(this, quizQuestionAndResponseObserver)
         }
 
     override var timeZone: String = ""
@@ -383,7 +384,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             val publicCommentsObserverVal = publicCommentsObserver?:return
             publicCommentsLiveData?.removeObserver(publicCommentsObserverVal)
             publicCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
-            publicCommentsLiveData?.observe(viewLifecycleOwner, publicCommentsObserverVal)
+            publicCommentsLiveData?.observeIfFragmentViewIsReady(this, publicCommentsObserverVal)
 
         }
 
@@ -393,7 +394,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             val privateCommentsObserverVal = privateCommentsObserver?:return
             privateCommentsLiveData?.removeObserver(privateCommentsObserverVal)
             privateCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
-            privateCommentsLiveData?.observe(viewLifecycleOwner, privateCommentsObserverVal)
+            privateCommentsLiveData?.observeIfFragmentViewIsReady(this, privateCommentsObserverVal)
         }
 
 
