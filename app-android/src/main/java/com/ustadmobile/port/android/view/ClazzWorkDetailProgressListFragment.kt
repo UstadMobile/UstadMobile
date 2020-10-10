@@ -78,6 +78,7 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWit
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
+        metricsRecyclerAdapter = null
     }
 
     override val displayTypeRepo: Any?
