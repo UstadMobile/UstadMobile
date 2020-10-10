@@ -29,6 +29,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -49,7 +50,7 @@ interface SimpleTwoButtonHandler{
 }
 
 class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmission>(),
-        ClazzWorkDetailOverviewView, NewCommentHandler, SimpleButtonHandler, SimpleTwoButtonHandler{
+        ClazzWorkDetailOverviewView, NewCommentHandler, SimpleButtonHandler{
 
     internal var mBinding: FragmentClazzWorkWithSubmissionDetailBinding? = null
 
@@ -267,6 +268,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
     override var isStudent: Boolean = false
         set(value) {
+            if(field == value){
+                return
+            }
             field = value
             quizQuestionsRecyclerAdapter?.studentMode = value
             submissionFreeTextRecyclerAdapter?.visible = value
@@ -363,7 +367,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             contentLiveData?.removeObserver(contentObserver)
             contentLiveData = value?.asRepositoryLiveData(ClazzWorkDao)
             field = value
-            contentLiveData?.observe(viewLifecycleOwner, contentObserver)
+            contentLiveData?.observeIfFragmentViewIsReady(this, contentObserver)
         }
 
 
@@ -372,7 +376,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         set(value) {
             field?.removeObserver(quizQuestionAndResponseObserver)
             field = value
-            value?.observe(viewLifecycleOwner, quizQuestionAndResponseObserver)
+            value?.observeIfFragmentViewIsReady(this, quizQuestionAndResponseObserver)
         }
 
     override var timeZone: String = ""
@@ -383,7 +387,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             val publicCommentsObserverVal = publicCommentsObserver?:return
             publicCommentsLiveData?.removeObserver(publicCommentsObserverVal)
             publicCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
-            publicCommentsLiveData?.observe(viewLifecycleOwner, publicCommentsObserverVal)
+            publicCommentsLiveData?.observeIfFragmentViewIsReady(this, publicCommentsObserverVal)
 
         }
 
@@ -393,7 +397,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             val privateCommentsObserverVal = privateCommentsObserver?:return
             privateCommentsLiveData?.removeObserver(privateCommentsObserverVal)
             privateCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
-            privateCommentsLiveData?.observe(viewLifecycleOwner, privateCommentsObserverVal)
+            privateCommentsLiveData?.observeIfFragmentViewIsReady(this, privateCommentsObserverVal)
         }
 
 
@@ -426,7 +430,15 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
             override fun areContentsTheSame(oldItem: ClazzWorkWithSubmission,
                                             newItem: ClazzWorkWithSubmission): Boolean {
-                return oldItem == newItem
+                return oldItem.clazzWorkUid == newItem.clazzWorkUid
+                        && oldItem.clazzWorkInstructions == newItem.clazzWorkInstructions
+                        && oldItem.clazzWorkCommentsEnabled == newItem.clazzWorkCommentsEnabled
+                        && oldItem.clazzWorkSubmissionType == newItem.clazzWorkSubmissionType
+                        && oldItem.clazzWorkCreatedDate == newItem.clazzWorkCreatedDate
+                        && oldItem.clazzWorkDueDateTime == newItem.clazzWorkDueDateTime
+                        && oldItem.clazzWorkSubmission?.clazzWorkSubmissionInactive == newItem.clazzWorkSubmission?.clazzWorkSubmissionInactive
+                        && oldItem.clazzWorkSubmission?.clazzWorkSubmissionUid == newItem.clazzWorkSubmission?.clazzWorkSubmissionUid
+                //return oldItem == newItem
             }
         }
 
@@ -440,16 +452,18 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
             override fun areContentsTheSame(oldItem: ClazzWorkQuestionAndOptionWithResponse,
                                             newItem: ClazzWorkQuestionAndOptionWithResponse): Boolean {
-                return oldItem == newItem
+
+                return oldItem.clazzWork.clazzWorkUid == newItem.clazzWork.clazzWorkUid &&
+                        oldItem.clazzWorkQuestion.clazzWorkQuestionUid == newItem.clazzWorkQuestion.clazzWorkQuestionUid
+                        && oldItem.clazzWorkQuestion.clazzWorkQuestionText == newItem.clazzWorkQuestion.clazzWorkQuestionText
+                        && oldItem.clazzWorkQuestion.clazzWorkQuestionType == newItem.clazzWorkQuestion.clazzWorkQuestionType
+                        && oldItem.clazzWorkQuestion.clazzWorkQuestionIndex == newItem.clazzWorkQuestion.clazzWorkQuestionIndex
+                        && oldItem.clazzWorkQuestion.clazzWorkQuestionActive == newItem.clazzWorkQuestion.clazzWorkQuestionActive
+                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseInactive == newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseInactive
+                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseUid == newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseUid
+                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseText == newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseText
+                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseOptionSelected == newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseOptionSelected
             }
         }
-    }
-
-    override fun onClickPrimary(view: View) {
-        //TODO
-    }
-
-    override fun onClickSecondary(view: View) {
-        //TODO
     }
 }
