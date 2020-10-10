@@ -33,40 +33,33 @@ class ClazzWorkDetailPresenter(context: Any,
 
         view.ustadFragmentTitle = clazzWork.clazzWorkTitle
 
-        val loggedInPersonUid = accountManager.activeAccount.personUid
-
-        val clazzMember: ClazzMember? =
-                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
-                        entity?.clazzWorkClazzUid?: 0L)
-
-        val loggedInPerson: Person? = withTimeoutOrNull(2000){
-            db.personDao.findByUid(loggedInPersonUid)
-        }
-        if(loggedInPerson?.admin == true){
-            view.isStudent = false
-        }else {
-            if(clazzMember == null){
-                view.isStudent = false
-            }else {
-                view.isStudent = (clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER)
-            }
-        }
-
         return clazzWork
     }
 
     override fun onCreate(savedState: Map<String, String>?) {
+        val clazzWorkUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val loggedInPersonUid = accountManager.activeAccount.personUid
         GlobalScope.launch(doorMainDispatcher()) {
+            val clazzWork = withTimeoutOrNull(2000) {
+                db.clazzWorkDao.findByUidAsync(clazzWorkUid)
+            } ?: ClazzWork()
             val clazzMember: ClazzMember? =
                     db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
-                            entity?.clazzWorkClazzUid?: 0L)
-            if(clazzMember == null){
-                view.isStudent = false
-            }else{
-                view.isStudent = clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER
+                            clazzWork.clazzWorkClazzUid)
+            val loggedInPerson: Person? = withTimeoutOrNull(2000){
+                db.personDao.findByUid(loggedInPersonUid)
             }
-
+            when {
+                loggedInPerson?.admin == true -> {
+                    view.isStudent = false
+                }
+                clazzMember == null -> {
+                    view.isStudent = false
+                }
+                else -> {
+                    view.isStudent = clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER
+                }
+            }
         }
 
         super.onCreate(savedState)

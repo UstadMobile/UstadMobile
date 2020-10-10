@@ -62,10 +62,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         t -> quizQuestionsRecyclerAdapter?.submitList(t)
     }
     private var quizQuestionsEditRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseRA? = null
-    private val quizQuestionAndResponseEditObserver = Observer<List<
-            ClazzWorkQuestionAndOptionWithResponse>?> {
-        t -> quizQuestionsEditRecyclerAdapter?.submitList(t)
-    }
 
     private var privateCommentsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
     private var privateCommentsObserver: Observer<PagedList<CommentsWithPerson>>? = null
@@ -75,12 +71,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
     private var privateCommentsMergerRecyclerAdapter: MergeAdapter? = null
     private var submitWithMetricsRecyclerAdapter: ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter ? = null
     private var recordForStudentButtonRecyclerAdapter: SimpleButtonRecyclerAdapter? = null
-
-    //Submission on behalf of student:
-
-    //Submit/Cancel button
     private var simpleTwoButtonRecyclerAdapter: SimpleTwoButtonRecyclerAdapter? = null
-
 
     private var detailMergerRecyclerAdapter: MergeAdapter? = null
     private var detailMergerRecyclerView: RecyclerView? = null
@@ -198,12 +189,27 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         mBinding = null
         mPresenter = null
         entity = null
-        privateCommentsRecyclerAdapter = null
+        submissionHeadingRecyclerAdapter = null
+        submissionResultRecyclerAdapter = null
+        markingEditRecyclerAdapter = null
+        submissionFreeTextRecyclerAdapter = null
+        markingHeadingRecyclerAdapter = null
+        questionsHeadingRecyclerAdapter = null
+        quizQuestionsRecyclerAdapter = null
         quizQuestionsEditRecyclerAdapter = null
+        privateCommentsHeadingRecyclerAdapter = null
+        privateCommentsRecyclerAdapter = null
+        newPrivateCommentRecyclerAdapter = null
+        privateCommentsMergerRecyclerAdapter = null
+        submitWithMetricsRecyclerAdapter = null
+        recordForStudentButtonRecyclerAdapter = null
+        simpleTwoButtonRecyclerAdapter = null
+        detailMergerRecyclerAdapter = null
+        detailMergerRecyclerView = null
+
     }
 
     override var entity: ClazzMemberAndClazzWorkWithSubmission? = null
-        get() = field
         set(value) {
             field = value
 
