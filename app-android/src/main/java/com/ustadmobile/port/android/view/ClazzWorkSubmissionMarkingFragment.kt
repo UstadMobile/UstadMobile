@@ -25,6 +25,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -62,10 +63,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         t -> quizQuestionsRecyclerAdapter?.submitList(t)
     }
     private var quizQuestionsEditRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseRA? = null
-    private val quizQuestionAndResponseEditObserver = Observer<List<
-            ClazzWorkQuestionAndOptionWithResponse>?> {
-        t -> quizQuestionsEditRecyclerAdapter?.submitList(t)
-    }
 
     private var privateCommentsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
     private var privateCommentsObserver: Observer<PagedList<CommentsWithPerson>>? = null
@@ -75,12 +72,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
     private var privateCommentsMergerRecyclerAdapter: MergeAdapter? = null
     private var submitWithMetricsRecyclerAdapter: ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter ? = null
     private var recordForStudentButtonRecyclerAdapter: SimpleButtonRecyclerAdapter? = null
-
-    //Submission on behalf of student:
-
-    //Submit/Cancel button
     private var simpleTwoButtonRecyclerAdapter: SimpleTwoButtonRecyclerAdapter? = null
-
 
     private var detailMergerRecyclerAdapter: MergeAdapter? = null
     private var detailMergerRecyclerView: RecyclerView? = null
@@ -198,12 +190,27 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         mBinding = null
         mPresenter = null
         entity = null
-        privateCommentsRecyclerAdapter = null
+        submissionHeadingRecyclerAdapter = null
+        submissionResultRecyclerAdapter = null
+        markingEditRecyclerAdapter = null
+        submissionFreeTextRecyclerAdapter = null
+        markingHeadingRecyclerAdapter = null
+        questionsHeadingRecyclerAdapter = null
+        quizQuestionsRecyclerAdapter = null
         quizQuestionsEditRecyclerAdapter = null
+        privateCommentsHeadingRecyclerAdapter = null
+        privateCommentsRecyclerAdapter = null
+        newPrivateCommentRecyclerAdapter = null
+        privateCommentsMergerRecyclerAdapter = null
+        submitWithMetricsRecyclerAdapter = null
+        recordForStudentButtonRecyclerAdapter = null
+        simpleTwoButtonRecyclerAdapter = null
+        detailMergerRecyclerAdapter = null
+        detailMergerRecyclerView = null
+
     }
 
     override var entity: ClazzMemberAndClazzWorkWithSubmission? = null
-        get() = field
         set(value) {
             field = value
 
@@ -254,7 +261,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             val privateCommentsObserverVal = privateCommentsObserver?:return
             privateCommentsLiveData?.removeObserver(privateCommentsObserverVal)
             privateCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
-            privateCommentsLiveData?.observe(viewLifecycleOwner, privateCommentsObserverVal)
+            privateCommentsLiveData?.observeIfFragmentViewIsReady(this, privateCommentsObserverVal)
         }
 
 
@@ -263,7 +270,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         set(value) {
             field?.removeObserver(quizQuestionAndResponseObserver)
             field = value
-            value?.observe(viewLifecycleOwner, quizQuestionAndResponseObserver)
+            value?.observeIfFragmentViewIsReady(this, quizQuestionAndResponseObserver)
         }
 
 

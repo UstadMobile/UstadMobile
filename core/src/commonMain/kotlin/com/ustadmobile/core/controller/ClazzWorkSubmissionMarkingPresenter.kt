@@ -44,13 +44,16 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzMemberAndClazzWorkWithSubmission? {
+
+        filterByClazzWorkUid = arguments[ARG_CLAZZWORK_UID]?.toLong()?:0L
+        filterByClazzMemberUid = arguments[ARG_CLAZZMEMBER_UID]?.toLong() ?: 0L
+
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val clazzMemberWithSubmission = withTimeoutOrNull(2000){
             db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(filterByClazzWorkUid,
                     filterByClazzMemberUid)
         }
-
 
         unmarkedMembers = withTimeoutOrNull(2000){
             db.clazzWorkSubmissionDao.findCompletedUnMarkedSubmissionsByClazzWorkUid(filterByClazzWorkUid)
@@ -73,11 +76,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             db.clazzWorkDao.findWithSubmissionByUidAndPerson(filterByClazzWorkUid,
                     clazzMemberWithSubmission?.clazzMemberPersonUid?:0L)
         }?: ClazzWorkWithSubmission()
-
-        val submission = clazzMemberWithSubmission?.submission
-        if(
-                //submission != null && submission.clazzWorkSubmissionUid != 0L &&
-                clazzMemberWithSubmission?.clazzWork?.clazzWorkSubmissionType
+        if(clazzMemberWithSubmission?.clazzWork?.clazzWorkSubmissionType
                 == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
             val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
                     withTimeoutOrNull(2000) {
@@ -110,16 +109,21 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                         qResponse.first())
                 }
 
-            view.submissionQuestionAndOptionsWithResponse =
-                    DoorMutableLiveData(questionsAndOptionsWithResponseList)
+            view.takeIf { it.submissionQuestionAndOptionsWithResponse == null
+                }?.submissionQuestionAndOptionsWithResponse = DoorMutableLiveData(
+                    questionsAndOptionsWithResponseList)
+
+//            view.submissionQuestionAndOptionsWithResponse = DoorMutableLiveData(
+//                    questionsAndOptionsWithResponseList)
+
         }
 
         val privateComments = withTimeoutOrNull(2000) {
-            db.commentsDao.findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToLive(
+            repo.commentsDao.findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToLive(
                     ClazzWork.CLAZZ_WORK_TABLE_ID, clazzWorkWithSubmission.clazzWorkUid,
                     clazzMember?.clazzMemberPersonUid?:0L)
         }
-        view.privateComments = privateComments
+        view.takeIf { it.privateComments == null}?.privateComments = privateComments
 
         newCommentItemListener.fromPerson = loggedInPersonUid
         newCommentItemListener.toPerson = clazzMember?.clazzMemberPersonUid?:0L
@@ -131,7 +135,8 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                         filterByClazzWorkUid)
 
         view.runOnUiThread(Runnable {
-            view.clazzWorkMetrics = clazzWorkWithMetrics
+            view.takeIf { it.clazzWorkMetrics == null}?.clazzWorkMetrics = clazzWorkWithMetrics
+//            view.clazzWorkMetrics = clazzWorkWithMetrics
         })
 
         return clazzMemberWithSubmission
@@ -185,7 +190,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                         entity?.clazzWork?.clazzWorkClazzUid?:0L)
             }
 
-            var submission = entity?.submission ?: ClazzWorkSubmission().apply {
+            val submission = entity?.submission ?: ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWork?.clazzWorkUid ?: 0L
                 clazzWorkSubmissionClazzMemberUid = studentClazzMember?.clazzMemberUid ?: 0L
                 clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
