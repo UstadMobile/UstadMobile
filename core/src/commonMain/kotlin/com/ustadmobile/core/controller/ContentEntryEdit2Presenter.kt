@@ -143,7 +143,7 @@ class ContentEntryEdit2Presenter(context: Any,
                     entity.contentEntryUid = repo.contentEntryDao.insertAsync(entity)
 
                     if(entity.entryId == null){
-                        entity.entryId = "${systemImpl.getAppConfigString(AppConfig.KEY_API_URL, null, context)}" +
+                        entity.entryId = accountManager.activeAccount.endpointUrl +
                                 "${entity.contentEntryUid}/${UMUUID.randomUUID()}"
                         repo.contentEntryDao.updateAsync(entity)
                     }

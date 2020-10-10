@@ -9,16 +9,19 @@
 <body>
 <div id="h5p-container"></div>
 <script type="text/javascript">
-    let { H5P } = H5PStandalone, params = {}
+    const {
+      H5P
+    } = H5PStandalone;
+    let activityId = null;
     if (location.search) {
-      params = JSON.parse('{"' + decodeURI(location.search.substring(1)).replace(/"/g, '\\"')
-        .replace(/&/g, '","').replace(/=/g, '":"') + '"}');
+      activityId = new URLSearchParams(location.search.substring(1)).get("activity_id");
     }
     new H5P(document.getElementById('h5p-container'), 'workspace', {
       frameJs: 'dist/frame.bundle.js',
       frameCss: 'dist/styles/h5p.css',
-      id: decodeURIComponent(params.activity_id || null)
+      id: activityId
     });
+
   </script>
 </body>
 
