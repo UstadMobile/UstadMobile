@@ -25,6 +25,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -260,7 +261,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             val privateCommentsObserverVal = privateCommentsObserver?:return
             privateCommentsLiveData?.removeObserver(privateCommentsObserverVal)
             privateCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
-            privateCommentsLiveData?.observe(viewLifecycleOwner, privateCommentsObserverVal)
+            privateCommentsLiveData?.observeIfFragmentViewIsReady(this, privateCommentsObserverVal)
         }
 
 
@@ -269,7 +270,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         set(value) {
             field?.removeObserver(quizQuestionAndResponseObserver)
             field = value
-            value?.observe(viewLifecycleOwner, quizQuestionAndResponseObserver)
+            value?.observeIfFragmentViewIsReady(this, quizQuestionAndResponseObserver)
         }
 
 
