@@ -5,6 +5,10 @@
     <fields>;
 }
 
+-keep public class com.ustadmobile.core.contentformats.metadata.*{
+    *;
+}
+
 # Prevent proguard from stripping interface information from TypeAdapter, TypeAdapterFactory,
 # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
 # as per https://github.com/google/gson/blob/master/examples/android-proguard-example/proguard.cfg

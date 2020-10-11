@@ -17,7 +17,4 @@ abstract class ContentCategoryDao : BaseDao<ContentCategory> {
 
     @Query("SELECT * FROM ContentCategory WHERE " + "ctnCatContentCategorySchemaUid = :schemaId AND name = :name")
     abstract fun findCategoryBySchemaIdAndName(schemaId: Long, name: String): ContentCategory?
-
-    @Update
-    abstract override fun update(entity: ContentCategory)
 }

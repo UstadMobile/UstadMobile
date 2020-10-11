@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
@@ -27,11 +28,15 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
+import org.kxml2.io.KXmlSerializer
 import org.mockito.ArgumentMatchers.any
 import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mockito.timeout
 import org.mockito.Mockito.verify
+import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
+import org.xmlpull.v1.XmlPullParserFactory
+import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -72,6 +77,21 @@ class EpubContentPresenterTest {
         di = DI {
             import(ustadTestRule.diModule)
             bind<XapiStatementEndpoint>() with singleton { mockStatementEndpoint }
+
+            bind<XmlPullParserFactory>() with singleton {
+                XmlPullParserFactory.newInstance().also {
+                    it.isNamespaceAware = true
+                }
+            }
+
+            bind<XmlPullParser>() with provider {
+                instance<XmlPullParserFactory>().newPullParser()
+            }
+
+            bind<XmlSerializer>() with provider {
+                KXmlSerializer()
+            }
+
         }
 
         val accountManager: UstadAccountManager = di.direct.instance()
@@ -122,7 +142,6 @@ class EpubContentPresenterTest {
 
     @Suppress("UNCHECKED_CAST")
     @Test
-    @Throws(IOException::class)
     fun givenValidEpub_whenCreated_shouldSetTitleAndSpineHrefsAndRecordProgress() {
         val args = HashMap<String, String>()
         args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
@@ -164,5 +183,60 @@ class EpubContentPresenterTest {
         }
 
     }
+
+
+    @Test
+    fun givenValidEpubAndNavItemExists_whenHandleClickNavItemCalled_thenShouldCallScrollToSpinePosition() {
+        val args = HashMap<String, String>()
+        args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
+        args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+
+        val presenter = EpubContentPresenter(Any(), args, mockEpubView, di)
+        presenter.onCreate(args)
+        presenter.onStart()
+
+
+        verify(mockEpubView, timeout(15000)).containerTitle = opf!!.title!!
+
+        presenter.handleClickNavItem(EpubNavItem("Link with #", "4.xhtml#anchor", null, 0))
+
+        verify(mockEpubView).scrollToSpinePosition(3, "anchor")
+    }
+
+    @Test
+    fun givenValidEpub_whenHandlePageChangeCalledAndTitleIsKnown_thenShouldSetWindowTitle() {
+        val args = HashMap<String, String>()
+        args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
+        args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+
+        val presenter = EpubContentPresenter(Any(), args, mockEpubView, di)
+        presenter.onCreate(args)
+        presenter.onStart()
+
+
+        verify(mockEpubView, timeout(15000)).containerTitle = opf!!.title!!
+
+        presenter.handlePageTitleChanged(1, "Title 1")
+        presenter.handlePageChanged(1)
+
+        verify(mockEpubView).windowTitle = "Title 1"
+    }
+
+    @Test
+    fun givenValidEpub_whenHandlePageChangeCalledAndTitleIsUnknown_thenShouldSetWindowTitleFromNavDoc() {
+        val args = HashMap<String, String>()
+        args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
+        args[UstadView.ARG_CONTENT_ENTRY_UID] = contentEntry.contentEntryUid.toString()
+
+        val presenter = EpubContentPresenter(Any(), args, mockEpubView, di)
+        presenter.onCreate(args)
+        presenter.onStart()
+
+        verify(mockEpubView, timeout(15000)).tableOfContents = any()
+
+        presenter.handlePageChanged(1)
+        verify(mockEpubView).windowTitle = "Page 2" //the title as specified in test.epub's OPF for this file
+    }
+
 
 }

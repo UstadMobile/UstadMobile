@@ -11,6 +11,7 @@ import org.xmlpull.v1.XmlPullParserException
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.net.URI
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
@@ -66,11 +67,10 @@ class H5PTypeFilePlugin : H5PTypePlugin(), ContentTypeFilePlugin {
                             contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
                             licenseType = licenseMap[json.jsonObject["license"] ?: ""]
                                     ?: ContentEntry.LICENSE_TYPE_OTHER
-                            title = json.jsonObject["title"]?.content ?: ""
+                            title = if(json.jsonObject["title"]?.content.isNullOrEmpty())
+                                file.nameWithoutExtension else json.jsonObject["title"]?.content
                             this.author = author
-                            description = ""
                             leaf = true
-                            entryId = file.name
                         }
                         break
                     }

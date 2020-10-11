@@ -4,15 +4,21 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ContentEntryListTabsView
+import com.ustadmobile.core.view.PersonDetailView
+import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
@@ -42,7 +48,12 @@ class PersonEditPresenter(context: Any,
 
     private var registrationMode: Boolean = false
 
-    private val clazzMemberJoinEditHelper = DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
+    private var loggedInPerson: Person? = null
+
+    private var regViaLink: Boolean = false
+
+    private val clazzMemberJoinEditHelper =
+            DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
             "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
             ClazzMemberWithClazz.serializer().list, this) { clazzMemberUid = it }
 
@@ -54,11 +65,20 @@ class PersonEditPresenter(context: Any,
         clazzMemberJoinEditHelper.onDeactivateEntity(clazzMemberWithClazz)
     }
 
+    private val rolesAndPermissionEditHelper = DefaultOneToManyJoinEditHelper<EntityRoleWithNameAndRole>(
+            EntityRoleWithNameAndRole::erUid,
+            "state_EntityRoleWithNameAndRole_list", EntityRoleWithNameAndRole.serializer().list,
+            EntityRoleWithNameAndRole.serializer().list, this) { erUid = it }
 
-    /*
-     * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
-     * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
-     */
+    fun handleAddOrEditRoleAndPermission(entityRoleWithNameAndRole: EntityRoleWithNameAndRole) {
+        rolesAndPermissionEditHelper.onEditResult(entityRoleWithNameAndRole)
+    }
+
+    fun handleRemoveRoleAndPermission(entityRoleWithNameAndRole: EntityRoleWithNameAndRole) {
+        rolesAndPermissionEditHelper.onDeactivateEntity(entityRoleWithNameAndRole)
+    }
+
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
@@ -66,7 +86,10 @@ class PersonEditPresenter(context: Any,
                 MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
         view.clazzList = clazzMemberJoinEditHelper.liveList
 
-        registrationMode = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toBoolean() ?: false
+        view.rolesAndPermissionsList = rolesAndPermissionEditHelper.liveList
+
+        registrationMode = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toBoolean()?:false
+        regViaLink = arguments[PersonEditView.REGISTER_VIA_LINK]?.toBoolean()?:false
 
         serverUrl = if (arguments.containsKey(UstadView.ARG_SERVER_URL)) {
             arguments.getValue(UstadView.ARG_SERVER_URL)
@@ -79,6 +102,7 @@ class PersonEditPresenter(context: Any,
                 ?: ContentEntryListTabsView.VIEW_NAME
 
         view.registrationMode = registrationMode
+
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): PersonWithAccount? {
@@ -101,6 +125,25 @@ class PersonEditPresenter(context: Any,
         } ?: listOf()
         clazzMemberJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
 
+
+        val rolesAndPermissionList = withTimeoutOrNull(2000){
+            db.takeIf{entityUid != 0L}?.entityRoleDao?.filterByPersonWithExtraAsList(
+                    entity?.personGroupUid?:0L)
+        }?:listOf()
+        rolesAndPermissionEditHelper.liveList.sendValue(rolesAndPermissionList)
+
+        val loggedInPersonUid = accountManager.activeAccount.personUid
+        loggedInPerson = withTimeoutOrNull(2000){
+            db.personDao.findByUidAsync(loggedInPersonUid)
+        }
+
+        val canDelegate = repo.personDao.personHasPermissionAsync(loggedInPersonUid?: 0,
+                arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
+                Role.PERMISSION_PERSON_DELEGATE, excludesNameCheck = 1)
+
+        if(loggedInPerson != null && loggedInPerson?.admin == false){
+            view.canDelegatePermissions = canDelegate
+        }else view.canDelegatePermissions = loggedInPerson != null && loggedInPerson?.admin == true
 
         return person
     }
@@ -154,7 +197,7 @@ class PersonEditPresenter(context: Any,
                     } else if (dateToday.month0 == dateOfBirth.month0 && dateOfBirth.dayOfYear > dateToday.dayOfYear) {
                         age--
                     }
-                    if (age < 13) {
+                    if (age < 13 && !regViaLink) {
                         view.dateOfBirthError = impl.getString(MessageID.underRegistrationAgeError, context)
                         return@launch
                     }
@@ -162,7 +205,9 @@ class PersonEditPresenter(context: Any,
                     try {
                         val umAccount = accountManager.register(entity, serverUrl)
                         accountManager.activeAccount = umAccount
-                        view.navigateToNextDestination(umAccount, nextDestination)
+                        val goOptions = UstadMobileSystemCommon.UstadGoOptions(UstadView.CURRENT_DEST,
+                                true)
+                        impl.go(nextDestination, mapOf(), context, goOptions)
                     } catch (e: Exception) {
 
                         if (e is IllegalStateException) {
@@ -174,23 +219,52 @@ class PersonEditPresenter(context: Any,
                         return@launch
                     }
                 }
-            } else {
-                if (entity.personUid == 0L) {
-                    entity.personUid = repo.personDao.insertAsync(entity)
-                } else {
+            }else{
+                //Create/Update person group
+                if(entity.personUid == 0L) {
+                    val personWithGroup = repo.insertPersonAndGroup(entity, loggedInPerson)
+                    entity.personGroupUid = personWithGroup.personGroupUid
+                    entity.personUid = personWithGroup.personUid
+                }else {
                     repo.personDao.updateAsync(entity)
                 }
 
+                //Insert any roles and permissions
+                repo.entityRoleDao.insertListAsync(
+                        rolesAndPermissionEditHelper.entitiesToInsert.also {
+                            it.forEach {
+                                it.erUid = 0
+                                it.erGroupUid = entity.personGroupUid
+                                it.erActive = true
+                            }
+                        }
+                )
+                //Update any roles and permissions
+                repo.entityRoleDao.updateListAsync(
+                        rolesAndPermissionEditHelper.entitiesToUpdate.also {
+                            it.forEach{
+                                it.erGroupUid = entity.personGroupUid
+                            }
+                        }
+                )
+
+                //Remove any roles and permissions
+                repo.entityRoleDao.deactivateByUids(
+                        rolesAndPermissionEditHelper.primaryKeysToDeactivate)
+
+                //Insert any Clazz enrollments
                 clazzMemberJoinEditHelper.entitiesToInsert.forEach {
                     repo.enrolPersonIntoClazzAtLocalTimezone(entity, it.clazzMemberClazzUid,
                             it.clazzMemberRole)
                 }
+                //Update any clazz enrollments
                 repo.clazzMemberDao.updateDateLeft(clazzMemberJoinEditHelper.primaryKeysToDeactivate,
                         getSystemTimeInMillis())
 
                 var personPicture = db.personPictureDao.findByPersonUidAsync(entity.personUid)
                 val viewPicturePath = view.personPicturePath
-                val currentPath = if (personPicture != null) repo.personPictureDao.getAttachmentPath(personPicture) else null
+                val currentPath = if(personPicture != null)
+                    repo.personPictureDao.getAttachmentPath(personPicture) else null
 
                 if (personPicture != null && viewPicturePath != null && currentPath != viewPicturePath) {
                     repo.personPictureDao.setAttachment(personPicture, viewPicturePath)
@@ -212,5 +286,4 @@ class PersonEditPresenter(context: Any,
             }
         }
     }
-
 }

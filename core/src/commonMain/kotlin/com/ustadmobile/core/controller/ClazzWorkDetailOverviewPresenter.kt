@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
@@ -29,108 +30,128 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWorkWithSubmission? {
-        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-
+    override fun onCreate(savedState: Map<String, String>?) {
+        super.onCreate(savedState)
+        val clazzWorkUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
-        val loggedInPerson = withTimeoutOrNull(2000){
-            db.personDao.findByUidAsync(loggedInPersonUid)
-        }
+        GlobalScope.launch(doorMainDispatcher()) {
+            val clazzWorkWithSubmission = withTimeoutOrNull(2000){
+                db.clazzWorkDao.findWithSubmissionByUidAndPerson(clazzWorkUid, loggedInPersonUid)
+            }?: ClazzWorkWithSubmission()
 
-        val clazzWorkWithSubmission = withTimeoutOrNull(2000){
-            db.clazzWorkDao.findWithSubmissionByUidAndPerson(entityUid, loggedInPersonUid)
-        }?: ClazzWorkWithSubmission()
+            val clazzWithSchool = withTimeoutOrNull(2000) {
+                db.clazzDao.getClazzWithSchool(clazzWorkWithSubmission.clazzWorkClazzUid)
+            } ?: ClazzWithSchool()
 
-        val clazzWithSchool = withTimeoutOrNull(2000){
-            db.clazzDao.getClazzWithSchool(clazzWorkWithSubmission.clazzWorkClazzUid)
-        }?: ClazzWithSchool()
+            view.timeZone = clazzWithSchool.effectiveTimeZone()
 
-        view.timeZone = clazzWithSchool.effectiveTimeZone()
+            val loggedInPerson = withTimeoutOrNull(2000){
+                db.personDao.findByUidAsync(loggedInPersonUid)
+            }
+            val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
+                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
+                        clazzWorkWithSubmission.clazzWorkClazzUid)
+            }
 
-        //Find Content and questions
-        val contentList = withTimeoutOrNull(2000) {
-            db.clazzWorkContentJoinDao.findAllContentByClazzWorkUidDF(
-                    clazzWorkWithSubmission.clazzWorkUid,
-                    loggedInPersonUid)
-        }
+            if(loggedInPerson?.admin == true){
+                view.isStudent = false
+            }else{
+                if(clazzMember == null){
+                    view.isStudent = false
+                }else {
+                    view.isStudent = (clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER)
+                }
+            }
 
-        view.clazzWorkContent = contentList
+            //If Submission object doesn't exist, create it.
+            if(clazzWorkWithSubmission.clazzWorkSubmission == null && view.isStudent){
+                clazzWorkWithSubmission.clazzWorkSubmission = ClazzWorkSubmission().apply {
+                    clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
+                    clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid?:0L
+                    clazzWorkSubmissionPersonUid = loggedInPersonUid
+                    clazzWorkSubmissionInactive = false
+                    clazzWorkSubmissionDateTimeStarted = getSystemTimeInMillis()
+                }
+            }
 
-        val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
-            db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
-                    clazzWorkWithSubmission.clazzWorkClazzUid)
-        }
+            if(clazzWorkWithSubmission.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
+                val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
+                        withTimeoutOrNull(2000) {
+                            db.clazzWorkQuestionDao.findAllActiveQuestionsWithOptionsInClazzWorkAsList(
+                                    clazzWorkUid)
+                        } ?: listOf()
 
-        if(loggedInPerson?.admin == true){
-            view.isStudent = false
-        }else{
-            view.isStudent = (clazzMember != null &&
-                    clazzMember.clazzMemberRole == ClazzMember.ROLE_STUDENT)
-        }
+                val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
+                        questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
+                                .map {
+                                    val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
+                                    val qResponse: MutableList<ClazzWorkQuestionResponse> =
+                                            withTimeoutOrNull(2000) {
+                                                db.clazzWorkQuestionResponseDao.findByQuestionUidAndClazzMemberUidAsync(
+                                                        questionUid, clazzMember?.clazzMemberUid
+                                                        ?: 0L).toMutableList()
+                                            }?: mutableListOf()
+                                    if (qResponse.isEmpty()) {
+                                        qResponse.add(ClazzWorkQuestionResponse().apply {
+                                            clazzWorkQuestionResponseQuestionUid = questionUid
+                                            clazzWorkQuestionResponsePersonUid = loggedInPersonUid
+                                            clazzWorkQuestionResponseClazzMemberUid = clazzMember?.clazzMemberUid
+                                                    ?: 0L
+                                            clazzWorkQuestionResponseClazzWorkUid = clazzWorkUid
+                                                    ?: 0L
+                                        })
+                                    }
+                                    ClazzWorkQuestionAndOptionWithResponse(
+                                            entity ?: ClazzWorkWithSubmission(),
+                                            it.key ?: ClazzWorkQuestion(),
+                                            it.value.map {
+                                                it.clazzWorkQuestionOption ?: ClazzWorkQuestionOption()
+                                            },
+                                            qResponse.first())
+                                }
 
-        //If Submission object doesnt exist, create it.
-        if(clazzWorkWithSubmission.clazzWorkSubmission == null){
-            clazzWorkWithSubmission.clazzWorkSubmission = ClazzWorkSubmission().apply {
-                clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
-                clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid?:0L
-                clazzWorkSubmissionPersonUid = loggedInPersonUid
-                clazzWorkSubmissionInactive = false
-                clazzWorkSubmissionDateTimeStarted = getSystemTimeInMillis()
+                view.clazzWorkQuizQuestionsAndOptionsWithResponse =
+                        DoorMutableLiveData(questionsAndOptionsWithResponseList)
             }
         }
 
-        if(clazzWorkWithSubmission.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
-            val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
+        newCommentItemListener.fromPerson = loggedInPersonUid
+        newCommentItemListener.entityId = clazzWorkUid
+
+
+    }
+
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWorkWithSubmission? {
+        val clazzWorkUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+
+        val loggedInPersonUid = accountManager.activeAccount.personUid
+
+        //Find Content and questions
+        view.clazzWorkContent =
+        //view.takeIf { it.clazzWorkContent == null  }?.clazzWorkContent =
                 withTimeoutOrNull(2000) {
-                    db.clazzWorkQuestionDao.findAllActiveQuestionsWithOptionsInClazzWorkAsList(
-                            entityUid)
-                } ?: listOf()
+                    repo.clazzWorkContentJoinDao.findAllContentByClazzWorkUidDF(
+                            clazzWorkUid, loggedInPersonUid)
+                }
 
-            val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
-                questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
-                    .map {
-                        val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
-                        val qResponse: MutableList<ClazzWorkQuestionResponse> =
-                            withTimeoutOrNull(2000) {
-                                db.clazzWorkQuestionResponseDao.findByQuestionUidAndClazzMemberUidAsync(
-                                        questionUid, clazzMember?.clazzMemberUid
-                                        ?: 0L).toMutableList()
-                            }?: mutableListOf()
-                        if (qResponse.isEmpty()) {
-                            qResponse.add(ClazzWorkQuestionResponse().apply {
-                                clazzWorkQuestionResponseQuestionUid = questionUid
-                                clazzWorkQuestionResponsePersonUid = loggedInPersonUid
-                                clazzWorkQuestionResponseClazzMemberUid = clazzMember?.clazzMemberUid
-                                        ?: 0L
-                                clazzWorkQuestionResponseClazzWorkUid = entity?.clazzWorkUid
-                                        ?: 0L
+        val clazzWorkWithSubmission = withTimeoutOrNull(2000){
+            db.clazzWorkDao.findWithSubmissionByUidAndPerson(clazzWorkUid, loggedInPersonUid)
+        }?: ClazzWorkWithSubmission()
 
-                            })
-                        }
-                        ClazzWorkQuestionAndOptionWithResponse(
-                                entity ?: ClazzWorkWithSubmission(),
-                                it.key ?: ClazzWorkQuestion(),
-                                it.value.map {
-                                    it.clazzWorkQuestionOption ?: ClazzWorkQuestionOption()
-                                },
-                                qResponse.first())
-                        }
 
-            view.clazzWorkQuizQuestionsAndOptionsWithResponse =
-                    DoorMutableLiveData(questionsAndOptionsWithResponseList)
-        }
 
-        view.clazzWorkPublicComments = db.commentsDao.findPublicByEntityTypeAndUidLive(ClazzWork.CLAZZ_WORK_TABLE_ID,
-                    clazzWorkWithSubmission.clazzWorkUid)
+        view.clazzWorkPublicComments = repo.commentsDao.findPublicByEntityTypeAndUidLive(
+                ClazzWork.CLAZZ_WORK_TABLE_ID, clazzWorkWithSubmission.clazzWorkUid)
 
         if(view.isStudent) {
-            view.clazzWorkPrivateComments = db.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(ClazzWork.CLAZZ_WORK_TABLE_ID,
-                    clazzWorkWithSubmission.clazzWorkUid, loggedInPersonUid)
+            view.clazzWorkPrivateComments =
+                    repo.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
+                            ClazzWork.CLAZZ_WORK_TABLE_ID, clazzWorkWithSubmission.clazzWorkUid,
+                            loggedInPersonUid)
         }
 
-        newCommentItemListener.fromPerson = loggedInPersonUid
-        newCommentItemListener.entityId = clazzWorkWithSubmission.clazzWorkUid
+
 
         return clazzWorkWithSubmission
     }
@@ -174,7 +195,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                         entity?.clazzWorkClazzUid?:0L)
             }
 
-            var submission = entity?.clazzWorkSubmission ?: ClazzWorkSubmission().apply {
+            val submission = entity?.clazzWorkSubmission ?: ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWorkUid ?: 0L
                 clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid ?: 0L
                 clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
@@ -192,7 +213,8 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
             clazzWorkWithSubmission?.clazzWorkSubmission = submission
             view.runOnUiThread(Runnable {
                 view.entity = clazzWorkWithSubmission
-                view.clazzWorkQuizQuestionsAndOptionsWithResponse = DoorMutableLiveData(newOptionsAndResponse)
+                view.clazzWorkQuizQuestionsAndOptionsWithResponse =
+                        DoorMutableLiveData(newOptionsAndResponse)
             })
 
         }

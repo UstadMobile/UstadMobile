@@ -11,6 +11,10 @@
         <variable
             name="errorText"
             type="String" />
+
+        <variable
+            name="entityType"
+            type="String" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -19,7 +23,7 @@
 
         <TextView
             android:id="@+id/instructions_text"
-            android:text="@string/ask_your_teacher_for_code"
+            android:text="@string/join_code_instructions"
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             app:layout_constraintStart_toStartOf="parent"
@@ -46,7 +50,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="@={code}"
-                android:hint="@string/class_code" />
+                android:hint="@{String.format(@string/entity_code, entityType)}" />
         </com.google.android.material.textfield.TextInputLayout>
 
 

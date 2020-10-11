@@ -67,8 +67,7 @@ class ClazzEndToEndTests {
                 .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         val context = ApplicationProvider.getApplicationContext<Context>()
-        val newClazzText = context.getString(R.string.add_a_new,
-                context.getString(R.string.clazz).toLowerCase())
+        val newClazzText = context.getString(R.string.add_a_new_class)
         onView(withId(R.id.home_clazzlist_dest)).perform(click())
         onView(withText(R.string.clazz)).perform(click())
         onView(withText(newClazzText)).perform(click())

@@ -9,6 +9,7 @@ import com.ustadmobile.port.sharedse.contentformats.DefaultContainerImporter
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import java.io.File
+import java.net.URI
 
 
 class H5PImporter(prefixContainer: String) : DefaultContainerImporter(prefixContainer, true) {

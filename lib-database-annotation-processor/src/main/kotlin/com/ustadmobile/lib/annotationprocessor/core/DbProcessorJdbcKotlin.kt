@@ -643,7 +643,7 @@ internal fun CodeBlock.Builder.addGenerateSqlitePrimaryKeyInsert(execSqlFn: Stri
                                                         syncableEntityInfo: SyncableEntityInfo) : CodeBlock.Builder{
     return add("$execSqlFn(%S)\n",
             "REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) " +
-            "VALUES (${syncableEntityInfo.tableId}, (SELECT COALESCE((SELECT MAX(${syncableEntityInfo.entityPkField.name}) " +
+            "VALUES (${syncableEntityInfo.tableId}, (SELECT COALESCE((SELECT MAX(${syncableEntityInfo.entityPkField.name}) + 1 " +
             "FROM ${syncableEntityInfo.syncableEntity.simpleName} WHERE " +
             "${syncableEntityInfo.entityPkField.name} & (SELECT nodeClientId << 32 FROM SyncNode) = " +
             "(SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")

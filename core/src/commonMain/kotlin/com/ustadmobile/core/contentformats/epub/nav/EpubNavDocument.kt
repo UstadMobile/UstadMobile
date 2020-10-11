@@ -204,6 +204,19 @@ class EpubNavDocument {
         }
     }
 
+    fun EpubNavItem.findByHref(href: String): EpubNavItem? {
+        if(this.href == href)
+            return this
+
+        return getChildren()?.asSequence()?.map { it.findByHref(href) }?.firstOrNull { it != null}
+    }
+
+    fun getNavByHref(href: String): EpubNavItem? {
+        val result = navElements.asSequence().map { it.findByHref(href) }.firstOrNull { it != null }
+                ?: ncxNavMap?.findByHref(href)
+        return result
+    }
+
     companion object {
 
         private val EPUB_NAV_DOCUMENT_TYPE_TOC = "toc"

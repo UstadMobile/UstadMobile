@@ -18,7 +18,4 @@ abstract class ContentCategorySchemaDao : BaseDao<ContentCategorySchema> {
     @Query("SELECT * FROM ContentCategorySchema WHERE schemaUrl = :schemaUrl")
     abstract fun findBySchemaUrl(schemaUrl: String): ContentCategorySchema?
 
-    @Update
-    abstract override fun update(entity: ContentCategorySchema)
-
 }

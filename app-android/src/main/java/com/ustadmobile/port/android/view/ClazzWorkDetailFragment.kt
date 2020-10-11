@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
@@ -72,50 +73,63 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         mTabLayout = null
     }
 
+    override fun onResume() {
+        super.onResume()
+    }
+
     override var entity: ClazzWork? = null
-        get() = field
         set(value) {
             field = value
             mBinding?.clazzWork = value
         }
 
+    private fun setTabs(){
+        if(isStudent) {
+            mBinding?.root?.tabs?.visibility = View.GONE
+        }else{
+            mBinding?.root?.tabs?.visibility = View.VISIBLE
+        }
+
+        val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
+
+        val tabs: List<String>
+        tabs = if(isStudent){
+            listOf(
+                    ClazzWorkDetailOverviewView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +
+                            entityUidValue
+            )
+        }else {
+            listOf(
+                    ClazzWorkDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
+                            entityUidValue,
+                    ClazzWorkDetailProgressListView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
+                            entityUidValue)
+        }
+        val viewNameToTitle = mapOf(
+                ClazzWorkEditView.VIEW_NAME to getText(R.string.edit).toString(),
+                ClazzWorkDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
+                ClazzWorkDetailProgressListView.VIEW_NAME to getText(R.string.student_progress).toString()
+        )
+
+        mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
+                FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
+                VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle)
+
+        Handler().post {
+            mPager?.adapter = mPagerAdapter
+            mTabLayout?.setupWithViewPager(mPager)
+        }
+    }
+
     override var isStudent: Boolean = true
-        get() = field
         set(value) {
             field = value
-            if(value) {
-                mBinding?.root?.tabs?.visibility = View.GONE
-            }
 
-            val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
+            if(context == null)
+                //the fragment is already detached and we cannot continue
+                return
 
-            val tabs: List<String>
-            tabs = if(isStudent){
-                listOf(
-                        ClazzWorkDetailOverviewView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +
-                                entityUidValue
-                )
-            }else {
-                listOf(
-                        ClazzWorkDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
-                                entityUidValue,
-                        ClazzWorkDetailProgressListView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
-                                entityUidValue)
-            }
-            val viewNameToTitle = mapOf(
-                    ClazzWorkEditView.VIEW_NAME to getText(R.string.edit).toString(),
-                    ClazzWorkDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
-                    ClazzWorkDetailProgressListView.VIEW_NAME to getText(R.string.student_progress).toString()
-            )
-
-            mPagerAdapter = ViewNameListFragmentPagerAdapter(childFragmentManager,
-                    FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT, tabs,
-                    VIEW_NAME_TO_FRAGMENT_CLASS, viewNameToTitle)
-
-            Handler().post {
-                mPager?.adapter = mPagerAdapter
-                mTabLayout?.setupWithViewPager(mPager)
-            }
+            setTabs()
         }
 
     companion object{

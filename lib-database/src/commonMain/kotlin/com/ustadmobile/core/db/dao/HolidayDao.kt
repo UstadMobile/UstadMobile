@@ -11,6 +11,9 @@ abstract class HolidayDao: BaseDao<Holiday>, OneToManyJoinDao<Holiday> {
     @Query("SELECT * FROM Holiday WHERE holHolidayCalendarUid = :holidayCalendarUid")
     abstract fun findByHolidayCalendaUid(holidayCalendarUid: Long): List<Holiday>
 
+    @Query("SELECT * FROM Holiday WHERE holHolidayCalendarUid = :holidayCalendarUid")
+    abstract suspend fun findByHolidayCalendaUidAsync(holidayCalendarUid: Long): List<Holiday>
+
     @Query("UPDATE Holiday SET holActive = :active WHERE holUid = :holidayUid")
     abstract fun updateActiveByUid(holidayUid: Long, active: Boolean)
 

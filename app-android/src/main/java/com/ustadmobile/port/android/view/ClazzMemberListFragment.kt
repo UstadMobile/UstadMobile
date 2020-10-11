@@ -20,9 +20,13 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.ClazzMemberListView
+import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_NAME
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson
 import com.ustadmobile.lib.db.entities.Person
@@ -165,8 +169,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ClazzMemberListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.add_a,
-                requireContext().getString(R.string.teacher))
+        val createNewText = requireContext().getString(R.string.add_a_teacher)
         mStudentListRecyclerViewAdapter = ClazzMemberListRecyclerAdapter(mPresenter).also {
             mStudentListObserver = PagedListSubmitObserver(it)
         }
@@ -174,8 +177,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
                 headerStringId = R.string.teachers_literal,
                 headerLayoutId = R.layout.item_simple_list_header,
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
-        val addStudentText = requireContext().getString(R.string.add_a,
-                requireContext().getString(R.string.students))
+        val addStudentText = requireContext().getString(R.string.add_a_student)
         mNewStudentListRecyclerViewAdapter = NewItemRecyclerViewAdapter(mOnClickAddStudent,
                 addStudentText, headerStringId = R.string.students,
                 headerLayoutId = R.layout.item_simple_list_header)
@@ -215,6 +217,18 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
         fabManager?.visible = false
     }
 
+    private fun navigateToPickNewMember(keyName: String) {
+
+        val bundle = if(keyName == KEY_TEACHER_SELECTED){
+            bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString())
+        }else{
+            bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
+                    ARG_CODE_TABLE to Clazz.TABLE_ID.toString())
+        }
+        navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest,
+                bundle, keyName, true)
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
@@ -227,11 +241,6 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
 
     private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
 
-    fun navigateToPickNewMember(keyName: String) {
-        navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest,
-                bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString()),
-                keyName, true)
-    }
 
     /**
      * OnClick function that will handle when the user clicks to create a new item

@@ -143,6 +143,10 @@ open class ContentEntry() {
 
         const val LICENSE_TYPE_OTHER = 8
 
+        const val LICENSE_TYPE_CC_BY_ND = 10
+
+        const val LICENSE_TYPE_CC_BY_NC_ND = 11
+
         const val LICENSE_TYPE_CC_0 = 9
 
         const val TYPE_UNDEFINED = 0
@@ -166,7 +170,6 @@ open class ContentEntry() {
         const val FLAG_CONTENT_EDITOR = 2
 
         const val FLAG_SCRAPPED = 4
-
     }
 
     override fun equals(other: Any?): Boolean {

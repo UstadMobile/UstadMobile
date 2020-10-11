@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -19,6 +20,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.view.ClazzEdit2View
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -126,7 +128,10 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     override fun handleClickSchool() {
         onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(School::class.java, R.id.home_schoollist_dest)
+        navigateToPickEntityFromList(School::class.java, R.id.home_schoollist_dest,
+                args = bundleOf(UstadView.ARG_FILTER_BY_PERMISSION to
+                Role.PERMISSION_PERSON_DELEGATE.toString())
+        )
     }
 
     override fun showFeaturePicker() {
@@ -162,7 +167,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.clazz)
+        setEditFragmentTitle(R.string.add_a_new_class, R.string.edit_clazz)
 
         val navController = findNavController()
 
@@ -185,6 +190,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
                 School::class.java) {
             val school = it.firstOrNull() ?: return@observeResult
             entity?.clazzSchoolUid = school.schoolUid
+            entity?.school = school
             mDataBinding?.fragmentClazzEditSchoolText?.setText(school.schoolName)
             mDataBinding?.clazz = entity
         }

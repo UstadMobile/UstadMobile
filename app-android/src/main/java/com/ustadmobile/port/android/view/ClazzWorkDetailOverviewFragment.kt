@@ -29,6 +29,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -43,6 +44,11 @@ interface SimpleButtonHandler{
     fun onClickButton(view: View)
 }
 
+interface SimpleTwoButtonHandler{
+    fun onClickPrimary(view:View)
+    fun onClickSecondary(view:View)
+}
+
 class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmission>(),
         ClazzWorkDetailOverviewView, NewCommentHandler, SimpleButtonHandler{
 
@@ -55,8 +61,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     val accountManager: UstadAccountManager by instance()
 
     private var contentRecyclerAdapter: ContentEntryListRecyclerAdapter? = null
-    private var contentLiveData: LiveData<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
-    private val contentObserver = Observer<PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> {
+    private var contentLiveData: LiveData<PagedList<
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>>? = null
+    private val contentObserver = Observer<PagedList<
+            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> {
         t ->
         run {
             if (t?.size ?: 0 > 0) {
@@ -67,7 +75,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     }
 
     private var quizQuestionsRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseRA? = null
-    private val quizQuestionAndResponseObserver = Observer<List<ClazzWorkQuestionAndOptionWithResponse>?> {
+    private val quizQuestionAndResponseObserver = Observer<List<
+            ClazzWorkQuestionAndOptionWithResponse>?> {
         t -> quizQuestionsRecyclerAdapter?.submitList(t)
     }
 
@@ -97,13 +106,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
     private var detailMergerRecyclerAdapter: MergeAdapter? = null
     private var detailMergerRecyclerView: RecyclerView? = null
 
-
-
     override fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String,
                                 public: Boolean, to: Long, from: Long) {
         (view.parent as View).findViewById<EditText>(R.id.item_comment_new_comment_et).setText("")
         mPresenter?.addComment(entityType, entityUid, comment, public, to, from)
-
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -119,10 +125,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
-        //fragment_list_recyclerview
-        detailMergerRecyclerView = rootView.findViewById(R.id.fragment_clazz_work_with_submission_detail_rv)
+        detailMergerRecyclerView =
+                rootView.findViewById(R.id.fragment_clazz_work_with_submission_detail_rv)
 
-        
         //Main Merger:PP
         detailRecyclerAdapter = ClazzWorkBasicDetailsRecyclerAdapter(entity)
         detailRecyclerAdapter?.visible = false
@@ -131,8 +136,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 DefaultContentEntryListItemListener(context = requireContext(), di = di),
                 ListViewMode.BROWSER.toString(), viewLifecycleOwner, di)
 
-        quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRA(
-                isStudent)
+        quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRA()
+        quizQuestionsRecyclerAdapter?.studentMode = isStudent
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.submission).toString())
         submissionHeadingRecyclerAdapter?.visible = false
@@ -202,7 +207,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         detailMergerRecyclerAdapter = MergeAdapter(
                 detailRecyclerAdapter,
-                contentHeadingRecyclerAdapter, contentRecyclerAdapter,
+                contentHeadingRecyclerAdapter,
+                contentRecyclerAdapter,
                 submissionHeadingRecyclerAdapter,
                 submissionResultRecyclerAdapter, submissionFreeTextRecyclerAdapter,
                 questionsHeadingRecyclerAdapter,
@@ -262,6 +268,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
     override var isStudent: Boolean = false
         set(value) {
+            if(field == value){
+                return
+            }
             field = value
             quizQuestionsRecyclerAdapter?.studentMode = value
             submissionFreeTextRecyclerAdapter?.visible = value
@@ -358,7 +367,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             contentLiveData?.removeObserver(contentObserver)
             contentLiveData = value?.asRepositoryLiveData(ClazzWorkDao)
             field = value
-            contentLiveData?.observe(viewLifecycleOwner, contentObserver)
+            contentLiveData?.observeIfFragmentViewIsReady(this, contentObserver)
         }
 
 
@@ -367,7 +376,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         set(value) {
             field?.removeObserver(quizQuestionAndResponseObserver)
             field = value
-            value?.observe(viewLifecycleOwner, quizQuestionAndResponseObserver)
+            value?.observeIfFragmentViewIsReady(this, quizQuestionAndResponseObserver)
         }
 
     override var timeZone: String = ""
@@ -378,7 +387,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             val publicCommentsObserverVal = publicCommentsObserver?:return
             publicCommentsLiveData?.removeObserver(publicCommentsObserverVal)
             publicCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
-            publicCommentsLiveData?.observe(viewLifecycleOwner, publicCommentsObserverVal)
+            publicCommentsLiveData?.observeIfFragmentViewIsReady(this, publicCommentsObserverVal)
 
         }
 
@@ -388,7 +397,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             val privateCommentsObserverVal = privateCommentsObserver?:return
             privateCommentsLiveData?.removeObserver(privateCommentsObserverVal)
             privateCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
-            privateCommentsLiveData?.observe(viewLifecycleOwner, privateCommentsObserverVal)
+            privateCommentsLiveData?.observeIfFragmentViewIsReady(this, privateCommentsObserverVal)
         }
 
 
@@ -421,7 +430,15 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
             override fun areContentsTheSame(oldItem: ClazzWorkWithSubmission,
                                             newItem: ClazzWorkWithSubmission): Boolean {
-                return oldItem == newItem
+                return oldItem.clazzWorkUid == newItem.clazzWorkUid
+                        && oldItem.clazzWorkInstructions == newItem.clazzWorkInstructions
+                        && oldItem.clazzWorkCommentsEnabled == newItem.clazzWorkCommentsEnabled
+                        && oldItem.clazzWorkSubmissionType == newItem.clazzWorkSubmissionType
+                        && oldItem.clazzWorkCreatedDate == newItem.clazzWorkCreatedDate
+                        && oldItem.clazzWorkDueDateTime == newItem.clazzWorkDueDateTime
+                        && oldItem.clazzWorkSubmission?.clazzWorkSubmissionInactive == newItem.clazzWorkSubmission?.clazzWorkSubmissionInactive
+                        && oldItem.clazzWorkSubmission?.clazzWorkSubmissionUid == newItem.clazzWorkSubmission?.clazzWorkSubmissionUid
+                //return oldItem == newItem
             }
         }
 
@@ -435,7 +452,17 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
             override fun areContentsTheSame(oldItem: ClazzWorkQuestionAndOptionWithResponse,
                                             newItem: ClazzWorkQuestionAndOptionWithResponse): Boolean {
-                return oldItem == newItem
+
+                return oldItem.clazzWork.clazzWorkUid == newItem.clazzWork.clazzWorkUid &&
+                        oldItem.clazzWorkQuestion.clazzWorkQuestionUid == newItem.clazzWorkQuestion.clazzWorkQuestionUid
+                        && oldItem.clazzWorkQuestion.clazzWorkQuestionText == newItem.clazzWorkQuestion.clazzWorkQuestionText
+                        && oldItem.clazzWorkQuestion.clazzWorkQuestionType == newItem.clazzWorkQuestion.clazzWorkQuestionType
+                        && oldItem.clazzWorkQuestion.clazzWorkQuestionIndex == newItem.clazzWorkQuestion.clazzWorkQuestionIndex
+                        && oldItem.clazzWorkQuestion.clazzWorkQuestionActive == newItem.clazzWorkQuestion.clazzWorkQuestionActive
+                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseInactive == newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseInactive
+                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseUid == newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseUid
+                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseText == newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseText
+                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseOptionSelected == newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseOptionSelected
             }
         }
     }
