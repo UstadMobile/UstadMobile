@@ -35,21 +35,14 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
         inflater.inflate(R.menu.menu_done, menu)
     }
 
-    /**
-     * Set the title of an edit fragment to "New Widget" or "Edit Widget" based on whether or not a new
-     * entity is being created.
-     *
-     * @param entityTitleId the string id for the entity type (e.g. Widget)
-     */
-    protected fun setEditFragmentTitle(entityTitleId: Int)  {
+    protected fun setEditFragmentTitle(newTitleId: Int, editStringId: Int) {
         val entityUid = arguments?.getString(ARG_ENTITY_UID)?.toLong() ?: 0L
         val entityJsonStr = arguments?.getString(UstadEditView.ARG_ENTITY_JSON)
         ustadFragmentTitle = if(entityUid != 0L || entityJsonStr != null){
-            getString(R.string.edit_entity, getString(entityTitleId))
+            getString(editStringId)
         }else {
-            getString(R.string.new_entity, getString(entityTitleId))
+            getString(newTitleId)
         }
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

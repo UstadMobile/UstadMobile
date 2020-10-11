@@ -169,8 +169,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ClazzMemberListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.add_a,
-                requireContext().getString(R.string.teacher))
+        val createNewText = requireContext().getString(R.string.add_a_teacher)
         mStudentListRecyclerViewAdapter = ClazzMemberListRecyclerAdapter(mPresenter).also {
             mStudentListObserver = PagedListSubmitObserver(it)
         }
@@ -178,8 +177,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
                 headerStringId = R.string.teachers_literal,
                 headerLayoutId = R.layout.item_simple_list_header,
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
-        val addStudentText = requireContext().getString(R.string.add_a,
-                requireContext().getString(R.string.students))
+        val addStudentText = requireContext().getString(R.string.add_a_student)
         mNewStudentListRecyclerViewAdapter = NewItemRecyclerViewAdapter(mOnClickAddStudent,
                 addStudentText, headerStringId = R.string.students,
                 headerLayoutId = R.layout.item_simple_list_header)

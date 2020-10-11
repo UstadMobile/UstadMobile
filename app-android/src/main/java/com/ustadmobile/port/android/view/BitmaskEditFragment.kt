@@ -90,7 +90,7 @@ class BitmaskEditFragment: UstadEditFragment<LongWrapper>(), BitmaskEditView,
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.features_enabled)
+        setEditFragmentTitle(R.string.features_enabled, R.string.features_enabled)
     }
 
     override fun onDestroyView() {

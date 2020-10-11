@@ -10,4 +10,6 @@ import kotlinx.serialization.Serializable
 class CommentsWithPerson : Comments() {
     @Embedded
     var commentsPerson: Person ? = null
+
+
 }

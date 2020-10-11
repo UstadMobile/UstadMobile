@@ -11,7 +11,6 @@ class ClazzWorkWithSubmission : ClazzWork() {
     @Embedded
     var clazzWorkSubmission: ClazzWorkSubmission? = null
 
-
     fun generateWithClazzWorkAndClazzWorkSubmission(cw: ClazzWork, cws: ClazzWorkSubmission?): ClazzWorkWithSubmission{
         clazzWorkSubmission = cws
         clazzWorkUid = cw.clazzWorkUid
@@ -34,4 +33,6 @@ class ClazzWorkWithSubmission : ClazzWork() {
 
         return this
     }
+
+
 }

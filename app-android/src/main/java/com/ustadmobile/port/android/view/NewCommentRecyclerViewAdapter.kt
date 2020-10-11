@@ -22,6 +22,7 @@ class NewCommentRecyclerViewAdapter(
         set(value) {
             field = value
             viewHolder?.itemBinding?.commentHandler = newCommentHandler
+            viewHolder?.itemBinding?.commentText = ""
         }
 
     private var publicMode: Boolean = commentPublic
@@ -72,6 +73,7 @@ class NewCommentRecyclerViewAdapter(
                     it.entityUid = entityUid
                     it.toComment = commentTo
                     it.fromComment = commentFrom
+
                 })
     }
 

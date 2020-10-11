@@ -1,45 +1,47 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.ItemSimpleButtonBinding
+import com.toughra.ustadmobile.databinding.ItemSimpleTwoButtonBinding
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
-class SimpleButtonRecyclerAdapter(heading: String, val buttonHandler: SimpleButtonHandler)
-    : SingleItemRecyclerViewAdapter<SimpleButtonRecyclerAdapter.SimpleHeadingViewHolder>() {
+class SimpleTwoButtonRecyclerAdapter(primary: String, secondary: String,
+                                     val buttonHandler: SimpleTwoButtonHandler)
+    : SingleItemRecyclerViewAdapter<SimpleTwoButtonRecyclerAdapter.SimpleHeadingViewHolder>() {
 
-    var buttonText: String? = heading
+    var primaryText: String? = primary
         set(value) {
             field = value
-            viewHolder?.itemBinding?.buttonText = value
+            viewHolder?.itemBinding?.primaryText = value
         }
 
-    var isOutline: Boolean? = false
-        set(value){
+
+    var secondaryText: String? = secondary
+        set(value) {
             field = value
-            viewHolder?.itemBinding?.outline = value
+            viewHolder?.itemBinding?.secondaryText = value
         }
 
-    class SimpleHeadingViewHolder(var itemBinding: ItemSimpleButtonBinding)
+
+    class SimpleHeadingViewHolder(var itemBinding: ItemSimpleTwoButtonBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
     private var viewHolder: SimpleHeadingViewHolder? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleHeadingViewHolder {
         return SimpleHeadingViewHolder(
-                ItemSimpleButtonBinding.inflate(LayoutInflater.from(parent.context),
+                ItemSimpleTwoButtonBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
-                    it.buttonText = buttonText
+                    it.primaryText = primaryText
+                    it.secondaryText = secondaryText
                     it.mHandler = buttonHandler
-                    it.outline = isOutline
                 })
     }
 
     override fun onBindViewHolder(holder: SimpleHeadingViewHolder, position: Int) {
         super.onBindViewHolder(holder, position)
-        holder.itemView.tag = buttonText
+        holder.itemView.tag = primaryText
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

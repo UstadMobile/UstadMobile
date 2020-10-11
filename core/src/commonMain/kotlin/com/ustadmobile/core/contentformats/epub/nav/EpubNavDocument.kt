@@ -212,7 +212,7 @@ class EpubNavDocument {
     }
 
     fun getNavByHref(href: String): EpubNavItem? {
-        val result = navItems.values.asSequence().map { it.findByHref(href) }.firstOrNull { it != null }
+        val result = navElements.asSequence().map { it.findByHref(href) }.firstOrNull { it != null }
                 ?: ncxNavMap?.findByHref(href)
         return result
     }

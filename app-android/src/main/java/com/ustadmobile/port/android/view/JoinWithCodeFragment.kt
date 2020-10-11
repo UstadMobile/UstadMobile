@@ -57,15 +57,13 @@ class JoinWithCodeFragment: UstadBaseFragment(), JoinWithCodeView {
         val tableId = arguments?.get(UstadView.ARG_CODE_TABLE).toString().toInt()
         ustadFragmentTitle = if(tableId == Clazz.TABLE_ID){
             mBinding?.entityType = requireContext().getString(R.string.clazz)
-            requireContext().getString(R.string.join_existing,
-                    requireContext().getString(R.string.clazz))
+            requireContext().getString(R.string.join_existing_class)
         }else if (tableId == School.TABLE_ID){
             mBinding?.entityType = requireContext().getString(R.string.school)
-            requireContext().getString(R.string.join_existing,
-                    requireContext().getString(R.string.school))
+            requireContext().getString(R.string.join_existing_school)
         }else{
             mBinding?.entityType = ""
-            requireContext().getString(R.string.join_existing, "")
+            "ERR - Unknown entity type"
         }
 
         mPresenter = JoinWithCodePresenter(requireContext(), arguments.toStringMap(), this,

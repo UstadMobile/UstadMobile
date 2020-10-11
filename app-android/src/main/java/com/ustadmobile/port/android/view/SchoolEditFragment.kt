@@ -104,7 +104,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.school)
+        setEditFragmentTitle(R.string.add_a_new_school, R.string.edit_school)
         val navController = findNavController()
 
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
@@ -142,7 +142,7 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.school)
+        setEditFragmentTitle(R.string.add_a_new_school, R.string.edit_school)
     }
 
     override var entity: SchoolWithHolidayCalendar? = null
