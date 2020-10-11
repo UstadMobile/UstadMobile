@@ -29,7 +29,7 @@ import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
 
 @AdbScreenRecord("Report Detail Screen Test")
-@RunWith(Parameterized::class)
+//@RunWith(Parameterized::class)
 class ReportDetailFragmentTest(val report: Report){
 
     @JvmField
@@ -54,7 +54,7 @@ class ReportDetailFragmentTest(val report: Report){
 
     lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
 
-    @Before
+    //@Before
     fun setup() {
         runBlocking {
             dbRule.db.insertTestStatements()
@@ -63,7 +63,7 @@ class ReportDetailFragmentTest(val report: Report){
 
 
     @AdbScreenRecord("show report on detail")
-    @Test
+    //@Test
     fun givenReportExists_whenLaunched_thenShouldShowReport() {
         val reportUid = dbRule.db.reportDao.insert(report)
 
@@ -89,7 +89,7 @@ class ReportDetailFragmentTest(val report: Report){
 
 
         @JvmStatic
-        @Parameterized.Parameters
+        //@Parameterized.Parameters
         fun data(): Iterable<Report> {
             return listOf(ReportWithFilters().apply {
                 chartType = Report.BAR_CHART

@@ -39,7 +39,7 @@ class RedirectFragmentTest {
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     @AdbScreenRecord("given app launched when navigating from on-boarding screen should navigate to get started")
-    @Test
+    //@Test
     fun givenAppLaunched_whenNavigateFromOnBoardingScreen_thenShouldNavigateToGetStarted() {
         launchFragment(true)
 
@@ -48,7 +48,7 @@ class RedirectFragmentTest {
     }
 
     @AdbScreenRecord("given app launched when navigating from other screen should navigate to content list")
-    @Test
+    //@Test
     fun givenAppLaunched_whenNavigateFromOtherScreens_thenShouldNavigateContentList() {
         launchFragment()
 

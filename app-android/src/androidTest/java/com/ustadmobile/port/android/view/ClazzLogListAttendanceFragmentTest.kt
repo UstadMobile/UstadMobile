@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.port.android.screen.ClazzLogListAttendanceScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
@@ -41,14 +42,6 @@ class ClazzLogListAttendanceFragmentTest {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
-    @JvmField
-    @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
     @JvmField
@@ -58,10 +51,10 @@ class ClazzLogListAttendanceFragmentTest {
     @JvmField
     @Rule
     val dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true,
-        account = UmAccount(7L, "bond", "", "http://localhost"))
+            account = UmAccount(7L, "bond", "", "http://localhost"))
 
     @After
-    fun tearDown(){
+    fun tearDown() {
         UstadMobileSystemImpl.instance.navController = null
     }
 
@@ -76,18 +69,24 @@ class ClazzLogListAttendanceFragmentTest {
         }
 
         launchFragmentInContainer(
-            bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to clazzAndMembers.clazz.clazzUid.toString()),
+                bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to clazzAndMembers.clazz.clazzUid.toString()),
                 themeResId = R.style.UmTheme_App
-        ){ ClazzLogListAttendanceFragment().also {
-            it.installNavController(systemImplNavRule.navController) }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        ) {
+            ClazzLogListAttendanceFragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }
 
+        ClazzLogListAttendanceScreen {
 
-        onView(withId(R.id.fragment_list_recyclerview)).check(matches(isDisplayed()))
-        onView(withId(R.id.fragment_list_recyclerview))
-                .perform(
-                        RecyclerViewActions.actionOnItemAtPosition<RecyclerView.ViewHolder>(1, click()))
+            recycler {
+                isDisplayed()
+                childAt<ClazzLogListAttendanceScreen.MainItem>(1) {
+                    click()
+                }
+            }
+
+        }
 
         Assert.assertEquals("After clicking on attendance log, fragment goes to attendance view",
                 R.id.clazz_log_edit_attendance_dest, systemImplNavRule.navController.currentDestination?.id)
@@ -109,27 +108,36 @@ class ClazzLogListAttendanceFragmentTest {
         val timeRange = (timeNow - oneWeekInMs) to timeNow
 
         val numInClazz = 10
-        runBlocking { dbRule.db.insertClazzLogs(testClazz.clazzUid, 5) {index ->
-            ClazzLog().apply {
-                logDate = timeRange.first + (index * oneDayInMs) + (1000 * 60 * 60 * 8)
-                clazzLogNumAbsent = if(index.rem(2) == 0) 2 else 4
-                clazzLogNumPartial = if(index.rem(2) == 0) 1 else 2
-                clazzLogNumPresent = numInClazz - (clazzLogNumAbsent + clazzLogNumPartial)
-                clazzLogStatusFlag = ClazzLog.STATUS_RECORDED
+        runBlocking {
+            dbRule.db.insertClazzLogs(testClazz.clazzUid, 5) { index ->
+                ClazzLog().apply {
+                    logDate = timeRange.first + (index * oneDayInMs) + (1000 * 60 * 60 * 8)
+                    clazzLogNumAbsent = if (index.rem(2) == 0) 2 else 4
+                    clazzLogNumPartial = if (index.rem(2) == 0) 1 else 2
+                    clazzLogNumPresent = numInClazz - (clazzLogNumAbsent + clazzLogNumPartial)
+                    clazzLogStatusFlag = ClazzLog.STATUS_RECORDED
+                }
             }
-        } }
+        }
 
         launchFragmentInContainer(
                 bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()),
                 themeResId = R.style.UmTheme_App
-        ){ ClazzLogListAttendanceFragment().also {
-            it.installNavController(systemImplNavRule.navController) }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        ) {
+            ClazzLogListAttendanceFragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }
 
-        onView(withId(R.id.fragment_list_recyclerview)).check(
-                matches(childOfViewAtPositionWithMatcher(R.id.chart, 0,
-                        isDisplayed())))
+        ClazzLogListAttendanceScreen {
+            recycler {
+                childAt<ClazzLogListAttendanceScreen.MainItem>(0){
+                    chartGraph{
+                        isDisplayed()
+                    }
+                }
+            }
+        }
     }
 
 

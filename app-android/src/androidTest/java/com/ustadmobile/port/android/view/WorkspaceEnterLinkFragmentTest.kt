@@ -13,6 +13,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.port.android.screen.WorkSpaceEnterLinkScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
@@ -42,21 +43,11 @@ class WorkspaceEnterLinkFragmentTest {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
     val screenRecordRule = AdbScreenRecordRule()
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     private val context = ApplicationProvider.getApplicationContext<Application>()
 
     private lateinit var mockWebServer: MockWebServer
-
-    private val defaultTimeout: Long = 5000
 
     @Before
     fun setup(){
@@ -82,13 +73,17 @@ class WorkspaceEnterLinkFragmentTest {
                 .setHeader("Content-Type", "application/json")
                 .setBody(Buffer().write(workSpace.toByteArray())))
 
-        launchFragment(mockWebServer.url("/").toString())
+        WorkSpaceEnterLinkScreen{
 
-        sleep(defaultTimeout)
-        onView(withId(R.id.next_button)).check(matches(isDisplayed()))
+            launchFragment(mockWebServer.url("/").toString(), systemImplNavRule)
+            nextButton{
+                isDisplayed()
+            }
+            enterLinkTextInput{
+                not(hasInputLayoutError(context.getString(R.string.invalid_link)))
+            }
 
-        onView(withId(R.id.workspace_link_view)).check(matches(
-                not(hasInputLayoutError(context.getString(R.string.invalid_link)))))
+        }
     }
 
     @AdbScreenRecord("given invalid workspace link when checked should not show next button")
@@ -96,25 +91,19 @@ class WorkspaceEnterLinkFragmentTest {
     fun givenInValidWorkSpaceLink_whenCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
         mockWebServer.enqueue(MockResponse().setResponseCode(404))
 
-        launchFragment(mockWebServer.url("/").toString())
+        WorkSpaceEnterLinkScreen {
 
-        sleep(defaultTimeout)
-        onView(withId(R.id.next_button)).check(matches(not(isDisplayed())))
-        onView(withId(R.id.workspace_link_view)).check(matches(
-                hasInputLayoutError(context.getString(R.string.invalid_link))))
-    }
+            launchFragment(mockWebServer.url("/").toString(), systemImplNavRule)
 
-
-    private fun launchFragment(workSpaceLink: String){
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf()) {
-            WorkspaceEnterLinkFragment().also {
-                it.installNavController(systemImplNavRule.navController)
+            nextButton{
+                isNotDisplayed()
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+            enterLinkTextInput {
+                hasInputLayoutError(context.getString(R.string.invalid_link))
+            }
 
-        onView(withId(R.id.organisation_link)).perform(typeText(workSpaceLink))
+        }
+
     }
 
 }

@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
@@ -157,4 +158,4 @@ class MainActivityIntentTest {
     }
 
 
-}
+}*/

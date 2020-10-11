@@ -71,7 +71,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
     private lateinit var di: DI
 
     @Before
-    fun setup(){
+    fun setup() {
         di = (ApplicationProvider.getApplicationContext<Context>() as DIAware).di
     }
 
@@ -80,7 +80,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
     fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntryWithProgressComplete() {
 
         val entryTitle = "Dummy Title"
-        init{
+        init {
 
             val testEntry = ContentEntryWithLanguage().apply {
                 title = entryTitle
@@ -114,16 +114,15 @@ class ContentEntry2DetailFragmentTest : TestCase() {
 
             ContentEntryDetailScreen {
 
-                flakySafely(15000){
-                    entryTitleTextView {
-                        isDisplayed()
-                        hasText(entryTitle)
-                    }
+                entryTitleTextView {
+                    isDisplayed()
+                    hasText(entryTitle)
                 }
-                progress{
+
+                progress {
                     isDisplayed()
                 }
-                progressCheck{
+                progressCheck {
                     isDisplayed()
                 }
 
@@ -133,15 +132,13 @@ class ContentEntry2DetailFragmentTest : TestCase() {
         }
 
 
-
-
     }
 
     @AdbScreenRecord("Given content entry exists should show user selected content entry with no progress")
     @Test
     fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntryWithProgressHidden() {
         val entryTitle = "Dummy Title"
-        init{
+        init {
 
             val testEntry = ContentEntryWithLanguage().apply {
                 title = entryTitle
@@ -159,19 +156,17 @@ class ContentEntry2DetailFragmentTest : TestCase() {
 
         }.run {
 
-            ContentEntryDetailScreen{
+            ContentEntryDetailScreen {
 
-                flakySafely(15000) {
-                    entryTitleTextView{
-                        isDisplayed()
-                        hasText(entryTitle)
-                    }
+                entryTitleTextView {
+                    isDisplayed()
+                    hasText(entryTitle)
                 }
 
-                progress{
+                progress {
                     isNotDisplayed()
                 }
-                progressCheck{
+                progressCheck {
                     isNotDisplayed()
                 }
 
@@ -179,8 +174,6 @@ class ContentEntry2DetailFragmentTest : TestCase() {
 
 
         }
-
-
 
 
     }
@@ -191,7 +184,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
     fun givenContentEntryWithTranslationExists_whenLaunched_thenShouldShowTranslations() {
         val parentUid = 10000L
         val totalTranslations = 5
-        var  testEntry: ContentEntry? = null
+        var testEntry: ContentEntry? = null
         init {
             testEntry = runBlocking {
                 dbRule.db.insertContentEntryWithTranslations(totalTranslations, parentUid)
@@ -205,13 +198,11 @@ class ContentEntry2DetailFragmentTest : TestCase() {
             }
         }.run {
 
-            ContentEntryDetailScreen{
+            ContentEntryDetailScreen {
 
-                flakySafely(15000) {
-                    entryTitleTextView {
-                        isDisplayed()
-                        hasText(testEntry!!.title!!)
-                    }
+                entryTitleTextView {
+                    isDisplayed()
+                    hasText(testEntry!!.title!!)
                 }
 
                 translationsList {
@@ -225,8 +216,6 @@ class ContentEntry2DetailFragmentTest : TestCase() {
 
 
         }
-
-
 
 
     }
@@ -248,12 +237,12 @@ class ContentEntry2DetailFragmentTest : TestCase() {
             }
         }
 
-        ContentEntryDetailScreen{
+        ContentEntryDetailScreen {
 
-            translationsList{
+            translationsList {
                 isDisplayed()
                 hasChildCount(totalTranslations)
-                emptyChildAt(1){
+                emptyChildAt(1) {
                     click()
                 }
             }

@@ -6,23 +6,17 @@ import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.matcher.ViewMatchers.withTagValue
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
-import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.hamcrest.Matchers
-import org.hamcrest.core.AllOf.allOf
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -38,16 +32,8 @@ class SortListFragmentTest {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
     @AdbScreenRecord("given a person list, when sort option clicked, then show Sort List and change sort")
-    @Test
+    //@Test
     fun givenPersonPresent_whenOnSortOptionClicked_thenShoulShowBottomFragAndChangeSort() {
 
         val admin = Person().apply {
@@ -72,8 +58,7 @@ class SortListFragmentTest {
             PersonListFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
 
         fragmentScenario.onFragment {
             Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)

@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import androidx.test.core.app.launchActivity
@@ -72,4 +73,4 @@ class MainActivityTest {
     }
 
 
-}
+}*/

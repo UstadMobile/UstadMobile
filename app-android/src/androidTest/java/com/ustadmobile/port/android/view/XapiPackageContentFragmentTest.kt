@@ -15,6 +15,7 @@ import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.android.screen.XapiContentScreen
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
@@ -40,15 +41,6 @@ class XapiPackageContentFragmentTest {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
-
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
 
     @JvmField
     @Rule
@@ -92,12 +84,16 @@ class XapiPackageContentFragmentTest {
             XapiPackageContentFragment().also { fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
 
-        //verify that there is a header link with Home title
-        onWebView().withElement(findElement(Locator.TAG_NAME, "a"))
-                .check(webMatches(getText(), containsString("Tin Can Home")))
+
+        XapiContentScreen{
+            webView{
+                withElement(Locator.TAG_NAME, "a"){
+                    hasText("Tin Can Home")
+                }
+            }
+        }
 
         //clean up
         containerTmpDir.deleteRecursively()

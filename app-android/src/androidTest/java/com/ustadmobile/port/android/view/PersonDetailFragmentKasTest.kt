@@ -38,7 +38,7 @@ class PersonDetailFragmentKasTest : TestCase() {
     val screenRecordRule = AdbScreenRecordRule()
 
     @AdbScreenRecord("given person when active user details is opened and account management is allowed then should show change password option")
-    @Test
+    //@Test
     fun givenPersonDetails_whenOpenedActivePersonDetailPersonAndCanManageAccount_thenChangePasswordShouldBeShown(){
         before {
             launchFragment(false, sameUser = true)
@@ -60,7 +60,7 @@ class PersonDetailFragmentKasTest : TestCase() {
 
 
     @AdbScreenRecord("given person detail when admin logged and username is null and account management allowed then should show create account option")
-    @Test
+    //@Test
     fun givenPersonDetailsAndAdminLogged_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldBeShown(){
         before {
             launchFragment(withUsername = false)
@@ -80,7 +80,7 @@ class PersonDetailFragmentKasTest : TestCase() {
     }
 
     @AdbScreenRecord("given person detail when admin logged in and username is not null and account management allowed then should show change password option")
-    @Test
+    //@Test
     fun givenPersonDetailsAndAdminLogged_whenPersonUsernameIsNotNullAndCanManageAccount_thenChangePasswordShouldBeShown(){
         before {
             launchFragment(true)
@@ -100,7 +100,7 @@ class PersonDetailFragmentKasTest : TestCase() {
     }
 
     @AdbScreenRecord("given create account visible when clicked should open person account edit screen")
-    @Test
+    //@Test
     fun givenCreateAccountVisible_whenClicked_shouldOpenPersonAccountEditScreen(){
 
 
@@ -123,7 +123,7 @@ class PersonDetailFragmentKasTest : TestCase() {
     }
 
     @AdbScreenRecord("given change password visible when clicked should open person account screen")
-    @Test
+    //@Test
     fun givenChangePasswordVisible_whenClicked_shouldOpenPersonAccountSection(){
 
         before {
