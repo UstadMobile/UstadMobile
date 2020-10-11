@@ -130,7 +130,7 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
                             repo.updateTableSyncStatusLastChanged(tableId, systemTimeInMillis())
                             invalidate()
                             httpClient.get<Unit>("${repo.endpoint}$syncDaoNotificationReceivedPath?" +
-                                    "deviceId=${repo.clientId}&$HEADER_DBVERSION=$dbVersion&notificationId=${message.id}")
+                                    "deviceId=${repo.clientId}&$HEADER_DBVERSION=$dbVersion&tableId=$tableId&lastModTimestamp=$lastModified")
                         }
                     }
                 }

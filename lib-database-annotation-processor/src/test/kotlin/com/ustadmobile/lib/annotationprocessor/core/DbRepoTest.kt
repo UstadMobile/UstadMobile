@@ -270,13 +270,22 @@ class DbRepoTest {
                     "token", httpClient, useClientSyncManager = true)
                     .asConnectedRepository()
 
-
+            //Wait for the entity to land on the client
             clientDb.waitUntil(10000, listOf("ExampleSyncableEntity")) {
                 clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid) != null
             }
 
+            //Wait for the server to delete the update notifications
+            serverDb.waitUntil(10000, listOf("UpdateNotification")) {
+                serverDb.updateNotificationTestDao().getUpdateNotificationsForDevice(clientId).isEmpty()
+            }
+
             Assert.assertNotNull("Entity is in client database after sync",
                     clientDb.exampleSyncableDao().findByUid(exampleSyncableEntity.esUid))
+
+            Assert.assertEquals("Processed updateNotifications have been deleted", 0,
+                    serverDb.updateNotificationTestDao().getUpdateNotificationsForDevice(clientId).size)
+
         }
     }
 
@@ -564,7 +573,10 @@ class DbRepoTest {
                 "token", httpClient).asConnectedRepository<ExampleDatabase2>()
 
         val clientSyncManager = ClientSyncManager(clientRepo as DoorDatabaseSyncRepository,
-            2, STATUS_CONNECTED, "ExampleDatabase2/ExampleDatabase2SyncDao/_subscribe")
+            2, STATUS_CONNECTED,
+                "ExampleDatabase2/ExampleDatabase2SyncDao/${DbProcessorSync.ENDPOINT_POSTFIX_UPDATES}",
+                "ExampleDatabase2/ExampleDatabase2SyncDao/${DbProcessorSync.ENDPOINT_POSTFIX_DELETE_UPDATE}",
+                httpClient)
 
 
         val testUid = 42L

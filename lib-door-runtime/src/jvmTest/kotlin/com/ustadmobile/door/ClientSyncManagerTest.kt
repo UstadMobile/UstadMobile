@@ -4,6 +4,7 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.door.DoorDatabaseRepository.Companion.STATUS_CONNECTED
 import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
+import com.ustadmobile.door.ktor.respondUpdateNotificationReceived
 import com.ustadmobile.door.ktor.respondUpdateNotifications
 import com.ustadmobile.door.util.systemTimeInMillis
 import io.ktor.application.ApplicationCall
@@ -50,7 +51,7 @@ class ClientSyncManagerTest {
         }
 
         val clientSyncManager = ClientSyncManager(mockRepo, 2, STATUS_CONNECTED,
-                "none")
+                "none", "none", HttpClient())
 
         //wait for the initial load
         verify(mockRepo, timeout(4000)).findTablesToSync()
@@ -76,15 +77,19 @@ class ClientSyncManagerTest {
         val updateListeners = mutableListOf<UpdateNotificationListener>()
 
         val exampleTableId = 42
+        val updateNotificationId = 5000L
+        val notificationTime = systemTimeInMillis()
+
         val mockRepo = mock<DoorDatabaseSyncRepository> {
             on { tableIdMap }.thenReturn(mapOf("Example" to exampleTableId))
             on { endpoint }.thenReturn("http://localhost:8089/")
+            on { clientId }.thenReturn(57)
         }
 
         val mockServerRepo = mock<DoorDatabaseSyncRepository> {
             on { tableIdMap }.thenReturn(mapOf("Example" to exampleTableId))
             onBlocking { findPendingUpdateNotifications(any()) }.thenReturn(
-                    listOf(UpdateNotification(5000, 1234, exampleTableId, systemTimeInMillis())))
+                    listOf(UpdateNotification(updateNotificationId, 1234, exampleTableId, notificationTime)))
         }
 
         val mockUpdateNotificationManager = mock<ServerUpdateNotificationManager> {
@@ -112,17 +117,29 @@ class ClientSyncManagerTest {
                 get("ExampleDatabaseSyncDao/_subscribe") {
                     call.respondUpdateNotifications(mockServerRepo)
                 }
+
+                get("ExampleDatabaseSyncDao/_deleteNotification") {
+                    call.respondUpdateNotificationReceived(mockServerRepo)
+                }
             }
 
         }
         server.start()
 
+        val httpClient = HttpClient()
+
         val clientSyncManager = ClientSyncManager(mockRepo, 2,  STATUS_CONNECTED,
-            "ExampleDatabaseSyncDao/_subscribe")
+            "ExampleDatabaseSyncDao/_subscribe",
+                "ExampleDatabaseSyncDao/_deleteNotification",
+                httpClient)
 
         runBlocking {
             verifyBlocking(mockRepo, timeout(30000)) {
                 updateTableSyncStatusLastChanged(eq(exampleTableId), any())
+            }
+
+            verifyBlocking(mockServerRepo, timeout(10000)) {
+                deleteUpdateNotification(mockRepo.clientId, exampleTableId, notificationTime)
             }
         }
 

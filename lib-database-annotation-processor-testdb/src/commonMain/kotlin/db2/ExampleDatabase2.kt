@@ -41,6 +41,9 @@ abstract class ExampleDatabase2 : DoorDatabase(), SyncableDoorDatabase {
 
     abstract fun accessGrantDao(): AccessGrantDao
 
+    abstract fun updateNotificationTestDao(): UpdateNotificationTestDao
+
+
     //#DOORDB_SYNCDAO
 
 

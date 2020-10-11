@@ -24,10 +24,18 @@ interface DoorDatabaseSyncRepository: DoorDatabaseRepository {
     suspend fun findPendingUpdateNotifications(deviceId: Int): List<UpdateNotification>
 
     /**
-     * This will delete the given UpdateNotification. It should be called after an update notification
-     * has been delivered to the client
+     * This will delete the matching UpdateNotification. It should be called after an update notification
+     * has been delivered to the client (via the client making an http request answered by
+     * lib-door-runtime RespondUpdateNotifications.respondUpdateNotificationReceived).
+     *
+     * Note this is not done using the actual notification uid because this is not known when
+     * the server sends it live
+     *
+     * @param deviceId The deviceid as per the UpdateNotification
+     * @param tableId The tableId as per the UpdateNotification
+     * @param lastModTimestamp The pnTimestamp as per the UpdateNotification
      */
-    suspend fun deleteUpdateNotification(uid: Long, deviceId: Int)
+    suspend fun deleteUpdateNotification(deviceId: Int, tableId: Int, lastModTimestamp: Long)
 
     /**
      * This will be implemented by generated code to run the query. It will find a list of any

@@ -216,13 +216,23 @@ class DbProcessorSync: AbstractDbProcessor() {
                 MemberName("io.ktor.routing", "route"), abstractDaoSimpleName)
 
         //Route for clients to subscribe for updates
-        codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER, "_subscribe")
+        codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER, ENDPOINT_POSTFIX_UPDATES)
                 .add("val _repo: %T by %M().%M(call).%M(tag = %T.TAG_REPO)\n",
                     dbType, MemberName("org.kodein.di.ktor", "di"),
                     DI_ON_MEMBER, DI_INSTANCE_MEMBER, DoorTag::class)
                 .add("call.%M(_repo as %T)\n",
                         MemberName("com.ustadmobile.door.ktor", "respondUpdateNotifications"),
                         DoorDatabaseSyncRepository::class)
+                .endControlFlow()
+
+        //Route for clients to callback to notify that they have received an update
+        codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER, ENDPOINT_POSTFIX_DELETE_UPDATE)
+                .add("val _repo: %T by %M().%M(call).%M(tag = %T.TAG_REPO)\n",
+                        dbType, MemberName("org.kodein.di.ktor", "di"),
+                        DI_ON_MEMBER, DI_INSTANCE_MEMBER, DoorTag::class)
+                .add("call.%M(_repo as %T)",
+                    MemberName("com.ustadmobile.door.ktor","respondUpdateNotificationReceived"),
+                    DoorDatabaseSyncRepository::class)
                 .endControlFlow()
 
         //Route for clients to acknowledge an update notification as received
@@ -235,19 +245,6 @@ class DbProcessorSync: AbstractDbProcessor() {
                         MemberName("com.ustadmobile.door.ktor", "respondUpdateNotificationReceived"),
                         DoorDatabaseSyncRepository::class)
                 .endControlFlow()
-
-        codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER, "_deleteUpdateNotifications")
-                .addRequestDi()
-                .add(generateGetParamFromRequestCodeBlock(LONG, "timestamp", "_timestamp",
-                        serverType = DbProcessorKtorServer.SERVER_TYPE_KTOR))
-                .add(generateGetParamFromRequestCodeBlock(INT, "tableId", "_tableId",
-                        serverType = DbProcessorKtorServer.SERVER_TYPE_KTOR))
-                .addGetClientIdHeader("_clientId", DbProcessorKtorServer.SERVER_TYPE_KTOR)
-                .add("val _dao = _daoFn(_db)\n")
-                .add("_dao._deleteUpdateNotifications(_clientId, _tableId, _timestamp)\n")
-                .add("call.respond(%T.NoContent, %S)\n", HttpStatusCode::class, "")
-                .endControlFlow()
-
 
 
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
@@ -429,18 +426,18 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addCode("return _dao.findPendingUpdateNotifications(deviceId)\n")
                 .build())
 
+        repoTypeSpec.addFunction(FunSpec.builder("deleteUpdateNotification")
+                .addParameter("deviceId", INT)
+                .addParameter("tableId", INT)
+                .addParameter("lastModTimestamp", LONG)
+                .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                .addCode("_dao.deleteUpdateNotification(deviceId, tableId, lastModTimestamp)\n")
+                .build())
+
         repoTypeSpec.addFunction(FunSpec.builder("findTablesWithPendingChangeLogs")
                 .returns(List::class.parameterizedBy(Int::class))
                 .addModifiers(KModifier.SUSPEND, KModifier.OVERRIDE)
                 .addCode("return _dao.findTablesWithPendingChangeLogs()\n")
-                .build())
-
-        repoTypeSpec.addFunction(FunSpec.builder("_deleteUpdateNotifications")
-                .addParameter("deviceId", INT)
-                .addParameter("tableId", INT)
-                .addParameter("timestamp", LONG)
-                .addCode("return _dao._deleteUpdateNotifications(deviceId, tableId, timestamp)\n")
-                .addModifiers(KModifier.OVERRIDE)
                 .build())
 
         repoTypeSpec.addFunction(FunSpec.builder("updateTableSyncStatusLastChanged")
@@ -758,6 +755,20 @@ class DbProcessorSync: AbstractDbProcessor() {
         implDaoTypeSpec.addFunction(implFindUpdateFN)
         abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceFindUpdateFn)
 
+        //deleteUpdateNotification - as declared in DoorDatabaseSyncRepository
+        val (abstractDeleteUpdateNotificationFn, implDeleteUpdateNotificationFn, abstractInterfaceDeleteNotificationFn) =
+                generateAbstractAndImplQueryFunSpecs("DELETE FROM UpdateNotification WHERE " +
+                        "pnDeviceId = :clientId AND pnTableId = :tableId AND pnTimestamp = :lastModTimestamp",
+                        "deleteUpdateNotification",
+                        UNIT,
+                        listOf(ParameterSpec("clientId", INT),
+                                ParameterSpec("tableId", INT),
+                                ParameterSpec("lastModTimestamp", LONG)),
+                    addReturnStmt = false, abstractFunIsOverride = true, suspended = true)
+        abstractDaoTypeSpec.addFunction(abstractDeleteUpdateNotificationFn)
+        implDaoTypeSpec.addFunction(implDeleteUpdateNotificationFn)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceDeleteNotificationFn)
+
         val (abstractFindPendingChangeLogs, implFindPendingChangeLogs, abstractInterfaceFindPendingChangeLogs) =
                 generateAbstractAndImplQueryFunSpecs("SELECT DISTINCT chTableId FROM ChangeLog WHERE CAST(dispatched AS INTEGER) = 0",
                 "findTablesWithPendingChangeLogs", List::class.parameterizedBy(Int::class),
@@ -803,20 +814,6 @@ class DbProcessorSync: AbstractDbProcessor() {
         abstractDaoTypeSpec.addFunction(abstractFindTablesToSyncFn)
         implDaoTypeSpec.addFunction(implFindTablesToSyncFn)
         abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceFindTablesToSyncFn)
-
-
-        val (abstractDeleteUpdateNotification, implDeleteUpdateNotification, abstractInterfaceDeleteUpdateNotification) =
-                generateAbstractAndImplQueryFunSpecs("DELETE FROM UpdateNotification WHERE " +
-                        "pnDeviceId = :deviceId AND pnTableId = :tableId AND pnTimestamp = :timestamp",
-                        "_deleteUpdateNotifications", UNIT,
-                        listOf(ParameterSpec("deviceId", INT),
-                                ParameterSpec("tableId", INT),
-                                ParameterSpec("timestamp", LONG)),
-                        addReturnStmt = false, abstractFunIsOverride = true)
-        abstractDaoTypeSpec.addFunction(abstractDeleteUpdateNotification)
-        implDaoTypeSpec.addFunction(implDeleteUpdateNotification)
-        abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceDeleteUpdateNotification)
-
 
 
         val updateNotificationClassName = UpdateNotification::class.asClassName()
@@ -1035,6 +1032,19 @@ class DbProcessorSync: AbstractDbProcessor() {
         const val TRACKER_TIMESTAMP_FIELDNAME = "ts"
 
         val SYSTEMTIME_MEMBER_NAME = MemberName("com.ustadmobile.door.util", "systemTimeInMillis")
+
+        /**
+         * The path postfix to be used in the Sync HTTP Server for the url to a Server Sent Events source
+         *
+         * e.g. path will be DbName/DbNameSyncDao/_updateNotifications
+         */
+        const val ENDPOINT_POSTFIX_UPDATES = "_updateNotifications"
+
+        /**
+         * The path postfix to be used in the Sync HTTP Server for the url that will delete an update
+         * notification that has been received
+         */
+        const val ENDPOINT_POSTFIX_DELETE_UPDATE = "_deleteUpdateNotification"
     }
 
 }

@@ -68,13 +68,21 @@ suspend fun ApplicationCall.respondUpdateNotifications(repo: DoorDatabaseSyncRep
 }
 
 /**
- * Server endpoint to receive acknowledgement from the client that it has received an update.
+ * Server endpoint to receive an acknowledgement from the client that it has received an
+ * UpdateNotification. This is done without using the primary key UID because if this was pushed
+ * live to the client using ServerUpdateNotificationManager.onNewUpdateNotifications then the
+ * key was not known at the time.
+ *
+ * This will delete the UpdateNotification entity from the database
+ * @param repo The DoorDatabaseSyncRepository we are responding for
  */
 suspend fun ApplicationCall.respondUpdateNotificationReceived(repo: DoorDatabaseSyncRepository) {
-    val notificationId = request.queryParameters["notificationId"]?.toLong() ?: 0L
     val deviceId = request.queryParameters["deviceId"]?.toInt() ?: 0
+    val tableId = request.queryParameters["tableId"]?.toInt() ?: 0
+    val lastModTimestamp = request.queryParameters["lastModTimestamp"]?.toLong() ?: 0
 
-    repo.deleteUpdateNotification(notificationId, deviceId)
-    Napier.d("[respondUpdateNotificationReceived] - delete notification $notificationId for $deviceId")
+    repo.deleteUpdateNotification(deviceId, tableId, lastModTimestamp)
+    Napier.d("[respondUpdateNotificationReceived] - delete notification for $deviceId / " +
+            "table id $tableId ts=$lastModTimestamp")
     respond(HttpStatusCode.NoContent, "")
 }
