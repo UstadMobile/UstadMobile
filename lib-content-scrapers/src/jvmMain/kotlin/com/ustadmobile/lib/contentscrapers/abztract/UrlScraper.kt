@@ -36,14 +36,6 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
         val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
         val headRequestValues = isUrlContentUpdated(url, recentContainer)
-        val supported = mimeTypeSupported.find { fileMimeType -> fileMimeType == headRequestValues.mimeType }
-
-        if (supported == null) {
-            Napier.i("$logPrefix with sourceUrl $sourceUrl had mimeType ${headRequestValues.mimeType} which is not supported", tag = SCRAPER_TAG)
-            hideContentEntry()
-            setScrapeDone(false, ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED)
-            return
-        }
 
         if(recentContainer != null){
             if (!headRequestValues.isUpdated) {

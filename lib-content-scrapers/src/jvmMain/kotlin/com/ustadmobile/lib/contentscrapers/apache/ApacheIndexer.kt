@@ -10,6 +10,8 @@ import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
+import com.ustadmobile.port.sharedse.contentformats.extSupported
+import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.kodein.di.DI
@@ -57,48 +59,37 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
         document.select("tr:has([alt])").forEachIndexed { counter, it ->
 
             val alt = it.select("td [alt]").attr("alt")
-            var conn: HttpURLConnection? = null
             try {
                 val element = it.select("td a")
                 val href = element.attr("href")
                 val title = element.text()
                 val hrefUrl = URL(url, href)
 
+                if(alt == "[PARENTDIR]" || alt == "[ICO]"){
+                    return@forEachIndexed
+                }
+
                 if (alt == "[DIR]") {
 
                     Napier.i("$logPrefix found new directory with title $title for parent folder $folderTitle", tag = SCRAPER_TAG)
+                    createQueueItem(hrefUrl.toString(), null, ScraperTypes.APACHE_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, folderEntry.contentEntryUid)
 
-                    val childEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, hrefUrl.toString(), folderEntry.primaryLanguageUid, title)
-                    ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, folderEntry, childEntry, counter)
-                    createQueueItem(hrefUrl.toString(), childEntry, ScraperTypes.APACHE_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, folderEntry.contentEntryUid)
-
-                } else if (alt == "[   ]") {
+                } else {
 
                     Napier.i("$logPrefix found new file with title $title for parent folder $folderTitle", tag = SCRAPER_TAG)
-
-                    conn = hrefUrl.openConnection() as HttpURLConnection
-                    conn.requestMethod = "HEAD"
-                    val mimeType = conn.contentType
-
-                    val supported = mimeTypeSupported.find { fileMimeType -> fileMimeType == mimeType }
+                    val ext = href.substringAfterLast(".")
+                    val supported = extSupported.find { extension -> extension.toLowerCase() == ext.toLowerCase() }
 
                     if (supported != null) {
-                        Napier.d("$logPrefix file $title with $mimeType found", tag = SCRAPER_TAG)
-
-                        val childEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, hrefUrl.toString(), folderEntry.primaryLanguageUid, title)
-                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, folderEntry, childEntry, counter)
-                        createQueueItem(hrefUrl.toString(), childEntry, ScraperTypes.URL_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, folderEntry.contentEntryUid)
+                        Napier.d("$logPrefix file $title with $ext found", tag = SCRAPER_TAG)
+                        createQueueItem(hrefUrl.toString(), null, ScraperTypes.URL_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, folderEntry.contentEntryUid)
                     } else {
-                        Napier.i("$logPrefix file: $title not supported with mimeType: $mimeType", tag = SCRAPER_TAG)
+                        Napier.i("$logPrefix file: $title not supported with mimeType: $ext", tag = SCRAPER_TAG)
                     }
-                } else {
-                    Napier.i("$logPrefix found unknown apache: $title not supported with alt: $alt", tag = SCRAPER_TAG)
                 }
             } catch (e: Exception) {
                 Napier.e("$logPrefix Error during directory search on $srcUrl", tag = SCRAPER_TAG)
                 Napier.e("$logPrefix ${ExceptionUtils.getStackTrace(e)}", tag = SCRAPER_TAG)
-            } finally {
-                conn?.disconnect()
             }
         }
 

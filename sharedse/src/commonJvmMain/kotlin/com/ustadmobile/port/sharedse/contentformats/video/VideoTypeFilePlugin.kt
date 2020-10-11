@@ -12,7 +12,7 @@ class VideoTypeFilePlugin : VideoTypePlugin(), ContentTypeFilePlugin {
 
     override fun getContentEntry(file: File): ContentEntryWithLanguage? {
 
-        fileExtensions.find { file.name.endsWith(it) } ?: return null
+        fileExtensions.find { file.name.endsWith(it, true) } ?: return null
 
         return ContentEntryWithLanguage().apply {
             this.title = file.nameWithoutExtension
