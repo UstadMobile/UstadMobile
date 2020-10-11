@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
