@@ -10,6 +10,8 @@ import com.ustadmobile.door.sse.DoorEventListener
 import com.ustadmobile.door.sse.DoorEventSource
 import com.ustadmobile.door.sse.DoorServerSentEvent
 import com.ustadmobile.door.util.systemTimeInMillis
+import io.ktor.client.HttpClient
+import io.ktor.client.request.get
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
@@ -25,7 +27,10 @@ import kotlin.math.min
  */
 class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int,
                         initialConnectivityStatus: Int,
-                        private val syncDaoSubscribePath: String, val maxProcessors: Int = 5): TableChangeListener {
+                        private val syncDaoSubscribePath: String,
+                        private val syncDaoNotificationReceivedPath: String,
+                        val httpClient: HttpClient,
+                        val maxProcessors: Int = 5): TableChangeListener {
 
     val updateCheckJob: AtomicRef<Job?> = atomic(null)
 
@@ -124,6 +129,8 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
                                     tag = LOG_TAG)
                             repo.updateTableSyncStatusLastChanged(tableId, systemTimeInMillis())
                             invalidate()
+                            httpClient.get<Unit>("${repo.endpoint}$syncDaoNotificationReceivedPath?" +
+                                    "deviceId=${repo.clientId}&$HEADER_DBVERSION=$dbVersion&notificationId=${message.id}")
                         }
                     }
                 }

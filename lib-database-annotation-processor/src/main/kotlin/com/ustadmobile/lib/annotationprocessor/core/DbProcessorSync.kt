@@ -225,6 +225,17 @@ class DbProcessorSync: AbstractDbProcessor() {
                         DoorDatabaseSyncRepository::class)
                 .endControlFlow()
 
+        //Route for clients to acknowledge an update notification as received
+        codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER,
+                "_updateNotificationReceived")
+                .add("val _repo: %T by %M().%M(call).%M(tag = %T.TAG_REPO)\n",
+                        dbType, MemberName("org.kodein.di.ktor", "di"),
+                        DI_ON_MEMBER, DI_INSTANCE_MEMBER, DoorTag::class)
+                .add("call.%M(_repo as %T)",
+                        MemberName("com.ustadmobile.door.ktor", "respondUpdateNotificationReceived"),
+                        DoorDatabaseSyncRepository::class)
+                .endControlFlow()
+
         codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER, "_deleteUpdateNotifications")
                 .addRequestDi()
                 .add(generateGetParamFromRequestCodeBlock(LONG, "timestamp", "_timestamp",
