@@ -9,9 +9,11 @@ import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.networkmanager.initPicasso
 import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.port.android.screen.WorkSpaceEnterLinkScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
@@ -35,7 +37,7 @@ import java.lang.Thread.sleep
 
 @AdbScreenRecord("Workspace screen Test")
 @ExperimentalStdlibApi
-class WorkspaceEnterLinkFragmentTest {
+class WorkspaceEnterLinkFragmentTest : TestCase(){
 
     @JvmField
     @Rule
@@ -63,46 +65,64 @@ class WorkspaceEnterLinkFragmentTest {
     @AdbScreenRecord("given valid workspace link when checked should show enable button")
     @Test
     fun givenValidWorkSpaceLink_whenCheckedAndIsValid_shouldAllowToGoToNextScreen() {
-        val workSpace = Json.stringify(WorkSpace.serializer(), WorkSpace().apply {
-            name = "Dummy workspace"
-            registrationAllowed = true
-            guestLogin = true
-        })
 
-        mockWebServer.enqueue(MockResponse()
-                .setHeader("Content-Type", "application/json")
-                .setBody(Buffer().write(workSpace.toByteArray())))
 
-        WorkSpaceEnterLinkScreen{
+        init{
 
-            launchFragment(mockWebServer.url("/").toString(), systemImplNavRule)
-            nextButton{
-                isDisplayed()
-            }
-            enterLinkTextInput{
-                not(hasInputLayoutError(context.getString(R.string.invalid_link)))
+            val workSpace = Json.stringify(WorkSpace.serializer(), WorkSpace().apply {
+                name = "Dummy workspace"
+                registrationAllowed = true
+                guestLogin = true
+            })
+
+            mockWebServer.enqueue(MockResponse()
+                    .setHeader("Content-Type", "application/json")
+                    .setBody(Buffer().write(workSpace.toByteArray())))
+
+        }.run{
+
+            WorkSpaceEnterLinkScreen{
+
+                launchFragment(mockWebServer.url("/").toString(), systemImplNavRule)
+                nextButton{
+                    isDisplayed()
+                }
+                enterLinkTextInput{
+                    not(hasInputLayoutError(context.getString(R.string.invalid_link)))
+                }
+
             }
 
         }
+
+
     }
 
     @AdbScreenRecord("given invalid workspace link when checked should not show next button")
     @Test
     fun givenInValidWorkSpaceLink_whenCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
-        mockWebServer.enqueue(MockResponse().setResponseCode(404))
 
-        WorkSpaceEnterLinkScreen {
 
-            launchFragment(mockWebServer.url("/").toString(), systemImplNavRule)
+        init{
+            mockWebServer.enqueue(MockResponse().setResponseCode(404))
+        }.run {
 
-            nextButton{
-                isNotDisplayed()
-            }
-            enterLinkTextInput {
-                hasInputLayoutError(context.getString(R.string.invalid_link))
+            WorkSpaceEnterLinkScreen {
+
+                launchFragment(mockWebServer.url("/").toString(), systemImplNavRule)
+
+                nextButton{
+                    isNotDisplayed()
+                }
+                enterLinkTextInput {
+                    hasInputLayoutError(context.getString(R.string.invalid_link))
+                }
+
             }
 
         }
+
+
 
     }
 
