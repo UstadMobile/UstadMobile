@@ -47,8 +47,6 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
     private var tinCanXml: TinCanXML? = null
 
-    private var registrationUUID: String? = null
-
     private var mountedPath: String = ""
 
     private val mounter: ContainerMounter by instance()
@@ -61,7 +59,6 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        registrationUUID = UMUUID.randomUUID().toString()
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLongOrNull() ?: 0L
         val contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLongOrNull() ?: 0L
         val learnerGroupUid = arguments[UstadView.ARG_LEARNER_GROUP_UID]?.toLongOrNull() ?: 0L
@@ -92,6 +89,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                     "endpoint" to UMFileUtil.resolveLink(mountedPath,
                             "/${UMURLEncoder.encodeUTF8(activeEndpoint)}/xapi/$contentEntryUid/"),
                     "auth" to "OjFjMGY4NTYxNzUwOGI4YWY0NjFkNzU5MWUxMzE1ZGQ1",
+                    "registration" to UMUUID.randomUUID().toString(),
                     "activity_id" to (tinCanXml?.launchActivity?.id ?: "xapi_id"))
             if(launchHref != null) {
                 val launchUrl = UMFileUtil.joinPaths(mountedPath, launchHref) + "?"  +

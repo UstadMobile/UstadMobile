@@ -71,7 +71,6 @@ class H5PTypeFilePlugin : H5PTypePlugin(), ContentTypeFilePlugin {
                                 file.nameWithoutExtension else json.jsonObject["title"]?.content
                             this.author = author
                             leaf = true
-                            entryId = file.name
                         }
                         break
                     }

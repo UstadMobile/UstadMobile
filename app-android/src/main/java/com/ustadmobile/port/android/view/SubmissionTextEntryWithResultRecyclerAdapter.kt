@@ -8,7 +8,8 @@ import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionTextEntryBindi
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission
 
-class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false, marking: Boolean = false)
+class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false,
+                                                   marking: Boolean = false)
     : ListAdapter<ClazzWorkWithSubmission,
         SubmissionTextEntryWithResultRecyclerAdapter.SubmissionTextEntryWithResultViewHolder>(
         ClazzWorkDetailOverviewFragment.DU_CLAZZWORKWITHSUBMISSION) {
@@ -22,12 +23,21 @@ class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false, mar
         }
 
     var markingMode: Boolean = marking
+        set(value){
+            if(field == value)
+                return
+            field = value
+            viewHolder?.itemBinding?.markingMode = value
+            viewHolder?.itemBinding?.freeText = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
+
+        }
 
     class SubmissionTextEntryWithResultViewHolder(
             var itemBinding: ItemClazzworkSubmissionTextEntryBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
     private var viewHolder: SubmissionTextEntryWithResultViewHolder? = null
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
             : SubmissionTextEntryWithResultViewHolder {
@@ -50,6 +60,7 @@ class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false, mar
 
     override fun onBindViewHolder(holder: SubmissionTextEntryWithResultViewHolder, position: Int) {
         holder.itemBinding.clazzWorkWithSubmission = getItem(position)
-        holder.itemView.tag = getItem(position).clazzWorkUid?:0L
+        holder.itemView.tag = getItem(position).clazzWorkUid ?: 0L
+        holder.itemBinding.markingMode = markingMode
     }
 }

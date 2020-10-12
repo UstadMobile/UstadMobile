@@ -90,7 +90,7 @@ abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentCon
     fun isUrlContentUpdated(url: URL, container: Container?): HeadRequestValues {
         val conn = (url.openConnection() as HttpURLConnection)
         conn.requestMethod = "HEAD"
-        val mimeType = conn.contentType
+        val mimeType = conn.contentType ?: ""
         val lastModified = conn.lastModified
         val eTagHeaderValue = conn.getHeaderField(ETAG.toLowerCase())
 
