@@ -33,7 +33,7 @@ class SortListFragmentTest {
     var systemImplNavRule = SystemImplTestNavHostRule()
 
     @AdbScreenRecord("given a person list, when sort option clicked, then show Sort List and change sort")
-    //@Test
+    @Test
     fun givenPersonPresent_whenOnSortOptionClicked_thenShoulShowBottomFragAndChangeSort() {
 
         val admin = Person().apply {

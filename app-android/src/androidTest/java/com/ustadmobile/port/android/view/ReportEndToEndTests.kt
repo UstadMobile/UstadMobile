@@ -47,14 +47,6 @@ class ReportEndToEndTests {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
     private val context = ApplicationProvider.getApplicationContext<Application>()
 
     val impl =  UstadMobileSystemImpl.instance
@@ -84,9 +76,6 @@ class ReportEndToEndTests {
         }
 
         val activityScenario = launchActivity<MainActivity>()
-                .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
-
 
         onView(withId(R.id.report_list_dest)).perform(click())
         onView(withText(R.string.report)).perform(click())

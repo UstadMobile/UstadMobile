@@ -1,4 +1,3 @@
-/*
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
@@ -109,15 +108,14 @@ class ContentEntryList2FragmentTest : TestCase() {
 
             ContentEntryListScreen {
 
-                flakySafely {
-                    newEntryItem {
-                        isDisplayed()
-                        click()
-                    }
-                    newBottomSheet {
-                        isDisplayed()
-                    }
+                newEntryItem {
+                    isDisplayed()
+                    click()
                 }
+                newBottomSheet {
+                    isDisplayed()
+                }
+
             }
 
 
@@ -143,14 +141,14 @@ class ContentEntryList2FragmentTest : TestCase() {
 
         ContentEntryListScreen {
 
-            recycler{
+            recycler {
 
                 isDisplayed()
-                emptyChildAt(3){
+                emptyChildAt(3) {
                     click()
                 }
-                childAt<ContentEntryListScreen.MainItem>(1){
-                    selectButton{
+                childAt<ContentEntryListScreen.MainItem>(1) {
+                    selectButton {
                         click()
                     }
                 }
@@ -163,11 +161,13 @@ class ContentEntryList2FragmentTest : TestCase() {
     @Test
     fun givenContentEntryListOpenedInPickerMode_whenOnBackPressedWhileInAFolder_thenShouldGoBackToThePreviousParentFolder() {
         val createdEntries = runBlocking {
-            dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3,parentEntryUid,
-                    nonLeafIndexes = mutableListOf(0)) }
+            dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3, parentEntryUid,
+                    nonLeafIndexes = mutableListOf(0))
+        }
         runBlocking {
             dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(6,
-                    createdEntries[0].contentEntryUid) }
+                    createdEntries[0].contentEntryUid)
+        }
 
         var list2Fragment: ContentEntryList2Fragment? = null
 
@@ -177,19 +177,19 @@ class ContentEntryList2FragmentTest : TestCase() {
             list2Fragment = it
         }
 
-        ContentEntryListScreen{
+        ContentEntryListScreen {
 
-            recycler{
+            recycler {
 
                 isDisplayed()
-                emptyChildAt(3){
+                emptyChildAt(3) {
                     click()
                 }
                 //on back navigation: observers on list can't be cancelled on background, so cancel on main thread
                 GlobalScope.launch(doorMainDispatcher()) {
                     list2Fragment?.onHostBackPressed()
                 }
-                hasSize(createdEntries.size+1)
+                hasSize(createdEntries.size + 1)
 
             }
 
@@ -208,4 +208,4 @@ class ContentEntryList2FragmentTest : TestCase() {
         }
     }
 
-}*/
+}

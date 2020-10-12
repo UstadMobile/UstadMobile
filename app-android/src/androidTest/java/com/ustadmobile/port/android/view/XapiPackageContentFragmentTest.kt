@@ -7,6 +7,7 @@ import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
 import androidx.test.espresso.web.webdriver.DriverAtoms.getText
 import androidx.test.espresso.web.webdriver.Locator
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -25,6 +26,7 @@ import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.hamcrest.CoreMatchers.containsString
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -32,7 +34,7 @@ import java.io.File
 
 
 @AdbScreenRecord("Xapi package content screen test")
-class XapiPackageContentFragmentTest {
+class XapiPackageContentFragmentTest : TestCase() {
 
     @JvmField
     @Rule
@@ -75,28 +77,40 @@ class XapiPackageContentFragmentTest {
         addEntriesFromZipToContainer(testFile.absolutePath, containerManager)
     }
 
+    @After
+    fun tearDown(){
+        //clean up
+        containerTmpDir.deleteRecursively()
+    }
+
     @AdbScreenRecord("Given valid xapi package content when created should be loaded to the view")
     @Test
     fun givenValidXapiPackage_whenCreated_shouldLoadToTheView(){
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadView.ARG_CONTAINER_UID to container?.containerUid,
-                        UstadView.ARG_CONTENT_ENTRY_UID to contentEntry?.contentEntryUid)) {
-            XapiPackageContentFragment().also { fragment ->
-                fragment.installNavController(systemImplNavRule.navController)
-            }
-        }
 
 
-        XapiContentScreen{
-            webView{
-                withElement(Locator.TAG_NAME, "a"){
-                    hasText("Tin Can Home")
+        init{
+
+            launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadView.ARG_CONTAINER_UID to container?.containerUid,
+                            UstadView.ARG_CONTENT_ENTRY_UID to contentEntry?.contentEntryUid)) {
+                XapiPackageContentFragment().also { fragment ->
+                    fragment.installNavController(systemImplNavRule.navController)
                 }
             }
+        }.run{
+
+            XapiContentScreen{
+                webView{
+                    withElement(Locator.TAG_NAME, "a"){
+                        hasText("Tin Can Home")
+                    }
+                }
+            }
+
+
         }
 
-        //clean up
-        containerTmpDir.deleteRecursively()
-
     }
+
+
 }

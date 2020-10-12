@@ -10,6 +10,7 @@ import androidx.test.espresso.web.sugar.Web.onWebView
 import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
 import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.rule.GrantPermissionRule
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -37,7 +38,7 @@ import java.io.File
 
 @AdbScreenRecord("WebChunk Screen Test")
 @ExperimentalStdlibApi
-class WebChunkFragmentTest {
+class WebChunkFragmentTest : TestCase() {
 
     @JvmField
     @Rule
@@ -98,24 +99,32 @@ class WebChunkFragmentTest {
 
         Assume.assumeTrue(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP)
 
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadView.ARG_CONTENT_ENTRY_UID to container.containerContentEntryUid, UstadView.ARG_CONTAINER_UID to container.containerUid)) {
-            WebChunkFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
 
-        WebChunkScreen{
 
-            webView{
-                isDisplayed()
-                isJavascriptEnabled()
-                withElement(Locator.CSS_SELECTOR, "div[data-test-id=tutorial-page]"){
+        init{
 
+            launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadView.ARG_CONTENT_ENTRY_UID to container.containerContentEntryUid, UstadView.ARG_CONTAINER_UID to container.containerUid)) {
+                WebChunkFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
                 }
             }
 
+        }.run{
+            WebChunkScreen{
+
+                webView{
+                    isDisplayed()
+                    isJavascriptEnabled()
+                    withElement(Locator.CSS_SELECTOR, "div[data-test-id=tutorial-page]"){
+
+                    }
+                }
+
+            }
         }
+
+
 
     }
 

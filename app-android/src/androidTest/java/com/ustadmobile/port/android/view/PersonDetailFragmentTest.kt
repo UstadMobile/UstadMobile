@@ -6,12 +6,14 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
+import com.ustadmobile.port.android.screen.PersonDetailScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
@@ -26,7 +28,7 @@ import org.junit.Test
 
 
 @AdbScreenRecord("PersonDetail screen Test")
-class PersonDetailFragmentTest {
+class PersonDetailFragmentTest : TestCase() {
 
     @JvmField
     @Rule
@@ -38,68 +40,136 @@ class PersonDetailFragmentTest {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     @AdbScreenRecord("given person detail when username is null and account management allowed then should hide create account option")
-    //@Test
+    @Test
     fun givenPersonDetails_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldHidden(){
-        launchFragment(withUsername = false, isAdmin = false)
-        onView(withId(R.id.create_account_view)).check(matches(not(isDisplayed())))
-        onView(withId(R.id.change_account_password_view)).check(matches(not(isDisplayed())))
+
+        init{
+            launchFragment(withUsername = false, isAdmin = false)
+        }.run {
+
+            PersonDetailScreen{
+
+                createAccView{
+                    isNotDisplayed()
+                }
+                changePassView{
+                    isNotDisplayed()
+                }
+
+            }
+
+        }
     }
 
     @AdbScreenRecord("given person detail when admin logged and username is null and account management allowed then should show create account option")
-    //@Test
+    @Test
     fun givenPersonDetailsAndAdminLogged_whenPersonUsernameIsNullAndCanManageAccount_thenCreateAccountShouldBeShown(){
-        launchFragment(withUsername = false)
-        onView(withId(R.id.create_account_view)).check(matches(isDisplayed()))
-        onView(withId(R.id.change_account_password_view)).check(matches(not(isDisplayed())))
+        init{
+            launchFragment(withUsername = false)
+        }.run {
+
+            PersonDetailScreen{
+
+                createAccView{
+                    isDisplayed()
+                }
+                changePassView{
+                    isNotDisplayed()
+                }
+
+            }
+
+        }
     }
 
     @AdbScreenRecord("given person detail when admin logged in and username is not null and account management allowed then should show change password option")
-    //@Test
+    @Test
     fun givenPersonDetailsAndAdminLogged_whenPersonUsernameIsNotNullAndCanManageAccount_thenChangePasswordShouldBeShown(){
-        launchFragment(true)
-        onView(withId(R.id.change_account_password_view)).check(matches(isDisplayed()))
-        onView(withId(R.id.create_account_view)).check(matches(not(isDisplayed())))
+        init{
+            launchFragment(true)
+        }.run {
+
+            PersonDetailScreen{
+
+                createAccView{
+                    isNotDisplayed()
+                }
+                changePassView{
+                    isDisplayed()
+                }
+
+            }
+
+        }
     }
 
     @AdbScreenRecord("given person when active user details is opened and account management is allowed then should show change password option")
-    //@Test
+    @Test
     fun givenPersonDetails_whenOpenedActivePersonDetailPersonAndCanManageAccount_thenChangePasswordShouldBeShown(){
-        launchFragment(false, sameUser = true)
-        onView(withId(R.id.change_account_password_view)).check(matches(isDisplayed()))
-        onView(withId(R.id.create_account_view)).check(matches(not(isDisplayed())))
+        init{
+            launchFragment(false, sameUser = true)
+        }.run {
+
+            PersonDetailScreen{
+
+                createAccView{
+                    isNotDisplayed()
+                }
+                changePassView{
+                    isDisplayed()
+                }
+
+            }
+
+        }
     }
 
 
 
     @AdbScreenRecord("given change password visible when clicked should open person account screen")
-    //@Test
+    @Test
     fun givenChangePasswordVisible_whenClicked_shouldOpenPersonAccountSection(){
-        launchFragment(true)
-        onView(withId(R.id.change_account_password_view)).check(matches(isDisplayed()))
-        onView(withId(R.id.change_account_password_view)).perform(click())
-        assertEquals("It navigated to person account screen",
-                R.id.person_account_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+
+        init{
+            launchFragment(true)
+        }.run {
+
+            PersonDetailScreen{
+
+                changePassView{
+                    isDisplayed()
+                    click()
+                }
+                assertEquals("It navigated to person account screen",
+                        R.id.person_account_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+            }
+
+        }
     }
 
     @AdbScreenRecord("given create account visible when clicked should open person account edit screen")
-    //@Test
+    @Test
     fun givenCreateAccountVisible_whenClicked_shouldOpenPersonAccountEditScreen(){
-        launchFragment(withUsername = false)
-        onView(withId(R.id.create_account_view)).check(matches(isDisplayed()))
-        onView(withId(R.id.create_account_view)).perform(click())
-        assertEquals("It navigated to account edit screen",
+        init{
+            launchFragment(withUsername = false)
+        }.run {
+
+            PersonDetailScreen{
+
+                createAccView{
+                    isDisplayed()
+                    click()
+                }
+                assertEquals("It navigated to account edit screen",
                 R.id.person_account_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+            }
+
+        }
+
     }
 
     private fun launchFragment(isAdmin: Boolean = true, withUsername: Boolean = true, sameUser: Boolean = false){
@@ -131,8 +201,7 @@ class PersonDetailFragmentTest {
             PersonDetailFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
     }
 
 }

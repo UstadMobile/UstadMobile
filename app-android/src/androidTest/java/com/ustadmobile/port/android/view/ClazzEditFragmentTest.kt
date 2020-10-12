@@ -1,4 +1,3 @@
-/*
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
@@ -40,7 +39,7 @@ class ClazzEditFragmentTest  {
 
     @JvmField
     @Rule
-    var systemImplNavRule = SystemImplTestNavHostRule()
+    var systemImplNavRule = SystemImplTestNavHostRule()  Intents.init()
 
     @JvmField
     @Rule
@@ -194,4 +193,4 @@ class ClazzEditFragmentTest  {
         }
 
     }
-}*/
+}

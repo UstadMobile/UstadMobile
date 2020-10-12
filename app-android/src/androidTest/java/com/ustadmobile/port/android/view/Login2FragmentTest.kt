@@ -1,41 +1,19 @@
-/*
 package com.ustadmobile.port.android.view
 
 import android.app.Application
-import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso.onIdle
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.action.ViewActions.typeText
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.intent.Intents.init
-import androidx.test.espresso.matcher.ViewMatchers.*
 import com.google.gson.Gson
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.util.ext.toBundle
-import com.ustadmobile.core.view.ContentEntryListTabsView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.port.android.screen.LoginScreen
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
-import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import junit.framework.Assert.assertEquals
-import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.hamcrest.Matchers.allOf
-import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -72,22 +50,34 @@ class Login2FragmentTest : TestCase(){
     @Test
     fun givenRegistrationIsAllowed_whenLogin_shouldShowRegisterButton() {
 
-        LoginScreen {
-            launchFragment(registration = true, systemImplNavRule = systemImplNavRule)
-            createAccount {
-                isDisplayed()
+        init {
+
+        }.run {
+            LoginScreen {
+                launchFragment(registration = true, systemImplNavRule = systemImplNavRule)
+                createAccount {
+                    isDisplayed()
+                }
             }
         }
+
+
     }
 
 
     @AdbScreenRecord("given registration is not allowed when logging in then should hide create account button")
     @Test
     fun givenRegistrationIsNotAllowed_whenLogin_shouldNotShowRegisterButton() {
-        LoginScreen {
-            launchFragment(registration = false, systemImplNavRule = systemImplNavRule)
-            createAccount {
-                isNotDisplayed()
+
+
+        init {
+
+        }.run {
+            LoginScreen {
+                launchFragment(registration = false, systemImplNavRule = systemImplNavRule)
+                createAccount {
+                    isNotDisplayed()
+                }
             }
         }
     }
@@ -97,51 +87,81 @@ class Login2FragmentTest : TestCase(){
     @Test
     fun givenGuestConnectionIsAllowed_whenLogin_shouldShowConnectAsGuestButton() {
 
-        LoginScreen {
-            launchFragment(guestConnection = true, systemImplNavRule = systemImplNavRule)
-            connectAsGuest {
-                isDisplayed()
+
+
+        init {
+
+        }.run {
+            LoginScreen {
+                launchFragment(guestConnection = true, systemImplNavRule = systemImplNavRule)
+                connectAsGuest {
+                    isDisplayed()
+                }
             }
         }
+
     }
 
 
     @AdbScreenRecord("given connect as guest is not allowed when logging in then should hide connect as guest button")
     @Test
     fun givenGuestConnectionIsNotAllowed__whenLogin_shouldNotShowConnectAsGuestButton() {
-        LoginScreen {
-            launchFragment(guestConnection = false, systemImplNavRule = systemImplNavRule)
-            connectAsGuest {
-                isNotDisplayed()
+
+
+        init {
+
+        }.run {
+            LoginScreen {
+                launchFragment(guestConnection = false, systemImplNavRule = systemImplNavRule)
+                connectAsGuest {
+                    isNotDisplayed()
+                }
             }
         }
+
     }
 
 
     @AdbScreenRecord("given create account button is visible when clicked should go to account creation screen")
     @Test
     fun givenCreateAccountIsVisible_whenClicked_shouldOpenAccountCreationSection() {
-        LoginScreen {
-            launchFragment(registration = true, systemImplNavRule = systemImplNavRule)
-            createAccount {
-                click()
+
+
+
+        init {
+
+        }.run {
+            LoginScreen {
+                launchFragment(registration = true, systemImplNavRule = systemImplNavRule)
+                createAccount {
+                    click()
+                }
+                assertEquals("It navigated to account creation screen",
+                        R.id.person_edit_register_dest, systemImplNavRule.navController.currentDestination?.id)
             }
-            assertEquals("It navigated to account creation screen",
-                    R.id.person_edit_register_dest, systemImplNavRule.navController.currentDestination?.id)
         }
+
     }
 
     @AdbScreenRecord("given connect as guest button is visible when clicked should go to content screen")
     @Test
     fun givenConnectAsGuestIsVisible_whenClicked_shouldOpenContentSection() {
-        LoginScreen {
-            launchFragment(guestConnection = true, systemImplNavRule = systemImplNavRule)
-            connectAsGuest {
-                click()
+
+
+
+        init {
+
+        }.run {
+            LoginScreen {
+                launchFragment(guestConnection = true, systemImplNavRule = systemImplNavRule)
+                connectAsGuest {
+                    click()
+                }
+                assertEquals("It navigated to account creation screen",
+                        R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
             }
-            assertEquals("It navigated to account creation screen",
-                    R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
         }
+
 
     }
 
@@ -180,15 +200,25 @@ class Login2FragmentTest : TestCase(){
     @AdbScreenRecord("given invalid username and password when handle login clicked should show password and username errors")
     @Test
     fun givenInvalidUsernameAndPassword_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
-        mockWebServer.enqueue(MockResponse().setResponseCode(403))
-        val httpUrl = mockWebServer.url("/").toString()
 
-        LoginScreen {
-            launchFragment(httpUrl, fillAllFields = true, systemImplNavRule = systemImplNavRule)
-            loginErrorText {
-                isDisplayed()
-                hasText(context.getString(R.string.wrong_user_pass_combo))
+
+
+        init{
+
+            mockWebServer.enqueue(MockResponse().setResponseCode(403))
+
+        }.run {
+
+            val httpUrl = mockWebServer.url("/").toString()
+
+            LoginScreen {
+                launchFragment(httpUrl, fillAllFields = true, systemImplNavRule = systemImplNavRule)
+                loginErrorText {
+                    isDisplayed()
+                    hasText(context.getString(R.string.wrong_user_pass_combo))
+                }
             }
+
         }
 
 
@@ -198,34 +228,42 @@ class Login2FragmentTest : TestCase(){
     @AdbScreenRecord("given server is offline when handle login clicked should shoe network errors ")
     @Test
     fun givenServerOffline_whenHandleLoginCalled_thenShouldCallSetErrorMessage() {
-        mockWebServer.shutdown()
-        val httpUrl = mockWebServer.url("/").toString()
-
-        LoginScreen {
-            launchFragment(httpUrl, fillAllFields = true, systemImplNavRule = systemImplNavRule)
-            loginErrorText {
-                hasText(context.getString(R.string.login_network_error))
-                isDisplayed()
+        init{
+            mockWebServer.shutdown()
+        }.run {
+            val httpUrl = mockWebServer.url("/").toString()
+            LoginScreen {
+                launchFragment(httpUrl, fillAllFields = true, systemImplNavRule = systemImplNavRule)
+                loginErrorText {
+                    hasText(context.getString(R.string.login_network_error))
+                    isDisplayed()
+                }
             }
+
         }
+
     }
 
     @AdbScreenRecord("given login form without filling it when clicked should show required fields errors")
     @Test
     fun givenFieldsAreNotFilled_whenHandleLoginCalled_thenShouldShowErrors() {
-        mockWebServer.shutdown()
-        val httpUrl = mockWebServer.url("/").toString()
+        init{
+            mockWebServer.shutdown()
 
-        LoginScreen{
-            launchFragment(httpUrl, fillAllFields = true, systemImplNavRule = systemImplNavRule)
-            userNameTextInput{
-                hasInputLayoutError(context.getString(R.string.field_required_prompt))
-            }
-            passwordTextInput{
-                hasInputLayoutError(context.getString(R.string.field_required_prompt))
+        }.run {
+            val httpUrl = mockWebServer.url("/").toString()
+
+            LoginScreen{
+                launchFragment(httpUrl, fillAllFields = true, systemImplNavRule = systemImplNavRule)
+                userNameTextInput{
+                    hasInputLayoutError(context.getString(R.string.field_required_prompt))
+                }
+                passwordTextInput{
+                    hasInputLayoutError(context.getString(R.string.field_required_prompt))
+                }
             }
         }
 
     }
 
-}*/
+}

@@ -66,7 +66,7 @@ class PersonEditFragmentTest : TestCase() {
 
     val impl = UstadMobileSystemImpl.instance
 
-    //@Before
+    @Before
     fun setUp() {
         impl.messageIdMap = MessageIDMap.ID_MAP
         mockWebServer = MockWebServer()
@@ -74,14 +74,14 @@ class PersonEditFragmentTest : TestCase() {
         serverUrl = mockWebServer.url("/").toString()
     }
 
-    //@After
+    @After
     fun tearDown() {
         mockWebServer.shutdown()
     }
 
 
     @AdbScreenRecord("given person edit opened in normal mode classes should be shown")
-    //@Test
+    @Test
     fun givenPersonEditOpened_whenInNoRegistrationMode_thenClassesShouldBeShown() {
 
         launchFragment(false, fillForm = false)
@@ -98,7 +98,7 @@ class PersonEditFragmentTest : TestCase() {
 
     @AdbScreenRecord("given person edit opened in normal mode and admin, " +
             "roles and permissions should be shown")
-    //@Test
+    @Test
     fun givenPersonEditOpenedAsAdmin_whenInNoRegistrationMode_thenRolesShouldBeShown() {
 
         init {
@@ -143,7 +143,7 @@ class PersonEditFragmentTest : TestCase() {
 
     @AdbScreenRecord("given person edit for existing opened in normal mode and admin, " +
             "roles and permissions should be shown")
-//@Test
+    @Test
     fun givenPersonEditOpenedDoeExistingAsAdmin_whenInNoRegistrationMode_thenRolesShouldBeShown() {
 
 
@@ -198,7 +198,7 @@ class PersonEditFragmentTest : TestCase() {
 
     @AdbScreenRecord("given person edit opened in normal mode username and password " +
             "should be hidden")
-    //@Test
+    @Test
     fun givenPersonEditOpened_whenInNoRegistrationMode_thenUsernameAndPasswordShouldBeHidden() {
         launchFragment(false, fillForm = false)
 
@@ -216,7 +216,7 @@ class PersonEditFragmentTest : TestCase() {
     }
 
     @AdbScreenRecord("given person edit opened in registration mode classes should be hidden")
-    //@Test
+    @Test
     fun givenPersonEditOpened_whenInRegistrationMode_thenClassesShouldBeHidden() {
         launchFragment(true, fillForm = false)
 
@@ -233,7 +233,7 @@ class PersonEditFragmentTest : TestCase() {
 
     @AdbScreenRecord("given person edit opened in registration mode when username and " +
             "password are not filled and save is clicked should show errors")
-    //@Test
+    @Test
     fun givenPersonEditOpenedInRegistrationMode_whenUserNameAndPasswordAreNotFilled_thenShouldShowErrors() {
         launchFragment(registrationMode = true, leftOutPassword = true, leftOutUsername = true)
 
@@ -250,7 +250,7 @@ class PersonEditFragmentTest : TestCase() {
 
     @AdbScreenRecord("given person edit opened in registration mode when dateOfBirth " +
             "is not filled and save is clicked should show errors")
-    //@Test
+    @Test
     fun givenPersonEditOpenedInRegistrationMode_whenDateOfBirthAreNotFilled_thenShouldShowErrors() {
         launchFragment(registrationMode = true, leftOutDateOfBirth = true)
 
@@ -263,7 +263,7 @@ class PersonEditFragmentTest : TestCase() {
 
     @AdbScreenRecord("given person edit opened in registration mode when dateOfBirth " +
             "is less than 13 years of age and save is clicked should show errors")
-    //@Test
+    @Test
     fun givenPersonEditOpenedInRegistrationMode_whenDateOfBirthIsLessThan13YearsOfAge_thenShouldShowErrors() {
         launchFragment(registrationMode = true,
                 selectedDateOfBirth = DateTime(2010, 10, 24).unixMillisLong)
@@ -278,7 +278,7 @@ class PersonEditFragmentTest : TestCase() {
 
     @AdbScreenRecord("given person edit opened in registration mode when password " +
             "doesn't match and save is clicked should show errors")
-    //@Test
+    @Test
     fun givenPersonEditOpenedInRegistrationMode_whenPasswordDoNotMatch_thenShouldShowErrors() {
         launchFragment(registrationMode = true, misMatchPassword = true)
 
@@ -295,7 +295,7 @@ class PersonEditFragmentTest : TestCase() {
 
     @AdbScreenRecord("given person edit opened in registration mode when try to register " +
             "existing person should show errors")
-    //@Test
+    @Test
     fun givenPersonEditOpenedInRegistrationMode_whenTryToRegisterExistingPerson_thenShouldShowErrors() {
         mockWebServer.enqueue(MockResponse().setResponseCode(409))
         launchFragment(registrationMode = true, misMatchPassword = false, leftOutUsername = false)

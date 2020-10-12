@@ -1,27 +1,18 @@
-/*
 package com.ustadmobile.port.android.view
 
-import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.ComponentNameMatchers.hasClassName
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasComponent
-import androidx.test.espresso.matcher.RootMatchers
-import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.toughra.ustadmobile.R
+import com.agoda.kakao.common.views.KView
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
+import com.ustadmobile.port.android.screen.OnBoardingScreen
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -31,7 +22,7 @@ import java.util.*
 
 @RunWith(AndroidJUnit4::class)
 @AdbScreenRecord("OnBoarding test")
-class OnBoardingActivityTest {
+class OnBoardingActivityTest : TestCase() {
 
     @JvmField
     @Rule
@@ -45,33 +36,36 @@ class OnBoardingActivityTest {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
     @AdbScreenRecord("given onboarding when user clicks arabic, activity recreated in arabic")
     @Test
     fun givenOnBoardingDisplays_whenUserClicksOnArabic_thenActivityRecreatedInArabic() {
 
-        launchActivity<OnBoardingActivity>()
-                .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        onView(withId(R.id.language_options_autocomplete_textview)).check(matches(isDisplayed())).perform(click())
 
-        Assert.assertEquals("device lang is english", "en", Locale.getDefault().language.substring(0, 2))
+        init{
+            launchActivity<OnBoardingActivity>()
+        }.run {
 
-        onView(withText("العربية"))
-                .inRoot(RootMatchers.isPlatformPopup())
-                .perform(click())
+            OnBoardingScreen{
 
-        onView(withText("العربية")).check(matches(isDisplayed()))
+                langOption{
+                    edit{
+                        click()
+                    }
+                }
+                KView{ withText("العربية") } perform {
+                    inRoot { isPlatformPopup() }
+                    isDisplayed()
+                    click()
+                }
 
-        Assert.assertEquals("app lang changed to arabic", "ar", systemImplNavRule.impl.getLocale(ApplicationProvider.getApplicationContext()))
+                Assert.assertEquals("device lang is english", "en", Locale.getDefault().language.substring(0, 2))
+
+
+
+            }
+
+        }
 
     }
 
@@ -79,16 +73,25 @@ class OnBoardingActivityTest {
     @Test
     fun givenOnBoardingDisplays_whenUserClicksGetStarted_thenGoesToMainActivity() {
 
-        Intents.init()
 
-        launchActivity<OnBoardingActivity>()
 
-        onView(withId(R.id.get_started_btn)).perform(click())
+        before {
+            Intents.init()
+            launchActivity<OnBoardingActivity>()
+        }.after {
+            Intents.release()
+        }.run {
 
-        intended(hasComponent(hasClassName(MainActivity::class.java.name)))
+            OnBoardingScreen{
+                getStartedButton{
+                    click()
+                }
+                intended(hasComponent(hasClassName(MainActivity::class.java.name)))
+            }
 
-        Intents.release()
+
+        }
     }
 
 
-}*/
+}

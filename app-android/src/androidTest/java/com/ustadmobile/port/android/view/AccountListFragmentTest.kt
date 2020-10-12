@@ -317,7 +317,6 @@ class AccountListFragmentTest : TestCase() {
     fun givenAccountList_whenAccountIsClicked_shouldBeActive() {
 
         init{
-
             launchFragment(true, defaultNumOfAccounts)
         }.run {
 
