@@ -9,6 +9,7 @@ import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.espresso.matcher.ViewMatchers.withTagValue
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.lib.db.entities.Clazz
@@ -24,7 +25,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @AdbScreenRecord("Class list screen tests")
-class ClazzListFragmentTest  {
+class ClazzListFragmentTest : TestCase() {
 
     @JvmField
     @Rule
@@ -44,40 +45,51 @@ class ClazzListFragmentTest  {
             clazzUid = dbRule.db.clazzDao.insert(this)
         }
 
-        dbRule.insertPersonForActiveUser(Person().apply {
-            admin = true
-            firstNames = "Test"
-            lastName = "User"
-        })
 
-        val fragmentScenario = launchFragmentInContainer(
-            bundleOf(), themeResId = R.style.UmTheme_App){
-            ClazzListFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            } }
 
-        fragmentScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
-        }
+        init {
 
-        ClazzListScreen{
+            dbRule.insertPersonForActiveUser(Person().apply {
+                admin = true
+                firstNames = "Test"
+                lastName = "User"
+            })
 
-            recycler{
+            val fragmentScenario = launchFragmentInContainer(
+                    bundleOf(), themeResId = R.style.UmTheme_App){
+                ClazzListFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                } }
 
-                childWith<ClazzListScreen.MainItem> {
-                    withTag(testEntity.clazzUid)
-                } perform {
-                    click()
+            fragmentScenario.onFragment {
+                Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
+            }
+
+        }.run {
+
+            ClazzListScreen{
+
+                recycler{
+
+                    childWith<ClazzListScreen.MainItem> {
+                        withTag(testEntity.clazzUid)
+                    } perform {
+                        click()
+                    }
+
                 }
 
             }
 
+            Assert.assertEquals("After clicking on item, it navigates to detail view",
+                    R.id.clazz_detail_dest, systemImplNavRule.navController.currentDestination?.id)
+            val currentArgs = systemImplNavRule.navController.currentDestination?.arguments
+            //Note: as of 02/June/2020 arguments were missing even though they were given
+
         }
 
-        Assert.assertEquals("After clicking on item, it navigates to detail view",
-            R.id.clazz_detail_dest, systemImplNavRule.navController.currentDestination?.id)
-        val currentArgs = systemImplNavRule.navController.currentDestination?.arguments
-        //Note: as of 02/June/2020 arguments were missing even though they were given
+
+
     }
 
 }

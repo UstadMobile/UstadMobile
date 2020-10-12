@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import android.content.Context
@@ -66,10 +67,12 @@ class ClazzEndToEndTests {
         closeSoftKeyboard()
 
         //select holiday calendar
-        /*
+        */
+/*
          * Weird issue: if you specify the EditText itself, instead of the TextInputLayout, Android 5
          * will click ON 'SCHOOL' THE BOTTOM NAVIGATION instead!
-         */
+         *//*
+
         onView(withId(R.id.activity_clazz_edit_holiday_calendar_selected)).perform(click())
         onView(withId(R.id.fragment_list_recyclerview)).perform(
                 RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(
@@ -91,4 +94,4 @@ class ClazzEndToEndTests {
         onView(allOf(withParent(withId(R.id.toolbar)), withText(createdClazz.clazzName))).check(matches(isDisplayed()))
     }
 
-}
+}*/

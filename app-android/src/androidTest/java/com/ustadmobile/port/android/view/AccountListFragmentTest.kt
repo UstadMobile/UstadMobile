@@ -17,12 +17,14 @@ import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers
 import androidx.test.espresso.matcher.ViewMatchers.*
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccounts
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.initPicasso
 import com.ustadmobile.core.view.AboutView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.screen.AccountListScreen
@@ -52,7 +54,7 @@ import org.kodein.di.instance
 
 @AdbScreenRecord("Account List Tests")
 @ExperimentalStdlibApi
-class AccountListFragmentTest {
+class AccountListFragmentTest : TestCase() {
 
     @JvmField
     @Rule
@@ -89,87 +91,126 @@ class AccountListFragmentTest {
     @AdbScreenRecord("given stored accounts exists when app launched should be displayed")
     @Test
     fun givenStoredAccounts_whenAppLaunched_thenShouldShowAllAccounts() {
-        launchFragment(true, defaultNumOfAccounts)
-        val accountManager: UstadAccountManager by di.instance()
 
-        AccountListScreen {
-            recycler {
-                //active account was removed from the list
-                hasChildCount(accountManager.storedAccounts.size + 2)
+
+
+        init{
+            launchFragment(true, defaultNumOfAccounts)
+        }.run {
+            val accountManager: UstadAccountManager by di.instance()
+            AccountListScreen {
+                recycler {
+                    //active account was removed from the list
+                    hasChildCount(accountManager.storedAccounts.size + 2)
+                }
             }
         }
+
+
+
     }
 
     @AdbScreenRecord("given app launched when only guest account on the device and is " +
             "active then both profile and logout button should be hidden")
     @Test
     fun givenAppLaunched_whenOnlyGuestAccountOnTheDeviceAndIsLogged_thenShouldHideBothProfileAndLogoutButton() {
-        launchFragment()
 
-        AccountListScreen {
-            recycler {
-                firstChild<AccountListScreen.MainItem> {
-                    profileButton {
-                        isNotDisplayed()
-                    }
-                    logoutButton {
-                        isNotDisplayed()
+
+        init{
+            launchFragment()
+
+        }.run {
+            AccountListScreen {
+                recycler {
+                    firstChild<AccountListScreen.MainItem> {
+                        profileButton {
+                            isNotDisplayed()
+                        }
+                        logoutButton {
+                            isNotDisplayed()
+                        }
                     }
                 }
             }
         }
+
+
     }
 
     @AdbScreenRecord("given stored accounts when guest account active profile button should be hidden ")
     @Test
     fun givenStoredAccounts_whenGuestAccountActive_thenShouldHideProfileButton() {
-        launchFragment(true, defaultNumOfAccounts, true)
 
-        AccountListScreen {
-            recycler {
-                firstChild<AccountListScreen.MainItem> {
-                    profileButton{
-                        isNotDisplayed()
+
+        init{
+            launchFragment(true, defaultNumOfAccounts, true)
+
+        }.run{
+
+            AccountListScreen {
+                recycler {
+                    firstChild<AccountListScreen.MainItem> {
+                        profileButton{
+                            isNotDisplayed()
+                        }
                     }
                 }
             }
         }
+
+
     }
 
 
     @AdbScreenRecord("given active account when app launched should be displayed")
     @Test
     fun givenActiveAccountExists_whenAppLaunched_thenShouldShowIt() {
-        launchFragment(true, defaultNumOfAccounts)
-        AccountListScreen {
-            recycler {
-                firstChild<AccountListScreen.MainItem> {
-                    fullNameText{
-                        hasText("FirstName1 Lastname1")
+        init{
+            launchFragment(true, defaultNumOfAccounts)
+        }.run {
+
+            AccountListScreen {
+                recycler {
+                    firstChild<AccountListScreen.MainItem> {
+                        fullNameText{
+                            hasText("FirstName1 Lastname1")
+                        }
                     }
                 }
             }
+
         }
+
+
     }
 
     @AdbScreenRecord("given add account button when clicked should open get started screen")
     @Test
     fun givenAddAccountButton_whenClicked_thenShouldOpenGetStarted() {
 
-        launchFragment()
 
-        AccountListScreen{
-            recycler{
-                childAt<AccountListScreen.NewLayout>(1){
-                    newLayout {
-                        click()
-                        assertEquals("It navigated to the get started screen",
-                                R.id.account_get_started_dest,
-                                systemImplNavRule.navController.currentDestination?.id)
+
+        init{
+            launchFragment()
+
+        }.run {
+
+            AccountListScreen{
+                recycler{
+                    childAt<AccountListScreen.NewLayout>(1){
+                        newLayout {
+                            click()
+                            assertEquals("It navigated to the get started screen",
+                                    R.id.account_get_started_dest,
+                                    systemImplNavRule.navController.currentDestination?.id)
+                        }
                     }
                 }
             }
+
         }
+
+
 
     }
 
@@ -177,97 +218,129 @@ class AccountListFragmentTest {
     @AdbScreenRecord("given delete button when clicked should remove account from the device")
     @Test
     fun givenDeleteAccountButton_whenClicked_thenShouldRemoveAccountFromTheDevice() {
-        val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
-        val accountManager: UstadAccountManager by di.instance()
 
-        val storedAccounts = accountManager.storedAccounts
+        init{
 
-        AccountListScreen{
-            recycler{
-                childAt<AccountListScreen.MainItem>(2){
-                    accountDeleteButton{
-                        click()
+        }.run {
+            val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
+            val accountManager: UstadAccountManager by di.instance()
+
+            val storedAccounts = accountManager.storedAccounts
+
+            AccountListScreen{
+                recycler{
+                    childAt<AccountListScreen.MainItem>(2){
+                        accountDeleteButton{
+                            click()
+                        }
                     }
                 }
             }
+
+            val currentStoredAccounts = accountManager.storedAccountsLive.waitUntilWithFragmentScenario(fragmentScenario) {
+                it.isNotEmpty()
+            }
+
+            assertNotEquals("Current account was removed from the device",
+                    storedAccounts, currentStoredAccounts)
+
         }
 
-        val currentStoredAccounts = accountManager.storedAccountsLive.waitUntilWithFragmentScenario(fragmentScenario) {
-            it.isNotEmpty()
-        }
 
-        assertNotEquals("Current account was removed from the device",
-                storedAccounts, currentStoredAccounts)
     }
 
     @AdbScreenRecord("given logout button when clicked should logout current active account")
     @Test
     fun givenLogoutButton_whenClicked_thenShouldRemoveAccountFromTheDevice() {
-        val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
-        val accountManager: UstadAccountManager by di.instance()
 
-        val activeAccount = accountManager.activeAccount
+        init{
 
-        AccountListScreen{
-            recycler{
-                firstChild<AccountListScreen.MainItem> {
-                    logoutButton{
-                        click()
+        }.run {
+
+            val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
+            val accountManager: UstadAccountManager by di.instance()
+
+            val activeAccount = accountManager.activeAccount
+
+            AccountListScreen{
+                recycler{
+                    firstChild<AccountListScreen.MainItem> {
+                        logoutButton{
+                            click()
+                        }
                     }
                 }
             }
+
+            val currentActiveAccount = accountManager.activeAccountLive.waitUntilWithFragmentScenario(fragmentScenario) {
+                !accountManager.storedAccounts.contains(activeAccount)
+            }
+
+            assertTrue("Active account was logged out successfully",
+                    currentActiveAccount != activeAccount)
+
         }
 
-        val currentActiveAccount = accountManager.activeAccountLive.waitUntilWithFragmentScenario(fragmentScenario) {
-            !accountManager.storedAccounts.contains(activeAccount)
-        }
 
-        assertTrue("Active account was logged out successfully",
-                currentActiveAccount != activeAccount)
     }
 
 
     @AdbScreenRecord("given profile button when clicked should open profile details screen")
     @Test
     fun givenProfileButton_whenClicked_thenShouldGoToProfileView() {
-        launchFragment(true, defaultNumOfAccounts)
 
-        AccountListScreen{
-            recycler{
-                firstChild<AccountListScreen.MainItem> {
-                    profileButton{
-                        click()
+
+        init{
+
+            launchFragment(true, defaultNumOfAccounts)
+        }.run {
+
+            AccountListScreen{
+                recycler{
+                    firstChild<AccountListScreen.MainItem> {
+                        profileButton{
+                            click()
+                        }
                     }
                 }
             }
+            assertEquals("It navigated to the profile details",
+                    R.id.person_detail_dest, systemImplNavRule.navController.currentDestination?.id)
         }
-        assertEquals("It navigated to the profile details",
-                R.id.person_detail_dest, systemImplNavRule.navController.currentDestination?.id)
+
+
     }
 
 
     @AdbScreenRecord("given account list when account is clicked should be active")
     @Test
     fun givenAccountList_whenAccountIsClicked_shouldBeActive() {
-        launchFragment(true, defaultNumOfAccounts)
 
-        AccountListScreen{
-            recycler{
-                firstChild<AccountListScreen.MainItem> {
-                    fullNameText{
-                        hasText("FirstName1 Lastname1")
+        init{
+
+            launchFragment(true, defaultNumOfAccounts)
+        }.run {
+
+            AccountListScreen{
+                recycler{
+                    firstChild<AccountListScreen.MainItem> {
+                        fullNameText{
+                            hasText("FirstName1 Lastname1")
+                        }
                     }
-                }
-                childAt<AccountListScreen.MainItem>(2){
-                    click()
-                }
-                firstChild<AccountListScreen.MainItem> {
-                    fullNameText{
-                        hasText("FirstName3 Lastname3")
+                    childAt<AccountListScreen.MainItem>(2){
+                        click()
+                    }
+                    firstChild<AccountListScreen.MainItem> {
+                        fullNameText{
+                            hasText("FirstName3 Lastname3")
+                        }
                     }
                 }
             }
         }
+
+
 
     }
 
@@ -275,19 +348,27 @@ class AccountListFragmentTest {
     @AdbScreenRecord("given about item displayed when clicked should open about screen")
     @Test
     fun givenAboutButton_whenClicked_thenShouldGoToAboutView() {
-        launchFragment()
-        Intents.init()
 
-        AccountListScreen {
-            recycler {
-                childAt<AccountListScreen.AboutItem>(2){
-                    aboutTextView{
-                        click()
+
+        init{
+            launchFragment()
+            Intents.init()
+
+        }.run {
+
+            AccountListScreen {
+                recycler {
+                    childAt<AccountListScreen.AboutItem>(2){
+                        aboutTextView{
+                            click()
+                        }
                     }
                 }
             }
+            intended(IntentMatchers.hasExtra("ref", "/${AboutView.VIEW_NAME}?"))
         }
-        intended(IntentMatchers.hasExtra("ref", "/${AboutView.VIEW_NAME}?"))
+
+
     }
 
 
