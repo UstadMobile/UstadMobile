@@ -25,8 +25,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.ext.createTempFileForDestination
-import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.sharedse.contentformats.*
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
@@ -139,15 +138,18 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 registry ?: requireActivity().activityResultRegistry) { uri: Uri? ->
             if (uri != null) {
                 try {
-                    val input = requireContext().contentResolver.openInputStream(uri)
-                    val tmpFile = findNavController().createTempFileForDestination(requireContext(),
-                            "import-${System.currentTimeMillis()}.${UMFileUtil.getExtension(uri.toString())}")
-                    val output = tmpFile.outputStream()
-                    input?.copyTo(tmpFile.outputStream())
-                    output.flush()
-                    output.close()
-                    input?.close()
                     GlobalScope.launch {
+                        val input = requireContext().contentResolver.openInputStream(uri)
+                        val tmpDir = findNavController().createTempDirForDestination(requireContext(),
+                                "import-${System.currentTimeMillis()}")
+
+                        val tmpFile = File(tmpDir, requireContext().contentResolver.getFileName(uri))
+                        val output = tmpFile.outputStream()
+                        input?.copyTo(tmpFile.outputStream())
+                        output.flush()
+                        output.close()
+                        input?.close()
+
                         val accountManager: UstadAccountManager by instance()
                         val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
                         val metaData = extractContentEntryMetadataFromFile(tmpFile, db)
