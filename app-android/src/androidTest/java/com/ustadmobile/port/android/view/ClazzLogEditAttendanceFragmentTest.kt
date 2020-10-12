@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
@@ -240,3 +241,4 @@ class ClazzLogEditAttendanceFragmentTest  {
     }
 
 }
+*/
