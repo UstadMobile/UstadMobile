@@ -34,7 +34,7 @@ class HolidayEditFragment(): UstadEditFragment<Holiday>(), HolidayEditView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setEditFragmentTitle(R.string.holiday)
+        setEditFragmentTitle(R.string.add_a_holiday, R.string.edit_holiday)
 
         mPresenter = HolidayEditPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)

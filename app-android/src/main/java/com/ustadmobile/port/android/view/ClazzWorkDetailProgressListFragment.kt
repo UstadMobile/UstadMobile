@@ -18,8 +18,7 @@ import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
+import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
 class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWithClazzWorkProgress,
@@ -79,6 +78,7 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWit
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
+        metricsRecyclerAdapter = null
     }
 
     override val displayTypeRepo: Any?
@@ -90,7 +90,7 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWit
             metricsLiveData?.removeObserver(metricsObserver)
             metricsLiveData = value?.asRepositoryLiveData(ClazzWorkDao)
             field = value
-            metricsLiveData?.observe(viewLifecycleOwner, metricsObserver)
+            metricsLiveData?.observeIfFragmentViewIsReady(this, metricsObserver)
         }
 
     companion object {
