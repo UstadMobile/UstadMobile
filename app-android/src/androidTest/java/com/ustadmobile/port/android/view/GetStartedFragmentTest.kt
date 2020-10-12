@@ -84,12 +84,11 @@ class GetStartedFragmentTest {
 
         GetStartedScreen{
 
-            createWorkSpaceView{
-                isDisplayed()
-                Intents.init()
-                click()
-            }
+            createWorkSpaceView.isDisplayed()
+            Intents.init()
+            createWorkSpaceView.click()
             intended(hasAction(Intent.ACTION_VIEW))
+            Intents.release()
 
         }
     }

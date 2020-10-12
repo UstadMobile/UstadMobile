@@ -349,11 +349,11 @@ class AccountListFragmentTest : TestCase() {
     @Test
     fun givenAboutButton_whenClicked_thenShouldGoToAboutView() {
 
-
-        init{
+        before{
             launchFragment()
             Intents.init()
-
+        }.after {
+            Intents.release()
         }.run {
 
             AccountListScreen {
