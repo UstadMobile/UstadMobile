@@ -39,7 +39,7 @@ class ClazzEditFragmentTest  {
 
     @JvmField
     @Rule
-    var systemImplNavRule = SystemImplTestNavHostRule()  Intents.init()
+    var systemImplNavRule = SystemImplTestNavHostRule()
 
     @JvmField
     @Rule
