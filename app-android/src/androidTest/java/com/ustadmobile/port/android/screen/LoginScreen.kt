@@ -1,9 +1,6 @@
 package com.ustadmobile.port.android.screen
 
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.matcher.ViewMatchers
 import com.agoda.kakao.edit.KTextInputLayout
 import com.agoda.kakao.text.KButton
 import com.agoda.kakao.text.KTextView
@@ -14,7 +11,6 @@ import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.port.android.view.Login2Fragment
-import com.ustadmobile.port.android.view.Login2FragmentTest
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import kotlinx.serialization.json.Json
