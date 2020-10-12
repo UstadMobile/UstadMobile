@@ -37,10 +37,10 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         super.onCreate(savedState)
         filterExcludeMembersOfClazz = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ]?.toLong() ?: 0L
         filterExcludeMemberOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
-        filterAlreadySelectedList = arguments[ARG_EXCLUDE_PERSONUIDS_LIST]?.split(",")?.filter { it.isNotEmpty() }?.map { it.toLong() }
+        filterAlreadySelectedList = arguments[ARG_EXCLUDE_PERSONUIDS_LIST]?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
                 ?: listOf()
 
-        filterByPermission = arguments[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
+        filterByPermission = arguments[UstadView.ARG_FILTER_BY_PERMISSION]?.trim()?.toLong()
                 ?: Role.PERMISSION_PERSON_SELECT
 
         selectedSortOption = SORT_OPTIONS[0]

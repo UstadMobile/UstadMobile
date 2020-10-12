@@ -65,9 +65,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
         mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
                 arguments?.get(UstadView.ARG_LISTMODE).toString(), viewLifecycleOwner, di)
-        val createNewText = requireContext().getString(R.string.add_a_new,
-                requireContext().getString(R.string.content_editor_create_new_title))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+            requireContext().getString(R.string.add_new_content))
         return view
     }
 
@@ -170,7 +169,11 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
             override fun areContentsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
                                             newItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer): Boolean {
-                return oldItem == newItem
+                return oldItem.title == newItem.title &&
+                        oldItem.description == newItem.description &&
+                        oldItem.contentTypeFlag == newItem.contentTypeFlag &&
+                        oldItem.mostRecentContainer?.fileSize == newItem.mostRecentContainer?.fileSize &&
+                        oldItem.thumbnailUrl == newItem.thumbnailUrl
             }
         }
     }

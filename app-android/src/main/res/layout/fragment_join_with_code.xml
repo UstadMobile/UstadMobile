@@ -23,7 +23,7 @@
 
         <TextView
             android:id="@+id/instructions_text"
-            android:text="@{String.format(@string/join_code_instructions, entityType)}"
+            android:text="@string/join_code_instructions"
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             app:layout_constraintStart_toStartOf="parent"

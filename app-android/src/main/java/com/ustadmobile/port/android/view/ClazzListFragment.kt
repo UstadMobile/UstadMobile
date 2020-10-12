@@ -39,8 +39,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
         mPresenter = ClazzListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
-            requireContext().getString(R.string.add_a_new,
-                    requireContext().getString(R.string.clazz)),  onClickSort = this,
+            requireContext().getString(R.string.add_a_new_class),  onClickSort = this,
                 sortOrderOption = mPresenter?.sortOptions?.get(0))
         mDataRecyclerViewAdapter = ClazzListRecyclerAdapter(mPresenter)
 
@@ -55,13 +54,11 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
         fabManager?.onClickListener = {
             val optionList = if(newClazzListOptionVisible) {
                 listOf(BottomSheetOption(R.drawable.ic_add_black_24dp,
-                        requireContext().getString(R.string.add_a_new,
-                                requireContext().getString(R.string.clazz).toLowerCase()), NEW_CLAZZ))
+                        requireContext().getString(R.string.add_a_new_class), NEW_CLAZZ))
             }else {
                 listOf()
             } + listOf(BottomSheetOption(R.drawable.ic_login_24px,
-                requireContext().getString(R.string.join_existing,
-                requireContext().getString(R.string.clazz).toLowerCase()), JOIN_CLAZZ))
+                requireContext().getString(R.string.join_existing_class), JOIN_CLAZZ))
 
             val sheet = OptionsBottomSheetFragment(optionList, this)
             sheet.show(childFragmentManager, sheet.tag)
