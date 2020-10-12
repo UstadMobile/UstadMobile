@@ -198,6 +198,9 @@ class ClazzWorkEditFragmentTest {
         //TODO
 
         //Assert inserted in database
+
+        IdlingRegistry.getInstance().unregister(contentRVIdlingResource)
+        IdlingRegistry.getInstance().unregister(questionsRVIdlingResource)
     }
 
 
@@ -274,6 +277,8 @@ class ClazzWorkEditFragmentTest {
         //TODO
 
         //Assert update in database
+        IdlingRegistry.getInstance().unregister(contentRVIdlingResource)
+        IdlingRegistry.getInstance().unregister(questionsRVIdlingResource)
     }
 
 
