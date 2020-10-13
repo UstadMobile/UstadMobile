@@ -81,8 +81,10 @@ class ReportEditFragmentTest: TestCase() {
             contentEntryUid = dbRule.db.contentEntryDao.insert(this)
         }
 
-
-        val currentEntity = fragmentScenario.letOnFragment { it.entity }
+        var currentEntity: ReportWithFilters? = null
+        while(currentEntity == null){
+            currentEntity = fragmentScenario.nullableLetOnFragment { it.entity}
+        }
         val formVals = ReportWithFilters().apply {
             reportTitle = "New Report"
             chartType = Report.LINE_GRAPH
@@ -140,13 +142,11 @@ class ReportEditFragmentTest: TestCase() {
             }
         }
 
-        val editIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it })
-        IdlingRegistry.getInstance().register(editIdlingResource)
-
-        onIdle()
-
         //Freeze and serialize the value as it was first shown to the user
-        val entityLoadedByFragment = fragmentScenario.letOnFragment { it.entity }
+        var entityLoadedByFragment: ReportWithFilters? = null
+        while(entityLoadedByFragment == null){
+            entityLoadedByFragment = fragmentScenario.nullableLetOnFragment { it.entity}
+        }
         val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
         val newClazzValues = defaultGson().fromJson(entityLoadedJson, ReportWithFilters::class.java).apply {
             reportTitle = "Updated Report"
