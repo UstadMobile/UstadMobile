@@ -72,8 +72,7 @@ class ClazzLogListAttendanceFragmentTest : TestCase() {
 
             launchFragmentInContainer(
                     bundleOf(UstadView.ARG_FILTER_BY_CLAZZUID to clazzAndMembers.clazz.clazzUid.toString()),
-                    themeResId = R.style.UmTheme_App
-            ) {
+                    themeResId = R.style.UmTheme_App) {
                 ClazzLogListAttendanceFragment().also {
                     it.installNavController(systemImplNavRule.navController)
                 }
@@ -93,8 +92,10 @@ class ClazzLogListAttendanceFragmentTest : TestCase() {
 
             }
 
-            Assert.assertEquals("After clicking on attendance log, fragment goes to attendance view",
-                    R.id.clazz_log_edit_attendance_dest, systemImplNavRule.navController.currentDestination?.id)
+            flakySafely {
+                Assert.assertEquals("After clicking on attendance log, fragment goes to attendance view",
+                        R.id.clazz_log_edit_attendance_dest, systemImplNavRule.navController.currentDestination?.id)
+            }
 
         }
 

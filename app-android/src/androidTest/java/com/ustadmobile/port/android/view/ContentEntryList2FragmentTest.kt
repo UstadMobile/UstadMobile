@@ -31,6 +31,7 @@ import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -55,6 +56,7 @@ class ContentEntryList2FragmentTest : TestCase() {
 
     @Before
     fun setup() {
+        dbRule.db.clearAllTables()
         dbRule.insertPersonForActiveUser(Person().apply {
             firstNames = "Test"
             lastName = "User"
@@ -62,6 +64,7 @@ class ContentEntryList2FragmentTest : TestCase() {
             admin = true
         })
     }
+
 
     @AdbScreenRecord("Given Content entry present when user clicks on an entry then should navigate to entry")
     @Test
@@ -94,8 +97,7 @@ class ContentEntryList2FragmentTest : TestCase() {
     @AdbScreenRecord("Given content entry list in a picker mode when create new content is clicked should show content creation options")
     @Test
     fun givenContentEntryListOpenedInPickerMode_whenCreateNewContentClicked_shouldShowContentCreationOptions() {
-
-
+        
         init {
 
             runBlocking {
