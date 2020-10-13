@@ -116,8 +116,10 @@ class PersonDetailFragmentKasTest : TestCase() {
                     click()
                 }
             }
-            assertEquals("It navigated to account edit screen",
-                    R.id.person_account_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+            flakySafely {
+                assertEquals("It navigated to account edit screen",
+                        R.id.person_account_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+            }
         }
 
     }

@@ -88,31 +88,41 @@ class EpubContentActivityTest : TestCase() {
         val activityScenario = ActivityScenario.launch<EpubContentActivity>(intent)
         activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 
-        EpubScreen {
+        init {
+            
+        }.run {
 
-            epubTitle {
-                hasText("ರುಮ್ನಿಯಾ")
-                isDisplayed()
-            }
-            activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
+            EpubScreen {
 
-            recycler {
+                epubTitle {
+                    hasText("ರುಮ್ನಿಯಾ")
+                    isDisplayed()
+                }
+                activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 
-                firstChild<EpubScreen.EpubPage> {
-                    KWebView {
-                        withTag("1.xhtml")
-                        withId(R.id.epub_contentview)
-                    }.invoke {
-                        ViewMatchers.isDisplayed()
-                        ViewMatchers.isJavascriptEnabled()
-                        withElement(Locator.CLASS_NAME, "authors") {
-                            hasText("Rukmini Banerji")
+                recycler {
+
+                    firstChild<EpubScreen.EpubPage> {
+                        KWebView {
+                            withTag("1.xhtml")
+                            withId(R.id.epub_contentview)
+                        }.invoke {
+                            ViewMatchers.isDisplayed()
+                            ViewMatchers.isJavascriptEnabled()
+                            withElement(Locator.CLASS_NAME, "authors") {
+                                hasText("Rukmini Banerji")
+                            }
                         }
                     }
                 }
+
             }
 
+
+
         }
+
+
     }
 
     @AdbScreenRecord("Given valid epub content opened when table of content item is clicked should be loaded to the view")
