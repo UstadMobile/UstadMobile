@@ -75,9 +75,15 @@ class WorkspaceEnterLinkFragmentTest : TestCase(){
                 guestLogin = true
             })
 
+            val buffer = Buffer()
+            buffer.write((workSpace.toByteArray()))
+            buffer.flush()
+
             mockWebServer.enqueue(MockResponse()
                     .setHeader("Content-Type", "application/json")
-                    .setBody(Buffer().write(workSpace.toByteArray())))
+                    .setBody(buffer))
+
+            buffer.clear()
 
         }.run{
 

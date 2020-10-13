@@ -5,9 +5,10 @@ import com.agoda.kakao.text.KTextView
 
 fun setMessageIdOption(view: KTextView, message: String){
 
-   view {
-       click()
-   }
+    view{
+        isClickable()
+        click()
+    }
 
     KView{
         withText(message)
@@ -16,7 +17,4 @@ fun setMessageIdOption(view: KTextView, message: String){
         isDisplayed()
         click()
     }
-
-
-
 }

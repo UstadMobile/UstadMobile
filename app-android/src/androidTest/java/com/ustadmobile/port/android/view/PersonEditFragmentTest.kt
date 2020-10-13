@@ -50,6 +50,7 @@ class PersonEditFragmentTest : TestCase() {
 
     @Before
     fun setUp() {
+        dbRule.db.clearAllTables()
         impl.messageIdMap = MessageIDMap.ID_MAP
         mockWebServer = MockWebServer()
         mockWebServer.start()

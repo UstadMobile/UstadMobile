@@ -51,21 +51,21 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
 
     val passwordTextInput = KTextInputLayout { withId(R.id.username_textinputlayout) }
 
-    val firstNameTextInput = KTextInputLayout { withId(R.id.firstnames_textinputlayout)}
+    val firstNameTextInput = KTextInputLayout { withId(R.id.firstnames_textinputlayout) }
 
-    val lastNameTextInput = KTextInputLayout { withId(R.id.lastname_textInputLayout)}
+    val lastNameTextInput = KTextInputLayout { withId(R.id.lastname_textInputLayout) }
 
     val confirmPassTextInput = KTextInputLayout { withId(R.id.confirm_password_textinputlayout) }
 
     val birthdayTextInput = KTextInputLayout { withId(R.id.birthday_textinputlayout) }
 
-    val phoneNumberTextInput=  KTextInputLayout { withId(R.id.phonenumber_textinputlayout)}
+    val phoneNumberTextInput = KTextInputLayout { withId(R.id.phonenumber_textinputlayout) }
 
-    val emailTextInput = KTextInputLayout { withId(R.id.email_textinputlayout)}
+    val emailTextInput = KTextInputLayout { withId(R.id.email_textinputlayout) }
 
-    val addressTextInput = KTextInputLayout { withId(R.id.address_textinputlayout)}
+    val addressTextInput = KTextInputLayout { withId(R.id.address_textinputlayout) }
 
-    val genderValue = KTextView { withId(R.id.gender_value)}
+    val genderValue = KTextView { withId(R.id.gender_value) }
 
     fun launchFragment(registrationMode: Boolean = false, misMatchPassword: Boolean = false,
                        leftOutPassword: Boolean = false, leftOutUsername: Boolean = false,
@@ -101,7 +101,7 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
         if (fillForm) {
 
             var personOnForm: Person? = null
-            while(personOnForm == null){
+            while (personOnForm == null) {
                 personOnForm = scenario.nullableLetOnFragment { it.entity }
             }
 
@@ -119,16 +119,16 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
             }
 
             person.firstNames.takeIf { it != personOnForm?.firstNames }?.also {
-                firstNameTextInput{
-                    edit{
+                firstNameTextInput {
+                    edit {
                         replaceText(it)
                     }
                 }
             }
 
             person.lastName.takeIf { it != personOnForm?.lastName }?.also {
-                lastNameTextInput{
-                    edit{
+                lastNameTextInput {
+                    edit {
                         replaceText(it)
                     }
                 }
@@ -141,24 +141,24 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
 
             person.phoneNum.takeIf { it != personOnForm?.phoneNum }?.also {
                 //scroll
-                phoneNumberTextInput{
-                    edit{
+                phoneNumberTextInput {
+                    edit {
                         replaceText(it)
                     }
                 }
             }
 
             person.emailAddr.takeIf { it != personOnForm?.emailAddr }?.also {
-                emailTextInput{
-                    edit{
+                emailTextInput {
+                    edit {
                         replaceText(it)
                     }
                 }
             }
 
             person.personAddress.takeIf { it != personOnForm?.personAddress }?.also {
-                addressTextInput{
-                    edit{
+                addressTextInput {
+                    edit {
                         replaceText(it)
                     }
                 }
@@ -174,8 +174,8 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
                 //scroll
                 scrollToBottom()
                 person.username.takeIf { it != personOnForm?.username }?.also {
-                    usernameTextInput{
-                        edit{
+                    usernameTextInput {
+                        edit {
                             replaceText(it)
                         }
                     }
@@ -185,13 +185,13 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
             if (!leftOutPassword) {
                 //scroll
                 scrollToBottom()
-                passwordTextInput{
-                    edit{
+                passwordTextInput {
+                    edit {
                         replaceText(password)
                     }
                 }
-                confirmPassTextInput{
-                    edit{
+                confirmPassTextInput {
+                    edit {
                         replaceText(confirmedPassword)
                     }
                 }

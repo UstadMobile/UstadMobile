@@ -58,7 +58,7 @@ class XapiPackageContentFragmentTest : TestCase() {
 
     @Before
     fun setUp(){
-
+        dbRule.db.clearAllTables()
         contentEntry = ContentEntry().apply {
             leaf = true
             contentEntryUid = dbRule.db.contentEntryDao.insert(this)
@@ -86,7 +86,6 @@ class XapiPackageContentFragmentTest : TestCase() {
     @AdbScreenRecord("Given valid xapi package content when created should be loaded to the view")
     @Test
     fun givenValidXapiPackage_whenCreated_shouldLoadToTheView(){
-
 
         init{
 
