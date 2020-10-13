@@ -43,3 +43,18 @@ fun NavController.createTempFileForDestination(context: Context, name: String,
     registerDestinationTempFile(context, newTmpFile, destination)
     return newTmpFile
 }
+
+/**
+ * Create a temporary directory for the given destination. This is the smae as createTempFileForDestination,
+ * only it creates a directory instead of a file.
+ *
+ * Because DeleteTempNavigationListener will use deleteRecursively, anything in the directory will
+ * be deleted once the destination is no longer in the stack
+ */
+fun NavController.createTempDirForDestination(context: Context, name: String,
+                                              destination: NavDestination? = this.currentDestination): File {
+    val newTmpDir = File(context.cacheDir, name)
+    newTmpDir.mkdirs()
+    registerDestinationTempFile(context, newTmpDir, destination)
+    return newTmpDir
+}

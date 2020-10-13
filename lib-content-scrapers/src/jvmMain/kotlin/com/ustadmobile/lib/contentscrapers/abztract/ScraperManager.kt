@@ -30,6 +30,7 @@ import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.*
 import org.apache.commons.cli.*
 import org.apache.commons.io.FileUtils
+import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.kodein.di.DI
@@ -42,6 +43,7 @@ import java.io.InputStream
 import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
 import java.net.URL
+import java.net.URLDecoder
 import java.nio.file.Files
 import kotlin.system.exitProcess
 
@@ -167,128 +169,129 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
         queueDao.insert(scrapeQueue)
     }
 
-    suspend fun extractMetadata(url: String): ImportedContentEntryMetaData? {
+    suspend fun extractMetadata(urlString: String): ImportedContentEntryMetaData? {
 
         var tempDir = Files.createTempDirectory("folder").toFile()
         tempDir.mkdir()
-        val contentFile = File(tempDir, "url")
+        val url = URL(urlString)
+        val urlName = URLDecoder.decode(url.path, ScraperConstants.UTF_ENCODING)
+        val name = FilenameUtils.getName(if(urlName.endsWith("/")) urlName.substringBeforeLast("/") else urlName)
+        val contentFile = File(tempDir, name)
 
-        val huc: HttpURLConnection = URL(url).openConnection() as HttpURLConnection
+        val huc: HttpURLConnection = url.openConnection() as HttpURLConnection
 
-        val mimeType = huc.contentType
+        val mimeType = huc.contentType ?: ""
         val stream = huc.inputStream
         FileOutputStream(contentFile).use {
             stream.copyTo(it)
             it.flush()
         }
         stream.close()
+        return when {
+            urlString.startsWith("https://drive.google.com/") -> {
 
-        val supported = mimeTypeSupported.find { fileMimeType -> fileMimeType == mimeType }
-        return if (supported != null) {
-            val metaData = extractContentEntryMetadataFromFile(contentFile, db)
-            metaData?.scraperType = ScraperTypes.URL_SCRAPER
-            metaData?.uri = url
-            metaData?.contentEntry?.sourceUrl = url
-            Napier.e("$logPrefix metadata uri for urlScraper: ${metaData?.uri ?: "not found"}", tag = SCRAPER_TAG)
-            tempDir.deleteRecursively()
-            metaData
-        } else {
+                tempDir.deleteRecursively()
 
-            when {
-                url.startsWith("https://drive.google.com/") -> {
-
-                    tempDir.deleteRecursively()
-
-                    if(apiKey == "secret"){
-                        Napier.e("$logPrefix api key not set", tag = SCRAPER_TAG)
-                        return null
-                    }
-
-                    val apiCall: String
-                    val fileId: String
-                    if (url.startsWith("https://drive.google.com/file/d/")) {
-                        val fileIdLookUp = url.substringAfter("https://drive.google.com/file/d/")
-                        val char = fileIdLookUp.firstOrNull { it == '/' || it == '?' }
-                        fileId = if (char == null) fileIdLookUp else fileIdLookUp.substringBefore(char)
-                        apiCall = "https://www.googleapis.com/drive/v3/files/$fileId"
-                    } else {
-                        Napier.e("$logPrefix unsupported google drive link", tag = SCRAPER_TAG)
-                        return null
-                    }
-
-                    val statement = defaultHttpClient().get<HttpStatement>(apiCall) {
-                        parameter("key", apiKey)
-                        parameter("fields", "id,modifiedTime,name,mimeType,description,thumbnailLink")
-                    }.execute()
-
-                    val file = statement.receive<GoogleFile>()
-
-                    if (file.mimeType.isNullOrEmpty()) {
-                        Napier.e("$logPrefix no mimetype found in googleDriveLink", tag = SCRAPER_TAG)
-                        return null
-                    }
-
-                    mimeTypeSupported.find { fileMimeType -> fileMimeType == file.mimeType }
-                            ?: return null
-
-                    Napier.d("$logPrefix mimetype found for google drive link: ${file.mimeType}", tag = SCRAPER_TAG)
-
-                    val dataStatement = defaultHttpClient().get<HttpStatement>(apiCall) {
-                        parameter("alt", "media")
-                        parameter("key", apiKey)
-                    }.execute()
-
-                    tempDir = Files.createTempDirectory("folder").toFile()
-                    tempDir.mkdir()
-                    val googleStream = dataStatement.receive<InputStream>()
-                    val googleFile = File(tempDir, file.name ?: file.id ?: fileId)
-
-                    FileOutputStream(googleFile).use {
-                        googleStream.copyTo(it)
-                        it.flush()
-                    }
-                    stream.close()
-
-                    val metadata = extractContentEntryMetadataFromFile(googleFile, db)
-                    metadata?.scraperType = ScraperTypes.GOOGLE_DRIVE_SCRAPE
-                    metadata?.uri = apiCall
-                    metadata?.contentEntry?.sourceUrl = apiCall
-                    Napier.e("$logPrefix metadata uri for drive link: ${metadata?.uri ?: "not found"}", tag = SCRAPER_TAG)
-                    tempDir.deleteRecursively()
-                    return metadata
-                }
-                mimeType.contains("text/html") -> {
-
-                    val data = FileUtils.readFileToString(contentFile, ScraperConstants.UTF_ENCODING)
-                    tempDir.deleteRecursively()
-                    val document = Jsoup.parse(data)
-
-                    val table = document.select("table tr th")
-                    if (table.isEmpty()) {
-                        return null
-                    }
-
-                    val altElement = table.select("[alt]")
-                    if (altElement.isNullOrEmpty() || altElement.attr("alt") != "[ICO]") {
-                        return null
-                    }
-
-                    val urlWithEndingSlash =  url.requirePostfix("/")
-                    val entry = ContentEntryWithLanguage()
-                    entry.title = document.title().substringAfterLast("/")
-                    entry.sourceUrl = urlWithEndingSlash
-                    entry.leaf = false
-                    entry.contentTypeFlag = ContentEntry.TYPE_COLLECTION
-                    Napier.e("$logPrefix metadata uri for apacheIndexer: $urlWithEndingSlash", tag = SCRAPER_TAG)
-
-                    return ImportedContentEntryMetaData(entry, "text/html", urlWithEndingSlash, 0, ScraperTypes.APACHE_INDEXER)
-
+                if (apiKey == "secret") {
+                    Napier.e("$logPrefix api key not set", tag = SCRAPER_TAG)
+                    return null
                 }
 
-                else -> return null
+                val apiCall: String
+                val fileId: String
+                if (urlString.startsWith("https://drive.google.com/file/d/")) {
+                    val fileIdLookUp = urlString.substringAfter("https://drive.google.com/file/d/")
+                    val char = fileIdLookUp.firstOrNull { it == '/' || it == '?' }
+                    fileId = if (char == null) fileIdLookUp else fileIdLookUp.substringBefore(char)
+                    apiCall = "https://www.googleapis.com/drive/v3/files/$fileId"
+                } else {
+                    Napier.e("$logPrefix unsupported google drive link", tag = SCRAPER_TAG)
+                    return null
+                }
+
+                val statement = defaultHttpClient().get<HttpStatement>(apiCall) {
+                    parameter("key", apiKey)
+                    parameter("fields", "id,modifiedTime,name,mimeType,description,thumbnailLink")
+                }.execute()
+
+                val file = statement.receive<GoogleFile>()
+
+                if (file.mimeType.isNullOrEmpty()) {
+                    Napier.e("$logPrefix no mimetype found in googleDriveLink", tag = SCRAPER_TAG)
+                    return null
+                }
+
+                mimeTypeSupported.find { fileMimeType -> fileMimeType == file.mimeType }
+                        ?: return null
+
+                Napier.d("$logPrefix mimetype found for google drive link: ${file.mimeType}", tag = SCRAPER_TAG)
+
+                val dataStatement = defaultHttpClient().get<HttpStatement>(apiCall) {
+                    parameter("alt", "media")
+                    parameter("key", apiKey)
+                }.execute()
+
+                tempDir = Files.createTempDirectory("folder").toFile()
+                tempDir.mkdir()
+                val googleStream = dataStatement.receive<InputStream>()
+                val googleFile = File(tempDir, file.name ?: file.id ?: fileId)
+
+                FileOutputStream(googleFile).use {
+                    googleStream.copyTo(it)
+                    it.flush()
+                }
+                stream.close()
+
+                val metadata = extractContentEntryMetadataFromFile(googleFile, db)
+                metadata?.scraperType = ScraperTypes.GOOGLE_DRIVE_SCRAPE
+                metadata?.uri = apiCall
+                metadata?.contentEntry?.sourceUrl = apiCall
+                Napier.e("$logPrefix metadata uri for drive link: ${metadata?.uri ?: "not found"}", tag = SCRAPER_TAG)
+                tempDir.deleteRecursively()
+                return metadata
+            }
+            mimeType.contains("text/html") -> {
+
+                val data = FileUtils.readFileToString(contentFile, ScraperConstants.UTF_ENCODING)
+                tempDir.deleteRecursively()
+                val document = Jsoup.parse(data)
+
+                val table = document.select("table tr th")
+                if (table.isEmpty()) {
+                    return null
+                }
+
+                val altElement = table.select("[alt]")
+                if (altElement.isNullOrEmpty() || altElement.attr("alt") != "[ICO]") {
+                    return null
+                }
+
+                val urlWithEndingSlash = urlString.requirePostfix("/")
+                val entry = ContentEntryWithLanguage()
+                entry.title = document.title().substringAfterLast("/")
+                entry.sourceUrl = urlWithEndingSlash
+                entry.leaf = false
+                entry.contentTypeFlag = ContentEntry.TYPE_COLLECTION
+                Napier.e("$logPrefix metadata uri for apacheIndexer: $urlWithEndingSlash", tag = SCRAPER_TAG)
+
+                return ImportedContentEntryMetaData(entry, "text/html", urlWithEndingSlash, 0, ScraperTypes.APACHE_INDEXER)
+
+            }
+
+            else -> {
+
+                val metaData = extractContentEntryMetadataFromFile(contentFile, db)
+                metaData?.scraperType = ScraperTypes.URL_SCRAPER
+                metaData?.uri = urlString
+                metaData?.contentEntry?.sourceUrl = urlString
+                Napier.e("$logPrefix metadata uri for urlScraper: ${metaData?.uri ?: "not found"}", tag = SCRAPER_TAG)
+                tempDir.deleteRecursively()
+
+                metaData
             }
         }
     }
+
 
 
     companion object {
@@ -411,8 +414,6 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
 
             val containerPath = cmd.getOptionValue(CONTAINER_ARGS)
-
-
 
 
             /*  val runner = ScraperManager(indexTotal, scraperTotal)
