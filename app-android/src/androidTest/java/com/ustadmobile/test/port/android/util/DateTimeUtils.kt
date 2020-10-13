@@ -19,7 +19,6 @@ fun setDateField(viewId: Int, timeInMillis: Long, timeZoneId: String = "UTC") {
     KView {
         withId(viewId)
     } perform {
-        isClickable()
         click()
     }
 
@@ -38,7 +37,6 @@ fun setDateField(viewId: Int, timeInMillis: Long, timeZoneId: String = "UTC") {
     KView {
         withId(android.R.id.button1)
     } perform {
-        isClickable()
         click()
     }
 }

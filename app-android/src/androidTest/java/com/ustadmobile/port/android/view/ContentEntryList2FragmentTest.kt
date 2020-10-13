@@ -112,6 +112,7 @@ class ContentEntryList2FragmentTest : TestCase() {
 
                 newEntryItem {
                     isDisplayed()
+                    isClickable()
                     click()
                 }
                 newBottomSheet {
