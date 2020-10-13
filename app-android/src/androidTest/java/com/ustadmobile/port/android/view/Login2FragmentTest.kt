@@ -125,9 +125,6 @@ class Login2FragmentTest : TestCase(){
     @AdbScreenRecord("given create account button is visible when clicked should go to account creation screen")
     @Test
     fun givenCreateAccountIsVisible_whenClicked_shouldOpenAccountCreationSection() {
-
-
-
         init {
 
         }.run {
@@ -147,18 +144,19 @@ class Login2FragmentTest : TestCase(){
     @Test
     fun givenConnectAsGuestIsVisible_whenClicked_shouldOpenContentSection() {
 
-
-
         init {
 
         }.run {
             LoginScreen {
                 launchFragment(guestConnection = true, systemImplNavRule = systemImplNavRule)
                 connectAsGuest {
+                    isClickable()
                     click()
                 }
-                assertEquals("It navigated to account creation screen",
-                        R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
+                flakySafely {
+                    assertEquals("It navigated to account creation screen",
+                            R.id.home_content_dest, systemImplNavRule.navController.currentDestination?.id)
+                }
             }
         }
 
