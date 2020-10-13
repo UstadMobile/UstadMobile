@@ -1,48 +1,27 @@
-/*
 package com.ustadmobile.port.android.view
 
 import android.app.Application
-import androidx.fragment.app.testing.FragmentScenario
-import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.navigation.fragment.findNavController
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.*
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
-import com.kaspersky.kaspresso.testcases.core.testcontext.BaseTestContext
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultGson
-import com.ustadmobile.core.networkmanager.initPicasso
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
-import com.ustadmobile.core.util.ext.toBundle
-import com.ustadmobile.core.view.PersonEditView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.screen.PersonEditScreen
-import com.ustadmobile.port.android.screen.PersonEditScreen.scrollToBottom
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
-import com.ustadmobile.test.port.android.util.*
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
-import org.hamcrest.Matchers.not
 import org.junit.*
 
 
@@ -110,9 +89,11 @@ class PersonEditFragmentTest : TestCase() {
 
     }
 
+
+    // TODO roles have changed here, need to update
     @AdbScreenRecord("given person edit opened in normal mode and admin, " +
             "roles and permissions should be shown")
-    @Test
+    //@Test
     fun givenPersonEditOpenedAsAdmin_whenInNoRegistrationMode_thenRolesShouldBeShown() {
 
         var entityRoles: List<EntityRoleWithNameAndRole> = listOf()
@@ -141,8 +122,8 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
 
-                launchFragment(false, fillForm = true, leftOutUsername = true,
-                        leftOutPassword = true, entityRoles = entityRoles,
+                launchFragment(false, leftOutPassword = true, leftOutUsername = true,
+                        fillForm = true, entityRoles = entityRoles,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
                         impl = impl, context = context)
 
@@ -162,9 +143,10 @@ class PersonEditFragmentTest : TestCase() {
 
     }
 
+    // TODO roles have changed here, need to update
     @AdbScreenRecord("given person edit for existing opened in normal mode and admin, " +
             "roles and permissions should be shown")
-    @Test
+    //@Test
     fun givenPersonEditOpenedDoeExistingAsAdmin_whenInNoRegistrationMode_thenRolesShouldBeShown() {
 
         var person: Person? = null
@@ -201,8 +183,8 @@ class PersonEditFragmentTest : TestCase() {
         }.run {
             PersonEditScreen {
 
-                launchFragment(false, fillForm = false, leftOutUsername = true,
-                        leftOutPassword = true, entityRoles = entityRoles, personUid = person!!.personUid,
+                launchFragment(false, leftOutPassword = true, leftOutUsername = true,
+                        fillForm = false, entityRoles = entityRoles, personUid = person!!.personUid,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
                         impl = impl, context = context)
 
@@ -403,4 +385,4 @@ class PersonEditFragmentTest : TestCase() {
     }
 
 
-}*/
+}

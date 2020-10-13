@@ -3,18 +3,11 @@ package com.ustadmobile.port.android.screen
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.fragment.findNavController
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.agoda.kakao.common.views.KSwipeView
-import com.agoda.kakao.common.views.KView
 import com.agoda.kakao.edit.KTextInputLayout
 import com.agoda.kakao.recycler.KRecyclerView
-import com.agoda.kakao.scroll.KScrollView
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
-import com.kaspersky.kaspresso.testcases.api.testcase.BaseTestCase
-import com.kaspersky.kaspresso.testcases.core.testcontext.BaseTestContext
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
@@ -72,18 +65,17 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
 
     val addressTextInput = KTextInputLayout { withId(R.id.address_textinputlayout)}
 
-    val genderValue = KView { withId(R.id.gender_value) }
-
+    val genderValue = KTextView { withId(R.id.gender_value)}
 
     fun launchFragment(registrationMode: Boolean = false, misMatchPassword: Boolean = false,
-                               leftOutPassword: Boolean = false, leftOutUsername: Boolean = false,
-                               fillForm: Boolean = true,
-                               entityRoles: List<EntityRoleWithNameAndRole> = listOf(),
-                               entityRolesOnForm: List<EntityRoleWithNameAndRole>? = null,
-                               personUid: Long = 0, leftOutDateOfBirth: Boolean = false,
-                               selectedDateOfBirth: Long = DateTime(1990, 10, 18).unixMillisLong,
-                                serverUrl: String, systemImplNavRule: SystemImplTestNavHostRule,
-                                impl: UstadMobileSystemImpl, context: Any)
+                       leftOutPassword: Boolean = false, leftOutUsername: Boolean = false,
+                       fillForm: Boolean = true,
+                       entityRoles: List<EntityRoleWithNameAndRole> = listOf(),
+                       entityRolesOnForm: List<EntityRoleWithNameAndRole>? = null,
+                       personUid: Long = 0, leftOutDateOfBirth: Boolean = false,
+                       selectedDateOfBirth: Long = DateTime(1990, 10, 18).unixMillisLong,
+                       serverUrl: String, systemImplNavRule: SystemImplTestNavHostRule,
+                       impl: UstadMobileSystemImpl, context: Any)
             : FragmentScenario<PersonEditFragment> {
 
         val password = "password"
@@ -108,7 +100,10 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
         // instead of type we'll replace text
         if (fillForm) {
 
-            val personOnForm = scenario.letOnFragment { it.entity }
+            var personOnForm: Person? = null
+            while(personOnForm == null){
+                personOnForm = scenario.nullableLetOnFragment { it.entity }
+            }
 
             val person = Person().apply {
                 firstNames = "Jane"
@@ -139,8 +134,9 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
                 }
             }
 
+
             person.gender.takeIf { it != personOnForm?.gender }?.also {
-                setMessageIdOption(R.id.gender_value, impl.getString(MessageID.male, context))
+                setMessageIdOption(genderValue, impl.getString(MessageID.male, context))
             }
 
             person.phoneNum.takeIf { it != personOnForm?.phoneNum }?.also {
@@ -178,7 +174,11 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
                 //scroll
                 scrollToBottom()
                 person.username.takeIf { it != personOnForm?.username }?.also {
-                    Espresso.onView(withId(R.id.username_text)).perform(ViewActions.replaceText(it))
+                    usernameTextInput{
+                        edit{
+                            replaceText(it)
+                        }
+                    }
                 }
             }
 
