@@ -49,7 +49,6 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
             reportTitleInput{
                 edit{
                     replaceText(it)
-                    hasText(it)
                 }
             }
         }

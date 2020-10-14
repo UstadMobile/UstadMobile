@@ -69,7 +69,7 @@ class ClazzEditFragmentTest : TestCase() {
                     it.installNavController(systemImplNavRule.navController)
                     it.arguments = bundleOf()
                 }
-            }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+            }
 
 
             val currentEntity = fragmentScenario.waitUntilLetOnFragment { it.entity }

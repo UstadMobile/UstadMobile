@@ -14,9 +14,13 @@ import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.ReportEditScreen
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.*
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -36,6 +40,14 @@ class ReportEditFragmentTest: TestCase() {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     @Before
     fun setup(){
@@ -140,7 +152,9 @@ class ReportEditFragmentTest: TestCase() {
             ReportEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+
 
         //Freeze and serialize the value as it was first shown to the user
         var entityLoadedByFragment: ReportWithFilters? = null
