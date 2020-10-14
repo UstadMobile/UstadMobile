@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
@@ -140,7 +141,8 @@ class ClazzWorkEditFragmentTest {
 
     }
 
-    /*private fun fillFields(newClazzWork: ClazzWork?, newContent: List<ContentEntry>,
+    */
+/*private fun fillFields(newClazzWork: ClazzWork?, newContent: List<ContentEntry>,
                             questionAndResponses: List<ClazzWorkQuestionAndOptions>){
         //TODO:
     }
@@ -163,7 +165,8 @@ class ClazzWorkEditFragmentTest {
         //TODO
 
         //Assert inserted in database
-    }*/
+    }*//*
+
 
 
 
@@ -259,3 +262,4 @@ class ClazzWorkEditFragmentTest {
 
 
 }
+*/
