@@ -2,14 +2,8 @@ package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.Espresso
 import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.hasDescendant
 import androidx.test.espresso.matcher.ViewMatchers.withText
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -22,19 +16,13 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.screen.ClazzWorkDetailOverviewScreen
-import com.ustadmobile.port.android.screen.ContentEntryListScreen
 import com.ustadmobile.port.android.view.binding.dateWithTimeFormat
 import com.ustadmobile.port.android.view.binding.dateWithTimeFormatWithPrepend
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.*
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.Matchers
 import org.junit.Rule
 import org.junit.Test
 import java.util.*
@@ -107,7 +95,6 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
         }.run {
 
             checkClazzWorkBasicDetailDisplayOk(clazzWork!!, contentList)
-
 
             clazzWork!!.clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
             runBlocking {
@@ -478,41 +465,48 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
         }
 
-        dbRule.account.personUid = studentMember1.clazzMemberPersonUid
+        init{
 
-        reloadFragment(testClazzWork.clazzWork)
+        }.run {
 
-        ClazzWorkDetailOverviewScreen{
+            dbRule.account.personUid = studentMember1.clazzMemberPersonUid
 
-            recycler{
+            reloadFragment(testClazzWork.clazzWork)
 
-                childWith<ClazzWorkDetailOverviewScreen.Comments> {
-                    withDescendant { withId(R.id.item_comments_list_line2_text) }
-                } perform{
-                    commentTextView{
-                        hasText("Student 1 private comment")
-                        isEnabled()
-                        hasNoText("Student 2 private comment")
+            ClazzWorkDetailOverviewScreen{
+
+                recycler{
+
+                    childWith<ClazzWorkDetailOverviewScreen.Comments> {
+                        withDescendant { withId(R.id.item_comments_list_line2_text) }
+                    } perform{
+                        commentTextView{
+                            hasText("Student 1 private comment")
+                            isEnabled()
+                            hasNoText("Student 2 private comment")
+                        }
+                    }
+
+                    //Student 2 logged in user. Cannot see private comment.
+                    dbRule.account.personUid = studentMember2.clazzMemberPersonUid
+
+                    reloadFragment(testClazzWork.clazzWork)
+
+                    childWith<ClazzWorkDetailOverviewScreen.Comments> {
+                        withDescendant { withId(R.id.item_comments_list_line2_text) }
+                    } perform{
+                        commentTextView{
+                            hasText("Student 2 private comment")
+                            hasNoText("Student 1 private comment")
+                            isEnabled()
+                        }
                     }
                 }
 
-                //Student 2 logged in user. Cannot see private comment.
-                dbRule.account.personUid = studentMember2.clazzMemberPersonUid
-
-                reloadFragment(testClazzWork.clazzWork)
-
-                childWith<ClazzWorkDetailOverviewScreen.Comments> {
-                    withDescendant { withId(R.id.item_comments_list_line2_text) }
-                } perform{
-                    commentTextView{
-                        hasText("Student 2 private comment")
-                        hasNoText("Student 1 private comment")
-                        isEnabled()
-                    }
-                }
             }
-
         }
+
+
 
 
 
