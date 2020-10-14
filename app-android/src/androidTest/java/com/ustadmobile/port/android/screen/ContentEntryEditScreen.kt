@@ -13,6 +13,7 @@ import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.android.view.ContentEntryEdit2Fragment
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -42,7 +43,7 @@ object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
 
     fun createEntryFromFile(fileName: String, isZipped: Boolean = true,
                                     systemImplNavRule : SystemImplTestNavHostRule,
-                                    dbRule: UmAppDatabaseAndroidClientRule): Pair<ContainerManager, Container> {
+                                    dbRule: UmAppDatabaseAndroidClientRule): Container {
         val containerTmpDir = UmFileUtilSe.makeTempDir("containerTmpDir","${System.currentTimeMillis()}")
         val testFile = File.createTempFile("contentEntryEdit", fileName, containerTmpDir)
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/$fileName")
@@ -81,6 +82,8 @@ object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
             }
         }
 
+        val repo = dbRule.repo as DoorDatabaseSyncRepository
+        repo.clientId
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
         val entries = dbRule.db.contentEntryDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario, 15000) {
@@ -92,11 +95,9 @@ object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
 
         Assert.assertTrue("Entry's data set and is a leaf", entries.first().title != null && entries.first().leaf)
 
-        val containerManager = ContainerManager(container!!, dbRule.db, dbRule.repo, containerTmpDir.absolutePath)
-
         containerTmpDir.deleteRecursively()
 
-        return Pair(containerManager, container)
+        return container
     }
 
 }

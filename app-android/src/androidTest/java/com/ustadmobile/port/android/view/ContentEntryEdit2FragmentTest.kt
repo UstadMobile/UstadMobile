@@ -8,6 +8,7 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.android.screen.ContentEntryEditScreen
 import com.ustadmobile.test.port.android.util.clickOptionMenu
@@ -27,7 +28,7 @@ class ContentEntryEdit2FragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -87,6 +88,8 @@ class ContentEntryEdit2FragmentTest : TestCase() {
                     }
                 }
 
+                val repo = dbRule.repo as DoorDatabaseSyncRepository
+                repo.clientId
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
                 val entries = dbRule.db.contentEntryDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
@@ -111,11 +114,10 @@ class ContentEntryEdit2FragmentTest : TestCase() {
 
             ContentEntryEditScreen {
 
-                val (containerManager, container) = createEntryFromFile("test.epub",
+                val container = createEntryFromFile("test.epub",
                         systemImplNavRule = systemImplNavRule, dbRule = dbRule)
                 assertTrue("Container for an entry was created from a zipped file",
-                        container.fileSize > 0 && container.mimeType?.contains("zip")!!
-                                && containerManager.allEntries.size > 1)
+                        container.fileSize > 0 && container.mimeType?.contains("zip")!!)
 
             }
 
@@ -132,11 +134,10 @@ class ContentEntryEdit2FragmentTest : TestCase() {
 
             ContentEntryEditScreen {
 
-                val (containerManager, container) = createEntryFromFile("video.mp4", false,
+                val container = createEntryFromFile("video.mp4", false,
                         systemImplNavRule = systemImplNavRule, dbRule = dbRule)
                 assertTrue("Container for an entry was created from a non zipped file",
-                        container.fileSize > 0 && !container.mimeType?.contains("zip")!!
-                                && containerManager.allEntries.size == 1)
+                        container.fileSize > 0 && !container.mimeType?.contains("zip")!!)
 
             }
 

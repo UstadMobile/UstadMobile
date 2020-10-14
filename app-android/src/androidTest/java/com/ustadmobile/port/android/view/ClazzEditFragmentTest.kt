@@ -13,6 +13,7 @@ import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
@@ -33,7 +34,7 @@ class ClazzEditFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -50,6 +51,8 @@ class ClazzEditFragmentTest : TestCase() {
     @JvmField
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
+
+    
 
 
     @AdbScreenRecord("")
@@ -94,6 +97,9 @@ class ClazzEditFragmentTest : TestCase() {
 
                 fillFields(fragmentScenario, formVals, currentEntity, schedules)
 
+
+                val repo = dbRule.repo as DoorDatabaseSyncRepository
+                repo.clientId
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
                 val clazzes = dbRule.db.clazzDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
