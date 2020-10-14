@@ -6,7 +6,8 @@ import android.widget.DatePicker
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
-import androidx.test.espresso.Espresso.*
+import androidx.test.espresso.Espresso.closeSoftKeyboard
+import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.action.ViewActions.typeText
 import androidx.test.espresso.assertion.ViewAssertions.matches
@@ -14,15 +15,15 @@ import androidx.test.espresso.contrib.PickerActions
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.port.android.screen.MainActivityScreen
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
-import com.ustadmobile.test.rules.*
+import com.ustadmobile.port.android.screen.ClazzListScreen
+import com.ustadmobile.port.android.screen.MainScreen
+import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import org.hamcrest.Matchers.allOf
 import org.hamcrest.Matchers.equalTo
 import org.junit.Rule
@@ -31,7 +32,7 @@ import org.junit.runner.RunWith
 
 @RunWith(AndroidJUnit4::class)
 @AdbScreenRecord("Class end-to-end test")
-class ClazzEndToEndTests {
+class ClazzEndToEndTests : TestCase() {
 
     @JvmField
     @Rule
@@ -45,18 +46,37 @@ class ClazzEndToEndTests {
             "fills in form, then it should go to the new class")
     @Test
     fun givenEmptyClazzList_whenUserClicksAddAndFillsInForm_thenClassIsCreatedAndGoneInto() {
-        val calendarUid = dbRule.db.holidayCalendarDao.insert(HolidayCalendar().apply {
-            this.umCalendarName = "Test Calendar"
-        })
 
-        dbRule.insertPersonForActiveUser(Person().apply {
-            firstNames = "Bob"
-            lastName = "Jones"
-            admin = true
-        })
+        var calendarUid = 0L
+        init {
+            calendarUid = dbRule.db.holidayCalendarDao.insert(HolidayCalendar().apply {
+                this.umCalendarName = "Test Calendar"
+            })
+
+            dbRule.insertPersonForActiveUser(Person().apply {
+                firstNames = "Bob"
+                lastName = "Jones"
+                admin = true
+            })
+            launchActivity<MainActivity>()
+
+        }.run {
+
+            MainScreen {
+
+                clazzItem {
+                    isDisplayed()
+                    click()
+                }
+                fab {
+                    isDisplayed()
+                    click()
+                }
+            }
 
 
-        launchActivity<MainActivity>()
+        }
+
 
         val context = ApplicationProvider.getApplicationContext<Context>()
         val newClazzText = context.getString(R.string.add_a_new_class)
@@ -67,9 +87,10 @@ class ClazzEndToEndTests {
         closeSoftKeyboard()
 
         //select holiday calendar
-       */
-/*  * Weird issue: if you specify the EditText itself, instead of the TextInputLayout, Android 5
-         * will click ON 'SCHOOL' THE BOTTOM NAVIGATION instead!*//*
+        */
+/* * Weird issue: if you specify the EditText itself, instead of the TextInputLayout, Android 5
+                * will click ON 'SCHOOL' THE BOTTOM NAVIGATION instead!*//*
+
 
 
 

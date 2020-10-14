@@ -2,13 +2,11 @@ package com.ustadmobile.port.android.screen
 
 import com.agoda.kakao.bottomnav.KBottomNavigationView
 import com.agoda.kakao.common.views.KView
-import com.agoda.kakao.text.KButton
-import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.MainActivity
 
-object MainActivityScreen : KScreen<MainActivityScreen>() {
+object MainScreen : KScreen<MainScreen>() {
 
     override val layoutId: Int?
         get() = R.layout.activity_main
@@ -21,6 +19,7 @@ object MainActivityScreen : KScreen<MainActivityScreen>() {
 
     val toolBarTitle: KView = KView { withId(R.id.toolbar)}
 
-    val bottomNav = KBottomNavigationView { withId(R.id.bottom_nav_view)}
+    val clazzItem = KView { withId(R.id.home_clazzlist_dest)}
+
 
 }
