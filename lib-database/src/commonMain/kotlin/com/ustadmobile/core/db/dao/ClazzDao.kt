@@ -9,6 +9,8 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
+import com.ustadmobile.lib.db.entities.ClazzMember.Companion.ROLE_STUDENT
+import com.ustadmobile.lib.db.entities.ClazzMember.Companion.ROLE_TEACHER
 
 @UmRepository
 @Dao
@@ -129,8 +131,8 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                                                       permission: Long) : Boolean
 
     @Query("""SELECT Clazz.*, HolidayCalendar.*, School.*,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = 1) AS numStudents,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = 2) AS numTeachers
+        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = $ROLE_STUDENT) AS numStudents,
+        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = $ROLE_TEACHER) AS numTeachers
         FROM Clazz 
         LEFT JOIN HolidayCalendar ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
         LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
