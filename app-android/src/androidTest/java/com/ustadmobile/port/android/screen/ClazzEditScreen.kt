@@ -22,6 +22,8 @@ object ClazzEditScreen : KScreen<ClazzEditScreen>() {
 
     val editDescTextInput = KTextInputLayout { withId(R.id.activity_clazz_edit_description)}
 
+    val holidayCalendarTextInput = KTextInputLayout { withId(R.id.activity_clazz_edit_holiday_calendar_selected)}
+
     fun fillFields(fragmentScenario: FragmentScenario<ClazzEditFragment>,
                    clazz: ClazzWithHolidayCalendarAndSchool,
                    clazzOnForm: ClazzWithHolidayCalendarAndSchool?,
