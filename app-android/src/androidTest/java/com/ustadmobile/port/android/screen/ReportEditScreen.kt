@@ -3,6 +3,8 @@ package com.ustadmobile.port.android.screen
 import android.content.Context
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.navigation.fragment.findNavController
+import com.agoda.kakao.common.views.KSwipeView
+import com.agoda.kakao.common.views.KView
 import com.agoda.kakao.edit.KTextInputLayout
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
@@ -38,6 +40,12 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
     val fromDateTextInput = KTextInputLayout { withId(R.id.activity_report_edit_fromDate_textinputlayout)}
 
     val toDateTextInput = KTextInputLayout { withId(R.id.activity_report_edit_toDate_textinputlayout)}
+
+    val personAddList = KView {
+        withId(R.id.item_createnew_line1_text)
+        isDescendantOfA { withId(R.id.fragment_edit_report_who_add_layout) }
+    }
+
 
     fun fillFields(fragmentScenario: FragmentScenario<ReportEditFragment>? = null,
                    report: ReportWithFilters,

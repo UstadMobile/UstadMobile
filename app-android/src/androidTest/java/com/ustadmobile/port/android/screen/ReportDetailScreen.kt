@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.screen
 
 import com.agoda.kakao.recycler.KRecyclerView
+import com.agoda.kakao.text.KButton
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.ReportDetailFragment
@@ -17,5 +18,7 @@ object ReportDetailScreen : KScreen<ReportDetailScreen>() {
     }, itemTypeBuilder = {
 
     })
+
+    val addToListButton = KButton { withId(R.id.preview_add_to_dashboard_button)}
 
 }
