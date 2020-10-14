@@ -29,7 +29,11 @@ class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = do
         set(newValue) {
             connectivityStatusAtomic.set(newValue)
             weakConnectivityListeners.forEach {
-                it?.get()?.onConnectivityStatusChanged(newValue)
+                try {
+                    it?.get()?.onConnectivityStatusChanged(newValue)
+                }catch(e: Exception) {
+                    println("Exception with weakConnectivityListener $e")
+                }
             }
         }
 
