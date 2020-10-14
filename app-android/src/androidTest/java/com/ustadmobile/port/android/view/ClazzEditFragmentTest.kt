@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.Espresso.onIdle
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
@@ -18,12 +17,13 @@ import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.screen.ClazzEditScreen
-import com.ustadmobile.test.port.android.util.clickOptionMenu
-import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.port.android.util.letOnFragment
-import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.test.port.android.util.*
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -43,6 +43,14 @@ class ClazzEditFragmentTest : TestCase() {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
+
 
     @AdbScreenRecord("")
     @Test
@@ -61,10 +69,11 @@ class ClazzEditFragmentTest : TestCase() {
                     it.installNavController(systemImplNavRule.navController)
                     it.arguments = bundleOf()
                 }
-            }
+            }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
 
 
-            val currentEntity = fragmentScenario.letOnFragment { it.entity }
+            val currentEntity = fragmentScenario.waitUntilLetOnFragment { it.entity }
+
             val formVals = ClazzWithHolidayCalendarAndSchool().apply {
                 clazzName = "New Clazz"
                 clazzDesc = "Description"
@@ -129,16 +138,16 @@ class ClazzEditFragmentTest : TestCase() {
                     ClazzEditFragment().also {
                         it.installNavController(systemImplNavRule.navController)
                     }
-                }
+                }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                        .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
 
                 //Freeze and serialize the value as it was first shown to the user
-                val entityLoadedByFragment = fragmentScenario.letOnFragment { it.entity }
+                var entityLoadedByFragment = fragmentScenario.waitUntilLetOnFragment { it.entity }
                 val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
                 val newClazzValues = defaultGson().fromJson(entityLoadedJson, ClazzWithHolidayCalendarAndSchool::class.java).apply {
                     clazzName = "Updated Clazz"
                 }
-
 
                 fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment)
 
