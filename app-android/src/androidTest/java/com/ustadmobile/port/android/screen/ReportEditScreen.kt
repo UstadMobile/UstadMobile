@@ -56,7 +56,8 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
         report.reportTitle?.takeIf { it != reportOnForm?.reportTitle }?.also {
             reportTitleInput{
                 edit{
-                    replaceText(it)
+                    clearText()
+                    typeText(it)
                 }
             }
         }
