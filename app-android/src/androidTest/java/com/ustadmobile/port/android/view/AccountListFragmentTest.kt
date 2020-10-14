@@ -79,7 +79,7 @@ class AccountListFragmentTest : TestCase() {
     fun givenStoredAccounts_whenAppLaunched_thenShouldShowAllAccounts() {
 
 
-        init{
+        init {
             launchFragment(true, defaultNumOfAccounts)
         }.run {
             val accountManager: UstadAccountManager by di!!.instance()
@@ -99,7 +99,7 @@ class AccountListFragmentTest : TestCase() {
     fun givenAppLaunched_whenOnlyGuestAccountOnTheDeviceAndIsLogged_thenShouldHideBothProfileAndLogoutButton() {
 
 
-        init{
+        init {
             launchFragment()
         }.run {
             AccountListScreen {
@@ -124,15 +124,15 @@ class AccountListFragmentTest : TestCase() {
     fun givenStoredAccounts_whenGuestAccountActive_thenShouldHideProfileButton() {
 
 
-        init{
+        init {
             launchFragment(true, defaultNumOfAccounts, true)
 
-        }.run{
+        }.run {
 
             AccountListScreen {
                 recycler {
                     firstChild<AccountListScreen.MainItem> {
-                        profileButton{
+                        profileButton {
                             isNotDisplayed()
                         }
                     }
@@ -147,13 +147,13 @@ class AccountListFragmentTest : TestCase() {
     @AdbScreenRecord("given active account when app launched should be displayed")
     @Test
     fun givenActiveAccountExists_whenAppLaunched_thenShouldShowIt() {
-        init{
+        init {
             launchFragment(true, defaultNumOfAccounts)
         }.run {
             AccountListScreen {
                 recycler {
                     firstChild<AccountListScreen.MainItem> {
-                        fullNameText{
+                        fullNameText {
                             hasText("FirstName1 Lastname1")
                         }
                     }
@@ -170,15 +170,14 @@ class AccountListFragmentTest : TestCase() {
     fun givenAddAccountButton_whenClicked_thenShouldOpenGetStarted() {
 
 
-
-        init{
+        init {
             launchFragment()
 
         }.run {
 
-            AccountListScreen{
-                recycler{
-                    childAt<AccountListScreen.NewLayout>(1){
+            AccountListScreen {
+                recycler {
+                    childAt<AccountListScreen.NewLayout>(1) {
                         newLayout {
                             click()
                             assertEquals("It navigated to the get started screen",
@@ -192,7 +191,6 @@ class AccountListFragmentTest : TestCase() {
         }
 
 
-
     }
 
 
@@ -200,18 +198,18 @@ class AccountListFragmentTest : TestCase() {
     @Test
     fun givenDeleteAccountButton_whenClicked_thenShouldRemoveAccountFromTheDevice() {
 
-        init{
+        init {
 
         }.run {
             val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
             val accountManager: UstadAccountManager by di!!.instance()
 
-            val storedAccounts = accountManager.storedAccounts
-
-            AccountListScreen{
-                recycler{
-                    childAt<AccountListScreen.MainItem>(2){
-                        accountDeleteButton{
+            AccountListScreen {
+                recycler {
+                    childWith<AccountListScreen.MainItem> {
+                        withDescendant { withText("FirstName3 Lastname3") }
+                    } perform {
+                        accountDeleteButton {
                             click()
                         }
                     }
@@ -219,11 +217,12 @@ class AccountListFragmentTest : TestCase() {
             }
 
             val currentStoredAccounts = accountManager.storedAccountsLive.waitUntilWithFragmentScenario(fragmentScenario) {
-                it.isNotEmpty()
+                it.size == 2
             }
 
-            assertNotEquals("Current account was removed from the device",
-                    storedAccounts, currentStoredAccounts)
+            val isAccountDeleted = currentStoredAccounts?.find { it.firstName == "FirstName3" }
+            assertEquals("Correct account got deleted",
+                    null, isAccountDeleted)
 
         }
 
@@ -234,7 +233,7 @@ class AccountListFragmentTest : TestCase() {
     @Test
     fun givenLogoutButton_whenClicked_thenShouldRemoveAccountFromTheDevice() {
 
-        init{
+        init {
 
         }.run {
 
@@ -243,10 +242,10 @@ class AccountListFragmentTest : TestCase() {
 
             val activeAccount = accountManager.activeAccount
 
-            AccountListScreen{
-                recycler{
+            AccountListScreen {
+                recycler {
                     firstChild<AccountListScreen.MainItem> {
-                        logoutButton{
+                        logoutButton {
                             click()
                         }
                     }
@@ -271,14 +270,14 @@ class AccountListFragmentTest : TestCase() {
     fun givenProfileButton_whenClicked_thenShouldGoToProfileView() {
 
 
-        init{
+        init {
             launchFragment(true, defaultNumOfAccounts)
         }.run {
 
-            AccountListScreen{
-                recycler{
+            AccountListScreen {
+                recycler {
                     firstChild<AccountListScreen.MainItem> {
-                        profileButton{
+                        profileButton {
                             click()
                         }
                     }
@@ -296,29 +295,28 @@ class AccountListFragmentTest : TestCase() {
     @Test
     fun givenAccountList_whenAccountIsClicked_shouldBeActive() {
 
-        init{
+        init {
             launchFragment(true, defaultNumOfAccounts)
         }.run {
 
-            AccountListScreen{
-                recycler{
+            AccountListScreen {
+                recycler {
                     firstChild<AccountListScreen.MainItem> {
-                        fullNameText{
+                        fullNameText {
                             hasText("FirstName1 Lastname1")
                         }
                     }
-                    childAt<AccountListScreen.MainItem>(2){
+                    childAt<AccountListScreen.MainItem>(2) {
                         click()
                     }
                     firstChild<AccountListScreen.MainItem> {
-                        fullNameText{
+                        fullNameText {
                             hasText("FirstName3 Lastname3")
                         }
                     }
                 }
             }
         }
-
 
 
     }
@@ -328,7 +326,7 @@ class AccountListFragmentTest : TestCase() {
     @Test
     fun givenAboutButton_whenClicked_thenShouldGoToAboutView() {
 
-        before{
+        before {
             launchFragment()
             Intents.init()
         }.after {
@@ -337,8 +335,8 @@ class AccountListFragmentTest : TestCase() {
 
             AccountListScreen {
                 recycler {
-                    childAt<AccountListScreen.AboutItem>(2){
-                        aboutTextView{
+                    childAt<AccountListScreen.AboutItem>(2) {
+                        aboutTextView {
                             click()
                         }
                     }
@@ -376,7 +374,6 @@ class AccountListFragmentTest : TestCase() {
         impl.setAppPref(UstadAccountManager.ACCOUNTS_PREFKEY,
                 Json.stringify(UstadAccounts.serializer(), storedAccounts), context)
     }
-
 
 
     private fun launchFragment(createExtraAccounts: Boolean = false, numberOfAccounts: Int = 1, guestActive: Boolean = false):
