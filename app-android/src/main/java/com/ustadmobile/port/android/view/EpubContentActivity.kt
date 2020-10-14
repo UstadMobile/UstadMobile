@@ -27,7 +27,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.port.android.view.ext.adjustHeightToDisplayHeight
 import com.ustadmobile.port.android.view.ext.adjustHeightToWrapContent
-import com.ustadmobile.port.android.view.ext.dpAsPx
+import com.ustadmobile.core.util.ext.dpAsPx
 import com.ustadmobile.port.android.view.ext.scrollToAnchor
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.appbar_material_with_progress.view.*
