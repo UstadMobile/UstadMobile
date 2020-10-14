@@ -19,6 +19,7 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.port.android.screen.VideoContentScreen
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.CrudIdlingResource
@@ -122,8 +123,11 @@ class VideoContentFragmentTest : TestCase() {
                     isGone()
                 }
 
-                val contentProgress = dbRule.db.contentEntryProgressDao.getProgressByContentAndPerson(container!!.containerContentEntryUid, dbRule.account.personUid)
-                Assert.assertEquals("progress started since user pressed play", 0, contentProgress!!.contentEntryProgressProgress)
+                var contentProgress: ContentEntryProgress? = null
+                while(contentProgress == null){
+                    contentProgress = dbRule.db.contentEntryProgressDao.getProgressByContentAndPerson(container!!.containerContentEntryUid, dbRule.account.personUid)
+                }
+                Assert.assertEquals("progress started since user pressed play", 0, contentProgress.contentEntryProgressProgress)
 
             }
 

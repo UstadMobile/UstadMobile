@@ -306,7 +306,10 @@ class AccountListFragmentTest : TestCase() {
                             hasText("FirstName1 Lastname1")
                         }
                     }
-                    childAt<AccountListScreen.MainItem>(2) {
+
+                    childWith<AccountListScreen.MainItem> {
+                        withDescendant { withText("FirstName3 Lastname3") }
+                    }perform {
                         click()
                     }
                     firstChild<AccountListScreen.MainItem> {
