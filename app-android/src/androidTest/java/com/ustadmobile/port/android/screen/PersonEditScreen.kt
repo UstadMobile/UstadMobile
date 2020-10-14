@@ -20,8 +20,12 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.view.PersonEditFragment
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.*
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 
 object PersonEditScreen : KScreen<PersonEditScreen>() {
 
@@ -76,7 +80,7 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
                        personUid: Long = 0, leftOutDateOfBirth: Boolean = false,
                        selectedDateOfBirth: Long = DateTime(1990, 10, 18).unixMillisLong,
                        serverUrl: String, systemImplNavRule: SystemImplTestNavHostRule,
-                       impl: UstadMobileSystemImpl, context: Any, testContext: TestContext<Unit>)
+                       impl: UstadMobileSystemImpl, context: Any, testContext: TestContext<Unit>, databinding: ScenarioIdlingResourceRule<DataBindingIdlingResource>, crud: ScenarioIdlingResourceRule<CrudIdlingResource>)
             : FragmentScenario<PersonEditFragment> {
 
         val password = "password"
@@ -95,7 +99,8 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
             PersonEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }
+        }.withScenarioIdlingResourceRule(dataBinding)
+                .withScenarioIdlingResourceRule(scenario)
 
         //Soft keyboard tend to hide views, when try to type will throw exception so
         // instead of type we'll replace text
