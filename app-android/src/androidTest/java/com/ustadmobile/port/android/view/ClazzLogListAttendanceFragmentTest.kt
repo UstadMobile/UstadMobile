@@ -1,15 +1,7 @@
-/*
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
@@ -21,16 +13,11 @@ import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.screen.ClazzLogListAttendanceScreen
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
-import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions.Companion.childOfViewAtPositionWithMatcher
 import kotlinx.coroutines.runBlocking
 import org.junit.After
 import org.junit.Assert
@@ -163,4 +150,4 @@ class ClazzLogListAttendanceFragmentTest : TestCase() {
     }
 
 
-}*/
+}

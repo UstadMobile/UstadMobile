@@ -1,4 +1,3 @@
-/*
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
@@ -213,4 +212,3 @@ class ContentEntryList2FragmentTest : TestCase() {
     }
 
 }
-*/

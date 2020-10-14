@@ -1,23 +1,15 @@
-/*
 package com.ustadmobile.port.android.view
 
-import android.accounts.Account
 import android.app.Application
 import android.content.Context
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers
-import androidx.test.espresso.matcher.ViewMatchers.*
+import androidx.test.espresso.matcher.ViewMatchers.hasChildCount
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -25,24 +17,15 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccounts
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.initPicasso
 import com.ustadmobile.core.view.AboutView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.screen.AccountListScreen
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
-import com.ustadmobile.test.port.android.UmViewActions.atPosition
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
-import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions.Companion.actionOnChild
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockWebServer
-import org.hamcrest.Matchers.allOf
-import org.hamcrest.Matchers.not
 import org.junit.After
 import org.junit.Assert.*
 import org.junit.Before
@@ -73,7 +56,7 @@ class AccountListFragmentTest : TestCase() {
 
     private val defaultNumOfAccounts = 2
 
-    private lateinit var di: DI
+    private var di: DI? = null
 
     val impl = UstadMobileSystemImpl.instance
 
@@ -84,13 +67,11 @@ class AccountListFragmentTest : TestCase() {
         }
         mockServerUrl = mockWebServer.url("/").toString()
         di = (ApplicationProvider.getApplicationContext<Context>() as DIAware).di
-        impl.setAppPref(UstadAccountManager.ACCOUNTS_PREFKEY, null, context)
     }
 
     @After
     fun destroy() {
         mockWebServer.shutdown()
-        impl.setAppPref(UstadAccountManager.ACCOUNTS_PREFKEY, null, context)
     }
 
     @AdbScreenRecord("given stored accounts exists when app launched should be displayed")
@@ -101,7 +82,7 @@ class AccountListFragmentTest : TestCase() {
         init{
             launchFragment(true, defaultNumOfAccounts)
         }.run {
-            val accountManager: UstadAccountManager by di.instance()
+            val accountManager: UstadAccountManager by di!!.instance()
             AccountListScreen {
                 recycler {
                     //active account was removed from the list
@@ -109,8 +90,6 @@ class AccountListFragmentTest : TestCase() {
                 }
             }
         }
-
-
 
     }
 
@@ -171,7 +150,6 @@ class AccountListFragmentTest : TestCase() {
         init{
             launchFragment(true, defaultNumOfAccounts)
         }.run {
-
             AccountListScreen {
                 recycler {
                     firstChild<AccountListScreen.MainItem> {
@@ -226,7 +204,7 @@ class AccountListFragmentTest : TestCase() {
 
         }.run {
             val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
-            val accountManager: UstadAccountManager by di.instance()
+            val accountManager: UstadAccountManager by di!!.instance()
 
             val storedAccounts = accountManager.storedAccounts
 
@@ -261,7 +239,7 @@ class AccountListFragmentTest : TestCase() {
         }.run {
 
             val fragmentScenario = launchFragment(true, defaultNumOfAccounts)
-            val accountManager: UstadAccountManager by di.instance()
+            val accountManager: UstadAccountManager by di!!.instance()
 
             val activeAccount = accountManager.activeAccount
 
@@ -399,6 +377,8 @@ class AccountListFragmentTest : TestCase() {
                 Json.stringify(UstadAccounts.serializer(), storedAccounts), context)
     }
 
+
+
     private fun launchFragment(createExtraAccounts: Boolean = false, numberOfAccounts: Int = 1, guestActive: Boolean = false):
             FragmentScenario<AccountListFragment> {
         if (createExtraAccounts) {
@@ -413,4 +393,4 @@ class AccountListFragmentTest : TestCase() {
         }
     }
 
-}*/
+}

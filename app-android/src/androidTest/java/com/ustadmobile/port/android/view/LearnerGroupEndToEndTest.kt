@@ -1,4 +1,3 @@
-/*
 package com.ustadmobile.port.android.view
 
 import android.content.Context
@@ -197,4 +196,4 @@ class LearnerGroupEndToEndTest : TestCase() {
     }
 
 
-}*/
+}
