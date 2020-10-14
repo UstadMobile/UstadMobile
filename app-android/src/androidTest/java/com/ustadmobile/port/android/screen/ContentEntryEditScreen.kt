@@ -97,7 +97,7 @@ object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
 
         containerTmpDir.deleteRecursively()
 
-        return container
+        return container!!
     }
 
 }
