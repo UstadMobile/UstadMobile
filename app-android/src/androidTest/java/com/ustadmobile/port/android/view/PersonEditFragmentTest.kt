@@ -75,7 +75,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
                 launchFragment(false, fillForm = false,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run)
                 scrollToBottom()
                 clazzListRecyclerView {
                     isDisplayed()
@@ -126,7 +126,7 @@ class PersonEditFragmentTest : TestCase() {
                 launchFragment(false, leftOutPassword = true, leftOutUsername = true,
                         fillForm = true, entityRoles = entityRoles,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run)
 
                 scrollToBottom()
                 rolesList {
@@ -187,7 +187,7 @@ class PersonEditFragmentTest : TestCase() {
                 launchFragment(false, leftOutPassword = true, leftOutUsername = true,
                         fillForm = false, entityRoles = entityRoles, personUid = person!!.personUid,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run)
 
 
                 scrollToBottom()
@@ -223,7 +223,7 @@ class PersonEditFragmentTest : TestCase() {
         }.run {
             PersonEditScreen {
                 launchFragment(false, fillForm = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run)
 
                 usernameTextInput {
                     isNotDisplayed()
@@ -250,7 +250,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
                 launchFragment(true, fillForm = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run)
 
                 scrollToBottom()
                 clazzListRecyclerView {
@@ -275,7 +275,7 @@ class PersonEditFragmentTest : TestCase() {
 
                 launchFragment(registrationMode = true, leftOutPassword = true, leftOutUsername = true,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run)
 
 
                 scrollToBottom()
@@ -303,7 +303,7 @@ class PersonEditFragmentTest : TestCase() {
 
 
                 launchFragment(registrationMode = true, leftOutDateOfBirth = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run)
 
 
                 birthdayTextInput {
@@ -325,7 +325,7 @@ class PersonEditFragmentTest : TestCase() {
 
                 launchFragment(registrationMode = true,
                         selectedDateOfBirth = DateTime(2010, 10, 24).unixMillisLong, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run)
 
                 birthdayTextInput {
                     hasInputLayoutError(context.getString(R.string.underRegistrationAgeError))
@@ -346,7 +346,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
                 launchFragment(registrationMode = true, misMatchPassword = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run)
 
                 scrollToBottom()
                 passwordTextInput {
@@ -374,7 +374,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
                 launchFragment(registrationMode = true, misMatchPassword = false, leftOutUsername = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run)
 
                 scrollToBottom()
                 usernameTextInput {

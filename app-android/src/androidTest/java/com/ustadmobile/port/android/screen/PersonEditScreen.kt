@@ -8,6 +8,7 @@ import com.agoda.kakao.edit.KTextInputLayout
 import com.agoda.kakao.recycler.KRecyclerView
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
+import com.kaspersky.kaspresso.testcases.core.testcontext.TestContext
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.generated.locale.MessageID
@@ -75,7 +76,7 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
                        personUid: Long = 0, leftOutDateOfBirth: Boolean = false,
                        selectedDateOfBirth: Long = DateTime(1990, 10, 18).unixMillisLong,
                        serverUrl: String, systemImplNavRule: SystemImplTestNavHostRule,
-                       impl: UstadMobileSystemImpl, context: Any)
+                       impl: UstadMobileSystemImpl, context: Any, testContext: TestContext<Unit>)
             : FragmentScenario<PersonEditFragment> {
 
         val password = "password"
@@ -136,7 +137,9 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
 
 
             person.gender.takeIf { it != personOnForm?.gender }?.also {
-                setMessageIdOption(genderValue, impl.getString(MessageID.male, context))
+                testContext.flakySafely {
+                    setMessageIdOption(genderValue, impl.getString(MessageID.male, context))
+                }
             }
 
             person.phoneNum.takeIf { it != personOnForm?.phoneNum }?.also {
