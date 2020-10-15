@@ -1,4 +1,3 @@
-/*
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
@@ -27,9 +26,12 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.port.android.screen.ClazzWorkDetailOverviewScreen
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.TestClazzWork
 import com.ustadmobile.util.test.ext.createTestContentEntriesAndJoinToClazzWork
 import com.ustadmobile.util.test.ext.insertTestClazzWorkAndQuestionsAndOptionsWithResponse
@@ -52,6 +54,10 @@ class ClazzWorkSubmissionMarkingFragmentTest {
     @JvmField
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
 
     @After
     fun tearDown() {
@@ -239,7 +245,7 @@ class ClazzWorkSubmissionMarkingFragmentTest {
                 it.arguments = bundleOf(UstadView.ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
                         UstadView.ARG_CLAZZMEMBER_UID to clazzMemberUid.toString())
             }
-        }
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
     }
 
     @AdbScreenRecord("ClazzWorkSubmissionMarking: Should show marking (no Quiz) ")
@@ -574,4 +580,3 @@ class ClazzWorkSubmissionMarkingFragmentTest {
     }
 
 }
-*/

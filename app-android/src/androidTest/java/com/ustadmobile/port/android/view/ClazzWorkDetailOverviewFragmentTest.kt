@@ -1,4 +1,4 @@
-
+/*
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
@@ -19,7 +19,6 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.screen.ClazzWorkDetailOverviewScreen
 import com.ustadmobile.port.android.view.binding.dateWithTimeFormat
 import com.ustadmobile.port.android.view.binding.dateWithTimeFormatWithPrepend
-import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
@@ -51,11 +50,8 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
+    val dataBindingIdlingResourceRule =
+            ScenarioIdlingResourceRule(DataBindingIdlingResource())
 
     @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as student should " +
             "show all fields")
@@ -109,39 +105,152 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
             checkClazzWorkBasicDetailDisplayOk(clazzWork!!, contentList)
 
-//            clazzWork!!.clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
-//            runBlocking {
-//                dbRule.db.clazzWorkDao.updateAsync(clazzWork!!)
-//            }
+        }
 
-//            reloadFragment(testClazzWork!!.clazzWork)
-//
-//            //Check overview page
-//            checkClazzWorkBasicDetailDisplayOk(clazzWork!!, contentList)
-//
-//            //Change type to quiz
-//            var clazzWorkQuizStuff: TestClazzWorkWithQuestionAndOptionsAndResponse? = null
-//            runBlocking {
-//                clazzWorkQuizStuff = dbRule.db.insertQuizQuestionsAndOptions(clazzWork!!, false, 0,
-//                        0, 0, true)
-//                clazzWork = clazzWorkQuizStuff?.clazzWork!!
-//            }
-//
-//            reloadFragment(clazzWorkQuizStuff!!.clazzWork)
-//
-//            //Check overview page
-//            checkClazzWorkBasicDetailDisplayOk(clazzWork!!, contentList)
-//
-//            checkQuizQuestionsDisplayOk(clazzWorkQuizStuff)
+    }
+
+    @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as student should " +
+            "show all fields in Submission type ClazzWork")
+    @Test
+    fun givenValidClazzWorkUidSubmission_whenLoadedAsStudent_thenShouldShow() {
+
+        var clazzWork: ClazzWork? = null
+        var contentList = listOf<ContentEntry>()
+        var testClazzWork: TestClazzWork? = null
+        before {
+            //Create ClazzWork accordingly
+            clazzWork = ClazzWork().apply {
+                clazzWorkTitle = "Test ClazzWork A"
+                clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+                clazzWorkInstructions = "Pass espresso test for ClazzWork"
+                clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+                clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
+                clazzWorkCommentsEnabled = true
+                clazzWorkMaximumScore = 120
+
+            }
+
+            testClazzWork = runBlocking {
+                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                        clazzWork!!, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
+                        true, 0, false, true)
+            }
+
+            //Assign content
+            val contentEntriesWithJoin = runBlocking {
+                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork, 2)
+            }
+            contentList = contentEntriesWithJoin.contentList
+
+            //Log in as student
+            val studentMember = testClazzWork!!.clazzAndMembers.studentList.get(0)
+            dbRule.account.personUid = studentMember.clazzMemberPersonUid
+
+            //Insert public and private comments
+            runBlocking {
+                dbRule.db.insertPublicAndPrivateComments(UMCalendarUtil.getDateInMilliPlusDays(0),
+                        testClazzWork!!.clazzWork, testClazzWork!!.clazzAndMembers)
+            }
+
+
+            clazzWork!!.clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
+            runBlocking {
+                dbRule.db.clazzWorkDao.updateAsync(clazzWork!!)
+            }
+
+
+        }.after {
+
+        }.run {
+
+
+            reloadFragment(testClazzWork!!.clazzWork)
+
+            //Check overview page
+            checkClazzWorkBasicDetailDisplayOk(clazzWork!!, contentList)
+
+        }
+
+    }
+
+    @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as student should " +
+            "show all fields in Quiz type ClazzWork")
+    @Test
+    fun givenValidClazzWorkUidQuizType_whenLoadedAsStudent_thenShouldShow() {
+
+        var clazzWork: ClazzWork? = null
+        var contentList = listOf<ContentEntry>()
+        var testClazzWork: TestClazzWork? = null
+        before {
+            //Create ClazzWork accordingly
+            clazzWork = ClazzWork().apply {
+                clazzWorkTitle = "Test ClazzWork A"
+                clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+                clazzWorkInstructions = "Pass espresso test for ClazzWork"
+                clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+                clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
+                clazzWorkCommentsEnabled = true
+                clazzWorkMaximumScore = 120
+
+            }
+
+            testClazzWork = runBlocking {
+                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                        clazzWork!!, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
+                        true, 0, false, true)
+            }
+
+            //Assign content
+            val contentEntriesWithJoin = runBlocking {
+                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork, 2)
+            }
+            contentList = contentEntriesWithJoin.contentList
+
+            //Log in as student
+            val studentMember = testClazzWork!!.clazzAndMembers.studentList.get(0)
+            dbRule.account.personUid = studentMember.clazzMemberPersonUid
+
+            //Insert public and private comments
+            runBlocking {
+                dbRule.db.insertPublicAndPrivateComments(UMCalendarUtil.getDateInMilliPlusDays(0),
+                        testClazzWork!!.clazzWork, testClazzWork!!.clazzAndMembers)
+            }
+
+
+            clazzWork!!.clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
+            runBlocking {
+                dbRule.db.clazzWorkDao.updateAsync(clazzWork!!)
+            }
+
+
+
+
+        }.after {
+
+        }.run {
+
+            //Change type to quiz
+            var clazzWorkQuizStuff: TestClazzWorkWithQuestionAndOptionsAndResponse? = null
+            runBlocking {
+                clazzWorkQuizStuff = dbRule.db.insertQuizQuestionsAndOptions(clazzWork!!, false, 0,
+                        0, 0, true)
+                clazzWork = clazzWorkQuizStuff?.clazzWork!!
+            }
+            reloadFragment(clazzWorkQuizStuff!!.clazzWork)
+
+            //Check overview page
+            checkClazzWorkBasicDetailDisplayOk(clazzWork!!, contentList)
+
+            checkQuizQuestionsDisplayOk(clazzWorkQuizStuff)
 
         }
 
     }
 
     @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as teacher should" +
-            " show all relevant fields")
+            " show all relevant fields of No Submission type Clazz Work")
     @Test
-    fun givenValidClazzWorkUid_whenLoadedAsTeacher_thenShouldShow() {
+    fun givenValidClazzWorkUidNoType_whenLoadedAsTeacher_thenShouldShow() {
 
         var clazzWork: ClazzWork? = null
         var contentList = listOf<ContentEntry>()
@@ -183,6 +292,53 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
             //Check overview page
             checkClazzWorkBasicDetailDisplayOk(testClazzWork!!.clazzWork, contentList, true)
 
+        }
+
+    }
+
+    @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as teacher should" +
+            " show all relevant fields of Short Text type ClazzWork")
+    @Test
+    fun givenValidClazzWorkUidText_whenLoadedAsTeacher_thenShouldShow() {
+
+        var clazzWork: ClazzWork? = null
+        var contentList = listOf<ContentEntry>()
+        var testClazzWork: TestClazzWork? = null
+        before {
+
+            clazzWork = ClazzWork().apply {
+                clazzWorkTitle = "Test ClazzWork A"
+                clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+                clazzWorkInstructions = "Pass espresso test for ClazzWork"
+                clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+                clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
+                clazzWorkCommentsEnabled = true
+                clazzWorkMaximumScore = 120
+
+            }
+
+            testClazzWork = runBlocking {
+                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                        clazzWork!!, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
+                        true, 0, false, false)
+            }
+
+            val contentEntriesWithJoin = runBlocking {
+                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork,
+                        2)
+            }
+            contentList = contentEntriesWithJoin.contentList
+
+            val teacherMember = testClazzWork!!.clazzAndMembers.teacherList.get(0)
+            dbRule.account.personUid = teacherMember.clazzMemberPersonUid
+
+
+
+        }.after {
+
+        }.run {
+
+
             //Change type:
             clazzWork!!.clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
             runBlocking {
@@ -193,6 +349,54 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
             //Check overview page
             checkClazzWorkBasicDetailDisplayOk(testClazzWork!!.clazzWork, contentList, true)
+
+
+        }
+
+    }
+
+
+    @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as teacher should" +
+            " show all relevant fields of Quiz ClazzWork")
+    @Test
+    fun givenValidClazzWorkUidQuiz_whenLoadedAsTeacher_thenShouldShow() {
+
+        var clazzWork: ClazzWork? = null
+        var contentList = listOf<ContentEntry>()
+        var testClazzWork: TestClazzWork? = null
+        before {
+
+            clazzWork = ClazzWork().apply {
+                clazzWorkTitle = "Test ClazzWork A"
+                clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+                clazzWorkInstructions = "Pass espresso test for ClazzWork"
+                clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+                clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
+                clazzWorkCommentsEnabled = true
+                clazzWorkMaximumScore = 120
+
+            }
+
+            testClazzWork = runBlocking {
+                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                        clazzWork!!, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
+                        true, 0, false, false)
+            }
+
+            val contentEntriesWithJoin = runBlocking {
+                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork,
+                        2)
+            }
+            contentList = contentEntriesWithJoin.contentList
+
+            val teacherMember = testClazzWork!!.clazzAndMembers.teacherList.get(0)
+            dbRule.account.personUid = teacherMember.clazzMemberPersonUid
+
+
+
+        }.after {
+
+        }.run {
 
             //Change type to quiz
             var clazzWorkQuizStuff: TestClazzWorkWithQuestionAndOptionsAndResponse? = null
@@ -499,6 +703,74 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
                             hasNoText("Student 2 private comment")
                         }
                     }
+                }
+
+            }
+        }
+        
+    }
+
+    @AdbScreenRecord("ClazzWorkDetailOverview: One student can make a private comment " +
+            "that is not seen by another student2 ")
+    @Test
+    fun givenLValidClazzWorkUid_whenPrivateCommentedByOneUser_thenOtherUsershallNotSee2() {
+
+        val clazzWork = ClazzWork().apply {
+            clazzWorkTitle = "Test ClazzWork A"
+            clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+            clazzWorkInstructions = "Pass espresso test for ClazzWork"
+            clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+            clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
+            clazzWorkCommentsEnabled = true
+            clazzWorkMaximumScore = 120
+
+        }
+
+        val testClazzWork = runBlocking {
+            dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                    clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
+                    true,
+                    0,false, true)
+        }
+
+        //Student 1 logged in user. Makes private comment :
+        val studentMember1 = testClazzWork.clazzAndMembers.studentList.get(0)
+        val studentMember2 = testClazzWork.clazzAndMembers.studentList.get(1)
+
+        //Test comments loaded (if any)
+        runBlocking {
+            Comments().apply {
+                commentsText = "Student 1 private comment"
+                commentsDateTimeAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
+                commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
+                commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
+                commentsPublic = false
+                commentsPersonUid = studentMember1.clazzMemberPersonUid
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
+            }
+            Comments().apply {
+                commentsText = "Student 2 private comment"
+                commentsDateTimeAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
+                commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
+                commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
+                commentsPublic = false
+                commentsPersonUid = studentMember2.clazzMemberPersonUid
+                commentsUid = dbRule.db.commentsDao.insertAsync(this)
+            }
+
+        }
+
+        init{
+
+        }.run {
+
+            dbRule.account.personUid = studentMember1.clazzMemberPersonUid
+
+
+            ClazzWorkDetailOverviewScreen{
+
+                recycler{
+
 
                     //Student 2 logged in user. Cannot see private comment.
                     dbRule.account.personUid = studentMember2.clazzMemberPersonUid
@@ -518,7 +790,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
             }
         }
-        
+
     }
 
 
@@ -752,9 +1024,9 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
                         clazzWork.clazzWorkUid.toString())
             }
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+
 
     }
 
 }
-
+*/
