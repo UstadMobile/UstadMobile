@@ -40,7 +40,7 @@ open class Clazz() {
     var clazzEndTime: Long = 0
 
     //Clazz features
-    var clazzFeatures: Long = (CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ASSIGNMENT)
+    var clazzFeatures: Long = (CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_CLAZZWORK)
 
     var clazzSchoolUid : Long = 0L
 
@@ -72,14 +72,14 @@ open class Clazz() {
 
     constructor(clazzName: String) : this() {
         this.clazzName = clazzName
-        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY  or CLAZZ_FEATURE_ASSIGNMENT
+        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY  or CLAZZ_FEATURE_CLAZZWORK
         this.isClazzActive = true
     }
 
     constructor(clazzName: String, clazzLocationUid: Long) : this() {
         this.clazzName = clazzName
         this.clazzLocationUid = clazzLocationUid
-        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or CLAZZ_FEATURE_ASSIGNMENT
+        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or CLAZZ_FEATURE_CLAZZWORK
         this.isClazzActive = true
     }
 
@@ -88,7 +88,7 @@ open class Clazz() {
         const val TABLE_ID = 6
         const val CLAZZ_FEATURE_ATTENDANCE = 1L
         const val CLAZZ_FEATURE_ACTIVITY = 4L
-        const val CLAZZ_FEATURE_ASSIGNMENT = 8L
+        const val CLAZZ_FEATURE_CLAZZWORK = 8L
 
         const val CLAZZ_CODE_DEFAULT_LENGTH = 6
 

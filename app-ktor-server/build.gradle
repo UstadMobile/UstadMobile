@@ -114,7 +114,7 @@ configurations {
     standaloneRuntime.extendsFrom runtime
 }
 
-mainClassName = 'io.ktor.server.netty.EngineMain'
+mainClassName = 'com.ustadmobile.lib.rest.ServerAppMain'
 
 // This task will generate your fat JAR and put it in the ./build/libs/ directory
 shadowJar {
