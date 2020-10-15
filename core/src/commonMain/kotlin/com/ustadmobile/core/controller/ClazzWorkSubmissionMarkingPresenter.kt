@@ -183,9 +183,9 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 val response = everyResult.clazzWorkQuestionResponse
                 if(response.clazzWorkQuestionResponseUid == 0L) {
                     response.clazzWorkQuestionResponseUid =
-                            db.clazzWorkQuestionResponseDao.insertAsync(response)
+                            repo.clazzWorkQuestionResponseDao.insertAsync(response)
                 }else{
-                    db.clazzWorkQuestionResponseDao.updateAsync(response)
+                    repo.clazzWorkQuestionResponseDao.updateAsync(response)
                 }
                 everyResult.clazzWorkQuestionResponse = response
                 newOptionsAndResponse.add(everyResult)
@@ -210,9 +210,9 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             submission.clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
 
             if(submission.clazzWorkSubmissionUid == 0L) {
-                submission.clazzWorkSubmissionUid = db.clazzWorkSubmissionDao.insertAsync(submission)
+                submission.clazzWorkSubmissionUid = repo.clazzWorkSubmissionDao.insertAsync(submission)
             }else{
-                db.clazzWorkSubmissionDao.updateAsync(submission)
+                repo.clazzWorkSubmissionDao.updateAsync(submission)
             }
             clazzWorkWithSubmission?.submission = submission
             view.runOnUiThread(Runnable {

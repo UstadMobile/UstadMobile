@@ -168,9 +168,9 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                 val response = everyResult.clazzWorkQuestionResponse
                 if(response.clazzWorkQuestionResponseUid == 0L) {
                     response.clazzWorkQuestionResponseUid =
-                            db.clazzWorkQuestionResponseDao.insertAsync(response)
+                            repo.clazzWorkQuestionResponseDao.insertAsync(response)
                 }else{
-                    db.clazzWorkQuestionResponseDao.updateAsync(response)
+                    repo.clazzWorkQuestionResponseDao.updateAsync(response)
                 }
                 everyResult.clazzWorkQuestionResponse = response
                 newOptionsAndResponse.add(everyResult)
@@ -178,7 +178,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
             val loggedInPersonUid = accountManager.activeAccount.personUid
             val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
-                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
+                repo.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                         entity?.clazzWorkClazzUid?:0L)
             }
 
@@ -193,9 +193,9 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
             submission.clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
 
             if(submission.clazzWorkSubmissionUid == 0L) {
-                submission.clazzWorkSubmissionUid = db.clazzWorkSubmissionDao.insertAsync(submission)
+                submission.clazzWorkSubmissionUid = repo.clazzWorkSubmissionDao.insertAsync(submission)
             }else{
-                db.clazzWorkSubmissionDao.updateAsync(submission)
+                repo.clazzWorkSubmissionDao.updateAsync(submission)
             }
             clazzWorkWithSubmission?.clazzWorkSubmission = submission
             view.runOnUiThread(Runnable {
