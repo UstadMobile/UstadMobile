@@ -119,6 +119,9 @@ dependencies {
     //compileOnly  "androidx.room:room-compiler:$version_android_room"
 
 
+    //Logging
+    implementation "com.github.aakira:napier-android:$version_napier"
+
 
 
     // Paging

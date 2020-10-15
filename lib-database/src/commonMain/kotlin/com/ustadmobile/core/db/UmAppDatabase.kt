@@ -4,7 +4,10 @@ import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.MinSyncVersion
+import com.ustadmobile.door.entities.ChangeLog
 import com.ustadmobile.door.entities.SqliteSyncablePrimaryKey
+import com.ustadmobile.door.entities.TableSyncStatus
+import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.*
@@ -38,12 +41,15 @@ import kotlin.jvm.Volatile
     Report::class, ReportFilter::class,
     DeviceSession::class, WorkSpace::class, ContainerUploadJob::class,
     SqliteSyncablePrimaryKey::class, LearnerGroup::class, LearnerGroupMember::class,
-    GroupLearningSession::class
+    GroupLearningSession::class,
+    UpdateNotification::class,
+    TableSyncStatus::class,
+    ChangeLog::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 42)
+], version = 43)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 

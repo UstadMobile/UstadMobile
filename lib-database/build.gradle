@@ -55,6 +55,7 @@ kotlin {
                 implementation project(":lib-database-entities")
                 implementation project(':lib-door-runtime')
                 implementation project(":lib-database-annotations")
+                implementation "com.github.aakira:napier:$version_napier"
                 compileOnly project(":lib-room-annotations")
 
             }
@@ -65,6 +66,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
             }
         }
         jsMain {
@@ -72,6 +74,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
+                implementation "com.github.aakira:napier-js:$version_napier"
             }
         }
 
@@ -118,6 +121,7 @@ dependencies {
     kapt "org.nanohttpd:nanohttpd:$version_nanohttpd"
     kapt "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
     kapt "org.kodein.di:kodein-di:$version_kodein_di"
+    kapt "com.github.aakira:napier-jvm:$version_napier"
 }
 
 compileKotlinJvm.dependsOn(":lib-database-annotation-processor:jar")

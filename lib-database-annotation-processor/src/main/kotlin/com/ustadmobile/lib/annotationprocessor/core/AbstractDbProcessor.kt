@@ -1577,7 +1577,11 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                             //TODO: Check if we really want the primary CSN field here
                             // or is this coming from a local device?
                             .add(".map·{·%T(epk·=·it.${syncableEntityInfo.entityPkField.name},·" +
-                                    "csn·=·it.${syncableEntityInfo.entityMasterCsnField.name})·}\n", EntityAck::class)
+                                    "csn·=·it.${syncableEntityInfo.entityMasterCsnField.name}", EntityAck::class)
+                            .apply {
+                                if(syncableEntityInfo.entityMasterCsnField.type == LONG)
+                                    add(".toInt()")
+                            }.add(")·}\n")
                             .add(generateKtorRequestCodeBlockForMethod(httpEndpointVarName = "_endpoint",
                                     dbPathVarName = "_dbPath",
                                     daoName = daoName, methodName = sendTrkEntitiesFn.name,
