@@ -4,14 +4,8 @@ package com.ustadmobile.port.android.view
 import android.app.Application
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
-import androidx.test.espresso.Espresso.onIdle
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.agoda.kakao.common.views.KView
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -20,25 +14,17 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.port.android.generated.MessageIDMap
-import com.ustadmobile.port.android.view.ReportEditFragmentTest.Companion.fillFields
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
-import com.ustadmobile.test.port.android.UmAndroidTestUtil
+import com.ustadmobile.port.android.screen.*
 import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.Matchers
-import org.hamcrest.core.AllOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
 
 @AdbScreenRecord("Report end-to-end test")
-class ReportEndToEndTests {
+class ReportEndToEndTests : TestCase() {
 
     @JvmField
     @Rule
@@ -50,7 +36,7 @@ class ReportEndToEndTests {
 
     private val context = ApplicationProvider.getApplicationContext<Application>()
 
-    val impl =  UstadMobileSystemImpl.instance
+    val impl = UstadMobileSystemImpl.instance
 
     @Before
     fun setup() {
@@ -63,8 +49,7 @@ class ReportEndToEndTests {
 
 
     @AdbScreenRecord("Given an empty report list, when the user clicks add report and fills in form, then the new report is shown in list")
-    //Temporarily disabled by 23/Jul/20 Mike due to two consecutive test failures on Android 7
-    //@Test
+    @Test
     fun givenEmptyReportList_whenUserClicksAddAndFillsInFormAndAddsToDashboardOnDetail_thenReportIsCreatedAndShownInList() {
         val newClazzValues = ReportWithFilters().apply {
             reportTitle = "Updated Report"
@@ -78,33 +63,100 @@ class ReportEndToEndTests {
 
         val activityScenario = launchActivity<MainActivity>()
 
-        onView(withId(R.id.report_list_dest)).perform(click())
-        onView(withText(R.string.report)).perform(click())
+        init {
 
-        fillFields(report = newClazzValues, setFieldsRequiringNavigation = false, impl = impl, context = context)
+        }.run {
 
-        UmAndroidTestUtil.swipeScreenDown()
+            MainScreen {
 
-        onIdle()
+                bottomNav {
+                    setSelectedItem(R.id.report_list_dest)
+                }
 
-        onView(AllOf.allOf(withId(R.id.item_createnew_line1_text),
-                ViewMatchers.isDescendantOfA(withId(R.id.fragment_edit_report_who_add_layout))))
-                .perform(click())
+                fab.click()
+            }
 
-        onIdle()
+            ReportEditScreen {
 
-        onView(withText("Hello World")).perform(click())
+                fillFields(report = newClazzValues, setFieldsRequiringNavigation = false, impl = impl, context = context)
 
-        onView(withId(R.id.menu_done)).perform(click())
+                personAddList.click()
 
-        onView(withId(R.id.preview_add_to_dashboard_button)).perform(click())
+            }
 
-        val createdReport = runBlocking {
-            dbRule.db.reportDao.findAllLive().waitUntilWithActivityScenario(activityScenario) { it.size == 1 }
-        }!!.first()
-        onView(Matchers.allOf(withId(R.id.item_reportlist_report_cl), ViewMatchers.withTagValue(Matchers.equalTo(createdReport.reportUid))))
-                .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+            PersonListScreen {
+
+                recycler {
+                    childWith<PersonListScreen.Person> {
+                        withDescendant { withText("Hello World") }
+                    } perform {
+                        click()
+                    }
+                }
+
+            }
+
+            MainScreen {
+
+                KView {
+                    withId(R.id.menu_done)
+                } perform {
+                    click()
+                }
+
+            }
+
+            ReportDetailScreen {
+
+                addToListButton {
+                    click()
+                }
+
+            }
+
+            val createdReport = runBlocking {
+                dbRule.db.reportDao.findAllLive().waitUntilWithActivityScenario(activityScenario) { it.size == 1 }
+            }!!.first()
+
+            ReportListScreen {
+
+                recycler {
+
+                    firstChild<ReportListScreen.Report> {
+                        reportLayout {
+                            hasTag("${createdReport.reportUid}")
+                            isDisplayed()
+                        }
+                    }
+
+                }
+
+            }
+
+
+        }
+
+        */
+/*  onView(AllOf.allOf(withId(R.id.item_createnew_line1_text),
+                  ViewMatchers.isDescendantOfA(withId(R.id.fragment_edit_report_who_add_layout))))
+                  .perform(click())
+
+          onIdle()
+
+          onView(withText("Hello World")).perform(click())
+
+          onView(withId(R.id.menu_done)).perform(click())
+
+          onView(withId(R.id.preview_add_to_dashboard_button)).perform(click())
+
+          val createdReport = runBlocking {
+              dbRule.db.reportDao.findAllLive().waitUntilWithActivityScenario(activityScenario) { it.size == 1 }
+          }!!.first()
+          onView(Matchers.allOf(withId(R.id.item_reportlist_report_cl), ViewMatchers.withTagValue(Matchers.equalTo(createdReport.reportUid))))
+                  .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))*//*
+
 
     }
 
-}*/
+}
+*/

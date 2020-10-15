@@ -1,29 +1,23 @@
-/*
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withTagValue
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.port.android.screen.PersonListScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import org.hamcrest.Matchers
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
 @AdbScreenRecord("Sort list screen tests")
-class SortListFragmentTest {
+class SortListFragmentTest : TestCase() {
 
     @JvmField
     @Rule
@@ -71,19 +65,33 @@ class SortListFragmentTest {
                     PersonDao.SORT_FIRST_NAME_ASC, sortOption!!.flag)
         }
 
-        onView(withId(R.id.item_sort_selected_layout)).perform(click())
+        init{
 
-        onView(withId(R.id.fragment_sort_order_list)).perform(
-                RecyclerViewActions.actionOnItem<RecyclerView.ViewHolder>(withTagValue(Matchers.equalTo(PersonDao.SORT_FIRST_NAME_ASC)),
-                        click()))
+        }.run {
 
-        fragmentScenario.onFragment {
-            val sortOption = it.mNewItemRecyclerViewAdapter!!.sortOptionSelected
-            Assert.assertEquals("order changed to descending", PersonDao.SORT_FIRST_NAME_ASC, sortOption!!.flag)
+            PersonListScreen{
+
+                recycler{
+                    emptyFirstChild{
+                        click()
+                    }
+                }
+
+                sortList{
+                    childWith<PersonListScreen.Sort> {
+                        withTag(PersonDao.SORT_FIRST_NAME_ASC)
+                    }perform {
+                        click()
+                    }
+                }
+
+                fragmentScenario.onFragment {
+                    val sortOption = it.mNewItemRecyclerViewAdapter!!.sortOptionSelected
+                    Assert.assertEquals("order changed to descending", PersonDao.SORT_FIRST_NAME_ASC, sortOption!!.flag)
+                }
+            }
         }
-
     }
 
 
 }
-*/

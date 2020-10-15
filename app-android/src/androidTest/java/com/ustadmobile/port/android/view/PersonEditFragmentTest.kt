@@ -15,7 +15,10 @@ import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.screen.PersonEditScreen
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import kotlinx.coroutines.GlobalScope
@@ -39,6 +42,14 @@ class PersonEditFragmentTest : TestCase() {
     @JvmField
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     private val context = ApplicationProvider.getApplicationContext<Application>()
 
@@ -75,7 +86,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
                 launchFragment(false, fillForm = false,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run, databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
                 scrollToBottom()
                 clazzListRecyclerView {
                     isDisplayed()
@@ -126,7 +137,8 @@ class PersonEditFragmentTest : TestCase() {
                 launchFragment(false, leftOutPassword = true, leftOutUsername = true,
                         fillForm = true, entityRoles = entityRoles,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run,
+                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 scrollToBottom()
                 rolesList {
@@ -187,7 +199,8 @@ class PersonEditFragmentTest : TestCase() {
                 launchFragment(false, leftOutPassword = true, leftOutUsername = true,
                         fillForm = false, entityRoles = entityRoles, personUid = person!!.personUid,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run,
+                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
 
                 scrollToBottom()
@@ -223,7 +236,8 @@ class PersonEditFragmentTest : TestCase() {
         }.run {
             PersonEditScreen {
                 launchFragment(false, fillForm = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run,
+                databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 usernameTextInput {
                     isNotDisplayed()
@@ -250,7 +264,8 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
                 launchFragment(true, fillForm = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run,
+                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 scrollToBottom()
                 clazzListRecyclerView {
@@ -275,7 +290,8 @@ class PersonEditFragmentTest : TestCase() {
 
                 launchFragment(registrationMode = true, leftOutPassword = true, leftOutUsername = true,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run,
+                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
 
                 scrollToBottom()
@@ -303,7 +319,8 @@ class PersonEditFragmentTest : TestCase() {
 
 
                 launchFragment(registrationMode = true, leftOutDateOfBirth = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run,
+                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
 
                 birthdayTextInput {
@@ -325,7 +342,8 @@ class PersonEditFragmentTest : TestCase() {
 
                 launchFragment(registrationMode = true,
                         selectedDateOfBirth = DateTime(2010, 10, 24).unixMillisLong, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run,
+                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 birthdayTextInput {
                     hasInputLayoutError(context.getString(R.string.underRegistrationAgeError))
@@ -346,7 +364,8 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
                 launchFragment(registrationMode = true, misMatchPassword = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run,
+                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 scrollToBottom()
                 passwordTextInput {
@@ -374,7 +393,8 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
                 launchFragment(registrationMode = true, misMatchPassword = false, leftOutUsername = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context)
+                        impl = impl, context = context, testContext = this@run,
+                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
                 scrollToBottom()
                 usernameTextInput {

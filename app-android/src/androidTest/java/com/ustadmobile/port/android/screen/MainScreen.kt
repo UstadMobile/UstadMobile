@@ -19,7 +19,7 @@ object MainScreen : KScreen<MainScreen>() {
 
     val toolBarTitle: KView = KView { withId(R.id.toolbar)}
 
-    val clazzItem = KView { withId(R.id.home_clazzlist_dest)}
+    val bottomNav = KBottomNavigationView { withId(R.id.bottom_nav_view)}
 
 
 }

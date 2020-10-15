@@ -3,9 +3,12 @@ package com.ustadmobile.port.android.screen
 import android.content.Context
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.navigation.fragment.findNavController
+import com.agoda.kakao.common.views.KSwipeView
+import com.agoda.kakao.common.views.KView
 import com.agoda.kakao.edit.KTextInputLayout
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
+import com.kaspersky.kaspresso.testcases.core.testcontext.TestContext
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -39,16 +42,24 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
     val toDateTextInput = KTextInputLayout { withId(R.id.activity_report_edit_toDate_textinputlayout)}
 
+    val personAddList = KView {
+        withId(R.id.item_createnew_line1_text)
+        isDescendantOfA { withId(R.id.fragment_edit_report_who_add_layout) }
+    }
+
+
     fun fillFields(fragmentScenario: FragmentScenario<ReportEditFragment>? = null,
                    report: ReportWithFilters,
                    reportOnForm: ReportWithFilters? = ReportWithFilters(),
                    setFieldsRequiringNavigation: Boolean = true, person: Person? = null,
-                   verbDisplay: VerbDisplay? = null, entry: ContentEntry? = null, impl: UstadMobileSystemImpl, context: Context) {
+                   verbDisplay: VerbDisplay? = null, entry: ContentEntry? = null,
+                   impl: UstadMobileSystemImpl, context: Context, testContext: TestContext<Unit>) {
 
         report.reportTitle?.takeIf { it != reportOnForm?.reportTitle }?.also {
             reportTitleInput{
                 edit{
-                    replaceText(it)
+                    clearText()
+                    typeText(it)
                 }
             }
         }
@@ -56,23 +67,31 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
         closeSoftKeyboard()
 
         report.chartType.takeIf { it != reportOnForm?.chartType }?.also {
-            setMessageIdOption(visualTypeValue,
-                    impl.getString(ReportEditPresenter.ChartOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
+            testContext.flakySafely {
+                setMessageIdOption(visualTypeValue,
+                        impl.getString(ReportEditPresenter.ChartOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
+            }
         }
 
         report.yAxis.takeIf { it != reportOnForm?.yAxis }?.also {
-            setMessageIdOption(yAxisValue,
-                    impl.getString(ReportEditPresenter.YAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
+            testContext.flakySafely {
+                setMessageIdOption(yAxisValue,
+                        impl.getString(ReportEditPresenter.YAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
+            }
         }
 
         report.xAxis.takeIf { it != reportOnForm?.xAxis }?.also {
-            setMessageIdOption(xAxisValue,
-                    impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
+            testContext.flakySafely {
+                setMessageIdOption(xAxisValue,
+                        impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
+            }
         }
 
         report.subGroup.takeIf { it != reportOnForm?.subGroup }?.also {
-            setMessageIdOption(subGroupValue,
-                    impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
+            testContext.flakySafely {
+                setMessageIdOption(subGroupValue,
+                        impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
+            }
         }
 
         report.fromDate.takeIf { it != reportOnForm?.fromDate }?.also {

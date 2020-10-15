@@ -18,7 +18,10 @@ object ContentEntryListScreen : KScreen<ContentEntryListScreen>() {
     override val viewClass: Class<*>?
         get() = ContentEntryList2Fragment::class.java
 
-    val newEntryItem: KView = KView { withId(R.id.item_createnew_layout) }
+    val newEntryItem: KView = KView {
+        withId(R.id.item_createnew_layout)
+        withDescendant { withText("Add new content") }
+    }
 
     val newBottomSheet: KView = KView { withId(R.id.bottom_content_option_sheet) }
 

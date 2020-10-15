@@ -115,7 +115,8 @@ class ReportEditFragmentTest: TestCase() {
 
                 fillFields(fragmentScenario, formVals, currentEntity, true,
                         person, verbDisplay, contentEntry,
-                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext())
+                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
+                        testContext = this@run)
 
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
@@ -183,7 +184,8 @@ class ReportEditFragmentTest: TestCase() {
             ReportEditScreen{
 
                 fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment, person = person,
-                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext())
+                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
+                        testContext = this@run)
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
