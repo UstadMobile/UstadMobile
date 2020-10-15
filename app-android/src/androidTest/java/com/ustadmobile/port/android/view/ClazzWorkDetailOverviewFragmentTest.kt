@@ -505,11 +505,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
             }
         }
-
-
-
-
-
+        
     }
 
 
@@ -524,16 +520,9 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
         ClazzWorkDetailOverviewScreen {
             recycler {
-                scrollTo {
-                    withDescendant { withText(contentList[1].title) }
-                }
-                scrollTo {
-                   withDescendant { withText(contentList[0].title) }
-                }
+
                 scrollToStart()
-                scrollTo {
-                    hasDescendant(withText(clazzWork.clazzWorkInstructions))
-                }
+
                 childWith<ClazzWorkDetailOverviewScreen.ClazzWorkBasicDetail> {
                     withDescendant { withText(clazzWork.clazzWorkInstructions!!) }
                 } perform {

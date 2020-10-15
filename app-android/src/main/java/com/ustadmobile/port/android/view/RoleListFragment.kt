@@ -52,6 +52,7 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
             holder.itemBinding.role = item
             holder.itemBinding.presenter = presenter
             holder.itemBinding.bitMaskFlags = RoleEditPresenter.FLAGS_AVAILABLE
+            holder.itemView.tag = holder.itemBinding.role?.roleUid
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
