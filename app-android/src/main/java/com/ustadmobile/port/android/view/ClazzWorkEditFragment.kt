@@ -41,6 +41,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusA
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
+import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 
 interface ClazzWorkEditFragmentEventHandler {
     fun onClickClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions?)
@@ -189,7 +190,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         set(value) {
             field?.removeObserver(contentObserver)
             field = value
-            value?.observe(viewLifecycleOwner, contentObserver)
+            value?.observeIfFragmentViewIsReady(this, contentObserver)
         }
 
     override var submissionTypeOptions: List<
