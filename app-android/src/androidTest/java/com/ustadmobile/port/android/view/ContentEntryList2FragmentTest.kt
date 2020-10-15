@@ -20,7 +20,10 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.ContentEntryListScreen
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
@@ -47,6 +50,14 @@ class ContentEntryList2FragmentTest : TestCase() {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     private val parentEntryUid = 10000L
 
@@ -208,7 +219,8 @@ class ContentEntryList2FragmentTest : TestCase() {
             ContentEntryList2Fragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
     }
 
 }
