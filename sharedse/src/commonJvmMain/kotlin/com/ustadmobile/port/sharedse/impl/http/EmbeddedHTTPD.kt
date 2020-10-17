@@ -22,6 +22,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.sharedse.impl.http.vhToPxFactor
+
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
  *
@@ -125,7 +127,8 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
         val mountPath = "/${sanitizeDbNameFromUrl(endpointUrl)}/container/$containerUid/"
 
         val filters = if(filterMode == ContainerMounter.FILTER_MODE_EPUB) {
-            listOf<MountedContainerResponder.MountedContainerFilter>(EpubContainerFilter(di))
+            listOf<MountedContainerResponder.MountedContainerFilter>(EpubContainerFilter(di),
+                CssVhFilter() {vhToPxFactor()})
         }else {
             listOf<MountedContainerResponder.MountedContainerFilter>()
         }
