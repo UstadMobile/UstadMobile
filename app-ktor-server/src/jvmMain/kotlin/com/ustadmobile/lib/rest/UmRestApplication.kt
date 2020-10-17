@@ -5,7 +5,11 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.ServerUpdateNotificationManager
+import com.ustadmobile.door.ServerUpdateNotificationManagerImpl
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
@@ -116,6 +120,16 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 it.preload()
                 it.ktorInit(File(storageRoot, context.identifier(dbMode)).absolutePath)
             }
+        }
+
+        bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
+            ServerUpdateNotificationManagerImpl()
+        }
+
+        bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
+            instance<UmAppDatabase>(tag = DoorTag.TAG_DB).asRepository(Any(), "http://localhost/",
+                "", defaultHttpClient(), File(".").absolutePath,
+                instance(), false)
         }
 
         bind<ScraperManager>() with scoped(EndpointScope.Default).singleton {

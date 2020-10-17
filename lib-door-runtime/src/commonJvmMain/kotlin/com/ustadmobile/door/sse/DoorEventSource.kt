@@ -41,8 +41,6 @@ actual class DoorEventSource actual constructor(var url: String, var listener: D
                 urlConnection.connectTimeout = CONNECT_TIMEOUT
                 urlConnection.readTimeout = READ_TIMEOUT
 
-                //these are hardcoded for test purposes only - should be put in url parameters instead
-                urlConnection.setRequestProperty("door-dbversion", "2")
 
                 input = urlConnection.inputStream.toByteReadChannel()
 
