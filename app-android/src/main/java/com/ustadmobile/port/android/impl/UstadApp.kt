@@ -83,7 +83,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
             instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
-                    context.url, "", defaultHttpClient()).also {
+                    context.url, "", defaultHttpClient(), useClientSyncManager = true).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
             }
         }

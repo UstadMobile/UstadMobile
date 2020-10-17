@@ -96,7 +96,7 @@ dependencies {
     implementation project(":lib-database-annotations")
     implementation project(':lib-util')
 
-    //Kotlin
+    //Kotlin 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
     //Repository dependencies

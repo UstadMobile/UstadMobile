@@ -18,6 +18,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlin.jvm.Synchronized
 import kotlin.math.min
 
 /**
@@ -66,7 +67,9 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
                 }
             }
 
-            takeIf { value == STATUS_CONNECTED }?.checkQueue()
+            if(value == STATUS_CONNECTED) {
+                GlobalScope.launch { checkQueue() }
+            }
         }
 
     fun CoroutineScope.launchProcessor(id: Int, channel: Channel<Int>) = launch {
