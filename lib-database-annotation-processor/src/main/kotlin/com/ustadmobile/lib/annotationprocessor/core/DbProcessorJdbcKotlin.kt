@@ -877,8 +877,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
         codeBlock.endControlFlow() //end when
                 .apply {
-                    takeIf { dbTypeIsSyncable }?.add(generateInsertTableSyncStatusCodeBlock(dbTypeElement,
-                            "_stmt.executeUpdate", processingEnv))
+                    takeIf { dbTypeIsSyncable }?.addInsertTableSyncStatuses(dbTypeElement,
+                            "_stmt.executeUpdate", processingEnv)
                 }.nextControlFlow("catch(e: %T)", Exception::class)
                 .add("e.printStackTrace()\n")
                 .add("throw %T(%S, e)\n", RuntimeException::class, "Exception creating tables")
@@ -945,8 +945,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                     .endControlFlow()
         }
         dropFunSpec.endControlFlow()
-        dropFunSpec.addCode(generateInsertTableSyncStatusCodeBlock(dbTypeElement,
-                "_stmt.executeUpdate",processingEnv))
+        dropFunSpec.addCode(CodeBlock.builder().addInsertTableSyncStatuses(dbTypeElement,
+                "_stmt.executeUpdate",processingEnv).build())
 
         dropFunSpec.nextControlFlow("finally")
                 .addCode("_stmt?.close()\n")

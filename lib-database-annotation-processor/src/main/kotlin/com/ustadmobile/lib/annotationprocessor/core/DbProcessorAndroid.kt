@@ -228,6 +228,8 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                 .addModifiers(KModifier.OVERRIDE)
                 .addCode(generateInsertNodeIdFun(dbTypeEl, DoorDbType.SQLITE, "db.execSQL",
                         processingEnv))
+                .addCode(CodeBlock.builder().addInsertTableSyncStatuses(dbTypeEl,
+                        "db.execSQL", processingEnv).build())
                 .build())
 
         onCreateFunSpec.addCode(codeBlock.build())
