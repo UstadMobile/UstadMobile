@@ -33,6 +33,8 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
 
     class NoConnectionException(message: String, cause: Throwable? = null): Exception(message, cause)
 
+    val completed = atomic(false)
+
     val requestLock = Mutex()
 
     @Volatile
@@ -103,8 +105,6 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             }
         }
     }
-
-    val completed = atomic(false)
 
     @Volatile
     var triedMainEndpoint = false
