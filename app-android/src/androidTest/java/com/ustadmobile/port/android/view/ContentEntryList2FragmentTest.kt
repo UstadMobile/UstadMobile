@@ -110,12 +110,20 @@ class ContentEntryList2FragmentTest : TestCase() {
 
             ContentEntryListScreen {
 
-                newEntryItem {
-                    isDisplayed()
-                    isClickable()
-                    click()
+                recycler{
+
+                    childWith<ContentEntryListScreen.NewItem> {
+                        withDescendant { withId(R.id.item_createnew_layout) }
+                    }perform {
+                        newEntryItem{
+                            isDisplayed()
+                            click()
+                        }
+                    }
+
                 }
-                newBottomSheet {
+
+                newBottomSheet{
                     isDisplayed()
                 }
 
