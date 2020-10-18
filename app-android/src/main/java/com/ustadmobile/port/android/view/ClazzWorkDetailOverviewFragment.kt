@@ -241,9 +241,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         quizSubmissionViewRecyclerAdapter?.submitList(listOf())
 
         mPresenter?.handleClickSubmit()
-        //Update RV?
         submissionFreeTextRecyclerAdapter?.notifyDataSetChanged()
-        //quizSubmissionEditRecyclerAdapter?.notifyDataSetChanged()
 
 
     }
@@ -303,10 +301,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                     newPrivateCommentRecyclerAdapter?.visible = false
                 }
             }
-//
-//            submissionResultRecyclerAdapter?.visible = isStudent &&
-//                    entity?.clazzWorkSubmission?.clazzWorkSubmissionMarkerPersonUid != 0L
-
         }
 
     override var entity: ClazzWorkWithSubmission? = null
@@ -450,7 +444,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                         newItem.clazzWorkSubmission?.clazzWorkSubmissionInactive
                         && oldItem.clazzWorkSubmission?.clazzWorkSubmissionUid ==
                         newItem.clazzWorkSubmission?.clazzWorkSubmissionUid
-                //return oldItem == newItem
             }
         }
 

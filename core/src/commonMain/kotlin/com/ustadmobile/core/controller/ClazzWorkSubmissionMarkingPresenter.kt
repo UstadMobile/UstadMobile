@@ -122,10 +122,6 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             }
 
 
-//            view.takeIf { it.quizSubmissionViewData == null
-//                }?.quizSubmissionViewData = DoorMutableLiveData(
-//                    questionsAndOptionsWithResponseList)
-
         }
 
         val privateComments = withTimeoutOrNull(2000) {

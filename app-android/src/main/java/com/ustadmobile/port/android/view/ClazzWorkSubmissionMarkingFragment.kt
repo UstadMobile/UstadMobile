@@ -232,7 +232,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             }else{
                 //No submission
                 submissionHeadingRecyclerAdapter?.visible = true
-                //quizViewRecyclerAdapter?.submitList(listOf())
                 recordForStudentButtonRecyclerAdapter?.visible = true
             }
 
@@ -274,9 +273,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
     override var quizSubmissionEditData
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>? = null
         set(value) {
-            //field?.removeObserver(quizQuestionAndResponseObserver)
             field = value
-            //value?.observe(viewLifecycleOwner, quizQuestionAndResponseObserver)
         }
 
 

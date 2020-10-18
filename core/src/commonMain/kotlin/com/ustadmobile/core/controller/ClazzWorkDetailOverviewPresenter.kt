@@ -123,7 +123,6 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
         //Find Content and questions
         view.clazzWorkContent =
-        //view.takeIf { it.clazzWorkContent == null  }?.clazzWorkContent =
                 withTimeoutOrNull(2000) {
                     repo.clazzWorkContentJoinDao.findAllContentByClazzWorkUidDF(
                             clazzWorkUid, loggedInPersonUid)
