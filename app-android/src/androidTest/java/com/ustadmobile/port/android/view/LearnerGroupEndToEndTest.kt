@@ -128,10 +128,13 @@ class LearnerGroupEndToEndTest : TestCase() {
 
             PersonListScreen {
                 recycler {
-                    emptyChildWith {
-                        withDescendant { withText("New Student") }
+                    childWith<PersonListScreen.Person> {
+                        withDescendant { withId(R.id.item_person_text) }
                     } perform {
-                        click()
+                        personName{
+                            hasText("New Student")
+                            click()
+                        }
                     }
                 }
             }
