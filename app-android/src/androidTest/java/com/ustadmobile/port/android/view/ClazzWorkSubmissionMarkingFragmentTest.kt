@@ -16,6 +16,7 @@ import androidx.test.espresso.matcher.BoundedMatcher
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withText
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -26,6 +27,7 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.port.android.screen.ClazzWorkDetailOverviewScreen
+import com.ustadmobile.port.android.screen.ClazzWorkMarkingFragmentScreen
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
@@ -41,7 +43,7 @@ import org.hamcrest.Matcher
 import org.junit.*
 
 @AdbScreenRecord("ClazzWork (Assignments) Teacher Marking tests")
-class ClazzWorkSubmissionMarkingFragmentTest {
+class ClazzWorkSubmissionMarkingFragmentTest : TestCase() {
 
     @JvmField
     @Rule
@@ -57,7 +59,8 @@ class ClazzWorkSubmissionMarkingFragmentTest {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+    val dataBindingIdlingResourceRule =
+            ScenarioIdlingResourceRule(DataBindingIdlingResource())
 
     @After
     fun tearDown() {
@@ -252,21 +255,25 @@ class ClazzWorkSubmissionMarkingFragmentTest {
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForQuiz_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
 
-        val testClazzWork = createQuizDbScenario()
-        val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
-        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
+        var testClazzWork: TestClazzWork? = null
+        before{
+            testClazzWork = createQuizDbScenario()
+            val clazzWorkUid: Long = testClazzWork?.clazzWork?.clazzWorkUid?:0L
+            val clazzMemberUid: Long = testClazzWork?.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
 
-        reloadFragment(clazzWorkUid, clazzMemberUid)
-
-        fillMarkingAndReturn(testClazzWork)
-
-        //Check database
-        val submissionPostSubmit = runBlocking {
-            dbRule.db.clazzWorkSubmissionDao.findByUidAsync(
-                    testClazzWork.submissions!!.get(0).clazzWorkSubmissionUid)
+            reloadFragment(clazzWorkUid, clazzMemberUid)
+        }.after {
+            fillMarkingAndReturn(testClazzWork!!)
+        }.run {
+            //Check database
+            val submissionPostSubmit = runBlocking {
+                dbRule.db.clazzWorkSubmissionDao.findByUidAsync(
+                        testClazzWork?.submissions!!.get(0).clazzWorkSubmissionUid)
+            }
+            Assert.assertEquals("Marked OK", 42,
+                    submissionPostSubmit?.clazzWorkSubmissionScore)
         }
-        Assert.assertEquals("Marked OK", 42,
-                submissionPostSubmit?.clazzWorkSubmissionScore)
+
     }
 
     @AdbScreenRecord("ClazzWorkSubmissionMarking: Should show marking (partially filled Quiz) ")
@@ -294,22 +301,43 @@ class ClazzWorkSubmissionMarkingFragmentTest {
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForFreeText_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
 
-        val testClazzWork = createFreeTextDbScenario()
-        val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
-        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
+//        val testClazzWork = createFreeTextDbScenario()
+//        val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
+//        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
+//
+//        reloadFragment(clazzWorkUid, clazzMemberUid)
+//        //TODO: Check why it fails to see one et
+//        //Thread.sleep(1000)
+//        fillMarkingAndReturn(testClazzWork)
+//
+//        //Check database
+//        val submissionPostSubmit = runBlocking {
+//            dbRule.db.clazzWorkSubmissionDao.findByUidAsync(
+//                    testClazzWork.submissions!!.get(0).clazzWorkSubmissionUid)
+//        }
+//        Assert.assertEquals("Marked OK", 42,
+//                submissionPostSubmit?.clazzWorkSubmissionScore)
 
-        reloadFragment(clazzWorkUid, clazzMemberUid)
-        //TODO: Check why it fails to see one et
-        //Thread.sleep(1000)
-        fillMarkingAndReturn(testClazzWork)
+        var testClazzWork: TestClazzWork? = null
+        before{
+            testClazzWork = createFreeTextDbScenario()
+            val clazzWorkUid: Long = testClazzWork?.clazzWork?.clazzWorkUid?:0L
+            val clazzMemberUid: Long = testClazzWork?.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
 
-        //Check database
-        val submissionPostSubmit = runBlocking {
-            dbRule.db.clazzWorkSubmissionDao.findByUidAsync(
-                    testClazzWork.submissions!!.get(0).clazzWorkSubmissionUid)
+            reloadFragment(clazzWorkUid, clazzMemberUid)
+        }.after {
+
+        }.run {
+            fillMarkingAndReturn(testClazzWork!!)
+
+            //Check database
+            val submissionPostSubmit = runBlocking {
+                dbRule.db.clazzWorkSubmissionDao.findByUidAsync(
+                        testClazzWork?.submissions!!.get(0).clazzWorkSubmissionUid)
+            }
+            Assert.assertEquals("Marked OK", 42,
+                    submissionPostSubmit?.clazzWorkSubmissionScore)
         }
-        Assert.assertEquals("Marked OK", 42,
-                submissionPostSubmit?.clazzWorkSubmissionScore)
 
     }
 
@@ -440,25 +468,16 @@ class ClazzWorkSubmissionMarkingFragmentTest {
 
     private fun fillMarkingAndReturn(testClazzWork: TestClazzWork, hitReturn: Boolean = true) {
 
-        Espresso.onView(ViewMatchers.withId(R.id.fragment_clazz_work_submission_marking_rv)).perform(
-                scrollToHolder(withTagInMarking(
-                        testClazzWork.submissions!!.get(0).clazzWorkSubmissionUid)))
 
-        //Type marking value
-        Espresso.onView(ViewMatchers.withId(R.id.item_clazzwork_submission_score_edit_et))
-                .perform(ViewActions.clearText(), ViewActions.typeText("42"),
-                        ViewActions.closeSoftKeyboard())
-
-        ClazzWorkDetailOverviewScreen {
+        ClazzWorkMarkingFragmentScreen {
 
             recycler {
 
                 scrollToHolder(withTagInMarking(testClazzWork.submissions!![0].clazzWorkSubmissionUid))
 
-                childWith<ClazzWorkDetailOverviewScreen.Submission> {
-                    withTag(testClazzWork.submissions!![0].clazzWorkSubmissionUid)
+                childWith<ClazzWorkMarkingFragmentScreen.Submission> {
+                    withDescendant { withId(R.id.item_clazzwork_submission_score_edit_et) }
                 } perform {
-                    scrollTo()
                     submissionEditText {
                         clearText()
                         typeText("42")
@@ -471,7 +490,7 @@ class ClazzWorkSubmissionMarkingFragmentTest {
                 }
                 if (hitReturn) {
 
-                    childWith<ClazzWorkDetailOverviewScreen.SubmitWithMetrics> {
+                    childWith<ClazzWorkMarkingFragmentScreen.SubmitWithMetrics> {
                         withDescendant { withId(R.id.item_clazzworksubmission_marking_button_with_extra_button) }
                     } perform {
                         click()
