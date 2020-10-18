@@ -35,7 +35,6 @@ object ContentEntryListScreen : KScreen<ContentEntryListScreen>() {
     class NewItem(parent: Matcher<View>) : KRecyclerItem<NewItem>(parent){
         val newEntryItem = KView {
             withId(R.id.item_createnew_layout)
-            withMatcher(parent)
         }
         val newItemTitle = KTextView(parent) { withId(R.id.item_createnew_line1_text)}
     }
