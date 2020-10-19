@@ -4,6 +4,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.fragment.findNavController
+import androidx.test.core.app.ApplicationProvider
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -131,10 +132,10 @@ class @BaseFileName@FragmentTest : TestCase(){
                         "New @Entity@",
                         defaultGson().fromJson(entityLoadedJson, @EditEntity@::class.java).clazzName)
 
-                val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existing@ Entity@ .@Entity_VariableName @Uid)
+                val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existing@Entity@.@Entity_VariableName@Uid)
                         .waitUntilWithFragmentScenario(fragmentScenario) { it?.clazzName == "Updated @Entity@" }
                 Assert.assertEquals("@Entity@ name is updated", "Updated @Entity@",
-                        updatedEntityFromDb?.@ Entity_VariableName @Name)
+                        updatedEntityFromDb?.@Entity_VariableName@Name)
 
             }
 

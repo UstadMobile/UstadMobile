@@ -3,24 +3,13 @@ package com.ustadmobile.port.android.screen
 import android.content.Context
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.navigation.fragment.findNavController
-import com.agoda.kakao.common.views.KSwipeView
-import com.agoda.kakao.common.views.KView
 import com.agoda.kakao.edit.KTextInputLayout
-import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.kaspersky.kaspresso.testcases.core.testcontext.TestContext
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.ReportEditPresenter
+import com.ustadmobile.port.android.view.@BaseFileName@Fragment
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultGson
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.ReportWithFilters
-import com.ustadmobile.lib.db.entities.VerbDisplay
-import com.ustadmobile.port.android.view.ReportEditFragment
-import com.ustadmobile.test.port.android.KNestedScrollView
-import com.ustadmobile.test.port.android.util.setDateField
-import com.ustadmobile.test.port.android.util.setMessageIdOption
 
 object @BaseFileName@Screen : KScreen<@BaseFileName@Screen>() {
 
