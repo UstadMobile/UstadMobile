@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
@@ -44,8 +45,6 @@ import java.util.*
 @AdbScreenRecord("ClazzWork (Assignments) Detail overview tests")
 class ClazzWorkDetailOverviewFragmentTest {
 
-    lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
-
     @JvmField
     @Rule
     var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
@@ -67,11 +66,6 @@ class ClazzWorkDetailOverviewFragmentTest {
     @Rule
     val crudIdlingResourceRule =
             ScenarioIdlingResourceRule(CrudIdlingResource())
-
-    @Before
-    fun setup() {
-        recyclerViewIdlingResource = RecyclerViewIdlingResource(null, 3)
-    }
 
     @After
     fun tearDown(){
@@ -673,4 +667,4 @@ class ClazzWorkDetailOverviewFragmentTest {
 
 
 
-}
+}*/

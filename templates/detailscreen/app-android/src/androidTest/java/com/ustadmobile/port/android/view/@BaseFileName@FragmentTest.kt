@@ -4,30 +4,25 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
 import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withTagValue
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.port.android.util.UstadSingleEntityFragmentIdlingResource
-import com.ustadmobile.test.port.android.util.installNavController
-import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.espresso.assertion.ViewAssertions.matches
 import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.port.android.screen.@BaseFileName@Screen
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
-class @BaseFileName@FragmentTest {
+
+@AdbScreenRecord(" @Entity@Detail screen Test")
+class @BaseFileName@FragmentTest : TestCase(){
 
     @JvmField
     @Rule
@@ -37,7 +32,11 @@ class @BaseFileName@FragmentTest {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
 
+    @AdbScreenRecord("given @Entity@ exists when launched then show @Entity@")
     @Test
     fun given@Entity@Exists_whenLaunched_thenShouldShow@Entity@() {
         val existingClazz = @Entity@().apply {
@@ -52,13 +51,21 @@ class @BaseFileName@FragmentTest {
             }
         }
 
-        val fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it }).also {
-            IdlingRegistry.getInstance().register(it)
+        init{
+
+        }.run{
+
+            @BaseFileName@Screen{
+
+                title{
+                    isDisplayed()
+                    hasText("Test @Entity@")
+                }
+            }
+
+
         }
 
-        onView(withText("Test @Entity@")).check(matches(isDisplayed()))
-
-        IdlingRegistry.getInstance().unregister(fragmentIdlingResource)
     }
 
 }

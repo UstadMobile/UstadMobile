@@ -32,6 +32,17 @@ fun <F: Fragment, R> FragmentScenario<F>.nullableLetOnFragment(block: (F) -> R) 
     return retVal
 }
 
+fun <F: Fragment, R> FragmentScenario<F>.waitUntilLetOnFragment(block: (F) -> R) : R{
+    var retVal: R? = null
+    while(retVal == null){
+        onFragment {
+            retVal = block(it)
+        }
+    }
+
+    return retVal as R
+}
+
 /**
  * Convenience extension function that will call on the onOptionItemSelected with the given
  * optionId
