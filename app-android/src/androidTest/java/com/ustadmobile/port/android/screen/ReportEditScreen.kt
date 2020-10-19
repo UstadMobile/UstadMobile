@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.lib.db.entities.VerbDisplay
 import com.ustadmobile.port.android.view.ReportEditFragment
+import com.ustadmobile.test.port.android.KNestedScrollView
 import com.ustadmobile.test.port.android.util.setDateField
 import com.ustadmobile.test.port.android.util.setMessageIdOption
 
@@ -42,11 +43,19 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
     val toDateTextInput = KTextInputLayout { withId(R.id.activity_report_edit_toDate_textinputlayout)}
 
-    val personAddList = KView {
+    val personAddList = KTextView {
         withId(R.id.item_createnew_line1_text)
-        isDescendantOfA { withId(R.id.fragment_edit_report_who_add_layout) }
+        withText("Add person filter")
     }
 
+    val verbAddList = KTextView {
+        withId(R.id.item_createnew_line1_text)
+        withText("Add verb filter")
+    }
+
+    val nestScroll = KNestedScrollView {
+        withId(R.id.fragment_report_edit_edit_scroll)
+    }
 
     fun fillFields(fragmentScenario: FragmentScenario<ReportEditFragment>? = null,
                    report: ReportWithFilters,

@@ -2,6 +2,8 @@
 package com.ustadmobile.port.android.view
 
 import android.app.Application
+import android.view.View
+import androidx.core.widget.NestedScrollView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import com.agoda.kakao.common.views.KView
@@ -15,6 +17,7 @@ import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.screen.*
+import com.ustadmobile.test.port.android.NestedScrollViewExtension
 import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.util.test.ext.insertTestStatements
@@ -78,9 +81,17 @@ class ReportEndToEndTests : TestCase() {
 
             ReportEditScreen {
 
-                fillFields(report = newClazzValues, setFieldsRequiringNavigation = false, impl = impl, context = context)
+                fillFields(report = newClazzValues, setFieldsRequiringNavigation = false, impl = impl, context = context, testContext = this@run)
 
-                personAddList.click()
+                nestScroll{
+                    scrollToEnd()
+                    scrollToEnd()
+                }
+
+                personAddList{
+                    isCompletelyDisplayed()
+                    click()
+                }
 
             }
 
@@ -90,7 +101,9 @@ class ReportEndToEndTests : TestCase() {
                     childWith<PersonListScreen.Person> {
                         withDescendant { withText("Hello World") }
                     } perform {
-                        click()
+                        personName{
+                            click()
+                        }
                     }
                 }
 
@@ -136,14 +149,15 @@ class ReportEndToEndTests : TestCase() {
 
         }
 
-        */
-/*  onView(AllOf.allOf(withId(R.id.item_createnew_line1_text),
+     */
+/*   onView(AllOf.allOf(withId(R.id.item_createnew_line1_text),
                   ViewMatchers.isDescendantOfA(withId(R.id.fragment_edit_report_who_add_layout))))
                   .perform(click())
 
           onIdle()
 
           onView(withText("Hello World")).perform(click())
+
 
           onView(withId(R.id.menu_done)).perform(click())
 
@@ -154,6 +168,7 @@ class ReportEndToEndTests : TestCase() {
           }!!.first()
           onView(Matchers.allOf(withId(R.id.item_reportlist_report_cl), ViewMatchers.withTagValue(Matchers.equalTo(createdReport.reportUid))))
                   .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))*//*
+
 
 
     }
