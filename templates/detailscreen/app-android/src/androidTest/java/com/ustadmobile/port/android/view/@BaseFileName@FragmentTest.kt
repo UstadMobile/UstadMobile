@@ -14,7 +14,7 @@ import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.port.android.screen.@BaseFileName@DetailScreen
+import com.ustadmobile.port.android.screen.@BaseFileName@Screen
 import org.hamcrest.Matchers.equalTo
 import org.junit.Assert
 import org.junit.Rule
@@ -22,7 +22,7 @@ import org.junit.Test
 
 
 @AdbScreenRecord(" @Entity@Detail screen Test")
-class @BaseFileName@DetailFragmentTest : TestCase(){
+class @BaseFileName@FragmentTest : TestCase(){
 
     @JvmField
     @Rule
@@ -46,7 +46,7 @@ class @BaseFileName@DetailFragmentTest : TestCase(){
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(ARG_ENTITY_UID to existingClazz.clazzUid)) {
-            @BaseFileName@DetailFragment().also {
+            @BaseFileName@Fragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
         }
@@ -55,7 +55,7 @@ class @BaseFileName@DetailFragmentTest : TestCase(){
 
         }.run{
 
-            @BaseFileName@DetailScreen{
+            @BaseFileName@Screen{
 
                 title{
                     isDisplayed()
