@@ -69,7 +69,7 @@ class @BaseFileName@FragmentTest : TestCase()  {
 
                 flakySafely {
                     Assert.assertEquals("After clicking on item, it navigates to detail view",
-                            R.id.@ Entity_SnakeCase @_detail_dest, systemImplNavRule.navController.currentDestination?.id)
+                            R.id.@Entity_SnakeCase@_detail_dest, systemImplNavRule.navController.currentDestination?.id)
                 }
 
 
