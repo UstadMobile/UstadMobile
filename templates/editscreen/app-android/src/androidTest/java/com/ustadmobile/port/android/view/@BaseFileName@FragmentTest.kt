@@ -26,8 +26,8 @@ import org.junit.Test
 import com.ustadmobile.core.view.UstadView
 
 
-@AdbScreenRecord("@BaseFileName@ screen Test")
-class @BaseFileName@FragmentTest : TestCase(){
+@AdbScreenRecord("@BaseFileName@ Edit screen Test")
+class @BaseFileName@EditFragmentTest : TestCase(){
 
     @JvmField
     @Rule
@@ -69,7 +69,7 @@ class @BaseFileName@FragmentTest : TestCase(){
 
         }.run{
 
-            @BaseFileName@Screen{
+            @BaseFileName@EditScreen{
 
                 fillFields(fragmentScenario, formVals, currentEntity,
                         impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
@@ -120,7 +120,7 @@ class @BaseFileName@FragmentTest : TestCase(){
 
         }.run{
 
-            @BaseFileName@Screen {
+            @BaseFileName@EditScreen {
 
                 fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment,
                         impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),

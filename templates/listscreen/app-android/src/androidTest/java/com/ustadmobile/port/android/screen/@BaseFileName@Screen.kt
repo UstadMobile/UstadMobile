@@ -8,16 +8,16 @@ import com.agoda.kakao.recycler.KRecyclerView
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
-import com.ustadmobile.port.android.view.@BaseFileName@Fragment
+import com.ustadmobile.port.android.view.@BaseFileName@ListFragment
 import org.hamcrest.Matcher
 
-object @BaseFileName@Screen : KScreen<@BaseFileName@Screen>() {
+object @BaseFileName@ListScreen : KScreen<@BaseFileName@ListScreen>() {
 
 
     override val layoutId: Int?
         get() = R.layout.fragment_list
     override val viewClass: Class<*>?
-        get() = @BaseFileName@Fragment::class.java
+        get() = @BaseFileName@ListFragment::class.java
 
     val recycler: KRecyclerView = KRecyclerView({
         withId(R.id.fragment_list_recyclerview)

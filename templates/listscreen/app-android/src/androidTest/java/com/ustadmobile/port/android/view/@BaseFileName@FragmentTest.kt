@@ -4,7 +4,7 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
-import com.ustadmobile.port.android.screen.@BaseFileName@Screen
+import com.ustadmobile.port.android.screen.@BaseFileName@ListScreen
 import androidx.recyclerview.widget.RecyclerView
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -19,7 +19,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @AdbScreenRecord("@Entity@ list screen tests")
-class @BaseFileName@FragmentTest : TestCase()  {
+class @BaseFileName@ListFragmentTest : TestCase()  {
 
     @JvmField
     @Rule
@@ -44,7 +44,7 @@ class @BaseFileName@FragmentTest : TestCase()  {
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf()) {
-            @BaseFileName@Fragment().also {
+            @BaseFileName@ListFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
         }
@@ -53,11 +53,11 @@ class @BaseFileName@FragmentTest : TestCase()  {
 
         }.run{
 
-            @BaseFileName@Screen{
+            @BaseFileName@ListScreen{
 
                 recycler{
 
-                    childWith<@BaseFileName@Screen.@Entity@>{
+                    childWith<@BaseFileName@ListScreen.@Entity@>{
                         withDescendant { withTag(testEntity.@Entity_VariableName@Uid) }
                     }perform {
                         title {
