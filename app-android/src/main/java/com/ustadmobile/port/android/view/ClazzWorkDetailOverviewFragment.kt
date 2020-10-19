@@ -74,10 +74,15 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
     }
 
-    private var quizQuestionsRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseRA? = null
-    private val quizQuestionAndResponseObserver = Observer<List<
+    private var quizSubmissionEditRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter? = null
+    private val quizQuestionAndResponseEditObserver = Observer<List<
             ClazzWorkQuestionAndOptionWithResponse>?> {
-        t -> quizQuestionsRecyclerAdapter?.submitList(t)
+        t -> quizSubmissionEditRecyclerAdapter?.submitList(t)
+    }
+
+    private var quizSubmissionViewRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter? = null
+    private val quizQuestionAndResponseViewObserver = Observer<List<ClazzWorkQuestionAndOptionWithResponse>?> {
+        t -> quizSubmissionViewRecyclerAdapter?.submitList(t)
     }
 
     private var contentHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
@@ -136,8 +141,9 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 DefaultContentEntryListItemListener(context = requireContext(), di = di),
                 ListViewMode.BROWSER.toString(), viewLifecycleOwner, di)
 
-        quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseRA()
-        quizQuestionsRecyclerAdapter?.studentMode = isStudent
+        quizSubmissionEditRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter()
+        //quizSubmissionEditRecyclerAdapter?.studentMode = isStudent
+        quizSubmissionViewRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter()
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.submission).toString())
         submissionHeadingRecyclerAdapter?.visible = false
@@ -211,8 +217,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 contentRecyclerAdapter,
                 submissionHeadingRecyclerAdapter,
                 submissionResultRecyclerAdapter, submissionFreeTextRecyclerAdapter,
-                questionsHeadingRecyclerAdapter,
-                quizQuestionsRecyclerAdapter, submissionButtonRecyclerAdapter,
+                questionsHeadingRecyclerAdapter, quizSubmissionViewRecyclerAdapter,
+                quizSubmissionEditRecyclerAdapter, submissionButtonRecyclerAdapter,
                 publicCommentsHeadingRecyclerAdapter, publicCommentsMergerRecyclerAdapter,
                 privateCommentsHeadingRecyclerAdapter, privateCommentsMergerRecyclerAdapter
         )
@@ -229,11 +235,15 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
     }
 
+    //On Click Submit
     override fun onClickButton(view: View) {
+        quizSubmissionEditRecyclerAdapter?.submitList(listOf())
+        quizSubmissionViewRecyclerAdapter?.submitList(listOf())
+
         mPresenter?.handleClickSubmit()
-        //Update RV?
         submissionFreeTextRecyclerAdapter?.notifyDataSetChanged()
-        quizQuestionsRecyclerAdapter?.notifyDataSetChanged()
+
+
     }
 
     override fun onDestroyView() {
@@ -257,7 +267,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         submissionResultRecyclerAdapter = null
         submissionFreeTextRecyclerAdapter = null
         questionsHeadingRecyclerAdapter = null
-        quizQuestionsRecyclerAdapter = null
+        quizSubmissionEditRecyclerAdapter = null
         submissionButtonRecyclerAdapter = null
         publicCommentsHeadingRecyclerAdapter = null
         publicCommentsMergerRecyclerAdapter = null
@@ -272,7 +282,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 return
             }
             field = value
-            quizQuestionsRecyclerAdapter?.studentMode = value
             submissionFreeTextRecyclerAdapter?.visible = value
             when {
                 entity?.clazzWorkCommentsEnabled == false -> {
@@ -292,22 +301,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                     newPrivateCommentRecyclerAdapter?.visible = false
                 }
             }
-
-            submissionButtonRecyclerAdapter?.visible = isStudent &&
-                    (entity?.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L || entity?.clazzWorkSubmission == null)
-                    &&
-                    (entity?.clazzWorkSubmission == null || entity?.clazzWorkSubmissionType !=
-                            ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE)
-
-            submissionResultRecyclerAdapter?.visible = isStudent &&
-                    entity?.clazzWorkSubmission?.clazzWorkSubmissionMarkerPersonUid != 0L
-
-
-            submissionHeadingRecyclerAdapter?.visible = isStudent &&
-                    (submissionResultRecyclerAdapter?.visible?:false ||
-                            submissionFreeTextRecyclerAdapter?.visible?:false ||
-                            submissionButtonRecyclerAdapter?.visible?:false)
-
         }
 
     override var entity: ClazzWorkWithSubmission? = null
@@ -336,8 +329,11 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             }
 
             submissionButtonRecyclerAdapter?.visible = isStudent &&
-                    value?.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L &&
-                    value.clazzWorkSubmissionType != ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+                    (entity?.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L || entity?.clazzWorkSubmission == null)
+                    &&
+                    (entity?.clazzWorkSubmission == null || entity?.clazzWorkSubmissionType !=
+                            ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE)
+
 
 
             submissionHeadingRecyclerAdapter?.visible = isStudent &&
@@ -371,12 +367,20 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
 
-    override var clazzWorkQuizQuestionsAndOptionsWithResponse
+    override var quizSubmissionEdit
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>? = null
         set(value) {
-            field?.removeObserver(quizQuestionAndResponseObserver)
+            field?.removeObserver(quizQuestionAndResponseEditObserver)
             field = value
-            value?.observeIfFragmentViewIsReady(this, quizQuestionAndResponseObserver)
+            value?.observeIfFragmentViewIsReady(this, quizQuestionAndResponseEditObserver)
+        }
+
+    override var quizSubmissionView
+            : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>? = null
+        set(value) {
+            field?.removeObserver(quizQuestionAndResponseViewObserver)
+            field = value
+            value?.observeIfFragmentViewIsReady(this, quizQuestionAndResponseViewObserver)
         }
 
     override var timeZone: String = ""
@@ -436,9 +440,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                         && oldItem.clazzWorkSubmissionType == newItem.clazzWorkSubmissionType
                         && oldItem.clazzWorkCreatedDate == newItem.clazzWorkCreatedDate
                         && oldItem.clazzWorkDueDateTime == newItem.clazzWorkDueDateTime
-                        && oldItem.clazzWorkSubmission?.clazzWorkSubmissionInactive == newItem.clazzWorkSubmission?.clazzWorkSubmissionInactive
-                        && oldItem.clazzWorkSubmission?.clazzWorkSubmissionUid == newItem.clazzWorkSubmission?.clazzWorkSubmissionUid
-                //return oldItem == newItem
+                        && oldItem.clazzWorkSubmission?.clazzWorkSubmissionInactive ==
+                        newItem.clazzWorkSubmission?.clazzWorkSubmissionInactive
+                        && oldItem.clazzWorkSubmission?.clazzWorkSubmissionUid ==
+                        newItem.clazzWorkSubmission?.clazzWorkSubmissionUid
             }
         }
 
@@ -454,15 +459,24 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                                             newItem: ClazzWorkQuestionAndOptionWithResponse): Boolean {
 
                 return oldItem.clazzWork.clazzWorkUid == newItem.clazzWork.clazzWorkUid &&
-                        oldItem.clazzWorkQuestion.clazzWorkQuestionUid == newItem.clazzWorkQuestion.clazzWorkQuestionUid
-                        && oldItem.clazzWorkQuestion.clazzWorkQuestionText == newItem.clazzWorkQuestion.clazzWorkQuestionText
-                        && oldItem.clazzWorkQuestion.clazzWorkQuestionType == newItem.clazzWorkQuestion.clazzWorkQuestionType
-                        && oldItem.clazzWorkQuestion.clazzWorkQuestionIndex == newItem.clazzWorkQuestion.clazzWorkQuestionIndex
-                        && oldItem.clazzWorkQuestion.clazzWorkQuestionActive == newItem.clazzWorkQuestion.clazzWorkQuestionActive
-                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseInactive == newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseInactive
-                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseUid == newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseUid
-                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseText == newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseText
-                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseOptionSelected == newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseOptionSelected
+                        oldItem.clazzWorkQuestion.clazzWorkQuestionUid ==
+                        newItem.clazzWorkQuestion.clazzWorkQuestionUid
+                        && oldItem.clazzWorkQuestion.clazzWorkQuestionText ==
+                        newItem.clazzWorkQuestion.clazzWorkQuestionText
+                        && oldItem.clazzWorkQuestion.clazzWorkQuestionType ==
+                        newItem.clazzWorkQuestion.clazzWorkQuestionType
+                        && oldItem.clazzWorkQuestion.clazzWorkQuestionIndex ==
+                        newItem.clazzWorkQuestion.clazzWorkQuestionIndex
+                        && oldItem.clazzWorkQuestion.clazzWorkQuestionActive ==
+                        newItem.clazzWorkQuestion.clazzWorkQuestionActive
+                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseInactive ==
+                        newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseInactive
+                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseUid ==
+                        newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseUid
+                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseText ==
+                        newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseText
+                        && oldItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseOptionSelected ==
+                        newItem.clazzWorkQuestionResponse.clazzWorkQuestionResponseOptionSelected
             }
         }
     }

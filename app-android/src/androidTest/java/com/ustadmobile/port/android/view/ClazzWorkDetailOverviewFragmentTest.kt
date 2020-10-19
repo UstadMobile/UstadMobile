@@ -605,11 +605,11 @@ class ClazzWorkDetailOverviewFragmentTest {
 
     private fun withTagInQuestion(quid: Long): Matcher<RecyclerView.ViewHolder?>? {
         return object : BoundedMatcher<RecyclerView.ViewHolder?,
-            ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder>(
-                ClazzWorkQuestionAndOptionsWithResponseRA.
+            ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder>(
+                ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.
                     ClazzWorkQuestionViewHolder::class.java) {
             override fun matchesSafely(
-                    item: ClazzWorkQuestionAndOptionsWithResponseRA
+                    item: ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter
                                 .ClazzWorkQuestionViewHolder): Boolean {
                 return item.itemView.tag.equals(quid)
             }
@@ -622,8 +622,8 @@ class ClazzWorkDetailOverviewFragmentTest {
 
     private fun withTagInQuestionAnswer(quid: Long): Matcher<RecyclerView.ViewHolder?>? {
         return object : BoundedMatcher<RecyclerView.ViewHolder?,
-                ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder>(ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder::class.java) {
-            override fun matchesSafely(item: ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder): Boolean {
+                ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder>(ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder::class.java) {
+            override fun matchesSafely(item: ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder): Boolean {
                 return item.binding.itemClazzworkquestionandoptionswithresponseAnswerEt.tag.equals(quid)
             }
 
