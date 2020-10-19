@@ -1,16 +1,10 @@
-/*
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions.scrollToHolder
-import androidx.test.espresso.contrib.RecyclerViewActions.scrollToPosition
+import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.matcher.BoundedMatcher
-import androidx.test.espresso.matcher.ViewMatchers.*
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -18,27 +12,30 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzWork
+import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.port.android.view.binding.dateWithTimeFormat
-import com.ustadmobile.port.android.view.binding.dateWithTimeFormatWithPrepend
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.util.test.ext.TestClazzWorkWithQuestionAndOptionsAndResponse
-import com.ustadmobile.util.test.ext.createTestContentEntriesAndJoinToClazzWork
-import com.ustadmobile.util.test.ext.insertQuizQuestionsAndOptions
-import com.ustadmobile.util.test.ext.insertTestClazzWorkAndQuestionsAndOptionsWithResponse
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
+import com.ustadmobile.util.test.ext.*
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Description
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.allOf
 import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import java.util.*
 
 @AdbScreenRecord("ClazzWork (Assignments) Edit tests")
 class ClazzWorkEditFragmentTest {
+
+    lateinit var contentRVIdlingResource: RecyclerViewIdlingResource
+    lateinit var questionsRVIdlingResource: RecyclerViewIdlingResource
 
     @JvmField
     @Rule
@@ -50,7 +47,23 @@ class ClazzWorkEditFragmentTest {
 
     @JvmField
     @Rule
+    val dataBindingIdlingResourceRule =
+            ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
     val screenRecordRule = AdbScreenRecordRule()
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule =
+            ScenarioIdlingResourceRule(CrudIdlingResource())
+
+    @Before
+    fun setup() {
+        contentRVIdlingResource = RecyclerViewIdlingResource(null, 3)
+        questionsRVIdlingResource = RecyclerViewIdlingResource(null, 3)
+    }
 
     @After
     fun tearDown(){
@@ -79,6 +92,14 @@ class ClazzWorkEditFragmentTest {
                 it.arguments = bundleOf(UstadView.ARG_ENTITY_UID to
                         clazzWorkUid.toString())
             }
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+
+        fragmentScenario.onFragment {
+            contentRVIdlingResource.recyclerView =
+                    it.mBinding!!.fragmentClazzWorkEditContentRv
+            questionsRVIdlingResource.recyclerView =
+                    it.mBinding!!.fragmentClazzWorkEditQuestionsRv
         }
 
 
@@ -86,63 +107,62 @@ class ClazzWorkEditFragmentTest {
 
     private fun checkClazzWorkBasicEditDisplayOk(clazzWork: ClazzWork?, contentList: List<ContentEntry>){
         //Scroll to top
-        onView(withId(R.id.fragment_clazz_work_with_submission_detail_rv)).perform(
-                scrollToPosition<RecyclerView.ViewHolder>(0)
-        )
-        onView(withId(R.id.item_clazzwork_detail_description_cl)).check(matches(
-                withEffectiveVisibility(Visibility.VISIBLE)))
-        onView(withId(R.id.item_clazzwork_detail_description_title)).check(matches(
-                withEffectiveVisibility(Visibility.VISIBLE)))
-        onView(withText(clazzWork?.clazzWorkInstructions?:"")).check(matches(
-                withEffectiveVisibility(Visibility.VISIBLE)))
-
-        val startDateString =  dateWithTimeFormat.format(arrayOf(clazzWork?.clazzWorkStartDateTime,
-                scheduleTimeToDate(clazzWork?.clazzWorkStartTime?.toInt()?:0), ""))
-        val dueDateString =  dateWithTimeFormatWithPrepend.format(
-                arrayOf("Due date", clazzWork?.clazzWorkDueDateTime,
-                        scheduleTimeToDate(clazzWork?.clazzWorkDueTime?.toInt()?:0), ""))
-        onView(withText(startDateString)).check(matches(
-                withEffectiveVisibility(Visibility.VISIBLE)))
-        onView(withText(dueDateString)).check(matches(
-                withEffectiveVisibility(Visibility.VISIBLE)))
-        onView(withText("Content")).check(matches(
-                withEffectiveVisibility(Visibility.VISIBLE)))
-        if(contentList.isNotEmpty()) {
-            onView(withText(contentList[0].title)).check(matches(
-                    withEffectiveVisibility(Visibility.VISIBLE)))
-            onView(withText(contentList[1].title)).check(matches(
-                    withEffectiveVisibility(Visibility.VISIBLE)))
-        }
+//        onView(withId(R.id.fragment_clazz_work_with_submission_detail_rv)).perform(
+//                scrollToPosition<RecyclerView.ViewHolder>(0)
+//        )
+//        onView(withId(R.id.item_clazzwork_detail_description_cl)).check(matches(
+//                withEffectiveVisibility(Visibility.VISIBLE)))
+//        onView(withId(R.id.item_clazzwork_detail_description_title)).check(matches(
+//                withEffectiveVisibility(Visibility.VISIBLE)))
+//        onView(withText(clazzWork?.clazzWorkInstructions?:"")).check(matches(
+//                withEffectiveVisibility(Visibility.VISIBLE)))
+//
+//        val startDateString =  dateWithTimeFormat.format(arrayOf(clazzWork?.clazzWorkStartDateTime,
+//                scheduleTimeToDate(clazzWork?.clazzWorkStartTime?.toInt()?:0), ""))
+//        val dueDateString =  dateWithTimeFormatWithPrepend.format(
+//                arrayOf("Due date", clazzWork?.clazzWorkDueDateTime,
+//                        scheduleTimeToDate(clazzWork?.clazzWorkDueTime?.toInt()?:0), ""))
+//        onView(withText(startDateString)).check(matches(
+//                withEffectiveVisibility(Visibility.VISIBLE)))
+//        onView(withText(dueDateString)).check(matches(
+//                withEffectiveVisibility(Visibility.VISIBLE)))
+//        onView(withText("Content")).check(matches(
+//                withEffectiveVisibility(Visibility.VISIBLE)))
+//        if(contentList.isNotEmpty()) {
+//            onView(withText(contentList[0].title)).check(matches(
+//                    withEffectiveVisibility(Visibility.VISIBLE)))
+//            onView(withText(contentList[1].title)).check(matches(
+//                    withEffectiveVisibility(Visibility.VISIBLE)))
+//        }
 
     }
 
     private fun checkQuizQuestionsDisplayOk(
             clazzWorkQuizStuff : TestClazzWorkWithQuestionAndOptionsAndResponse?){
 
-        //Scroll to Submission
-            onView(withText("Submission")).check(doesNotExist())
-            onView(withId(R.id.item_simpl_button_button_tv)).check(doesNotExist())
-            onView(withId(R.id.item_clazzwork_submission_text_entry_et)).check(doesNotExist())
-
-
-        val q1uid = clazzWorkQuizStuff?.questionsAndOptions?.get(0)?.clazzWorkQuestion
-                ?.clazzWorkQuestionUid
-
-        onView(withId(R.id.fragment_clazz_work_with_submission_detail_rv)).perform(
-                scrollToHolder(withTagInQuestion(q1uid!!)))
-
-        onView(allOf(withText("Question 1"),
-            withId(R.id.item_clazzworkquestionandoptionswithresponse_title_tv))).check(
-                matches(isDisplayed()))
-
-        val q2uid = clazzWorkQuizStuff?.questionsAndOptions?.get(1)?.clazzWorkQuestion
-                ?.clazzWorkQuestionUid
+//        //Scroll to Submission
+//            onView(withText("Submission")).check(doesNotExist())
+//            onView(withId(R.id.item_simpl_button_button_tv)).check(doesNotExist())
+//            onView(withId(R.id.item_clazzwork_submission_text_entry_et)).check(doesNotExist())
+//
+//
+//        val q1uid = clazzWorkQuizStuff?.questionsAndOptions?.get(0)?.clazzWorkQuestion
+//                ?.clazzWorkQuestionUid
+//
+//        onView(withId(R.id.fragment_clazz_work_with_submission_detail_rv)).perform(
+//                scrollToHolder(withTagInQuestion(q1uid!!)))
+//
+//        onView(allOf(withText("Question 1"),
+//            withId(R.id.item_clazzworkquestionandoptionswithresponse_title_tv))).check(
+//                matches(isDisplayed()))
+//
+//        val q2uid = clazzWorkQuizStuff?.questionsAndOptions?.get(1)?.clazzWorkQuestion
+//                ?.clazzWorkQuestionUid
 
 
     }
 
-    */
-/*private fun fillFields(newClazzWork: ClazzWork?, newContent: List<ContentEntry>,
+    private fun fillFields(newClazzWork: ClazzWork?, newContent: List<ContentEntry>,
                             questionAndResponses: List<ClazzWorkQuestionAndOptions>){
         //TODO:
     }
@@ -151,6 +171,8 @@ class ClazzWorkEditFragmentTest {
             "show edit a new ClazzWork ")
     @Test
     fun givenNoClazzWorkUid_whenLoadedThenFilledAndSaved_thenShouldShowAndInsert() {
+        IdlingRegistry.getInstance().register(contentRVIdlingResource)
+        IdlingRegistry.getInstance().register(questionsRVIdlingResource)
 
         reloadFragment(null)
 
@@ -165,8 +187,7 @@ class ClazzWorkEditFragmentTest {
         //TODO
 
         //Assert inserted in database
-    }*//*
-
+    }
 
 
 
@@ -174,6 +195,8 @@ class ClazzWorkEditFragmentTest {
             "show edit OK in all cases")
     @Test
     fun givenValidClazzWorkUid_whenLoadedAndUpdatedAndSubmitted_thenShouldShowAndUpdateAndPersist() {
+        IdlingRegistry.getInstance().register(contentRVIdlingResource)
+        IdlingRegistry.getInstance().register(questionsRVIdlingResource)
 
         //Create ClazzWork accordingly
         var clazzWork = ClazzWork().apply {
@@ -234,7 +257,7 @@ class ClazzWorkEditFragmentTest {
 
 
         //Fill fields
-       // fillFields(null, listOf(), listOf())
+        fillFields(null, listOf(), listOf())
 
         //Hit submit
         //TODO
@@ -245,11 +268,11 @@ class ClazzWorkEditFragmentTest {
 
     private fun withTagInQuestion(quid: Long): Matcher<RecyclerView.ViewHolder?>? {
         return object : BoundedMatcher<RecyclerView.ViewHolder?,
-                ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder>(
-                ClazzWorkQuestionAndOptionsWithResponseRA.
+                ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder>(
+                ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.
                 ClazzWorkQuestionViewHolder::class.java) {
             override fun matchesSafely(
-                    item: ClazzWorkQuestionAndOptionsWithResponseRA
+                    item: ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter
                     .ClazzWorkQuestionViewHolder): Boolean {
                 return item.itemView.tag.equals(quid)
             }
@@ -262,4 +285,3 @@ class ClazzWorkEditFragmentTest {
 
 
 }
-*/

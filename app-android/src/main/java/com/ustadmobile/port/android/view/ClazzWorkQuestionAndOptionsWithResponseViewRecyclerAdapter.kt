@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 
-class ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter(var studentMode: Boolean)
+class ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter()
     : ListAdapter<ClazzWorkQuestionAndOptionWithResponse,
         ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter.ClazzWorkQuestionViewHolder>(
         ClazzWorkDetailOverviewFragment.DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE) {
@@ -24,13 +24,11 @@ class ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter(var studentMode
         viewHolder.binding.freeTextType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT
         viewHolder.binding.quizType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE
         viewHolder.binding.clazzWorkQuizType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
-        viewHolder.binding.studentMode = studentMode?:false
         return viewHolder
     }
 
     override fun onBindViewHolder(holder: ClazzWorkQuestionViewHolder, position: Int) {
         holder.binding.clazzWorkQuestionAndOptionsWithResponse = getItem(position)
-        holder.binding.studentMode = studentMode
         holder.itemView.tag = getItem(position).clazzWorkQuestion.clazzWorkQuestionUid
         holder.binding.itemClazzworkquestionandoptionswithresponseViewAnswerEt.tag =
                 getItem(position).clazzWorkQuestion.clazzWorkQuestionUid

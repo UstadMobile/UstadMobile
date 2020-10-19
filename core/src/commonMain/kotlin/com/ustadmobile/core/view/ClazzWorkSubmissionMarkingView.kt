@@ -11,7 +11,10 @@ interface ClazzWorkSubmissionMarkingView: UstadEditView<ClazzMemberAndClazzWorkW
 
     var privateComments: DataSource.Factory<Int, CommentsWithPerson>?
 
-    var submissionQuestionAndOptionsWithResponse
+    var quizSubmissionEditData
+            : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>?
+
+    var quizSubmissionViewData
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>?
 
     var isMarkingFinished: Boolean
