@@ -10,6 +10,7 @@ import androidx.test.espresso.action.ViewActions
 import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.contrib.RecyclerViewActions
 import androidx.test.espresso.matcher.ViewMatchers
+import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -20,10 +21,8 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.ContentEntryListScreen
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.port.android.view.binding.updateDateOnEditTextWithExtraText
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
@@ -50,14 +49,6 @@ class ContentEntryList2FragmentTest : TestCase() {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
-
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     private val parentEntryUid = 10000L
 
@@ -108,7 +99,7 @@ class ContentEntryList2FragmentTest : TestCase() {
     @AdbScreenRecord("Given content entry list in a picker mode when create new content is clicked should show content creation options")
     @Test
     fun givenContentEntryListOpenedInPickerMode_whenCreateNewContentClicked_shouldShowContentCreationOptions() {
-        
+
         init {
 
             runBlocking {
@@ -121,11 +112,23 @@ class ContentEntryList2FragmentTest : TestCase() {
 
             ContentEntryListScreen {
 
-                newEntryItem {
-                    isDisplayed()
-                    isClickable()
-                    click()
+
+                recycler {
+
+                    childWith<ContentEntryListScreen.NewItem> {
+                        withDescendant { withId(R.id.item_createnew_line1_text) }
+                    } perform {
+                        newItemTitle{
+                            hasText("Add new content")
+                            isDisplayed()
+                        }
+                        newEntryItem{
+                            click()
+                        }
+                    }
+
                 }
+
                 newBottomSheet {
                     isDisplayed()
                 }
@@ -219,8 +222,7 @@ class ContentEntryList2FragmentTest : TestCase() {
             ContentEntryList2Fragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
     }
 
 }

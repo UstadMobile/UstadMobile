@@ -1,4 +1,4 @@
-package com.ustadmobile.port.android.view.ext
+package com.ustadmobile.core.util.ext
 
 import android.content.res.Resources
 import kotlin.math.roundToInt

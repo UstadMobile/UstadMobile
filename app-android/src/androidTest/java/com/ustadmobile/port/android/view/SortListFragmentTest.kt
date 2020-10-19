@@ -6,6 +6,7 @@ import androidx.navigation.Navigation
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.PersonListScreen
@@ -26,6 +27,10 @@ class SortListFragmentTest : TestCase() {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
+
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
 
     @AdbScreenRecord("given a person list, when sort option clicked, then show Sort List and change sort")
     @Test

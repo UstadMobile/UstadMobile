@@ -706,7 +706,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
             }
         }
-        
+
     }
 
     @AdbScreenRecord("ClazzWorkDetailOverview: One student can make a private comment " +

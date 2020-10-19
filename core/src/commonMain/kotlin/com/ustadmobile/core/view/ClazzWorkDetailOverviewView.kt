@@ -12,7 +12,9 @@ interface ClazzWorkDetailOverviewView: UstadDetailView<ClazzWorkWithSubmission> 
 
     var clazzWorkContent
             :DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
-    var clazzWorkQuizQuestionsAndOptionsWithResponse
+    var quizSubmissionEdit
+            : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>?
+    var quizSubmissionView
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>?
     var timeZone: String
     var clazzWorkPublicComments: DataSource.Factory<Int, CommentsWithPerson>?

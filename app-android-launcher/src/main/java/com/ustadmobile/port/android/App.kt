@@ -22,7 +22,8 @@ class App : UstadApp() {
 
     override fun attachBaseContext(base: Context) {
         super.attachBaseContext(base)
-        ACRA.init(this)
+        if(BuildConfig.ACRA_HTTP_URI.isNotBlank())
+            ACRA.init(this)
     }
 
     companion object {

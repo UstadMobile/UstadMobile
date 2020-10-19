@@ -22,7 +22,7 @@ import org.junit.Rule
 import org.junit.Test
 
 
-@AdbScreenRecord("KAS PersonDetail screen Test")
+@AdbScreenRecord("PersonDetail screen Test")
 class PersonDetailFragmentTest : TestCase() {
 
     @JvmField

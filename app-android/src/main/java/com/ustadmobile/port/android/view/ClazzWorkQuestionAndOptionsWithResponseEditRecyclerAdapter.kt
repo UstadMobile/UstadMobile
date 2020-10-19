@@ -9,21 +9,10 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 
-class ClazzWorkQuestionAndOptionsWithResponseRA()
+class ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter()
     : ListAdapter<ClazzWorkQuestionAndOptionWithResponse,
-        ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder>(
+        ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder>(
         ClazzWorkDetailOverviewFragment.DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE) {
-
-    var studentMode: Boolean = false
-        set(value){
-            if(field == value)
-                return
-            field = value
-            if(studentMode){
-                viewHolder?.binding?.studentMode = value
-            }
-
-        }
 
     class ClazzWorkQuestionViewHolder(val binding: ItemClazzworkquestionandoptionswithresponseBinding)
         : RecyclerView.ViewHolder(binding.root)
@@ -37,13 +26,11 @@ class ClazzWorkQuestionAndOptionsWithResponseRA()
         viewHolder.binding.freeTextType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT
         viewHolder.binding.quizType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE
         viewHolder.binding.clazzWorkQuizType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
-        viewHolder.binding.studentMode = studentMode?:false
         return viewHolder
     }
 
     override fun onBindViewHolder(holder: ClazzWorkQuestionViewHolder, position: Int) {
         holder.binding.clazzWorkQuestionAndOptionsWithResponse = getItem(position)
-        holder.binding.studentMode = studentMode
         holder.itemView.tag = getItem(position).clazzWorkQuestion.clazzWorkQuestionUid
         holder.binding.itemClazzworkquestionandoptionswithresponseAnswerEt.tag =
                 getItem(position).clazzWorkQuestion.clazzWorkQuestionUid
