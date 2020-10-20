@@ -65,8 +65,8 @@ class ContentEntryImportLinkPresenterTest {
                 "file://abc.zip", 1, "googleDriveScraper")
 
         var response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json")
-        response.body = Buffer().write(Json.stringify(ImportedContentEntryMetaData.serializer(),
-                importedContentEntryMetaData).toByteArray())
+        response.setBody(Buffer().write(Json.stringify(ImportedContentEntryMetaData.serializer(),
+                importedContentEntryMetaData).toByteArray()))
 
         mockWebServer.enqueue(response)
 
