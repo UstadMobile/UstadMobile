@@ -251,7 +251,7 @@ class ClazzWorkSubmissionMarkingFragmentTest : TestCase() {
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
     }
 
-    @AdbScreenRecord("ClazzWorkSubmissionMarking: Should show marking (no Quiz) ")
+    @AdbScreenRecord("ClazzWorkSubmissionMarking: Should show marking (Quiz scenario) ")
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForQuiz_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
 
@@ -263,8 +263,9 @@ class ClazzWorkSubmissionMarkingFragmentTest : TestCase() {
 
             reloadFragment(clazzWorkUid, clazzMemberUid)
         }.after {
-            fillMarkingAndReturn(testClazzWork!!)
+
         }.run {
+            fillMarkingAndReturn(testClazzWork!!)
             //Check database
             val submissionPostSubmit = runBlocking {
                 dbRule.db.clazzWorkSubmissionDao.findByUidAsync(
@@ -300,23 +301,6 @@ class ClazzWorkSubmissionMarkingFragmentTest : TestCase() {
     @AdbScreenRecord("ClazzWorkSubmissionMarking: Should show marking (for Free Text Submission) ")
     @Test
     fun givenNoClazzWorkSubmissionMarkingPresentYetForFreeText_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
-
-//        val testClazzWork = createFreeTextDbScenario()
-//        val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
-//        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
-//
-//        reloadFragment(clazzWorkUid, clazzMemberUid)
-//        //TODO: Check why it fails to see one et
-//        //Thread.sleep(1000)
-//        fillMarkingAndReturn(testClazzWork)
-//
-//        //Check database
-//        val submissionPostSubmit = runBlocking {
-//            dbRule.db.clazzWorkSubmissionDao.findByUidAsync(
-//                    testClazzWork.submissions!!.get(0).clazzWorkSubmissionUid)
-//        }
-//        Assert.assertEquals("Marked OK", 42,
-//                submissionPostSubmit?.clazzWorkSubmissionScore)
 
         var testClazzWork: TestClazzWork? = null
         before{

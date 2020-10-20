@@ -43,39 +43,28 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
-        val clazzMemberWithSubmission = withTimeoutOrNull(2000){
-            db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(filterByClazzWorkUid,
-                    filterByClazzMemberUid)
-        }
-
         val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
             db.clazzMemberDao.findByUid(filterByClazzMemberUid)
         }
 
-        val clazzWorkWithSubmission = withTimeoutOrNull(2000){
-            db.clazzWorkDao.findWithSubmissionByUidAndPerson(filterByClazzWorkUid,
-                    clazzMemberWithSubmission?.clazzMemberPersonUid?:0L)
-        }?: ClazzWorkWithSubmission()
-
-        unmarkedMembers = withTimeoutOrNull(2000){
-            db.clazzWorkSubmissionDao.findCompletedUnMarkedSubmissionsByClazzWorkUid(filterByClazzWorkUid)
-        }?: listOf()
-
-        if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid ==
-                clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid ) !view.isMarkingFinished
-        else if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid !=
-                clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid){
-            view.isMarkingFinished = true
-        }else {
-            view.isMarkingFinished = unmarkedMembers.size > 1
+        val clazzMemberAndClazzWorkWithSubmission = withTimeoutOrNull(2000){
+            db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(filterByClazzWorkUid,
+                    filterByClazzMemberUid)
         }
 
-        if(clazzMemberWithSubmission?.clazzWork?.clazzWorkSubmissionType
+        val clazzWorkWithSubmission = withTimeoutOrNull(2000){
+            db.clazzWorkDao.findWithSubmissionByUidAndPerson(filterByClazzWorkUid,
+                    clazzMemberAndClazzWorkWithSubmission?.clazzMemberPersonUid?:0L)
+        }?: ClazzWorkWithSubmission()
+
+        //Build the quiz questions
+        if(clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkSubmissionType
                 == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
+
             val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
                     withTimeoutOrNull(2000) {
                         db.clazzWorkQuestionDao.findAllActiveQuestionsWithOptionsInClazzWorkAsList(
-                                clazzMemberWithSubmission.clazzWork?.clazzWorkUid?:0L)
+                                clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkUid?:0L)
                     } ?: listOf()
 
             val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
@@ -91,7 +80,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                             clazzWorkQuestionResponseClazzMemberUid =
                                     clazzMember?.clazzMemberUid?: 0L
                             clazzWorkQuestionResponseClazzWorkUid =
-                                    clazzMemberWithSubmission.clazzWork?.clazzWorkUid?: 0L
+                                    clazzMemberAndClazzWorkWithSubmission.clazzWork?.clazzWorkUid?: 0L
                         })
                     }
                     ClazzWorkQuestionAndOptionWithResponse(
@@ -120,20 +109,49 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 }?.quizSubmissionEditData = DoorMutableLiveData(
                         questionsAndOptionsWithResponseList)
             }
+        }
 
+        //Add a blank submission for marking to be saved to.
+        if(clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkSubmissionType
+                == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE) {
+            //Add submission if it does not exist for none type:
+            val submission = clazzMemberAndClazzWorkWithSubmission.submission ?:
+            ClazzWorkSubmission().apply {
+                clazzWorkSubmissionClazzWorkUid = clazzMemberAndClazzWorkWithSubmission.clazzWork?.clazzWorkUid?: 0L
+                clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid ?: 0L
+                clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
+                clazzWorkSubmissionInactive = false
+                clazzWorkSubmissionPersonUid = loggedInPersonUid
+            }
 
+            if (submission.clazzWorkSubmissionUid == 0L) {
+                submission.clazzWorkSubmissionUid = repo.clazzWorkSubmissionDao.insertAsync(submission)
+            }
+        }else{
+            //Add un persisted submission if it does not exist for others type:
+            val submission = clazzMemberAndClazzWorkWithSubmission?.submission ?:
+            ClazzWorkSubmission().apply {
+                clazzWorkSubmissionClazzWorkUid = clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkUid?: 0L
+                clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid ?: 0L
+                clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
+                clazzWorkSubmissionInactive = false
+                clazzWorkSubmissionPersonUid = loggedInPersonUid
+            }
+
+            clazzMemberAndClazzWorkWithSubmission?.submission = submission
         }
 
         val privateComments = withTimeoutOrNull(2000) {
             repo.commentsDao.findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToLive(
-                    ClazzWork.CLAZZ_WORK_TABLE_ID, clazzWorkWithSubmission.clazzWorkUid,
+                    ClazzWork.CLAZZ_WORK_TABLE_ID,
+                    clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkUid?:0L,
                     clazzMember?.clazzMemberPersonUid?:0L)
         }
         view.takeIf { it.privateComments == null}?.privateComments = privateComments
 
         newCommentItemListener.fromPerson = loggedInPersonUid
         newCommentItemListener.toPerson = clazzMember?.clazzMemberPersonUid?:0L
-        newCommentItemListener.entityId = clazzWorkWithSubmission.clazzWorkUid
+        newCommentItemListener.entityId = clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkUid?:0L
 
 
         val clazzWorkWithMetrics =
@@ -144,7 +162,58 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             view.takeIf { it.clazzWorkMetrics == null}?.clazzWorkMetrics = clazzWorkWithMetrics
         })
 
-        return clazzMemberWithSubmission
+        unmarkedMembers = withTimeoutOrNull(2000){
+            db.clazzWorkSubmissionDao.findCompletedUnMarkedSubmissionsByClazzWorkUid(filterByClazzWorkUid)
+        }?: listOf()
+
+        if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid ==
+                clazzMemberAndClazzWorkWithSubmission?.submission?.clazzWorkSubmissionUid ) !view.isMarkingFinished
+        else if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid !=
+                clazzMemberAndClazzWorkWithSubmission?.submission?.clazzWorkSubmissionUid){
+            view.isMarkingFinished = true
+        }else {
+            view.isMarkingFinished = unmarkedMembers.size > 1
+        }
+
+
+        return clazzMemberAndClazzWorkWithSubmission
+    }
+
+    fun createSubmissionIfDoesNotExist(){
+        val loggedInPersonUid = accountManager.activeAccount.personUid
+        GlobalScope.launch {
+            val clazzMemberWithSubmission = withTimeoutOrNull(2000) {
+                db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(filterByClazzWorkUid,
+                        filterByClazzMemberUid)
+            }
+
+            val clazzWorkWithSubmission = withTimeoutOrNull(2000){
+                db.clazzWorkDao.findWithSubmissionByUidAndPerson(filterByClazzWorkUid,
+                        clazzMemberWithSubmission?.clazzMemberPersonUid?:0L)
+            }?: ClazzWorkWithSubmission()
+
+            if (clazzMemberWithSubmission?.clazzWork?.clazzWorkSubmissionType
+                    == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT) {
+                //Add submission if it does not exist for none type:
+                val submission = clazzMemberWithSubmission.submission
+                        ?: ClazzWorkSubmission().apply {
+                            clazzWorkSubmissionClazzWorkUid = clazzMemberWithSubmission.clazzWork?.clazzWorkUid
+                                    ?: 0L
+                            clazzWorkSubmissionClazzMemberUid = clazzMemberWithSubmission?.clazzMemberUid ?: 0L
+                            clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
+                            clazzWorkSubmissionInactive = false
+                            clazzWorkSubmissionPersonUid = loggedInPersonUid
+                        }
+
+                submission.clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
+                clazzWorkWithSubmission.clazzWorkSubmission = submission
+
+                view.runOnUiThread(Runnable {
+                    view.updatedSubmission = clazzWorkWithSubmission
+                })
+
+            }
+        }
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ClazzMemberAndClazzWorkWithSubmission? {
@@ -173,6 +242,8 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 view.quizSubmissionEditData?.getValue()?: listOf()
         val newOptionsAndResponse = mutableListOf<ClazzWorkQuestionAndOptionWithResponse>()
 
+        val updatedShortTextSubmission = view.updatedSubmission?.clazzWorkSubmission
+
         val clazzWorkWithSubmission = entity
         GlobalScope.launch {
             for (everyResult in questionsWithOptionsAndResponse) {
@@ -194,22 +265,35 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                         entity?.person?.personUid?:0L,
                         entity?.clazzWork?.clazzWorkClazzUid?:0L)
             }
+            var submission: ClazzWorkSubmission? = null
 
-            val submission = entity?.submission ?: ClazzWorkSubmission().apply {
-                clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWork?.clazzWorkUid ?: 0L
-                clazzWorkSubmissionClazzMemberUid = studentClazzMember?.clazzMemberUid ?: 0L
-                clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
-                clazzWorkSubmissionInactive = false
-                clazzWorkSubmissionPersonUid = loggedInPersonUid
+            if(entity?.clazzWork?.clazzWorkSubmissionType ==
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT &&
+                    updatedShortTextSubmission != null){
+                submission = updatedShortTextSubmission
+
+            }else if(entity?.clazzWork?.clazzWorkSubmissionType ==
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
+
+
+                submission = entity?.submission ?: ClazzWorkSubmission().apply {
+                    clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWork?.clazzWorkUid
+                            ?: 0L
+                    clazzWorkSubmissionClazzMemberUid = studentClazzMember?.clazzMemberUid ?: 0L
+                    clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
+                    clazzWorkSubmissionInactive = false
+                    clazzWorkSubmissionPersonUid = loggedInPersonUid
+                }
             }
 
-            submission.clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
+            submission?.clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
 
-            if(submission.clazzWorkSubmissionUid == 0L) {
-                submission.clazzWorkSubmissionUid = repo.clazzWorkSubmissionDao.insertAsync(submission)
-            }else{
+            if(submission?.clazzWorkSubmissionUid == 0L ) {
+                submission?.clazzWorkSubmissionUid = repo.clazzWorkSubmissionDao.insertAsync(submission)
+            }else if (submission != null ){
                 repo.clazzWorkSubmissionDao.updateAsync(submission)
             }
+
             clazzWorkWithSubmission?.submission = submission
             view.runOnUiThread(Runnable {
                 view.entity = clazzWorkWithSubmission
@@ -235,11 +319,11 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                     mapOf(ARG_CLAZZWORK_UID to filterByClazzWorkUid.toString(),
                             ARG_CLAZZMEMBER_UID to nextClazzMemberUid.toString()),
                     context)
-
         }
     }
 
-    private fun handleClickSaveWithMovement(entity: ClazzMemberAndClazzWorkWithSubmission, leave: Boolean){
+    private fun handleClickSaveWithMovement(entity: ClazzMemberAndClazzWorkWithSubmission,
+                                            leave: Boolean){
         GlobalScope.launch(doorMainDispatcher()) {
             val submission = entity.submission
             //If submission exists

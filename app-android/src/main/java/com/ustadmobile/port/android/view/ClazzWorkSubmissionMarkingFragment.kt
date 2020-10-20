@@ -24,6 +24,9 @@ import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ClazzWork.Companion.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+import com.ustadmobile.lib.db.entities.ClazzWork.Companion.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
+import com.ustadmobile.lib.db.entities.ClazzWork.Companion.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
@@ -120,12 +123,10 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
                         clazzWorkWithSubmission)
         submissionResultRecyclerAdapter?.visible = false
 
-        markingEditRecyclerAdapter =
-                ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWorkWithSubmission)
-        markingEditRecyclerAdapter?.visible = false
+        markingEditRecyclerAdapter = ClazzWorkSubmissionScoreEditRecyclerAdapter(entity)
+        markingEditRecyclerAdapter?.visible = true
 
         submissionFreeTextRecyclerAdapter = SubmissionTextEntryWithResultRecyclerAdapter()
-        submissionFreeTextRecyclerAdapter?.visible = false
         submissionFreeTextRecyclerAdapter?.markingMode = true
 
 
@@ -218,42 +219,68 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
             ustadFragmentTitle = value?.person?.fullName()?:""
 
+            val submission = entity?.submission
+            //Don't show the button if submission exists or submission is not required.
+            markingEditRecyclerAdapter?.clazzWorkVal = value
+            markingEditRecyclerAdapter?.notifyDataSetChanged()
+
+
+            //Show submission heading and record for student
+            submissionHeadingRecyclerAdapter?.visible = true
+            recordForStudentButtonRecyclerAdapter?.visible = true
+
             val clazzWorkWithSubmission: ClazzWorkWithSubmission =
                     ClazzWorkWithSubmission().generateWithClazzWorkAndClazzWorkSubmission(
-                            entity?.clazzWork?: ClazzWork(), entity?.submission
-                    )
+                            entity?.clazzWork?: ClazzWork(), entity?.submission)
 
             submissionResultRecyclerAdapter?.submitList(listOf(clazzWorkWithSubmission))
-            markingEditRecyclerAdapter?.submitList(listOf(clazzWorkWithSubmission))
 
-            val submission = entity?.submission
+            //If there is a submission
             if(submission != null && submission.clazzWorkSubmissionUid != 0L){
-                submissionHeadingRecyclerAdapter?.visible = true
-            }else{
-                //No submission
-                submissionHeadingRecyclerAdapter?.visible = true
-                recordForStudentButtonRecyclerAdapter?.visible = true
+
+                //Don't show record for student
+                recordForStudentButtonRecyclerAdapter?.visible = false
+                //Show submission heading if type not none
+                if(value?.clazzWork?.clazzWorkSubmissionType != CLAZZ_WORK_SUBMISSION_TYPE_NONE){
+                    submissionHeadingRecyclerAdapter?.visible = true
+                }
+            }else{ //No submission.
+                //Show marking if type not none and dont show record for student.
+                if(value?.clazzWork?.clazzWorkSubmissionType == CLAZZ_WORK_SUBMISSION_TYPE_NONE){
+
+                    recordForStudentButtonRecyclerAdapter?.visible = false
+                }
             }
 
-            if(entity?.clazzWork?.clazzWorkSubmissionType ==
-                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT ){
-                submissionFreeTextRecyclerAdapter?.submitList(listOf(clazzWorkWithSubmission))
-                submissionFreeTextRecyclerAdapter?.visible = true
-            }else{
-                submissionFreeTextRecyclerAdapter?.visible = false
+            when (value?.clazzWork?.clazzWorkSubmissionType) {
+                CLAZZ_WORK_SUBMISSION_TYPE_NONE -> {
+
+                    //Hide submission heading and record button
+                    submissionHeadingRecyclerAdapter?.visible = false
+                    recordForStudentButtonRecyclerAdapter?.visible = false
+
+                }
+                CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT -> {
+
+                    if(submission == null){ // if not submission
+                        //Don't show response
+                        submissionFreeTextRecyclerAdapter?.submitList(listOf())
+                    }else {
+                        //Show response
+                        submissionFreeTextRecyclerAdapter?.submitList(listOf(clazzWorkWithSubmission))
+                    }
+                }
+
+                else -> {
+                    submissionFreeTextRecyclerAdapter?.submitList(listOf())
+                }
             }
-
-            submitWithMetricsRecyclerAdapter?.submitList(listOf(clazzWorkMetrics))
-            submitWithMetricsRecyclerAdapter?.visible = true
-            submitWithMetricsRecyclerAdapter?.showNext = isMarkingFinished
-            submitWithMetricsRecyclerAdapter?.passThis = entity
-
 
         }
 
     override var privateComments: DataSource.Factory<Int, CommentsWithPerson>? = null
-        get() = field
         set(value) {
+            field = value
             val privateCommentsObserverVal = privateCommentsObserver?:return
             privateCommentsLiveData?.removeObserver(privateCommentsObserverVal)
             privateCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
@@ -272,10 +299,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
     override var quizSubmissionEditData
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>? = null
-        set(value) {
-            field = value
-        }
-
 
     override var isMarkingFinished: Boolean = false
 
@@ -285,7 +308,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             field = value
             submitWithMetricsRecyclerAdapter?.visible = true
             submitWithMetricsRecyclerAdapter?.showNext = isMarkingFinished
-            submitWithMetricsRecyclerAdapter?.passThis = entity
             submitWithMetricsRecyclerAdapter?.submitList(listOf(clazzWorkMetrics))
 
         }
@@ -306,40 +328,45 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         submissionFreeTextRecyclerAdapter?.markingMode = false
 
         if(entity?.clazzWork?.clazzWorkSubmissionType ==
-                ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT ){
-            val clazzWorkWithSubmission: ClazzWorkWithSubmission =
-                ClazzWorkWithSubmission().generateWithClazzWorkAndClazzWorkSubmission(
-                        entity?.clazzWork?: ClazzWork(), entity?.submission
-                )
-            submissionFreeTextRecyclerAdapter?.markingMode = false
-            submissionFreeTextRecyclerAdapter?.submitList(listOf(clazzWorkWithSubmission))
+                CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT ){
+
             submissionFreeTextRecyclerAdapter?.visible = true
-            submissionFreeTextRecyclerAdapter?.notifyDataSetChanged()
+            submissionFreeTextRecyclerAdapter?.markingMode = false
+            mPresenter?.createSubmissionIfDoesNotExist()
+
         }else if(entity?.clazzWork?.clazzWorkSubmissionType ==
-                ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ){
-            submissionFreeTextRecyclerAdapter?.visible = false
+                CLAZZ_WORK_SUBMISSION_TYPE_QUIZ){
             quizEditRecyclerAdapter?.submitList(
                     quizSubmissionEditData?.value)
-        }else{
-            submissionFreeTextRecyclerAdapter?.visible = false
         }
     }
+
+    override var updatedSubmission: ClazzWorkWithSubmission? = null
+
+        set(value) {
+            field = value
+            submissionFreeTextRecyclerAdapter?.markingMode = false
+            submissionFreeTextRecyclerAdapter?.submitList(listOf(value))
+        }
 
     //Submit class work on behalf of student
     override fun onClickPrimary(view: View) {
         simpleTwoButtonRecyclerAdapter?.visible = false
         submissionFreeTextRecyclerAdapter?.markingMode = true
-        submissionFreeTextRecyclerAdapter?.visible = false
         quizEditRecyclerAdapter?.submitList(listOf())
         mPresenter?.handleClickSubmitOnBehalf()
         recordForStudentButtonRecyclerAdapter?.visible = false
         quizViewRecyclerAdapter?.submitList(quizSubmissionEditData?.value)
+        val clazzWorkWithSubmission: ClazzWorkWithSubmission =
+                ClazzWorkWithSubmission().generateWithClazzWorkAndClazzWorkSubmission(
+                        entity?.clazzWork?: ClazzWork(), entity?.submission)
+        submissionFreeTextRecyclerAdapter?.submitList(listOf(clazzWorkWithSubmission))
     }
 
     //On click cancel for student recording on their behalf
     override fun onClickSecondary(view: View) {
         submissionFreeTextRecyclerAdapter?.markingMode = true
-        submissionFreeTextRecyclerAdapter?.visible = false
+        submissionFreeTextRecyclerAdapter?.submitList(listOf())
         quizEditRecyclerAdapter?.submitList(listOf())
         simpleTwoButtonRecyclerAdapter?.visible = false
         recordForStudentButtonRecyclerAdapter?.visible = true

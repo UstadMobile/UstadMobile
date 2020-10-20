@@ -447,6 +447,30 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             }
         }
 
+        val DU_CLAZZMEMBERANDCLAZZWORKWITHSUBMISSION =
+                object: DiffUtil.ItemCallback<ClazzMemberAndClazzWorkWithSubmission>() {
+                    override fun areItemsTheSame(oldItem: ClazzMemberAndClazzWorkWithSubmission,
+                                                 newItem: ClazzMemberAndClazzWorkWithSubmission): Boolean {
+                        return oldItem.clazzWork?.clazzWorkUid == newItem.clazzWork?.clazzWorkUid
+                    }
+
+                    override fun areContentsTheSame(oldItem: ClazzMemberAndClazzWorkWithSubmission,
+                                                    newItem: ClazzMemberAndClazzWorkWithSubmission): Boolean {
+                        return oldItem.clazzWork?.clazzWorkUid == newItem.clazzWork?.clazzWorkUid
+                                && oldItem.clazzWork?.clazzWorkInstructions == newItem.clazzWork?.clazzWorkInstructions
+                                && oldItem.clazzWork?.clazzWorkCommentsEnabled == newItem.clazzWork?.clazzWorkCommentsEnabled
+                                && oldItem.clazzWork?.clazzWorkSubmissionType == newItem.clazzWork?.clazzWorkSubmissionType
+                                && oldItem.clazzWork?.clazzWorkCreatedDate == newItem.clazzWork?.clazzWorkCreatedDate
+                                && oldItem.clazzWork?.clazzWorkDueDateTime == newItem.clazzWork?.clazzWorkDueDateTime
+                                && oldItem.submission?.clazzWorkSubmissionInactive ==
+                                newItem.submission?.clazzWorkSubmissionInactive
+                                && oldItem.submission?.clazzWorkSubmissionScore ==
+                                newItem.submission?.clazzWorkSubmissionScore
+                                && oldItem.submission?.clazzWorkSubmissionUid ==
+                                newItem.submission?.clazzWorkSubmissionUid
+                    }
+                }
+
         val DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE =
                 object: DiffUtil.ItemCallback<ClazzWorkQuestionAndOptionWithResponse>() {
             override fun areItemsTheSame(oldItem: ClazzWorkQuestionAndOptionWithResponse,

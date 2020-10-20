@@ -2,10 +2,7 @@ package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission
-import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
-import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
-import com.ustadmobile.lib.db.entities.CommentsWithPerson
+import com.ustadmobile.lib.db.entities.*
 
 interface ClazzWorkSubmissionMarkingView: UstadEditView<ClazzMemberAndClazzWorkWithSubmission> {
 
@@ -20,6 +17,8 @@ interface ClazzWorkSubmissionMarkingView: UstadEditView<ClazzMemberAndClazzWorkW
     var isMarkingFinished: Boolean
 
     var clazzWorkMetrics : ClazzWorkWithMetrics?
+
+    var updatedSubmission : ClazzWorkWithSubmission?
 
     companion object {
 

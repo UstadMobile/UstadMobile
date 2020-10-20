@@ -40,7 +40,6 @@ class ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter(clazzWork: Claz
     private var viewHolder: ClazzWorkProgressViewHolder? = null
     private var clazzWorkVal : ClazzWorkWithMetrics? = clazzWork
     private var mPresenter : ClazzWorkSubmissionMarkingPresenter? = presenter
-    var passThis: ClazzMemberAndClazzWorkWithSubmission? = clazzMemberAndClazzWorkWithSubmission
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkProgressViewHolder {
         return ClazzWorkProgressViewHolder(
@@ -49,7 +48,6 @@ class ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter(clazzWork: Claz
                     it.mPresenter = mPresenter
                     it.clazzWorkWithMetrics = clazzWorkVal
                     it.showNext = showNext
-                    it.clazzMemberAndClazzWorkWithSubmission = passThis
                 })
     }
 
