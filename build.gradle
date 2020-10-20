@@ -95,7 +95,7 @@ ext {
 
     //3.12.6 is the latest (backport) OKHttp version that still supports Android 4
     // see https://medium.com/square-corner-blog/okhttp-3-13-requires-android-5-818bb78d07ce
-    version_okhttp = "3.12.6"
+    version_okhttp = "4.9.0"
     version_commons_io = "2.6"
     version_gson = "2.8.6"
     version_apache_commons_cli = "1.4"
@@ -104,7 +104,7 @@ ext {
     version_apache_commons_dbcp2 = "2.7.0"
     version_mpandroidchart = "v3.0.3"
 
-    version_mockwebserver = "3.10.0"
+    version_mockwebserver = "4.9.0"
     version_javapoet = "1.11.1"
     version_kotlinpoet = "1.5.0"
     version_reflections = "0.9.11"
@@ -130,8 +130,8 @@ ext {
     version_kodein_di = "7.0.0"
 
     version_android_buildtools = "29.0.0"
-    version_android_compile_sdk = 29
-    version_android_target_sdk = 29
+    version_android_compile_sdk = 30
+    version_android_target_sdk = 30
     version_android_min_sdk = 18
     version_android_picasso = 2.71828
     version_android_desugar_jdk_libs = "1.0.10"
