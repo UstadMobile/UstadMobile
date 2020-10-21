@@ -327,16 +327,6 @@ abstract class UstadMobileSystemCommon {
     }
 
 
-    /**
-     * Get storage directories
-     *
-     * @param context Platform specific context
-     * @param callback Storage dir list callback
-     */
-    @JsName("getStorageDirs")
-    abstract fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>)
-
-
     @JsName("getStorageDirAsync")
     abstract suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
 

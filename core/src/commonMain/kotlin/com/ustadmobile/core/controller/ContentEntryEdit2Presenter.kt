@@ -80,16 +80,9 @@ class ContentEntryEdit2Presenter(context: Any,
         super.onCreate(savedState)
         view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
         parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0
-        systemImpl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
-            override fun onDone(result: List<UMStorageDir>?) {
-                storageOptions = result
-                if (result != null) {
-                    view.runOnUiThread(Runnable {
-                        view.storageOptions = result
-                    })
-                }
-            }
-        })
+        GlobalScope.launch(doorMainDispatcher()){
+            view.storageOptions = systemImpl.getStorageDirsAsync(context)
+        }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithLanguage? {
