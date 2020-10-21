@@ -2,9 +2,9 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.appcompat.widget.SearchView
+import androidx.core.app.ActivityCompat.invalidateOptionsMenu
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import com.toughra.ustadmobile.R
@@ -54,6 +54,12 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             field = value
         }
 
+    override var hasUpdatePermission: Boolean = false
+        set(value) {
+            activity?.invalidateOptionsMenu()
+            field = value
+        }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         val mTitle = arguments?.get(ARG_PARENT_ENTRY_TITLE)
@@ -80,9 +86,16 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 (mDataRecyclerViewAdapter as? ContentEntryListRecyclerAdapter)?.onLocalAvailabilityUpdated(availabilityMap)
             }
         }
+        setHasOptionsMenu(true)
 
         super.onViewCreated(view, savedInstanceState)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_entrylist_options, menu)
+        menu.findItem(R.id.edit).isVisible = hasUpdatePermission
+    }
+
 
     private var mCurrentPagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
 
@@ -93,6 +106,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         if(localAvailabilityCallbackVal != null){
             mCurrentPagedList?.removeWeakCallback(localAvailabilityCallbackVal)
         }
+
 
         if(localAvailabilityCallbackVal != null && t != null) {
             localAvailabilityCallbackVal.pagedList = t
@@ -119,8 +133,18 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
      * when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
+        if (view?.id == R.id.item_createnew_layout)
             mPresenter?.handleClickCreateNewFab()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.edit -> {
+                mPresenter?.handleEditFolder()
+                return super.onOptionsItemSelected(item)
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onDestroyView() {
