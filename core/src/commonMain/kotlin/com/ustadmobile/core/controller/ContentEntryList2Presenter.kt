@@ -69,13 +69,13 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 Role.PERMISSION_CONTENT_UPDATE)
     }
 
-    private fun getAndSetList(sortOrder: SortOrder = currentSortOrder) {
+    private fun getAndSetList(sortOrder: SortOrder = currentSortOrder, showHidden: Boolean = false) {
         view.list = when (contentFilter) {
             ARG_LIBRARIES_CONTENT -> when (sortOrder) {
                 SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                        parentEntryUid, 0, 0, loggedPersonUid)
+                        parentEntryUid, 0, 0, loggedPersonUid, showHidden)
                 SortOrder.ORDER_NAME_DSC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameDesc(
-                        parentEntryUid, 0, 0, loggedPersonUid)
+                        parentEntryUid, 0, 0, loggedPersonUid, showHidden)
             }
             ARG_DOWNLOADED_CONTENT -> when (sortOrder) {
                 SortOrder.ORDER_NAME_ASC -> db.contentEntryDao.downloadedRootItemsAsc(loggedPersonUid)
@@ -92,6 +92,25 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         }
     }
 
+    override suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
+        return listOf(SelectionOption.MOVE, SelectionOption.HIDE)
+    }
+
+    override fun handleClickSelectionOption(selectedItem: List<ContentEntry>, option: SelectionOption) {
+        when(option){
+            SelectionOption.MOVE ->{
+
+            }
+            SelectionOption.HIDE ->{
+
+            }
+            SelectionOption.UNHIDE ->{
+                
+            }
+        }
+    }
+
+
     /**
      * Handles when the user clicks a "folder" in picker mode
      */
@@ -102,7 +121,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     private fun showContentEntryListByParentUid(){
         view.list = repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                parentEntryUid, 0, 0, loggedPersonUid)
+                parentEntryUid, 0, 0, loggedPersonUid, false)
     }
 
     fun handleOnBackPressed(): Boolean{
@@ -126,8 +145,12 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         }
     }
 
-    fun handleEditFolder() {
+    fun handleClickEditFolder() {
         systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
                 mapOf(UstadView.ARG_ENTITY_UID to parentEntryUid.toString()), context)
+    }
+
+    fun handleClickShowHiddenItems() {
+        getAndSetList(showHidden = true)
     }
 }

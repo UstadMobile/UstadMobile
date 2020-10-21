@@ -92,6 +92,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_entrylist_options, menu)
         menu.findItem(R.id.edit).isVisible = editOptionVisible
+        menu.findItem(R.id.hidden_items).isVisible = editOptionVisible
     }
 
 
@@ -135,10 +136,16 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             mPresenter?.handleClickCreateNewFab()
     }
 
+
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.edit -> {
-                mPresenter?.handleEditFolder()
+                mPresenter?.handleClickEditFolder()
+                return true
+            }
+            R.id.hidden_items -> {
+                mPresenter?.handleClickShowHiddenItems()
                 return true
             }
         }
