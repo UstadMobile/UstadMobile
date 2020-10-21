@@ -2,12 +2,11 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_RECYCLED_CONTENT
-import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -24,7 +23,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                                  = DefaultContentEntryListItemListener(view = view, context = context, di = di))
     : UstadListPresenter<ContentEntryList2View, ContentEntry>(context, arguments, view, di, lifecycleOwner),
         ContentEntryListItemListener by contentEntryListItemListener {
-
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
@@ -53,22 +51,33 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
         loggedPersonUid = accountManager.activeAccount.personUid
         getAndSetList()
+        GlobalScope.launch(doorMainDispatcher()) {
+            if (contentFilter == ARG_LIBRARIES_CONTENT) {
+                view.editOptionVisible = onCheckUpdatePermission()
+            }
+        }
+
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return db.entityRoleDao.userHasTableLevelPermission(accountManager.activeAccount.personUid,
-            Role.PERMISSION_CONTENT_INSERT)
+                Role.PERMISSION_CONTENT_INSERT)
+    }
+
+    suspend fun onCheckUpdatePermission(): Boolean {
+        return db.entityRoleDao.userHasTableLevelPermission(accountManager.activeAccount.personUid,
+                Role.PERMISSION_CONTENT_UPDATE)
     }
 
     private fun getAndSetList(sortOrder: SortOrder = currentSortOrder) {
-        view.list  = when(contentFilter){
-            ARG_LIBRARIES_CONTENT -> when(sortOrder){
+        view.list = when (contentFilter) {
+            ARG_LIBRARIES_CONTENT -> when (sortOrder) {
                 SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
                         parentEntryUid, 0, 0, loggedPersonUid)
                 SortOrder.ORDER_NAME_DSC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameDesc(
                         parentEntryUid, 0, 0, loggedPersonUid)
             }
-            ARG_DOWNLOADED_CONTENT -> when(sortOrder){
+            ARG_DOWNLOADED_CONTENT -> when (sortOrder) {
                 SortOrder.ORDER_NAME_ASC -> db.contentEntryDao.downloadedRootItemsAsc(loggedPersonUid)
                 SortOrder.ORDER_NAME_DSC -> db.contentEntryDao.downloadedRootItemsDesc(loggedPersonUid)
             }
@@ -106,14 +115,19 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override fun handleClickCreateNewFab() {
-       view.showContentEntryAddOptions(parentEntryUid)
+        view.showContentEntryAddOptions(parentEntryUid)
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {
         val sortOrder = (sortOption as? ContentEntryListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
+        if (sortOrder != currentSortOrder) {
             currentSortOrder = sortOrder
             getAndSetList(currentSortOrder)
         }
+    }
+
+    fun handleEditFolder() {
+        systemImpl.go(ContentEntryEdit2View.VIEW_NAME,
+                mapOf(UstadView.ARG_ENTITY_UID to parentEntryUid.toString()), context)
     }
 }

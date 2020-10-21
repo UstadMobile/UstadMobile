@@ -14,6 +14,8 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
     var title: String?
 
+    var editOptionVisible: Boolean
+
     companion object {
 
         const val ARG_DOWNLOADED_CONTENT = "downloaded"
