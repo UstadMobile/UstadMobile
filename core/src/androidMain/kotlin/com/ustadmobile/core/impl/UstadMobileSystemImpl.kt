@@ -323,6 +323,40 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
+    /**
+     * Get storage directories
+     *
+     * @param context Platform specific context
+     * @param callback Storage dir list callback
+     */
+
+    @Deprecated("Use getStorageDirsAsync instead")
+    actual override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>) {
+        Thread {
+            val dirList = ArrayList<UMStorageDir>()
+            val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
+            val contentDirName = getContentDirName(context)
+
+            var umDir = File(storageOptions[deviceStorageIndex], contentDirName!!)
+            if (!umDir.exists()) umDir.mkdirs()
+            dirList.add(UMStorageDir(umDir.absolutePath,
+                    getString(MessageID.phone_memory, context), true,
+                    isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
+
+            if (storageOptions.size > 1) {
+                val sdCardStorage = storageOptions[sdCardStorageIndex]
+                umDir = File(sdCardStorage, contentDirName)
+                if (!umDir.exists()) umDir.mkdirs()
+                dirList.add(UMStorageDir(umDir.absolutePath,
+                        getString(MessageID.memory_card, context), removableMedia = true,
+                        isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
+            }
+
+            callback.onDone(dirList)
+        }.start()
+    }
+
+
     actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> = withContext(Dispatchers.IO){
         val dirList = ArrayList<UMStorageDir>()
         val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
