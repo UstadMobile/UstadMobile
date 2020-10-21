@@ -3,8 +3,6 @@ package com.ustadmobile.port.android.view
 import android.Manifest
 import android.os.Bundle
 import android.view.*
-import androidx.appcompat.widget.SearchView
-import androidx.core.app.ActivityCompat.invalidateOptionsMenu
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import com.toughra.ustadmobile.R
@@ -54,7 +52,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             field = value
         }
 
-    override var hasUpdatePermission: Boolean = false
+    override var editOptionVisible: Boolean = false
         set(value) {
             activity?.invalidateOptionsMenu()
             field = value
@@ -93,7 +91,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.menu_entrylist_options, menu)
-        menu.findItem(R.id.edit).isVisible = hasUpdatePermission
+        menu.findItem(R.id.edit).isVisible = editOptionVisible
     }
 
 
@@ -141,7 +139,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         when (item.itemId) {
             R.id.edit -> {
                 mPresenter?.handleEditFolder()
-                return super.onOptionsItemSelected(item)
+                return true
             }
         }
         return super.onOptionsItemSelected(item)

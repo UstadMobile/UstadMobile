@@ -11,13 +11,10 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.plus
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, view: ContentEntryList2View,
@@ -56,7 +53,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         getAndSetList()
         GlobalScope.launch(doorMainDispatcher()) {
             if (contentFilter == ARG_LIBRARIES_CONTENT) {
-                view.hasUpdatePermission = onCheckUpdatePermission()
+                view.editOptionVisible = onCheckUpdatePermission()
             }
         }
 
