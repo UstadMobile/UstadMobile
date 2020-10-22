@@ -138,6 +138,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
 
 
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.edit -> {
@@ -202,7 +203,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                         oldItem.description == newItem.description &&
                         oldItem.contentTypeFlag == newItem.contentTypeFlag &&
                         oldItem.mostRecentContainer?.fileSize == newItem.mostRecentContainer?.fileSize &&
-                        oldItem.thumbnailUrl == newItem.thumbnailUrl
+                        oldItem.thumbnailUrl == newItem.thumbnailUrl &&
+                        oldItem.ceInactive == newItem.ceInactive
             }
         }
     }

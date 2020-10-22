@@ -22,6 +22,7 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.ContentEntryListScreen
 import com.ustadmobile.port.android.view.binding.updateDateOnEditTextWithExtraText
+import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
@@ -211,6 +212,47 @@ class ContentEntryList2FragmentTest : TestCase() {
             }
 
         }
+    }
+
+
+    @AdbScreenRecord("given a list of items when menu option show hidden items selected then show all items in list")
+    @Test
+    fun givenListOfEntry_whenMenuOptionShowHiddenItemsSelected_thenShowAllItemsInList(){
+        var scenario: FragmentScenario<ContentEntryList2Fragment>? = null
+        init {
+
+            runBlocking {
+                val list = dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(4, parentEntryUid)
+                list.forEach{
+                    it.ceInactive = true
+                }
+                dbRule.db.contentEntryDao.updateList(list)
+            }
+
+            scenario = launchFragment()
+
+        }.run {
+
+            ContentEntryListScreen{
+
+                recycler{
+                    
+                    hasSize(2)
+
+                    scenario?.clickOptionMenu(R.id.hidden_items)
+
+                    hasSize(5)
+
+                }
+
+
+            }
+
+
+        }
+
+
+
     }
 
 

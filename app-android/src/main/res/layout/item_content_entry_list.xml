@@ -35,7 +35,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="@dimen/dimen_10dp"
-        android:alpha="@{contentEntry.ceInactive ? .5 : 1}"
+        android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, contentEntry)}"
         app:onSelectableItemClicked="@{() -> itemListener.onClickContentEntry(contentEntry)}"
