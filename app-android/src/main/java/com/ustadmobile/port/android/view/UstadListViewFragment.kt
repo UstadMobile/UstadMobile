@@ -112,9 +112,13 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         }
 
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
+            return true
+        }
+
+        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
+            menu.clear()
             val systemImpl = UstadMobileSystemImpl.instance
             val fragmentContext = fragmentHost?.requireContext() ?: return false
-
             fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
                 menu.add(0, item.commandId, index,
                         systemImpl.getString(item.messageId, fragmentContext)).apply {
@@ -124,12 +128,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
                     icon = drawable
                 }
             }
-
             return true
-        }
-
-        override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            return false // if nothing has changed
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
@@ -165,6 +164,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
                         }
                 actionMode = (activity as? AppCompatActivity)?.startSupportActionMode(
                         actionModeCallbackVal)
+                listPresenter?.handleSelectionOptionChanged(t)
             } else if (actionModeVal != null && t.isNullOrEmpty()) {
                 actionModeVal.finish()
             }

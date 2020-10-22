@@ -239,6 +239,81 @@ class ContentEntryEndtoEnd : TestCase() {
 
                 }
 
+            }
+
+        }
+
+    }
+
+    @AdbScreenRecord("given a list of items when menu option show hidden items selected then show all items in list")
+    @Test
+    fun givenListOfEntry_whenUserSelectsHiddenAndUnHideItems_thenMenuOptionsChangesToUnHide(){
+
+        init {
+
+            runBlocking {
+                dbRule.insertPersonForActiveUser(Person().apply {
+                    firstNames = "Test"
+                    lastName = "User"
+                    username = "admin"
+                    admin = true
+                })
+                val list = dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(4, -4103245208651563007L, mutableListOf(0))
+                list[0].ceInactive = true
+                dbRule.db.contentEntryDao.updateList(list)
+            }
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val launchIntent = Intent(context, MainActivity::class.java).also {
+                it.putExtra(UstadView.ARG_NEXT,
+                        "${ContentEntryList2View.VIEW_NAME}?${UstadView.ARG_PARENT_ENTRY_UID}=-4103245208651563007" +
+                                "&${ContentEntryList2View.ARG_CONTENT_FILTER}=${ContentEntryList2View.ARG_LIBRARIES_CONTENT}")
+            }
+
+            launchActivity<MainActivity>(launchIntent)
+
+        }.run {
+
+            ContentEntryListScreen{
+
+                recycler{
+
+                    hasSize(3)
+
+                    openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
+
+                    KView {
+                        withText("Show hidden items")
+                    } perform {
+                        click()
+                    }
+
+                    hasSize(4)
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant { withText("Dummy folder title 1") }
+                    }perform {
+                        title{
+                            longClick()
+                        }
+                    }
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant { withText("Dummy  entry title 2") }
+                    }perform {
+                        title{
+                            click()
+                        }
+                    }
+
+                    KView{
+                        withContentDescription("Unhide")
+                    }perform {
+                        click()
+                    }
+
+                    hasSize(4)
+
+                }
 
             }
 

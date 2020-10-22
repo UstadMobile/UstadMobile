@@ -93,10 +93,22 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
-        return listOf(SelectionOption.MOVE, SelectionOption.HIDE)
+        return if(view.editOptionVisible) listOf(SelectionOption.MOVE, SelectionOption.HIDE) else listOf()
     }
 
+    override fun handleSelectionOptionChanged(t: List<ContentEntry>) {
+        if(!view.editOptionVisible){
+            return
+        }
 
+        val isAllInActive = t.all {
+            !it.ceInactive
+        }
+        view.selectionOptions = if(isAllInActive)
+            listOf(SelectionOption.MOVE, SelectionOption.HIDE)
+        else
+            listOf(SelectionOption.MOVE, SelectionOption.UNHIDE)
+    }
 
     override fun handleClickSelectionOption(selectedItem: List<ContentEntry>, option: SelectionOption) {
         GlobalScope.launch(doorMainDispatcher()) {

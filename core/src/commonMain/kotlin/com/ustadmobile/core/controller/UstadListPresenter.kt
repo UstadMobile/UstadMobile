@@ -107,5 +107,9 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     abstract fun handleClickCreateNewFab()
 
+    open fun handleSelectionOptionChanged(t: List<RT>){
+
+    }
+
 
 }
