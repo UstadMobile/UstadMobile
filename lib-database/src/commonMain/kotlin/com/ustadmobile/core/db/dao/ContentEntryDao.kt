@@ -283,6 +283,10 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract suspend fun personHasPermissionWithContentEntry(accountPersonUid: Long, contentEntryUid: Long,
                                                       permission: Long) : Boolean
 
+
+    @Query("UPDATE ContentEntry SET ceInactive = :toggleVisibility WHERE ContentEntry.contentEntryUid IN (:selectedItem)")
+    abstract fun toggleVisibilityContentEntryItems(toggleVisibility: Boolean, selectedItem: List<ContentEntry>)
+
     companion object {
 
         const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
