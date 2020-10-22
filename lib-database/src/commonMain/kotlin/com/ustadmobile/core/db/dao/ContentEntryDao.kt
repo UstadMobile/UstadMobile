@@ -287,7 +287,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     @Query("""UPDATE ContentEntry SET ceInactive = :toggleVisibility, 
                 contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
                 WHERE contentEntryUid IN (:selectedItem)""")
-    abstract fun toggleVisibilityContentEntryItems(toggleVisibility: Boolean, selectedItem: List<Long>)
+    abstract suspend fun toggleVisibilityContentEntryItems(toggleVisibility: Boolean, selectedItem: List<Long>)
 
     companion object {
 

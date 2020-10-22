@@ -215,47 +215,6 @@ class ContentEntryList2FragmentTest : TestCase() {
     }
 
 
-    @AdbScreenRecord("given a list of items when menu option show hidden items selected then show all items in list")
-    @Test
-    fun givenListOfEntry_whenMenuOptionShowHiddenItemsSelected_thenShowAllItemsInList(){
-        var scenario: FragmentScenario<ContentEntryList2Fragment>? = null
-        init {
-
-            runBlocking {
-                val list = dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(4, parentEntryUid)
-                list.forEach{
-                    it.ceInactive = true
-                }
-                dbRule.db.contentEntryDao.updateList(list)
-            }
-
-            scenario = launchFragment()
-
-        }.run {
-
-            ContentEntryListScreen{
-
-                recycler{
-                    
-                    hasSize(2)
-
-                    scenario?.clickOptionMenu(R.id.hidden_items)
-
-                    hasSize(5)
-
-                }
-
-
-            }
-
-
-        }
-
-
-
-    }
-
-
     private fun launchFragment(bundle: Bundle = bundleOf(UstadView.ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
             ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT,
             UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())): FragmentScenario<ContentEntryList2Fragment> {
