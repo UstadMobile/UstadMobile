@@ -92,7 +92,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         get() = field
         set(value) {
             field = value
-            //todo: invalidate options if required
+            actionMode?.invalidate()
         }
 
     // See https://developer.android.com/guide/topics/ui/menus#CAB
@@ -337,7 +337,10 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
         val SELECTION_ICONS_MAP =
                 mapOf(SelectionOption.EDIT to R.drawable.ic_edit_white_24dp,
-                        SelectionOption.DELETE to R.drawable.ic_delete_black_24dp)
+                        SelectionOption.DELETE to R.drawable.ic_delete_black_24dp,
+                        SelectionOption.MOVE to R.drawable.ic_move,
+                        SelectionOption.HIDE to R.drawable.ic_baseline_visibility_off_24,
+                        SelectionOption.UNHIDE to R.drawable.ic_baseline_visibility_24)
 
     }
 

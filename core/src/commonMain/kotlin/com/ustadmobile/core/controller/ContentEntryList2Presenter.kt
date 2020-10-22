@@ -96,16 +96,18 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         return listOf(SelectionOption.MOVE, SelectionOption.HIDE)
     }
 
+
+
     override fun handleClickSelectionOption(selectedItem: List<ContentEntry>, option: SelectionOption) {
         when(option){
             SelectionOption.MOVE ->{
 
             }
             SelectionOption.HIDE ->{
-
+                repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedItem.map { it.contentEntryUid })
             }
             SelectionOption.UNHIDE ->{
-                
+                repo.contentEntryDao.toggleVisibilityContentEntryItems(false, selectedItem.map { it.contentEntryUid })
             }
         }
     }
