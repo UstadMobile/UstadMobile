@@ -355,65 +355,65 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
     }
 
 
-    @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as teacher should" +
-            " show all relevant fields of Quiz ClazzWork")
-    @Test
-    fun givenValidClazzWorkUidQuiz_whenLoadedAsTeacher_thenShouldShow() {
-
-        var clazzWork: ClazzWork? = null
-        var contentList = listOf<ContentEntry>()
-        var testClazzWork: TestClazzWork? = null
-        before {
-
-            clazzWork = ClazzWork().apply {
-                clazzWorkTitle = "Test ClazzWork A"
-                clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
-                clazzWorkInstructions = "Pass espresso test for ClazzWork"
-                clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
-                clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
-                clazzWorkCommentsEnabled = true
-                clazzWorkMaximumScore = 120
-
-            }
-
-            testClazzWork = runBlocking {
-                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
-                        clazzWork!!, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
-                        true, 0, false, false)
-            }
-
-            val contentEntriesWithJoin = runBlocking {
-                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork,
-                        2)
-            }
-            contentList = contentEntriesWithJoin.contentList
-
-            val teacherMember = testClazzWork!!.clazzAndMembers.teacherList.get(0)
-            dbRule.account.personUid = teacherMember.clazzMemberPersonUid
-
-
-
-        }.after {
-
-        }.run {
-
-            //Change type to quiz
-            var clazzWorkQuizStuff: TestClazzWorkWithQuestionAndOptionsAndResponse? = null
-            runBlocking {
-                clazzWorkQuizStuff = dbRule.db.insertQuizQuestionsAndOptions(clazzWork!!,
-                        false, 0,
-                        0, 0, true)
-                clazzWork = clazzWorkQuizStuff!!.clazzWork
-            }
-
-            reloadFragment(testClazzWork!!.clazzWork)
-
-            //Check questions
-            checkQuizQuestionsDisplayOk(clazzWorkQuizStuff, true)
-
-        }
-
-    }
+//    @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as teacher should" +
+//            " show all relevant fields of Quiz ClazzWork")
+//    @Test
+//    fun givenValidClazzWorkUidQuiz_whenLoadedAsTeacher_thenShouldShow() {
+//
+//        var clazzWork: ClazzWork? = null
+//        var contentList = listOf<ContentEntry>()
+//        var testClazzWork: TestClazzWork? = null
+//        before {
+//
+//            clazzWork = ClazzWork().apply {
+//                clazzWorkTitle = "Test ClazzWork A"
+//                clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+//                clazzWorkInstructions = "Pass espresso test for ClazzWork"
+//                clazzWorkStartDateTime = UMCalendarUtil.getDateInMilliPlusDays(0)
+//                clazzWorkDueDateTime = UMCalendarUtil.getDateInMilliPlusDays(10)
+//                clazzWorkCommentsEnabled = true
+//                clazzWorkMaximumScore = 120
+//
+//            }
+//
+//            testClazzWork = runBlocking {
+//                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+//                        clazzWork!!, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
+//                        true, 0, false, false)
+//            }
+//
+//            val contentEntriesWithJoin = runBlocking {
+//                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork,
+//                        2)
+//            }
+//            contentList = contentEntriesWithJoin.contentList
+//
+//            val teacherMember = testClazzWork!!.clazzAndMembers.teacherList.get(0)
+//            dbRule.account.personUid = teacherMember.clazzMemberPersonUid
+//
+//
+//
+//        }.after {
+//
+//        }.run {
+//
+//            //Change type to quiz
+//            var clazzWorkQuizStuff: TestClazzWorkWithQuestionAndOptionsAndResponse? = null
+//            runBlocking {
+//                clazzWorkQuizStuff = dbRule.db.insertQuizQuestionsAndOptions(clazzWork!!,
+//                        false, 0,
+//                        0, 0, true)
+//                clazzWork = clazzWorkQuizStuff!!.clazzWork
+//            }
+//
+//            reloadFragment(testClazzWork!!.clazzWork)
+//
+//            //Check questions
+//            checkQuizQuestionsDisplayOk(clazzWorkQuizStuff, true)
+//
+//        }
+//
+//    }
 
     @AdbScreenRecord("ClazzWorkDetailOverview: When student answers questions and " +
             "hits submit, the view should be updated")

@@ -43,10 +43,6 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
-        val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
-            db.clazzMemberDao.findByUid(filterByClazzMemberUid)
-        }
-
         val clazzMemberAndClazzWorkWithSubmission = withTimeoutOrNull(2000){
             db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(filterByClazzWorkUid,
                     filterByClazzMemberUid)
@@ -64,7 +60,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
                     withTimeoutOrNull(2000) {
                         db.clazzWorkQuestionDao.findAllActiveQuestionsWithOptionsInClazzWorkAsList(
-                                clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkUid?:0L)
+                                clazzMemberAndClazzWorkWithSubmission.clazzWork?.clazzWorkUid?:0L)
                     } ?: listOf()
 
             val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
@@ -72,13 +68,13 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
 
                     val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
                     val qResponse = db.clazzWorkQuestionResponseDao.findByQuestionUidAndClazzMemberUidAsync(
-                            questionUid, clazzMember?.clazzMemberUid?:0L).toMutableList()
+                            questionUid, clazzMemberAndClazzWorkWithSubmission.clazzMemberUid?:0L).toMutableList()
                     if (qResponse.isEmpty()) {
                         qResponse.add(ClazzWorkQuestionResponse().apply {
                             clazzWorkQuestionResponseQuestionUid = questionUid
-                            clazzWorkQuestionResponsePersonUid = clazzMember?.clazzMemberPersonUid?:0L
+                            clazzWorkQuestionResponsePersonUid = clazzMemberAndClazzWorkWithSubmission.clazzMemberPersonUid?:0L
                             clazzWorkQuestionResponseClazzMemberUid =
-                                    clazzMember?.clazzMemberUid?: 0L
+                                    clazzMemberAndClazzWorkWithSubmission.clazzMemberUid?: 0L
                             clazzWorkQuestionResponseClazzWorkUid =
                                     clazzMemberAndClazzWorkWithSubmission.clazzWork?.clazzWorkUid?: 0L
                         })
@@ -93,10 +89,9 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 }
 
 
-
             //If submitted - show view data
-            if(clazzWorkWithSubmission.clazzWorkSubmission != null
-                    && clazzWorkWithSubmission.clazzWorkSubmission?.clazzWorkSubmissionUid != 0L){
+            if(clazzMemberAndClazzWorkWithSubmission.submission != null
+                    && clazzMemberAndClazzWorkWithSubmission.submission?.clazzWorkSubmissionUid != 0L){
                 view.takeIf { it.quizSubmissionViewData == null
                 }?.quizSubmissionViewData = DoorMutableLiveData(
                         questionsAndOptionsWithResponseList)
@@ -118,10 +113,10 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             val submission = clazzMemberAndClazzWorkWithSubmission.submission ?:
             ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzMemberAndClazzWorkWithSubmission.clazzWork?.clazzWorkUid?: 0L
-                clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid ?: 0L
+                clazzWorkSubmissionClazzMemberUid = clazzMemberAndClazzWorkWithSubmission.clazzMemberUid ?: 0L
                 clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
                 clazzWorkSubmissionInactive = false
-                clazzWorkSubmissionPersonUid = loggedInPersonUid
+                clazzWorkSubmissionPersonUid = clazzMemberAndClazzWorkWithSubmission.clazzMemberPersonUid?:0L
             }
 
             if (submission.clazzWorkSubmissionUid == 0L) {
@@ -132,10 +127,10 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             val submission = clazzMemberAndClazzWorkWithSubmission?.submission ?:
             ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkUid?: 0L
-                clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid ?: 0L
+                clazzWorkSubmissionClazzMemberUid = clazzMemberAndClazzWorkWithSubmission?.clazzMemberUid ?: 0L
                 clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
                 clazzWorkSubmissionInactive = false
-                clazzWorkSubmissionPersonUid = loggedInPersonUid
+                clazzWorkSubmissionPersonUid = clazzMemberAndClazzWorkWithSubmission?.clazzMemberPersonUid?:0L
             }
 
             clazzMemberAndClazzWorkWithSubmission?.submission = submission
@@ -145,12 +140,12 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             repo.commentsDao.findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToLive(
                     ClazzWork.CLAZZ_WORK_TABLE_ID,
                     clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkUid?:0L,
-                    clazzMember?.clazzMemberPersonUid?:0L)
+                    clazzMemberAndClazzWorkWithSubmission?.clazzMemberPersonUid?:0L)
         }
         view.takeIf { it.privateComments == null}?.privateComments = privateComments
 
         newCommentItemListener.fromPerson = loggedInPersonUid
-        newCommentItemListener.toPerson = clazzMember?.clazzMemberPersonUid?:0L
+        newCommentItemListener.toPerson = clazzMemberAndClazzWorkWithSubmission?.clazzMemberPersonUid?:0L
         newCommentItemListener.entityId = clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkUid?:0L
 
 
@@ -180,7 +175,6 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
     }
 
     fun createSubmissionIfDoesNotExist(){
-        val loggedInPersonUid = accountManager.activeAccount.personUid
         GlobalScope.launch {
             val clazzMemberWithSubmission = withTimeoutOrNull(2000) {
                 db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(filterByClazzWorkUid,
@@ -199,10 +193,10 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                         ?: ClazzWorkSubmission().apply {
                             clazzWorkSubmissionClazzWorkUid = clazzMemberWithSubmission.clazzWork?.clazzWorkUid
                                     ?: 0L
-                            clazzWorkSubmissionClazzMemberUid = clazzMemberWithSubmission?.clazzMemberUid ?: 0L
+                            clazzWorkSubmissionClazzMemberUid = clazzMemberWithSubmission.clazzMemberUid ?: 0L
                             clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
                             clazzWorkSubmissionInactive = false
-                            clazzWorkSubmissionPersonUid = loggedInPersonUid
+                            clazzWorkSubmissionPersonUid = clazzMemberWithSubmission.person?.personUid?:0L
                         }
 
                 submission.clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
@@ -258,8 +252,6 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 newOptionsAndResponse.add(everyResult)
             }
 
-            val loggedInPersonUid = accountManager.activeAccount.personUid
-
             val studentClazzMember: ClazzMember? = withTimeoutOrNull(2000){
                 db.clazzMemberDao.findByPersonUidAndClazzUidAsync(
                         entity?.person?.personUid?:0L,
@@ -282,7 +274,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                     clazzWorkSubmissionClazzMemberUid = studentClazzMember?.clazzMemberUid ?: 0L
                     clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
                     clazzWorkSubmissionInactive = false
-                    clazzWorkSubmissionPersonUid = loggedInPersonUid
+                    clazzWorkSubmissionPersonUid = studentClazzMember?.clazzMemberPersonUid ?: 0L
                 }
             }
 
