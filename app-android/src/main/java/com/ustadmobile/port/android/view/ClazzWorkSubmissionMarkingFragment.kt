@@ -113,6 +113,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
                 SimpleButtonRecyclerAdapter(getText(R.string.record_for_student).toString(),
                         this)
         recordForStudentButtonRecyclerAdapter?.isOutline = true
+        recordForStudentButtonRecyclerAdapter?.visible = true
 
         simpleTwoButtonRecyclerAdapter = SimpleTwoButtonRecyclerAdapter(
                 getText(R.string.submit).toString(),getText(R.string.cancel).toString(),
@@ -227,7 +228,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
             //Show submission heading and record for student
             submissionHeadingRecyclerAdapter?.visible = true
-            recordForStudentButtonRecyclerAdapter?.visible = true
 
             val clazzWorkWithSubmission: ClazzWorkWithSubmission =
                     ClazzWorkWithSubmission().generateWithClazzWorkAndClazzWorkSubmission(
@@ -247,7 +247,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             }else{ //No submission.
                 //Show marking if type not none and dont show record for student.
                 if(value?.clazzWork?.clazzWorkSubmissionType == CLAZZ_WORK_SUBMISSION_TYPE_NONE){
-
                     recordForStudentButtonRecyclerAdapter?.visible = false
                 }
             }
@@ -339,6 +338,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             quizEditRecyclerAdapter?.submitList(
                     quizSubmissionEditData?.value)
         }
+        recordForStudentButtonRecyclerAdapter?.visible = false
     }
 
     override var updatedSubmission: ClazzWorkWithSubmission? = null
