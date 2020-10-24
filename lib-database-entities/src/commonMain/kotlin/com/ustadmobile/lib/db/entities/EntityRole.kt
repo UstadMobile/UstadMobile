@@ -11,7 +11,28 @@ import kotlinx.serialization.Serializable
 
 
 @Entity
-@SyncableEntity(tableId = 47)
+@SyncableEntity(tableId = EntityRole.TABLE_ID,
+    notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+        ChangeLog
+        JOIN EntityRole ON ChangeLog.chTableId = ${EntityRole.TABLE_ID} AND ChangeLog.chEntityPk = EntityRole.erUid
+        JOIN PersonGroup ON PersonGroup.groupUid = EntityRole.erGroupUid
+        JOIN PersonGroupMember ON PersonGroupMember.groupMemberGroupUid = PersonGroup.groupUid
+        JOIN Person ON Person.personUid = PersonGroupMember.groupMemberPersonUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
+    syncFindAllQuery = """
+        SELECT EntityRole.* FROM
+        EntityRole
+        JOIN PersonGroup on PersonGroup.groupUid = EntityRole.erGroupUid
+        JOIN PersonGroupMember ON PersonGroupMember.groupMemberGroupUid = PersonGroup.groupUid
+        JOIN Person ON Person.personUid = PersonGroupMember.groupMemberPersonUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+        """)
 @Serializable
 open class EntityRole() {
 
@@ -47,6 +68,10 @@ open class EntityRole() {
         this.erGroupUid = erGroupUid
         this.erRoleUid = erRoleUid
         this.erActive = true
+    }
+
+    companion object {
+        const val TABLE_ID = 47
     }
 
 }

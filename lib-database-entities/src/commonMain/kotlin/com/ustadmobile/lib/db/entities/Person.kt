@@ -6,6 +6,9 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.lib.db.entities.Person.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT1
+import com.ustadmobile.lib.db.entities.Person.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT2
+import com.ustadmobile.lib.db.entities.Person.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT4
 import com.ustadmobile.lib.db.entities.Person.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
@@ -14,7 +17,22 @@ import kotlinx.serialization.Serializable
  */
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = TABLE_ID, notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+        ChangeLog
+        JOIN Person ON ChangeLog.chTableId = $TABLE_ID AND ChangeLog.chEntityPk = Person.personUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( $ENTITY_PERSONS_WITH_PERMISSION_PT1 0 $ENTITY_PERSONS_WITH_PERMISSION_PT2 ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4 )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
+    syncFindAllQuery = """
+        SELECT Person.* FROM 
+        Person
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( $ENTITY_PERSONS_WITH_PERMISSION_PT1 0 $ENTITY_PERSONS_WITH_PERMISSION_PT2 ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4 )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+        """
+    )
 @Serializable
 open class Person() {
 
@@ -155,6 +173,34 @@ open class Person() {
         const val GENDER_MALE = 2
 
         const val GENDER_OTHER = 4
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
+            SELECT DISTINCT Person_Perm.personUid FROM Person Person_Perm
+            LEFT JOIN PersonGroupMember ON Person_Perm.personUid = PersonGroupMember.groupMemberPersonUid
+            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
+            WHERE
+            CAST(Person_Perm.admin AS INTEGER) = 1 OR ( (
+            """
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 =  """
+            = 0) AND (Person_Perm.personUid = Person.personUid))
+            OR
+            (
+            ((EntityRole.erTableId = ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid) OR 
+            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid)) OR
+            (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.PersonUid)) OR
+            (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
+                SELECT DISTINCT Clazz.clazzSchoolUid 
+                FROM Clazz
+                JOIN ClazzMember ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberPersonUid = Person.personUid
+            ))
+            ) 
+            AND (Role.rolePermissions & 
+        """
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT4 = ") > 0)"
+
     }
 
 

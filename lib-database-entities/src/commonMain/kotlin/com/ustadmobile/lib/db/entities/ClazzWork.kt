@@ -10,7 +10,23 @@ import com.ustadmobile.lib.db.entities.ClazzWork.Companion.CLAZZ_WORK_TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = CLAZZ_WORK_TABLE_ID)
+@SyncableEntity(tableId = CLAZZ_WORK_TABLE_ID,
+    notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+        ChangeLog
+        JOIN ClazzWork ON ChangeLog.chTableId = ${CLAZZ_WORK_TABLE_ID} AND CAST(ChangeLog.dispatched AS INTEGER) = 0 AND ClazzWork.clazzWorkUid = ChangeLog.chEntityPk
+        JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
+        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+    """,
+    syncFindAllQuery = """
+        SELECT ClazzWork.* FROM
+        ClazzWork
+        JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid
+        JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId  
+    """)
 @Serializable
 open class ClazzWork {
 

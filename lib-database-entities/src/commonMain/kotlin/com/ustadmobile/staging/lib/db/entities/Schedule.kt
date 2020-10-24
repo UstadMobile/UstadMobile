@@ -8,7 +8,22 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
-@SyncableEntity(tableId = 21)
+@SyncableEntity(tableId = Schedule.TABLE_ID, notifyOnUpdate = """
+    SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+    ChangeLog
+    JOIN Schedule ON ChangeLog.chTableId = ${Schedule.TABLE_ID} AND CAST(ChangeLog.dispatched AS INTEGER) = 0 AND Schedule.scheduleUid = ChangeLog.chEntityPk
+    JOIN Clazz ON Clazz.clazzUid = Schedule.scheduleClazzUid 
+    JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZ_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+    JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid""",
+    syncFindAllQuery = """
+        SELECT Schedule.* FROM
+        Schedule
+        JOIN Clazz ON Clazz.clazzUid = Schedule.scheduleClazzUid
+        JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZ_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+    """
+)
 @Entity
 @Serializable
 class Schedule {
@@ -65,41 +80,6 @@ class Schedule {
     //active or removed
     var scheduleActive: Boolean = true
 
-
-
-    companion object {
-
-        val SCHEDULE_FREQUENCY_DAILY = 1
-        val SCHEDULE_FREQUENCY_WEEKLY = 2
-
-        val SCHEDULE_FREQUENCY_ONCE = 3
-        val SCHEDULE_FREQUENCY_MONTHLY = 4
-        val SCHEDULE_FREQUENCY_YEARLY = 5
-
-        // Constants as per Klock
-        val DAY_SUNDAY = 0
-        val DAY_MONDAY = 1
-        val DAY_TUESDAY = 2
-        val DAY_WEDNESDAY = 3
-        val DAY_THURSDAY = 4
-        val DAY_FRIDAY = 5
-        val DAY_SATURDAY = 6
-
-
-        val MONTH_JANUARY = 1
-        val MONTH_FEBUARY = 2
-        val MONTH_MARCH = 3
-        val MONTH_APRIL = 4
-        val MONTH_MAY = 5
-        val MONTH_JUNE = 6
-        val MONTH_JULY = 7
-        val MONTH_AUGUST = 8
-        val MONTH_SEPTEMBER = 9
-        val MONTH_OCTOBER = 10
-        val MONTH_NOVEMBER = 11
-        val MONTH_DECEMBER = 12
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -137,4 +117,40 @@ class Schedule {
         result = 31 * result + scheduleActive.hashCode()
         return result
     }
+
+    companion object {
+
+        const val TABLE_ID = 21
+
+        val SCHEDULE_FREQUENCY_DAILY = 1
+        val SCHEDULE_FREQUENCY_WEEKLY = 2
+
+        val SCHEDULE_FREQUENCY_ONCE = 3
+        val SCHEDULE_FREQUENCY_MONTHLY = 4
+        val SCHEDULE_FREQUENCY_YEARLY = 5
+
+        // Constants as per Klock
+        val DAY_SUNDAY = 0
+        val DAY_MONDAY = 1
+        val DAY_TUESDAY = 2
+        val DAY_WEDNESDAY = 3
+        val DAY_THURSDAY = 4
+        val DAY_FRIDAY = 5
+        val DAY_SATURDAY = 6
+
+
+        val MONTH_JANUARY = 1
+        val MONTH_FEBUARY = 2
+        val MONTH_MARCH = 3
+        val MONTH_APRIL = 4
+        val MONTH_MAY = 5
+        val MONTH_JUNE = 6
+        val MONTH_JULY = 7
+        val MONTH_AUGUST = 8
+        val MONTH_SEPTEMBER = 9
+        val MONTH_OCTOBER = 10
+        val MONTH_NOVEMBER = 11
+        val MONTH_DECEMBER = 12
+    }
+
 }

@@ -16,7 +16,24 @@ import kotlinx.serialization.Serializable
  */
 
 @Entity
-@SyncableEntity(tableId = 65)
+@SyncableEntity(tableId = ClazzMember.TABLE_ID,
+    notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+            ChangeLog
+            JOIN ClazzMember ON ChangeLog.chTableId = ${ClazzMember.TABLE_ID} AND ChangeLog.chEntityPk = ClazzMember.clazzMemberUid
+            JOIN Person ON Person.personUid = ClazzMember.clazzMemberPersonUid
+            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
+    syncFindAllQuery = """
+        SELECT ClazzMember.* FROM
+            ClazzMember
+            JOIN Person ON Person.personUid = ClazzMember.clazzMemberPersonUid
+            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+            WHERE DeviceSession.dsDeviceId = :clientId
+    """)
 @Serializable
 open class ClazzMember()  {
 
@@ -70,10 +87,6 @@ open class ClazzMember()  {
         this.clazzMemberActive = true
     }
 
-    override fun equals(other: Any?): Boolean {
-        return super.equals(other)
-    }
-
     companion object {
 
         const val ROLE_STUDENT = 1000
@@ -85,6 +98,6 @@ open class ClazzMember()  {
          */
         const val ROLE_STUDENT_PENDING = 1002
 
-        const val TABLE_ID = 13
+        const val TABLE_ID = 65
     }
 }

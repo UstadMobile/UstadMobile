@@ -152,6 +152,15 @@ open class Role() {
 
         const val PERMISSION_SCHOOL_ADD_STUDENT: Long = 274877906944L
 
+        /**
+         * Permission to view the learner records of a person (e.g. Xapi statements, progress, etc)
+         */
+        const val PERMISSION_PERSON_LEARNINGRECORD_SELECT: Long = 549755813888L
+
+        const val PERMISSION_PERSON_LEARNINGRECORD_INSERT: Long = 1099511627776L
+
+        const val PERMISSION_PERSON_LEARNINGRECORD_UPDATE: Long = 2199023255552L
+
         //Predefined roles that are added by the system
         const val ROLE_CLAZZ_TEACHER_NAME = "Teacher"
 

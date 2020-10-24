@@ -9,7 +9,23 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = 204)
+@SyncableEntity(tableId = ClazzWorkContentJoin.TABLE_ID,
+    notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+        ChangeLog
+        JOIN ClazzWorkContentJoin ON ChangeLog.chTableId = ${ClazzWorkContentJoin.TABLE_ID} AND CAST(ChangeLog.dispatched AS INTEGER) = 0 AND ClazzWorkContentJoin.clazzWorkContentJoinUid = ChangeLog.chEntityPk
+        JOIN ClazzWork ON ClazzWork.clazzWorkUid = ClazzWorkContentJoin.clazzWorkContentJoinClazzWorkUid
+        JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
+        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid""",
+    syncFindAllQuery = """
+        SELECT ClazzWorkContentJoin.* FROM
+        ClazzWorkContentJoin
+        JOIN ClazzWork ON ClazzWork.clazzWorkUid = ClazzWorkContentJoin.clazzWorkContentJoinClazzWorkUid
+        JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid
+        JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId""")
 @Serializable
 open class ClazzWorkContentJoin() {
 
@@ -33,5 +49,10 @@ open class ClazzWorkContentJoin() {
     @LastChangedBy
     var clazzWorkContentJoinLCB: Int = 0
 
+    companion object {
+
+        const val TABLE_ID = 204
+
+    }
 
 }

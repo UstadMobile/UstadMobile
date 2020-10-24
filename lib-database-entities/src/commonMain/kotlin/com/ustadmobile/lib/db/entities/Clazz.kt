@@ -6,11 +6,26 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.lib.db.entities.Clazz.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT1
+import com.ustadmobile.lib.db.entities.Clazz.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT2
 import com.ustadmobile.lib.db.entities.Clazz.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID, notifyOnUpdate = "SELECT DISTINCT dsDeviceId FROM DeviceSession")
+@SyncableEntity(tableId = TABLE_ID, notifyOnUpdate = """
+    SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+    ChangeLog
+    JOIN Clazz ON ChangeLog.chTableId = $TABLE_ID AND CAST(ChangeLog.dispatched AS INTEGER) = 0 AND Clazz.clazzUid = ChangeLog.chEntityPk
+    JOIN Person ON Person.personUid IN ($ENTITY_PERSONS_WITH_PERMISSION_PT1  ${Role.PERMISSION_CLAZZ_SELECT } $ENTITY_PERSONS_WITH_PERMISSION_PT2)
+    JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid""",
+    syncFindAllQuery = """
+        SELECT Clazz.* FROM
+        Clazz
+        JOIN Person ON Person.personUid IN  ($ENTITY_PERSONS_WITH_PERMISSION_PT1 ${Role.PERMISSION_CLAZZ_SELECT } $ENTITY_PERSONS_WITH_PERMISSION_PT2)
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+    """
+)
 @Serializable
 open class Clazz() {
 
@@ -91,6 +106,27 @@ open class Clazz() {
         const val CLAZZ_FEATURE_CLAZZWORK = 8L
 
         const val CLAZZ_CODE_DEFAULT_LENGTH = 6
+
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
+            SELECT DISTINCT Person_Perm.PersonUid FROM Person Person_Perm
+            LEFT JOIN PersonGroupMember ON Person_Perm.personUid = PersonGroupMember.groupMemberPersonUid
+            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
+            WHERE 
+            CAST(Person.admin AS INTEGER) = 1
+            OR 
+            (
+            ((EntityRole.ertableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) OR
+            (EntityRole.ertableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
+            )
+            AND
+            (Role.rolePermissions &  
+        """
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 = ") > 0)"
+
+
 
     }
 }

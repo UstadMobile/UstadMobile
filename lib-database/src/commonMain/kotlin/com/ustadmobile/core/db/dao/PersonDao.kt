@@ -159,10 +159,12 @@ abstract class PersonDao : BaseDao<Person> {
      * @param accountPersonUid the personUid of the person who wants to perform the operation
      * @param personUid the personUid of the person object in the database to perform the operation on
      * @param permission permission to check for
+     * @param checkPermissionForSelf if 0 then don't check for permission when accountPersonUid == personUid
+     * (e.g. where give the person permission over their own entity automatically).
      */
     @Query("SELECT EXISTS(SELECT 1 FROM Person WHERE " +
             "Person.personUid = :personUid AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_PERMISSION_PARAM))")
-    abstract suspend fun personHasPermissionAsync(accountPersonUid: Long, personUid: Long, permission: Long, excludesNameCheck: Int = 0): Boolean
+    abstract suspend fun personHasPermissionAsync(accountPersonUid: Long, personUid: Long, permission: Long, checkPermissionForSelf: Int = 0): Boolean
 
     @Query("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0)")
     abstract suspend fun personIsAdmin(accountPersonUid: Long): Boolean
@@ -279,7 +281,7 @@ abstract class PersonDao : BaseDao<Person> {
 
         const val ENTITY_PERSONS_WITH_SELECT_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
-        const val ENTITY_PERSONS_WITH_PERMISSION_PARAM = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :excludesNameCheck $ENTITY_PERSONS_WITH_PERMISSION_PT2  :permission $ENTITY_PERSONS_WITH_PERMISSION_PT4"
+        const val ENTITY_PERSONS_WITH_PERMISSION_PARAM = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :checkPermissionForSelf $ENTITY_PERSONS_WITH_PERMISSION_PT2  :permission $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
 

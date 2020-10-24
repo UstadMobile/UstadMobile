@@ -13,7 +13,23 @@ import kotlinx.serialization.Serializable
  * could also be related to behavior logs etc. in the future.
  */
 
-@SyncableEntity(tableId = 14)
+@SyncableEntity(tableId = ClazzLog.TABLE_ID,
+        notifyOnUpdate = """
+            SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+            ChangeLog
+            JOIN ClazzLog ON ChangeLog.chTableId = ${ClazzLog.TABLE_ID} AND CAST(ChangeLog.dispatched AS INTEGER) = 0 AND ClazzLog.clazzLogUid = ChangeLog.chEntityPk
+            JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid 
+            JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid""",
+        syncFindAllQuery = """
+            SELECT ClazzLog.* FROM
+            ClazzLog
+            JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid
+            JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZ_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+            WHERE DeviceSession.dsDeviceId = :clientId
+        """
+)
 @Entity
 @Serializable
 open class ClazzLog()  {
@@ -60,6 +76,8 @@ open class ClazzLog()  {
     }
 
     companion object {
+
+        const val TABLE_ID = 14
 
         const val STATUS_CREATED = 0
 
