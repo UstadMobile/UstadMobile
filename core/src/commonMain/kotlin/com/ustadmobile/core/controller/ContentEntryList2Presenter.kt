@@ -9,6 +9,7 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_C
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_FOLDER_FILTER
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_MOVING_CONTENT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -132,7 +133,9 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
             }
             super.handleClickEntry(entry)
             view.finishWithResult(listOf(entry))
-            view.finishPage()
+            view.finishPage(mapOf(
+                    ContentEntryList2View.ARG_MOVING_COUNT to selectedItems?.size.toString(),
+                    ARG_CONTENT_ENTRY_UID to entry.contentEntryUid.toString()))
         }
     }
 

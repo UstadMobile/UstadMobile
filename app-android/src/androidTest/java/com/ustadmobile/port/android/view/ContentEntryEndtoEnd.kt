@@ -403,16 +403,10 @@ class ContentEntryEndtoEnd : TestCase() {
 
                     hasSize(1)
 
-                    this@ContentEntryListScreen.pressBack()
-
-
-                    childWith<ContentEntryListScreen.MainItem> {
-                        withDescendant {
-                            withText("Dummy folder title 2") }
+                    KView{
+                        withText("Open Folder")
                     }perform {
-                        title{
-                            click()
-                        }
+                        click()
                     }
 
                     hasSize(2)

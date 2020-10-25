@@ -16,8 +16,10 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.ext.setAllFromMap
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.*
@@ -93,6 +95,16 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
         setHasOptionsMenu(true)
 
+        var moveCount = navController.currentBackStackEntry?.savedStateHandle?.get<String>(ContentEntryList2View.ARG_MOVING_COUNT)
+        if(!moveCount.isNullOrBlank()){
+            var entryUid = navController.currentBackStackEntry?.savedStateHandle?.get<String>(ARG_CONTENT_ENTRY_UID)
+            showSnackBar("Moved $moveCount entries", {
+                navController.navigate(R.id.content_entry_list_dest, bundleOf(
+                        UstadView.ARG_PARENT_ENTRY_UID to entryUid,
+                        ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT))
+            }, MessageID.open_folder)
+        }
+
         super.onViewCreated(view, savedInstanceState)
     }
 
@@ -152,7 +164,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                         ContentEntryList2View.ARG_FOLDER_FILTER to true.toString()))
     }
 
-    override fun finishPage() {
+    override fun finishPage(bundle: Map<String, String>) {
+        findNavController().previousBackStackEntry?.savedStateHandle?.setAllFromMap(bundle)
         findNavController().popBackStack()
     }
 

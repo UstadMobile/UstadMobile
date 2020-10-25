@@ -14,7 +14,7 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
     fun selectEntry(listOfSelectedEntries: String)
 
-    fun finishPage()
+    fun finishPage(bundle: Map<String, String>)
 
     var title: String?
 
@@ -37,6 +37,8 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
         const val VIEW_NAME = "ContentEntryListView"
 
         const val ARG_MOVING_CONTENT = "SelectedItems"
+
+        const val ARG_MOVING_COUNT = "moveCount"
 
     }
 
