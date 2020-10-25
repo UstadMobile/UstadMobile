@@ -11,6 +11,7 @@ interface ClazzWorkQuestionAndOptionsEditView: UstadEditView<ClazzWorkQuestionAn
     var clazzWorkQuestionOptionList : DoorMutableLiveData<List<ClazzWorkQuestionOption>>?
     var clazzWorkQuestionOptionDeactivateList: DoorMutableLiveData<List<ClazzWorkQuestionOption>>?
     var typeOptions: List<ClazzWorkQuestionAndOptionsEditPresenter.ClazzWorkQuestionOptionTypeMessageIdOption>?
+    var errorMessage: String?
 
     companion object {
 

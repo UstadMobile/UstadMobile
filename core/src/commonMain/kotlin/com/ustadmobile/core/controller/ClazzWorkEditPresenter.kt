@@ -70,7 +70,6 @@ class ClazzWorkEditPresenter(context: Any,
 
         //We could save this
         GlobalScope.launch {
-            entityClass
             entityClass.clazzWorkQuestion.clazzWorkQuestionClazzWorkUid = entity?.clazzWorkUid ?: 0L
             entityClass.clazzWorkQuestion.clazzWorkQuestionUid = 0L
             val questionUid = repo.clazzWorkQuestionDao.insertAsync(entityClass.clazzWorkQuestion)
@@ -158,9 +157,6 @@ class ClazzWorkEditPresenter(context: Any,
 
         view.clazzWorkQuizQuestionsAndOptions = questionAndOptionsEditHelper.liveList
         view.submissionTypeOptions = SubmissionOptions.values().map{SubmissionOptionsMessageIdOption(it, context)}
-
-        contentJoinEditHelper.liveList.sendValue(listOf())
-        questionAndOptionsEditHelper.liveList.sendValue(listOf())
 
         questionAndOptionsEditHelper.onLoadFromJsonSavedState(bundle)
 
