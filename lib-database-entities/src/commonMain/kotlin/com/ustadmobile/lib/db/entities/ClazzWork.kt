@@ -14,16 +14,16 @@ import kotlinx.serialization.Serializable
     notifyOnUpdate = """
         SELECT DISTINCT DeviceSession.dsDeviceId FROM 
         ChangeLog
-        JOIN ClazzWork ON ChangeLog.chTableId = ${CLAZZ_WORK_TABLE_ID} AND CAST(ChangeLog.dispatched AS INTEGER) = 0 AND ClazzWork.clazzWorkUid = ChangeLog.chEntityPk
+        JOIN ClazzWork ON ChangeLog.chTableId = ${CLAZZ_WORK_TABLE_ID} AND ClazzWork.clazzWorkUid = ChangeLog.chEntityPk
         JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
-        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZWORK_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
     """,
     syncFindAllQuery = """
         SELECT ClazzWork.* FROM
         ClazzWork
         JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid
-        JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZWORK_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
         WHERE DeviceSession.dsDeviceId = :clientId  
     """)

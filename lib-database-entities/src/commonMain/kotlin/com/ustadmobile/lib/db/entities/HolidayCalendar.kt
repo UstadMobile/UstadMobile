@@ -12,7 +12,10 @@ import kotlinx.serialization.Serializable
  * Represents a Caledar which will be liked to multiple holidays, schedules etc
  * Its basically a collection of dates and time. (holidays and schedules)
  */
-@SyncableEntity(tableId = 28)
+@SyncableEntity(tableId = HolidayCalendar.TABLE_ID,
+        notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM DeviceSession
+    """)
 @Entity
 @Serializable
 open class HolidayCalendar() {
@@ -45,6 +48,8 @@ open class HolidayCalendar() {
     }
 
     companion object {
+
+        const val TABLE_ID = 28
 
         const val CATEGORY_HOLIDAY = 1
     }

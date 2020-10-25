@@ -487,10 +487,10 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addModifiers(KModifier.OVERRIDE)
                 .build())
 
-        repoTypeSpec.addFunction(FunSpec.builder("_updateChangeLogDispatched")
+        repoTypeSpec.addFunction(FunSpec.builder("_deleteChangeLogs")
                 .addParameter("tableId", INT)
-                .addParameter("dispatched", BOOLEAN)
                 .addModifiers(KModifier.OVERRIDE)
+                .addCode("_dao._deleteChangeLogs(tableId)\n")
                 .build())
 
         syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
@@ -551,7 +551,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                                 .add("return %M(${syncableEntityInfo.tableId}, _updateNotificationManager, " +
                                         "_dao::_findDevicesToNotify${entityType.simpleName}, " +
                                         "::_replaceUpdateNotifications," +
-                                        "::_updateChangeLogDispatched)",
+                                        "::_deleteChangeLogs)",
                                 MemberName("com.ustadmobile.door.ext", "sendUpdates"))
                                 .build())
                         .build())
@@ -832,20 +832,19 @@ class DbProcessorSync: AbstractDbProcessor() {
         implDaoTypeSpec.addFunction(implReplaceUpdateNotification)
         abstractDaoInterfaceTypeSpec.addFunction(abstractDaoReplaceUpdateNotification)
 
-        val (abstractUpdateChangeLogDispatched, implUpdateChangeLogDispatched, abstractDaoUpdateChangeLogDispatched) =
+        val (abstractDeleteChangeLogFun, implDeleteChangeLogFun, abstractDaoDeleteChangeLogFun) =
                 generateAbstractAndImplQueryFunSpecs(
-                        """UPDATE ChangeLog SET dispatched = :dispatched 
-                        |WHERE 
-                        |chTableId = :tableId
-                        |AND chTime < (SELECT max(pnTimestamp) FROM UpdateNotification WHERE pnTableId = :tableId)
-                        |""".trimMargin(),
-                        "_updateChangeLogDispatched", UNIT,
-                        listOf(ParameterSpec("tableId", INT),
-                                ParameterSpec("dispatched", BOOLEAN)),
-                        addReturnStmt = false,abstractFunIsOverride = true)
-        abstractDaoTypeSpec.addFunction(abstractUpdateChangeLogDispatched)
-        implDaoTypeSpec.addFunction(implUpdateChangeLogDispatched)
-        abstractDaoInterfaceTypeSpec.addFunction(abstractDaoUpdateChangeLogDispatched)
+                        """
+                        DELETE FROM ChangeLog
+                        WHERE chTableId = :tableId
+                        AND chTime < (SELECT max(pnTimestamp) FROM UpdateNotification WHERE pnTableId = :tableId)
+                        """.trimIndent(), "_deleteChangeLogs", UNIT,
+                        listOf(ParameterSpec("tableId", INT)),
+                        addReturnStmt = false, abstractFunIsOverride = true)
+        abstractDaoTypeSpec.addFunction(abstractDeleteChangeLogFun)
+        implDaoTypeSpec.addFunction(implDeleteChangeLogFun)
+        abstractDaoInterfaceTypeSpec.addFunction(abstractDaoDeleteChangeLogFun)
+
 
         syncableEntityTypesOnDb(dbType, processingEnv).forEach {entityType ->
             val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)

@@ -10,7 +10,26 @@ import com.ustadmobile.lib.db.entities.LearnerGroup.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = TABLE_ID,
+    notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+        ChangeLog
+        JOIN LearnerGroup ON ChangeLog.chTableId = ${LearnerGroup.TABLE_ID} AND ChangeLog.chEntityPk = LearnerGroup.learnerGroupUid
+        JOIN LearnerGroupMember ON LearnerGroupMember.learnerGroupMemberLgUid = LearnerGroup.learnerGroupUid
+        JOIN Person ON Person.personUid = LearnerGroupMember.learnerGroupMemberPersonUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
+    syncFindAllQuery = """
+        SELECT LearnerGroup.* FROM 
+        LearnerGroup
+        JOIN LearnerGroupMember ON LearnerGroupMember.learnerGroupMemberLgUid = LearnerGroup.learnerGroupUid
+        JOIN Person ON Person.personUid = LearnerGroupMember.learnerGroupMemberPersonUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+    """)
 @Serializable
 class LearnerGroup {
 

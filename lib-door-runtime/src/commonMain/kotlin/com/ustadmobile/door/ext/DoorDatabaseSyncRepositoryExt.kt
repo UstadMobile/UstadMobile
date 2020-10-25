@@ -17,7 +17,7 @@ import com.ustadmobile.door.util.systemTimeInMillis
 fun DoorDatabaseSyncRepository.sendUpdates(tableId: Int, updateNotificationManager: ServerUpdateNotificationManager?,
                                            findDevicesFn: () -> List<Int>,
                                             replaceUpdateNotificationFn: (List<UpdateNotification>) -> Unit,
-                                            updateChangeLogDispatchedFn: (Int, Boolean) -> Unit): List<Int> {
+                                            deleteChangeLogFn: (Int) -> Unit): List<Int> {
     val devicesToNotify = findDevicesFn()
     Napier.v("[SyncRepo@${this.doorIdentityHashCode}]: sendUpdates: Table #$tableId needs to notify ${devicesToNotify.joinToString()}.",
         tag= DoorTag.LOG_TAG)
@@ -34,7 +34,7 @@ fun DoorDatabaseSyncRepository.sendUpdates(tableId: Int, updateNotificationManag
                 "and informed updatenotificationmanager: $updateNotificationManager", tag = DoorTag.LOG_TAG)
     }
 
-    updateChangeLogDispatchedFn(tableId, true)
+    deleteChangeLogFn(tableId)
 
     return devicesToNotify
 }

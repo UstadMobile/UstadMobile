@@ -11,7 +11,8 @@ import com.ustadmobile.lib.db.entities.XObjectEntity.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = TABLE_ID, notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM DeviceSession""")
 @Serializable
 class XObjectEntity {
 

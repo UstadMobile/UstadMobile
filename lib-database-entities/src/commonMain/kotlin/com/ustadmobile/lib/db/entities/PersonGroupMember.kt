@@ -10,7 +10,24 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = 44)
+@SyncableEntity(tableId = PersonGroupMember.TABLE_ID,
+    notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+        ChangeLog
+        JOIN PersonGroupMember ON ChangeLog.chTableId = ${PersonGroupMember.TABLE_ID} AND ChangeLog.chEntityPk = PersonGroupMember.groupMemberUid
+        JOIN Person ON Person.personUid = PersonGroupMember.groupMemberPersonUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
+    syncFindAllQuery = """
+        SELECT PersonGroupMember.* FROM 
+        PersonGroupMember
+        JOIN Person ON Person.personUid = PersonGroupMember.groupMemberPersonUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+        """)
 @Serializable
 class PersonGroupMember() {
 
@@ -39,5 +56,9 @@ class PersonGroupMember() {
     constructor(personUid:Long, groupUid:Long) : this(){
         this.groupMemberPersonUid = personUid
         this.groupMemberGroupUid = groupUid
+    }
+
+    companion object {
+        const val TABLE_ID = 44
     }
 }

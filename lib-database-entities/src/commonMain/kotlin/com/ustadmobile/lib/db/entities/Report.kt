@@ -9,7 +9,19 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = Report.TABLE_ID)
+@SyncableEntity(tableId = Report.TABLE_ID,
+    notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+        ChangeLog
+        JOIN Report ON ChangeLog.chTableId = ${Report.TABLE_ID} AND ChangeLog.chEntityPk = Report.reportUid
+        JOIN DeviceSession ON Report.reportOwnerUid = DeviceSession.dsPersonUid""",
+    syncFindAllQuery = """
+        SELECT Report.* FROM
+        Report
+        JOIN DeviceSession ON Report.reportOwnerUid = DeviceSession.dsPersonUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+    """
+)
 @Serializable
 open class Report {
 

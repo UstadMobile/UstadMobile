@@ -15,7 +15,24 @@ import kotlinx.serialization.Serializable
  */
 
 @Entity
-@SyncableEntity(tableId = 200)
+@SyncableEntity(tableId = SchoolMember.TABLE_ID,
+        notifyOnUpdate = """
+            SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+            ChangeLog
+            JOIN SchoolMember ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
+            JOIN Person ON Person.personUid = SchoolMember.schoolMemberPersonUid
+            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
+        syncFindAllQuery = """
+            SELECT SchoolMember.* FROM
+            SchoolMember
+            JOIN Person ON Person.personUid = SchoolMember.schoolMemberPersonUid
+            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+            WHERE DeviceSession.dsDeviceId = :clientId
+    """)
 @Serializable
 open class SchoolMember {
 
@@ -52,7 +69,7 @@ open class SchoolMember {
     }
 
     companion object {
-
+        const val TABLE_ID = 200
 
     }
 }

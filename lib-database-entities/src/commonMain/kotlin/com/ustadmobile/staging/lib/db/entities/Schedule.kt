@@ -8,21 +8,21 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
-@SyncableEntity(tableId = Schedule.TABLE_ID, notifyOnUpdate = """
-    SELECT DISTINCT DeviceSession.dsDeviceId FROM 
-    ChangeLog
-    JOIN Schedule ON ChangeLog.chTableId = ${Schedule.TABLE_ID} AND CAST(ChangeLog.dispatched AS INTEGER) = 0 AND Schedule.scheduleUid = ChangeLog.chEntityPk
-    JOIN Clazz ON Clazz.clazzUid = Schedule.scheduleClazzUid 
-    JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZ_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-    JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid""",
+@SyncableEntity(tableId = Schedule.TABLE_ID,
+    notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+        ChangeLog
+        JOIN Schedule ON ChangeLog.chTableId = ${Schedule.TABLE_ID} AND CAST(ChangeLog.dispatched AS INTEGER) = 0 AND Schedule.scheduleUid = ChangeLog.chEntityPk
+        JOIN Clazz ON Clazz.clazzUid = Schedule.scheduleClazzUid 
+        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZ_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid""",
     syncFindAllQuery = """
         SELECT Schedule.* FROM
         Schedule
         JOIN Clazz ON Clazz.clazzUid = Schedule.scheduleClazzUid
         JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZ_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId
-    """
+        WHERE DeviceSession.dsDeviceId = :clientId"""
 )
 @Entity
 @Serializable

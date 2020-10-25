@@ -10,7 +10,24 @@ import com.ustadmobile.lib.db.entities.SchoolPicture.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = TABLE_ID,
+    notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM
+        ChangeLog 
+        JOIN SchoolPicture ON ChangeLog.chTableId = ${SchoolPicture.TABLE_ID} AND ChangeLog.chEntityPk = SchoolPicture.schoolPictureUid
+        JOIN School ON SchoolPicture.schoolPictureUid = School.schoolUid
+        JOIN Person ON Person.personUid IN 
+            (${School.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_SCHOOL_SELECT} ${School.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid""",
+    syncFindAllQuery = """
+        SELECT SchoolPicture.* FROM
+        SchoolPicture
+        JOIN School ON SchoolPicture.schoolPictureUid = School.schoolUid
+        JOIN Person ON Person.personUid IN 
+            (${School.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_SCHOOL_SELECT} ${School.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+    """)
 @Serializable
 open class SchoolPicture() {
 

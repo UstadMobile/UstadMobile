@@ -11,7 +11,9 @@ import kotlinx.serialization.Serializable
 
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = TABLE_ID,
+    notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM DeviceSession""")
 @Serializable
 open class Role() {
 
@@ -118,12 +120,12 @@ open class Role() {
 
         const val PERMISSION_PERSON_PICTURE_UPDATE: Long = 4194304
 
-        const val PERMISSION_CLAZZ_ASSIGNMENT_VIEW : Long = 8388608
+        const val PERMISSION_CLAZZWORK_SELECT : Long = 8388608
 
         //There is no "insert" for CLAZZ_ASSIGNMENT as they are all tied to classes, so are considered updates
-        const val PERMISSION_CLAZZ_ASSIGNMENT_UPDATE : Long = 16777216
+        const val PERMISSION_CLAZZWORK_UPDATE : Long = 16777216
 
-        const val PERMISSION_CLAZZ_ASSIGNMENT_VIEWSTUDENTPROGRESS : Long= 33554432
+        const val PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS : Long= 33554432
 
         const val PERMISSION_CONTENT_SELECT : Long= 67108864
 
@@ -180,8 +182,8 @@ open class Role() {
                 PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT or
                 PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT or
                 PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE or
-                PERMISSION_CLAZZ_ASSIGNMENT_VIEW or
-                PERMISSION_CLAZZ_ASSIGNMENT_UPDATE
+                PERMISSION_CLAZZWORK_SELECT or
+                PERMISSION_CLAZZWORK_UPDATE
 
 
         const val ROLE_CLAZZ_STUDENT_NAME = "Class Student"
@@ -192,7 +194,7 @@ open class Role() {
                 PERMISSION_CLAZZ_SELECT or
                 PERMISSION_CLAZZ_OPEN or
                 PERMISSION_PERSON_SELECT or
-                PERMISSION_CLAZZ_ASSIGNMENT_VIEW
+                PERMISSION_CLAZZWORK_SELECT
 
         const val ROLE_CLAZZ_STUDENT_PENDING_NAME = "Student Pending"
 
@@ -222,7 +224,7 @@ open class Role() {
                 PERMISSION_PERSON_UPDATE or
                 PERMISSION_PERSON_INSERT or
                 PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT or
-                PERMISSION_CLAZZ_ASSIGNMENT_VIEW or
+                PERMISSION_CLAZZWORK_SELECT or
                 PERMISSION_SCHOOL_SELECT or
                 PERMISSION_SCHOOL_ADD_STUDENT
 
@@ -263,9 +265,9 @@ open class Role() {
                         PERMISSION_PERSON_PICTURE_SELECT or
                         PERMISSION_PERSON_PICTURE_INSERT or
                         PERMISSION_PERSON_PICTURE_UPDATE or
-                        PERMISSION_CLAZZ_ASSIGNMENT_VIEW  or
-                        PERMISSION_CLAZZ_ASSIGNMENT_UPDATE  or
-                        PERMISSION_CLAZZ_ASSIGNMENT_VIEWSTUDENTPROGRESS or
+                        PERMISSION_CLAZZWORK_SELECT  or
+                        PERMISSION_CLAZZWORK_UPDATE  or
+                        PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS or
                         PERMISSION_CONTENT_SELECT or
                         PERMISSION_CONTENT_INSERT or
                         PERMISSION_CONTENT_UPDATE or

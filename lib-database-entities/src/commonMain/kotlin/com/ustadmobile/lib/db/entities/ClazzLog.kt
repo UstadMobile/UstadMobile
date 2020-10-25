@@ -17,7 +17,7 @@ import kotlinx.serialization.Serializable
         notifyOnUpdate = """
             SELECT DISTINCT DeviceSession.dsDeviceId FROM 
             ChangeLog
-            JOIN ClazzLog ON ChangeLog.chTableId = ${ClazzLog.TABLE_ID} AND CAST(ChangeLog.dispatched AS INTEGER) = 0 AND ClazzLog.clazzLogUid = ChangeLog.chEntityPk
+            JOIN ClazzLog ON ChangeLog.chTableId = ${ClazzLog.TABLE_ID} AND ClazzLog.clazzLogUid = ChangeLog.chEntityPk
             JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid 
             JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
             JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid""",

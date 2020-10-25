@@ -10,7 +10,10 @@ import com.ustadmobile.lib.db.entities.LanguageVariant.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = TABLE_ID,
+        notifyOnUpdate = """
+        SELECT DISTINCT DeviceSession.dsDeviceId FROM DeviceSession
+    """)
 @Entity
 @Serializable
 class LanguageVariant() {
