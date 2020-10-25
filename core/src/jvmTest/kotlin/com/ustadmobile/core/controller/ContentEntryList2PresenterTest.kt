@@ -89,7 +89,7 @@ class ContentEntryList2PresenterTest {
 
         val accountManager: UstadAccountManager by di.instance()
         verify(repoContentEntrySpyDao, timeout(defaultTimeout)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                eq(parentEntryUid), eq(0), eq(0), eq(accountManager.activeAccount.personUid), false)
+                eq(parentEntryUid), eq(0), eq(0), eq(accountManager.activeAccount.personUid), eq(false))
 
         verify(mockView, timeout(defaultTimeout)).list = any()
     }
@@ -149,7 +149,7 @@ class ContentEntryList2PresenterTest {
 
         argumentCaptor<Long>().apply{
             verify(repoContentEntrySpyDao, timeout(defaultTimeout).times(2)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid), false)
+                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid), eq(false))
             assertEquals("Expected folder was opened", secondValue, createdEntries?.get(0)?.contentEntryUid)
         }
     }
@@ -209,7 +209,7 @@ class ContentEntryList2PresenterTest {
 
         argumentCaptor<Long>().apply{
             verify(repoContentEntrySpyDao, timeout(defaultTimeout).times(3)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid), false)
+                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid), eq(false))
             assertEquals("Went back to the expected folder", thirdValue, parentEntryUid)
         }
     }
