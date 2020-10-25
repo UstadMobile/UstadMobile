@@ -290,7 +290,8 @@ class ContentEntryEndtoEnd : TestCase() {
                     hasSize(4)
 
                     childWith<ContentEntryListScreen.MainItem> {
-                        withDescendant { withText("Dummy folder title 1") }
+                         withDescendant {
+                             withText("Dummy folder title 1") }
                     }perform {
                         title{
                             longClick()
@@ -298,7 +299,8 @@ class ContentEntryEndtoEnd : TestCase() {
                     }
 
                     childWith<ContentEntryListScreen.MainItem> {
-                        withDescendant { withText("Dummy  entry title 2") }
+                        withDescendant {
+                            withText("Dummy  entry title 2") }
                     }perform {
                         title{
                             click()
@@ -318,6 +320,112 @@ class ContentEntryEndtoEnd : TestCase() {
             }
 
         }
+
+    }
+
+    @Test
+    fun givenListOfEntries_whenUserMovesEntriesToAnotherFolder_thenMoveToNewFolder(){
+
+        init {
+
+            runBlocking {
+                dbRule.insertPersonForActiveUser(Person().apply {
+                    firstNames = "Test"
+                    lastName = "User"
+                    username = "admin"
+                    admin = true
+                })
+
+                val oneList = dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(2, -4103245208651563007L, mutableListOf(0,1))
+                dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3, oneList[0].contentEntryUid)
+
+            }
+
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val launchIntent = Intent(context, MainActivity::class.java).also {
+                it.putExtra(UstadView.ARG_NEXT,
+                        "${ContentEntryList2View.VIEW_NAME}?${UstadView.ARG_PARENT_ENTRY_UID}=-4103245208651563007" +
+                                "&${ContentEntryList2View.ARG_CONTENT_FILTER}=${ContentEntryList2View.ARG_LIBRARIES_CONTENT}")
+            }
+
+            launchActivity<MainActivity>(launchIntent)
+
+        }.run {
+
+            ContentEntryListScreen{
+
+
+                recycler{
+
+                    hasSize(2)
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant {
+                            withText("Dummy folder title 1") }
+                    }perform {
+                        title{
+                            click()
+                        }
+                    }
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant {
+                            withText("Dummy  entry title 2") }
+                    }perform {
+                        title{
+                            longClick()
+                        }
+                    }
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant {
+                            withText("Dummy  entry title 3") }
+                    }perform {
+                        title{
+                            click()
+                        }
+                    }
+
+                    KView{
+                        withContentDescription("Move")
+                    }perform {
+                        click()
+                    }
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant {
+                            withText("Dummy folder title 2") }
+                    }perform {
+                        selectButton{
+                            click()
+                        }
+                    }
+
+                    hasSize(1)
+
+                    this@ContentEntryListScreen.pressBack()
+
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant {
+                            withText("Dummy folder title 2") }
+                    }perform {
+                        title{
+                            click()
+                        }
+                    }
+
+                    hasSize(2)
+
+                }
+
+
+            }
+
+
+
+        }
+
 
     }
 

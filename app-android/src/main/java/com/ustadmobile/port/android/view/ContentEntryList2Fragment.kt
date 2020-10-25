@@ -3,6 +3,8 @@ package com.ustadmobile.port.android.view
 import android.Manifest
 import android.os.Bundle
 import android.view.*
+import androidx.core.os.bundleOf
+import androidx.navigation.fragment.findNavController
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import com.toughra.ustadmobile.R
@@ -13,11 +15,13 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
+import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.runAfterRequestingPermissionIfNeeded
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
@@ -78,12 +82,15 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         val accountManager: UstadAccountManager by di.instance()
         val localAvailabilityManager: LocalAvailabilityManager by di.on(accountManager.activeAccount).instance()
 
+        val navController = findNavController()
+
         localAvailabilityCallback = ContentEntryLocalAvailabilityPagedListCallback(localAvailabilityManager,
                 null) {availabilityMap ->
             GlobalScope.launch(Dispatchers.Main) {
                 (mDataRecyclerViewAdapter as? ContentEntryListRecyclerAdapter)?.onLocalAvailabilityUpdated(availabilityMap)
             }
         }
+
         setHasOptionsMenu(true)
 
         super.onViewCreated(view, savedInstanceState)
@@ -136,6 +143,18 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             mPresenter?.handleClickCreateNewFab()
     }
 
+    override fun selectEntry(listOfSelectedEntries: String) {
+        navigateToPickEntityFromList(ContentEntry::class.java,
+                R.id.content_entry_list_dest,
+                bundleOf(UstadView.ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+                        ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT,
+                        ContentEntryList2View.ARG_MOVING_CONTENT to listOfSelectedEntries,
+                        ContentEntryList2View.ARG_FOLDER_FILTER to true.toString()))
+    }
+
+    override fun finishPage() {
+        findNavController().popBackStack()
+    }
 
 
 

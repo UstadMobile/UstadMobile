@@ -12,6 +12,10 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
      */
     fun showDownloadDialog(args: Map<String, String>)
 
+    fun selectEntry(listOfSelectedEntries: String)
+
+    fun finishPage()
+
     var title: String?
 
     var editOptionVisible: Boolean
@@ -22,6 +26,8 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
         const val ARG_CONTENT_FILTER = "filter"
 
+        const val ARG_FOLDER_FILTER = "folder"
+
         const val ARG_LIBRARIES_CONTENT = "libraries"
 
         const val ARG_RECYCLED_CONTENT = "recycled"
@@ -29,6 +35,8 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
         const val ARG_CLAZZWORK_FILTER = "clazzworkFilter"
 
         const val VIEW_NAME = "ContentEntryListView"
+
+        const val ARG_MOVING_CONTENT = "SelectedItems"
 
     }
 

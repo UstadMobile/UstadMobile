@@ -7,12 +7,16 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FIL
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_RECYCLED_CONTENT
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_FOLDER_FILTER
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_MOVING_CONTENT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -28,12 +32,18 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     private var contentFilter = ARG_LIBRARIES_CONTENT
 
+    private var onlyFolderFilter = false
+
     private var loggedPersonUid: Long = 0L
 
     private val parentEntryUidStack = mutableListOf<Long>()
 
+    private var movingSelectedItems: List<Long>? = null
+
     private val parentEntryUid: Long
         get() = parentEntryUidStack.lastOrNull() ?: 0L
+
+    private val editVisible = CompletableDeferred<Boolean>()
 
     enum class SortOrder(val messageId: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc),
@@ -48,12 +58,15 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         contentEntryListItemListener.presenter = this
         view.sortOptions = SortOrder.values().toList().map { ContentEntryListSortOption(it, context) }
         contentFilter = arguments[ARG_CONTENT_FILTER].toString()
+        onlyFolderFilter = arguments[ARG_FOLDER_FILTER]?.toBoolean()?: false
         parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
+        movingSelectedItems = arguments[ARG_MOVING_CONTENT]?.split(",")?.map { it.toLong() }
         loggedPersonUid = accountManager.activeAccount.personUid
         getAndSetList()
         GlobalScope.launch(doorMainDispatcher()) {
             if (contentFilter == ARG_LIBRARIES_CONTENT) {
                 view.editOptionVisible = onCheckUpdatePermission()
+                editVisible.complete(view.editOptionVisible)
             }
         }
 
@@ -73,9 +86,9 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         view.list = when (contentFilter) {
             ARG_LIBRARIES_CONTENT -> when (sortOrder) {
                 SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                        parentEntryUid, 0, 0, loggedPersonUid, showHidden)
+                        parentEntryUid, 0, 0, loggedPersonUid, showHidden, onlyFolderFilter)
                 SortOrder.ORDER_NAME_DSC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameDesc(
-                        parentEntryUid, 0, 0, loggedPersonUid, showHidden)
+                        parentEntryUid, 0, 0, loggedPersonUid, showHidden, onlyFolderFilter)
             }
             ARG_DOWNLOADED_CONTENT -> when (sortOrder) {
                 SortOrder.ORDER_NAME_ASC -> db.contentEntryDao.downloadedRootItemsAsc(loggedPersonUid)
@@ -93,7 +106,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     override suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
-        return if(view.editOptionVisible) listOf(SelectionOption.MOVE, SelectionOption.HIDE) else listOf()
+        val isVisible = editVisible.await()
+        return if(isVisible) listOf(SelectionOption.MOVE, SelectionOption.HIDE) else listOf()
     }
 
     override fun handleSelectionOptionChanged(t: List<ContentEntry>) {
@@ -110,11 +124,24 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
             listOf(SelectionOption.MOVE, SelectionOption.UNHIDE)
     }
 
+    override fun onClickSelectContentEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+        GlobalScope.launch(doorMainDispatcher()){
+            val selectedItems = movingSelectedItems
+            if(!selectedItems.isNullOrEmpty()){
+                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(entry.contentEntryUid, selectedItems)
+            }
+            super.handleClickEntry(entry)
+            view.finishWithResult(listOf(entry))
+            view.finishPage()
+        }
+    }
+
     override fun handleClickSelectionOption(selectedItem: List<ContentEntry>, option: SelectionOption) {
         GlobalScope.launch(doorMainDispatcher()) {
             when (option) {
                 SelectionOption.MOVE -> {
-
+                    val listOfSelectedEntries = selectedItem.map { (it as ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer).contentEntryParentChildJoin?.cepcjUid }.joinToString(",")
+                    view.selectEntry(listOfSelectedEntries)
                 }
                 SelectionOption.HIDE -> {
                     repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedItem.map { it.contentEntryUid })
@@ -126,7 +153,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         }
     }
 
-
     /**
      * Handles when the user clicks a "folder" in picker mode
      */
@@ -137,7 +163,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     private fun showContentEntryListByParentUid(){
         view.list = repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                parentEntryUid, 0, 0, loggedPersonUid, false)
+                parentEntryUid, 0, 0, loggedPersonUid, false, false)
     }
 
     fun handleOnBackPressed(): Boolean{
