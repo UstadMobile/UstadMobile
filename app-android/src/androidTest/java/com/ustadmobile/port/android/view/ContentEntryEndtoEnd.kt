@@ -336,7 +336,7 @@ class ContentEntryEndtoEnd : TestCase() {
                     admin = true
                 })
 
-                val oneList = dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(2, -4103245208651563007L, mutableListOf(0,1))
+                val oneList = dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3, -4103245208651563007L, mutableListOf(0,1))
                 dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3, oneList[0].contentEntryUid)
 
             }
@@ -357,7 +357,7 @@ class ContentEntryEndtoEnd : TestCase() {
 
                 recycler{
 
-                    hasSize(2)
+                    hasSize(3)
 
                     childWith<ContentEntryListScreen.MainItem> {
                         withDescendant {
@@ -391,6 +391,9 @@ class ContentEntryEndtoEnd : TestCase() {
                     }perform {
                         click()
                     }
+
+                    // includes add new content
+                    hasSize(3)
 
                     childWith<ContentEntryListScreen.MainItem> {
                         withDescendant {
