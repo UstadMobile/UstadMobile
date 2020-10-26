@@ -471,7 +471,7 @@ fun generateReplaceSyncableEntitiesTrackerCodeBlock(resultVarName: String, resul
     syncableEntitiesList.forEach {
         val sEntityInfo = SyncableEntityInfo(it.value, processingEnv)
 
-        val isListOrArrayResult = isListOrArray(resultType)
+        val isListOrArrayResult = resultType.isListOrArray()
         var wrapperFnName = Pair("", "")
         var varName = ""
         if(isListOrArrayResult) {
@@ -547,7 +547,7 @@ fun generateReplaceSyncableEntityCodeBlock(resultVarName: String, resultType: Ty
     syncableEntitiesList.forEach {
         val sEntityInfo = SyncableEntityInfo(it.value, processingEnv)
 
-        val isListOrArrayResult = isListOrArray(resultType)
+        val isListOrArrayResult = resultType.isListOrArray()
 
         val replaceEntityFnName ="_replace${sEntityInfo.syncableEntity.simpleName}"
 
@@ -898,59 +898,133 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         return codeBlock.build()
     }
 
+    /**
+     * Creates an SQL statement that will insert a row into the ChangeLog table. This SQL should
+     * be included in the SQL that is run by the change triggers.
+     */
+    val SyncableEntityInfo.sqliteChangeLogInsertSql: String
+        get() = """
+            INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+            SELECT ${tableId}, NEW.${entityPkField.name}, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000)
+        """.trimIndent()
+
+
+    /**
+     * Adds code that will create the triggers (to increment change sequence numbers and, if
+     * required, insert into ChangeLog) on SQLite when a row on the given syncableEntityInfo is updated.
+     *
+     * @param syncableEntityInfo SyncableEntityInfo for the entity annotated @SyncableEntity
+     * @param execSqlFn the code to run an SQL statement e.g. "db.execSQL"
+     * @return this
+     */
+    fun CodeBlock.Builder.addSyncableEntityUpdateTriggersSqlite(execSqlFn: String, syncableEntityInfo: SyncableEntityInfo) : CodeBlock.Builder {
+        val localCsnFieldName = syncableEntityInfo.entityLocalCsnField.name
+        val primaryCsnFieldName = syncableEntityInfo.entityMasterCsnField.name
+        val entityName = syncableEntityInfo.syncableEntity.simpleName
+        val pkFieldName = syncableEntityInfo.entityPkField.name
+        val tableId = syncableEntityInfo.tableId
+
+        add("$execSqlFn(%S)\n", """
+            CREATE TRIGGER UPD_LOC_$tableId
+            AFTER UPDATE ON $entityName
+            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                AND (NEW.$localCsnFieldName == OLD.$localCsnFieldName OR
+                    NEW.$localCsnFieldName == 0))
+            BEGIN
+                UPDATE $entityName
+                SET $localCsnFieldName = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId) 
+                WHERE $pkFieldName = NEW.$pkFieldName;
+                
+                UPDATE SqliteChangeSeqNums 
+                SET sCsnNextLocal = sCsnNextLocal + 1
+                WHERE sCsnTableId = $tableId;
+            END
+        """.trimIndent())
+
+        add("$execSqlFn(%S)\n", """
+            CREATE TRIGGER UPD_PRI_$tableId
+            AFTER UPDATE ON $entityName
+            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                AND (NEW.$primaryCsnFieldName == OLD.$primaryCsnFieldName OR
+                    NEW.$primaryCsnFieldName == 0))
+            BEGIN
+                UPDATE $entityName
+                SET $primaryCsnFieldName = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId)
+                WHERE $pkFieldName = NEW.$pkFieldName;
+                
+                UPDATE SqliteChangeSeqNums
+                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                WHERE sCsnTableId = $tableId;
+                
+                ${syncableEntityInfo.sqliteChangeLogInsertSql};
+            END
+        """.trimIndent())
+
+        return this
+    }
+
+    /**
+     * Adds code that will create the triggers (to increment change sequence numbers and, if
+     * required, insert into ChangeLog) on SQLite when a row on the given syncableEntityInfo is
+     * inserted.
+     *
+     * @param syncableEntityInfo SyncableEntityInfo for the entity annotated @SyncableEntity
+     * @param execSqlFn the code to run an SQL statement e.g. "db.execSQL"
+     * @return this
+     */
+    fun CodeBlock.Builder.addSyncableEntityInsertTriggersSqlite(execSqlFn: String, syncableEntityInfo: SyncableEntityInfo): CodeBlock.Builder {
+        val localCsnFieldName = syncableEntityInfo.entityLocalCsnField.name
+        val primaryCsnFieldName = syncableEntityInfo.entityMasterCsnField.name
+        val entityName = syncableEntityInfo.syncableEntity.simpleName
+        val pkFieldName = syncableEntityInfo.entityPkField.name
+        val tableId = syncableEntityInfo.tableId
+
+        add("$execSqlFn(%S)\n", """
+            CREATE TRIGGER INS_LOC_${syncableEntityInfo.tableId}
+            AFTER INSERT ON $entityName
+            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                NEW.$localCsnFieldName = 0)
+            BEGIN
+                UPDATE $entityName
+                SET $primaryCsnFieldName = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId)
+                WHERE $pkFieldName = NEW.$pkFieldName;
+                
+                UPDATE SqliteChangeSeqNums
+                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                WHERE sCsnTableId = $tableId;
+            END
+        """.trimIndent())
+
+        add("$execSqlFn(%S)\n", """
+            CREATE TRIGGER INS_PRI_${syncableEntityInfo.tableId}
+            AFTER INSERT ON $entityName
+            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                NEW.$primaryCsnFieldName = 0)
+            BEGIN
+                UPDATE $entityName
+                SET $primaryCsnFieldName = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId)
+                WHERE $pkFieldName = NEW.$pkFieldName;
+                
+                UPDATE SqliteChangeSeqNums
+                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                WHERE sCsnTableId = $tableId;
+                
+                ${syncableEntityInfo.sqliteChangeLogInsertSql};
+            END
+        """.trimIndent())
+
+        return this
+    }
+
+
     protected fun generateSyncTriggersCodeBlock(entityClass: ClassName, execSqlFn: String, dbType: Int): CodeBlock {
         val codeBlock = CodeBlock.builder()
         val syncableEntityInfo = SyncableEntityInfo(entityClass, processingEnv)
         when(dbType){
             DoorDbType.SQLITE -> {
-                //If the being updated was the entity with the largest chance sequence number,
-                //then we must consider it's previous value as the potential max of change sequence numbers
-                val mkMaxClause = fun(fieldName: String, clauseName: String): String = when {
-                    clauseName.equals("UPDATE", ignoreCase = true) -> {
-                        "MAX(MAX(${fieldName}), OLD.${fieldName})"
-                    }
-                    clauseName.equals("INSERT", ignoreCase = true) -> "MAX($fieldName)"
-                    else -> throw IllegalArgumentException("Clause must be update or insert")
-                }
+                codeBlock.addSyncableEntityInsertTriggersSqlite(execSqlFn, syncableEntityInfo)
+                codeBlock.addSyncableEntityUpdateTriggersSqlite(execSqlFn, syncableEntityInfo)
 
-                listOf("UPDATE", "INSERT").forEach {op_name ->
-                    codeBlock.add("$execSqlFn(%S)\n", """CREATE TRIGGER ${op_name.substring(0, 3)}_${syncableEntityInfo.tableId}
-                        |AFTER $op_name ON ${entityClass.simpleName} FOR EACH ROW WHEN
-                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                        |(NEW.${syncableEntityInfo.entityMasterCsnField.name} = 0 
-                        |${
-                        if(op_name == "UPDATE") {
-                            "OR OLD.${syncableEntityInfo.entityMasterCsnField.name} = NEW.${syncableEntityInfo.entityMasterCsnField.name}"
-                        }else {
-                            ""
-                        }}
-                        |)
-                        |ELSE
-                        |(NEW.${syncableEntityInfo.entityLocalCsnField.name} = 0  
-                        |${
-                        if(op_name == "UPDATE") {
-                            "OR OLD.${syncableEntityInfo.entityLocalCsnField.name} = NEW.${syncableEntityInfo.entityLocalCsnField.name}"
-                        }else {
-                            ""
-                        }}
-                        |) END)
-                        |BEGIN 
-                        |UPDATE ${entityClass.simpleName} SET ${syncableEntityInfo.entityLocalCsnField.name} = 
-                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.${syncableEntityInfo.entityLocalCsnField.name} 
-                        |ELSE (SELECT ${mkMaxClause(syncableEntityInfo.entityLocalCsnField.name, op_name)} + 1 FROM ${entityClass.simpleName}) END),
-                        |${syncableEntityInfo.entityMasterCsnField.name} = 
-                        |(SELECT CASE WHEN (SELECT master FROM SyncNode) THEN 
-                        |(SELECT ${mkMaxClause(syncableEntityInfo.entityMasterCsnField.name, op_name)} + 1 FROM ${entityClass.simpleName})
-                        |ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END)
-                        |WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name}
-                        |;
-                        |INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
-                        |SELECT ${syncableEntityInfo.tableId}, NEW.${syncableEntityInfo.entityPkField.name}, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000)
-                        |WHERE COALESCE((SELECT master From SyncNode LIMIT 1), 0)
-                        |;
-                        |END
-                    """.trimMargin())
-                }
 
             }
 
@@ -1063,7 +1137,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 .add("_conToClose = _con\n")
 
         if(rawQueryVarName == null) {
-            if(queryVars.any { isListOrArray(it.value.javaToKotlinType()) }) {
+            if(queryVars.any { it.value.javaToKotlinType().isListOrArray() }) {
                 codeBlock.beginControlFlow("val _stmt = if(_db!!.jdbcArraySupported)")
                         .add("_con.prepareStatement(_db.adjustQueryWithSelectInParam(%S))!!\n", preparedStatementSql)
                         .nextControlFlow("else")
@@ -1093,7 +1167,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 val paramType = queryVars[it]
                 if(paramType == null ) {
                     queryVarsNotSubstituted.add(it)
-                }else if(isListOrArray(paramType.javaToKotlinType())) {
+                }else if(paramType.javaToKotlinType().isListOrArray()) {
                     //val con = null as Connection
                     val arrayTypeName = sqlArrayComponentTypeOf(paramType.javaToKotlinType())
                     codeBlock.add("_stmt.setArray(${paramIndex++}, ")
@@ -1168,7 +1242,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 }
 
 
-                if(isListOrArray(resultType)) {
+                if(resultType.isListOrArray()) {
                     codeBlock.beginControlFlow("while(_resultSet.next())")
                 }else {
                     codeBlock.beginControlFlow("if(_resultSet.next())")
@@ -1181,7 +1255,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                             colIndexVarName = "_columnIndexMap"))
                 }
 
-                if(isListOrArray(resultType)) {
+                if(resultType.isListOrArray()) {
                     codeBlock.add("$resultVarName.add(_entity)\n")
                 }else {
                     codeBlock.add("$resultVarName = _entity\n")
@@ -1231,16 +1305,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                                    pgOnConflict: String? = null): CodeBlock {
         val codeBlock = CodeBlock.builder()
         val paramType = parameterSpec.type
-        val entityClassName = if(paramType is ParameterizedTypeName && paramType.rawType == List::class.asClassName()) {
-            val typeArg = paramType.typeArguments[0]
-            if(typeArg is WildcardTypeName) {
-                typeArg.outTypes[0] as ClassName
-            }else {
-                typeArg as ClassName
-            }
-        }else {
-            paramType as ClassName
-        }
+        val entityClassName = paramType.asComponentClassNameIfList()
 
         val pgOnConflictHash = pgOnConflict?.hashCode()?.let { Math.abs(it) }?.toString() ?: ""
         val entityInserterPropName = "_insertAdapter${entityTypeSpec.name}_${if(upsertMode) "upsert" else ""}$pgOnConflictHash"
@@ -1329,7 +1394,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         codeBlock.add("$entityInserterPropName.$insertMethodName(${parameterSpec.name}, _db.openConnection())")
 
         if(returnType != UNIT) {
-            if(isListOrArray(returnType)
+            if(returnType.isListOrArray()
                     && returnType is ParameterizedTypeName
                     && returnType.typeArguments[0] == INT) {
                 codeBlock.add(".map { it.toInt() }")
@@ -1419,8 +1484,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 ?.addModifiers(KModifier.SUSPEND)
 
         codeBlock.add(generateHttpServerPassToDaoCodeBlock(modifiedQueryFunSpec.build(),
-                daoVarName = "_ktorHelperDao", preexistingVarNames = listOf("clientId"),
-                serverType = serverType, addRespondCall = false))
+                processingEnv, daoVarName = "_ktorHelperDao",
+                preexistingVarNames = listOf("clientId"), serverType = serverType, addRespondCall = false))
 
         codeBlock.add(generateRespondCall(resultType, "_result", serverType,
                 ktorBeforeRespondCodeBlock = CodeBlock.of("%M.response.header(%S, _reqId)\n",
@@ -1442,17 +1507,25 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * @param preexistingVarNames a list of variable names that already exist in the scope being
      * generated. The name created in scope must be the variable name prefixed with __ e.g.
      * __paramName.
+     * @param resetChangeSequenceNumbers if true and any parameter is a syncable entity then the
+     * change sequence number fields will be set to zero (to ensure that the database recognizes it
+     * as an updated entity). This avoids a situation where the change sequence number is not
+     * incremented when using REPLACE on Sqlite (because REPLACE = DELETE then INSERT, if the primary
+     * change sequence number is not zero, the trigger does not know if it was the same as before).
      *
      * This will skip generation of getting the parameter name from the call (e.g.
      * no val __paramName = request.queryParameters["paramName"] will be generated
      */
-    fun generateHttpServerPassToDaoCodeBlock(daoMethod: FunSpec, mutlipartHelperVarName: String? = null,
+    fun generateHttpServerPassToDaoCodeBlock(daoMethod: FunSpec,
+                                             processingEnv: ProcessingEnvironment,
+                                             mutlipartHelperVarName: String? = null,
                                              beforeDaoCallCode: CodeBlock = CodeBlock.of(""),
                                              afterDaoCallCode: CodeBlock = CodeBlock.of(""),
                                              daoVarName: String = "_dao",
                                              preexistingVarNames: List<String> = listOf(),
                                              serverType: Int = DbProcessorKtorServer.SERVER_TYPE_KTOR,
-                                             addRespondCall: Boolean = true): CodeBlock {
+                                             addRespondCall: Boolean = true,
+                                             resetChangeSequenceNumbers: Boolean? = null): CodeBlock {
         val getVarsCodeBlock = CodeBlock.builder()
         val callCodeBlock = CodeBlock.builder()
 
@@ -1488,6 +1561,15 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                                 multipartHelperVarName = mutlipartHelperVarName,
                                 serverType = serverType))
                         .add("\n")
+
+                if(resetChangeSequenceNumbers == true) {
+                    val syncableEntityInfo = SyncableEntityInfo(param.type.asComponentClassNameIfList(),
+                        processingEnv)
+
+                    getVarsCodeBlock.addRunCodeBlocksOnParamComponents(ParameterSpec("__${param.name}", param.type),
+                        CodeBlock.of("${syncableEntityInfo.entityMasterCsnField.name} = 0\n"),
+                        CodeBlock.of("${syncableEntityInfo.entityLocalCsnField.name} = 0\n"))
+                }
             }
 
 

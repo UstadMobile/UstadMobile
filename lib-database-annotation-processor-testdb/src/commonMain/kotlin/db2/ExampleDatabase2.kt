@@ -3,10 +3,7 @@ package db2
 import androidx.room.Database
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.MinSyncVersion
-import com.ustadmobile.door.entities.SqliteSyncablePrimaryKey
-import com.ustadmobile.door.entities.ChangeLog
-import com.ustadmobile.door.entities.TableSyncStatus
-import com.ustadmobile.door.entities.UpdateNotification
+import com.ustadmobile.door.entities.*
 import db2.ExampleDatabase2.Companion.DB_VERSION
 
 @Database(version = DB_VERSION, entities = [ExampleEntity2::class, ExampleLinkEntity::class,
@@ -20,7 +17,8 @@ import db2.ExampleDatabase2.Companion.DB_VERSION
     AccessGrant::class,
     UpdateNotification::class,
     TableSyncStatus::class,
-    SqliteSyncablePrimaryKey::class
+    SqliteSyncablePrimaryKey::class,
+    SqliteChangeSeqNums::class
     //#DOORDB_TRACKER_ENTITIES
 
 ])

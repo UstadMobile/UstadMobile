@@ -268,7 +268,7 @@ fun getPreparedStatementSetterGetterTypeName(typeName: TypeName): String? {
         BOOLEAN -> return "Boolean"
         String::class.asTypeName() -> return "String"
         else -> {
-            if(isListOrArray(kotlinType)) {
+            if(kotlinType.isListOrArray()) {
                 return "Array"
             }else {
                 return "UNKNOWN"
@@ -485,6 +485,7 @@ fun defaultVal(typeName: TypeName) : CodeBlock {
     return codeBlock.build()
 }
 
+@Deprecated("Should use extension function for this")
 fun isListOrArray(typeName: TypeName) = (typeName is ClassName && typeName.canonicalName =="kotlin.Array")
         || (typeName is ParameterizedTypeName && typeName.rawType == List::class.asClassName())
 
@@ -606,6 +607,7 @@ internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
                         "INSERT OR REPLACE INTO sqlite_sequence(name,seq) VALUES('${it.simpleName}', ((SELECT nodeClientId FROM SyncNode) << 32)) ")
             }
             codeBlock.addGenerateSqlitePrimaryKeyInsert(execSqlFunName, syncableEntityInfo)
+                    .addReplaceSqliteChangeSeqNums(execSqlFunName, syncableEntityInfo)
         }else if(jdbcDbType == DoorDbType.POSTGRES){
             codeBlock.add("$execSqlFunName(\"ALTER·SEQUENCE·" +
                     "${it.simpleName}_${syncableEntityInfo.entityPkField.name}_seq·RESTART·WITH·\${_nodeId·shl·32}\")\n")
@@ -648,6 +650,18 @@ internal fun CodeBlock.Builder.addGenerateSqlitePrimaryKeyInsert(execSqlFn: Stri
             "${syncableEntityInfo.entityPkField.name} & (SELECT nodeClientId << 32 FROM SyncNode) = " +
             "(SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
 }
+
+/**
+ * Add to the codeblock to create a line that will execute SQL to insert a row into SqliteChangeSeqNums
+ * for the given SyncableEntity
+ *
+ * @param execSqlFn The name of the function to call to execute SQL e.g. "db.execSQL
+ * @param syncableEntityInfo the syncableentityinfo for this row
+ */
+internal fun CodeBlock.Builder.addReplaceSqliteChangeSeqNums(execSqlFn: String, syncableEntityInfo: SyncableEntityInfo)
+    = add("$execSqlFn(%S)\n", "REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary)" +
+        " VALUES(${syncableEntityInfo.tableId}, 1, 1)")
+
 
 /**
  * Determine if the result type is nullable. Any single result entity object or String result can be
@@ -1125,7 +1139,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 .add("_stmt = _con.prepareStatement(%S)!!\n", sqlStmt)
 
         var entityVarName = daoMethod.parameters[0].simpleName.toString()
-        if(isListOrArray(paramType)) {
+        if(paramType.isListOrArray()) {
             codeBlock.add("_con.autoCommit = false\n")
                     .beginControlFlow("for(_entity in ${daoMethod.parameters[0].simpleName})")
             entityVarName = "_entity"
@@ -1144,7 +1158,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
         codeBlock.add("_stmt.executeUpdate()\n")
 
-        if(isListOrArray(paramType)) {
+        if(paramType.isListOrArray()) {
             codeBlock.endControlFlow()
                 .add("_con.commit()\n")
         }
@@ -1199,7 +1213,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
 
         var entityVarName = daoMethod.parameters[0].simpleName.toString()
-        if(isListOrArray(paramType)) {
+        if(paramType.isListOrArray()) {
             codeBlock.add("_con.autoCommit = false\n")
                     .beginControlFlow("for(_entity in ${daoMethod.parameters[0].simpleName})")
             entityVarName = "_entity"
@@ -1208,7 +1222,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
         codeBlock.add("_stmt.set${getPreparedStatementSetterGetterTypeName(pkEl.asType().asTypeName())}(1, $entityVarName.${pkEl.simpleName})\n")
         codeBlock.add("_numChanges += _stmt.executeUpdate()\n")
 
-        if(isListOrArray(paramType)) {
+        if(paramType.isListOrArray()) {
             codeBlock.endControlFlow()
                 .add("_con.commit()\n")
                 .add("_con.autoCommit = true\n")

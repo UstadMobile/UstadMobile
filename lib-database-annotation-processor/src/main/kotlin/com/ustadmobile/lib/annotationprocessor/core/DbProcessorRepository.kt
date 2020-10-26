@@ -651,7 +651,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
             val entityType = resolveEntityFromResultType(daoFunSpec.parameters[0].type) as ClassName
             val lastChangedByField = processingEnv.elementUtils.getTypeElement(entityType.canonicalName)
                     .enclosedElements.firstOrNull { it.kind == ElementKind.FIELD && it.getAnnotation(LastChangedBy::class.java) != null}
-            isListOrArrayParam = isListOrArray(entityParam.type)
+            isListOrArrayParam =  entityParam.type.isListOrArray()
 
             if(lastChangedByField != null) {
                 if(isListOrArrayParam) {
@@ -705,7 +705,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
         //Generate a call to handleTableChanged for functions that
         //are annotated with @Insert or @Update
         if(isUpdateDeleteOrInsertMethod(daoFunSpec)) {
-            val isList = isListOrArray(daoFunSpec.parameters[0].type)
+            val isList = daoFunSpec.parameters[0].type.isListOrArray()
             codeBlock.add("_repo")
 
             codeBlock.takeIf { isList }?.add(".takeIf·{·%L.isNotEmpty()·}?",

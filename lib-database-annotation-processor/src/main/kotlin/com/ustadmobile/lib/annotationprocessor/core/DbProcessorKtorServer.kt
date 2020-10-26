@@ -36,7 +36,6 @@ import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Compan
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_ON_MEMBER
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.NANOHTTPD_URIRESOURCE_FUNPARAMS
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER
-import io.ktor.application.ApplicationCallPipeline
 import org.kodein.di.DI
 import javax.annotation.processing.ProcessingEnvironment
 
@@ -764,8 +763,10 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
             }else {
                 val funSpecBuilt = funSpec.build()
                 ktorCodeBlock.add(generateHttpServerPassToDaoCodeBlock(funSpecBuilt,
+                        processingEnv,
                         serverType = SERVER_TYPE_KTOR))
                 nanoHttpdCodeBlock.add(generateHttpServerPassToDaoCodeBlock(funSpecBuilt,
+                        processingEnv,
                         serverType = SERVER_TYPE_NANOHTTPD))
             }
 

@@ -298,7 +298,8 @@ class DbProcessorSync: AbstractDbProcessor() {
                 val entityParamName = "__" + replaceEntityFunSpec.parameters[0].name
                 val pkEl = processingEnv.elementUtils.getTypeElement(
                     entityType.qualifiedName).enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null}
-                codeBlock.add(generateHttpServerPassToDaoCodeBlock(replaceEntityFunSpec, multipartHelperVarName,
+                codeBlock.add(generateHttpServerPassToDaoCodeBlock(replaceEntityFunSpec, processingEnv,
+                        multipartHelperVarName,
                         beforeDaoCallCode = CodeBlock.builder()
                                 .beginControlFlow("if(_multipartHelper.containsAllAttachments($entityParamName.map{it.${pkEl.simpleName}.toString()}))")
                                 .add("_multipartHelper.moveTmpFiles(%T(_attachmentsDir, %S))\n",
@@ -311,7 +312,8 @@ class DbProcessorSync: AbstractDbProcessor() {
                                 .endControlFlow()
                                 .build()))
             }else {
-                codeBlock.add(generateHttpServerPassToDaoCodeBlock(replaceEntityFunSpec))
+                codeBlock.add(generateHttpServerPassToDaoCodeBlock(replaceEntityFunSpec,
+                        processingEnv, resetChangeSequenceNumbers = true))
             }
 
             codeBlock.endControlFlow()

@@ -80,3 +80,40 @@ fun CodeBlock.Builder.addInsertTableSyncStatuses(dbType: TypeElement,
     return this
 }
 
+/**
+ * When generating code for a parameter we often want to add some statements that would run directly
+ * on a given variable if it is a singular type, or use a forEach loop if it is a list or array.
+ *
+ * e.g.
+ *
+ * singular.changeSeqNum = 0
+ *
+ * or
+ *
+ * list.forEach {
+ *     it.changeSeqNum = 0
+ * }
+ *
+ * @param param the ParameterSpec that gives the type and the variable name
+ * @param codeBlocks codeBlocks that should be run against each component of the parameter if it is
+ * a list or array, or directly against the parameter if it is singular. Each will be automatically
+ * prefixed with the parameter name for singular components, or "it" for lists and arrays
+ * @return this
+ */
+fun CodeBlock.Builder.addRunCodeBlocksOnParamComponents(param: ParameterSpec, vararg codeBlocks: CodeBlock) : CodeBlock.Builder {
+    if(param.type.isListOrArray()) {
+        beginControlFlow("${param.name}.forEach")
+        codeBlocks.forEach {
+            add("it.")
+            add(it)
+        }
+        endControlFlow()
+    }else {
+        codeBlocks.forEach {
+            add("${param.name}.")
+            add(it)
+        }
+    }
+
+    return this
+}

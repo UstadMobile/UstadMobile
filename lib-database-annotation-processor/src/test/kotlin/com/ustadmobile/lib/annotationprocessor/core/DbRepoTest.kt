@@ -40,6 +40,7 @@ import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
 import org.sqlite.SQLiteDataSource
 import java.io.File
+import java.lang.IllegalStateException
 import javax.sql.DataSource
 import kotlin.test.assertEquals
 
@@ -48,7 +49,9 @@ class DbRepoTest {
 
     var serverDb : ExampleDatabase2? = null
 
-    var clientDb: ExampleDatabase2? = null
+    lateinit var clientDb: ExampleDatabase2
+
+    lateinit var clientDb2: ExampleDatabase2
 
     var server: ApplicationEngine? = null
 
@@ -136,6 +139,11 @@ class DbRepoTest {
 
             serverDb = serverDi.on("localhost").direct.instance(tag = DoorTag.TAG_DB)
             clientDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1")
+                    .build().also {
+                        it.clearAllTables()
+                    }
+
+            clientDb2 = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db2")
                     .build().also {
                         it.clearAllTables()
                     }
@@ -641,9 +649,73 @@ class DbRepoTest {
             Assert.assertNotNull("Entity is in client database after sync",
                     clientDb.exampleSyncableDao().findByUid(exampleEntity.esUid))
         }
-
-
     }
+
+
+    @Test
+    fun givenEntityCreatedOnFirstClient_whenUpdatedOnFirstClient_thenShouldUpdateOnSecondClient() {
+        mockUpdateNotificationManager = spy(ServerUpdateNotificationManagerImpl())
+        setupClientAndServerDb(mockUpdateNotificationManager)
+
+        val serverDb: ExampleDatabase2 by serverDi.on("localhost").instance(tag = DoorTag.TAG_DB)
+
+        val testUid = 42L
+
+        Napier.i("==== Initializing client =====")
+
+        //TODO: This should be closed to be sure that it does not interfere with the next test etc.
+        val clientRepo1 = clientDb.asRepository(Any(), "http://localhost:8089/",
+                "token", httpClient, useClientSyncManager = true)
+                .asConnectedRepository()
+
+        val clientRepo2 = clientDb2.asRepository(Any(), "http://localhost:8089/",
+                "token", httpClient, useClientSyncManager = true)
+                .asConnectedRepository()
+
+        //make access grants so that the notification will be dispatched
+        listOf(clientRepo1, clientRepo2).forEach { repo ->
+            serverDb.accessGrantDao().insert(AccessGrant().apply {
+                tableId = ExampleSyncableEntity.TABLE_ID
+                deviceId = (repo as DoorDatabaseSyncRepository).clientId
+                entityUid = testUid
+            })
+        }
+
+        val exampleEntity = ExampleSyncableEntity().apply {
+            esUid = testUid
+            esName = "Hello Notification"
+            publik = true
+        }
+        clientRepo1.exampleSyncableDao().insert(exampleEntity)
+
+        //wait for the entity to arrive on the second client
+        runBlocking {
+            clientDb2.waitUntil(10000, listOf("ExampleSyncableEntity")) {
+                clientDb2.exampleSyncableDao().findByUid(exampleEntity.esUid) != null
+            }
+        }
+
+        val entityOnServer = serverDb.exampleSyncableDao().findByUid(exampleEntity.esUid)
+        val entityOnClient2AfterCreation = clientDb2.exampleSyncableDao().findByUid(exampleEntity.esUid)
+
+        runBlocking {
+            clientRepo1.exampleSyncableDao().updateAsync(exampleEntity.apply {
+                esName = "Hello Updated Notification"
+            })
+        }
+
+        runBlocking {
+            clientDb2.waitUntil(10000, listOf("ExampleSyncableEntity")) {
+                clientDb2.exampleSyncableDao().findByUid(exampleEntity.esUid)?.esName == "Hello Updated Notification"
+            }
+        }
+
+        Assert.assertNotNull("Entity reached server after creation", entityOnServer)
+        Assert.assertNotNull("Entity reached client2 after creation", entityOnClient2AfterCreation)
+        Assert.assertEquals("Entity was updated on client2 after update on client1",
+            exampleEntity.esName, clientDb2.exampleSyncableDao().findByUid(exampleEntity.esUid)?.esName)
+    }
+
 
 
 }
