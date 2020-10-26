@@ -46,6 +46,8 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
 
     private val editVisible = CompletableDeferred<Boolean>()
 
+    private var showHiddenEntries = false
+
     enum class SortOrder(val messageId: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc),
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
@@ -63,6 +65,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
         movingSelectedItems = arguments[ARG_MOVING_CONTENT]?.split(",")?.map { it.toLong() }
         loggedPersonUid = accountManager.activeAccount.personUid
+        showHiddenEntries = false
         getAndSetList()
         GlobalScope.launch(doorMainDispatcher()) {
             if (contentFilter == ARG_LIBRARIES_CONTENT) {
@@ -83,13 +86,13 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 Role.PERMISSION_CONTENT_UPDATE)
     }
 
-    private fun getAndSetList(sortOrder: SortOrder = currentSortOrder, showHidden: Boolean = false) {
+    private fun getAndSetList(sortOrder: SortOrder = currentSortOrder) {
         view.list = when (contentFilter) {
             ARG_LIBRARIES_CONTENT -> when (sortOrder) {
                 SortOrder.ORDER_NAME_ASC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                        parentEntryUid, 0, 0, loggedPersonUid, showHidden, onlyFolderFilter)
+                        parentEntryUid, 0, 0, loggedPersonUid, showHiddenEntries, onlyFolderFilter)
                 SortOrder.ORDER_NAME_DSC -> repo.contentEntryDao.getChildrenByParentUidWithCategoryFilterOrderByNameDesc(
-                        parentEntryUid, 0, 0, loggedPersonUid, showHidden, onlyFolderFilter)
+                        parentEntryUid, 0, 0, loggedPersonUid, showHiddenEntries, onlyFolderFilter)
             }
             ARG_DOWNLOADED_CONTENT -> when (sortOrder) {
                 SortOrder.ORDER_NAME_ASC -> db.contentEntryDao.downloadedRootItemsAsc(loggedPersonUid)
@@ -196,6 +199,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
     }
 
     fun handleClickShowHiddenItems() {
-        getAndSetList(showHidden = true)
+        showHiddenEntries = true
+        getAndSetList()
     }
 }
