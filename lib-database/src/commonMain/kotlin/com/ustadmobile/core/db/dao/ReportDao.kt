@@ -35,7 +35,9 @@ abstract class ReportDao : BaseDao<Report> {
     @Query("Select * From Report")
     abstract fun findAllLive(): DoorLiveData<List<Report>>
 
-    @Query("UPDATE Report SET reportInactive = :inactive WHERE reportUid = :uid")
+    @Query("""UPDATE Report SET reportInactive = :inactive,
+                reportLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                WHERE reportUid = :uid""")
     abstract fun updateReportInactive(inactive: Boolean, uid: Long)
 
 

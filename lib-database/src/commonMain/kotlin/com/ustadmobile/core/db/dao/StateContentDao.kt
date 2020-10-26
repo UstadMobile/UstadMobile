@@ -15,7 +15,8 @@ abstract class StateContentDao : BaseDao<StateContentEntity> {
     @Query("SELECT * FROM StateContentEntity WHERE stateContentStateUid = :stateUid AND stateContentKey = :key AND isIsactive")
     abstract fun findStateContentByKeyAndStateUid(key: String, stateUid: Long): StateContentEntity?
 
-    @Query("UPDATE StateContentEntity SET isIsactive = :isActive WHERE stateContentUid = :stateUid")
+    @Query("""UPDATE StateContentEntity SET isIsactive = :isActive,  
+            stateContentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) WHERE stateContentUid = :stateUid""")
     abstract fun setInActiveStateContentByKeyAndUid(isActive: Boolean, stateUid: Long)
 
 

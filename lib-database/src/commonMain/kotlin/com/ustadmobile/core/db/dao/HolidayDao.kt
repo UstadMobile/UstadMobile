@@ -14,7 +14,9 @@ abstract class HolidayDao: BaseDao<Holiday>, OneToManyJoinDao<Holiday> {
     @Query("SELECT * FROM Holiday WHERE holHolidayCalendarUid = :holidayCalendarUid")
     abstract suspend fun findByHolidayCalendaUidAsync(holidayCalendarUid: Long): List<Holiday>
 
-    @Query("UPDATE Holiday SET holActive = :active WHERE holUid = :holidayUid")
+    @Query("""UPDATE Holiday SET holActive = :active, 
+        holLastModBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+        WHERE holUid = :holidayUid""")
     abstract fun updateActiveByUid(holidayUid: Long, active: Boolean)
 
     override suspend fun deactivateByUids(uidList: List<Long>) {
