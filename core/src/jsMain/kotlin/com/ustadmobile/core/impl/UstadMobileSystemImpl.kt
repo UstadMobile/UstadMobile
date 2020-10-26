@@ -53,15 +53,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         return mapVal?.toString() ?: ""
     }
 
-    /**
-     * Get storage directories
-     *
-     * @param context Platform specific context
-     * @param callback Storage dir list callback
-     */
-    actual override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
     /**
      * Must provide the system's default locale (e.g. en_US.UTF-8)
