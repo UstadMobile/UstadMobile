@@ -15,11 +15,11 @@ import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.core.view.EditButtonMode
 @DisplayEntity_Import@
 
-interface @Entity@DetailFragmentEventHandler {
+interface @BaseFileName@FragmentEventHandler {
 
 }
 
-class @Entity@DetailFragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@DetailView, @Entity@DetailFragmentEventHandler {
+class @BaseFileName@Fragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@DetailView, @Entity@DetailFragmentEventHandler {
 
     private var mBinding: Fragment@Entity@DetailBinding? = null
 

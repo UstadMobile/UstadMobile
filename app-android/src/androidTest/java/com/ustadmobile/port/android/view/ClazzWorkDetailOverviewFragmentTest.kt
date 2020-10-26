@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
@@ -44,8 +45,6 @@ import java.util.*
 @AdbScreenRecord("ClazzWork (Assignments) Detail overview tests")
 class ClazzWorkDetailOverviewFragmentTest {
 
-    lateinit var recyclerViewIdlingResource: RecyclerViewIdlingResource
-
     @JvmField
     @Rule
     var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
@@ -67,11 +66,6 @@ class ClazzWorkDetailOverviewFragmentTest {
     @Rule
     val crudIdlingResourceRule =
             ScenarioIdlingResourceRule(CrudIdlingResource())
-
-    @Before
-    fun setup() {
-        recyclerViewIdlingResource = RecyclerViewIdlingResource(null, 3)
-    }
 
     @After
     fun tearDown(){
@@ -605,11 +599,11 @@ class ClazzWorkDetailOverviewFragmentTest {
 
     private fun withTagInQuestion(quid: Long): Matcher<RecyclerView.ViewHolder?>? {
         return object : BoundedMatcher<RecyclerView.ViewHolder?,
-            ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder>(
-                ClazzWorkQuestionAndOptionsWithResponseRA.
+            ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder>(
+                ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.
                     ClazzWorkQuestionViewHolder::class.java) {
             override fun matchesSafely(
-                    item: ClazzWorkQuestionAndOptionsWithResponseRA
+                    item: ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter
                                 .ClazzWorkQuestionViewHolder): Boolean {
                 return item.itemView.tag.equals(quid)
             }
@@ -622,8 +616,8 @@ class ClazzWorkDetailOverviewFragmentTest {
 
     private fun withTagInQuestionAnswer(quid: Long): Matcher<RecyclerView.ViewHolder?>? {
         return object : BoundedMatcher<RecyclerView.ViewHolder?,
-                ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder>(ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder::class.java) {
-            override fun matchesSafely(item: ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder): Boolean {
+                ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder>(ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder::class.java) {
+            override fun matchesSafely(item: ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder): Boolean {
                 return item.binding.itemClazzworkquestionandoptionswithresponseAnswerEt.tag.equals(quid)
             }
 
@@ -673,4 +667,4 @@ class ClazzWorkDetailOverviewFragmentTest {
 
 
 
-}
+}*/

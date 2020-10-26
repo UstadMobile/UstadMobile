@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -15,6 +16,12 @@ class SimpleButtonRecyclerAdapter(heading: String, val buttonHandler: SimpleButt
             viewHolder?.itemBinding?.buttonText = value
         }
 
+    var isOutline: Boolean? = false
+        set(value){
+            field = value
+            viewHolder?.itemBinding?.outline = value
+        }
+
     class SimpleHeadingViewHolder(var itemBinding: ItemSimpleButtonBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
@@ -26,6 +33,7 @@ class SimpleButtonRecyclerAdapter(heading: String, val buttonHandler: SimpleButt
                         parent, false).also {
                     it.buttonText = buttonText
                     it.mHandler = buttonHandler
+                    it.outline = isOutline
                 })
     }
 

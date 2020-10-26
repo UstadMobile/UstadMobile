@@ -55,9 +55,8 @@ class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = LanguageListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.add_a_new,
-                requireContext().getString(R.string.language))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+            requireContext().getString(R.string.add_a_new_language))
         return view
     }
 

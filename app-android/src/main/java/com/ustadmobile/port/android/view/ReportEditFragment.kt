@@ -113,7 +113,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.report)
+        setEditFragmentTitle(R.string.create_a_new_report, R.string.edit_report)
 
         val navController = findNavController()
 
@@ -292,7 +292,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.report)
+        setEditFragmentTitle(R.string.create_a_new_report, R.string.edit_report)
     }
 
     override var entity: ReportWithFilters? = null

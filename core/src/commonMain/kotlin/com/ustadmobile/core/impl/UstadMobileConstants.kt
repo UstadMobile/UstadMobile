@@ -54,9 +54,10 @@ object UstadMobileConstants {
 
     val LANGUAGE_NAMES = mapOf(
             "en" to "English",
-            "tg" to "тоҷикӣ́",
+            "tg" to "Тоҷикӣ",
             "ps" to "\u067e\u069a\u062a\u0648",
             "fa" to "\u062f\u0631\u06cc",
-            "ar" to "العربية")
+            "ar" to "العربية",
+            "bn" to "বাংলা")
 
 }

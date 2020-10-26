@@ -28,6 +28,8 @@ object ClazzWorkDetailOverviewScreen : KScreen<ClazzWorkDetailOverviewScreen>() 
         itemType(::Submission)
         itemType(::QuestionSet)
         itemType(::SubmitSubmission)
+        itemType(::Comments)
+        itemType(::SubmitWithMetrics)
     })
 
     class ClazzWorkBasicDetail(parent: Matcher<View>) : KRecyclerItem<ClazzWorkBasicDetail>(parent) {
@@ -47,8 +49,6 @@ object ClazzWorkDetailOverviewScreen : KScreen<ClazzWorkDetailOverviewScreen>() 
 
     class Submission(parent: Matcher<View>) : KRecyclerItem<Submission>(parent) {
         val submissionEditText: KEditText = KEditText(parent) { withId(R.id.item_clazzwork_submission_text_entry_et) }
-        val submitButton: KButton = KButton(parent) { withId(R.id.item_simpl_button_button_tv) }
-
     }
 
     class QuestionSet(parent: Matcher<View>) : KRecyclerItem<QuestionSet>(parent) {
@@ -61,5 +61,18 @@ object ClazzWorkDetailOverviewScreen : KScreen<ClazzWorkDetailOverviewScreen>() 
         val submitButton: KButton = KButton(parent) { withId(R.id.item_simpl_button_button_tv) }
     }
 
+    class Comments(parent: Matcher<View>) : KRecyclerItem<Comments>(parent) {
+        val commentTextView: KTextView = KTextView(parent) { withId(R.id.item_comments_list_line2_text) }
+    }
+
+    class SubmitComment(parent: Matcher<View>) : KRecyclerItem<SubmitComment>(parent) {
+        val newCommentEditText: KEditText = KEditText(parent) { withId(R.id.item_comment_new_comment_et) }
+        val submitCommentButton = KButton(parent) { withId(R.id.item_comment_new_send_ib)}
+    }
+
+
+    class SubmitWithMetrics(parent: Matcher<View>) : KRecyclerItem<SubmitWithMetrics>(parent) {
+        val markingButton: KButton = KButton(parent) { withId(R.id.item_clazzworksubmission_marking_button_with_extra_button) }
+    }
 
 }

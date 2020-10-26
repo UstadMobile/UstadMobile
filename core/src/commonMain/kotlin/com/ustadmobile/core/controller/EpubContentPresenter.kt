@@ -137,6 +137,8 @@ class EpubContentPresenter(context: Any,
     @Volatile
     private var mNavDocument: EpubNavDocument? = null
 
+    private val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 100
@@ -163,7 +165,6 @@ class EpubContentPresenter(context: Any,
             return //no one is really logged in
 
         GlobalScope.launch {
-            val db: UmAppDatabase = on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
             val contentEntry =  db.contentEntryDao.findByUid(contentEntryUid) ?: return@launch
             val progress = ((maxPageReached + 1) * 100) / max(linearSpineUrls.size, 1)
             xapiStatementEndpoint.storeProgressStatement(accountManager.activeAccount,
@@ -215,8 +216,14 @@ class EpubContentPresenter(context: Any,
             val position : Int = if(arguments.containsKey(EpubContentView.ARG_INITIAL_PAGE_HREF))
                 opf.getLinearSpinePositionByHREF(arguments.getValue(EpubContentView.ARG_INITIAL_PAGE_HREF)) else 0
 
+            val containerTitle = if(!opf.title.isNullOrBlank()) {
+                opf.title
+            } else {
+                db.contentEntryDao.findTitleByUidAsync(contentEntryUid)
+            }
+
             epubContentView.runOnUiThread(Runnable {
-                epubContentView.containerTitle = opf.title
+                epubContentView.containerTitle = containerTitle
                 epubContentView.spineUrls = linearSpineUrls.toList()
                 if (opfCoverImageItem != null) {
                     epubContentView.coverImageUrl = opfCoverImageItem.href?.let {
@@ -295,7 +302,7 @@ class EpubContentPresenter(context: Any,
     private fun updateWindowTitle() {
         val relativeHref = opfBaseUrl?.let { linearSpineUrls[mCurrentPage].substringAfter(it, "") } ?: ""
         if(mCurrentPage == mCurrentPage)
-            view.windowTitle = pageTitles[mCurrentPage] ?:  mNavDocument?.getNavByHref(relativeHref)?.title
+            view.windowTitle =  mNavDocument?.getNavByHref(relativeHref)?.title ?: pageTitles[mCurrentPage]
                     ?: view.containerTitle ?: ""
     }
 

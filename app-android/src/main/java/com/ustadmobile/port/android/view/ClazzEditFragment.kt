@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
+import com.toughra.ustadmobile.R.id.bitmask_edit_dest
 import com.toughra.ustadmobile.databinding.FragmentClazzEditBinding
 import com.toughra.ustadmobile.databinding.ItemScheduleBinding
 import com.ustadmobile.core.controller.BitmaskEditPresenter
@@ -136,7 +137,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     override fun showFeaturePicker() {
         onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(LongWrapper(entity?.clazzFeatures ?: 0L), R.id.bitmask_edit_dest,
+        navigateToEditEntity(LongWrapper(entity?.clazzFeatures ?: 0L), bitmask_edit_dest,
                 LongWrapper::class.java, destinationResultKey = CLAZZ_FEATURES_KEY)
     }
 
@@ -167,7 +168,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.clazz)
+        setEditFragmentTitle(R.string.add_a_new_class, R.string.edit_clazz)
 
         val navController = findNavController()
 

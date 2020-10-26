@@ -2,9 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import com.toughra.ustadmobile.R
@@ -54,6 +52,12 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             field = value
         }
 
+    override var editOptionVisible: Boolean = false
+        set(value) {
+            activity?.invalidateOptionsMenu()
+            field = value
+        }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         val mTitle = arguments?.get(ARG_PARENT_ENTRY_TITLE)
@@ -65,9 +69,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
         mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
                 arguments?.get(UstadView.ARG_LISTMODE).toString(), viewLifecycleOwner, di)
-        val createNewText = requireContext().getString(R.string.add_a_new,
-                requireContext().getString(R.string.content_editor_create_new_title))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+            requireContext().getString(R.string.add_new_content))
         return view
     }
 
@@ -81,9 +84,16 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 (mDataRecyclerViewAdapter as? ContentEntryListRecyclerAdapter)?.onLocalAvailabilityUpdated(availabilityMap)
             }
         }
+        setHasOptionsMenu(true)
 
         super.onViewCreated(view, savedInstanceState)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_entrylist_options, menu)
+        menu.findItem(R.id.edit).isVisible = editOptionVisible
+    }
+
 
     private var mCurrentPagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
 
@@ -94,6 +104,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         if(localAvailabilityCallbackVal != null){
             mCurrentPagedList?.removeWeakCallback(localAvailabilityCallbackVal)
         }
+
 
         if(localAvailabilityCallbackVal != null && t != null) {
             localAvailabilityCallbackVal.pagedList = t
@@ -120,8 +131,18 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
      * when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
+        if (view?.id == R.id.item_createnew_layout)
             mPresenter?.handleClickCreateNewFab()
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.edit -> {
+                mPresenter?.handleEditFolder()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onDestroyView() {
@@ -170,7 +191,11 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
             override fun areContentsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
                                             newItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer): Boolean {
-                return oldItem == newItem
+                return oldItem.title == newItem.title &&
+                        oldItem.description == newItem.description &&
+                        oldItem.contentTypeFlag == newItem.contentTypeFlag &&
+                        oldItem.mostRecentContainer?.fileSize == newItem.mostRecentContainer?.fileSize &&
+                        oldItem.thumbnailUrl == newItem.thumbnailUrl
             }
         }
     }

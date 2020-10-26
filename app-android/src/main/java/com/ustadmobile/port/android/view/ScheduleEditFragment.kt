@@ -38,7 +38,7 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setEditFragmentTitle(R.string.schedule)
+        setEditFragmentTitle(R.string.add_a_schedule, R.string.edit_schedule)
     }
 
     override fun onDestroyView() {

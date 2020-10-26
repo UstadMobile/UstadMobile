@@ -30,12 +30,17 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
         super.onCreate(savedState)
         filterByClazzWorkUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: -1
         selectedSortOption = SORT_OPTIONS[0]
-        updateListOnView()
+
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         //We never add anything here.
         return false
+    }
+
+    override suspend fun onLoadFromDb() {
+        super.onLoadFromDb()
+        updateListOnView()
     }
 
     private fun updateListOnView() {

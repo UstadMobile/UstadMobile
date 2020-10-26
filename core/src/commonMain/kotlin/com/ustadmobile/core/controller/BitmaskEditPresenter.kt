@@ -77,9 +77,8 @@ class BitmaskEditPresenter(context: Any, arguments: Map<String, String>, view: B
 
 
         val FLAGS_AVAILABLE = listOf(
-                BitmaskFlag(Clazz.CLAZZ_FEATURE_ACTIVITY, MessageID.activity, false),
                 BitmaskFlag(Clazz.CLAZZ_FEATURE_ATTENDANCE, MessageID.attendance, false),
-                BitmaskFlag(Clazz.CLAZZ_FEATURE_ASSIGNMENT, MessageID.assignments, false)
+                BitmaskFlag(Clazz.CLAZZ_FEATURE_CLAZZWORK, MessageID.clazz_work, false)
         )
     }
 

@@ -34,13 +34,9 @@ package com.ustadmobile.core.impl
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.io.InputStream
 import java.io.*
 import java.util.*
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.atomic.AtomicReference
 import kotlin.collections.ArrayList
 
 
@@ -79,33 +75,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         return ""
     }
 
-
-    /**
-     * Get storage directories
-     *
-     * @param context Platform specific context
-     * @param callback Storage dir list callback
-     */
-
-    actual override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>){
-        val dirList = ArrayList<UMStorageDir>()
-        val systemBaseDir = getSystemBaseDir(context)
-        val contentDirName = getContentDirName(context)
-
-        dirList.add(UMStorageDir(systemBaseDir, getString(MessageID.device, context),
-                removableMedia = false, isAvailable = true, isUserSpecific = false,
-                usableSpace = File(systemBaseDir).usableSpace))
-
-        //Find external directories
-        val externalDirs = findRemovableStorage()
-        for (extDir in externalDirs) {
-            dirList.add(UMStorageDir(UMFileUtil.joinPaths(extDir!!, contentDirName!!),
-                    getString(MessageID.memory_card, context),
-                    true, true, false, false))
-        }
-
-        callback.onDone(dirList)
-    }
 
     actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> {
         val dirList = ArrayList<UMStorageDir>()

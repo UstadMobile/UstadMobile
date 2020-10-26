@@ -9,13 +9,15 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 
-class ClazzWorkQuestionAndOptionsWithResponseRA(var studentMode: Boolean)
+class ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter()
     : ListAdapter<ClazzWorkQuestionAndOptionWithResponse,
-        ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder>(
+        ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder>(
         ClazzWorkDetailOverviewFragment.DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE) {
 
     class ClazzWorkQuestionViewHolder(val binding: ItemClazzworkquestionandoptionswithresponseBinding)
         : RecyclerView.ViewHolder(binding.root)
+
+    private var viewHolder: ClazzWorkQuestionViewHolder? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkQuestionViewHolder {
         val viewHolder = ClazzWorkQuestionViewHolder(
@@ -24,15 +26,18 @@ class ClazzWorkQuestionAndOptionsWithResponseRA(var studentMode: Boolean)
         viewHolder.binding.freeTextType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT
         viewHolder.binding.quizType = ClazzWorkQuestion.CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE
         viewHolder.binding.clazzWorkQuizType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
-        viewHolder.binding.studentMode = studentMode?:false
         return viewHolder
     }
 
     override fun onBindViewHolder(holder: ClazzWorkQuestionViewHolder, position: Int) {
         holder.binding.clazzWorkQuestionAndOptionsWithResponse = getItem(position)
-        holder.binding.studentMode = studentMode
         holder.itemView.tag = getItem(position).clazzWorkQuestion.clazzWorkQuestionUid
         holder.binding.itemClazzworkquestionandoptionswithresponseAnswerEt.tag =
                 getItem(position).clazzWorkQuestion.clazzWorkQuestionUid
+    }
+
+    override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+        super.onDetachedFromRecyclerView(recyclerView)
+        viewHolder = null
     }
 }

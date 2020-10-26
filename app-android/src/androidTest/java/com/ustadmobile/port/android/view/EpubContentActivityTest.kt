@@ -34,12 +34,14 @@ import org.junit.runner.RunWith
 import java.io.File
 
 
-@AdbScreenRecord("KAS Epub content screen test")
-class EpubContentActivityKasTest : TestCase() {
+@AdbScreenRecord("Epub content screen test")
+class EpubContentActivityTest : TestCase() {
 
     private lateinit var container: Container
 
     private lateinit var containerTmpDir: File
+
+    private lateinit var contentEntry: ContentEntry
 
     @JvmField
     @Rule
@@ -57,7 +59,7 @@ class EpubContentActivityKasTest : TestCase() {
 
     @Before
     fun setUp() {
-        val contentEntry = ContentEntry().apply {
+        contentEntry = ContentEntry().apply {
             leaf = true
             contentEntryUid = dbRule.db.contentEntryDao.insert(this)
         }
@@ -82,34 +84,45 @@ class EpubContentActivityKasTest : TestCase() {
     fun givenValidEpubContent_whenCreated_shouldBeLoadedToTheView() {
         val intent = Intent(context, EpubContentActivity::class.java)
         intent.putExtra(UstadView.ARG_CONTAINER_UID, container.containerUid.toString())
+        intent.putExtra(UstadView.ARG_CONTENT_ENTRY_UID, contentEntry.contentEntryUid.toString())
         val activityScenario = ActivityScenario.launch<EpubContentActivity>(intent)
         activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 
-        EpubScreen {
+        init {
+            
+        }.run {
 
-            epubTitle {
-                hasText("ರುಮ್ನಿಯಾ")
-                isDisplayed()
-            }
-            activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
+            EpubScreen {
 
-            recycler {
+                epubTitle {
+                    hasText("ರುಮ್ನಿಯಾ")
+                    isDisplayed()
+                }
+                activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 
-                firstChild<EpubScreen.EpubPage> {
-                    KWebView {
-                        withTag("1.xhtml")
-                        withId(R.id.epub_contentview)
-                    }.invoke {
-                        ViewMatchers.isDisplayed()
-                        ViewMatchers.isJavascriptEnabled()
-                        withElement(Locator.CLASS_NAME, "authors") {
-                            hasText("Rukmini Banerji")
+                recycler {
+
+                    firstChild<EpubScreen.EpubPage> {
+                        KWebView {
+                            withTag("1.xhtml")
+                            withId(R.id.epub_contentview)
+                        }.invoke {
+                            ViewMatchers.isDisplayed()
+                            ViewMatchers.isJavascriptEnabled()
+                            withElement(Locator.CLASS_NAME, "authors") {
+                                hasText("Rukmini Banerji")
+                            }
                         }
                     }
                 }
+
             }
 
+
+
         }
+
+
     }
 
     @AdbScreenRecord("Given valid epub content opened when table of content item is clicked should be loaded to the view")
@@ -117,6 +130,7 @@ class EpubContentActivityKasTest : TestCase() {
     fun givenValidEpubContentOpened_whenTableOfContentItemIsClicked_shouldLoadThatItemIntoTheView() {
         val intent = Intent(context, EpubContentActivity::class.java)
         intent.putExtra(UstadView.ARG_CONTAINER_UID, container.containerUid.toString())
+        intent.putExtra(UstadView.ARG_CONTENT_ENTRY_UID, contentEntry.contentEntryUid.toString())
         val activityScenario = ActivityScenario.launch<EpubContentActivity>(intent)
         activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 

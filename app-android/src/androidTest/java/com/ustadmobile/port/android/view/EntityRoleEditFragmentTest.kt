@@ -17,10 +17,12 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.EntityRole
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.generated.MessageIDMap
+import com.ustadmobile.port.android.screen.EntityRoleEditScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.clickOptionMenu
@@ -51,15 +53,7 @@ class EntityRoleEditFragmentTest {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
     val screenRecordRule = AdbScreenRecordRule()
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     private val context = ApplicationProvider.getApplicationContext<Application>()
 
@@ -108,11 +102,11 @@ class EntityRoleEditFragmentTest {
 
         launchFragment(true)
 
-        onView(withId(R.id.fragment_entityrole_edit_role_tiet)).check(matches(isDisplayed()))
-
-
-
-
+        EntityRoleEditScreen{
+            editRoleLayout{
+                isDisplayed()
+            }
+        }
 
     }
 
@@ -136,7 +130,6 @@ class EntityRoleEditFragmentTest {
             }
         }
 
-        onIdle()
 
         //Soft keyboard tend to hide views, when try to type will throw exception so instead of type we'll replace text
         if(fillForm){

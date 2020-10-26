@@ -11,6 +11,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
@@ -35,14 +36,11 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzMemberAndClazzWorkWithSubmission? {
 
         filterByClazzWorkUid = arguments[ARG_CLAZZWORK_UID]?.toLong()?:0L
         filterByClazzMemberUid = arguments[ARG_CLAZZMEMBER_UID]?.toLong() ?: 0L
-    }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzMemberAndClazzWorkWithSubmission? {
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val clazzMemberWithSubmission = withTimeoutOrNull(2000){
@@ -50,32 +48,29 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                     filterByClazzMemberUid)
         }
 
+        val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
+            db.clazzMemberDao.findByUid(filterByClazzMemberUid)
+        }
+
+        val clazzWorkWithSubmission = withTimeoutOrNull(2000){
+            db.clazzWorkDao.findWithSubmissionByUidAndPerson(filterByClazzWorkUid,
+                    clazzMemberWithSubmission?.clazzMemberPersonUid?:0L)
+        }?: ClazzWorkWithSubmission()
 
         unmarkedMembers = withTimeoutOrNull(2000){
             db.clazzWorkSubmissionDao.findCompletedUnMarkedSubmissionsByClazzWorkUid(filterByClazzWorkUid)
         }?: listOf()
 
         if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid ==
-                clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid ){
-            view.isMarkingFinished == false
-        }else if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid !=
+                clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid ) !view.isMarkingFinished
+        else if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid !=
                 clazzMemberWithSubmission?.submission?.clazzWorkSubmissionUid){
             view.isMarkingFinished = true
         }else {
             view.isMarkingFinished = unmarkedMembers.size > 1
         }
 
-        val clazzMember: ClazzMember? = withTimeoutOrNull(2000){
-            db.clazzMemberDao.findByUid(filterByClazzMemberUid)
-        }
-        val clazzWorkWithSubmission = withTimeoutOrNull(2000){
-            db.clazzWorkDao.findWithSubmissionByUidAndPerson(filterByClazzWorkUid,
-                    clazzMemberWithSubmission?.clazzMemberPersonUid?:0L)
-        }?: ClazzWorkWithSubmission()
-
-        val submission = clazzMemberWithSubmission?.submission
-        if(submission != null && submission.clazzWorkSubmissionUid != 0L &&
-                clazzMemberWithSubmission.clazzWork?.clazzWorkSubmissionType
+        if(clazzMemberWithSubmission?.clazzWork?.clazzWorkSubmissionType
                 == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
             val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
                     withTimeoutOrNull(2000) {
@@ -108,16 +103,33 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                         qResponse.first())
                 }
 
-            view.submissionQuestionAndOptionsWithResponse =
-                    DoorMutableLiveData(questionsAndOptionsWithResponseList)
+
+
+            //If submitted - show view data
+            if(clazzWorkWithSubmission.clazzWorkSubmission != null
+                    && clazzWorkWithSubmission.clazzWorkSubmission?.clazzWorkSubmissionUid != 0L){
+                view.takeIf { it.quizSubmissionViewData == null
+                }?.quizSubmissionViewData = DoorMutableLiveData(
+                        questionsAndOptionsWithResponseList)
+            }else{
+                //No submission
+                view.takeIf { it.quizSubmissionViewData == null
+                }?.quizSubmissionViewData = DoorMutableLiveData(
+                        listOf())
+                view.takeIf { it.quizSubmissionEditData == null
+                }?.quizSubmissionEditData = DoorMutableLiveData(
+                        questionsAndOptionsWithResponseList)
+            }
+
+
         }
 
         val privateComments = withTimeoutOrNull(2000) {
-            db.commentsDao.findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToLive(
+            repo.commentsDao.findPrivateCommentsByEntityTypeAndUidAndPersonAndPersonToLive(
                     ClazzWork.CLAZZ_WORK_TABLE_ID, clazzWorkWithSubmission.clazzWorkUid,
                     clazzMember?.clazzMemberPersonUid?:0L)
         }
-        view.privateComments = privateComments
+        view.takeIf { it.privateComments == null}?.privateComments = privateComments
 
         newCommentItemListener.fromPerson = loggedInPersonUid
         newCommentItemListener.toPerson = clazzMember?.clazzMemberPersonUid?:0L
@@ -129,7 +141,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                         filterByClazzWorkUid)
 
         view.runOnUiThread(Runnable {
-            view.clazzWorkMetrics = clazzWorkWithMetrics
+            view.takeIf { it.clazzWorkMetrics == null}?.clazzWorkMetrics = clazzWorkWithMetrics
         })
 
         return clazzMemberWithSubmission
@@ -154,6 +166,57 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         val entityVal = entity
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null,
                 entityVal)
+    }
+
+    fun handleClickSubmitOnBehalf(){
+        val questionsWithOptionsAndResponse =
+                view.quizSubmissionEditData?.getValue()?: listOf()
+        val newOptionsAndResponse = mutableListOf<ClazzWorkQuestionAndOptionWithResponse>()
+
+        val clazzWorkWithSubmission = entity
+        GlobalScope.launch {
+            for (everyResult in questionsWithOptionsAndResponse) {
+                val response = everyResult.clazzWorkQuestionResponse
+                if(response.clazzWorkQuestionResponseUid == 0L) {
+                    response.clazzWorkQuestionResponseUid =
+                            repo.clazzWorkQuestionResponseDao.insertAsync(response)
+                }else{
+                    repo.clazzWorkQuestionResponseDao.updateAsync(response)
+                }
+                everyResult.clazzWorkQuestionResponse = response
+                newOptionsAndResponse.add(everyResult)
+            }
+
+            val loggedInPersonUid = accountManager.activeAccount.personUid
+
+            val studentClazzMember: ClazzMember? = withTimeoutOrNull(2000){
+                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(
+                        entity?.person?.personUid?:0L,
+                        entity?.clazzWork?.clazzWorkClazzUid?:0L)
+            }
+
+            val submission = entity?.submission ?: ClazzWorkSubmission().apply {
+                clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWork?.clazzWorkUid ?: 0L
+                clazzWorkSubmissionClazzMemberUid = studentClazzMember?.clazzMemberUid ?: 0L
+                clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
+                clazzWorkSubmissionInactive = false
+                clazzWorkSubmissionPersonUid = loggedInPersonUid
+            }
+
+            submission.clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
+
+            if(submission.clazzWorkSubmissionUid == 0L) {
+                submission.clazzWorkSubmissionUid = repo.clazzWorkSubmissionDao.insertAsync(submission)
+            }else{
+                repo.clazzWorkSubmissionDao.updateAsync(submission)
+            }
+            clazzWorkWithSubmission?.submission = submission
+            view.runOnUiThread(Runnable {
+                view.entity = clazzWorkWithSubmission
+                view.quizSubmissionEditData = DoorMutableLiveData(newOptionsAndResponse)
+            })
+
+        }
     }
 
     fun handleClickSaveAndMarkNext(showNext: Boolean?){

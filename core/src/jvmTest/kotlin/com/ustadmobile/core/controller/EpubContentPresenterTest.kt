@@ -203,7 +203,7 @@ class EpubContentPresenterTest {
         verify(mockEpubView).scrollToSpinePosition(3, "anchor")
     }
 
-    @Test
+    //@Test
     fun givenValidEpub_whenHandlePageChangeCalledAndTitleIsKnown_thenShouldSetWindowTitle() {
         val args = HashMap<String, String>()
         args[UstadView.ARG_CONTAINER_UID] = epubContainer!!.containerUid.toString()
