@@ -817,4 +817,56 @@ Content is provided under license by external content providers. Ustad Mobile, u
     directly -->
     <string name="record_for_student">Record for student</string>
 
+
+    <!--Goldozi-->
+    <string name="product">Product</string>
+    <string name="products">Products</string>
+    <string name="sales">Sales</string>
+    <string name="wes">WEs</string>
+    <string name="x_in_stock">%1$s in stock</string>
+    <string name="x_afs">%1$s AFS</string>
+    <string name="price">Price</string>
+    <string name="receive_inventory">Receive inventory</string>
+    <string name="record_sale">Record sale</string>
+    <string name="stock">Stock</string>
+    <string name="history">History</string>
+    <string name="x_item_by_y">%1$s by %1$s</string>
+    <string name="edit_product">Edit product</string>
+    <string name="edit_category">Edit category</string>
+    <string name="title_english">Title (English)</string>
+    <string name="title_dari">Title (Dari)</string>
+    <string name="title_pashto">Title (Pashto)</string>
+    <string name="desc_english">Desc (English)</string>
+    <string name="desc_dari">Desc (Dari)</string>
+    <string name="desc_pashto">Desc (Pashto)</string>
+    <string name="price_afn">Price (AFN)</string>
+    <string name="categories">Categories</string>
+    <string name="add_category">Add category</string>
+    <string name="add_we">Add woman embroiderer</string>
+    <string name="all_sales">All sales</string>
+    <string name="pre_orders">Pre-orders</string>
+    <string name="payments_due">Payments due</string>
+    <string name="afs">Afs</string>
+    <string name="sale">Sale</string>
+    <string name="customer">Customer</string>
+    <string name="province">Province</string>
+    <string name="items">Items</string>
+    <string name="quantity">Quantity</string>
+    <string name="total">Total</string>
+    <string name="order_total">Order total</string>
+    <string name="discount">Discount</string>
+    <string name="deliveries">Deliveries</string>
+    <string name="delivery">Delivery</string>
+    <string name="payments">Payments</string>
+    <string name="payment">Payment</string>
+    <string name="balance_due">Balance due</string>
+    <string name="order_notes">Order notes</string>
+    <string name="sale_item_edit">Sale item edit</string>
+    <string name="price_each">Price each (Afs)</string>
+    <string name="delivery_deadline">Delivery deadline</string>
+    <string name="record_delivery">Record delivery</string>
+    <string name="x_product_pieces_y">%1$s : pieces %1$s</string>
+    <string name="x_total_sales">%1$s Total total sales</string>
+
+
 </resources>

@@ -163,6 +163,24 @@
     </fragment>
 
     <fragment
+        android:id="@+id/home_product_dest"
+        android:name="com.ustadmobile.port.android.view.ProductListFragment"
+        android:label="@string/products">
+    </fragment>
+
+    <fragment
+        android:id="@+id/home_sales_dest"
+        android:name="com.ustadmobile.port.android.view.ProductListFragment"
+        android:label="@string/sales">
+    </fragment>
+
+    <fragment
+        android:id="@+id/home_wes_dest"
+        android:name="com.ustadmobile.port.android.view.ProductListFragment"
+        android:label="@string/wes">
+    </fragment>
+
+    <fragment
         android:id="@+id/content_entry_list_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment" />
 

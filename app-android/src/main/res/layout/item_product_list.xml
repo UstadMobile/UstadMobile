@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.ProductWithInventoryCount"/>
+        <import type="com.ustadmobile.port.android.view.ProductListFragment"/>
+        <import type="com.ustadmobile.port.android.view.ProductListRecyclerAdapter"/>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+
+        <variable
+            name="product"
+            type="ProductWithInventoryCount" />
+
+        <variable
+            name="itemListener"
+            type="com.ustadmobile.core.controller.ProductListItemListener" />
+
+        <variable
+            name="selectablePagedListAdapter"
+            type="ProductListRecyclerAdapter" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, product)}"
+        app:onSelectableItemClicked="@{() -> itemListener.onClickProduct(product)}"
+        android:background="@drawable/bg_listitem"
+        >
+
+        <TextView
+            android:id="@+id/item_school_list_item_school_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:text="@{product.productName}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+            android:textStyle="bold"
+            app:layout_constraintStart_toEndOf="@+id/imageView10"
+            app:layout_constraintTop_toTopOf="@+id/imageView10"
+            tools:text="Pink Hat" />
+
+
+        <TextView
+            android:id="@+id/item_product_list_price"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginEnd="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
+            android:text="@{@string/x_afs(product.productBasePrice)}"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/imageView10"
+            tools:text="800 AFS" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrierLoc"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="item_school_list_item_school_name"
+            />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_school_list_item_location_iv"
+            android:layout_width="@dimen/dimen_16dp"
+            android:layout_height="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_10dp"
+            android:visibility="gone"
+            android:contentDescription="@string/people"
+            android:tint="?colorOnIconTint"
+            app:layout_constraintStart_toEndOf="@+id/imageView10"
+            app:layout_constraintTop_toBottomOf="@+id/barrierLoc"
+            app:srcCompat="@drawable/ic_location_pin_24dp" />
+
+        <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            android:id="@+id/item_school_list_item_location_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:text="@{product.productDesc}"
+            android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(product.productDesc)}"
+            tools:text="These are pink hats"
+            app:layout_constraintStart_toEndOf="@+id/item_school_list_item_location_iv"
+            app:layout_constraintTop_toBottomOf="@+id/barrierLoc" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/barrierMemberDetails"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="item_school_list_item_location_name"
+            />
+
+        <ImageView
+            app:tint="?colorOnIconTint"
+            android:id="@+id/item_school_list_item_members_iv"
+            android:layout_width="@dimen/dimen_16dp"
+            android:layout_height="@dimen/dimen_16dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:visibility="gone"
+            android:contentDescription="@string/members"
+            app:layout_constraintStart_toEndOf="@+id/imageView10"
+            app:layout_constraintTop_toBottomOf="@+id/barrierMemberDetails"
+            app:srcCompat="@drawable/ic_people_black_24dp" />
+
+        <TextView
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            android:id="@+id/item_school_list_item_members_tv"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:text="@{@string/x_in_stock(product.stock)}"
+            tools:text="15 in stock"
+            app:layout_constraintStart_toEndOf="@+id/item_school_list_item_members_iv"
+            app:layout_constraintTop_toBottomOf="@+id/barrierMemberDetails" />
+
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/imageView10"
+            android:layout_width="@dimen/dimen_80dp"
+            android:layout_height="@dimen/dimen_80dp"
+            android:layout_marginStart="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            android:contentDescription="@string/school"
+            android:tint="?colorOnIconTint"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_launcher_icon" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

@@ -208,8 +208,11 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     }
 
     companion object {
-        val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest, R.id.home_clazzlist_dest,
-                R.id.home_personlist_dest, R.id.home_schoollist_dest, R.id.report_list_dest)
+//        val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest, R.id.home_clazzlist_dest,
+//                R.id.home_personlist_dest, R.id.home_schoollist_dest, R.id.report_list_dest)
+
+        val BOTTOM_NAV_DEST = listOf(R.id.home_product_dest, R.id.home_sales_dest,
+                R.id.home_wes_dest, R.id.home_content_dest)
 
         val DEST_TO_HIDE_BOTTOM_NAV = listOf(R.id.login_dest, R.id.account_get_started_dest,
                 R.id.workspace_enterlink_dest, R.id.settings_list_dest, R.id.person_edit_register_dest,
