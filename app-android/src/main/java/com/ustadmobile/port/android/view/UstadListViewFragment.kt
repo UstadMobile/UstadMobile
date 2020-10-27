@@ -120,12 +120,9 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
             val systemImpl = UstadMobileSystemImpl.instance
             val fragmentContext = fragmentHost?.requireContext() ?: return false
             fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
-                menu.add(0, item.commandId, index,
-                        systemImpl.getString(item.messageId, fragmentContext)).apply {
-                    val drawable = fragmentContext.getDrawable(SELECTION_ICONS_MAP[item]
-                            ?: R.drawable.ic_delete_black_24dp) ?: return@forEachIndexed
-                    DrawableCompat.setTint(drawable, ContextCompat.getColor(fragmentContext, R.color.onBackgroundColor))
-                    icon = drawable
+                val optionText = systemImpl.getString(item.messageId, fragmentContext)
+                menu.add(0, item.commandId, index, optionText).apply {
+                    setIcon(SELECTION_ICONS_MAP[item] ?: R.drawable.ic_delete_black_24dp)
                 }
             }
             return true

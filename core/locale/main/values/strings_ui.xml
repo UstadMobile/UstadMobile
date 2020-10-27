@@ -822,4 +822,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
     directly -->
     <string name="record_for_student">Record for student</string>
 
+    <!-- This is a popup that shows after users have moved a number of content entries. %1$s will
+    be replaced with the number of content entries that they moved
+    -->
+    <string name="moved_x_entries">Moved %1$s entries</string>
+
 </resources>

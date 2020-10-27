@@ -8,8 +8,6 @@ import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_DOWNLOADED_
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_LIBRARIES_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_RECYCLED_CONTENT
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_FOLDER_FILTER
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_MOVING_CONTENT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -63,7 +61,6 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         contentFilter = arguments[ARG_CONTENT_FILTER].toString()
         onlyFolderFilter = arguments[ARG_FOLDER_FILTER]?.toBoolean()?: false
         parentEntryUidStack += arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0L
-        movingSelectedItems = arguments[ARG_MOVING_CONTENT]?.split(",")?.map { it.toLong() }
         loggedPersonUid = accountManager.activeAccount.personUid
         showHiddenEntries = false
         getAndSetList()
@@ -128,26 +125,14 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
             listOf(SelectionOption.MOVE, SelectionOption.UNHIDE)
     }
 
-    override fun onClickSelectContentEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
-        GlobalScope.launch(doorMainDispatcher()){
-            val selectedItems = movingSelectedItems
-            if(!selectedItems.isNullOrEmpty()){
-                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(entry.contentEntryUid, selectedItems)
-            }
-            super.handleClickEntry(entry)
-            view.finishWithResult(listOf(entry))
-            view.finishPage(mapOf(
-                    ContentEntryList2View.ARG_MOVING_COUNT to selectedItems?.size.toString(),
-                    ARG_CONTENT_ENTRY_UID to entry.contentEntryUid.toString()))
-        }
-    }
-
     override fun handleClickSelectionOption(selectedItem: List<ContentEntry>, option: SelectionOption) {
         GlobalScope.launch(doorMainDispatcher()) {
             when (option) {
                 SelectionOption.MOVE -> {
-                    val listOfSelectedEntries = selectedItem.map { (it as ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer).contentEntryParentChildJoin?.cepcjUid }.joinToString(",")
-                    view.selectEntry(listOfSelectedEntries)
+                    val listOfSelectedEntries = selectedItem.mapNotNull {
+                        (it as? ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer)?.contentEntryParentChildJoin?.cepcjUid
+                    }.joinToString(",")
+                    view.showMoveEntriesFolderPicker(listOfSelectedEntries)
                 }
                 SelectionOption.HIDE -> {
                     repo.contentEntryDao.toggleVisibilityContentEntryItems(true, selectedItem.map { it.contentEntryUid })
@@ -155,6 +140,21 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
                 SelectionOption.UNHIDE -> {
                     repo.contentEntryDao.toggleVisibilityContentEntryItems(false, selectedItem.map { it.contentEntryUid })
                 }
+            }
+        }
+    }
+
+    fun handleMoveContentEntries(parentChildJoinUids: List<Long>, destContentEntryUid: Long) {
+        if(!parentChildJoinUids.isNullOrEmpty()){
+            GlobalScope.launch(doorMainDispatcher()) {
+                repo.contentEntryParentChildJoinDao.moveListOfEntriesToNewParent(destContentEntryUid, parentChildJoinUids)
+                view.showSnackBar(systemImpl.getString(MessageID.moved_x_entries, context).replace("%1\$s",
+                    parentChildJoinUids.size.toString()), actionMessageId = MessageID.open_folder,
+                    action = {
+                        systemImpl.go(ContentEntryList2View.VIEW_NAME,
+                            mapOf(ARG_PARENT_ENTRY_UID to destContentEntryUid.toString(),
+                                    ARG_CONTENT_FILTER to ARG_LIBRARIES_CONTENT), context)
+                    })
             }
         }
     }

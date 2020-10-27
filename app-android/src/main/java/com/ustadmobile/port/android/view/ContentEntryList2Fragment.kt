@@ -16,10 +16,8 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.ext.observeResult
-import com.ustadmobile.core.util.ext.setAllFromMap
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.*
@@ -95,14 +93,11 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
         setHasOptionsMenu(true)
 
-        var moveCount = navController.currentBackStackEntry?.savedStateHandle?.get<String>(ContentEntryList2View.ARG_MOVING_COUNT)
-        if(!moveCount.isNullOrBlank()){
-            var entryUid = navController.currentBackStackEntry?.savedStateHandle?.get<String>(ARG_CONTENT_ENTRY_UID)
-            showSnackBar("Moved $moveCount entries", {
-                navController.navigate(R.id.content_entry_list_dest, bundleOf(
-                        UstadView.ARG_PARENT_ENTRY_UID to entryUid,
-                        ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT))
-            }, MessageID.open_folder)
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+            ContentEntry::class.java) {
+            val selectedParentChildJoinUids = navController.currentBackStackEntry?.savedStateHandle
+                    ?.get<String>(KEY_SELECTED_ITEMS)?.split(",")?.map { it.trim().toLong() } ?: return@observeResult
+            mPresenter?.handleMoveContentEntries(selectedParentChildJoinUids, it.first().contentEntryUid )
         }
 
         super.onViewCreated(view, savedInstanceState)
@@ -155,20 +150,15 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             mPresenter?.handleClickCreateNewFab()
     }
 
-    override fun selectEntry(listOfSelectedEntries: String) {
+    override fun showMoveEntriesFolderPicker(selectedContentEntryParentChildJoinUids: String) {
+        findNavController().currentBackStackEntry?.savedStateHandle?.set(
+                KEY_SELECTED_ITEMS, selectedContentEntryParentChildJoinUids)
         navigateToPickEntityFromList(ContentEntry::class.java,
-                R.id.content_entry_list_dest,
+                R.id.content_entry_list_select_folder,
                 bundleOf(UstadView.ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
                         ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT,
-                        ContentEntryList2View.ARG_MOVING_CONTENT to listOfSelectedEntries,
                         ContentEntryList2View.ARG_FOLDER_FILTER to true.toString()))
     }
-
-    override fun finishPage(bundle: Map<String, String>) {
-        findNavController().previousBackStackEntry?.savedStateHandle?.setAllFromMap(bundle)
-        findNavController().popBackStack()
-    }
-
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -221,6 +211,12 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 ContentEntry.TYPE_INTERACTIVE_EXERCISE to MessageID.interactive,
                 ContentEntry.TYPE_AUDIO to MessageID.audio
         )
+
+        /**
+         * Key used when saving selected items to the savedStateHandle
+         */
+        const val KEY_SELECTED_ITEMS = "selected_items"
+
 
         val DIFF_CALLBACK: DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> = object
             : DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>() {

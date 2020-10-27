@@ -12,9 +12,13 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
      */
     fun showDownloadDialog(args: Map<String, String>)
 
-    fun selectEntry(listOfSelectedEntries: String)
-
-    fun finishPage(bundle: Map<String, String>)
+    /**
+     * Show ContentEntryList in picker mode so the user can select a folder to move entries to.
+     *
+     * @param selectedContentEntryParentChildJoinUids a string which is a comma separated list of
+     * the selected ContentEntryParentChildJoinUids (e.g. that should be saved to the savedStateHandle)
+     */
+    fun showMoveEntriesFolderPicker(selectedContentEntryParentChildJoinUids: String)
 
     var title: String?
 
