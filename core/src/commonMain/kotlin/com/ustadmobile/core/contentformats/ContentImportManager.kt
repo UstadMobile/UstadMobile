@@ -4,7 +4,7 @@ import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.lib.db.entities.ContainerUploadJob
 
 /**
- *
+ * Manager that handles importing content
  */
 interface ContentImportManager {
 
@@ -18,10 +18,14 @@ interface ContentImportManager {
     suspend fun extractMetadata(filePath: String) : ImportedContentEntryMetaData?
 
     /**
-     * Queue the given file path to be imported and then uploaded. On Android this should start a
-     * foreground service that will run the import and upload. On JVM this can just be forked into
-     * the background.
+     * Queue the given file path to be imported, and (if required), then uploaded. This would
+     * be done using a LiveDataWorkQueue and ImportJobRunner. On Android this should also start a
+     * foreground service that can display the progress of the job for the user.
      *
+     * @param filePath The path to the file that should be imported
+     * @param metadata ImportedContentEntryMetaData for the entry to be imported
+     *
+     * @return ImportJob (that is saved into the database)
      */
     suspend fun queueImportContentFromFile(filePath: String, metadata: ImportedContentEntryMetaData): ContainerUploadJob
 

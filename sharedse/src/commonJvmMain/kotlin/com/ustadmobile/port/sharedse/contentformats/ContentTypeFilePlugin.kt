@@ -9,6 +9,7 @@ import java.net.URI
 /**
  * @author kileha3
  */
+@Deprecated("See update ContentTypePlugin")
 interface ContentTypeFilePlugin : ContentTypePlugin {
 
     /**
