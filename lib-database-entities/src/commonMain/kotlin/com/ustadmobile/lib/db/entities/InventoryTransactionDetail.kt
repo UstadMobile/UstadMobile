@@ -2,7 +2,6 @@ package com.ustadmobile.lib.db.entities
 
 import kotlinx.serialization.Serializable
 
-
 /**
  * Person 's POJO for representing a Sale Product's transaction
  */

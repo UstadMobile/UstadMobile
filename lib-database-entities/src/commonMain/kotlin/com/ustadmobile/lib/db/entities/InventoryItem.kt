@@ -41,16 +41,6 @@ open class InventoryItem() {
     @LastChangedBy
     var inventoryItemLCB: Int = 0
 
-    init {
-    }
-
-    constructor(saleProductUid : Long, leUid: Long, selectedWeUid: Long, created: Long):this(){
-        inventoryItemSaleProductUid = saleProductUid
-        inventoryItemWeUid = selectedWeUid
-        inventoryItemDateAdded = created
-        inventoryItemLeUid = leUid
-        inventoryItemActive = true
-    }
 
     companion object{
         const val INVENTORY_ITEM_TABLE_ID = 205
