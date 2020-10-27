@@ -116,13 +116,11 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
             return
         }
 
-        val isAllInActive = t.all {
-            !it.ceInactive
-        }
-        view.selectionOptions = if(isAllInActive)
-            listOf(SelectionOption.MOVE, SelectionOption.HIDE)
-        else
+        view.selectionOptions = if(t.all { it.ceInactive })
             listOf(SelectionOption.MOVE, SelectionOption.UNHIDE)
+        else
+            listOf(SelectionOption.MOVE, SelectionOption.HIDE)
+
     }
 
     override fun handleClickSelectionOption(selectedItem: List<ContentEntry>, option: SelectionOption) {
