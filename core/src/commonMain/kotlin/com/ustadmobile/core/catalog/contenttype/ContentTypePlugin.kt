@@ -1,5 +1,9 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerUploadJob
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+
 /**
  * A ContentTypePlugin provides support to use a specific file type (e.g. EPUB, Xapi Package, etc) on
  * Ustad Mobile. Specifically a plugin is responsible to:
@@ -27,6 +31,10 @@ interface ContentTypePlugin {
     val mimeTypes: Array<String>
 
     val fileExtensions: Array<String>
+
+    suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage?
+
+    suspend fun importToContainer(importJob: ContainerUploadJob, progressListener: (Int) -> Unit): Container
 
 
     companion object {
