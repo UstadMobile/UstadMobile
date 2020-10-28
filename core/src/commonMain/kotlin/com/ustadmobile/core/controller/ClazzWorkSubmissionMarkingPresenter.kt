@@ -161,6 +161,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             db.clazzWorkSubmissionDao.findCompletedUnMarkedSubmissionsByClazzWorkUid(filterByClazzWorkUid)
         }?: listOf()
 
+        //TODO: this first if clause doesn't do anything.
         if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid ==
                 clazzMemberAndClazzWorkWithSubmission?.submission?.clazzWorkSubmissionUid ) !view.isMarkingFinished
         else if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid !=
@@ -231,6 +232,8 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 entityVal)
     }
 
+    //TODO: This is largely the same as what we have in ClazzWorkDetailOverview - what is duplicated
+    // could be moved to an extension function on the database e.g. suspend fun UmAppDatabase.submitClazzWorkResponse(...)
     fun handleClickSubmitOnBehalf(){
         val questionsWithOptionsAndResponse =
                 view.quizSubmissionEditData?.getValue()?: listOf()
@@ -304,6 +307,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             handleClickSaveWithMovement(entityFromView, !next)
         }
 
+        //TODO: Let's not use SystemImpl.go here.
         if(next) {
             val nextClazzMemberUid = unmarkedMembers[0].clazzWorkSubmissionClazzMemberUid
 
@@ -320,6 +324,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             val submission = entity.submission
             //If submission exists
             if(submission  != null) {
+                //TODO: why not just use systemTimeInMillis()?
                 submission.clazzWorkSubmissionDateTimeMarked =
                         UMCalendarUtil.getDateInMilliPlusDays(0)
                 submission.clazzWorkSubmissionMarkerPersonUid =

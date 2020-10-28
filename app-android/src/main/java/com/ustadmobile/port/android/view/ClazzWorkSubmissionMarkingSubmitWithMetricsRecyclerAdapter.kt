@@ -19,6 +19,7 @@ class ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter(clazzWork: Claz
 
     var visible: Boolean = visible
         set(value) {
+            //TODO: what is the point of this setter function, it doesn't do anything other than store the value
             if(field == value)
                 return
 
@@ -28,6 +29,7 @@ class ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter(clazzWork: Claz
 
     var showNext: Boolean = markingLeft
         set(value) {
+            //TODO: what is the point of this setter function, it doesn't do anything other than store the value
             if(field == value)
                 return
 
@@ -56,6 +58,7 @@ class ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter(clazzWork: Claz
         viewHolder = null
     }
 
+    //TODO: This should not be overriden in ListAdapter. We should submit an empty list
     override fun getItemCount(): Int {
         return if(visible) 1 else 0
     }

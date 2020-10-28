@@ -80,6 +80,12 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                                 clazzWorkUid)
                     } ?: listOf()
 
+            //TODO: this is running a query for every question to get the response. We could do one
+            //query to get all the responses from that student for the quiz
+
+            //TODO: this is the same routine as what is happening in the marking fragment.
+            // Suggestion: create an extension function that does this...
+            // e.g. fun List<ClazzWorkQuestionAndOptionRow>.toClazzWorkQuestionAndOptionWithResponse()
             val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
                     questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
                             .map {
@@ -132,8 +138,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
                 ClazzWork.CLAZZ_WORK_TABLE_ID, clazzWorkWithSubmission.clazzWorkUid)
 
         if(view.isStudent) {
-            view.clazzWorkPrivateComments =
-                    repo.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
+            view.clazzWorkPrivateComments = repo.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
                             ClazzWork.CLAZZ_WORK_TABLE_ID, clazzWorkWithSubmission.clazzWorkUid,
                             loggedInPersonUid)
         }
@@ -183,6 +188,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
             val submission = entity?.clazzWorkSubmission ?: ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWorkUid ?: 0L
                 clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid ?: 0L
+                //TODO : why set the time twice?
                 clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
                 clazzWorkSubmissionInactive = false
                 clazzWorkSubmissionPersonUid = loggedInPersonUid

@@ -17,6 +17,7 @@ class ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWork: ClazzMemberAndClazz
     class ScoreEditViewHolder(var itemBinding: ItemClazzworkSubmissionScoreEditBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
+    //TODO: this is never set
     private var viewHolder: ScoreEditViewHolder? = null
     var clazzWorkVal : ClazzMemberAndClazzWorkWithSubmission? = clazzWork
 

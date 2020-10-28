@@ -223,6 +223,8 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             val submission = entity?.submission
             //Don't show the button if submission exists or submission is not required.
             markingEditRecyclerAdapter?.clazzWorkVal = value
+
+            //TODO: this should not be needed - see comment on ClazzWorkSubmissionScoreEditRecyclerAdapter
             markingEditRecyclerAdapter?.notifyDataSetChanged()
 
 
@@ -239,6 +241,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             if(submission != null && submission.clazzWorkSubmissionUid != 0L){
 
                 //Don't show record for student
+                //TODO: control the visibility of this button on the presenter
                 recordForStudentButtonRecyclerAdapter?.visible = false
                 //Show submission heading if type not none
                 if(value?.clazzWork?.clazzWorkSubmissionType != CLAZZ_WORK_SUBMISSION_TYPE_NONE){
@@ -320,6 +323,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
     }
 
     //On click "Record for student" button
+    //TODO: Handle this event in the presenter, let it do the thinking and set properties on the view
     override fun onClickButton(view: View) {
 
         simpleTwoButtonRecyclerAdapter?.visible = true

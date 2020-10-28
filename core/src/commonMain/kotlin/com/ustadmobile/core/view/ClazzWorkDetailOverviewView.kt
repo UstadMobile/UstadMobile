@@ -12,8 +12,12 @@ interface ClazzWorkDetailOverviewView: UstadDetailView<ClazzWorkWithSubmission> 
 
     var clazzWorkContent
             :DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
+
+    //TODO: can we call these editableQuizQuestions (the submission is another entity)
     var quizSubmissionEdit
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>?
+
+    //TODO: can we call these viewOnlyQuizQuestions (the submission is another entity)
     var quizSubmissionView
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>?
     var timeZone: String

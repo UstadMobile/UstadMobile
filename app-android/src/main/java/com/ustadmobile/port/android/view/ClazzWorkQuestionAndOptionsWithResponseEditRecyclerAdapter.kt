@@ -12,7 +12,9 @@ import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 class ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter()
     : ListAdapter<ClazzWorkQuestionAndOptionWithResponse,
         ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder>(
-        ClazzWorkDetailOverviewFragment.DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE) {
+        //TODO: This DiffUtil is wrong for an editable adapter. It must use === (triple equals) otherwise
+        // the data might be saved to a different object.
+        ClazzWorkDetailOverviewFragment.DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE_EDIT) {
 
     class ClazzWorkQuestionViewHolder(val binding: ItemClazzworkquestionandoptionswithresponseBinding)
         : RecyclerView.ViewHolder(binding.root)

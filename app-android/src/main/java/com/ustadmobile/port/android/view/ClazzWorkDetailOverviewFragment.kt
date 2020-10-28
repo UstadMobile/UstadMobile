@@ -67,12 +67,14 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?> {
         t ->
         run {
+            //TODO : this should be set either way e.g. if the content goes away, .visible should get set to false
             if (t?.size ?: 0 > 0) {
                 contentHeadingRecyclerAdapter?.visible = true
             }
             contentRecyclerAdapter?.submitList(t)
         }
     }
+
 
     private var quizSubmissionEditRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter? = null
     private val quizQuestionAndResponseEditObserver = Observer<List<
@@ -123,6 +125,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
         fabManagementEnabled = true
 
+        //TODO: this would be easier to follow if the recyclerviewadapters were initialized in the
+        // order in which they are used on the view itself.
         mBinding = FragmentClazzWorkWithSubmissionDetailBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
@@ -142,7 +146,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 ListViewMode.BROWSER.toString(), viewLifecycleOwner, di)
 
         quizSubmissionEditRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter()
-        //quizSubmissionEditRecyclerAdapter?.studentMode = isStudent
         quizSubmissionViewRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter()
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.submission).toString())
@@ -235,8 +238,10 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
     }
 
+
     //On Click Submit
     override fun onClickButton(view: View) {
+        //TODO: emptying these out should be done by the presenter.
         quizSubmissionEditRecyclerAdapter?.submitList(listOf())
         quizSubmissionViewRecyclerAdapter?.submitList(listOf())
 
@@ -328,6 +333,8 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                 questionsHeadingRecyclerAdapter?.visible = true
             }
 
+            //TODO: This is logic here - this should move over to the presenter, and the view shoulld have
+            // a property controlled by the presenter that simply tells it if the submit button is visible (or not)
             submissionButtonRecyclerAdapter?.visible = isStudent &&
                     (entity?.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L || entity?.clazzWorkSubmission == null)
                     &&
@@ -336,6 +343,7 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
 
 
 
+            //As above
             submissionHeadingRecyclerAdapter?.visible = isStudent &&
                     (submissionResultRecyclerAdapter?.visible?:false ||
                     submissionFreeTextRecyclerAdapter?.visible?:false ||
@@ -468,6 +476,18 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
                                 newItem.submission?.clazzWorkSubmissionScore
                                 && oldItem.submission?.clazzWorkSubmissionUid ==
                                 newItem.submission?.clazzWorkSubmissionUid
+                    }
+                }
+
+        val DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE_EDIT =
+                object: DiffUtil.ItemCallback<ClazzWorkQuestionAndOptionWithResponse>() {
+                    override fun areItemsTheSame(oldItem: ClazzWorkQuestionAndOptionWithResponse, newItem: ClazzWorkQuestionAndOptionWithResponse): Boolean {
+                        return oldItem.clazzWorkQuestion.clazzWorkQuestionUid ==
+                                newItem.clazzWorkQuestion.clazzWorkQuestionUid
+                    }
+
+                    override fun areContentsTheSame(oldItem: ClazzWorkQuestionAndOptionWithResponse, newItem: ClazzWorkQuestionAndOptionWithResponse): Boolean {
+                        return oldItem === newItem
                     }
                 }
 

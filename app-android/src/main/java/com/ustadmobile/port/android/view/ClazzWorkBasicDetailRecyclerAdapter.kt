@@ -50,6 +50,7 @@ class ClazzWorkBasicDetailsRecyclerAdapter(clazzWork: ClazzWorkWithSubmission?,
         viewHolder = null
     }
 
+    //TODO: this extends a list adapter, so we shouldn't override this. To make it invisible, we should submit an empty list
     override fun getItemCount(): Int {
         return if(visible) 1 else 0
     }

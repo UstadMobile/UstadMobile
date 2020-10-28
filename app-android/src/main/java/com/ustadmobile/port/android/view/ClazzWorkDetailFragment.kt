@@ -105,6 +105,8 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
                     ClazzWorkDetailProgressListView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
                             entityUidValue)
         }
+
+        //TODO: why is edit in this list? This list is for the tab titles - edit is not shown as a tab
         val viewNameToTitle = mapOf(
                 ClazzWorkEditView.VIEW_NAME to getText(R.string.edit).toString(),
                 ClazzWorkDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
@@ -133,6 +135,8 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         }
 
     companion object{
+
+        //TODO: why is edit in this list? Edit is not being shown as a tab
         private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String,
                 Class<out Fragment>>(
                 ClazzWorkEditView.VIEW_NAME to ClazzWorkEditFragment::class.java,

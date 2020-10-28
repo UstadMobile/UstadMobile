@@ -29,6 +29,7 @@
         android:id="@+id/item_clazzwork_submission_text_entry_cl"
         >
 
+        <!-- TODO: the visibility expression here is quite complex and should be controlled by the presenter, via the view interface -->
         <EditText
             android:id="@+id/item_clazzwork_submission_text_entry_et"
             android:layout_width="0dp"
@@ -47,6 +48,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
 
+        <!-- TODO: the visibility expression here is quite complex and should be controlled by the presenter, via the view interface -->
         <TextView
             android:id="@+id/item_clazzwork_submission_text_entry_tv"
             android:layout_width="0dp"
