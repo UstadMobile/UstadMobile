@@ -2,12 +2,13 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.ListViewMode
-import com.ustadmobile.core.view.ProductListView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.Product
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 class ProductListPresenter(context: Any, arguments: Map<String, String>, view: ProductListView,

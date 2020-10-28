@@ -5,7 +5,6 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.ProductListView
-import com.ustadmobile.core.view.ProductDetailView
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase

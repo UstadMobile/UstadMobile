@@ -48,7 +48,7 @@ open class InventoryTransaction() {
     var inventoryTransactionItemLCB: Int = 0
 
     companion object{
-        const val INVENTORY_TRANSACTION_TABLE_ID = 206
+        const val INVENTORY_TRANSACTION_TABLE_ID = 211
     }
 
 

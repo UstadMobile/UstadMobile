@@ -40,10 +40,12 @@ import kotlin.jvm.Volatile
     SqliteSyncablePrimaryKey::class, LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class
 
+    //Goldozi:
+    ,Product::class, ProductCategoryJoin::class, InventoryItem::class, InventoryTransaction::class
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 42)
+], version = 142)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
