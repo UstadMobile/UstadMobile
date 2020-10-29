@@ -114,7 +114,7 @@ class ClazzWorkDetailOverviewPresenterTest {
 
         val liveDataSet = nullableArgumentCaptor<DoorMutableLiveData<
                 List<ClazzWorkQuestionAndOptionWithResponse>>>().run {
-            verify(mockView, timeout(5000).atLeastOnce()).quizSubmissionView = capture()
+            verify(mockView, timeout(5000).atLeastOnce()).viewOnlyQuizQuestions = capture()
             firstValue
         }
         val valueLiveDataSet = liveDataSet?.getValue()
@@ -169,7 +169,7 @@ class ClazzWorkDetailOverviewPresenterTest {
 
         val liveDataSet = nullableArgumentCaptor<DoorMutableLiveData<
                 List<ClazzWorkQuestionAndOptionWithResponse>>>().run {
-            verify(mockView, timeout(5000).atLeastOnce()).quizSubmissionView = capture()
+            verify(mockView, timeout(5000).atLeastOnce()).viewOnlyQuizQuestions = capture()
             firstValue
         }
         val valueLiveDataSet = liveDataSet?.getValue()

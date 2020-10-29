@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMCalendarUtil
+import com.ustadmobile.core.util.ext.getQuestionListForView
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -10,6 +11,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZWORK_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
@@ -57,37 +59,8 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         if(clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkSubmissionType
                 == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
 
-            val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
-                    withTimeoutOrNull(2000) {
-                        db.clazzWorkQuestionDao.findAllActiveQuestionsWithOptionsInClazzWorkAsList(
-                                clazzMemberAndClazzWorkWithSubmission.clazzWork?.clazzWorkUid?:0L)
-                    } ?: listOf()
-
-            val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
-                questionAndOptions.groupBy { it.clazzWorkQuestion }.entries.map {
-
-                    val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
-                    val qResponse = db.clazzWorkQuestionResponseDao.findByQuestionUidAndClazzMemberUidAsync(
-                            questionUid, clazzMemberAndClazzWorkWithSubmission.clazzMemberUid?:0L).toMutableList()
-                    if (qResponse.isEmpty()) {
-                        qResponse.add(ClazzWorkQuestionResponse().apply {
-                            clazzWorkQuestionResponseQuestionUid = questionUid
-                            clazzWorkQuestionResponsePersonUid = clazzMemberAndClazzWorkWithSubmission.clazzMemberPersonUid?:0L
-                            clazzWorkQuestionResponseClazzMemberUid =
-                                    clazzMemberAndClazzWorkWithSubmission.clazzMemberUid?: 0L
-                            clazzWorkQuestionResponseClazzWorkUid =
-                                    clazzMemberAndClazzWorkWithSubmission.clazzWork?.clazzWorkUid?: 0L
-                        })
-                    }
-                    ClazzWorkQuestionAndOptionWithResponse(
-                        clazzWorkWithSubmission,
-                        it.key ?: ClazzWorkQuestion(),
-                        it.value.map {
-                            it.clazzWorkQuestionOption ?: ClazzWorkQuestionOption()
-                        },
-                        qResponse.first())
-                }
-
+            val questionsAndOptionsWithResponseList = db.getQuestionListForView(clazzWorkWithSubmission,
+                    clazzMemberAndClazzWorkWithSubmission.clazzMemberUid, loggedInPersonUid)
 
             //If submitted - show view data
             if(clazzMemberAndClazzWorkWithSubmission.submission != null
@@ -161,9 +134,10 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             db.clazzWorkSubmissionDao.findCompletedUnMarkedSubmissionsByClazzWorkUid(filterByClazzWorkUid)
         }?: listOf()
 
-        //TODO: this first if clause doesn't do anything.
         if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid ==
-                clazzMemberAndClazzWorkWithSubmission?.submission?.clazzWorkSubmissionUid ) !view.isMarkingFinished
+                clazzMemberAndClazzWorkWithSubmission?.submission?.clazzWorkSubmissionUid ){
+            view.isMarkingFinished = false
+        }
         else if(unmarkedMembers.size == 1 && unmarkedMembers[0].clazzWorkSubmissionUid !=
                 clazzMemberAndClazzWorkWithSubmission?.submission?.clazzWorkSubmissionUid){
             view.isMarkingFinished = true
@@ -232,8 +206,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 entityVal)
     }
 
-    //TODO: This is largely the same as what we have in ClazzWorkDetailOverview - what is duplicated
-    // could be moved to an extension function on the database e.g. suspend fun UmAppDatabase.submitClazzWorkResponse(...)
+
     fun handleClickSubmitOnBehalf(){
         val questionsWithOptionsAndResponse =
                 view.quizSubmissionEditData?.getValue()?: listOf()
@@ -324,9 +297,8 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             val submission = entity.submission
             //If submission exists
             if(submission  != null) {
-                //TODO: why not just use systemTimeInMillis()?
                 submission.clazzWorkSubmissionDateTimeMarked =
-                        UMCalendarUtil.getDateInMilliPlusDays(0)
+                        systemTimeInMillis()
                 submission.clazzWorkSubmissionMarkerPersonUid =
                         accountManager.activeAccount.personUid
                 if(submission.clazzWorkSubmissionUid != 0L) {

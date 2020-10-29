@@ -6,6 +6,8 @@ import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionRow
+import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
+import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponseRow
 
 @UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @UmRepository
@@ -33,6 +35,26 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
     """)
     abstract suspend fun findAllActiveQuestionsWithOptionsInClazzWorkAsList(clazzWorkUid: Long)
                     : List<ClazzWorkQuestionAndOptionRow>
+
+    @Query("""
+        SELECT ClazzWorkQuestion.* , ClazzWorkQuestionOption.*, ClazzWorkQuestionResponse.* 
+
+        FROM ClazzWorkQuestion 
+        LEFT JOIN ClazzWorkQuestionOption ON 
+            ClazzWorkQuestionOption.clazzWorkQuestionOptionQuestionUid = ClazzWorkQuestion.clazzWorkQuestionUid 
+            AND CAST(ClazzWorkQuestionOption.clazzWorkQuestionOptionActive AS INTEGER) = 1
+        LEFT JOIN ClazzWorkQuestionResponse ON 
+            ClazzWorkQuestionResponse.clazzWorkQuestionResponseQuestionUid = ClazzWorkQuestion.clazzWorkQuestionUid
+            AND CAST(clazzWorkQuestionResponseInactive AS INTEGER) = 0
+            AND clazzWorkQuestionResponseClazzMemberUid = :clazzMemberUid
+        WHERE 
+        ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid = :clazzWorkUid 
+        AND CAST(ClazzWorkQuestion.clazzWorkQuestionActive AS INTEGER) = 1	
+    """)
+    abstract suspend fun findAllQuestionsAndOptionsWithResponse(clazzWorkUid: Long,
+                                                                clazzMemberUid: Long)
+            :List<ClazzWorkQuestionAndOptionWithResponseRow>
+
 
     override suspend fun deactivateByUids(uidList: List<Long>) {
         uidList.forEach {

@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.effectiveTimeZone
+import com.ustadmobile.core.util.ext.getQuestionListForView
 import com.ustadmobile.core.view.ClazzWorkDetailOverviewView
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -74,52 +75,15 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         }
 
         if(clazzWorkWithSubmission.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
-            val questionAndOptions: List<ClazzWorkQuestionAndOptionRow> =
-                    withTimeoutOrNull(2000) {
-                        db.clazzWorkQuestionDao.findAllActiveQuestionsWithOptionsInClazzWorkAsList(
-                                clazzWorkUid)
-                    } ?: listOf()
 
-            //TODO: this is running a query for every question to get the response. We could do one
-            //query to get all the responses from that student for the quiz
-
-            //TODO: this is the same routine as what is happening in the marking fragment.
-            // Suggestion: create an extension function that does this...
-            // e.g. fun List<ClazzWorkQuestionAndOptionRow>.toClazzWorkQuestionAndOptionWithResponse()
-            val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
-                    questionAndOptions.groupBy { it.clazzWorkQuestion }.entries
-                            .map {
-                                val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
-                                val qResponse: MutableList<ClazzWorkQuestionResponse> =
-                                        withTimeoutOrNull(2000) {
-                                            db.clazzWorkQuestionResponseDao.findByQuestionUidAndClazzMemberUidAsync(
-                                                    questionUid, clazzMember?.clazzMemberUid
-                                                    ?: 0L).toMutableList()
-                                        }?: mutableListOf()
-                                if (qResponse.isEmpty()) {
-                                    qResponse.add(ClazzWorkQuestionResponse().apply {
-                                        clazzWorkQuestionResponseQuestionUid = questionUid
-                                        clazzWorkQuestionResponsePersonUid = loggedInPersonUid
-                                        clazzWorkQuestionResponseClazzMemberUid = clazzMember?.clazzMemberUid
-                                                ?: 0L
-                                        clazzWorkQuestionResponseClazzWorkUid = clazzWorkUid
-                                                ?: 0L
-                                    })
-                                }
-                                ClazzWorkQuestionAndOptionWithResponse(
-                                        entity ?: ClazzWorkWithSubmission(),
-                                        it.key ?: ClazzWorkQuestion(),
-                                        it.value.map {
-                                            it.clazzWorkQuestionOption ?: ClazzWorkQuestionOption()
-                                        },
-                                        qResponse.first())
-                            }
+            val questionsAndOptionsWithResponseList = db.getQuestionListForView(clazzWorkWithSubmission,
+                    clazzMember?.clazzMemberUid?:0L,loggedInPersonUid )
 
             if(view.isStudent && clazzWorkWithSubmission.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L ) {
-                view.quizSubmissionEdit =
+                view.editableQuizQuestions =
                         DoorMutableLiveData(questionsAndOptionsWithResponseList)
             }else{
-                view.quizSubmissionView = DoorMutableLiveData(questionsAndOptionsWithResponseList)
+                view.viewOnlyQuizQuestions = DoorMutableLiveData(questionsAndOptionsWithResponseList)
             }
         }
 
@@ -141,6 +105,43 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
             view.clazzWorkPrivateComments = repo.commentsDao.findPrivateByEntityTypeAndUidAndForPersonLive2(
                             ClazzWork.CLAZZ_WORK_TABLE_ID, clazzWorkWithSubmission.clazzWorkUid,
                             loggedInPersonUid)
+            view.showMarking = clazzWorkWithSubmission.clazzWorkSubmission?.
+                        clazzWorkSubmissionMarkerPersonUid != 0L
+
+            if(clazzWorkWithSubmission.clazzWorkSubmissionType ==
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT){
+                view.showFreeTextSubmission = true
+            }
+
+            if(clazzWorkWithSubmission.clazzWorkSubmissionType ==
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ){
+                view.showQuestionHeading = true
+            }
+
+            if((clazzWorkWithSubmission.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L
+                            || clazzWorkWithSubmission.clazzWorkSubmission == null)
+                    &&
+                    (clazzWorkWithSubmission.clazzWorkSubmission == null
+                            || clazzWorkWithSubmission.clazzWorkSubmissionType !=
+                            ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE)){
+                view.showSubmissionButton = true
+            }
+
+            if(!view.showMarking || !view.showFreeTextSubmission || !view.showSubmissionButton){
+                view.showSubmissionHeading = true
+            }
+        }
+
+        if(!clazzWorkWithSubmission.clazzWorkCommentsEnabled && view.isStudent){
+            view.showPrivateComments = true
+            view.showNewPrivateComment = false
+
+        }else if (view.isStudent){
+            view.showPrivateComments = true
+            view.showNewPrivateComment = true
+        }else{
+            view.showPrivateComments = false
+            view.showNewPrivateComment = false
         }
 
         return clazzWorkWithSubmission
@@ -161,9 +162,14 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
     }
 
     fun handleClickSubmit(){
+
+
         val questionsWithOptionsAndResponse =
-                view.quizSubmissionEdit?.getValue()?: listOf()
+                view.editableQuizQuestions?.getValue()?: listOf()
         val newOptionsAndResponse = mutableListOf<ClazzWorkQuestionAndOptionWithResponse>()
+
+        view.editableQuizQuestions = DoorMutableLiveData(listOf())
+        view.viewOnlyQuizQuestions = DoorMutableLiveData(listOf())
 
         val clazzWorkWithSubmission = entity
         GlobalScope.launch {
@@ -188,8 +194,6 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
             val submission = entity?.clazzWorkSubmission ?: ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWorkUid ?: 0L
                 clazzWorkSubmissionClazzMemberUid = clazzMember?.clazzMemberUid ?: 0L
-                //TODO : why set the time twice?
-                clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
                 clazzWorkSubmissionInactive = false
                 clazzWorkSubmissionPersonUid = loggedInPersonUid
             }
@@ -204,7 +208,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
             clazzWorkWithSubmission?.clazzWorkSubmission = submission
             view.runOnUiThread(Runnable {
                 view.entity = clazzWorkWithSubmission
-                view.quizSubmissionView =
+                view.viewOnlyQuizQuestions =
                         DoorMutableLiveData(newOptionsAndResponse)
             })
 
