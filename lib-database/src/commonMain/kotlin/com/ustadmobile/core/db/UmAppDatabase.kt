@@ -43,7 +43,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 42)
+], version = 43)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -2897,12 +2897,28 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_42_43 = object : DoorMigration(42, 43) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("""
+                        Update (ClazzWorkQuestionResponse)
+                        SET lastChangedByField = (SELECT nodeClientId from SyncNode)
+                        WHERE
+                        lastChangedByField = 0
+                    """.trimIndent())
+
+                }
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
-                    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42)
+                    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43)
 
 
 
