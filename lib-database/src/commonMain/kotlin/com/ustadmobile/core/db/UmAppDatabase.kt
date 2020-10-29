@@ -2903,10 +2903,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 if (database.dbType() == DoorDbType.SQLITE) {
 
                     database.execSQL("""
-                        Update (ClazzWorkQuestionResponse)
-                        SET lastChangedByField = (SELECT nodeClientId from SyncNode)
+                        Update ClazzWorkQuestionResponse
+                        SET clazzWorkQuestionResponseLCB = (SELECT nodeClientId from SyncNode)
                         WHERE
-                        lastChangedByField = 0
+                        clazzWorkQuestionResponseLCB = 0
                     """.trimIndent())
 
                 }
