@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.ConcurrentHashMap
 import java.lang.ref.WeakReference
 import com.github.aakira.napier.Napier
+import kotlin.reflect.KClass
 
 /**
  * This implements common repository functions such as addMirror, removeMirror, setMirrorPriority
@@ -25,6 +26,8 @@ class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = do
     private val weakConnectivityListeners: MutableList<WeakReference<RepositoryConnectivityListener>> = CopyOnWriteArrayList()
 
     private val tableChangeListeners: MutableList<TableChangeListener> = CopyOnWriteArrayList()
+
+    private val syncListeners: MutableMap<KClass<out Any>, List<SyncListener<*>>> = ConcurrentHashMap()
 
     var connectivityStatus: Int
         get() = connectivityStatusAtomic.get()
@@ -92,5 +95,8 @@ class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = do
             it.onTableChanged(tableName)
         }
     }
+
+
+
 
 }

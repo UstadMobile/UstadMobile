@@ -316,6 +316,14 @@ class DbProcessorSync: AbstractDbProcessor() {
                         processingEnv, resetChangeSequenceNumbers = true))
             }
 
+            //Tell the repo to dispatch events that should take place when entities are received via sync
+            codeBlock.add("val _repo: %T by _di.%M(call).%M(_typeToken, tag = %T.TAG_REPO)\n",
+                    TypeVariableName.invoke("T"), DI_ON_MEMBER,
+                    DbProcessorKtorServer.DI_INSTANCE_TYPETOKEN_MEMBER, DoorTag::class)
+                .add("(_repo as %T).handleSyncEntitiesReceived(%T::class, __entities)\n",
+                    DoorDatabaseSyncRepository::class, entityType)
+
+
             codeBlock.endControlFlow()
             if(hasAttachments) {
                 codeBlock.add(generateGetAttachmentDataCodeBlock(entityType))
