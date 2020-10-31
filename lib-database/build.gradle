@@ -47,6 +47,9 @@ kotlin {
 
     sourceSets {
         commonMain {
+            //Add the SyncHelperEntitiesDao
+            kotlin.srcDir("../lib-door-runtime/src/commonMain/resources/daos")
+
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"

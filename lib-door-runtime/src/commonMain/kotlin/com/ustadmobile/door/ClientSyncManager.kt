@@ -82,7 +82,7 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
                         "received ${syncResults.firstOrNull()?.received} / " +
                         "sent ${syncResults.firstOrNull()?.sent}", tag = LOG_TAG)
                 repo.takeIf { syncResults.any { it.tableId == tableId && it.status == SyncResult.STATUS_SUCCESS} }
-                        ?.updateTableSyncStatusLastSynced(tableId, startTime)
+                        ?.syncHelperEntitiesDao?.updateTableSyncStatusLastSynced(tableId, startTime)
                 pendingJobs -= tableId
                 checkQueue()
             }catch(e: Exception) {
@@ -130,7 +130,8 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
                             val lastModified = lineParts[1].toLong()
                             Napier.v("$logPrefix - update last changed for $tableId to $lastModified",
                                     tag = LOG_TAG)
-                            repo.updateTableSyncStatusLastChanged(tableId, systemTimeInMillis())
+                            repo.syncHelperEntitiesDao.updateTableSyncStatusLastChanged(tableId,
+                                    systemTimeInMillis())
                             invalidate()
                             httpClient.get<Unit>("${repo.endpoint}$syncDaoNotificationReceivedPath?" +
                                     "deviceId=${repo.clientId}&$HEADER_DBVERSION=$dbVersion&tableId=$tableId&lastModTimestamp=$lastModified")
@@ -150,7 +151,7 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
         val tableId = repo.tableIdMap[tableName] ?: -1
         GlobalScope.launch {
             Napier.d("$logPrefix tableChanged: $tableName #$tableId", tag = LOG_TAG)
-            repo.updateTableSyncStatusLastChanged(tableId, systemTimeInMillis())
+            repo.syncHelperEntitiesDao.updateTableSyncStatusLastChanged(tableId, systemTimeInMillis())
             invalidate()
         }
     }
@@ -166,7 +167,9 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
     }
 
     fun checkQueue() {
-        val newJobs = repo.findTablesToSync().filter { it.tsTableId !in pendingJobs }
+        val newJobs = repo.syncHelperEntitiesDao.findTablesToSync()
+                .filter { it.tsTableId !in pendingJobs }
+
         Napier.v("$logPrefix checkQueue found ${newJobs.size} tables to sync", tag = LOG_TAG)
         newJobs.subList(0, min(maxProcessors, newJobs.size)).forEach {
             Napier.d("$logPrefix send table id #${it.tsTableId} to sync fan-out", tag = LOG_TAG)

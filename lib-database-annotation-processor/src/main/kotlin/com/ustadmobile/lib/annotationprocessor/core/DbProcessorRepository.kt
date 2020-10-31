@@ -5,6 +5,7 @@ import androidx.room.*
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.*
+import com.ustadmobile.door.daos.*
 import com.ustadmobile.door.annotation.LastChangedBy
 import io.ktor.client.HttpClient
 import javax.annotation.processing.RoundEnvironment
@@ -16,6 +17,7 @@ import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.GetAttachmentData
 import com.ustadmobile.door.annotation.SetAttachmentData
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.SUFFIX_JDBC_KT
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.ENDPOINT_POSTFIX_DELETE_UPDATE
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.ENDPOINT_POSTFIX_UPDATES
 import kotlinx.coroutines.newSingleThreadContext
@@ -246,10 +248,19 @@ class DbProcessorRepository: AbstractDbProcessor() {
             val dbTypeClassName = dbTypeElement.asClassName()
             dbRepoType.addFunction(FunSpec.builder("_syncDao")
                     .addModifiers(KModifier.OVERRIDE)
-                    .addCode("return _db._syncDao()")
+                    .addCode("return _db._syncDao()\n")
                     .returns(ClassName(dbTypeClassName.packageName,
                             "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}"))
                     .build())
+
+            if(isDbTypeSyncable) {
+                dbRepoType.addFunction(FunSpec.builder("_syncHelperEntitiesDao")
+                        .addModifiers(KModifier.OVERRIDE)
+                        .returns(ClassName("com.ustadmobile.door.daos",
+                                "SyncHelperEntitiesDao"))
+                        .addCode("return _db._syncHelperEntitiesDao()\n")
+                        .build())
+            }
         }
 
         if(overrideOpenHelper) {
@@ -282,17 +293,40 @@ class DbProcessorRepository: AbstractDbProcessor() {
             val syncableDaoClassName = ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
                     "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}")
             val syncDaoProperty = PropertySpec.builder("_syncDao", syncableDaoClassName)
+            val syncHelperEntitiesClassName =
+                    ClassName("com.ustadmobile.door.daos", "SyncHelperEntitiesDao")
+            val syncHelperEntitesDaoProperty = PropertySpec.builder("_syncHelperEntitiesDao",
+                syncHelperEntitiesClassName)
+
+            //TODO: Add SyncEntitiesDao here
             if(syncDaoMode == REPO_SYNCABLE_DAO_CONSTRUCT) {
                 syncDaoProperty.delegate(
                         CodeBlock.builder().beginControlFlow("lazy")
                                 .add("%T(_db) ", ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
                                         "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
                                 .endControlFlow().build())
+                syncHelperEntitesDaoProperty.delegate(
+                        CodeBlock.builder().beginControlFlow("lazy")
+                                .add("%T(_db)", ClassName(syncHelperEntitiesClassName.packageName,
+                                    "${syncHelperEntitiesClassName.simpleName}_$SUFFIX_JDBC_KT"))
+                                .endControlFlow()
+                                .build())
+
             }else if(syncDaoMode == REPO_SYNCABLE_DAO_FROMDB) {
                 syncDaoProperty.delegate("lazy {_db._syncDao() }")
+                syncHelperEntitesDaoProperty.delegate("lazy {_db._syncHelperEntitiesDao() } ")
             }
 
             dbRepoType.addProperty(syncDaoProperty.build())
+                    .addProperty(syncHelperEntitesDaoProperty.build())
+
+            dbRepoType.addProperty(PropertySpec.builder("syncHelperEntitiesDao",
+                    ISyncHelperEntitiesDao::class)
+                    .addModifiers(KModifier.OVERRIDE)
+                    .getter(FunSpec.getterBuilder()
+                            .addCode("return _syncHelperEntitiesDao")
+                            .build())
+                    .build())
 
             dbRepoType.addProperty(PropertySpec.builder("_clientId", INT)
                     .delegate("lazy { _syncDao._findSyncNodeClientId() }").build())
@@ -334,58 +368,16 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
                         .addCode("_${syncableDaoClassName.simpleName}.dispatchUpdateNotifications(tableId)\n")
                         .build())
-                    .addFunction(FunSpec.builder("findPendingUpdateNotifications")
-                            .addParameter("deviceId", INT)
-                            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                            .addCode("return _${syncableDaoClassName.simpleName}.findPendingUpdateNotifications(deviceId)\n")
-                            .build())
-                    .addFunction(FunSpec.builder("deleteUpdateNotification")
-                            .addParameter("deviceId", INT)
-                            .addParameter("tableId", INT)
-                            .addParameter("lastModTimestamp", LONG)
-                            .addCode("_${syncableDaoClassName.simpleName}.deleteUpdateNotification(deviceId, tableId, lastModTimestamp)\n")
-                            .addModifiers(KModifier.SUSPEND, KModifier.OVERRIDE)
-                            .build())
-                    .addFunction(FunSpec.builder("findTablesWithPendingChangeLogs")
-                            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                            .addCode("return _${syncableDaoClassName.simpleName}.findTablesWithPendingChangeLogs()\n")
-                            .build())
-                    .addFunction(FunSpec.builder("findTablesToSync")
-                            .addModifiers(KModifier.OVERRIDE)
-                            .addCode("return _${syncableDaoClassName.simpleName}.findTablesToSync()\n")
-                            .build())
-                    .addFunction(FunSpec.builder("updateTableSyncStatusLastChanged")
-                            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                            .addParameter("tableId", INT)
-                            .addParameter("lastChanged", LONG)
-                            .addCode("_${syncableDaoClassName.simpleName}.updateTableSyncStatusLastChanged(tableId, lastChanged)\n")
-                            .build())
-                    .addFunction(FunSpec.builder("updateTableSyncStatusLastSynced")
-                            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                            .addParameter("tableId", INT)
-                            .addParameter("lastChanged", LONG)
-                            .addCode("_${syncableDaoClassName.simpleName}.updateTableSyncStatusLastSynced(tableId, lastChanged)")
-                            .build())
 
-            dbRepoType.addFunction(FunSpec.builder("selectNextSqliteSyncablePk")
-                    .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                    .addParameter("tableId", INT)
-                    .returns(LONG)
-                    .addCode("return _${syncableDaoClassName.simpleName}.selectNextSqliteSyncablePk(tableId)\n")
-                    .build())
-
-            dbRepoType.addFunction(FunSpec.builder("incrementNextSqliteSyncablePk")
-                    .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                    .addParameter("tableId", INT)
-                    .addParameter("increment", INT)
-                    .addCode("_${syncableDaoClassName.simpleName}.incrementNextSqliteSyncablePk(tableId, increment)\n")
+            dbRepoType.addProperty(PropertySpec.builder("_sqlitePkManager", DoorSqlitePrimaryKeyManager::class)
+                    .initializer("%T(this)", DoorSqlitePrimaryKeyManager::class)
                     .build())
 
             dbRepoType.addFunction(FunSpec.builder("getAndIncrementSqlitePk")
                     .addParameter("tableId", INT)
                     .addParameter("increment", INT)
                     .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                    .addCode("return _${syncableDaoClassName.simpleName}.getAndIncrementSqlitePk(tableId, increment)\n")
+                    .addCode("return _sqlitePkManager.getAndIncrementSqlitePk(tableId, increment)\n")
                     .returns(LONG)
                     .build())
 

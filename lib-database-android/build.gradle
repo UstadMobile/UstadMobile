@@ -23,7 +23,8 @@ android {
     }
 
     sourceSets {
-        main.java.srcDirs += ["build/generated/source/door"]
+        main.java.srcDirs += ["build/generated/source/door",
+                              "../lib-door-runtime/src/commonMain/resources/daos"]
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 

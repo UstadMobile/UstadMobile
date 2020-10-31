@@ -42,7 +42,7 @@ suspend fun ApplicationCall.respondUpdateNotifications(repo: DoorDatabaseSyncRep
 
     updateManager.addUpdateNotificationListener(deviceId, listener)
 
-    repo.findPendingUpdateNotifications(deviceId).forEach {
+    repo.syncHelperEntitiesDao.findPendingUpdateNotifications(deviceId).forEach {
         channel.offer(it)
     }
 
@@ -81,7 +81,7 @@ suspend fun ApplicationCall.respondUpdateNotificationReceived(repo: DoorDatabase
     val tableId = request.queryParameters["tableId"]?.toInt() ?: 0
     val lastModTimestamp = request.queryParameters["lastModTimestamp"]?.toLong() ?: 0
 
-    repo.deleteUpdateNotification(deviceId, tableId, lastModTimestamp)
+    repo.syncHelperEntitiesDao.deleteUpdateNotification(deviceId, tableId, lastModTimestamp)
     Napier.d("[respondUpdateNotificationReceived] - delete notification for $deviceId / " +
             "table id $tableId ts=$lastModTimestamp")
     respond(HttpStatusCode.NoContent, "")

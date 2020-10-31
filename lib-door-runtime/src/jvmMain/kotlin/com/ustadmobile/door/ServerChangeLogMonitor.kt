@@ -42,12 +42,11 @@ class ServerChangeLogMonitor(val db: DoorDatabase, private val repo: DoorDatabas
 
             //Find anything that was changed when the ChangeLogMonitor wasn't running (e.g. repo not
             // yet created or manually changed by SQL)
-            (repo as? DoorDatabaseSyncRepository)?.findTablesWithPendingChangeLogs()?.also {
+            (repo as? DoorDatabaseSyncRepository)?.syncHelperEntitiesDao?.findTablesWithPendingChangeLogs()?.also {
                 Napier.d("$logPrefix init: tables changed before: ${it.joinToString() }}",
                         tag = DoorTag.LOG_TAG)
                 onTablesChangedInternal(it)
             }
-
         }
     }
 

@@ -27,7 +27,7 @@ class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = do
 
     private val tableChangeListeners: MutableList<TableChangeListener> = CopyOnWriteArrayList()
 
-    private val syncListeners: MutableMap<KClass<out Any>, List<SyncListener<*>>> = ConcurrentHashMap()
+    private val syncListeners: MutableMap<KClass<out Any>, MutableList<SyncListener<out Any>>> = ConcurrentHashMap()
 
     var connectivityStatus: Int
         get() = connectivityStatusAtomic.get()
@@ -96,7 +96,15 @@ class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = do
         }
     }
 
+    fun <T : Any> addSyncListener(entityClass: KClass<T>, listener: SyncListener<T>)  {
+        syncListeners.getOrPut(entityClass) { mutableListOf<SyncListener<out Any>>() }.add(listener)
+    }
 
+    fun <T: Any> handleSyncEntitiesReceived(entityClass: KClass<T>, entities: List<T>)  {
+        (syncListeners.get(entityClass) as? List<SyncListener<T>>)?.forEach {
+            it.onEntitiesReceived(entities)
+        }
+    }
 
 
 }

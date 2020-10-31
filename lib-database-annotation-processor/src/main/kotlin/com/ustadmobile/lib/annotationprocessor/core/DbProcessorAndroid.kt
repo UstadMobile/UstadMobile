@@ -80,6 +80,8 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                 } else if(line.contains("//#DOORDB_SYNCDAO")) {
                     lineOut += "//Generated section: add SyncDao getter, boundary callback getters, and http (ktor) helper DAO getters\n"
                     lineOut += "abstract fun _syncDao(): ${dbTypeEl.simpleName}${SUFFIX_SYNCDAO_ABSTRACT}\n\n"
+                    lineOut += "abstract fun _syncHelperEntitiesDao(): com.ustadmobile.door.daos.SyncHelperEntitiesDao\n\n"
+
                     //add boundary callbacks and http sync (KTOR) helper DAOs
                     methodsToImplement(dbTypeEl, dbTypeEl.asType() as DeclaredType, processingEnv).forEach {
                         val execEl = it as ExecutableElement
