@@ -6,6 +6,7 @@ import com.ustadmobile.core.db.dao.ProductDao.Companion.SELECT_ACCOUNT_IS_ADMIN
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.lib.db.entities.Category
 import com.ustadmobile.lib.db.entities.Product
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
 
@@ -27,6 +28,8 @@ abstract class ProductDao : BaseDao<Product> {
     @Query("SELECT * FROM Product WHERE CAST(productActive AS INTEGER) = 1 ")
     abstract fun findAllActiveProducts(): DataSource.Factory<Int, Product>
 
+    @Query(FIND_BY_UID_QUERY)
+    abstract suspend fun findProductWithInventoryCountAsync(productUid: Long): ProductWithInventoryCount?
 
     @Query(QUERY_PRODUCTS_WITH_INVENTORY)
     abstract fun findAllActiveProductWithInventoryCount(): DataSource.Factory<Int, ProductWithInventoryCount>
@@ -54,6 +57,9 @@ abstract class ProductDao : BaseDao<Product> {
     @Query(FIND_BY_UID_QUERY)
     abstract suspend fun findByUidListAsync(uid: Long): List<Product>
 
+    @Query(QUERY_FIND_ALL_CATEGORY_BY_PRODUCT)
+    abstract fun findAllCategoriesOfProductUid(productUid: Long): DataSource.Factory<Int, Category>?
+
 
     companion object {
 
@@ -63,7 +69,8 @@ abstract class ProductDao : BaseDao<Product> {
 
         const val SELECT_ACCOUNT_IS_ADMIN = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid)"
 
-        const val FIND_BY_UID_QUERY = "SELECT * FROM Product WHERE productUid = :uid"
+        const val FIND_BY_UID_QUERY = "SELECT * FROM Product WHERE productUid = :uid " +
+                " WHERE CAST(productActive AS INTEGER) = 1"
 
         const val FIND_BY_NAME_QUERY = "SELECT * FROM Product WHERE productName = :name AND CAST(productActive AS INTEGER) = 1"
 
@@ -74,6 +81,15 @@ abstract class ProductDao : BaseDao<Product> {
             WHERE CAST(productActive AS INTEGER) = 1 
         """
 
+
+        const val QUERY_FIND_ALL_CATEGORY_BY_PRODUCT = """
+            SELECT Category.* FROM ProductCategoryJoin
+            LEFT JOIN Category ON Category.categoryUid = ProductCategoryJoin.productCategoryJoinCategoryUid
+            WHERE 
+            ProductCategoryJoin.productCategoryJoinProductUid = :productUid
+            AND CAST(productCategoryJoinActive AS INTEGER ) = 1 
+            ORDER BY ProductCategoryJoin.productCategoryJoinDateCreated DESC
+        """
 
     }
 }

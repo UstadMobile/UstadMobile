@@ -23,7 +23,7 @@ open class ProductCategoryJoin() {
     //Category
     var productCategoryJoinCategoryUid: Long = 0
 
-    var productCategoryJoinActive: Boolean = false
+    var productCategoryJoinActive: Boolean = true
 
     var productCategoryJoinDateCreated: Long = 0
 
