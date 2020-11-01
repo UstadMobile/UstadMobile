@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 43,
-    "identityHash": "d54281049d9c0738d14a627b26b34863",
+    "identityHash": "91331e3ca7ac6ef400ed18120f496224",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5101,32 +5101,6 @@
         "foreignKeys": []
       },
       {
-        "tableName": "SqliteSyncablePrimaryKey",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sspTableId` INTEGER NOT NULL, `sspNextPrimaryKey` INTEGER NOT NULL, PRIMARY KEY(`sspTableId`))",
-        "fields": [
-          {
-            "fieldPath": "sspTableId",
-            "columnName": "sspTableId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sspNextPrimaryKey",
-            "columnName": "sspNextPrimaryKey",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "sspTableId"
-          ],
-          "autoGenerate": false
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
         "tableName": "LearnerGroup",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`learnerGroupUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `learnerGroupName` TEXT, `learnerGroupDescription` TEXT, `learnerGroupActive` INTEGER NOT NULL, `learnerGroupMCSN` INTEGER NOT NULL, `learnerGroupCSN` INTEGER NOT NULL, `learnerGroupLCB` INTEGER NOT NULL)",
         "fields": [
@@ -5298,6 +5272,81 @@
           "autoGenerate": true
         },
         "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SqliteSyncablePrimaryKey",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sspTableId` INTEGER NOT NULL, `sspNextPrimaryKey` INTEGER NOT NULL, PRIMARY KEY(`sspTableId`))",
+        "fields": [
+          {
+            "fieldPath": "sspTableId",
+            "columnName": "sspTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sspNextPrimaryKey",
+            "columnName": "sspNextPrimaryKey",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "sspTableId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SqliteChangeSeqNums",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sCsnTableId` INTEGER NOT NULL, `sCsnNextLocal` INTEGER NOT NULL, `sCsnNextPrimary` INTEGER NOT NULL, PRIMARY KEY(`sCsnTableId`))",
+        "fields": [
+          {
+            "fieldPath": "sCsnTableId",
+            "columnName": "sCsnTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sCsnNextLocal",
+            "columnName": "sCsnNextLocal",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sCsnNextPrimary",
+            "columnName": "sCsnNextPrimary",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "sCsnTableId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_SqliteChangeSeqNums_sCsnNextLocal",
+            "unique": false,
+            "columnNames": [
+              "sCsnNextLocal"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SqliteChangeSeqNums_sCsnNextLocal` ON `${TABLE_NAME}` (`sCsnNextLocal`)"
+          },
+          {
+            "name": "index_SqliteChangeSeqNums_sCsnNextPrimary",
+            "unique": false,
+            "columnNames": [
+              "sCsnNextPrimary"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SqliteChangeSeqNums_sCsnNextPrimary` ON `${TABLE_NAME}` (`sCsnNextPrimary`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -9389,7 +9438,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd54281049d9c0738d14a627b26b34863')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '91331e3ca7ac6ef400ed18120f496224')"
     ]
   }
 }

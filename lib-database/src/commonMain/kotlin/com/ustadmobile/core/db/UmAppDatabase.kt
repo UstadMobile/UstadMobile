@@ -4,10 +4,7 @@ import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.MinSyncVersion
-import com.ustadmobile.door.entities.ChangeLog
-import com.ustadmobile.door.entities.SqliteSyncablePrimaryKey
-import com.ustadmobile.door.entities.TableSyncStatus
-import com.ustadmobile.door.entities.UpdateNotification
+import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.*
@@ -40,8 +37,12 @@ import kotlin.jvm.Volatile
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
     Report::class, ReportFilter::class,
     DeviceSession::class, WorkSpace::class, ContainerUploadJob::class,
-    SqliteSyncablePrimaryKey::class, LearnerGroup::class, LearnerGroupMember::class,
+    LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
+
+    //Door Helper entities
+    SqliteSyncablePrimaryKey::class,
+    SqliteChangeSeqNums::class,
     UpdateNotification::class,
     TableSyncStatus::class,
     ChangeLog::class
