@@ -13,9 +13,10 @@ import kotlinx.serialization.Serializable
  * Its basically a collection of dates and time. (holidays and schedules)
  */
 @SyncableEntity(tableId = HolidayCalendar.TABLE_ID,
-        notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM DeviceSession
-    """)
+        notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${HolidayCalendar.TABLE_ID} AS tableId 
+        FROM DeviceSession
+    """])
 @Entity
 @Serializable
 open class HolidayCalendar() {

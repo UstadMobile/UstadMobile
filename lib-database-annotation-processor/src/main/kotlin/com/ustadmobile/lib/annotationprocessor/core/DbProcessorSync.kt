@@ -33,6 +33,7 @@ import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.TypeElement
 import kotlin.reflect.KClass
+import com.ustadmobile.door.entities.UpdateNotificationSummary
 
 /**
  * Generate a Tracker Entity for a Syncable Entity
@@ -387,10 +388,15 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addCode(CodeBlock.builder()
                         .beginControlFlow("when(tableId)")
                         .apply {
-                            syncableEntityTypesOnDb(dbType, processingEnv).forEach {
-                                val syncableEntityInfo = SyncableEntityInfo(it.asClassName(), processingEnv)
-                                if(syncableEntityInfo.notifyOnUpdate.isNotBlank()) {
-                                    add("%L -> _findDevicesToNotify${it.simpleName}()\n", syncableEntityInfo.tableId)
+                            syncableEntityTypesOnDb(dbType, processingEnv).forEach {syncEl ->
+                                val syncableEntityInfo = SyncableEntityInfo(syncEl.asClassName(),
+                                        processingEnv)
+                                if(syncableEntityInfo.notifyOnUpdate.size > 0) {
+                                    beginControlFlow("%L -> ", syncableEntityInfo.tableId)
+                                    syncableEntityInfo.notifyOnUpdate.forEachIndexed { index, queryStr ->
+                                        add("_findDevicesToNotify${syncEl.simpleName}_$index()\n")
+                                    }
+                                    endControlFlow()
                                 }
                             }
                         }
@@ -463,21 +469,21 @@ class DbProcessorSync: AbstractDbProcessor() {
                             receiveCountVarName = "_receiveCount"))
                     .add("_loadHelper.doRequest()\n")
 
-            val findDevicesSql = syncableEntityInfo.notifyOnUpdate
-            if(findDevicesSql != "") {
-                repoTypeSpec.addFunction(FunSpec.builder("_findDevicesToNotify${entityType.simpleName}")
-                        .returns(List::class.asClassName().parameterizedBy(INT))
+            syncableEntityInfo.notifyOnUpdate.forEachIndexed { index, notifyOnUpdateSql ->
+                repoTypeSpec.addFunction(FunSpec.builder("_findDevicesToNotify${entityType.simpleName}_$index")
+                        .returns(List::class.parameterizedBy(UpdateNotificationSummary::class))
                         .addModifiers(KModifier.OVERRIDE)
                         .addCode(CodeBlock.builder()
                                 .add("return (_repo as %T).%M(${syncableEntityInfo.tableId}, _updateNotificationManager, " +
-                                        "_dao::_findDevicesToNotify${entityType.simpleName}, " +
+                                        "_dao::_findDevicesToNotify${entityType.simpleName}_$index, " +
                                         "::_replaceUpdateNotifications," +
                                         "::_deleteChangeLogs)",
-                                DoorDatabaseSyncRepository::class,
-                                MemberName("com.ustadmobile.door.ext", "sendUpdates"))
+                                        DoorDatabaseSyncRepository::class,
+                                        MemberName("com.ustadmobile.door.ext", "sendUpdates"))
                                 .build())
                         .build())
             }
+
 
             val hasAttachments = entityType.getAnnotation(EntityWithAttachment::class.java) != null
 
@@ -733,12 +739,12 @@ class DbProcessorSync: AbstractDbProcessor() {
             abstractDaoInterfaceTypeSpec.addFunction(abstractInterfaceUpdateTrackerFun)
 
 
-            val findDevicesSql = syncableEntityInfo.notifyOnUpdate
-            if(findDevicesSql != "") {
+            syncableEntityInfo.notifyOnUpdate.forEachIndexed { index, notifyOnUpdateSql ->
                 val (abstractFindDevicesFun, implFindDevicesFun, abstractInterfaceFindDevicesFun) =
-                        generateAbstractAndImplQueryFunSpecs(syncableEntityInfo.notifyOnUpdate,
-                                "_findDevicesToNotify${entityType.simpleName}",
-                                List::class.asClassName().parameterizedBy(INT), listOf(),
+                        generateAbstractAndImplQueryFunSpecs(notifyOnUpdateSql,
+                                "_findDevicesToNotify${entityType.simpleName}_$index",
+                                List::class.parameterizedBy(UpdateNotificationSummary::class),
+                                listOf(),
                                 abstractFunIsOverride = true)
                 abstractDaoTypeSpec.addFunction(abstractFindDevicesFun)
                 implDaoTypeSpec.addFunction(implFindDevicesFun)

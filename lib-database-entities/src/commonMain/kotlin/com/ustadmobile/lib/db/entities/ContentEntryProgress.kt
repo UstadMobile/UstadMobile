@@ -11,14 +11,15 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = CONTENT_ENTRY_PROGRESS_TABLE_ID,
-    notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $CONTENT_ENTRY_PROGRESS_TABLE_ID AS tableId 
+        FROM 
         ChangeLog
         JOIN ContentEntryProgress ON ChangeLog.chTableId = ${CONTENT_ENTRY_PROGRESS_TABLE_ID} AND ChangeLog.chEntityPk = ContentEntryProgress.contentEntryProgressUid
         JOIN Person ON Person.personUid = ContentEntryProgress.contentEntryProgressPersonUid
         JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
             ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
     syncFindAllQuery = """
         SELECT ContentEntryProgress.* FROM
         ContentEntryProgress

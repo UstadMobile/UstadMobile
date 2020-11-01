@@ -17,13 +17,13 @@ import kotlinx.serialization.Serializable
  */
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID, notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+@SyncableEntity(tableId = TABLE_ID, notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${TABLE_ID} AS tableId FROM 
         ChangeLog
         JOIN Person ON ChangeLog.chTableId = $TABLE_ID AND ChangeLog.chEntityPk = Person.personUid
         JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
             ( $ENTITY_PERSONS_WITH_PERMISSION_PT1 0 $ENTITY_PERSONS_WITH_PERMISSION_PT2 ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4 )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
     syncFindAllQuery = """
         SELECT Person.* FROM 
         Person

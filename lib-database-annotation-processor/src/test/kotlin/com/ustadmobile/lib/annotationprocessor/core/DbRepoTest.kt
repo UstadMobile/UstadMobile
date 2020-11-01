@@ -716,6 +716,57 @@ class DbRepoTest {
             exampleEntity.esName, clientDb2.exampleSyncableDao().findByUid(exampleEntity.esUid)?.esName)
     }
 
+    @Test
+    fun givenEntityCreatedFirst_whenAccessGrantEntityCreatedAfter_thenShouldTriggerSyncOfEntity() {
+        mockUpdateNotificationManager = spy(ServerUpdateNotificationManagerImpl())
+        setupClientAndServerDb(mockUpdateNotificationManager)
+        val testUid = 42L
+
+        val serverDb: ExampleDatabase2 by serverDi.on("localhost").instance(tag = DoorTag.TAG_DB)
+
+        val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy",
+                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
+
+        val exampleEntity = ExampleSyncableEntity().apply {
+            esUid = testUid
+            esName = "Hello Notification"
+            publik = true
+        }
+
+        Napier.i("==== Initializing client =====")
+
+        val clientDb = this.clientDb!!
+
+        //TODO: This should be closed to be sure that it does not interfere with the next test etc.
+        val clientRepo = clientDb.asRepository(Any(), "http://localhost:8089/",
+                "token", httpClient, useClientSyncManager = true)
+                .asConnectedRepository()
+
+        Napier.i("==== Waiting for entity to arrive on client =====")
+
+
+        //Wait for the client to connect
+        Thread.sleep(1000)
+
+        serverRepo.exampleSyncableDao().insert(exampleEntity)
+
+        val clientId = clientDb.exampleSyncableDao().getSyncNode()!!.nodeClientId
+
+        serverDb.accessGrantDao().insert(AccessGrant().apply {
+            tableId = 42
+            deviceId = clientId
+            entityUid = exampleEntity.esUid
+        })
+
+        runBlocking {
+            clientDb.waitUntil(10000, listOf("ExampleSyncableEntity")) {
+                clientDb.exampleSyncableDao().findByUid(exampleEntity.esUid) != null
+            }
+
+            Assert.assertNotNull("Entity is in client database after sync",
+                    clientDb.exampleSyncableDao().findByUid(exampleEntity.esUid))
+        }
+    }
 
 
 }

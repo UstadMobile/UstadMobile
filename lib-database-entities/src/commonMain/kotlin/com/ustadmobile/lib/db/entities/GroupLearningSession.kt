@@ -7,13 +7,12 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
-import com.ustadmobile.lib.db.entities.GroupLearningSession.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-    notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+@SyncableEntity(tableId = GroupLearningSession.TABLE_ID,
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${GroupLearningSession.TABLE_ID} AS tableId FROM 
         ChangeLog
         JOIN GroupLearningSession ON ChangeLog.chTableId = ${GroupLearningSession.TABLE_ID} AND ChangeLog.chEntityPk = GroupLearningSession.groupLearningSessionUid
         JOIN LearnerGroup ON LearnerGroup.learnerGroupUid = GroupLearningSession.groupLearningSessionLearnerGroupUid
@@ -21,7 +20,7 @@ import kotlinx.serialization.Serializable
         JOIN Person ON Person.personUid = LearnerGroupMember.learnerGroupMemberPersonUid
         JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
             ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
     syncFindAllQuery = """
         SELECT GroupLearningSession.* FROM 
         GroupLearningSession

@@ -11,8 +11,9 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = TABLE_ID,
-    notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM DeviceSession""")
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${XLangMapEntry.TABLE_ID} AS tableId 
+        FROM DeviceSession"""])
 @Serializable
 data class XLangMapEntry(
         var verbLangMapUid: Long = 0L,

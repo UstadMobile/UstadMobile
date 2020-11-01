@@ -32,7 +32,7 @@ class SyncableEntityInfo {
 
     var tableId: Int = 0
 
-    var notifyOnUpdate: String = ""
+    var notifyOnUpdate: Array<String>
 
     constructor(syncableEntityParam: ClassName, processingEnv: ProcessingEnvironment) {
         syncableEntity = syncableEntityParam

@@ -9,15 +9,18 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 @SyncableEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
-    notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+    notifyOnUpdate = [
+        """
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzLogAttendanceRecord.TABLE_ID} AS tableId FROM 
             ChangeLog
             JOIN ClazzLogAttendanceRecord ON ChangeLog.chTableId = ${ClazzLogAttendanceRecord.TABLE_ID} AND ChangeLog.chEntityPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
             JOIN ClazzMember ON ClazzMember.clazzMemberUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid 
             JOIN Person ON Person.personUid = ClazzMember.clazzMemberPersonUid
             JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
                 ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        """
+    ],
     syncFindAllQuery = """
             SELECT ClazzLogAttendanceRecord.* FROM
             ClazzLogAttendanceRecord

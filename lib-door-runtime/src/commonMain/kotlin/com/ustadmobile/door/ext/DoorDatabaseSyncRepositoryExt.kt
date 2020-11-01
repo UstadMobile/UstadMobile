@@ -7,6 +7,7 @@ import com.github.aakira.napier.Napier
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.ServerUpdateNotificationManager
 import com.ustadmobile.door.entities.UpdateNotification
+import com.ustadmobile.door.entities.UpdateNotificationSummary
 import com.ustadmobile.door.util.systemTimeInMillis
 
 /**
@@ -15,16 +16,16 @@ import com.ustadmobile.door.util.systemTimeInMillis
  * in order to generate UpdateNotification entities.
  */
 fun DoorDatabaseSyncRepository.sendUpdates(tableId: Int, updateNotificationManager: ServerUpdateNotificationManager?,
-                                           findDevicesFn: () -> List<Int>,
+                                           findDevicesFn: () -> List<UpdateNotificationSummary>,
                                             replaceUpdateNotificationFn: (List<UpdateNotification>) -> Unit,
-                                            deleteChangeLogFn: (Int) -> Unit): List<Int> {
+                                            deleteChangeLogFn: (Int) -> Unit): List<UpdateNotificationSummary> {
     val devicesToNotify = findDevicesFn()
     Napier.v("[SyncRepo@${this.doorIdentityHashCode}]: sendUpdates: Table #$tableId needs to notify ${devicesToNotify.joinToString()}.",
         tag= DoorTag.LOG_TAG)
 
     val timeNow = systemTimeInMillis()
     val updateNotifications = devicesToNotify.map {
-        UpdateNotification(pnDeviceId = it, pnTableId = tableId, pnTimestamp = timeNow)
+        UpdateNotification(pnDeviceId = it.deviceId, pnTableId = it.tableId, pnTimestamp = timeNow)
     }
 
     if(updateNotifications.isNotEmpty()) {

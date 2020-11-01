@@ -9,14 +9,14 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 @SyncableEntity(tableId = ClazzWorkQuestion.TABLE_ID,
-        notifyOnUpdate = """
-            SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+        notifyOnUpdate = ["""
+            SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzWorkQuestion.TABLE_ID} AS tableId FROM 
             ChangeLog
             JOIN ClazzWorkQuestion ON ChangeLog.chTableId = ${ClazzWorkQuestion.TABLE_ID} AND ClazzWorkQuestion.clazzWorkQuestionUid = ChangeLog.chEntityPk
             JOIN ClazzWork ON ClazzWork.clazzWorkUid = ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid
             JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
             JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZWORK_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid""",
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid"""],
         syncFindAllQuery = """
             SELECT ClazzWorkQuestion.* FROM
             ClazzWorkQuestion

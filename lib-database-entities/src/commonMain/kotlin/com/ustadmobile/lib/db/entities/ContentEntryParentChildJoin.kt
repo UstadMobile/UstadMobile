@@ -19,9 +19,9 @@ import kotlinx.serialization.Serializable
 //short code = cepcj
 @Entity(indices = [Index(name = "parent_child", value = ["cepcjChildContentEntryUid", "cepcjParentContentEntryUid"])])
 @SyncableEntity(tableId = TABLE_ID,
-        notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM DeviceSession
-    """)
+        notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId FROM DeviceSession 
+    """])
 @Serializable
 class ContentEntryParentChildJoin(
     @ColumnInfo(index = true)

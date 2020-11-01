@@ -10,14 +10,14 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = ClazzWorkSubmission.TABLE_ID,
-    notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzWorkSubmission.TABLE_ID} AS tableId FROM 
         ChangeLog
         JOIN ClazzWorkSubmission ON ChangeLog.chTableId = ${ClazzWorkSubmission.TABLE_ID} AND ChangeLog.chEntityPk = ClazzWorkSubmission.clazzWorkSubmissionUid
         JOIN Person ON Person.personUid = ClazzWorkSubmission.clazzWorkSubmissionPersonUid
         JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
             ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
     syncFindAllQuery = """
         SELECT ClazzWorkSubmission.* FROM
         ClazzWorkSubmission

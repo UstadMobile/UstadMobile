@@ -2,6 +2,7 @@ package com.ustadmobile.door.daos
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.ClientSyncManager
 import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
 
@@ -62,7 +63,9 @@ abstract class SyncHelperEntitiesDao : ISyncHelperEntitiesDao {
      * Mark the given table id as having been changed at the specified time. This will be used by
      * the ClientSyncManager to determine which tables need to be synced.
      */
-    @Query("UPDATE TableSyncStatus SET tsLastChanged = :lastChanged WHERE tsTableId = :tableId")
+    @Query("""UPDATE TableSyncStatus 
+        SET tsLastChanged = :lastChanged 
+        WHERE :tableId = ${ClientSyncManager.TABLEID_SYNC_ALL_TABLES} OR tsTableId = :tableId""")
     override abstract suspend fun updateTableSyncStatusLastChanged(tableId: Int, lastChanged: Long)
 
     /**

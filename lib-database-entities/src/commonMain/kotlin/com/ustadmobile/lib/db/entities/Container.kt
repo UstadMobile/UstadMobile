@@ -13,9 +13,10 @@ import kotlinx.serialization.Serializable
 @Entity(indices = arrayOf(Index(name = "cnt_uid_to_most_recent",
         value = ["containerContentEntryUid", "cntLastModified"])))
 @SyncableEntity(tableId = Container.TABLE_ID,
-    notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM DeviceSession
-    """
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId as deviceId, ${Container.TABLE_ID} AS tableId 
+        FROM DeviceSession 
+    """]
 )
 @Serializable
 open class Container() {

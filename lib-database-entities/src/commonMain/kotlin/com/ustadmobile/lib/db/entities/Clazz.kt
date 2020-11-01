@@ -12,12 +12,16 @@ import com.ustadmobile.lib.db.entities.Clazz.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID, notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+@SyncableEntity(tableId = TABLE_ID,
+    notifyOnUpdate = [
+        """
+        SELECT DISTINCT DeviceSession.dsDeviceId as deviceId, $TABLE_ID as tableId FROM 
         ChangeLog
         JOIN Clazz ON ChangeLog.chTableId = $TABLE_ID AND Clazz.clazzUid = ChangeLog.chEntityPk
         JOIN Person ON Person.personUid IN ($ENTITY_PERSONS_WITH_PERMISSION_PT1  ${Role.PERMISSION_CLAZZ_SELECT } $ENTITY_PERSONS_WITH_PERMISSION_PT2)
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid""",
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        """
+    ],
     syncFindAllQuery = """
         SELECT Clazz.* FROM
         Clazz

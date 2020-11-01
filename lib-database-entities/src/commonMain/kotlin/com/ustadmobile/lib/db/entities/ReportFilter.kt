@@ -10,12 +10,12 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = ReportFilter.TABLE_ID,
-    notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ReportFilter.TABLE_ID} AS tableId FROM 
         ChangeLog
         JOIN ReportFilter ON ChangeLog.chTableId = ${ReportFilter.TABLE_ID} AND ChangeLog.chEntityPk = ReportFilter.reportFilterUid
         JOIN Report ON ReportFilter.reportFilterReportUid = Report.reportUid
-        JOIN DeviceSession ON Report.reportOwnerUid = DeviceSession.dsPersonUid""",
+        JOIN DeviceSession ON Report.reportOwnerUid = DeviceSession.dsPersonUid"""],
     syncFindAllQuery = """
         SELECT ReportFilter.* FROM
         ReportFilter

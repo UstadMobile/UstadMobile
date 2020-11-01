@@ -7,14 +7,14 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @SyncableEntity(tableId = PersonPicture.TABLE_ID,
-    notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM 
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${PersonPicture.TABLE_ID} AS tableId FROM 
         ChangeLog
         JOIN PersonPicture ON ChangeLog.chTableId = ${PersonPicture.TABLE_ID} AND ChangeLog.chEntityPk = PersonPicture.personPictureUid
         JOIN Person ON Person.personUid = PersonPicture.personPicturePersonUid
         JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
             ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_PICTURE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid""",
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
     syncFindAllQuery = """
         SELECT PersonPicture.* FROM 
         PersonPicture

@@ -14,20 +14,24 @@ import kotlinx.serialization.Serializable
  */
 
 @SyncableEntity(tableId = ClazzLog.TABLE_ID,
-        notifyOnUpdate = """
-            SELECT DISTINCT DeviceSession.dsDeviceId FROM 
-            ChangeLog
-            JOIN ClazzLog ON ChangeLog.chTableId = ${ClazzLog.TABLE_ID} AND ClazzLog.clazzLogUid = ChangeLog.chEntityPk
-            JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid 
-            JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid""",
-        syncFindAllQuery = """
-            SELECT ClazzLog.* FROM
-            ClazzLog
-            JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid
-            JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZ_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
-            WHERE DeviceSession.dsDeviceId = :clientId
+    notifyOnUpdate = [
+        """
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzLog.TABLE_ID} AS tableId FROM 
+        ChangeLog
+        JOIN ClazzLog ON ChangeLog.chTableId = ${ClazzLog.TABLE_ID} AND ClazzLog.clazzLogUid = ChangeLog.chEntityPk
+        JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid 
+        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        """
+    ],
+    syncFindAllQuery =
+        """
+        SELECT ClazzLog.* FROM
+        ClazzLog
+        JOIN Clazz ON Clazz.clazzUid = ClazzLog.clazzLogClazzUid
+        JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZ_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
         """
 )
 @Entity

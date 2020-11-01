@@ -18,9 +18,9 @@ import kotlinx.serialization.Serializable
 //shortcode cerej
 @Entity
 @SyncableEntity(tableId = TABLE_ID,
-    notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM DeviceSession
-    """)
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId FROM DeviceSession 
+    """])
 @Serializable
 open class ContentEntryRelatedEntryJoin() {
 

@@ -6,19 +6,18 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
-import com.ustadmobile.lib.db.entities.SchoolPicture.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
-    notifyOnUpdate = """
-        SELECT DISTINCT DeviceSession.dsDeviceId FROM
+@SyncableEntity(tableId = SchoolPicture.TABLE_ID,
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${SchoolPicture.TABLE_ID} AS tableId FROM
         ChangeLog 
         JOIN SchoolPicture ON ChangeLog.chTableId = ${SchoolPicture.TABLE_ID} AND ChangeLog.chEntityPk = SchoolPicture.schoolPictureUid
         JOIN School ON SchoolPicture.schoolPictureUid = School.schoolUid
         JOIN Person ON Person.personUid IN 
             (${School.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_SCHOOL_SELECT} ${School.ENTITY_PERSONS_WITH_PERMISSION_PT2})
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid""",
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid"""],
     syncFindAllQuery = """
         SELECT SchoolPicture.* FROM
         SchoolPicture

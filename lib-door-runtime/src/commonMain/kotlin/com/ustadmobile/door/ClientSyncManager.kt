@@ -188,6 +188,13 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
 
         val REGEX_WHITESPACE = "\\s+".toRegex()
 
+        /**
+         * This is a special flag that can be used by a notifyOnUpdate query to order all tables to
+         * update.
+         */
+        const val TABLEID_SYNC_ALL_TABLES = -1
+
+
     }
 
 }
