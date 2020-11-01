@@ -22,6 +22,7 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.ContentEntryListScreen
 import com.ustadmobile.port.android.view.binding.updateDateOnEditTextWithExtraText
+import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule

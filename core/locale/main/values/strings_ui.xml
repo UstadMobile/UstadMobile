@@ -103,6 +103,9 @@
     <string name="document">Document</string>
     <string name="article">Article</string>
     <string name="audio">Audio</string>
+    <string name="move">Move</string>
+    <string name="hide">Hide</string>
+    <string name="unhide">Unhide</string>
 
     <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
 
@@ -253,6 +256,8 @@
     <string name="content_editor_save_error">Error while saving, try again</string>
     <string name="content_entry_export_inprogress">Exporting</string>
     <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
+    <string name="show_hidden_items">Show hidden items</string>
+    <string name="open_folder">Open Folder</string>
 
     <string name="invalid_register_code">Invalid Registration Code</string>
     <string name="enter_register_code">Enter Registration Code</string>
@@ -816,5 +821,10 @@ Content is provided under license by external content providers. Ustad Mobile, u
     enter the answers on behalf of a student e.g. when the student is not using the phone/tablet
     directly -->
     <string name="record_for_student">Record for student</string>
+
+    <!-- This is a popup that shows after users have moved a number of content entries. %1$s will
+    be replaced with the number of content entries that they moved
+    -->
+    <string name="moved_x_entries">Moved %1$s entries</string>
 
 </resources>

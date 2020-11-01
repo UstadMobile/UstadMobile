@@ -161,13 +161,14 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
             AND 
             (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
-            AND NOT ContentEntry.ceInactive
-            AND (ContentEntry.publik OR :personUid != 0)
+            AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden) 
+            AND (NOT ContentEntry.leaf OR NOT ContentEntry.leaf = :onlyFolder) 
+            AND (ContentEntry.publik OR :personUid != 0) 
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
             WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntryParentChildJoin.childIndex, ContentEntry.title ASC , ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameAsc")
-    abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long, showHidden: Boolean, onlyFolder: Boolean): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
     @Query("""SELECT ContentEntry.*,ContentEntryStatus.*, ContentEntryParentChildJoin.*, Container.*, ContentEntryProgress.* 
             FROM ContentEntry 
@@ -180,13 +181,14 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
             AND 
             (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
-            AND NOT ContentEntry.ceInactive
+            AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden) 
+            AND (NOT ContentEntry.leaf OR NOT ContentEntry.leaf = :onlyFolder) 
             AND (ContentEntry.publik OR :personUid != 0)
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
             WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY  ContentEntryParentChildJoin.childIndex, ContentEntry.title DESC, ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameDesc")
-    abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameDesc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameDesc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long, showHidden: Boolean, onlyFolder: Boolean): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Update
@@ -282,6 +284,12 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "ContentEntry.contentEntryUid = :contentEntryUid AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_PERMISSION))")
     abstract suspend fun personHasPermissionWithContentEntry(accountPersonUid: Long, contentEntryUid: Long,
                                                       permission: Long) : Boolean
+
+
+    @Query("""UPDATE ContentEntry SET ceInactive = :toggleVisibility, 
+                contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                WHERE contentEntryUid IN (:selectedItem)""")
+    abstract suspend fun toggleVisibilityContentEntryItems(toggleVisibility: Boolean, selectedItem: List<Long>)
 
     companion object {
 
