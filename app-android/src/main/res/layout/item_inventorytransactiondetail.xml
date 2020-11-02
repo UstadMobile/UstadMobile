@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.InventoryTransactionDetail"/>
+        <import type="com.ustadmobile.port.android.view.InventoryTransactionDetailRecyclerAdapter"/>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+
+        <variable
+            name="entry"
+            type="InventoryTransactionDetail" />
+
+        <variable
+            name="itemListener"
+            type="com.ustadmobile.core.controller.InventoryTransactionDetailListener" />
+
+        <variable
+            name="selectablePagedListAdapter"
+            type="InventoryTransactionDetailRecyclerAdapter" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_inventory_transaction_cl"
+        android:background="?android:attr/selectableItemBackground"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, entry)}"
+        app:onSelectableItemClicked="@{() -> itemListener.onClickEntry(entry)}">
+
+        <TextView
+            android:id="@+id/item_inventory_transaction_mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            tools:text="Sell/Receive"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:text="@{entry.saleUid != 0?@string/sell:@string/receive}"
+            android:textSize="18sp"
+            app:layout_constraintStart_toEndOf="@+id/imageView11"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_inventory_transaction_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            tools:text="Date"
+            app:dateLong="@{entry.transactionDate}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_inventory_transaction_desc"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="@dimen/dimen_8dp"
+            tools:text="Transaction description"
+            android:text="@{@string/x_item_by_y(entry.stockCount,entry.weNames)}"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/item_inventory_transaction_od"
+            app:layout_constraintStart_toStartOf="@+id/item_inventory_transaction_mode"
+            app:layout_constraintTop_toBottomOf="@+id/item_inventory_transaction_mode" />
+
+        <TextView
+            android:id="@+id/item_inventory_transaction_od"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="8dp"
+            android:text=""
+            android:visibility="visible"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_inventory_transaction_date" />
+
+
+
+        <ImageView
+            android:id="@+id/imageView11"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@{entry.saleUid != 0 ? @drawable/ic_arrow_left_24dp:@drawable/ic_arrow_right_24dp" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

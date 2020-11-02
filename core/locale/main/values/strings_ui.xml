@@ -868,6 +868,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="x_product_pieces_y">%1$s : pieces %1$s</string>
     <string name="x_total_sales">%1$s Total total sales</string>
     <string name="create_product">New product</string>
-
+    <string name="sell">Sell</string>
+    <string name="receive">Receive</string>
 
 </resources>

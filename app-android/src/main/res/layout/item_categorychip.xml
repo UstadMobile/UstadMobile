@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.Category"/>
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="com.ustadmobile.port.android.view.CategoryChipRecyclerAdapter"/>
+
+        <variable
+            name="category"
+            type="Category" />
+
+        <variable
+            name="itemListener"
+            type="com.ustadmobile.core.controller.CategoryChipListener" />
+
+
+        <variable
+            name="selectablePagedListAdapter"
+            type="CategoryChipRecyclerAdapter" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_inventory_transaction_cl"
+        android:background="?android:attr/selectableItemBackground"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, category)}"
+        app:onSelectableItemClicked="@{() -> itemListener.onClickEntry(category)}"
+        >
+
+        <com.google.android.material.chip.Chip
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_8dp"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            tools:text = "Category A"
+            android:text="@{category.categoryName}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

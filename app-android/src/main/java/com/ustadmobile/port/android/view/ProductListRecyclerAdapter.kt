@@ -4,14 +4,13 @@ package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemProductListBinding
 import com.ustadmobile.core.controller.ProductListItemListener
-import com.ustadmobile.lib.db.entities.Product
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
-import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-import androidx.recyclerview.widget.DiffUtil
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
+import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
 class ProductListRecyclerAdapter(var itemListener: ProductListItemListener?)

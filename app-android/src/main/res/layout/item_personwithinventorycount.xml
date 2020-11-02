@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="com.ustadmobile.lib.db.entities.PersonWithInventoryCount" />
+        <import type="com.ustadmobile.port.android.view.ext.StringExtKt" />
+        <import type="com.ustadmobile.port.android.view.PersonWithInventoryCountRecyclerAdapter"/>
+
+        <variable
+            name="person"
+            type="PersonWithInventoryCount" />
+
+        <variable
+            name="itemListener"
+            type="com.ustadmobile.core.controller.PersonWithInventoryCountListener" />
+
+        <variable
+            name="selectablePagedListAdapter"
+            type="PersonWithInventoryCountRecyclerAdapter" />
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/item_person_cl"
+        android:background="?android:attr/selectableItemBackground"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, person)}"
+        app:onSelectableItemClicked="@{() -> itemListener.onClickPerson(person)}"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <TextView
+            android:id="@+id/item_person_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginStart="4dp"
+            android:text="@{person.fullName()}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Light.SearchResult.Subtitle"
+            app:layout_constraintBottom_toBottomOf="@+id/item_person_picture"
+            app:layout_constraintStart_toEndOf="@+id/item_person_picture"
+            app:layout_constraintTop_toTopOf="@+id/item_person_picture"
+            tools:text="Lisa Simpsons" />
+
+
+        <TextView
+            android:id="@+id/item_person_stock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_24dp"
+            android:text="@{person.inventoryCount}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            app:layout_constraintBottom_toBottomOf="@+id/item_person_picture"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/item_person_picture"
+            tools:text="42" />
+
+        <ImageView
+            android:id="@+id/item_person_picture"
+            android:layout_width="48dp"
+            android:layout_height="40dp"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            android:layout_marginHorizontal="@dimen/dimen_8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_person_black_24dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
