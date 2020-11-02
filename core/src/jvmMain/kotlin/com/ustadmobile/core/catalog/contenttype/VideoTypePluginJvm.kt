@@ -10,7 +10,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-class VideoTypePluginAndroid: VideoTypePlugin() {
+class VideoTypePluginJvm: VideoTypePlugin() {
 
     override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default){

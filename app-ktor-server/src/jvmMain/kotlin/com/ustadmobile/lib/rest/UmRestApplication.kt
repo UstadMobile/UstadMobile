@@ -3,9 +3,14 @@ package com.ustadmobile.lib.rest
 import com.google.gson.Gson
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.catalog.contenttype.*
+import com.ustadmobile.core.contentformats.ContentImportManager
+import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
@@ -118,8 +123,22 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             }
         }
 
+        bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
+            val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+            val repo = db.asRepository<UmAppDatabase>(Any(), "http://localhost/",
+                    "", defaultHttpClient(), File(".").absolutePath)
+            repo
+        }
+
         bind<ScraperManager>() with scoped(EndpointScope.Default).singleton {
             ScraperManager(endpoint = context, di = di)
+        }
+
+        bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
+            ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(),
+                    XapiTypePluginCommonJvm(), VideoTypePluginJvm(),
+                    H5PTypePluginCommonJvm(Any())),
+                    Any(), context, di)
         }
 
         registerContextTranslator { call: ApplicationCall -> Endpoint(call.request.header("Host") ?: "nohost") }
