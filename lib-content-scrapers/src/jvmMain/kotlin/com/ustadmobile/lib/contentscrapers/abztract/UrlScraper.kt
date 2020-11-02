@@ -2,6 +2,7 @@ package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -29,6 +30,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
     private val logPrefix = "[URLScraper SQI ID #$sqiUid] "
 
+    private val contentImportManager: ContentImportManager by on(endpoint).instance()
 
     override fun scrapeUrl(sourceUrl: String) {
 
@@ -54,7 +56,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
         runBlocking {
 
-            val metadata = extractContentEntryMetadataFromFile(file, db)
+            val metadata = contentImportManager.extractMetadata(file.path)
 
             if (metadata == null) {
                 Napier.i("$logPrefix with sourceUrl $sourceUrl had no metadata found, not supported", tag = SCRAPER_TAG)
@@ -88,9 +90,10 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
                 entry
             }
 
+            val container = contentImportManager.importFileToContainer(file.path, metadata.mimeType, fileEntry.contentEntryUid, containerFolder.path){
 
-            val container = importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file, db, db, metadata.importMode, Any())
-            if (!headRequestValues.etag.isNullOrEmpty()) {
+            }
+            if (!headRequestValues.etag.isNullOrEmpty() && container != null) {
                 val etagContainer = ContainerETag(container.containerUid, headRequestValues.etag)
                 db.containerETagDao.insert(etagContainer)
             }

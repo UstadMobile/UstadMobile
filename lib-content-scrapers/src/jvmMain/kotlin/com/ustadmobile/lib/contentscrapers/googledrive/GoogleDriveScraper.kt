@@ -4,6 +4,8 @@ import com.github.aakira.napier.Napier
 import com.soywiz.klock.DateFormat
 import com.soywiz.klock.parse
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.ContentImportManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
@@ -22,6 +24,7 @@ import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -37,6 +40,8 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
     val googleApiKey: String by di.instance(tag = DiTag.TAG_GOOGLE_API)
 
     private val logPrefix = "[GoogleDriveScraper SQI ID #$sqiUid] "
+
+    private val contentImportManager: ContentImportManager by on(endpoint).instance()
 
 
     override fun scrapeUrl(sourceUrl: String) {
@@ -88,7 +93,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     }
                     stream.close()
 
-                    val metadata = extractContentEntryMetadataFromFile(contentFile, db)
+                    val metadata = contentImportManager.extractMetadata(contentFile.path)
 
                     if (metadata == null) {
                         Napier.i("$logPrefix with sourceUrl $sourceUrl had no metadata found, not supported", tag = SCRAPER_TAG)
@@ -127,13 +132,10 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                         Napier.d("$logPrefix new entry created/updated with entryUid ${fileEntry.contentEntryUid} with title ${file.name}", tag = SCRAPER_TAG)
                         ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
                     }
+                    metadata.contentEntry.contentEntryUid = fileEntry.contentEntryUid
 
-
-
-                    importContainerFromFile(fileEntry.contentEntryUid,
-                            metadata.mimeType, containerFolder.absolutePath,
-                            contentFile, db, db, metadata.importMode, Any())
-
+                    contentImportManager.importFileToContainer(contentFile.path, metadata.mimeType, fileEntry.contentEntryUid, containerFolder.path){
+                    }
                     Napier.d("$logPrefix finished Scraping", tag = SCRAPER_TAG)
                     showContentEntry()
                     setScrapeDone(true, 0)

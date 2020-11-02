@@ -3,6 +3,7 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
@@ -57,6 +58,9 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
     private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
 
     private val apiKey: String by di.instance(tag = DiTag.TAG_GOOGLE_API)
+
+    private val contentImportManager: ContentImportManager by on(endpoint).instance()
+
 
     private val logPrefix = "[ScraperManager endpoint url: ${endpoint.url}] "
 
@@ -242,7 +246,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                 }
                 stream.close()
 
-                val metadata = extractContentEntryMetadataFromFile(googleFile, db)
+                val metadata = contentImportManager.extractMetadata(googleFile.path)
                 metadata?.scraperType = ScraperTypes.GOOGLE_DRIVE_SCRAPE
                 metadata?.uri = apiCall
                 metadata?.contentEntry?.sourceUrl = apiCall
@@ -280,7 +284,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
             else -> {
 
-                val metaData = extractContentEntryMetadataFromFile(contentFile, db)
+                val metaData = contentImportManager.extractMetadata(contentFile.path)
                 metaData?.scraperType = ScraperTypes.URL_SCRAPER
                 metaData?.uri = urlString
                 metaData?.contentEntry?.sourceUrl = urlString
