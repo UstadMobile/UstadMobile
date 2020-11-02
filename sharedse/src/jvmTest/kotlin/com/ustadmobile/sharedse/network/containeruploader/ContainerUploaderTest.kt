@@ -8,9 +8,10 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.ContainerUploaderRequest
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerUploadJob
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -95,9 +96,9 @@ class ContainerUploaderTest {
         val concatenatedResponse = appDb.containerEntryFileDao.generateConcatenatedFilesResponse(entryListStr)
         val inStream = concatenatedResponse.dataSrc
 
-        val job = ContainerUploadJob()
+        val job = ContainerImportJob()
         job.cujContainerUid = epubContainer.containerUid
-        job.cujUid = appDb.containerUploadJobDao.insert(job)
+        job.cujUid = appDb.containerImportJobDao.insert(job)
 
         val sessionId = UUID.randomUUID().toString()
         mockWebServer.enqueue(MockResponse().setBody(sessionId))

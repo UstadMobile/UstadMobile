@@ -16,15 +16,14 @@ import com.ustadmobile.door.ext.DoorTag.Companion.TAG_DB
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerUploadJob
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.rest.ContainerUpload
 import com.ustadmobile.lib.rest.ResumableUploadRoute
 import com.ustadmobile.lib.rest.TAG_UPLOAD_DIR
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.ext.TestContainer.assertContainersHaveSameContent
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader.Companion.DEFAULT_CHUNK_SIZE
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
+import com.ustadmobile.core.networkmanager.ContainerUploaderCommon
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
 import com.ustadmobile.sharedse.network.containeruploader.UploadJobRunner
 import io.ktor.application.ApplicationCall
@@ -75,7 +74,7 @@ class UploadJobRunnerTest {
 
     private val context = Any()
 
-    private lateinit var containerUploadJob: ContainerUploadJob
+    private lateinit var containerImportJob: ContainerImportJob
 
     @JvmField
     @Rule
@@ -162,9 +161,9 @@ class UploadJobRunnerTest {
         runBlocking {
             addEntriesFromZipToContainer(fileToUpload.absolutePath, containerManager)
         }
-        containerUploadJob = ContainerUploadJob().apply {
+        containerImportJob = ContainerImportJob().apply {
             this.cujContainerUid = epubContainer.containerUid
-            this.cujUid = appDb.containerUploadJobDao.insert(this)
+            this.cujUid = appDb.containerImportJobDao.insert(this)
         }
     }
 
@@ -180,7 +179,7 @@ class UploadJobRunnerTest {
         appDb = di.on(Endpoint(endpoint)).direct.instance(tag = UmAppDatabase.TAG_DB)
         createContainer(appDb)
 
-        val runner = UploadJobRunner(containerUploadJob, retryDelay, endpoint, di)
+        val runner = UploadJobRunner(containerImportJob, retryDelay, endpoint, di)
         runBlocking {
             runner.startUpload()
         }
@@ -198,7 +197,7 @@ class UploadJobRunnerTest {
         createContainer(appDb)
 
         // existing md5Sum response
-        val md5List = appDb.containerEntryDao.findByContainerWithMd5(containerUploadJob.cujContainerUid).map { it.cefMd5 }
+        val md5List = appDb.containerEntryDao.findByContainerWithMd5(containerImportJob.cujContainerUid).map { it.cefMd5 }
         mockWebServer.enqueue(MockResponse().addHeader("Content-Type", "application/json")
                 .setBody(Gson().toJson(md5List)))
 
@@ -211,7 +210,7 @@ class UploadJobRunnerTest {
             mockWebServer.enqueue(MockResponse().setResponseCode(HttpStatusCode.InternalServerError.value).setBody("Server error"))
         }
 
-        val runner = UploadJobRunner(containerUploadJob, retryDelay, mockWebServer.url("").toString(), di)
+        val runner = UploadJobRunner(containerImportJob, retryDelay, mockWebServer.url("").toString(), di)
         var status = 0
         runBlocking {
             status = runner.startUpload()
@@ -228,7 +227,7 @@ class UploadJobRunnerTest {
         createContainer(repo)
         createContainer(appDb)
 
-        val runner = UploadJobRunner(containerUploadJob, retryDelay, endpoint, di)
+        val runner = UploadJobRunner(containerImportJob, retryDelay, endpoint, di)
         var status = 0
         runBlocking {
             status = runner.startUpload()

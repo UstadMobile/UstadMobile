@@ -9,7 +9,6 @@ import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContextXObjectStatementJoinDao
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
@@ -23,9 +22,6 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
-import com.ustadmobile.sharedse.network.NetworkManagerBle
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import org.junit.Assert
