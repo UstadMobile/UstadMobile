@@ -2,25 +2,17 @@ package com.ustadmobile.door
 
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.door.DoorDatabaseRepository.Companion.STATUS_CONNECTED
+import com.ustadmobile.door.daos.ISyncHelperEntitiesDao
 import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
-import com.ustadmobile.door.ktor.respondUpdateNotificationReceived
-import com.ustadmobile.door.ktor.respondUpdateNotifications
 import com.ustadmobile.door.util.systemTimeInMillis
 import io.ktor.application.ApplicationCall
-import io.ktor.application.call
-import io.ktor.application.install
 import io.ktor.client.HttpClient
-import io.ktor.client.features.HttpTimeout
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
 import io.ktor.http.ContentType
-import io.ktor.routing.get
-import io.ktor.routing.routing
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.junit.Test
 import org.kodein.di.bind
@@ -32,6 +24,13 @@ import org.kodein.di.registerContextTranslator
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 import java.util.concurrent.atomic.AtomicBoolean
+import com.ustadmobile.door.ktor.respondUpdateNotificationReceived
+import com.ustadmobile.door.ktor.respondUpdateNotifications
+import io.ktor.application.call
+import io.ktor.application.install
+import io.ktor.routing.get
+import io.ktor.routing.routing
+
 
 class ClientSyncManagerTest {
 
@@ -39,8 +38,7 @@ class ClientSyncManagerTest {
     fun givenValidRepo_whenRepoChanges_thenShouldUpdateStatusTableAndCallSync() {
         val exampleTableId = 42
         val tableChanged = AtomicBoolean(false)
-        val mockRepo = mock<DoorDatabaseSyncRepository> {
-            on { tableIdMap }.thenReturn(mapOf("Example" to exampleTableId))
+        val mockSyncHelperEntitiesDao = mock<ISyncHelperEntitiesDao> {
             on { findTablesToSync() }.thenAnswer {
                 if(tableChanged.get()) {
                     listOf(TableSyncStatus(exampleTableId, systemTimeInMillis(), 0))
@@ -49,17 +47,21 @@ class ClientSyncManagerTest {
                 }
             }
         }
+        val mockRepo = mock<DoorDatabaseSyncRepository> {
+            on { tableIdMap }.thenReturn(mapOf("Example" to exampleTableId))
+            on { syncHelperEntitiesDao}.thenReturn(mockSyncHelperEntitiesDao)
+        }
 
         val clientSyncManager = ClientSyncManager(mockRepo, 2, STATUS_CONNECTED,
                 "none", "none", HttpClient())
 
         //wait for the initial load
-        verify(mockRepo, timeout(4000)).findTablesToSync()
+        verify(mockSyncHelperEntitiesDao, timeout(4000)).findTablesToSync()
 
         tableChanged.set(true)
 
         clientSyncManager.onTableChanged("Example")
-        verifyBlocking(mockRepo, timeout(4000)) { updateTableSyncStatusLastChanged(eq(exampleTableId), any()) }
+        verifyBlocking(mockSyncHelperEntitiesDao, timeout(4000)) { updateTableSyncStatusLastChanged(eq(exampleTableId), any()) }
         verifyBlocking(mockRepo, timeout(4000)) { mockRepo.sync(argWhere { exampleTableId in it })}
     }
 
@@ -80,16 +82,25 @@ class ClientSyncManagerTest {
         val updateNotificationId = 5000L
         val notificationTime = systemTimeInMillis()
 
+        val mockSyncHelperEntitiesDao = mock<ISyncHelperEntitiesDao> {
+            on { findTablesToSync() }.thenReturn(listOf())
+        }
+
         val mockRepo = mock<DoorDatabaseSyncRepository> {
             on { tableIdMap }.thenReturn(mapOf("Example" to exampleTableId))
             on { endpoint }.thenReturn("http://localhost:8089/")
             on { clientId }.thenReturn(57)
+            on { syncHelperEntitiesDao }.thenReturn(mockSyncHelperEntitiesDao)
+        }
+
+        val mockServerSyncHelperEntitiesDao = mock<ISyncHelperEntitiesDao> {
+            onBlocking { findPendingUpdateNotifications(any()) }.thenReturn(
+                    listOf(UpdateNotification(updateNotificationId, 1234, exampleTableId, notificationTime)))
         }
 
         val mockServerRepo = mock<DoorDatabaseSyncRepository> {
             on { tableIdMap }.thenReturn(mapOf("Example" to exampleTableId))
-            onBlocking { findPendingUpdateNotifications(any()) }.thenReturn(
-                    listOf(UpdateNotification(updateNotificationId, 1234, exampleTableId, notificationTime)))
+            on { syncHelperEntitiesDao }.thenReturn(mockServerSyncHelperEntitiesDao)
         }
 
         val mockUpdateNotificationManager = mock<ServerUpdateNotificationManager> {
@@ -134,11 +145,11 @@ class ClientSyncManagerTest {
                 httpClient)
 
         runBlocking {
-            verifyBlocking(mockRepo, timeout(30000)) {
+            verifyBlocking(mockSyncHelperEntitiesDao, timeout(30000)) {
                 updateTableSyncStatusLastChanged(eq(exampleTableId), any())
             }
 
-            verifyBlocking(mockServerRepo, timeout(10000)) {
+            verifyBlocking(mockServerSyncHelperEntitiesDao, timeout(10000)) {
                 deleteUpdateNotification(mockRepo.clientId, exampleTableId, notificationTime)
             }
         }

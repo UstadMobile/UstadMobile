@@ -34,6 +34,8 @@ actual class DoorEventSource actual constructor(var url: String, var listener: D
 
         var input: ByteReadChannel? = null
 
+        var retryWait = INITIAL_RETRY_DELAY
+
         while(coroutineContext.isActive) {
             try {
                 Napier.d("$logPrefix Connect to server side events from: $url", tag = DoorTag.LOG_TAG)
@@ -46,6 +48,7 @@ actual class DoorEventSource actual constructor(var url: String, var listener: D
 
                 listener.onOpen()
                 Napier.d("$logPrefix connected", tag = DoorTag.LOG_TAG)
+                retryWait = INITIAL_RETRY_DELAY
 
                 var dataStr: String = ""
                 var id: String = ""
@@ -89,8 +92,11 @@ actual class DoorEventSource actual constructor(var url: String, var listener: D
             }
 
             if(coroutineContext.isActive) {
-                Napier.d("$logPrefix waiting for reconnect", tag = DoorTag.LOG_TAG)
-                delay(1000)
+                val timeToWait = minOf(retryWait, RETRY_DELAY_MAX)
+                delay(timeToWait)
+                Napier.d("$logPrefix waiting ${timeToWait}ms to retry/reconnect", tag = DoorTag.LOG_TAG)
+                if(retryWait < RETRY_DELAY_MAX)
+                    retryWait *= DELAY_BACKOFF_FACTOR
             }
         }
     }
@@ -100,6 +106,21 @@ actual class DoorEventSource actual constructor(var url: String, var listener: D
         const val CONNECT_TIMEOUT = 10000
 
         const val READ_TIMEOUT = (60 * 60 * 1000) // 1 hour
+
+        /**
+         * The retry delay after the first connection failure.
+         */
+        const val INITIAL_RETRY_DELAY = 1000L
+
+        /**
+         * The factor by which the retry delay will be multiplied after each successive failure
+         */
+        const val DELAY_BACKOFF_FACTOR = 2
+
+        /**
+         * The maximum time to wait to retry connecting.
+         */
+        const val RETRY_DELAY_MAX = 60000L
 
     }
 

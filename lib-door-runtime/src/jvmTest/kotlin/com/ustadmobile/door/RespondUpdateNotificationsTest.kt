@@ -4,6 +4,7 @@ import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
+import com.ustadmobile.door.daos.ISyncHelperEntitiesDao
 import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.ktor.respondUpdateNotifications
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -26,9 +27,13 @@ import org.kodein.di.registerContextTranslator
 import org.kodein.di.scoped
 import org.kodein.di.singleton
 
+/**
+ * This is here to facilitate manual testing - e.g. timeouts on receiving entities through different
+ * proxies etc.
+ */
 class RespondUpdateNotificationsTest {
 
-    @Test
+    //@Test
     fun setup() {
         Napier.base(DebugAntilog())
         val updateListeners = mutableListOf<UpdateNotificationListener>()
@@ -43,10 +48,14 @@ class RespondUpdateNotificationsTest {
             }
         }
 
-        val mockServerRepo = mock<DoorDatabaseSyncRepository> {
-            on { tableIdMap }.thenReturn(mapOf("Example" to exampleTableId))
+        val mockSyncHelperEntitiesDao = mock<ISyncHelperEntitiesDao> {
             onBlocking { findPendingUpdateNotifications(any()) }.thenReturn(
                     listOf(UpdateNotification(5000, 1234, exampleTableId, systemTimeInMillis())))
+        }
+
+        val mockServerRepo = mock<DoorDatabaseSyncRepository> {
+            on { tableIdMap }.thenReturn(mapOf("Example" to exampleTableId))
+            on { syncHelperEntitiesDao}.thenReturn(mockSyncHelperEntitiesDao)
         }
 
 
