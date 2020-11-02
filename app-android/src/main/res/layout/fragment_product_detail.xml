@@ -11,18 +11,6 @@
             type="com.ustadmobile.lib.db.entities.Product" />
 
         <variable
-            name="loading"
-            type="boolean" />
-
-        <variable
-            name="fieldsEnabled"
-            type="boolean" />
-
-        <variable
-            name="editButtonMode"
-            type="com.ustadmobile.core.view.EditButtonMode"/>
-
-        <variable
             name="fragmentEventHandler"
             type="com.ustadmobile.port.android.view.ProductDetailFragmentEventHandler" />
 
@@ -31,9 +19,9 @@
 
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/activity_product_edit_scroll"
+        android:id="@+id/fragment_product_detail_scroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -42,10 +30,75 @@
             android:layout_height="wrap_content">
 
 
-            <!-- TODO: Put the actual view for editing Product here using two-way data binding -->
-            <!-- Available templates:
-            onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-            -->
+            <TextView
+                android:id="@+id/random_tv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                android:text="@string/price" />
+
+            <TextView
+                android:id="@+id/fragment_product_detail_price_tv"
+                android:layout_width="wrap_content"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:text="@{`` + product.productBasePrice}"
+                android:textAppearance="@style/UmTheme.TextAppearance.Headline5"
+                app:layout_constraintStart_toEndOf="@+id/random_tv"
+                tools:text="800 AFS"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_product_detail_category_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                tools:listitem="@layout/item_categorychip"
+                tools:itemCount="2"
+                android:orientation="horizontal"
+                tools:orientation="horizontal"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_product_detail_price_tv"
+                />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_product_detail_stock_rv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:listitem="@layout/item_personwithinventorycount"
+                tools:itemCount="2"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_product_detail_category_rv"
+                />
+
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_product_detail_history_rv"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                tools:listitem="@layout/item_inventorytransactiondetail"
+                tools:itemCount="2"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_product_detail_stock_rv"
+                />
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

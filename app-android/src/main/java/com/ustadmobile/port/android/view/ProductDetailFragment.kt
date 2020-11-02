@@ -8,27 +8,34 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.FragmentProductDetailBinding
-import com.ustadmobile.core.controller.ProductDetailPresenter
-import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.db.dao.ClazzWorkDao
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.controller.*
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.InventoryTransactionDao
 import com.ustadmobile.core.db.dao.ProductDao
+import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.ProductDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Category
+import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
+import com.ustadmobile.lib.db.entities.PersonWithInventoryCount
+import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
-import kotlinx.android.synthetic.main.fragment_person_detail.*
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 interface ProductDetailFragmentEventHandler {
 
 }
 
 class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), ProductDetailView,
-        ProductDetailFragmentEventHandler {
+        ProductDetailFragmentEventHandler, CategoryChipListener, InventoryTransactionDetailListener,
+        PersonWithInventoryCountListener{
 
     private var mBinding: FragmentProductDetailBinding? = null
 
@@ -93,20 +100,61 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
             historyLiveData?.observeIfFragmentViewIsReady(this, historyObserver)
         }
 
+    private var repo: UmAppDatabase? = null
+
+    override fun onClickEntry(entry: Category) {
+        //TODO
+    }
+
+    override fun onClickEntry(entry: InventoryTransactionDetail) {
+        //TODO
+    }
+
+    override fun onClickPerson(person: PersonWithInventoryCount) {
+        //TODO
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView: View
+
+        categoriesRecyclerAdapter = CategoryChipRecyclerAdapter(this)
+        stockRecyclerAdapter = PersonWithInventoryCountRecyclerAdapter(this)
+        historyRecyclerAdapter = InventoryTransactionDetailRecyclerAdapter(this)
+
+
+
         mBinding = FragmentProductDetailBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
+            it.fragmentProductDetailCategoryRv.apply{
+                adapter = categoriesRecyclerAdapter
+                val lm = LinearLayoutManager(requireContext())
+                lm.orientation = LinearLayoutManager.HORIZONTAL
+                layoutManager = lm
+            }
+            it.fragmentProductDetailStockRv.apply{
+                adapter = stockRecyclerAdapter
+                layoutManager = LinearLayoutManager(requireContext())
+            }
+            it.fragmentProductDetailHistoryRv.apply{
+                adapter = historyRecyclerAdapter
+                layoutManager = LinearLayoutManager(requireContext())
+            }
+
         }
+        mBinding?.fragmentEventHandler = this
+        val accountManager: UstadAccountManager by instance()
+        repo = di.direct.on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
         mPresenter = ProductDetailPresenter(requireContext(), arguments.toStringMap(), this,
                 di, this)
+        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
         return rootView
     }
+
+
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
@@ -135,14 +183,6 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
         set(value) {
             field = value
             mBinding?.product = value
-        }
-
-
-    override var editButtonMode: EditButtonMode = EditButtonMode.GONE
-        get() = field
-        set(value) {
-            mBinding?.editButtonMode = value
-            field = value
         }
 
 }
