@@ -41,7 +41,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
 
     private val logPrefix = "[GoogleDriveScraper SQI ID #$sqiUid] "
 
-    private val contentImportManager: ContentImportManager by on(endpoint).instance()
+    private val contentImportManager: ContentImportManager by di.on(endpoint).instance()
 
 
     override fun scrapeUrl(sourceUrl: String) {

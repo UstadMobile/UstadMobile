@@ -2,22 +2,20 @@ package com.ustadmobile.lib.contentscrapers.folder
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportManager
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper
-import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
 
 @ExperimentalStdlibApi
 class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
-    private val contentImportManager: ContentImportManager by on(endpoint).instance()
+    private val contentImportManager: ContentImportManager by di.on(endpoint).instance()
 
     override fun scrapeUrl(sourceUrl: String) {
 

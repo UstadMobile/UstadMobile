@@ -208,6 +208,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"

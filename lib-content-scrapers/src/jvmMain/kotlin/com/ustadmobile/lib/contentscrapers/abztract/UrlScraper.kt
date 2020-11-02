@@ -8,16 +8,14 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
-import com.ustadmobile.lib.contentscrapers.apache.ApacheIndexer
 import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
-import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
 import java.net.URL
 import java.net.URLDecoder
@@ -30,7 +28,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
     private val logPrefix = "[URLScraper SQI ID #$sqiUid] "
 
-    private val contentImportManager: ContentImportManager by on(endpoint).instance()
+    private val contentImportManager: ContentImportManager by di.on(endpoint).instance()
 
     override fun scrapeUrl(sourceUrl: String) {
 
