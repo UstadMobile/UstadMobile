@@ -22,7 +22,7 @@ import com.ustadmobile.lib.contentscrapers.googledrive.GoogleFile
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
 import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
-import com.ustadmobile.sharedse.util.LiveDataWorkQueue
+import com.ustadmobile.core.util.LiveDataWorkQueue
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
 import io.ktor.client.request.parameter
@@ -274,7 +274,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                 entry.contentTypeFlag = ContentEntry.TYPE_COLLECTION
                 Napier.e("$logPrefix metadata uri for apacheIndexer: $urlWithEndingSlash", tag = SCRAPER_TAG)
 
-                return ImportedContentEntryMetaData(entry, "text/html", urlWithEndingSlash, 0, ScraperTypes.APACHE_INDEXER)
+                return ImportedContentEntryMetaData(entry, "text/html", urlWithEndingSlash, ScraperTypes.APACHE_INDEXER)
 
             }
 

@@ -30,7 +30,7 @@ val mimeTypeSupported: List<String> = CONTENT_PLUGINS.flatMap { it.mimeTypes.asL
 val extSupported: List<String> = CONTENT_PLUGINS.flatMap { it.fileExtensions.asList() }
 
 suspend fun extractContentEntryMetadataFromFile(file: File, db: UmAppDatabase, plugins: List<ContentTypeFilePlugin> = CONTENT_PLUGINS): ImportedContentEntryMetaData? {
-    plugins.forEach {
+   /* plugins.forEach {
         val pluginResult = it.getContentEntry(file)
         val languageCode = pluginResult?.language?.iso_639_1_standard
         if (languageCode != null) {
@@ -40,7 +40,7 @@ suspend fun extractContentEntryMetadataFromFile(file: File, db: UmAppDatabase, p
             pluginResult.contentFlags = ContentEntry.FLAG_IMPORTED
             return ImportedContentEntryMetaData(pluginResult, it.mimeTypes[0], file.toURI().toString(), it.importMode())
         }
-    }
+    }*/
 
     return null
 }
@@ -68,11 +68,11 @@ suspend fun importContentEntryFromFile(file: File, db: UmAppDatabase, dbRepo: Um
     val (contentEntry, mimeType, fileUri, importMode) = extractContentEntryMetadataFromFile(file, db, plugins)
             ?: return null
 
-    contentEntry.contentEntryUid = dbRepo.contentEntryDao.insert(contentEntry)
+   /* contentEntry.contentEntryUid = dbRepo.contentEntryDao.insert(contentEntry)
     val container = importContainerFromFile(contentEntry.contentEntryUid, mimeType, containerBaseDir, file,
-            db, dbRepo, importMode, context)
+            db, dbRepo, importMode, context)*/
 
-    return Pair(contentEntry, container)
+    return Pair(contentEntry, Container())
 }
 
 

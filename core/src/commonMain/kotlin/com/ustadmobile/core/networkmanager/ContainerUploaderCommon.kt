@@ -1,4 +1,4 @@
-package com.ustadmobile.sharedse.network.containeruploader
+package com.ustadmobile.core.networkmanager
 
 import kotlinx.coroutines.Deferred
 

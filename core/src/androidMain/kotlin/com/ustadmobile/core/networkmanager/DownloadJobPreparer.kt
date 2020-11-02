@@ -1,17 +1,15 @@
-package com.ustadmobile.sharedse.network
+package com.ustadmobile.core.networkmanager
 
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.DownloadJobItemDao
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.UMUtil
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
@@ -136,6 +134,7 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
                 "entry uid = " + downloadJob.djRootContentEntryUid + " download job uid = " + downloadJobUid)
         val jobItemDao = appDatabase.downloadJobItemDao
         var childItemsToCreate: List<DownloadJobItemDao.DownloadJobItemToBeCreated2>
+        //TODO: Start a foreground notification on Android to show progress to the user and prevent it being killed
 
         var numItemsCreated = 0
 

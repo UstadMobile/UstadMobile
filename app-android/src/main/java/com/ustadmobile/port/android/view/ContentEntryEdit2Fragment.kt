@@ -1,6 +1,8 @@
 package com.ustadmobile.port.android.view
 
 import android.app.AlertDialog
+import android.media.MediaCodecInfo
+import android.media.MediaFormat
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
@@ -10,6 +12,9 @@ import android.view.ViewGroup
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
+import com.linkedin.android.litr.MediaTransformer
+import com.linkedin.android.litr.TransformationListener
+import com.linkedin.android.litr.analytics.TrackTransformationInfo
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
 import com.ustadmobile.core.account.UstadAccountManager
@@ -19,24 +24,27 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.ext.*
+import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.port.android.util.ext.createTempDirForDestination
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.util.ext.getFileName
+import com.ustadmobile.port.android.util.ext.unregisterDestinationTempFile
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.sharedse.contentformats.*
+import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
+import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 import java.net.URI
+import kotlin.coroutines.suspendCoroutine
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -132,6 +140,10 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     }
 
+    override fun unregisterFileFromTemp() {
+        findNavController().unregisterDestinationTempFile(requireContext(), File(entryMetaData?.uri?.removePrefix("file://")).parentFile)
+    }
+
 
     internal fun handleFileSelection() {
         registerForActivityResult(ActivityResultContracts.GetContent(),
@@ -150,22 +162,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                         output.close()
                         input?.close()
 
-                        val accountManager: UstadAccountManager by instance()
-                        val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
-                        val metaData = extractContentEntryMetadataFromFile(tmpFile, db)
-                        entryMetaData = metaData
-                        when (entryMetaData) {
-                            null -> {
-                                showSnackBar(getString(R.string.import_link_content_not_supported))
-                            }
-                        }
-                        val entry = entryMetaData?.contentEntry
-                        val entryUid = arguments?.get(ARG_ENTITY_UID)
-                        if (entry != null) {
-                            if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
-                            fileImportErrorVisible = false
-                            entity = entry
-                        }
+                        mPresenter?.handleFileSelection(tmpFile.absolutePath)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -180,23 +177,9 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
     }
 
-
     private fun handleLinkSelection() {
         onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(ImportedContentEntryMetaData::class.java, R.id.import_link_view)
-    }
-
-
-    override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase): Container? {
-        val fileUri = entryMetaData?.uri
-        val importMode = entryMetaData?.importMode
-        val container = if (fileUri != null && importMode != null) {
-            withContext(Dispatchers.IO) {
-                importContainerFromFile(entryUid, entryMetaData?.mimeType, selectedBaseDir, File(URI(fileUri).path), db, repo, importMode, requireContext())
-            }
-        } else null
-        loading = true
-        return container
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {

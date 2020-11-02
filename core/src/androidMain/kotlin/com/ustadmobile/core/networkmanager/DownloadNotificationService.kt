@@ -1,4 +1,4 @@
-package com.ustadmobile.sharedse.network
+package com.ustadmobile.core.networkmanager
 
 import android.app.*
 import android.content.Context
@@ -10,6 +10,7 @@ import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
+import com.ustadmobile.core.R
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -19,12 +20,12 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.util.copyOnWriteListOf
-import com.ustadmobile.port.sharedse.R
 import java.util.concurrent.atomic.AtomicInteger
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.db.entities.DownloadJob
 import kotlinx.coroutines.*
 import org.kodein.di.*
@@ -53,6 +54,8 @@ class DownloadNotificationService : Service(), DIAware {
     private val activeDownloadJobNotifications: MutableList<DownloadJobNotificationHolder> = copyOnWriteListOf()
 
     private val activeDeleteJobNotifications: MutableList<DeleteNotificationHolder> = copyOnWriteListOf()
+
+    private val activeImportJobNotifications: MutableList<ImportJobNotificationHolder> = copyOnWriteListOf()
 
     open inner class NotificationHolder2(var contentTitle: String, var contentText: String,
                                          val notificationId: Int = notificationIdRef.incrementAndGet()) {
@@ -195,7 +198,9 @@ class DownloadNotificationService : Service(), DIAware {
         }
     }
 
-    inner class DeleteNotificationHolder(val downloadJobUid: Int) : NotificationHolder2(impl.getString(MessageID.deleting, applicationContext), impl.getString(MessageID.deleting, applicationContext)) {
+    inner class DeleteNotificationHolder(val downloadJobUid: Int) :
+            NotificationHolder2(impl.getString(MessageID.deleting, applicationContext),
+                    impl.getString(MessageID.deleting, applicationContext)) {
         init {
             builder.setContentTitle(contentTitle)
                     .setContentText(contentText)
@@ -209,6 +214,47 @@ class DownloadNotificationService : Service(), DIAware {
             }
         }
     }
+
+    inner class ImportJobNotificationHolder(val importJobUid: Int) : NotificationHolder2(
+            impl.getString(MessageID.deleting, applicationContext),
+            impl.getString(MessageID.deleting, applicationContext)), DoorObserver<ContainerImportJob?> {
+
+
+        var bytesSoFar: Long = 0
+        var totalBytes: Long = 0
+
+        init {
+            builder.setContentTitle(contentTitle)
+                    .setContentText(contentText)
+
+        }
+
+        override fun onChanged(t: ContainerImportJob?) {
+            if(t != null) {
+                bytesSoFar = t.bytesSoFar
+                totalBytes = t.contentLength
+
+                val progress = (bytesSoFar.toDouble() / totalBytes * 100).toInt()
+                builder.setProgress(MAX_PROGRESS_VALUE, progress, false)
+                contentText = String.format(impl.getString(
+                        MessageID.download_downloading_placeholder, this@DownloadNotificationService),
+                        UMFileUtil.formatFileSize(bytesSoFar),
+                        UMFileUtil.formatFileSize(totalBytes))
+                builder.setContentText(contentText)
+
+                doNotify()
+                summaryNotificationHolder?.updateSummary()
+
+                if(t.jobStatus >= JobStatus.COMPLETE_MIN) {
+                    activeImportJobNotifications.remove(this)
+                    mNotificationManager.cancel(notificationId)
+                    //downloadJobLiveData.removeObserver(this)
+                    checkIfCompleteAfterDelay()
+                }
+            }
+        }
+    }
+
 
     inner class SummaryNotificationHolder() : NotificationHolder2(
             impl.getString(MessageID.downloading, applicationContext),
@@ -284,7 +330,7 @@ class DownloadNotificationService : Service(), DIAware {
 
         var foregroundNotificationHolder = null as NotificationHolder2?
 
-        if (intentAction in listOf(ACTION_DOWNLOADJOBITEM_STARTED, ACTION_PREPARE_DOWNLOAD) && !foregroundActive) {
+        if (intentAction in listOf(ACTION_DOWNLOADJOBITEM_STARTED, ACTION_PREPARE_DOWNLOAD, ACTION_PREPARE_IMPORT) && !foregroundActive) {
             if (canCreateGroupedNotification()) {
                 summaryNotificationHolder = SummaryNotificationHolder()
                 foregroundNotificationHolder = summaryNotificationHolder
@@ -292,6 +338,7 @@ class DownloadNotificationService : Service(), DIAware {
         }
 
         val downloadJobUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBUID) ?: -1
+        val importJobUid = intentExtras?.getInt(EXTRA_IMPORTJOB_UID) ?: -1
         val endpointUrl = intentExtras?.getString(EXTRA_ENDPOINT)
         val endpoint: Endpoint? = if(endpointUrl != null) Endpoint(endpointUrl) else null
 
@@ -378,6 +425,16 @@ class DownloadNotificationService : Service(), DIAware {
                 }
 
             }
+            ACTION_PREPARE_IMPORT ->{
+                val importNotificationHolder = ImportJobNotificationHolder(importJobUid)
+                activeImportJobNotifications.add(importNotificationHolder)
+
+                if (!foregroundActive && foregroundNotificationHolder == null) {
+                    foregroundNotificationHolder = importNotificationHolder
+                } else {
+                    importNotificationHolder.doNotify()
+                }
+            }
         }
 
         if (!foregroundActive && foregroundNotificationHolder != null) {
@@ -390,7 +447,7 @@ class DownloadNotificationService : Service(), DIAware {
         return START_STICKY
     }
 
-    private fun isEmpty(): Boolean = activeDownloadJobNotifications.isEmpty() && activeDeleteJobNotifications.isEmpty()
+    private fun isEmpty(): Boolean = activeDownloadJobNotifications.isEmpty() && activeDeleteJobNotifications.isEmpty() && activeImportJobNotifications.isEmpty()
 
     /**
      * Create a channel for the notification
@@ -442,11 +499,15 @@ class DownloadNotificationService : Service(), DIAware {
 
         const val ACTION_PREPARE_DOWNLOAD = "ACTION_PREPARE_DOWNLOAD"
 
+        const val ACTION_PREPARE_IMPORT = "ACTION_PREPARE_IMPORT"
+
         const val ACTION_DOWNLOADJOBITEM_STARTED = "ACTION_DOWNLOADJOBITEM_STARTED"
 
         const val EXTRA_ENDPOINT = "EXTRA_ENDPOINT"
 
         const val EXTRA_DOWNLOADJOBUID = "EXTRA_DOWNLOADJOBUID"
+
+        const val EXTRA_IMPORTJOB_UID = "EXTRA_IMPORTJOBUID"
 
         const val EXTRA_DOWNLOADJOBITEMUID = "EXTRA_DOWNLOADJOBITEMUID"
 

@@ -4,9 +4,10 @@ import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.ContainerUploaderRequest
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.lib.db.entities.ContainerUploadJob
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 import io.ktor.http.HttpStatusCode
@@ -38,7 +39,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
 
     suspend fun progressUpdater() = coroutineScope {
         while (isActive) {
-            db.containerUploadJobDao.updateProgress(bytesSoFar.get(), contentLength.get(), request.uploadJobUid)
+            db.containerImportJobDao.updateProgress(bytesSoFar.get(), contentLength.get(), request.uploadJobUid)
             delay(500L)
         }
     }
@@ -57,8 +58,8 @@ class ContainerUploader(val request: ContainerUploaderRequest,
             urlConnection.requestMethod = "GET"
             urlConnection.connect()
 
-            val uploadJob = db.containerUploadJobDao.findByUid(request.uploadJobUid)
-                    ?: ContainerUploadJob()
+            val uploadJob = db.containerImportJobDao.findByUid(request.uploadJobUid)
+                    ?: ContainerImportJob()
 
             val fileSize = db.containerEntryFileDao.generateConcatenatedFilesResponse(request.fileList).contentLength
 
@@ -67,7 +68,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                 uploadJob.sessionId = sessionId
                 uploadJob.bytesSoFar = 0
                 uploadJob.contentLength = fileSize
-                db.containerUploadJobDao.update(uploadJob)
+                db.containerImportJobDao.update(uploadJob)
             }
 
             urlConnection.disconnect()
@@ -153,7 +154,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
             }
 
             uploadJob.jobStatus = downloadStatus
-            db.containerUploadJobDao.updateStatus(downloadStatus, uploadJob.cujUid)
+            db.containerImportJobDao.updateStatus(downloadStatus, uploadJob.cujUid)
 
         }catch(e: Exception) {
             Napier.e("$logPrefix exception", e)

@@ -10,18 +10,28 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-class ContainerUploadJob {
+class ContainerImportJob {
 
     @PrimaryKey(autoGenerate = true)
     var cujUid: Long = 0
 
     var cujContainerUid: Long = 0
 
+    var filePath: String? = null
+
+    var containerBaseDir: String? = null
+
+    var contentEntryUid: Long = 0
+
+    var mimeType: String? = null
+
     var sessionId: String? = null
 
     var jobStatus: Int = 0
 
     var bytesSoFar: Long = 0
+
+    var importCompleted: Boolean = false
 
     var contentLength: Long = 0
 

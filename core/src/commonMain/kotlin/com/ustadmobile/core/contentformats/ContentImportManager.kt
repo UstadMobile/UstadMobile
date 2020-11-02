@@ -1,7 +1,8 @@
 package com.ustadmobile.core.contentformats
 
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
-import com.ustadmobile.lib.db.entities.ContainerUploadJob
+import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 
 /**
  * Manager that handles importing content
@@ -24,10 +25,12 @@ interface ContentImportManager {
      *
      * @param filePath The path to the file that should be imported
      * @param metadata ImportedContentEntryMetaData for the entry to be imported
+     * @param containerBaseDir path to container folder
      *
      * @return ImportJob (that is saved into the database)
      */
-    suspend fun queueImportContentFromFile(filePath: String, metadata: ImportedContentEntryMetaData): ContainerUploadJob
+    suspend fun queueImportContentFromFile(filePath: String, metadata: ImportedContentEntryMetaData,
+        containerBaseDir: String): ContainerImportJob
 
 
     /**
@@ -38,8 +41,9 @@ interface ContentImportManager {
      * This would lookup the right plugin to use to do the import, and then use the
      * ContentTypePlugin#importToContainer to run the import
      */
-    suspend fun importFileToContainer(filePath: String, metadata: ImportedContentEntryMetaData,
-                                      progressListener: (Int) -> Unit)
+    suspend fun importFileToContainer(filePath: String, mimeType: String, contentEntryUid: Long,
+                                      containerBaseDir: String,
+                                      progressListener: (Int) -> Unit): Container?
 
 
 

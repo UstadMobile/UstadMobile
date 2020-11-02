@@ -1,16 +1,32 @@
 package com.ustadmobile.core.contentformats
 
+import android.content.Context
+import android.content.Intent
+import android.os.Build
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
-import com.ustadmobile.lib.db.entities.ContainerUploadJob
+import com.ustadmobile.core.networkmanager.DownloadNotificationService
+import com.ustadmobile.lib.db.entities.ContainerImportJob
+import org.kodein.di.DI
 
-class ContentImportManagerImplAndroid(contentPlugins: List<ContentTypePlugin>) : ContentImportManagerImpl(contentPlugins) {
+class ContentImportManagerImplAndroid(contentPlugins: List<ContentTypePlugin>, val context: Any, endpoint: Endpoint, di: DI) : ContentImportManagerImpl(contentPlugins, context,endpoint, di) {
 
-    override suspend fun queueImportContentFromFile(filePath: String, metadata: ImportedContentEntryMetaData): ContainerUploadJob {
-        val uploadJob =  super.queueImportContentFromFile(filePath, metadata)
+    override suspend fun queueImportContentFromFile(filePath: String,
+                                                    metadata: ImportedContentEntryMetaData,
+                                                    containerBaseDir: String): ContainerImportJob {
+        val importJob =  super.queueImportContentFromFile(filePath, metadata, containerBaseDir)
 
-        //TODO: Start a foreground notification on Android to show progress to the user and prevent it being killed
+        val androidContext = context as Context
+        val importIntent = Intent(androidContext, DownloadNotificationService::class.java)
+        importIntent.action = DownloadNotificationService.ACTION_PREPARE_IMPORT
+        importIntent.putExtra(DownloadNotificationService.EXTRA_IMPORTJOB_UID, importJob.cujUid)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            androidContext.startForegroundService(importIntent)
+        } else {
+            androidContext.startService(importIntent)
+        }
 
-        return uploadJob
+        return importJob
     }
 }

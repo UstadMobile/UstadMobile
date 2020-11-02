@@ -1,11 +1,54 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerUploadJob
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.io.File
 
 class VideoTypePluginAndroid: VideoTypePlugin() {
 
-    override suspend fun importToContainer(importJob: ContainerUploadJob, progressListener: (Int) -> Unit): Container {
+    override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
+        return withContext(Dispatchers.Default){
+            val file = File(filePath)
 
+            fileExtensions.find { file.name.endsWith(it, true) }
+                    ?: return@withContext null
+
+            ContentEntryWithLanguage().apply {
+                this.title = file.nameWithoutExtension
+                this.leaf = true
+                this.contentTypeFlag = ContentEntry.TYPE_VIDEO
+            }
+        }
+
+
+    }
+
+    override suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>,
+                                           contentEntryUid: Long, mimeType: String, containerBaseDir: String,
+                                           db: UmAppDatabase, repo: UmAppDatabase, progressListener: (Int) -> Unit): Container {
+        return withContext(Dispatchers.Default) {
+
+            val file = File(filePath)
+            val container = Container().apply {
+                containerContentEntryUid = contentEntryUid
+            }
+
+            container.cntLastModified = System.currentTimeMillis()
+            container.fileSize = file.length()
+            container.mimeType = mimeType
+            container.containerUid = repo.containerDao.insert(container)
+
+            val containerManager = ContainerManager(container, db, repo, containerBaseDir)
+
+            containerManager.addEntries(ContainerManager.FileEntrySource(file, file.name))
+
+            container
+        }
     }
 }

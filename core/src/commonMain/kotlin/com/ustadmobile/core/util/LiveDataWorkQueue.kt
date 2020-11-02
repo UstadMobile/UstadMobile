@@ -1,10 +1,8 @@
-package com.ustadmobile.sharedse.util
+package com.ustadmobile.core.util
 
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.lib.util.copyOnWriteListOf
-import kotlinx.atomicfu.AtomicArray
-import kotlinx.atomicfu.atomicArrayOfNulls
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.Channel.Factory.UNLIMITED

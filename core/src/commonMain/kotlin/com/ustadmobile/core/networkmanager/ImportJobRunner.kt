@@ -1,16 +1,16 @@
-package com.ustadmobile.sharedse.network.containeruploader
+package com.ustadmobile.core.networkmanager
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.ContainerUploaderCommon
-import com.ustadmobile.core.networkmanager.ContainerUploaderRequest
-import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.db.entities.ContainerWithContainerEntryWithMd5
-import com.ustadmobile.sharedse.network.NetworkManagerBle
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
@@ -27,22 +27,50 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 
-class UploadJobRunner(private val containerImportJob: ContainerImportJob, private val retryDelay: Long = DEFAULT_RETRY_DELAY, private val endpointUrl: String, override val di: DI) : DIAware {
+class ImportJobRunner(private val containerImportJob: ContainerImportJob, private val retryDelay: Long = DEFAULT_RETRY_DELAY, private val endpointUrl: String, override val di: DI) : DIAware {
 
     private val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_DB)
 
     private val containerUploader: ContainerUploaderCommon by instance()
 
+    private val contentImportManager: ContentImportManager by on(Endpoint(endpointUrl)).instance()
+
+    private val containerManager: ContainerDownloadManager by on(Endpoint(endpointUrl)).instance()
+
     private val currentUploadAttempt = atomic(null as Deferred<Int>?)
 
     private val currentHttpClient = defaultHttpClient()
 
-    private val networkManager: NetworkManagerBle by di.instance()
+    private val _connectivityStatus = DoorMutableLiveData<ConnectivityStatus>()
+
+    val connectivityStatus: DoorLiveData<ConnectivityStatus>
+        get() = _connectivityStatus
 
     /**
      * Lock used for any operation that is changing the status of the Fetch download
      */
     private val downloadStatusLock = Mutex()
+
+    suspend fun importContainer(isFileImport: Boolean = false) {
+
+        val filePath = if(isFileImport) containerImportJob.filePath?.removePrefix("file://") else containerImportJob.filePath
+
+        val container = contentImportManager.importFileToContainer(
+                filePath!!,
+                containerImportJob.mimeType!!,
+                containerImportJob.contentEntryUid,
+                containerImportJob.containerBaseDir!!){
+
+        } ?: return 0
+        containerImportJob.cujContainerUid = container.containerUid
+        db.containerImportJobDao.updateImportComplete()
+
+        if(isFileImport){
+            containerManager.handleContainerLocalImport(container)
+            return startUpload()
+        }
+        return 0
+    }
 
     suspend fun startUpload(): Int {
 
@@ -124,7 +152,8 @@ class UploadJobRunner(private val containerImportJob: ContainerImportJob, privat
 
             } catch (e: Exception) {
 
-                val connectivityState = networkManager.connectivityStatus.getValue()?.connectivityState
+                println("${e.cause?.message}")
+                val connectivityState = connectivityStatus.getValue()?.connectivityState
                 if (connectivityState != ConnectivityStatus.STATE_UNMETERED && connectivityState != ConnectivityStatus.STATE_METERED) {
                     return JobStatus.QUEUED
                 }

@@ -8,6 +8,10 @@ import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.catalog.contenttype.*
+import com.ustadmobile.core.contentformats.ContentImportManager
+import com.ustadmobile.core.contentformats.ContentImportManagerImpl
+import com.ustadmobile.core.contentformats.ContentImportManagerImplAndroid
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
@@ -19,12 +23,8 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.ContainerUploadManager
-import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
-import com.ustadmobile.core.networkmanager.initPicasso
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
@@ -44,21 +44,18 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderManagerImpl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
+import com.ustadmobile.core.networkmanager.*
 
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
-
-import java.io.File
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -116,10 +113,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ContainerDownloadManagerImpl(endpoint = context, di = di)
         }
 
-        bind<ContainerUploadManager>() with scoped(EndpointScope.Default).singleton {
-            ContainerUploaderManagerImpl(endpoint = context, di = di)
-        }
-
         bind<DownloadPreparationRequester>() with scoped(EndpointScope.Default).singleton {
             DownloadPreparationRequesterAndroidImpl(applicationContext, context)
         }
@@ -142,6 +135,14 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
+
+        bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
+            ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),
+                    XapiTypePluginCommonJvm(), VideoTypePluginAndroid(),
+                    H5PTypePluginCommonJvm(applicationContext)),
+                    applicationContext, context, di)
+        }
+
 
         bind<Gson>() with singleton {
             val builder = GsonBuilder()

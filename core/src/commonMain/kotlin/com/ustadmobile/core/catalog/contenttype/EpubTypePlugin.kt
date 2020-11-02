@@ -1,6 +1,9 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.EpubContentView
+import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 
 /**
  * Created by mike on 9/9/17.
@@ -16,6 +19,14 @@ open class EpubTypePlugin : ContentTypePlugin {
 
     override val fileExtensions: Array<String>
         get() = arrayOf(*EXTENSIONS)
+
+    override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
+        throw IllegalStateException("Not implemented in default")
+    }
+
+    override suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>, contentEntryUid: Long, mimeType: String, containerBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase, progressListener: (Int) -> Unit): Container {
+        throw IllegalStateException("Not implemented in default")
+    }
 
     companion object {
 

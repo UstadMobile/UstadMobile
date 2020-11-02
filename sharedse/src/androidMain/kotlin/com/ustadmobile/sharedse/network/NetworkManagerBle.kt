@@ -23,6 +23,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
+import com.ustadmobile.core.networkmanager.DownloadNotificationService
 import com.ustadmobile.core.networkmanager.defaultGsonSerializer
 import com.ustadmobile.core.networkmanager.defaultOkHttpClient
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
