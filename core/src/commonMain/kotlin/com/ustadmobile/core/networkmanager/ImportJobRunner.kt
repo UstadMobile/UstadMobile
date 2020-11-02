@@ -61,15 +61,13 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
                 containerImportJob.contentEntryUid,
                 containerImportJob.containerBaseDir!!){
 
-        } ?: return 0
+        } ?: return
         containerImportJob.cujContainerUid = container.containerUid
         db.containerImportJobDao.updateImportComplete()
 
         if(isFileImport){
             containerManager.handleContainerLocalImport(container)
-            return startUpload()
         }
-        return 0
     }
 
     suspend fun startUpload(): Int {
