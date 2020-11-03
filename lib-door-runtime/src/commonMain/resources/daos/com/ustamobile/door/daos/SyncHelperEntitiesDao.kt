@@ -41,6 +41,13 @@ abstract class SyncHelperEntitiesDao : ISyncHelperEntitiesDao {
     @Query("DELETE FROM UpdateNotification WHERE pnDeviceId = :deviceId AND pnTableId = :tableId AND pnTimestamp = :lastModTimestamp")
     override abstract suspend fun deleteUpdateNotification(deviceId: Int, tableId: Int, lastModTimestamp: Long)
 
+    @Query("""
+        DELETE FROM ChangeLog
+        WHERE chTableId = :tableId
+        AND chTime < (SELECT max(pnTimestamp) FROM UpdateNotification WHERE pnTableId = :tableId)
+    """)
+    override abstract fun deleteChangeLogs(tableId: Int)
+
     /**
      * This will be implemented by generated code to run the query. It will find a list of any
      * tableIds that have pending ChangeLog items that should be sent to dispatchUpdateNotifications.

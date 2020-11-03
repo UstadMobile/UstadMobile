@@ -60,13 +60,14 @@ class ServerChangeLogMonitor(val db: DoorDatabase, private val repo: DoorDatabas
     }
 
     fun onTablesChanged(tablesChanged: List<String>) {
+        Napier.d("$logPrefix onTablesChange: names=${tablesChanged.joinToString()}")
         onTablesChangedInternal(tablesChanged.map { repo.tableIdMap[it] ?: 0})
     }
 
     private fun onTablesChangedInternal(tablesChanged: List<Int>) {
-        Napier.d("$logPrefix tablesChanged: ${tablesChanged.joinToString()}",
+        Napier.d("$logPrefix tablesChanged: ids=${tablesChanged.joinToString()}",
                 tag = DoorTag.LOG_TAG)
-        tablesChanged.forEach {table ->
+        tablesChanged.filter { it != 0 }.forEach {table ->
             tablesChangedChannel.offer(table)
 
             if(dispatchJob.get() == null) {

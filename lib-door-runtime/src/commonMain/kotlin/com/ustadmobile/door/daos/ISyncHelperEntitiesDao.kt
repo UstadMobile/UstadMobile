@@ -30,6 +30,12 @@ interface ISyncHelperEntitiesDao {
     suspend fun deleteUpdateNotification(deviceId: Int, tableId: Int, lastModTimestamp: Long)
 
     /**
+     * Delete the ChangeLogs for the given table. This should be called after all notifyOnUpdate
+     * queries for the table in question have been run
+     */
+    fun deleteChangeLogs(tableId: Int)
+
+    /**
      * This will be implemented by generated code to run the query. It will find a list of any
      * tableIds that have pending ChangeLog items that should be sent to dispatchUpdateNotifications.
      * This is used on startup to find any changes that happen when ChangeLogMonitor was not running.

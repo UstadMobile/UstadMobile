@@ -401,6 +401,8 @@ class DbProcessorSync: AbstractDbProcessor() {
                             }
                         }
                         .endControlFlow()
+                        .add("(_repo as %T).syncHelperEntitiesDao.deleteChangeLogs(tableId)\n",
+                                DoorDatabaseSyncRepository::class)
                         .build())
                 .build())
 
@@ -476,8 +478,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .addCode(CodeBlock.builder()
                                 .add("return (_repo as %T).%M(${syncableEntityInfo.tableId}, _updateNotificationManager, " +
                                         "_dao::_findDevicesToNotify${entityType.simpleName}_$index, " +
-                                        "::_replaceUpdateNotifications," +
-                                        "::_deleteChangeLogs)",
+                                        "::_replaceUpdateNotifications)",
                                         DoorDatabaseSyncRepository::class,
                                         MemberName("com.ustadmobile.door.ext", "sendUpdates"))
                                 .build())

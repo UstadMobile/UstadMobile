@@ -2,19 +2,30 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.ustadmobile.door.ClientSyncManager
 import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
-import com.ustadmobile.lib.db.entities.Role.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID,
+@SyncableEntity(tableId = Role.TABLE_ID,
     notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, $TABLE_ID AS tableId 
-        FROM DeviceSession"""])
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${Role.TABLE_ID} AS tableId 
+        FROM DeviceSession""",
+
+        //Anyone who has this role must do a full resync when the role itself changes
+        """
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClientSyncManager.TABLEID_SYNC_ALL_TABLES} AS tableId FROM 
+        ChangeLog
+        JOIN Role ON ChangeLog.chTableId = ${Role.TABLE_ID} AND ChangeLog.chEntityPk = Role.roleUid
+        JOIN EntityRole ON EntityRole.erRoleUid = Role.roleUid
+        JOIN PersonGroupMember ON PersonGroupMember.groupMemberGroupUid = EntityRole.erGroupUid
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+        """
+    ])
 @Serializable
 open class Role() {
 

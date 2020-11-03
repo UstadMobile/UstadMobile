@@ -17,9 +17,15 @@ import com.ustadmobile.door.util.systemTimeInMillis
  */
 fun DoorDatabaseSyncRepository.sendUpdates(tableId: Int, updateNotificationManager: ServerUpdateNotificationManager?,
                                            findDevicesFn: () -> List<UpdateNotificationSummary>,
-                                            replaceUpdateNotificationFn: (List<UpdateNotification>) -> Unit,
-                                            deleteChangeLogFn: (Int) -> Unit): List<UpdateNotificationSummary> {
+                                            replaceUpdateNotificationFn: (List<UpdateNotification>) -> Unit)
+        : List<UpdateNotificationSummary> {
+
     val devicesToNotify = findDevicesFn()
+    if(devicesToNotify.isEmpty()) {
+        Napier.d("[SyncRepo@${this.doorIdentityHashCode}]: sendUpdates: Table #$tableId has no devices to notify")
+        return listOf()
+    }
+
     Napier.v("[SyncRepo@${this.doorIdentityHashCode}]: sendUpdates: Table #$tableId needs to notify ${devicesToNotify.joinToString()}.",
         tag= DoorTag.LOG_TAG)
 
@@ -28,14 +34,11 @@ fun DoorDatabaseSyncRepository.sendUpdates(tableId: Int, updateNotificationManag
         UpdateNotification(pnDeviceId = it.deviceId, pnTableId = it.tableId, pnTimestamp = timeNow)
     }
 
-    if(updateNotifications.isNotEmpty()) {
-        replaceUpdateNotificationFn(updateNotifications)
-        updateNotificationManager?.onNewUpdateNotifications(updateNotifications)
-        Napier.v("[SyncRepo@${this.doorIdentityHashCode}] replaced update notifications " +
-                "and informed updatenotificationmanager: $updateNotificationManager", tag = DoorTag.LOG_TAG)
-    }
+    replaceUpdateNotificationFn(updateNotifications)
+    updateNotificationManager?.onNewUpdateNotifications(updateNotifications)
+    Napier.v("[SyncRepo@${this.doorIdentityHashCode}] replaced update notifications " +
+            "and informed updatenotificationmanager: $updateNotificationManager", tag = DoorTag.LOG_TAG)
 
-    deleteChangeLogFn(tableId)
 
     return devicesToNotify
 }
