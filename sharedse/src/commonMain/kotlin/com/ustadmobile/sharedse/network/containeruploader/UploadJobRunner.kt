@@ -53,9 +53,9 @@ class UploadJobRunner(private val containerImportJob: ContainerImportJob, privat
             try {
 
                 val containerEntryWithFileList = db.containerEntryDao
-                        .findByContainer(containerImportJob.cujContainerUid)
+                        .findByContainer(containerImportJob.cijContainerUid)
 
-                var containerEntryUidList = containerImportJob.containerEntryFileUids
+                var containerEntryUidList = containerImportJob.cijContainerEntryFileUids
                 if (containerEntryUidList.isNullOrEmpty()) {
 
                     val listOfMd5SumStr = containerEntryWithFileList.map { it.containerEntryFile?.cefMd5 }
@@ -72,13 +72,13 @@ class UploadJobRunner(private val containerImportJob: ContainerImportJob, privat
                     containerEntryUidList = containerEntriesServerDoesntHave.map { it.containerEntryFile?.cefUid }
                             .joinToString(";")
 
-                    containerImportJob.containerEntryFileUids = containerEntryUidList
+                    containerImportJob.cijContainerEntryFileUids = containerEntryUidList
                     db.containerImportJobDao.update(containerImportJob)
                 }
 
                 if (containerEntryUidList.isNotEmpty()) {
 
-                    val request = ContainerUploaderRequest(containerImportJob.cujUid,
+                    val request = ContainerUploaderRequest(containerImportJob.cijUid,
                             containerEntryUidList, UMFileUtil.joinPaths(endpointUrl, "/upload/"), endpointUrl)
 
 
@@ -96,19 +96,19 @@ class UploadJobRunner(private val containerImportJob: ContainerImportJob, privat
                     uploadAttemptStatus = JobStatus.COMPLETE
                 }
 
-                val containerEntries = db.containerEntryDao.findByContainerWithMd5(containerImportJob.cujContainerUid)
+                val containerEntries = db.containerEntryDao.findByContainerWithMd5(containerImportJob.cijContainerUid)
 
                 if (uploadAttemptStatus == JobStatus.COMPLETE) {
 
-                    val container = db.containerDao.findByUid(containerImportJob.cujContainerUid)
+                    val container = db.containerDao.findByUid(containerImportJob.cijContainerUid)
                             ?: throw Exception()
 
-                    val job = db.containerImportJobDao.findByUid(containerImportJob.cujUid)
+                    val job = db.containerImportJobDao.findByUid(containerImportJob.cijUid)
                     val code = currentHttpClient.post<HttpStatement>() {
                         url(UMFileUtil.joinPaths(endpointUrl,
                                 "/ContainerUpload/finalizeEntries/"))
-                        if(!job?.sessionId.isNullOrEmpty()){
-                            parameter("sessionId", job?.sessionId)
+                        if(!job?.cijSessionId.isNullOrEmpty()){
+                            parameter("sessionId", job?.cijSessionId)
                         }
                         header("content-type", "application/json")
                         body = ContainerWithContainerEntryWithMd5(container, containerEntries)

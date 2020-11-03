@@ -218,7 +218,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.menu_done){
-            if(mPresenter?.isImportValid() == true){
+            if(entity?.let { mPresenter?.isImportValid(it) } == true){
                 unregisterFileFromTemp()
             }
         }

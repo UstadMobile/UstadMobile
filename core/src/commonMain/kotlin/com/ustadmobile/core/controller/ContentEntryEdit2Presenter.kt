@@ -2,13 +2,9 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.networkmanager.ContainerUploadManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
-import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMUUID
@@ -118,7 +114,7 @@ class ContentEntryEdit2Presenter(context: Any,
         view.titleErrorEnabled = false
         view.fileImportErrorVisible = false
         GlobalScope.launch(doorMainDispatcher()) {
-            val canCreate = isImportValid()
+            val canCreate = isImportValid(entity)
 
             if (canCreate) {
                 entity.licenseName = view.licenceOptions?.firstOrNull { it.code == entity.licenseType }.toString()
@@ -190,8 +186,7 @@ class ContentEntryEdit2Presenter(context: Any,
         }
     }
 
-    fun isImportValid(): Boolean{
-        val entity = view.entity ?: return false
+    fun isImportValid(entity: ContentEntryWithLanguage): Boolean{
         return entity.title != null && (!entity.leaf || entity.contentEntryUid != 0L ||
                 (entity.contentEntryUid == 0L && view.entryMetaData?.uri != null))
     }

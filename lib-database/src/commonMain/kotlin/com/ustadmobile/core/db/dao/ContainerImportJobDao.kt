@@ -14,37 +14,37 @@ import com.ustadmobile.lib.db.entities.ContainerImportJob
 @Dao
 abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
 
-    @Query("SELECT * FROM ContainerImportJob WHERE sessionId = :sessionId")
+    @Query("SELECT * FROM ContainerImportJob WHERE cijSessionId = :sessionId")
     abstract fun findBySessionId(sessionId: String): ContainerImportJob?
 
-    @Query("SELECT * FROM ContainerImportJob where cujUid = :uploadId")
+    @Query("SELECT * FROM ContainerImportJob where cijUid = :uploadId")
     abstract fun findByUid(uploadId: Long): ContainerImportJob?
 
-    @Query("""SELECT * FROM ContainerImportJob WHERE jobStatus = $QUEUED
-           AND (NOT importCompleted OR (SELECT connectivityState from ConnectivityStatus WHERE connectivityState IN
+    @Query("""SELECT * FROM ContainerImportJob WHERE cijJobStatus = $QUEUED
+           AND (NOT cijImportCompleted OR (SELECT connectivityState from ConnectivityStatus WHERE connectivityState IN
             ($STATE_METERED, $STATE_UNMETERED)))
              LIMIT 10""")
     abstract fun findJobs(): DoorLiveData<List<ContainerImportJob>>
 
-    @Query("UPDATE ContainerImportJob SET jobStatus = $QUEUED WHERE cujUid = :uploadJobId AND jobStatus = $NOT_QUEUED")
+    @Query("UPDATE ContainerImportJob SET cijJobStatus = $QUEUED WHERE cijUid = :uploadJobId AND cijJobStatus = $NOT_QUEUED")
     abstract suspend fun setStatusToQueueAsync(uploadJobId: Long)
 
-    @Query("UPDATE ContainerImportJob SET bytesSoFar = :progress, contentLength = :contentLength WHERE cujUid = :uploadJobId")
+    @Query("UPDATE ContainerImportJob SET cijBytesSoFar = :progress, cijContentLength = :contentLength WHERE cijUid = :uploadJobId")
     abstract fun updateProgress(progress: Long, contentLength: Long, uploadJobId: Long)
 
-    @Query("UPDATE ContainerImportJob SET jobStatus = :status WHERE cujUid = :uploadJobId")
+    @Query("UPDATE ContainerImportJob SET cijJobStatus = :status WHERE cijUid = :uploadJobId")
     abstract fun updateStatus(status: Int, uploadJobId: Long)
 
-    @Query("UPDATE ContainerImportJob SET importCompleted = :importCompleted")
+    @Query("UPDATE ContainerImportJob SET cijImportCompleted = :importCompleted")
     abstract fun updateImportComplete(importCompleted: Boolean = true)
 
     @Query("SELECT ContentEntry.title FROM ContainerImportJob " +
-            "LEFT JOIN ContentEntry ON ContainerImportJob.contentEntryUid = ContentEntry.contentEntryUid " +
-            "WHERE ContainerImportJob.cujUid = :importJobUid")
+            "LEFT JOIN ContentEntry ON ContainerImportJob.cijContentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContainerImportJob.cijUid = :importJobUid")
     abstract suspend fun getTitleOfEntry(importJobUid: Long): String?
 
 
-    @Query("SELECT * From  ContainerImportJob WHERE ContainerImportJob.cujUid = :importJobUid")
+    @Query("SELECT * From  ContainerImportJob WHERE ContainerImportJob.cijUid = :importJobUid")
     abstract fun getImportJobLiveData(importJobUid: Long): DoorLiveData<ContainerImportJob?>
 
 }

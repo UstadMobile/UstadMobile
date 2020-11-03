@@ -244,13 +244,13 @@ class DownloadNotificationService : Service(), DIAware {
 
         override fun onChanged(t: ContainerImportJob?) {
             if(t != null) {
-                bytesSoFar = t.bytesSoFar
-                totalBytes = t.contentLength
+                bytesSoFar = t.cijBytesSoFar
+                totalBytes = t.cijContentLength
 
                 val progress = (bytesSoFar.toDouble() / totalBytes * 100).toInt()
                 builder.setProgress(MAX_PROGRESS_VALUE, progress, false)
 
-                contentText = if(t.importCompleted) impl.getString(
+                contentText = if(t.cijImportCompleted) impl.getString(
                         MessageID.uploading, this@DownloadNotificationService)
                 else
                     impl.getString(
@@ -260,7 +260,7 @@ class DownloadNotificationService : Service(), DIAware {
 
                 doNotify()
 
-                if(t.jobStatus >= JobStatus.COMPLETE_MIN) {
+                if(t.cijJobStatus >= JobStatus.COMPLETE_MIN) {
                     activeImportJobNotifications.remove(this)
                     mNotificationManager.cancel(notificationId)
                     importJobLiveData.removeObserver(this)
@@ -464,7 +464,10 @@ class DownloadNotificationService : Service(), DIAware {
         return START_STICKY
     }
 
-    private fun isEmpty(): Boolean = activeDownloadJobNotifications.isEmpty() && activeDeleteJobNotifications.isEmpty() && activeImportJobNotifications.isEmpty()
+    private fun isEmpty(): Boolean =
+            activeDownloadJobNotifications.isEmpty()
+            && activeDeleteJobNotifications.isEmpty()
+            && activeImportJobNotifications.isEmpty()
 
     /**
      * Create a channel for the notification

@@ -42,7 +42,7 @@ interface ContentImportManager {
      * ContentTypePlugin#importToContainer to run the import
      */
     suspend fun importFileToContainer(filePath: String, mimeType: String, contentEntryUid: Long,
-                                      containerBaseDir: String,
+                                      containerBaseDir: String, conversionParams: Map<String,String>,
                                       progressListener: (Int) -> Unit): Container?
 
     fun getMimeTypeSupported(): List<String>

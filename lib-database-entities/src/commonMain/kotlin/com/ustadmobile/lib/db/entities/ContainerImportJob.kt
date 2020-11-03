@@ -13,28 +13,30 @@ import kotlinx.serialization.Serializable
 class ContainerImportJob {
 
     @PrimaryKey(autoGenerate = true)
-    var cujUid: Long = 0
+    var cijUid: Long = 0
 
-    var cujContainerUid: Long = 0
+    var cijContainerUid: Long = 0
 
-    var filePath: String? = null
+    var cijFilePath: String? = null
 
-    var containerBaseDir: String? = null
+    var cijContainerBaseDir: String? = null
 
-    var contentEntryUid: Long = 0
+    var cijContentEntryUid: Long = 0
 
-    var mimeType: String? = null
+    var cijMimeType: String? = null
 
-    var sessionId: String? = null
+    var cijSessionId: String? = null
 
-    var jobStatus: Int = 0
+    var cijJobStatus: Int = 0
 
-    var bytesSoFar: Long = 0
+    var cijBytesSoFar: Long = 0
 
-    var importCompleted: Boolean = false
+    var cijImportCompleted: Boolean = false
 
-    var contentLength: Long = 0
+    var cijContentLength: Long = 0
 
-    var containerEntryFileUids: String? = null
+    var cijContainerEntryFileUids: String? = null
+
+    var cijConversionParams: String? = null
 
 }

@@ -128,7 +128,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     }
                     metadata.contentEntry.contentEntryUid = fileEntry.contentEntryUid
 
-                    contentImportManager.importFileToContainer(contentFile.path, metadata.mimeType, fileEntry.contentEntryUid, containerFolder.path){
+                    contentImportManager.importFileToContainer(contentFile.path, metadata.mimeType, fileEntry.contentEntryUid, containerFolder.path, mapOf()){
                     }
                     Napier.d("$logPrefix finished Scraping", tag = SCRAPER_TAG)
                     showContentEntry()

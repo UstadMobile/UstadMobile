@@ -97,8 +97,8 @@ class ContainerUploaderTest {
         val inStream = concatenatedResponse.dataSrc
 
         val job = ContainerImportJob()
-        job.cujContainerUid = epubContainer.containerUid
-        job.cujUid = appDb.containerImportJobDao.insert(job)
+        job.cijContainerUid = epubContainer.containerUid
+        job.cijUid = appDb.containerImportJobDao.insert(job)
 
         val sessionId = UUID.randomUUID().toString()
         mockWebServer.enqueue(MockResponse().setBody(sessionId))
@@ -107,7 +107,7 @@ class ContainerUploaderTest {
         }
 
 
-        val request = ContainerUploaderRequest(job.cujUid,
+        val request = ContainerUploaderRequest(job.cijUid,
                 entryListStr, mockWebServer.url("/upload/").toString(), TEST_ENDPOINT
         )
 

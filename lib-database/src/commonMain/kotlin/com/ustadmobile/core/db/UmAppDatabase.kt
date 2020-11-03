@@ -2903,9 +2903,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 database.execSQL("DROP TABLE ContainerUploadJob")
 
                 if (database.dbType() == DoorDbType.SQLITE) {
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerImportJob (`cujUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cujContainerUid` INTEGER NOT NULL, `filePath` TEXT, `containerBaseDir` TEXT, `contentEntryUid` INTEGER NOT NULL, `mimeType` TEXT, `sessionId` TEXT, `jobStatus` INTEGER NOT NULL, `bytesSoFar` INTEGER NOT NULL, `importCompleted` INTEGER NOT NULL, `contentLength` INTEGER NOT NULL, `containerEntryFileUids` TEXT)")
-                } else if (database.dbType() == DoorDbType.POSTGRES) {
-                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerImportJob (  cujContainerUid  BIGINT , filePath  TEXT , containerBaseDir  TEXT , contentEntryUid  BIGINT , mimeType  TEXT , sessionId  TEXT , jobStatus  INTEGER , bytesSoFar  BIGINT , importCompleted  BOOL , contentLength  BIGINT , containerEntryFileUids  TEXT , cujUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerImportJob (`cijUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cijContainerUid` INTEGER NOT NULL, `cijFilePath` TEXT, `cijContainerBaseDir` TEXT, `cijContentEntryUid` INTEGER NOT NULL, `cijMimeType` TEXT, `cijSessionId` TEXT, `cijJobStatus` INTEGER NOT NULL, `cijBytesSoFar` INTEGER NOT NULL, `cijImportCompleted` INTEGER NOT NULL, `cijContentLength` INTEGER NOT NULL, `cijContainerEntryFileUids` TEXT, `cijConversionParams` TEXT)")
+                }else if (database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerImportJob (  cijContainerUid  BIGINT , cijFilePath  TEXT , cijContainerBaseDir  TEXT , cijContentEntryUid  BIGINT , cijMimeType  TEXT , cijSessionId  TEXT , cijJobStatus  INTEGER , cijBytesSoFar  BIGINT , cijImportCompleted  BOOL , cijContentLength  BIGINT , cijContainerEntryFileUids  TEXT , cijConversionParams  TEXT , cijUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                 }
             }
         }

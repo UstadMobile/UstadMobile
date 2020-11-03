@@ -162,8 +162,8 @@ class UploadJobRunnerTest {
             addEntriesFromZipToContainer(fileToUpload.absolutePath, containerManager)
         }
         containerImportJob = ContainerImportJob().apply {
-            this.cujContainerUid = epubContainer.containerUid
-            this.cujUid = appDb.containerImportJobDao.insert(this)
+            this.cijContainerUid = epubContainer.containerUid
+            this.cijUid = appDb.containerImportJobDao.insert(this)
         }
     }
 
@@ -197,7 +197,7 @@ class UploadJobRunnerTest {
         createContainer(appDb)
 
         // existing md5Sum response
-        val md5List = appDb.containerEntryDao.findByContainerWithMd5(containerImportJob.cujContainerUid).map { it.cefMd5 }
+        val md5List = appDb.containerEntryDao.findByContainerWithMd5(containerImportJob.cijContainerUid).map { it.cefMd5 }
         mockWebServer.enqueue(MockResponse().addHeader("Content-Type", "application/json")
                 .setBody(Gson().toJson(md5List)))
 

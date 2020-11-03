@@ -32,24 +32,24 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
     init {
 
         LiveDataWorkQueue(db.containerImportJobDao.findJobs(),
-                { item1, item2 -> item1.cujUid == item2.cujUid },
+                { item1, item2 -> item1.cijUid == item2.cijUid },
                 mainDispatcher = doorMainDispatcher()) {
             try {
-                it.jobStatus = JobStatus.RUNNING
-                db.containerImportJobDao.updateStatus(it.jobStatus, it.cujUid)
+                it.cijJobStatus = JobStatus.RUNNING
+                db.containerImportJobDao.updateStatus(it.cijJobStatus, it.cijUid)
 
                 val runner = ImportJobRunner(it, endpointUrl = endpoint.url, di = di)
-                val isFileImport = it.filePath?.startsWith("file://") == true
+                val isFileImport = it.cijFilePath?.startsWith("file://") == true
                 runner.importContainer(isFileImport)
                 var status = JobStatus.COMPLETE
                 if(isFileImport){
                    status = runner.startUpload()
                 }
 
-                it.jobStatus = status
-                db.containerImportJobDao.updateStatus(status, it.cujUid)
+                it.cijJobStatus = status
+                db.containerImportJobDao.updateStatus(status, it.cijUid)
             }catch (e: Exception){
-                db.containerImportJobDao.updateStatus(JobStatus.FAILED, it.cujUid)
+                db.containerImportJobDao.updateStatus(JobStatus.FAILED, it.cijUid)
             }
         }.also { workQueue ->
             GlobalScope.launch {
@@ -82,25 +82,26 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
     override suspend fun queueImportContentFromFile(filePath: String, metadata: ImportedContentEntryMetaData,
                                                     containerBaseDir: String): ContainerImportJob {
         return ContainerImportJob().apply {
-            bytesSoFar = 0
-            this.filePath = filePath
-            this.contentEntryUid = metadata.contentEntry.contentEntryUid
-            this.mimeType = metadata.mimeType
-            this.containerBaseDir = containerBaseDir
-            this.jobStatus = JobStatus.QUEUED
-            cujUid = db.containerImportJobDao.insertAsync(this)
+            cijBytesSoFar = 0
+            this.cijFilePath = filePath
+            this.cijContentEntryUid = metadata.contentEntry.contentEntryUid
+            this.cijMimeType = metadata.mimeType
+            this.cijContainerBaseDir = containerBaseDir
+            this.cijJobStatus = JobStatus.QUEUED
+            cijUid = db.containerImportJobDao.insertAsync(this)
         }
     }
 
     override suspend fun importFileToContainer(filePath: String, mimeType: String,
                                                contentEntryUid: Long, containerBaseDir: String,
+                                               conversionParams: Map<String, String>,
                                                progressListener: (Int) -> Unit): Container? {
         contentPlugins.forEach {
 
             it.mimeTypes.find { pluginMimeType -> pluginMimeType == mimeType }
                     ?: return@forEach
 
-            return it.importToContainer(filePath, mapOf(), contentEntryUid, mimeType,
+            return it.importToContainer(filePath, conversionParams, contentEntryUid, mimeType,
                     containerBaseDir, db, repo, progressListener)
         }
         return null

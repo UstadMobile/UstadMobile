@@ -88,7 +88,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
                 entry
             }
 
-            val container = contentImportManager.importFileToContainer(file.path, metadata.mimeType, fileEntry.contentEntryUid, containerFolder.path){
+            val container = contentImportManager.importFileToContainer(file.path, metadata.mimeType, fileEntry.contentEntryUid, containerFolder.path, mapOf()){
 
             }
             if (!headRequestValues.etag.isNullOrEmpty() && container != null) {
