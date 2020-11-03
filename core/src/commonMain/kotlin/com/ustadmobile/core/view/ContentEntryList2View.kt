@@ -12,6 +12,14 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
      */
     fun showDownloadDialog(args: Map<String, String>)
 
+    /**
+     * Show ContentEntryList in picker mode so the user can select a folder to move entries to.
+     *
+     * @param selectedContentEntryParentChildJoinUids a string which is a comma separated list of
+     * the selected ContentEntryParentChildJoinUids (e.g. that should be saved to the savedStateHandle)
+     */
+    fun showMoveEntriesFolderPicker(selectedContentEntryParentChildJoinUids: String)
+
     var title: String?
 
     var editOptionVisible: Boolean
@@ -22,6 +30,8 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
 
         const val ARG_CONTENT_FILTER = "filter"
 
+        const val ARG_FOLDER_FILTER = "folder"
+
         const val ARG_LIBRARIES_CONTENT = "libraries"
 
         const val ARG_RECYCLED_CONTENT = "recycled"
@@ -29,6 +39,10 @@ interface ContentEntryList2View: UstadListView<ContentEntry, ContentEntryWithPar
         const val ARG_CLAZZWORK_FILTER = "clazzworkFilter"
 
         const val VIEW_NAME = "ContentEntryListView"
+
+        const val ARG_MOVING_CONTENT = "SelectedItems"
+
+        const val ARG_MOVING_COUNT = "moveCount"
 
     }
 
