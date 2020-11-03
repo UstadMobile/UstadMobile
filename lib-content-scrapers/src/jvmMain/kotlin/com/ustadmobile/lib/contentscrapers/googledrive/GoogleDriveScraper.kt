@@ -5,7 +5,6 @@ import com.soywiz.klock.DateFormat
 import com.soywiz.klock.parse
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportManager
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
@@ -14,12 +13,9 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
-import io.ktor.client.call.receive
-import io.ktor.client.request.get
-import io.ktor.client.request.parameter
-import io.ktor.client.statement.HttpStatement
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -42,7 +38,6 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
 
     private val contentImportManager: ContentImportManager by di.on(endpoint).instance()
 
-
     override fun scrapeUrl(sourceUrl: String) {
 
         var apiCall = sourceUrl
@@ -64,7 +59,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
 
                 val file = fileResponse.receive<GoogleFile>()
 
-                mimeTypeSupported.find { fileMimeType -> fileMimeType == file.mimeType }
+                contentImportManager.getMimeTypeSupported().find { fileMimeType -> fileMimeType == file.mimeType }
                         ?: return@execute
 
                 val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)

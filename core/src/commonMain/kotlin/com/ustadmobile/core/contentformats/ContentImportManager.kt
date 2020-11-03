@@ -45,6 +45,8 @@ interface ContentImportManager {
                                       containerBaseDir: String,
                                       progressListener: (Int) -> Unit): Container?
 
+    fun getMimeTypeSupported(): List<String>
 
+    fun getExtSupported(): List<String>
 
 }

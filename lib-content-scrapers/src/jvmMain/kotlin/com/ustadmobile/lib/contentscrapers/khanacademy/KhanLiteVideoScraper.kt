@@ -3,18 +3,15 @@ package com.ustadmobile.lib.contentscrapers.khanacademy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_PREFIX
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
 import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.kodein.di.DI
 import java.io.File
-import java.net.HttpURLConnection
 import java.net.URL
 import java.nio.file.Files
 

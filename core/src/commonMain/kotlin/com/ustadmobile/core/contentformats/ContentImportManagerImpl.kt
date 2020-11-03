@@ -25,6 +25,10 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
 
     private val repo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
 
+    private val mimeTypeSupported: List<String> = contentPlugins.flatMap { it.mimeTypes.asList() }
+
+    private val extSupported: List<String> = contentPlugins.flatMap { it.fileExtensions.asList() }
+
     init {
 
         LiveDataWorkQueue(db.containerImportJobDao.findJobs(),
@@ -54,7 +58,6 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
         }
 
     }
-
 
     //TODO: most implementation can go here as platform specific stuff is handled by the ContentTypePlugin itself
 
@@ -101,5 +104,13 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
                     containerBaseDir, db, repo, progressListener)
         }
         return null
+    }
+
+    override fun getMimeTypeSupported(): List<String> {
+        return mimeTypeSupported
+    }
+
+    override fun getExtSupported(): List<String> {
+        return extSupported
     }
 }
