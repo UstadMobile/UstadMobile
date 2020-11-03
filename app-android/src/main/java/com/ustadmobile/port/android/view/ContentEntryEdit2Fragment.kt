@@ -36,8 +36,6 @@ import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.util.ext.getFileName
 import com.ustadmobile.port.android.util.ext.unregisterDestinationTempFile
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
 import kotlinx.coroutines.*
 import org.kodein.di.instance

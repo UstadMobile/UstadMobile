@@ -1,24 +1,19 @@
 package com.ustadmobile.port.sharedse.contentformats
 
-import com.ustadmobile.core.container.ZipEntrySource
+import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.port.sharedse.contentformats.h5p.H5PTypeFilePlugin
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.kmp.io.KMPPullParser
 import org.kmp.io.KMPXmlParser
-import java.io.ByteArrayInputStream
 import java.io.File
-import java.nio.file.Files
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipFile
 
@@ -39,8 +34,10 @@ class H5PTypePluginTest {
         val tempH5pFile = File(tempFolder, "dialog-cards-620.h5p")
         tempH5pFile.copyInputStreamToFile(inputStream)
 
-        val h5pPlugin = H5PTypeFilePlugin()
-        val contentEntry = h5pPlugin.getContentEntry(tempH5pFile)
+        val h5pPlugin = H5PTypePluginCommonJvm(context)
+        val contentEntry = runBlocking {
+            h5pPlugin.extractMetadata(tempH5pFile.path)
+        }
 //        Assert.assertEquals("Got ContentEntry with expected entryId",
 //                "dialog-cards-620.h5p",
 //                contentEntry?.entryId)

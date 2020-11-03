@@ -15,7 +15,6 @@ import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
 import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
 import io.ktor.client.call.receive
 import io.ktor.client.request.get
