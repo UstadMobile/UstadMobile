@@ -1,34 +1,26 @@
 package com.ustadmobile.port.android.view
 
 import android.app.AlertDialog
-import android.media.MediaCodecInfo
-import android.media.MediaFormat
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
-import com.linkedin.android.litr.MediaTransformer
-import com.linkedin.android.litr.TransformationListener
-import com.linkedin.android.litr.analytics.TrackTransformationInfo
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.createTempDirForDestination
@@ -37,12 +29,9 @@ import com.ustadmobile.port.android.util.ext.getFileName
 import com.ustadmobile.port.android.util.ext.unregisterDestinationTempFile
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
-import kotlinx.coroutines.*
-import org.kodein.di.instance
-import org.kodein.di.on
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import java.io.File
-import java.net.URI
-import kotlin.coroutines.suspendCoroutine
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -138,8 +127,13 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     }
 
-    override fun unregisterFileFromTemp() {
-        findNavController().unregisterDestinationTempFile(requireContext(), File(entryMetaData?.uri?.removePrefix("file://")).parentFile)
+    /**
+     * removes the temp folder from being deleted in the backstack
+     */
+    private fun unregisterFileFromTemp() {
+        if(entryMetaData?.uri?.startsWith("file://") == true) {
+            findNavController().unregisterDestinationTempFile(requireContext(), File(entryMetaData?.uri?.removePrefix("file://")).parentFile)
+        }
     }
 
 
@@ -220,7 +214,15 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             }
         }
 
+    }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId == R.id.menu_done){
+            if(mPresenter?.isImportValid() == true){
+                unregisterFileFromTemp()
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onDestroyView() {

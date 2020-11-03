@@ -39,12 +39,6 @@ class ContentEntryEdit2Presenter(context: Any,
                                  di: DI)
     : UstadEditPresenter<ContentEntryEdit2View, ContentEntryWithLanguage>(context, arguments, view, di, lifecycleOwner) {
 
-    private val containerUploadManager: ContainerUploadManager?
-            by on(accountManager.activeAccount).instanceOrNull<ContainerUploadManager>()
-
-    private val containerDownloadManager: ContainerDownloadManager?
-            by on(accountManager.activeAccount).instanceOrNull<ContainerDownloadManager>()
-
     private val contentImportManager: ContentImportManager?
             by on(accountManager.activeAccount).instanceOrNull<ContentImportManager>()
 
@@ -124,8 +118,7 @@ class ContentEntryEdit2Presenter(context: Any,
         view.titleErrorEnabled = false
         view.fileImportErrorVisible = false
         GlobalScope.launch(doorMainDispatcher()) {
-            val canCreate = entity.title != null && (!entity.leaf || entity.contentEntryUid != 0L ||
-                    (entity.contentEntryUid == 0L && view.entryMetaData?.uri != null))
+            val canCreate = isImportValid()
 
             if (canCreate) {
                 entity.licenseName = view.licenceOptions?.firstOrNull { it.code == entity.licenseType }.toString()
@@ -155,8 +148,7 @@ class ContentEntryEdit2Presenter(context: Any,
                 val uri = metaData?.uri
                 if (metaData != null && uri != null) {
 
-                    if (uri.startsWith("file:/")) {
-                        view.unregisterFileFromTemp()
+                    if (uri.startsWith("file://")) {
 
                         metaData.contentEntry = entity
                         contentImportManager?.queueImportContentFromFile(uri, metaData,
@@ -196,6 +188,12 @@ class ContentEntryEdit2Presenter(context: Any,
                         && view.entryMetaData?.uri == null
             }
         }
+    }
+
+    fun isImportValid(): Boolean{
+        val entity = view.entity ?: return false
+        return entity.title != null && (!entity.leaf || entity.contentEntryUid != 0L ||
+                (entity.contentEntryUid == 0L && view.entryMetaData?.uri != null))
     }
 
     fun handleFileSelection(filePath: String) {

@@ -22,8 +22,6 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var entryMetaData: ImportedContentEntryMetaData?
 
-    fun unregisterFileFromTemp()
-
     companion object {
 
         const val VIEW_NAME = "ContentEntryEdit2EditView"
