@@ -16,8 +16,9 @@ class VideoTypePluginAndroid: VideoTypePlugin() {
         return withContext(Dispatchers.Default){
             val file = File(filePath)
 
-            fileExtensions.find { file.name.endsWith(it, true) }
-                    ?: return@withContext null
+            if(!fileExtensions.any { file.name.endsWith(it, true) }) {
+                return@withContext null
+            }
 
             ContentEntryWithLanguage().apply {
                 this.title = file.nameWithoutExtension

@@ -51,9 +51,9 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
      */
     private val downloadStatusLock = Mutex()
 
-    suspend fun importContainer(isFileImport: Boolean = false) {
+    suspend fun importContainer(markContainerAsDownloaded: Boolean = false) {
 
-        val filePath = if(isFileImport) containerImportJob.filePath?.removePrefix("file://") else containerImportJob.filePath
+        val filePath = if(markContainerAsDownloaded) containerImportJob.filePath?.removePrefix("file://") else containerImportJob.filePath
 
         val container = contentImportManager.importFileToContainer(
                 filePath!!,
@@ -65,7 +65,7 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
         containerImportJob.cujContainerUid = container.containerUid
         db.containerImportJobDao.updateImportComplete()
 
-        if(isFileImport){
+        if(markContainerAsDownloaded){
             containerManager.handleContainerLocalImport(container)
         }
     }
