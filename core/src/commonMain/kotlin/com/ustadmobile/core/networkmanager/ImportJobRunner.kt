@@ -71,7 +71,7 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
 
         } ?: return
         containerImportJob.cijContainerUid = container.containerUid
-        db.containerImportJobDao.updateImportComplete()
+        db.containerImportJobDao.updateImportComplete(importJobUid = containerImportJob.cijUid)
 
         if(markContainerAsDownloaded){
             containerManager.handleContainerLocalImport(container)

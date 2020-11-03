@@ -35,8 +35,8 @@ abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
     @Query("UPDATE ContainerImportJob SET cijJobStatus = :status WHERE cijUid = :uploadJobId")
     abstract fun updateStatus(status: Int, uploadJobId: Long)
 
-    @Query("UPDATE ContainerImportJob SET cijImportCompleted = :importCompleted")
-    abstract fun updateImportComplete(importCompleted: Boolean = true)
+    @Query("UPDATE ContainerImportJob SET cijImportCompleted = :importCompleted WHERE cijUid = :importJobUid")
+    abstract fun updateImportComplete(importCompleted: Boolean = true, importJobUid: Long)
 
     @Query("SELECT ContentEntry.title FROM ContainerImportJob " +
             "LEFT JOIN ContentEntry ON ContainerImportJob.cijContentEntryUid = ContentEntry.contentEntryUid " +

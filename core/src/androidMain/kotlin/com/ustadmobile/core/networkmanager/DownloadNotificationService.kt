@@ -215,7 +215,7 @@ class DownloadNotificationService : Service(), DIAware {
         }
     }
 
-    inner class ImportJobNotificationHolder(val importJobUid: Int, val endpoint: Endpoint) : NotificationHolder2(
+    inner class ImportJobNotificationHolder(val importJobUid: Long, val endpoint: Endpoint) : NotificationHolder2(
             impl.getString(MessageID.loading, applicationContext),
             impl.getString(MessageID.processing, applicationContext)), DoorObserver<ContainerImportJob?> {
 
@@ -230,13 +230,13 @@ class DownloadNotificationService : Service(), DIAware {
 
             GlobalScope.launch(Dispatchers.Main) {
                 val db: UmAppDatabase = on(endpoint).direct.instance(tag = TAG_DB)
-                val importJobTitleEntry = db.containerImportJobDao.getTitleOfEntry(importJobUid.toLong())
+                val importJobTitleEntry = db.containerImportJobDao.getTitleOfEntry(importJobUid)
                         ?: ""
                 builder.setContentTitle(importJobTitleEntry)
                 contentTitle = importJobTitleEntry
                 doNotify()
 
-                importJobLiveData = db.containerImportJobDao.getImportJobLiveData(importJobUid.toLong())
+                importJobLiveData = db.containerImportJobDao.getImportJobLiveData(importJobUid)
                 importJobLiveData.observeForever(this@ImportJobNotificationHolder)
             }
 
@@ -353,7 +353,7 @@ class DownloadNotificationService : Service(), DIAware {
         }
 
         val downloadJobUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBUID) ?: -1
-        val importJobUid = intentExtras?.getInt(EXTRA_IMPORTJOB_UID) ?: -1
+        val importJobUid = intentExtras?.getLong(EXTRA_IMPORTJOB_UID) ?: -1
         val endpointUrl = intentExtras?.getString(EXTRA_ENDPOINT)
         val endpoint: Endpoint? = if(endpointUrl != null) Endpoint(endpointUrl) else null
 
