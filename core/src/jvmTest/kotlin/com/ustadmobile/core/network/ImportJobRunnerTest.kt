@@ -1,4 +1,4 @@
-package com.ustadmobile.sharedse.network
+package com.ustadmobile.core.network
 
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.mock
@@ -9,21 +9,19 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.ext.DoorTag.Companion.TAG_DB
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.rest.ContainerUpload
 import com.ustadmobile.lib.rest.ResumableUploadRoute
-import com.ustadmobile.lib.rest.TAG_UPLOAD_DIR
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.ext.TestContainer.assertContainersHaveSameContent
 import com.ustadmobile.core.networkmanager.ContainerUploaderCommon
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
 import com.ustadmobile.sharedse.network.containeruploader.UploadJobRunner
 import io.ktor.application.ApplicationCall
@@ -49,7 +47,7 @@ import java.io.File
 import java.util.*
 import javax.naming.InitialContext
 
-class UploadJobRunnerTest {
+class ImportJobRunnerTest {
 
     private lateinit var endpoint: String
     private lateinit var serverFolder: File
