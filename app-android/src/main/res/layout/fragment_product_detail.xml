@@ -40,7 +40,7 @@
                 tools:listitem="@layout/item_product_image"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 android:orientation="horizontal"
-                tools:itemCount="2"
+                tools:itemCount="3"
                 app:layout_behavior="@string/appbar_scrolling_view_behavior"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -100,7 +100,6 @@
                 android:id="@+id/fragment_product_detail_category_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="@dimen/dimen_8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 tools:listitem="@layout/item_categorychip"
                 tools:itemCount="2"
@@ -115,49 +114,78 @@
             <View
                 android:id="@+id/hline1"
                 android:layout_width="match_parent"
+                android:layout_marginVertical="@dimen/dimen_8dp"
                 android:layout_height="1dp"
                 android:background="@android:color/darker_gray"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_product_detail_category_rv"
                 />
 
-            <ImageView
-                android:id="@+id/receive_delivery_image"
-                android:layout_width="@dimen/dimen_60dp"
-                android:layout_height="@dimen/dimen_60dp"
-                android:layout_marginHorizontal="@dimen/dimen_40dp"
-                android:src="@drawable/ic_outline_local_shipping_24"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/hline1"
-                />
-
-            <TextView
-                android:id="@+id/receive_delivery_title"
+            <LinearLayout
+                android:id="@+id/record_ll"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/receive_delivery"
-                app:layout_constraintEnd_toEndOf="@+id/receive_delivery_image"
-                app:layout_constraintStart_toStartOf="@+id/receive_delivery_image"
-                app:layout_constraintTop_toBottomOf="@+id/receive_delivery_image" />
-
-            <ImageView
-                android:id="@+id/record_sale_image"
-                android:layout_width="@dimen/dimen_60dp"
-                android:layout_height="@dimen/dimen_60dp"
-                android:layout_marginHorizontal="@dimen/dimen_40dp"
-                android:src="@drawable/ic_payment_note_cash_black_24dp"
+                android:orientation="horizontal"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/receive_delivery_image"
-                app:layout_constraintTop_toBottomOf="@+id/hline1" />
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/hline1">
 
-            <TextView
-                android:id="@+id/record_sale_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/record_sale"
-                app:layout_constraintEnd_toEndOf="@+id/record_sale_image"
-                app:layout_constraintStart_toStartOf="@+id/record_sale_image"
-                app:layout_constraintTop_toBottomOf="@+id/record_sale_image" />
+                <LinearLayout
+                    android:id="@+id/record_delivery_ll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
 
+                    android:orientation="vertical"
+                    android:onClick="@{() -> fragmentEventHandler.handleClickRecordDelivery(product)}"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toBottomOf="@id/hline1">
+
+                    <ImageView
+                        android:id="@+id/receive_delivery_image"
+                        android:layout_width="@dimen/dimen_60dp"
+                        android:layout_height="@dimen/dimen_60dp"
+                        android:layout_marginHorizontal="@dimen/dimen_40dp"
+                        android:src="@drawable/ic_outline_local_shipping_24"
+                      />
+
+                    <TextView
+                        android:id="@+id/receive_delivery_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginHorizontal="@dimen/dimen_20dp"
+                        android:text="@string/receive_delivery"
+              />
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:id="@+id/record_sale_ll"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:onClick="@{() -> fragmentEventHandler.handleClickRecordSale(product)}"
+                    app:layout_constraintStart_toEndOf="@+id/record_delivery_ll"
+                    app:layout_constraintTop_toBottomOf="@+id/hline1">
+
+
+                    <ImageView
+                        android:id="@+id/record_sale_image"
+                        android:layout_width="@dimen/dimen_60dp"
+                        android:layout_height="@dimen/dimen_60dp"
+                        android:layout_marginHorizontal="@dimen/dimen_40dp"
+                        android:src="@drawable/ic_payment_note_cash_black_24dp" />
+
+                    <TextView
+                        android:id="@+id/record_sale_title"
+                        android:layout_marginHorizontal="35dp"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/record_sale" />
+
+                </LinearLayout>
+
+            </LinearLayout>
 
             <View
                 android:id="@+id/hline2"
@@ -165,7 +193,7 @@
                 android:layout_height="1dp"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 android:background="@android:color/darker_gray"
-                app:layout_constraintTop_toBottomOf="@+id/receive_delivery_title"
+                app:layout_constraintTop_toBottomOf="@+id/record_ll"
                 />
 
             <TextView

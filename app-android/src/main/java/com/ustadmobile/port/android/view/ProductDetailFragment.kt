@@ -31,6 +31,8 @@ import org.kodein.di.on
 
 interface ProductDetailFragmentEventHandler {
 
+    fun handleClickRecordDelivery(product: ProductWithInventoryCount)
+    fun handleClickRecordSale(product: ProductWithInventoryCount)
 }
 
 class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), ProductDetailView,
@@ -113,6 +115,13 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
     override fun onClickPerson(person: PersonWithInventoryCount) {
         //TODO
     }
+    override fun handleClickRecordDelivery(product: ProductWithInventoryCount) {
+        //TOOD
+    }
+
+    override fun handleClickRecordSale(product: ProductWithInventoryCount) {
+        //TODO
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -184,5 +193,7 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
             field = value
             mBinding?.product = value
         }
+
+
 
 }
