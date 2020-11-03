@@ -5,13 +5,15 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.ProductDetailView
-import com.ustadmobile.core.view.ProductDetailView
-import com.ustadmobile.core.view.ProductEditView
 import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.InventoryTransactionDao
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ProductDao
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
+import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.Product
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
@@ -19,6 +21,8 @@ import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import org.kodein.di.DI
+import org.kodein.di.instance
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -29,11 +33,7 @@ class ProductDetailPresenterTest {
 
     @JvmField
     @Rule
-    var systemImplRule = SystemImplRule()
-
-    @JvmField
-    @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: ProductDetailView
 
@@ -42,61 +42,57 @@ class ProductDetailPresenterTest {
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
     private lateinit var repoProductDaoSpy: ProductDao
+    private lateinit var repoInventoryTransactionDaoSpy: InventoryTransactionDao
+
+    private lateinit var di: DI
 
     @Before
     fun setup() {
+
         mockView = mock { }
         mockLifecycleOwner = mock {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repoProductDaoSpy = spy(clientDbRule.db.productDao)
-        whenever(clientDbRule.db.productDao).thenReturn(repoProductDaoSpy)
+        di = DI {
+            import(ustadTestRule.diModule)
+        }
 
-        //TODO: insert any entities required for all tests
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        repoProductDaoSpy = spy(repo.productDao)
+        whenever(repo.productDao).thenReturn(repoProductDaoSpy)
+
+        repoInventoryTransactionDaoSpy = spy(repo.inventoryTransactionDao)
+        whenever(repo.inventoryTransactionDao).thenReturn(repoInventoryTransactionDaoSpy)
     }
 
     @Test
     fun givenProductExists_whenOnCreateCalled_thenProductIsSetOnView() {
+        val db: UmAppDatabase by di.activeDbInstance()
+        val accountManager: UstadAccountManager by di.instance<UstadAccountManager>()
         val testEntity = Product().apply {
             //set variables here
-            productUid = clientDbRule.db.productDao.insert(this)
+            productName = "Cow"
+            productActive = true
+            productUid = db.productDao.insert(this)
         }
+
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.productUid.toString())
         val presenter = ProductDetailPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
-
-
+                presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
         val entityValSet = mockView.captureLastEntityValue()!!
         Assert.assertEquals("Expected entity was set on view",
                 testEntity.productUid, entityValSet.productUid)
+
+        verify(repoProductDaoSpy, timeout(5000)).findAllCategoriesOfProductUid(entityValSet.productUid)
+        verify(repoInventoryTransactionDaoSpy, timeout(5000)).getStockListByProduct(entityValSet.productUid)
+        verify(repoInventoryTransactionDaoSpy, timeout(5000)).getProductTransactionDetail(entityValSet.productUid)
     }
 
-    @Test
-    fun givenProductExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
-        val testEntity = Product().apply {
-            //set variables here
-            productUid = clientDbRule.db.productDao.insert(this)
-        }
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.productUid.toString())
-        val presenter = ProductDetailPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
 
-        presenter.onCreate(null)
-
-        //wait for the entity value to be set
-        mockView.captureLastEntityValue()
-
-        presenter.handleClickEdit()
-
-        verify(systemImplRule.systemImpl, timeout(5000)).go(eq(ProductEditView.VIEW_NAME),
-            eq(mapOf(ARG_ENTITY_UID to testEntity.productUid.toString())), any())
-    }
+    //TODO : Add edit called goes to edit thingi 
 
 }

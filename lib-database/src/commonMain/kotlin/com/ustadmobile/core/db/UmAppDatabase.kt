@@ -41,7 +41,8 @@ import kotlin.jvm.Volatile
     GroupLearningSession::class
 
     //Goldozi:
-    ,Product::class, ProductCategoryJoin::class, InventoryItem::class, InventoryTransaction::class
+    ,Product::class, ProductCategoryJoin::class, InventoryItem::class, InventoryTransaction::class,
+    Category::class
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 

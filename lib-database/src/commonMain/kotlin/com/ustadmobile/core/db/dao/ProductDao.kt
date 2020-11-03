@@ -28,8 +28,8 @@ abstract class ProductDao : BaseDao<Product> {
     @Query("SELECT * FROM Product WHERE CAST(productActive AS INTEGER) = 1 ")
     abstract fun findAllActiveProducts(): DataSource.Factory<Int, Product>
 
-    @Query(FIND_BY_UID_QUERY)
-    abstract suspend fun findProductWithInventoryCountAsync(productUid: Long): ProductWithInventoryCount?
+    @Query(FINDWITHCOUNT_BY_UID_QUERY)
+    abstract suspend fun findProductWithInventoryCountAsync(uid: Long): ProductWithInventoryCount?
 
     @Query(QUERY_PRODUCTS_WITH_INVENTORY)
     abstract fun findAllActiveProductWithInventoryCount(): DataSource.Factory<Int, ProductWithInventoryCount>
@@ -58,7 +58,7 @@ abstract class ProductDao : BaseDao<Product> {
     abstract suspend fun findByUidListAsync(uid: Long): List<Product>
 
     @Query(QUERY_FIND_ALL_CATEGORY_BY_PRODUCT)
-    abstract fun findAllCategoriesOfProductUid(productUid: Long): DataSource.Factory<Int, Category>?
+    abstract fun findAllCategoriesOfProductUid(productUid: Long): DataSource.Factory<Int, Category>
 
 
     companion object {
@@ -70,7 +70,13 @@ abstract class ProductDao : BaseDao<Product> {
         const val SELECT_ACCOUNT_IS_ADMIN = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid)"
 
         const val FIND_BY_UID_QUERY = "SELECT * FROM Product WHERE productUid = :uid " +
-                " WHERE CAST(productActive AS INTEGER) = 1"
+                " AND CAST(productActive AS INTEGER) = 1"
+
+        const val FINDWITHCOUNT_BY_UID_QUERY = """
+                SELECT Product.* , 0 as stock
+                    FROM Product WHERE Product.productUid = :uid 
+                 AND CAST(productActive AS INTEGER) = 1
+                 """
 
         const val FIND_BY_NAME_QUERY = "SELECT * FROM Product WHERE productName = :name AND CAST(productActive AS INTEGER) = 1"
 

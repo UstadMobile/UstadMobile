@@ -19,11 +19,11 @@ abstract class InventoryTransactionDao : BaseDao<InventoryTransaction> {
 
     @Query(QUERY_GET_STOCK_LIST_BY_PRODUCT)
     abstract fun getStockListByProduct(productUid: Long) :
-            DataSource.Factory<Int, PersonWithInventoryCount>?
+            DataSource.Factory<Int, PersonWithInventoryCount>
 
     @Query(QUERY_GET_TRANSACTION_LIST_BY_PRODUCT)
     abstract fun getProductTransactionDetail(productUid: Long) :
-            DataSource.Factory<Int, InventoryTransactionDetail>?
+            DataSource.Factory<Int, InventoryTransactionDetail>
 
     companion object{
 
