@@ -827,6 +827,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="x_afs">%1$s AFS</string>
     <string name="price">Price</string>
     <string name="receive_inventory">Receive inventory</string>
+    <string name="receive_delivery">Receive delivery</string>
     <string name="record_sale">Record sale</string>
     <string name="stock">Stock</string>
     <string name="history">History</string>
