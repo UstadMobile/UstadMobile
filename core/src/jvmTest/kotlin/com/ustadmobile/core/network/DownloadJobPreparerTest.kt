@@ -1,4 +1,4 @@
-package com.ustadmobile.sharedse.network
+package com.ustadmobile.core.network
 
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
@@ -6,11 +6,14 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.networkmanager.DownloadJobPreparer
+import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.rest.umRestApplication
-import com.ustadmobile.sharedse.util.UstadTestRule
+import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
+import com.ustadmobile.sharedse.network.insertTestContentEntries
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
@@ -23,6 +26,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
+@ExperimentalStdlibApi
 class DownloadJobPreparerTest {
 
     @JvmField
