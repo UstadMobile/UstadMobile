@@ -35,12 +35,11 @@ class VideoTypePluginJvm: VideoTypePlugin() {
             val file = File(filePath)
             val container = Container().apply {
                 containerContentEntryUid = contentEntryUid
+                cntLastModified = System.currentTimeMillis()
+                fileSize = file.length()
+                this.mimeType = mimeType
+                containerUid = repo.containerDao.insert(this)
             }
-
-            container.cntLastModified = System.currentTimeMillis()
-            container.fileSize = file.length()
-            container.mimeType = mimeType
-            container.containerUid = repo.containerDao.insert(container)
 
             val containerManager = ContainerManager(container, db, repo, containerBaseDir)
 
