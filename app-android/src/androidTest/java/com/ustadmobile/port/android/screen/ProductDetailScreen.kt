@@ -11,6 +11,7 @@ object  ProductDetailScreen : KScreen<ProductDetailScreen>() {
     override val viewClass: Class<*>?
         get() = ProductDetailFragment::class.java
 
-    val title = KTextView { withId(R.id.entity_title) }
+    val description = KTextView { withId(R.id.description_text) }
+    val price = KTextView { withId(R.id.fragment_product_detail_price_tv)}
 
 }

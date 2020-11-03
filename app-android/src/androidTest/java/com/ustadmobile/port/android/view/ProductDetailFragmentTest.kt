@@ -8,6 +8,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import com.nhaarman.mockitokotlin2.description
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
@@ -39,13 +40,15 @@ class ProductDetailFragmentTest : TestCase(){
     @AdbScreenRecord("given Product exists when launched then show Product")
     @Test
     fun givenProductExists_whenLaunched_thenShouldShowProduct() {
-        val existingClazz = Product().apply {
-            productName = "Test Product"
+        val testEntity = Product().apply {
+            productName = "Test Name"
+            productActive = true
+            productDesc = "Blah Blah Blah"
+            productBasePrice = 12.24f
             productUid = dbRule.db.productDao.insert(this)
         }
-
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(ARG_ENTITY_UID to existingClazz.clazzUid)) {
+                fragmentArgs = bundleOf(ARG_ENTITY_UID to testEntity.productUid)) {
             ProductDetailFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
@@ -57,9 +60,13 @@ class ProductDetailFragmentTest : TestCase(){
 
             ProductDetailScreen{
 
-                title{
+                description{
                     isDisplayed()
-                    hasText("Test Product")
+                    hasText(testEntity.productDesc!!)
+                }
+                price{
+                    isDisplayed()
+                    hasText(testEntity.productBasePrice.toString())
                 }
             }
 

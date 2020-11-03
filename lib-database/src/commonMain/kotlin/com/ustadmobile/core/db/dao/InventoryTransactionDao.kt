@@ -50,6 +50,7 @@ abstract class InventoryTransactionDao : BaseDao<InventoryTransaction> {
             0 as toLeUid, 
             0 as transactionDate, 
             '' as leName, 
+            0 as saleUid,
             0 as fromLeUid 
             FROM InventoryTransaction
              LEFT JOIN Product ON Product.productUid = :productUid

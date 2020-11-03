@@ -123,6 +123,8 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
         //TODO
     }
 
+
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView: View

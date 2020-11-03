@@ -72,6 +72,15 @@ fun ImageView.setAttendanceTint(attendancePercentage: Float) {
     setColorFilter(ContextCompat.getColor(context, color))
 }
 
+@BindingAdapter("transactionIcon")
+fun ImageView.setTransactionIcon(saleUid: Long){
+    if(saleUid == 0L){
+        setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_arrow_right_24dp))
+    }else{
+        setImageDrawable(ContextCompat.getDrawable(context, R.drawable.ic_arrow_left_24dp))
+    }
+}
+
 /**
  * This binder will handle situations where there is a fixed list of flags, each of which
  * corresponds to a given drawable ID

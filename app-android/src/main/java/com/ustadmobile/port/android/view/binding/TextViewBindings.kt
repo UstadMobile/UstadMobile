@@ -154,6 +154,20 @@ fun TextView.setSchoolGenderText(gender: Int) {
     }
 }
 
+@BindingAdapter(value = ["inventoryDescriptionStockCount", "inventoryDescriptionWeNames"])
+fun TextView.setInventoryDescription(stockCount: Int, weNames: String){
+    text = context.getString(R.string.x_item_by_y, stockCount.toString(), weNames)
+}
+
+@BindingAdapter("inventoryType")
+fun TextView.getInventoryType(saleUid: Long){
+    if(saleUid == 0L){
+        text = context.getString(R.string.receive)
+    }else{
+        text = context.getString(R.string.sell)
+    }
+}
+
 @BindingAdapter("textClazzLogStatus")
 fun TextView.setTextClazzLogStatus(clazzLog: ClazzLog) {
     text = when (clazzLog.clazzLogStatusFlag) {

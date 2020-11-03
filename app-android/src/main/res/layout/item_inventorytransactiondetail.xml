@@ -39,7 +39,7 @@
             android:layout_marginTop="8dp"
             tools:text="Sell/Receive"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:text="@{entry.saleUid != 0?@string/sell:@string/receive}"
+            app:inventoryType="@{entry.saleUid}"
             android:textSize="18sp"
             app:layout_constraintStart_toEndOf="@+id/imageView11"
             app:layout_constraintTop_toTopOf="parent" />
@@ -63,7 +63,8 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="@dimen/dimen_8dp"
             tools:text="Transaction description"
-            android:text="@{@string/x_item_by_y(entry.stockCount,entry.weNames)}"
+            app:inventoryDescriptionStockCount="@{entry.stockCount}"
+            app:inventoryDescriptionWeNames="@{entry.weNames}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/item_inventory_transaction_od"
             app:layout_constraintStart_toStartOf="@+id/item_inventory_transaction_mode"
@@ -90,6 +91,8 @@
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@{entry.saleUid != 0 ? @drawable/ic_arrow_left_24dp:@drawable/ic_arrow_right_24dp" />
+            app:transactionIcon ="@{entry.saleUid}"
+            />
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

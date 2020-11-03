@@ -831,7 +831,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="record_sale">Record sale</string>
     <string name="stock">Stock</string>
     <string name="history">History</string>
-    <string name="x_item_by_y">%1$s by %1$s</string>
+    <string name="x_item_by_y">%1$s by %2$s</string>
     <string name="edit_product">Edit product</string>
     <string name="edit_category">Edit category</string>
     <string name="title_english">Title (English)</string>
