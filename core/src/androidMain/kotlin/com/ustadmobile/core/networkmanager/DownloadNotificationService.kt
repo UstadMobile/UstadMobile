@@ -215,17 +215,30 @@ class DownloadNotificationService : Service(), DIAware {
         }
     }
 
-    inner class ImportJobNotificationHolder(val importJobUid: Int) : NotificationHolder2(
-            impl.getString(MessageID.deleting, applicationContext),
-            impl.getString(MessageID.deleting, applicationContext)), DoorObserver<ContainerImportJob?> {
-
+    inner class ImportJobNotificationHolder(val importJobUid: Int, val endpoint: Endpoint) : NotificationHolder2(
+            impl.getString(MessageID.loading, applicationContext),
+            impl.getString(MessageID.processing, applicationContext)), DoorObserver<ContainerImportJob?> {
 
         var bytesSoFar: Long = 0
         var totalBytes: Long = 0
 
+        lateinit var importJobLiveData: DoorLiveData<ContainerImportJob?>
+
         init {
             builder.setContentTitle(contentTitle)
                     .setContentText(contentText)
+
+            GlobalScope.launch(Dispatchers.Main) {
+                val db: UmAppDatabase = on(endpoint).direct.instance(tag = TAG_DB)
+                val importJobTitleEntry = db.containerImportJobDao.getTitleOfEntry(importJobUid.toLong())
+                        ?: ""
+                builder.setContentTitle(importJobTitleEntry)
+                contentTitle = importJobTitleEntry
+                doNotify()
+
+                importJobLiveData = db.containerImportJobDao.getImportJobLiveData(importJobUid.toLong())
+                importJobLiveData.observeForever(this@ImportJobNotificationHolder)
+            }
 
         }
 
@@ -236,19 +249,21 @@ class DownloadNotificationService : Service(), DIAware {
 
                 val progress = (bytesSoFar.toDouble() / totalBytes * 100).toInt()
                 builder.setProgress(MAX_PROGRESS_VALUE, progress, false)
-                contentText = String.format(impl.getString(
-                        MessageID.download_downloading_placeholder, this@DownloadNotificationService),
-                        UMFileUtil.formatFileSize(bytesSoFar),
-                        UMFileUtil.formatFileSize(totalBytes))
+
+                contentText = if(t.importCompleted) impl.getString(
+                        MessageID.uploading, this@DownloadNotificationService)
+                else
+                    impl.getString(
+                            MessageID.processing, this@DownloadNotificationService)
+
                 builder.setContentText(contentText)
 
                 doNotify()
-                summaryNotificationHolder?.updateSummary()
 
                 if(t.jobStatus >= JobStatus.COMPLETE_MIN) {
                     activeImportJobNotifications.remove(this)
                     mNotificationManager.cancel(notificationId)
-                    //downloadJobLiveData.removeObserver(this)
+                    importJobLiveData.removeObserver(this)
                     checkIfCompleteAfterDelay()
                 }
             }
@@ -426,7 +441,9 @@ class DownloadNotificationService : Service(), DIAware {
 
             }
             ACTION_PREPARE_IMPORT ->{
-                val importNotificationHolder = ImportJobNotificationHolder(importJobUid)
+                val endpointVal = endpoint ?: throw IllegalArgumentException("ACTION_PREPARE_IMPORT requires EXTRA_ENDPOINT")
+
+                val importNotificationHolder = ImportJobNotificationHolder(importJobUid, endpointVal)
                 activeImportJobNotifications.add(importNotificationHolder)
 
                 if (!foregroundActive && foregroundNotificationHolder == null) {

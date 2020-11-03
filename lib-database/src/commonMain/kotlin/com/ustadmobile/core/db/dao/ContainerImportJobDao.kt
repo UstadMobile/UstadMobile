@@ -38,4 +38,13 @@ abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
     @Query("UPDATE ContainerImportJob SET importCompleted = :importCompleted")
     abstract fun updateImportComplete(importCompleted: Boolean = true)
 
+    @Query("SELECT ContentEntry.title FROM ContainerImportJob " +
+            "LEFT JOIN ContentEntry ON ContainerImportJob.contentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE ContainerImportJob.cujUid = :importJobUid")
+    abstract suspend fun getTitleOfEntry(importJobUid: Long): String?
+
+
+    @Query("SELECT * From  ContainerImportJob WHERE ContainerImportJob.cujUid = :importJobUid")
+    abstract fun getImportJobLiveData(importJobUid: Long): DoorLiveData<ContainerImportJob?>
+
 }

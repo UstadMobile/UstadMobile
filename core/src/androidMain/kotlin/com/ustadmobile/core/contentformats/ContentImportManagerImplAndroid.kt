@@ -21,6 +21,7 @@ class ContentImportManagerImplAndroid(contentPlugins: List<ContentTypePlugin>, v
         val importIntent = Intent(androidContext, DownloadNotificationService::class.java)
         importIntent.action = DownloadNotificationService.ACTION_PREPARE_IMPORT
         importIntent.putExtra(DownloadNotificationService.EXTRA_IMPORTJOB_UID, importJob.cujUid)
+        importIntent.putExtra(DownloadNotificationService.EXTRA_ENDPOINT, endpoint.url)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             androidContext.startForegroundService(importIntent)
         } else {
