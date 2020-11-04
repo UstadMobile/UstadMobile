@@ -87,9 +87,7 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                         val execEl = it as ExecutableElement
                         val returnTypeEl = processingEnv.typeUtils.asElement(execEl.returnType)
 
-                        if(returnTypeEl != null && returnTypeEl is TypeElement
-                                && syncableEntitiesOnDao(returnTypeEl.asClassName(), processingEnv).isNotEmpty()) {
-
+                        if(returnTypeEl is TypeElement && returnTypeEl.isDaoWithRepository) {
                             listOf(SUFFIX_KTOR_HELPER_MASTER, SUFFIX_KTOR_HELPER_LOCAL).forEach {suffix ->
                                 lineOut += "abstract fun _${returnTypeEl.simpleName}$suffix() : ${returnTypeEl.qualifiedName}$suffix\n\n"
                             }

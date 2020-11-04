@@ -106,12 +106,14 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
         for(daoElement in daos) {
             val daoTypeEl = daoElement as TypeElement
-            writeFileSpecToOutputDirs(generateDaoRepositoryClass(daoTypeEl),
-                    AnnotationProcessorWrapper.OPTION_JVM_DIRS)
-            val androidRepoFileSpec = generateDaoRepositoryClass(daoTypeEl,
-                    pagingBoundaryCallbackEnabled = true, isAlwaysSqlite = true)
-            writeFileSpecToOutputDirs(androidRepoFileSpec,
-                    AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
+            if(daoTypeEl.isDaoWithRepository) {
+                writeFileSpecToOutputDirs(generateDaoRepositoryClass(daoTypeEl),
+                        AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+                val androidRepoFileSpec = generateDaoRepositoryClass(daoTypeEl,
+                        pagingBoundaryCallbackEnabled = true, isAlwaysSqlite = true)
+                writeFileSpecToOutputDirs(androidRepoFileSpec,
+                        AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
+            }
         }
 
         return true
@@ -387,8 +389,19 @@ class DbProcessorRepository: AbstractDbProcessor() {
             .filter{it.kind == ElementKind.METHOD }.map {it as ExecutableElement }.forEach {
 
             val daoTypeEl = processingEnv.typeUtils.asElement(it.returnType) as TypeElement?
-            if(daoTypeEl == null)
+            if(daoTypeEl == null) {
                 return@forEach
+            }
+
+            //If the DAO in question is not annotated with Repository, we will not generate a
+            //repository class. Trying to use the database repo to access the object will throw
+            //an exception
+            if(!daoTypeEl.isDaoWithRepository) {
+                dbRepoType.addAccessorOverride(it, CodeBlock.of("throw %T(%S)\n",
+                    IllegalStateException::class,
+                    "${daoTypeEl.simpleName} is not annotated with @Repository"))
+                return@forEach
+            }
 
             val daoClassName = daoTypeEl.asClassName()
             val repoImplClassName = ClassName(pkgNameOfElement(daoTypeEl, processingEnv),
@@ -411,7 +424,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .build())
             dbRepoType.addAccessorOverride(it, CodeBlock.of("return  _${daoTypeEl.simpleName}"))
 
-            if(daoHasSyncableEntities && overrideKtorHelpers) {
+            if(daoTypeEl.isDaoWithRepository && overrideKtorHelpers) {
                 listOf("Master", "Local").forEach {suffix ->
                     val ktorHelperClassName = ClassName(daoClassName.packageName,
                             "${daoClassName.simpleName}${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}$suffix")

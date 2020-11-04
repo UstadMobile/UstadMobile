@@ -2,6 +2,9 @@ package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.paging.DataSource
 import com.squareup.kotlinpoet.*
+import javax.lang.model.element.TypeElement
+import androidx.room.Dao
+import com.ustadmobile.door.annotation.Repository
 
 internal fun TypeName.toSqlType(dbType: Int = 0) = when {
     this == BOOLEAN -> "BOOL"
@@ -40,3 +43,13 @@ internal fun TypeName.asComponentClassNameIfList() : ClassName {
         this as ClassName
     }
 }
+
+
+/**
+ * Check to see if this represents a TypeElement for a Dao which is annotated with Repository.
+ *
+ * This means that repository classes for this should be generated.
+ */
+val TypeElement.isDaoWithRepository: Boolean
+    get() = this.getAnnotation(Dao::class.java) != null
+            && this.getAnnotation(Repository::class.java) != null

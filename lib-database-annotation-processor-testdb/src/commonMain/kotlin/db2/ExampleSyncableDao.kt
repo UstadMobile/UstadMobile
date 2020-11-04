@@ -13,6 +13,7 @@ import com.ustadmobile.door.entities.UpdateNotification
 
 
 @Dao
+@Repository
 abstract class ExampleSyncableDao {
 
     @Insert

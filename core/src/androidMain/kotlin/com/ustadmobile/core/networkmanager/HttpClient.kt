@@ -66,14 +66,6 @@ private val httpClient = if(Build.VERSION.SDK_INT < OK_HTTP_MIN_SDKVERSION) {
 
 actual fun defaultHttpClient() = httpClient
 
-fun defaultOkHttpClient() = if(Build.VERSION.SDK_INT >= OK_HTTP_MIN_SDKVERSION) {
-    okHttpClient!!
-} else {
-    throw RuntimeException("OKHttp Min SDK Version is $OK_HTTP_MIN_SDKVERSION")
-}
-
-fun defaultGsonSerializer() = defaultGsonSerializer
-
 fun initPicasso(context: Context) {
     /**
      * OKHttp does not work on any version of Android less than 5.0 .

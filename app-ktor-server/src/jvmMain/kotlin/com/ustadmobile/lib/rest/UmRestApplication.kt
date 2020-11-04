@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.rest
 
+import com.github.aakira.napier.DebugAntilog
+import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -65,6 +67,9 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     }
 
     install(CallLogging)
+
+    //TODO: Put in a proper log filter here
+    Napier.base(DebugAntilog())
 
     install(ContentNegotiation) {
         gson {

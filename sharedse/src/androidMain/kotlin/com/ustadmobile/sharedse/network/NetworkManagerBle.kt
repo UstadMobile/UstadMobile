@@ -23,8 +23,6 @@ import androidx.core.app.ActivityCompat
 import androidx.core.net.ConnectivityManagerCompat
 import com.ustadmobile.core.impl.UMAndroidUtil.normalizeAndroidWifiSsid
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.networkmanager.defaultGsonSerializer
-import com.ustadmobile.core.networkmanager.defaultOkHttpClient
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.NetworkNode
@@ -34,10 +32,11 @@ import com.ustadmobile.sharedse.network.containerfetcher.ConnectionOpener
 import fi.iki.elonen.NanoHTTPD
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.json.JsonFeature
+import io.ktor.client.features.json.*
 import kotlinx.coroutines.CoroutineDispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.IOException
 import java.net.HttpURLConnection
@@ -409,7 +408,7 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
                 UMLog.l(UMLog.DEBUG, 0, "NetworkManager: create local network http " +
                         "client for $ssid using $socketFactory")
 
-                val localOkHttpClientVal = defaultOkHttpClient().newBuilder()
+                val localOkHttpClientVal = di.direct.instance<OkHttpClient>().newBuilder()
                         .socketFactory(socketFactory)
                         .build()
 
@@ -420,7 +419,7 @@ actual constructor(context: Any, di: DI, singleThreadDispatcher: CoroutineDispat
                         preconfigured = localOkHttpClientVal
                     }
                     install(JsonFeature) {
-                        serializer = defaultGsonSerializer()
+                        serializer = di.direct.instance<GsonSerializer>()
                     }
                 }
 

@@ -4,12 +4,11 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.entities.SchoolMember
+import com.ustadmobile.lib.db.entities.SchoolMemberWithPerson
 
-@UmDao
-@UmRepository
+@Repository
 @Dao
 abstract class SchoolMemberDao : BaseDao<SchoolMember> {
 

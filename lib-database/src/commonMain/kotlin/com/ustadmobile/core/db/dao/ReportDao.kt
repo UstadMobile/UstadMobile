@@ -7,11 +7,11 @@ import androidx.room.RawQuery
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.Report
 
 @Dao
-@UmRepository
+@Repository
 abstract class ReportDao : BaseDao<Report> {
 
     @RawQuery

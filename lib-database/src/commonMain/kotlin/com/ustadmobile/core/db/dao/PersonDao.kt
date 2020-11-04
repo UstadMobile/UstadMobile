@@ -21,7 +21,7 @@ import kotlin.js.JsName
 
 
 @Dao
-@UmRepository
+@Repository
 abstract class PersonDao : BaseDao<Person> {
 
     @JsName("insertListAsync")

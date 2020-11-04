@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -9,9 +10,8 @@ import kotlin.js.JsName
 
 data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: Long = 0L)
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@Repository
 @Dao
-@UmRepository
 abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJoin> {
 
     @JsName("insertListAsync")

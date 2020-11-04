@@ -462,7 +462,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
 
-        daos.forEach {
+        daos.filter {it is TypeElement && it.isDaoWithRepository}.forEach {
             val daoSpecs =  generateDaoImplClasses(it as TypeElement)
             daoSpecs.writeAllSpecs(writeImpl = true, writeKtor = true,
                     outputSpecArgName = OPTION_KTOR_OUTPUT, useFilerAsDefault = false)
@@ -513,7 +513,10 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 syncDaoProviderType)
         }
 
-        daosOnDatabase(dbTypeElement, processingEnv).forEach {
+        daosOnDatabase(dbTypeElement, processingEnv)
+                .filter { it.first.isDaoWithRepository }
+                .forEach {
+
             val daoTypeEl = it.first
             val daoFromDbGetter = it.second
             val daoTypeClassName = daoTypeEl.asClassName()
@@ -587,8 +590,10 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                     .add(")\n")
         }
 
+        daosOnDatabase(dbTypeElement, processingEnv)
+                .filter {it.first.isDaoWithRepository }
+                .forEach {
 
-        daosOnDatabase(dbTypeElement, processingEnv).forEach {
             val daoTypeEl = it.first
             val daoFromDbGetter = it.second
             val daoTypeClassName = daoTypeEl.asClassName()

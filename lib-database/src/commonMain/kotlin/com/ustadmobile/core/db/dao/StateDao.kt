@@ -2,11 +2,11 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.StateEntity
 
 @Dao
-@UmRepository
+@Repository
 abstract class StateDao : BaseDao<StateEntity> {
 
     @Query("SELECT * FROM StateEntity WHERE stateId = :id AND agentUid = :agentUid AND activityId = :activityId AND registration = :registration AND isIsactive LIMIT 1")

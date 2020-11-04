@@ -6,13 +6,13 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
 import com.ustadmobile.lib.db.entities.ClazzMember.Companion.ROLE_STUDENT
 import com.ustadmobile.lib.db.entities.ClazzMember.Companion.ROLE_TEACHER
 
-@UmRepository
+@Repository
 @Dao
 abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
