@@ -19,8 +19,9 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
     abstract suspend fun findByUidAsync(uid: Long) : ClazzWorkQuestion?
 
 
-    @Query("UPDATE ClazzWorkQuestion SET clazzWorkQuestionActive = :active " +
-            "WHERE clazzWorkQuestionUid = :clazzWorkQuestionUid ")
+    @Query("""UPDATE ClazzWorkQuestion SET clazzWorkQuestionActive = :active,
+            clazzWorkQuestionLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            WHERE clazzWorkQuestionUid = :clazzWorkQuestionUid """)
     abstract suspend fun updateActiveByClazzWorkQuestionUid(clazzWorkQuestionUid: Long, active : Boolean)
 
     @Query("""

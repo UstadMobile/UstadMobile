@@ -1,19 +1,28 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
+import android.content.Intent
+import androidx.fragment.app.testing.FragmentScenario
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.agoda.kakao.common.views.KView
+import com.agoda.kakao.image.KImageView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.generated.locale.MessageID.hide
+import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.ContentEntryEditScreen
 import com.ustadmobile.port.android.screen.ContentEntryListScreen
 import com.ustadmobile.port.android.screen.MainScreen
+import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.util.test.ext.insertContentEntryWithParentChildJoinAndMostRecentContainer
 import kotlinx.coroutines.runBlocking
@@ -126,5 +135,297 @@ class ContentEntryEndtoEnd : TestCase() {
             }
         }
     }
+
+    @AdbScreenRecord("given a list of items when long press on item then hide the item when visibility button is hit")
+    @Test
+    fun givenListOfEntries_whenUserLongPressAndSelectHideItem_thenEntriesIsHidden(){
+
+        init {
+
+            runBlocking {
+                dbRule.insertPersonForActiveUser(Person().apply {
+                    firstNames = "Test"
+                    lastName = "User"
+                    username = "admin"
+                    admin = true
+                })
+                dbRule.repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(3, -4103245208651563007L, mutableListOf(0))
+            }
+
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val launchIntent = Intent(context, MainActivity::class.java).also {
+                it.putExtra(UstadView.ARG_NEXT,
+                        "${ContentEntryList2View.VIEW_NAME}?${UstadView.ARG_PARENT_ENTRY_UID}=-4103245208651563007" +
+                                "&${ContentEntryList2View.ARG_CONTENT_FILTER}=${ContentEntryList2View.ARG_LIBRARIES_CONTENT}")
+            }
+            launchActivity<MainActivity>(launchIntent)
+
+        }.run {
+
+            ContentEntryListScreen{
+
+                recycler{
+
+                    hasSize(3)
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant { withText("Dummy folder title 1") }
+                    }perform {
+                        title{
+                            longClick()
+                        }
+                    }
+
+                    KView{
+                        withContentDescription("Hide")
+                    }perform {
+                        click()
+                    }
+
+                    hasSize(2)
+
+                }
+
+
+            }
+        }
+    }
+
+    @AdbScreenRecord("given a list of items when menu option show hidden items selected then show all items in list")
+    @Test
+    fun givenListOfEntry_whenMenuOptionShowHiddenItemsSelected_thenShowAllItemsInList(){
+
+        init {
+
+            runBlocking {
+                dbRule.insertPersonForActiveUser(Person().apply {
+                    firstNames = "Test"
+                    lastName = "User"
+                    username = "admin"
+                    admin = true
+                })
+                val list = dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(4, -4103245208651563007L)
+                list.forEach{
+                    it.ceInactive = true
+                }
+                dbRule.db.contentEntryDao.updateList(list)
+            }
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val launchIntent = Intent(context, MainActivity::class.java).also {
+                it.putExtra(UstadView.ARG_NEXT,
+                        "${ContentEntryList2View.VIEW_NAME}?${UstadView.ARG_PARENT_ENTRY_UID}=-4103245208651563007" +
+                                "&${ContentEntryList2View.ARG_CONTENT_FILTER}=${ContentEntryList2View.ARG_LIBRARIES_CONTENT}")
+            }
+
+            launchActivity<MainActivity>(launchIntent)
+
+        }.run {
+
+            ContentEntryListScreen{
+
+                recycler{
+
+                    hasSize(1)
+
+                    openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
+
+                    KView {
+                        withText("Show hidden items")
+                    } perform {
+                        click()
+                    }
+
+                    hasSize(4)
+
+                }
+
+            }
+
+        }
+
+    }
+
+    @AdbScreenRecord("given a list of items when menu option show hidden items selected then show all items in list")
+    @Test
+    fun givenListOfEntry_whenUserSelectsHiddenAndUnHideItems_thenMenuOptionsChangesToUnHide(){
+
+        init {
+
+            runBlocking {
+                dbRule.insertPersonForActiveUser(Person().apply {
+                    firstNames = "Test"
+                    lastName = "User"
+                    username = "admin"
+                    admin = true
+                })
+                val list = dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(4, -4103245208651563007L, mutableListOf(0))
+                list[0].ceInactive = true
+                dbRule.db.contentEntryDao.updateList(list)
+            }
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val launchIntent = Intent(context, MainActivity::class.java).also {
+                it.putExtra(UstadView.ARG_NEXT,
+                        "${ContentEntryList2View.VIEW_NAME}?${UstadView.ARG_PARENT_ENTRY_UID}=-4103245208651563007" +
+                                "&${ContentEntryList2View.ARG_CONTENT_FILTER}=${ContentEntryList2View.ARG_LIBRARIES_CONTENT}")
+            }
+
+            launchActivity<MainActivity>(launchIntent)
+
+        }.run {
+
+            ContentEntryListScreen{
+
+                recycler{
+
+                    hasSize(3)
+
+                    openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
+
+                    KView {
+                        withText("Show hidden items")
+                    } perform {
+                        click()
+                    }
+
+                    hasSize(4)
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                         withDescendant {
+                             withText("Dummy folder title 1") }
+                    }perform {
+                        title{
+                            longClick()
+                        }
+                    }
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant {
+                            withText("Dummy  entry title 2") }
+                    }perform {
+                        title{
+                            click()
+                        }
+                    }
+
+                    KView{
+                        withContentDescription("Unhide")
+                    }perform {
+                        click()
+                    }
+
+                    hasSize(4)
+
+                }
+
+            }
+
+        }
+
+    }
+
+    @Test
+    fun givenListOfEntries_whenUserMovesEntriesToAnotherFolder_thenMoveToNewFolder(){
+
+        init {
+
+            runBlocking {
+                dbRule.insertPersonForActiveUser(Person().apply {
+                    firstNames = "Test"
+                    lastName = "User"
+                    username = "admin"
+                    admin = true
+                })
+
+                val oneList = dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3, -4103245208651563007L, mutableListOf(0,1))
+                dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3, oneList[0].contentEntryUid)
+
+            }
+
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val launchIntent = Intent(context, MainActivity::class.java).also {
+                it.putExtra(UstadView.ARG_NEXT,
+                        "${ContentEntryList2View.VIEW_NAME}?${UstadView.ARG_PARENT_ENTRY_UID}=-4103245208651563007" +
+                                "&${ContentEntryList2View.ARG_CONTENT_FILTER}=${ContentEntryList2View.ARG_LIBRARIES_CONTENT}")
+            }
+
+            launchActivity<MainActivity>(launchIntent)
+
+        }.run {
+
+            ContentEntryListScreen{
+
+
+                recycler{
+
+                    hasSize(3)
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant {
+                            withText("Dummy folder title 1") }
+                    }perform {
+                        title{
+                            click()
+                        }
+                    }
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant {
+                            withText("Dummy  entry title 2") }
+                    }perform {
+                        title{
+                            longClick()
+                        }
+                    }
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant {
+                            withText("Dummy  entry title 3") }
+                    }perform {
+                        title{
+                            click()
+                        }
+                    }
+
+                    KView{
+                        withContentDescription("Move")
+                    }perform {
+                        click()
+                    }
+
+                    // includes add new content
+                    hasSize(3)
+
+                    childWith<ContentEntryListScreen.MainItem> {
+                        withDescendant {
+                            withText("Dummy folder title 2") }
+                    }perform {
+                        selectButton{
+                            click()
+                        }
+                    }
+
+                    hasSize(1)
+
+                    KView{
+                        withText("Open Folder")
+                    }perform {
+                        click()
+                    }
+
+                    hasSize(2)
+
+                }
+
+
+            }
+
+
+
+        }
+
+
+    }
+
+
 
 }
