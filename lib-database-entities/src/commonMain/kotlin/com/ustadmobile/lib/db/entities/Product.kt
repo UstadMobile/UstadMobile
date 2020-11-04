@@ -41,7 +41,7 @@ open class Product() {
     var productPictureUid: Long = 0
 
     //If the product active . False is effectively delete
-    var productActive: Boolean = false
+    var productActive: Boolean = true
 
     //Base price. Could be 4242.42
     var productBasePrice : Float = 0F

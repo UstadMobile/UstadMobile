@@ -22,6 +22,9 @@ abstract class ProductDao : BaseDao<Product> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertOrReplace(entity: Product)
 
+    @Update
+    abstract suspend fun updateAsync(entity: Product): Int
+
     @Query(FIND_BY_NAME_QUERY)
     abstract fun findByNameSync(name: String): Product?
 
@@ -55,10 +58,13 @@ abstract class ProductDao : BaseDao<Product> {
     abstract suspend fun findByUidAsync(uid: Long): Product?
 
     @Query(FIND_BY_UID_QUERY)
-    abstract suspend fun findByUidListAsync(uid: Long): List<Product>
+    abstract fun findByUidLive(uid: Long): DoorLiveData<Product?>
 
     @Query(QUERY_FIND_ALL_CATEGORY_BY_PRODUCT)
     abstract fun findAllCategoriesOfProductUid(productUid: Long): DataSource.Factory<Int, Category>
+
+    @Query(QUERY_FIND_ALL_CATEGORY_BY_PRODUCT)
+    abstract fun findAllCategoriesOfProductUidAsync(productUid: Long): List<Category>
 
 
     companion object {
