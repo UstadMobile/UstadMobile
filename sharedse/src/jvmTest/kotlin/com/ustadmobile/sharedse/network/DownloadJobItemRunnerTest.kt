@@ -1,6 +1,5 @@
 package com.ustadmobile.sharedse.network
 
-import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*

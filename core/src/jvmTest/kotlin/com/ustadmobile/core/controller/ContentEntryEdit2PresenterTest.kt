@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContentEntryDao
@@ -52,8 +53,6 @@ class ContentEntryEdit2PresenterTest {
 
     private lateinit var contentEntry: ContentEntryWithLanguage
 
-    private lateinit var containerManager: ContainerDownloadManager
-
     private val parentUid: Long = 12345678L
 
     private val timeoutInMill: Long = 5000
@@ -66,6 +65,8 @@ class ContentEntryEdit2PresenterTest {
 
     private lateinit var di: DI
 
+    private lateinit var contentImportManager: ContentImportManager
+
 
     @Before
     fun setUp() {
@@ -73,7 +74,7 @@ class ContentEntryEdit2PresenterTest {
         container = createMockContainer()
         contentEntry = createMockEntryWithLanguage()
         mockLifecycleOwner = mock { }
-        containerManager = spy {}
+        contentImportManager = mock {}
 
         systemImpl = mock {
 
@@ -89,7 +90,7 @@ class ContentEntryEdit2PresenterTest {
         di = DI {
             import(ustadTestRule.diModule)
             bind<UstadMobileSystemImpl>(overrides = true) with singleton { systemImpl }
-            bind<ContainerDownloadManager>() with singleton { containerManager }
+            bind<ContentImportManager>() with singleton { contentImportManager }
         }
 
         db = di.directActiveDbInstance()
@@ -117,11 +118,11 @@ class ContentEntryEdit2PresenterTest {
 
     private fun createMockView(isUriNull: Boolean = false) {
         mockView = mock {
-            onBlocking { saveContainerOnExit(any(), any(), any(), any()) }.thenAnswer { container }
             on { selectedStorageIndex }.thenAnswer { 0 }
+            on { storageOptions }.thenAnswer { runBlocking { systemImpl.getStorageDirsAsync(context) } }
             on { entryMetaData }.thenAnswer {
                 if (isUriNull) null else
-                    ImportedContentEntryMetaData(ContentEntryWithLanguage(), "application/epub+zip", "file:/Dummy", 1)
+                    ImportedContentEntryMetaData(ContentEntryWithLanguage(), "application/epub+zip", "file://Dummy")
             }
         }
     }
@@ -156,7 +157,6 @@ class ContentEntryEdit2PresenterTest {
         presenter.onCreate(null)
 
         val initialEntry = mockView.captureLastEntityValue()
-
         presenter.handleClickSave(contentEntry)
 
         argumentCaptor<ContentEntryWithLanguage>().apply {
@@ -166,12 +166,10 @@ class ContentEntryEdit2PresenterTest {
             assertEquals("Got expected content entry title", contentEntry.title, firstValue.title)
         }
 
-        argumentCaptor<Long>().apply {
-            verifyBlocking(mockView, timeout(timeoutInMill)) {
-                mockView.saveContainerOnExit(capture(), any(), eq(db), eq(repo))
-            }
-            assertEquals("Got expected content entry uid", contentEntry.contentEntryUid, firstValue)
+        verifyBlocking(contentImportManager, timeout(timeoutInMill)) {
+            queueImportContentFromFile(eq("file://Dummy"), any(), any())
         }
+
 
     }
 
@@ -193,9 +191,8 @@ class ContentEntryEdit2PresenterTest {
             assertEquals("Got expected folder title", contentEntry.title, firstValue.title)
         }
 
-        //verify that container was not created
-        verifyBlocking(mockView, times(0)) {
-            mockView.saveContainerOnExit(any(), any(), eq(db), eq(repo))
+        verifyBlocking(contentImportManager, times(0)) {
+            queueImportContentFromFile(eq("file://Dummy"), any(), any())
         }
     }
 
@@ -220,14 +217,10 @@ class ContentEntryEdit2PresenterTest {
             assertEquals("Got expected content entry title", "Updated Title", firstValue.title)
         }
 
-        argumentCaptor<Long>().apply {
-            verifyBlocking(mockView, timeout(5000)) {
-                mockView.saveContainerOnExit(capture(), any(), eq(db), eq(repo))
-            }
-
-            assertEquals("Got expected content entry uid", contentEntry.contentEntryUid,
-                    firstValue)
+        verifyBlocking(contentImportManager, timeout(timeoutInMill)) {
+            queueImportContentFromFile(eq("file://Dummy"), any(), any())
         }
+
     }
 
     @Test

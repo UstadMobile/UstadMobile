@@ -109,6 +109,8 @@ class H5PTypePluginCommonJvm(val context: Any): H5PTypePlugin() {
         val entry = db.contentEntryDao.findByUid(contentEntryUid)
         val containerManager = ContainerManager(container, db, repo, containerBaseDir)
 
+        addEntriesFromZipToContainer(file.absolutePath, containerManager, "workspace/")
+
         val tmpFolder: File = File.createTempFile("res", "")
         tmpFolder.delete()
         tmpFolder.mkdirs()
