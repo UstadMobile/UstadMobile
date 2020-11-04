@@ -68,6 +68,17 @@ class ProductDetailFragmentTest : TestCase(){
                     isDisplayed()
                     hasText(testEntity.productBasePrice.toString())
                 }
+
+                //TODO:
+
+                //1. Test Picture
+                //2. Test categories list
+                //3. Test click on receive delivery
+                //4. Test click on record Sale
+                //5. Test Stock list
+                //6. Test history list
+                //7. Test click edit.
+
             }
 
 
