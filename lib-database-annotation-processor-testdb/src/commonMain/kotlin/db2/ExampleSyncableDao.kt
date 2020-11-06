@@ -70,6 +70,9 @@ abstract class ExampleSyncableDao {
     @Query("SELECT * FROM ExampleSyncableEntity LIMIT 1")
     abstract suspend fun findOneFromWeb(): ExampleSyncableEntity?
 
+    @Query("SELECT esNumber FROM ExampleSyncableEntity LIMIT 1")
+    abstract suspend fun findOneValue(): Int
+
     @Query("SELECT SyncNode.* FROM SyncNode LIMIT 1")
     abstract fun getSyncNode(): SyncNode?
 

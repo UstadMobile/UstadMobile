@@ -92,8 +92,10 @@ dispatch this notification live to any client that is listening.
 ### Using kapt
 
 ```
-./gradlew -Dkotlin.daemon.jvm.options="-Xdebug,-Xrunjdwp:transport=dt_socket\,address=5006\,server=y\,suspend=n" lib-database-annotation-processor:clean lib-database-annotation-processor:test
+./gradlew -Dorg.gradle.debug=true -Dkotlin.daemon.jvm.options="-Xdebug,-Xrunjdwp:transport=dt_socket\,address=5005\,server=y\,suspend=n" lib-database-annotation-processor:clean lib-database-annotation-processor:test
 ```
+
+Note: kapt.use.worker.api=true must be set in gradle.properties for this to work.
 
 In IntelliJ select Run, Debug..., Add a remote configuration, and 
 enter the por as per org.gradle.jvmargs (e.g. 5006)

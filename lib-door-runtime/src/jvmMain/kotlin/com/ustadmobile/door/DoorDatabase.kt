@@ -141,16 +141,16 @@ actual abstract class DoorDatabase {
         runnable.run()
     }
 
-    fun addChangeListener(changeListenerRequest: ChangeListenerRequest) {
+    open fun addChangeListener(changeListenerRequest: ChangeListenerRequest) {
         changeListeners.add(changeListenerRequest)
     }
 
-    fun removeChangeListener(changeListenerRequest: ChangeListenerRequest) {
+    open fun removeChangeListener(changeListenerRequest: ChangeListenerRequest) {
         changeListeners.remove(changeListenerRequest)
     }
 
 
-    fun handleTableChanged(changeTableNames: List<String>) {
+    open fun handleTableChanged(changeTableNames: List<String>) {
         GlobalScope.launch {
             changeListeners.filter { it.tableNames.isEmpty() || it.tableNames.any { changeTableNames.contains(it) } }.forEach {
                 it.onChange.invoke(changeTableNames)

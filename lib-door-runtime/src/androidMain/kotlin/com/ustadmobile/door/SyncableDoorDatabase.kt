@@ -5,6 +5,7 @@ import androidx.core.content.ContextCompat
 import androidx.room.RoomDatabase
 import io.ktor.client.HttpClient
 import java.io.File
+import kotlin.reflect.KClass
 
 actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any,
                                                                     endpoint: String,
@@ -30,4 +31,20 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
             .newInstance(this, endpoint, accessToken, httpClient, attachmentsDirToUse,
                     updateNotificationManager, useClientSyncManager)
     return repo
+}
+
+/**
+ * Wrap a syncable database to prevent accidental use of the database instead of the repo on queries
+ * that modify syncable entities. All modification queries (e.g. update, insert etc) must be done on
+ * the repo.
+ */
+@Suppress("UNCHECKED_CAST")
+actual fun <T: SyncableDoorDatabase> T.wrap(dbClass: KClass<T>) : T {
+    val wrapperClass = Class.forName("${dbClass.qualifiedName}_DbWrapper") as Class<T>
+    return wrapperClass.getConstructor(dbClass.java).newInstance(this)
+}
+
+@Suppress("UNCHECKED_CAST")
+actual fun <T: SyncableDoorDatabase> T.unwrap(dbClass: KClass<T>): T {
+    return (this as SyncableDoorDatabaseWrapper<*>).realDatabase as T
 }

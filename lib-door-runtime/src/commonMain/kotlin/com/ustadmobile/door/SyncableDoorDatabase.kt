@@ -1,6 +1,7 @@
 package com.ustadmobile.door
 
 import io.ktor.client.HttpClient
+import kotlin.reflect.KClass
 
 interface SyncableDoorDatabase {
 
@@ -27,3 +28,7 @@ expect inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
                                                                  attachmentsDir: String? = null,
                                                                  updateNotificationManager: ServerUpdateNotificationManager? = null,
                                                                  useClientSyncManager: Boolean  = false): T
+
+expect fun <T: SyncableDoorDatabase> T.wrap(dbClass: KClass<T>): T
+
+expect fun <T: SyncableDoorDatabase> T.unwrap(dbClass: KClass<T>): T

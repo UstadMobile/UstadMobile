@@ -49,6 +49,8 @@ class DbRepoTest {
 
     var serverDb : ExampleDatabase2? = null
 
+    lateinit var serverRepo: ExampleDatabase2
+
     lateinit var clientDb: ExampleDatabase2
 
     lateinit var clientDb2: ExampleDatabase2
@@ -69,6 +71,7 @@ class DbRepoTest {
 
     @Before
     fun setup() {
+        tmpAttachmentsDir = temporaryFolder.newFolder("testdbrepoattachments")
         mockUpdateNotificationManager = mock {}
 
         if(!Napier.isEnable(Napier.Level.DEBUG, null)) {
@@ -85,7 +88,6 @@ class DbRepoTest {
             register(ContentType.Any, GsonConverter())
         }
 
-        tmpAttachmentsDir = temporaryFolder.newFolder("testdbrepoattachments")
 
         install(DIFeature) {
             extend(di)
@@ -106,7 +108,12 @@ class DbRepoTest {
                 bind<ExampleDatabase2>(tag = DoorTag.TAG_DB) with scoped(virtualHostScope).singleton {
                     DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "ExampleDatabase2")
                             .build().also {
-                                it.clearAllTables()
+                                try {
+                                    it.clearAllTables()
+                                    println("tables cleared")
+                                }catch(e: Exception) {
+                                    e.printStackTrace()
+                                }
                             }
                 }
 
@@ -138,6 +145,8 @@ class DbRepoTest {
             }
 
             serverDb = serverDi.on("localhost").direct.instance(tag = DoorTag.TAG_DB)
+            serverRepo = serverDi.on("localhost").direct.instance(tag = DoorTag.TAG_REPO)
+
             clientDb = DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "db1")
                     .build().also {
                         it.clearAllTables()
@@ -484,12 +493,13 @@ class DbRepoTest {
         val clientDb = this.clientDb!!
         val clientRepo = clientDb.asRepository(Any(),"http://localhost:8089/",
                 "token", httpClient, useClientSyncManager = true).asConnectedRepository()
+
         runBlocking {
             //1. Create a blank entity. Insert it.
             val client1 = ExampleSyncableEntity().apply {
                 esUid = 420
             }
-            serverDb.accessGrantDao().insert(AccessGrant().apply {
+            serverRepo.accessGrantDao().insert(AccessGrant().apply {
                 this.tableId = ExampleSyncableEntity.TABLE_ID
                 this.entityUid = 420
                 this.deviceId = (clientRepo as DoorDatabaseSyncRepository).clientId

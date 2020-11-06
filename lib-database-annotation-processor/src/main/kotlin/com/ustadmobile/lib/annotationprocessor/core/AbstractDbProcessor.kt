@@ -637,7 +637,7 @@ fun findEntityModifiedByQuery(querySql: String, allKnownEntityNames: List<String
      * case to use.
      */
     return if(tableModified != null) {
-        allKnownEntityNames.first {it.equals(tableModified,  ignoreCase = true)}
+        allKnownEntityNames.first { it.equals(tableModified,  ignoreCase = true) }
     }else {
         null
     }
@@ -654,6 +654,11 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * we use this so that we can match the case of the table name.
      */
     protected val allKnownEntityNames = mutableListOf<String>()
+
+    /**
+     * Provides a map that can be used to find the TypeElement for a given table name.
+     */
+    protected val allKnownEntityTypesMap = mutableMapOf<String, TypeElement>()
 
 
     /**
@@ -839,6 +844,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                 }
 
                 allKnownEntityNames.add(typeEntitySpec.name!!)
+                allKnownEntityTypesMap[typeEntitySpec.name!!] = entity
+
                 if(entity.getAnnotation(SyncableEntity::class.java) != null) {
                     val trackerEntitySpec = generateTrackerEntity(entity, processingEnv)
                     stmt.execute(makeCreateTableStatement(trackerEntitySpec, DoorDbType.SQLITE))
