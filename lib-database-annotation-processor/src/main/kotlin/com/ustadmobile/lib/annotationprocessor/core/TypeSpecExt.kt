@@ -116,3 +116,33 @@ fun TypeSpec.Builder.addDbVersionProperty(dbTypeElement: TypeElement): TypeSpec.
 
     return this
 }
+
+/**
+ * Add an override for the room database createOpenHelper function which is required for any
+ * child class of the database on Android
+ */
+fun TypeSpec.Builder.addRoomDatabaseCreateOpenHelperFunction() : TypeSpec.Builder {
+    addFunction(FunSpec.builder("createOpenHelper")
+            .addParameter("config", ClassName("androidx.room", "DatabaseConfiguration"))
+            .returns(ClassName("androidx.sqlite.db", "SupportSQLiteOpenHelper"))
+            .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
+            .addCode("throw IllegalAccessException(%S)\n", "Cannot use open helper on repository")
+            .build())
+
+    return this
+}
+
+/**
+ * Add an override for the room database createInvalidationTracker which is required for any
+ * child class of the database on Android
+ */
+fun TypeSpec.Builder.addRoomCreateInvalidationTrackerFunction() : TypeSpec.Builder {
+    addFunction(FunSpec.builder("createInvalidationTracker")
+            .returns(ClassName("androidx.room", "InvalidationTracker"))
+            .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
+            .addCode("return %T.createDummyInvalidationTracker(this)\n",
+                    ClassName("com.ustadmobile.door","DummyInvalidationTracker"))
+            .build())
+
+    return this
+}

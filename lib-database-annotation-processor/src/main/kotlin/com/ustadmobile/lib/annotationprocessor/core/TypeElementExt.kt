@@ -8,6 +8,7 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import androidx.room.*
 import com.ustadmobile.door.SyncableDoorDatabase
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER
 import javax.lang.model.type.TypeMirror
 
 internal fun TypeElement.asEntityTypeSpecBuilder(): TypeSpec.Builder {
@@ -153,3 +154,10 @@ fun TypeElement.isDbSyncable(processingEnv: ProcessingEnvironment): Boolean {
             processingEnv.elementUtils.getTypeElement(SyncableDoorDatabase::class.java.canonicalName).asType())
 }
 
+/**
+ * If the given TypeElement represents a Dao, this will return a map of the ClassNames for DAOs
+ * for the primary and local KTOR Helper Daos that are required.
+ */
+val TypeElement.daoKtorHelperDaoClassNames: Map<String, ClassName>
+    get() = mapOf("Master" to this.asClassNameWithSuffix("${SUFFIX_KTOR_HELPER}Master"),
+        "Local" to this.asClassNameWithSuffix("${SUFFIX_KTOR_HELPER}Local"))

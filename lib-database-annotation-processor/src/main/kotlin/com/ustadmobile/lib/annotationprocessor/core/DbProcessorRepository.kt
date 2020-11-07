@@ -266,19 +266,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
         }
 
         if(overrideOpenHelper) {
-            val invalidationTrackerClassName = ClassName("androidx.room", "InvalidationTracker")
-            dbRepoType.addFunction(FunSpec.builder("createOpenHelper")
-                    .addParameter("config", ClassName("androidx.room", "DatabaseConfiguration"))
-                    .returns(ClassName("androidx.sqlite.db", "SupportSQLiteOpenHelper"))
-                    .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
-                    .addCode("throw IllegalAccessException(%S)\n", "Cannot use open helper on repository")
-                    .build())
-            dbRepoType.addFunction(FunSpec.builder("createInvalidationTracker")
-                    .returns(invalidationTrackerClassName)
-                    .addModifiers(KModifier.OVERRIDE, KModifier.PROTECTED)
-                    .addCode("return %T.createDummyInvalidationTracker(this)\n",
-                            ClassName("com.ustadmobile.door","DummyInvalidationTracker"))
-                    .build())
+            dbRepoType.addRoomDatabaseCreateOpenHelperFunction()
+                    .addRoomCreateInvalidationTrackerFunction()
         }
 
         if(addDbVersionProp) {

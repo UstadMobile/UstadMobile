@@ -43,6 +43,21 @@ fun TypeSpec.Builder.addWrapperAccessorFunction(daoGetter: ExecutableElement,
 }
 
 /**
+ * Add access functions for the KTOR Helper DAOs. The KTOR helper DAOS contain
+ * only select queries, so the KTOR Helper DAOs themselves never need a wrapper
+ */
+fun TypeSpec.Builder.addKtorHelperWrapperAccessorFunction(daoGetter: ExecutableElement,
+                                                          processingEnv: ProcessingEnvironment) {
+    daoGetter.returnType.asTypeElement(processingEnv)?.daoKtorHelperDaoClassNames?.forEach {
+        addFunction(FunSpec.builder("_${it.value.simpleName}")
+                .addModifiers(KModifier.OVERRIDE)
+                .addCode("return _db._${it.value.simpleName}()\n")
+                .build())
+    }
+}
+
+
+/**
  * Adds a function that will delegate to the real DAO, or throw an exception if the function is
  * modifying an entity annotated with SyncableEntity
  */
@@ -86,7 +101,11 @@ fun TypeSpec.Builder.addDaoFunctionDelegate(daoMethod: ExecutableElement,
  */
 fun FileSpec.Builder.addDbWrapperTypeSpec(dbTypeEl: TypeElement,
                                          processingEnv: ProcessingEnvironment,
-                                         allKnownEntityTypesMap: Map<String, TypeElement>): FileSpec.Builder {
+                                         allKnownEntityTypesMap: Map<String, TypeElement>,
+                                         overrideKtorHelperDaos: Boolean = false,
+                                         overrideSyncDao: Boolean = false,
+                                         addJdbcOverrides: Boolean = true,
+                                         addRoomOverrides: Boolean = false): FileSpec.Builder {
     val dbClassName = dbTypeEl.asClassName()
     addType(
             TypeSpec.classBuilder("${dbTypeEl.simpleName}${DoorDatabaseSyncableReadOnlyWrapper.SUFFIX}")
@@ -97,13 +116,24 @@ fun FileSpec.Builder.addDbWrapperTypeSpec(dbTypeEl: TypeElement,
                             .build())
                     .addProperty(PropertySpec.builder("_db", dbClassName, KModifier.PRIVATE)
                             .initializer("_db").build())
-                    .addInitializerBlock(CodeBlock.builder()
-                            .add("sourceDatabase = _db\n")
-                            .build())
-                    .addDbVersionProperty(dbTypeEl)
+                    .applyIf(addJdbcOverrides) {
+                        addInitializerBlock(CodeBlock.builder()
+                                .add("sourceDatabase = _db\n")
+                                .build())
+                        addDbVersionProperty(dbTypeEl)
+                        addFunction(FunSpec.builder("createAllTables")
+                                .addModifiers(KModifier.OVERRIDE)
+                                .addCode("_db.createAllTables()\n")
+                                .build())
+                    }
                     .apply {
                         dbTypeEl.allDbClassDaoGetters(processingEnv).forEach {daoGetter ->
                             addWrapperAccessorFunction(daoGetter, processingEnv, allKnownEntityTypesMap)
+
+                            if(overrideKtorHelperDaos &&
+                                    daoGetter.returnType.asTypeElement(processingEnv)?.isDaoWithRepository == true) {
+                                addKtorHelperWrapperAccessorFunction(daoGetter, processingEnv)
+                            }
                         }
                     }
                     .addProperty(PropertySpec.builder("realDatabase", DoorDatabase::class)
@@ -115,19 +145,27 @@ fun FileSpec.Builder.addDbWrapperTypeSpec(dbTypeEl: TypeElement,
                             .addModifiers(KModifier.OVERRIDE)
                             .addCode("_db.clearAllTables()\n")
                             .build())
-                    .addFunction(FunSpec.builder("createAllTables")
-                            .addModifiers(KModifier.OVERRIDE)
-                            .addCode("_db.createAllTables()\n")
-                            .build())
-                    .apply {
-                        if(dbTypeEl.isDbSyncable(processingEnv)) {
-                            addProperty(PropertySpec.builder("master", Boolean::class)
-                                    .addModifiers(KModifier.OVERRIDE)
-                                    .getter(FunSpec.getterBuilder()
-                                            .addCode("return _db.master\n")
-                                            .build())
-                                    .build())
-                        }
+                    .applyIf(dbTypeEl.isDbSyncable(processingEnv)) {
+                        addProperty(PropertySpec.builder("master", Boolean::class)
+                                .addModifiers(KModifier.OVERRIDE)
+                                .getter(FunSpec.getterBuilder()
+                                        .addCode("return _db.master\n")
+                                        .build())
+                                .build())
+                    }
+                    .applyIf(overrideSyncDao && dbTypeEl.isDbSyncable(processingEnv)) {
+                        addFunction(FunSpec.builder("_syncDao")
+                                .addModifiers(KModifier.OVERRIDE)
+                                .addCode("return _db._syncDao()\n")
+                                .build())
+                        addFunction(FunSpec.builder("_syncHelperEntitiesDao")
+                                .addModifiers(KModifier.OVERRIDE)
+                                .addCode("return _db._syncHelperEntitiesDao()\n")
+                                .build())
+                    }
+                    .applyIf(addRoomOverrides) {
+                        addRoomDatabaseCreateOpenHelperFunction()
+                        addRoomCreateInvalidationTrackerFunction()
                     }
                     .build())
             .build()
@@ -193,6 +231,16 @@ class DbProcessorSyncableReadOnlyWrapper: AbstractDbProcessor()  {
                         .addDbWrapperTypeSpec(dbTypeEl, processingEnv, allKnownEntityTypesMap)
                         .build()
                         .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+
+                FileSpec.builder(dbTypeEl.packageName,
+                        "${dbTypeEl.simpleName}${DoorDatabaseSyncableReadOnlyWrapper.SUFFIX}")
+                        .addDbWrapperTypeSpec(dbTypeEl, processingEnv, allKnownEntityTypesMap,
+                            overrideKtorHelperDaos = true,
+                            addJdbcOverrides = false,
+                            overrideSyncDao = true,
+                            addRoomOverrides = true)
+                        .build()
+                        .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
             }
         }
 
@@ -201,8 +249,11 @@ class DbProcessorSyncableReadOnlyWrapper: AbstractDbProcessor()  {
                 FileSpec.builder(daoTypeEl.packageName,
                         "${daoTypeEl.simpleName}${DoorDatabaseSyncableReadOnlyWrapper.SUFFIX}")
                         .addDaoWrapperTypeSpec(daoTypeEl, processingEnv, allKnownEntityTypesMap)
-                        .build()
-                        .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+                        .build().apply {
+                            writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+                            writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
+                        }
+
             }
         }
 
