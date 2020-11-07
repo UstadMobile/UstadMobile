@@ -108,12 +108,7 @@ class DbRepoTest {
                 bind<ExampleDatabase2>(tag = DoorTag.TAG_DB) with scoped(virtualHostScope).singleton {
                     DatabaseBuilder.databaseBuilder(Any(), ExampleDatabase2::class, "ExampleDatabase2")
                             .build().also {
-                                try {
-                                    it.clearAllTables()
-                                    println("tables cleared")
-                                }catch(e: Exception) {
-                                    e.printStackTrace()
-                                }
+                                it.clearAllTables()
                             }
                 }
 
@@ -222,7 +217,7 @@ class DbRepoTest {
     fun givenEntityCreatedOnMaster_whenClientGetCalled_thenShouldReturnAndBeCopiedToServer() {
         setupClientAndServerDb()
         val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
-        exampleSyncableEntity.esUid = serverDb!!.exampleSyncableDao().insert(exampleSyncableEntity)
+        exampleSyncableEntity.esUid = serverRepo!!.exampleSyncableDao().insert(exampleSyncableEntity)
 
         val clientRepo = clientDb!!.asRepository(Any(),
                 "http://localhost:8089/", "token", httpClient)
@@ -241,7 +236,7 @@ class DbRepoTest {
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
         val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
-        exampleSyncableEntity.esUid = serverDb.exampleSyncableDao().insert(exampleSyncableEntity)
+        exampleSyncableEntity.esUid = serverRepo.exampleSyncableDao().insert(exampleSyncableEntity)
 
         val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/",
                 "token", httpClient)
@@ -250,7 +245,7 @@ class DbRepoTest {
         val entityFromServerBeforeChange = clientRepo.exampleSyncableDao()
                 .findByUid(exampleSyncableEntity.esUid)
 
-        serverDb.exampleSyncableDao().updateNumberByUid(exampleSyncableEntity.esUid, 43)
+        serverRepo.exampleSyncableDao().updateNumberByUid(exampleSyncableEntity.esUid, 43)
         val entityFromServerAfterChange = clientRepo.exampleSyncableDao()
                 .findByUid(exampleSyncableEntity.esUid)
 
@@ -274,13 +269,13 @@ class DbRepoTest {
             val clientId = clientDb.exampleSyncableDao().getSyncNode()!!.nodeClientId
             val exampleSyncableEntity = ExampleSyncableEntity(esUid = 50, esNumber = 42)
 
-            serverDb.accessGrantDao().insert(AccessGrant().apply {
+            serverRepo.accessGrantDao().insert(AccessGrant().apply {
                 tableId = 42
                 deviceId = clientId
                 entityUid = exampleSyncableEntity.esUid
             })
 
-            serverDb.exampleSyncableDao().insert(exampleSyncableEntity)
+            serverRepo.exampleSyncableDao().insert(exampleSyncableEntity)
 
 
             val clientRepo = clientDb.asRepository(Any(), "http://localhost:8089/",
@@ -359,8 +354,6 @@ class DbRepoTest {
         val clientDb = this.clientDb!!
         val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),"http://localhost:8089/",
                 "token", httpClient).asConnectedRepository<ExampleDatabase2>()
-        val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy",
-                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
 
         val entityName = "سلام"
 
@@ -384,7 +377,7 @@ class DbRepoTest {
         runBlocking {
             Napier.i("=====Create Initial Entity on client======")
             val exampleSyncableEntity = ExampleSyncableEntity(esUid = 420, esNumber = 42)
-            serverDb.accessGrantDao().insert(AccessGrant().apply {
+            serverRepo.accessGrantDao().insert(AccessGrant().apply {
                 tableId = 42
                 deviceId = (clientRepo as DoorDatabaseSyncRepository).clientId
                 entityUid = exampleSyncableEntity.esUid
@@ -408,7 +401,7 @@ class DbRepoTest {
             val updateNotificationAfter = serverDb.exampleSyncableDao().findAllUpdateNotifications()
 
             Napier.i("======= Performing update on server======")
-            serverDb.exampleSyncableDao().updateAsync(entityOnServerAfterSync!!.apply {
+            serverRepo.exampleSyncableDao().updateAsync(entityOnServerAfterSync!!.apply {
                 esNumber = 52
                 esLcb = 2
             })
@@ -434,13 +427,11 @@ class DbRepoTest {
         val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(),
                 "http://localhost:8089/", "token",
                 httpClient).asConnectedRepository<ExampleDatabase2>()
-        val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy", "token",
-                httpClient).asConnectedRepository<ExampleDatabase2>()
         runBlocking {
             val exampleSyncableEntity = ExampleSyncableEntity(esNumber = 42)
             exampleSyncableEntity.esUid = serverRepo.exampleSyncableDao().insert(exampleSyncableEntity)
 
-            serverDb.accessGrantDao().insert(AccessGrant().apply {
+            serverRepo.accessGrantDao().insert(AccessGrant().apply {
                 tableId = 42
                 deviceId = (clientRepo as DoorDatabaseSyncRepository).clientId
                 entityUid = exampleSyncableEntity.esUid
@@ -470,8 +461,6 @@ class DbRepoTest {
         val serverDb = this.serverDb!!
         val clientDb = this.clientDb!!
         val clientRepo = clientDb.asRepository<ExampleDatabase2>(Any(), "http://localhost:8089/", "token",
-                httpClient).asConnectedRepository<ExampleDatabase2>()
-        val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy", "token",
                 httpClient).asConnectedRepository<ExampleDatabase2>()
         val e1 = ExampleSyncableEntity(esNumber = 42)
         var e2 = ExampleSyncableEntity(esNumber = 43)
@@ -560,7 +549,7 @@ class DbRepoTest {
         val serverRepo: ExampleDatabase2 by serverDi.on("localhost").instance(tag = DoorTag.TAG_REPO)
         println(serverRepo)
 
-        serverDb.accessGrantDao().insert(AccessGrant().apply {
+        serverRepo.accessGrantDao().insert(AccessGrant().apply {
             deviceId = 57
             tableId = 42
             entityUid = testUid
@@ -569,7 +558,7 @@ class DbRepoTest {
         val exampleEntity = ExampleSyncableEntity().apply {
             esUid = testUid
             esName = "Hello Notification"
-            serverDb.exampleSyncableDao().insert(this)
+            serverRepo.exampleSyncableDao().insert(this)
         }
 
         verify(mockUpdateNotificationManager, timeout(5000 )).onNewUpdateNotifications(
@@ -584,7 +573,6 @@ class DbRepoTest {
 
 
         val serverDb: ExampleDatabase2 by serverDi.on("localhost").instance(tag = DoorTag.TAG_DB)
-        val serverRepo: ExampleDatabase2 by serverDi.on("localhost").instance(tag = DoorTag.TAG_REPO)
 
         val clientDb = this.clientDb!!
         val clientRepo = clientDb.asRepository(Any(),"http://localhost:8089/",
@@ -602,7 +590,7 @@ class DbRepoTest {
         //wait for subscription to take effect.
         Thread.sleep(2000)
 
-        serverDb.accessGrantDao().insert(AccessGrant().apply {
+        serverRepo.accessGrantDao().insert(AccessGrant().apply {
             deviceId = clientRepo.clientId
             tableId = 42
             entityUid = testUid
@@ -611,7 +599,7 @@ class DbRepoTest {
         val exampleEntity = ExampleSyncableEntity().apply {
             esUid = testUid
             esName = "Hello Notification"
-            serverDb.exampleSyncableDao().insert(this)
+            serverRepo.exampleSyncableDao().insert(this)
         }
 
         runBlocking {
@@ -637,7 +625,7 @@ class DbRepoTest {
             esUid = testUid
             esName = "Hello Notification"
             publik = true
-            serverDb.exampleSyncableDao().insert(this)
+            serverRepo.exampleSyncableDao().insert(this)
         }
 
         Napier.i("==== Initializing client =====")
@@ -684,7 +672,7 @@ class DbRepoTest {
 
         //make access grants so that the notification will be dispatched
         listOf(clientRepo1, clientRepo2).forEach { repo ->
-            serverDb.accessGrantDao().insert(AccessGrant().apply {
+            serverRepo.accessGrantDao().insert(AccessGrant().apply {
                 tableId = ExampleSyncableEntity.TABLE_ID
                 deviceId = (repo as DoorDatabaseSyncRepository).clientId
                 entityUid = testUid
@@ -734,9 +722,6 @@ class DbRepoTest {
 
         val serverDb: ExampleDatabase2 by serverDi.on("localhost").instance(tag = DoorTag.TAG_DB)
 
-        val serverRepo= serverDb.asRepository<ExampleDatabase2>(Any(), "http://localhost/dummy",
-                "token", httpClient).asConnectedRepository<ExampleDatabase2>()
-
         val exampleEntity = ExampleSyncableEntity().apply {
             esUid = testUid
             esName = "Hello Notification"
@@ -762,7 +747,7 @@ class DbRepoTest {
 
         val clientId = clientDb.exampleSyncableDao().getSyncNode()!!.nodeClientId
 
-        serverDb.accessGrantDao().insert(AccessGrant().apply {
+        serverRepo.accessGrantDao().insert(AccessGrant().apply {
             tableId = 42
             deviceId = clientId
             entityUid = exampleEntity.esUid

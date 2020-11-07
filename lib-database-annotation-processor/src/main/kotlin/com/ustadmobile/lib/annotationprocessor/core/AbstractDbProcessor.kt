@@ -1845,4 +1845,16 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
             fileSpec.writeTo(File(it))
         }
     }
+
+    /**
+     * Write the given FileSpec to the directories specified in the annotation processor arguments.
+     * Paths should be separated by the path separator character (platform dependent - e.g. :
+     * on Unix, ; on Windows)
+     */
+    protected fun FileSpec.writeToDirsFromArg(argName: String, useFilerAsDefault: Boolean = true) {
+        (processingEnv.options[argName]?.split(File.pathSeparator) ?: listOf(processingEnv.options["kapt.kotlin.generated"]!!)).forEach {
+            writeTo(File(it))
+        }
+    }
+
 }

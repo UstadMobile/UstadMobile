@@ -8,7 +8,6 @@ import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.C
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
-import javax.tools.Diagnostic
 
 @SupportedAnnotationTypes("androidx.room.Database")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
@@ -18,7 +17,7 @@ class AnnotationProcessorWrapper: AbstractProcessor() {
 
     val processors = listOf(DbProcessorJdbcKotlin(), DbProcessorKtorServer(),
             DbProcessorRepository(), DbProcessorSync(), DbProcessorAndroid(), DbProcessorJs(),
-            DbProcessorWrapper())
+            DbProcessorSyncableReadOnlyWrapper())
 
     lateinit var messager: Messager
 

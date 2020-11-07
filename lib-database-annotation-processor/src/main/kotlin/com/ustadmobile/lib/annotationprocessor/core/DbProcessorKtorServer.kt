@@ -297,9 +297,9 @@ fun CodeBlock.Builder.addRequestDi(diVarName: String = "_di", dbVarName: String 
     typeTokenVarName: String = "_typeToken", serverType: Int = SERVER_TYPE_KTOR) : CodeBlock.Builder {
     if(serverType == SERVER_TYPE_KTOR) {
         add("val ${diVarName} = %M()\n", MemberName("org.kodein.di.ktor", "di"))
-                .add("val ${dbVarName}: %T by _di.%M(call).%M($typeTokenVarName, tag = %T.TAG_DB)\n",
-                        TypeVariableName.invoke("T"), DI_ON_MEMBER, DI_INSTANCE_TYPETOKEN_MEMBER,
-                        DoorTag::class)
+                .add("val $dbVarName : %T = %M($typeTokenVarName)\n",
+                    TypeVariableName.invoke("T"),
+                    MemberName("com.ustadmobile.door.ext", "unwrappedDbOnCall"))
     }
 
     return this

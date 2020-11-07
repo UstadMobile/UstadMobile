@@ -40,11 +40,15 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
  */
 @Suppress("UNCHECKED_CAST")
 actual fun <T: SyncableDoorDatabase> T.wrap(dbClass: KClass<T>) : T {
-    val wrapperClass = Class.forName("${dbClass.qualifiedName}_DbWrapper") as Class<T>
+    val wrapperClass = Class.forName("${dbClass.qualifiedName}_DbSyncableReadOnlyWrapper") as Class<T>
     return wrapperClass.getConstructor(dbClass.java).newInstance(this)
 }
 
 @Suppress("UNCHECKED_CAST")
 actual fun <T: SyncableDoorDatabase> T.unwrap(dbClass: KClass<T>): T {
-    return (this as SyncableDoorDatabaseWrapper<*>).realDatabase as T
+    if(this is DoorDatabaseSyncableReadOnlyWrapper) {
+        return this.realDatabase as T
+    }else {
+        return this
+    }
 }

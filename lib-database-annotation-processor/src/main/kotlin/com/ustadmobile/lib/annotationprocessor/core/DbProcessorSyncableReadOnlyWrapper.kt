@@ -3,38 +3,13 @@ package com.ustadmobile.lib.annotationprocessor.core
 import androidx.room.Database
 import androidx.room.Dao
 import com.squareup.kotlinpoet.*
-import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.ustadmobile.lib.annotationprocessor.core.DbProcessorWrapper.Companion.SUFFIX_WRAPPER
+import com.ustadmobile.door.DoorDatabase
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
-import com.ustadmobile.door.SyncableDoorDatabaseWrapper
-
-fun newDaoWrapperTypeSpecBuilder(daoTypeElement: TypeElement) : TypeSpec.Builder {
-    return TypeSpec.classBuilder(daoTypeElement.asClassNameWithSuffix(SUFFIX_WRAPPER))
-            .superclass(daoTypeElement.asClassName())
-            .primaryConstructor(FunSpec.constructorBuilder()
-                    .addParameter("_dao", daoTypeElement.asClassName())
-                    .build())
-            .addProperty(PropertySpec.builder("_dao", daoTypeElement.asClassName(),
-                    KModifier.PRIVATE)
-                    .initializer("_dao")
-                    .build())
-}
-
-
-fun TypeSpec.Builder.addAllDbWrapperDaoAccessorsForDb(dbTypeElement: TypeElement,
-                                              processingEnv: ProcessingEnvironment,
-                                              allKnownEntityTypesMap: Map<String, TypeElement>): TypeSpec.Builder {
-    //iterate over all DAO getters
-    dbTypeElement.allDbClassDaoGetters(processingEnv).forEach {daoGetter ->
-        addWrapperAccessorFunction(daoGetter, processingEnv, allKnownEntityTypesMap)
-    }
-
-    return this
-}
+import com.ustadmobile.door.DoorDatabaseSyncableReadOnlyWrapper
 
 /**
  * Add a DAO accessor for a database wrapper (e.g. property or function). If the given DAO
@@ -52,7 +27,7 @@ fun TypeSpec.Builder.addWrapperAccessorFunction(daoGetter: ExecutableElement,
     }else {
         val daoType = daoGetter.returnType.asTypeElement(processingEnv)
                 ?: throw IllegalStateException("Dao return type is not TypeElement")
-        val wrapperClassName = daoType.asClassNameWithSuffix(SUFFIX_WRAPPER)
+        val wrapperClassName = daoType.asClassNameWithSuffix(DoorDatabaseSyncableReadOnlyWrapper.SUFFIX)
         addProperty(PropertySpec.builder("_${daoType.simpleName}",
                 daoType.asClassName()).delegate(
                 CodeBlock.builder().beginControlFlow("lazy ")
@@ -67,7 +42,10 @@ fun TypeSpec.Builder.addWrapperAccessorFunction(daoGetter: ExecutableElement,
     return this
 }
 
-
+/**
+ * Adds a function that will delegate to the real DAO, or throw an exception if the function is
+ * modifying an entity annotated with SyncableEntity
+ */
 fun TypeSpec.Builder.addDaoFunctionDelegate(daoMethod: ExecutableElement,
         daoTypeEl: TypeElement, processingEnv: ProcessingEnvironment,
         allKnownEntityTypesMap: Map<String, TypeElement>) : TypeSpec.Builder {
@@ -100,17 +78,6 @@ fun TypeSpec.Builder.addDaoFunctionDelegate(daoMethod: ExecutableElement,
     return this
 }
 
-fun TypeSpec.Builder.addAllDaoFunctionDelegates(daoTypeEl: TypeElement,
-                                                processingEnv: ProcessingEnvironment,
-                                                allKnownEntityTypesMap: Map<String, TypeElement>) : TypeSpec.Builder {
-
-    daoTypeEl.allOverridableMethods(processingEnv).forEach {daoMethodEl ->
-        addDaoFunctionDelegate(daoMethodEl, daoTypeEl, processingEnv, allKnownEntityTypesMap)
-    }
-
-    return this
-}
-
 /**
  * Add a TypeSpec representing a database wrapper for the given database to the filespec
  */
@@ -119,19 +86,24 @@ fun FileSpec.Builder.addDbWrapperTypeSpec(dbTypeEl: TypeElement,
                                          allKnownEntityTypesMap: Map<String, TypeElement>): FileSpec.Builder {
     val dbClassName = dbTypeEl.asClassName()
     addType(
-            TypeSpec.classBuilder("${dbTypeEl.simpleName}$SUFFIX_WRAPPER")
+            TypeSpec.classBuilder("${dbTypeEl.simpleName}${DoorDatabaseSyncableReadOnlyWrapper.SUFFIX}")
                     .superclass(dbClassName)
-                    .addSuperinterface(SyncableDoorDatabaseWrapper::class.asClassName()
-                            .parameterizedBy(dbClassName))
+                    .addSuperinterface(DoorDatabaseSyncableReadOnlyWrapper::class.asClassName())
                     .primaryConstructor(FunSpec.constructorBuilder()
                             .addParameter("_db", dbClassName)
                             .build())
                     .addProperty(PropertySpec.builder("_db", dbClassName, KModifier.PRIVATE)
                             .initializer("_db").build())
+                    .addInitializerBlock(CodeBlock.builder()
+                            .add("sourceDatabase = _db\n")
+                            .build())
                     .addDbVersionProperty(dbTypeEl)
-                    .addAllDbWrapperDaoAccessorsForDb(dbTypeEl, processingEnv,
-                            allKnownEntityTypesMap)
-                    .addProperty(PropertySpec.builder("realDatabase", dbTypeEl.asClassName())
+                    .apply {
+                        dbTypeEl.allDbClassDaoGetters(processingEnv).forEach {daoGetter ->
+                            addWrapperAccessorFunction(daoGetter, processingEnv, allKnownEntityTypesMap)
+                        }
+                    }
+                    .addProperty(PropertySpec.builder("realDatabase", DoorDatabase::class)
                             .addModifiers(KModifier.OVERRIDE)
                             .getter(FunSpec.getterBuilder().addCode("return _db\n")
                                     .build())
@@ -161,7 +133,36 @@ fun FileSpec.Builder.addDbWrapperTypeSpec(dbTypeEl: TypeElement,
 }
 
 /**
- *
+ * Add a TypeSpec to the FileSpec that is a wrapper class for the given DAO
+ */
+fun FileSpec.Builder.addDaoWrapperTypeSpec(daoTypeElement: TypeElement,
+                                            processingEnv: ProcessingEnvironment,
+                                            allKnownEntityTypesMap: Map<String, TypeElement>): FileSpec.Builder {
+    addType(TypeSpec.classBuilder(daoTypeElement.asClassNameWithSuffix(DoorDatabaseSyncableReadOnlyWrapper.SUFFIX))
+            .superclass(daoTypeElement.asClassName())
+            .primaryConstructor(FunSpec.constructorBuilder()
+                    .addParameter("_dao", daoTypeElement.asClassName())
+                    .build())
+            .addProperty(PropertySpec.builder("_dao", daoTypeElement.asClassName(),
+                    KModifier.PRIVATE)
+                    .initializer("_dao")
+                    .build())
+            .apply {
+                daoTypeElement.allOverridableMethods(processingEnv).forEach {daoMethodEl ->
+                    addDaoFunctionDelegate(daoMethodEl, daoTypeElement, processingEnv,
+                            allKnownEntityTypesMap)
+                }
+            }
+            .build())
+
+    return this
+}
+
+
+
+/**
+ * Determine if this TypeElement (or any of it's ancestors) representing a DAO has any methods that
+ * modify a syncable entity
  */
 private fun TypeElement.daoHasSyncableWriteMethods(
         processingEnv: ProcessingEnvironment, allKnownEntityTypesMap: Map<String, TypeElement>): Boolean {
@@ -177,44 +178,32 @@ private fun TypeElement.daoHasSyncableWriteMethods(
  * Generates the DbWrapper class to prevent accidental usage of insert, update, and delete functions
  * for syncable entities on the database which must be routed via the repository for sync to work.
  */
-class DbProcessorWrapper: AbstractDbProcessor()  {
+class DbProcessorSyncableReadOnlyWrapper: AbstractDbProcessor()  {
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         setupDb(roundEnv)
         roundEnv.getElementsAnnotatedWith(Database::class.java).map { it as TypeElement }.forEach {dbTypeEl ->
             //jvm version
             if(dbTypeEl.isDbSyncable(processingEnv)) {
-                writeFileSpecToOutputDirs(
-                        FileSpec.builder(dbTypeEl.qualifiedPackageName(processingEnv),
-                                "${dbTypeEl.simpleName}$SUFFIX_WRAPPER")
-                                .addDbWrapperTypeSpec(dbTypeEl, processingEnv, allKnownEntityTypesMap)
-                                .build(),
-                        AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+                FileSpec.builder(dbTypeEl.qualifiedPackageName(processingEnv),
+                        "${dbTypeEl.simpleName}${DoorDatabaseSyncableReadOnlyWrapper.SUFFIX}")
+                        .addDbWrapperTypeSpec(dbTypeEl, processingEnv, allKnownEntityTypesMap)
+                        .build()
+                        .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_JVM_DIRS)
             }
         }
 
         roundEnv.getElementsAnnotatedWith(Dao::class.java).map { it as TypeElement }.forEach {daoTypeEl ->
             if(daoTypeEl.daoHasSyncableWriteMethods(processingEnv, allKnownEntityTypesMap)) {
-                writeFileSpecToOutputDirs(generateDaoFileSpec(daoTypeEl),
-                        AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+                FileSpec.builder(daoTypeEl.packageName,
+                        "${daoTypeEl.simpleName}${DoorDatabaseSyncableReadOnlyWrapper.SUFFIX}")
+                        .addDaoWrapperTypeSpec(daoTypeEl, processingEnv, allKnownEntityTypesMap)
+                        .build()
+                        .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_JVM_DIRS)
             }
         }
 
         return true
-    }
-
-    fun generateDaoFileSpec(daoTypeEl: TypeElement) : FileSpec {
-        return FileSpec.builder(daoTypeEl.packageName, "${daoTypeEl.simpleName}$SUFFIX_WRAPPER")
-                .addType(newDaoWrapperTypeSpecBuilder(daoTypeEl)
-                        .addAllDaoFunctionDelegates(daoTypeEl, processingEnv, allKnownEntityTypesMap)
-                        .build())
-                .build()
-    }
-
-
-
-    companion object {
-        const val SUFFIX_WRAPPER = "_DbWrapper"
     }
 
 }

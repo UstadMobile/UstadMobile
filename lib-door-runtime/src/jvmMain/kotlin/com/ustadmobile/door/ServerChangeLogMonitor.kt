@@ -17,18 +17,24 @@ import java.util.concurrent.atomic.AtomicReference
  * bulk changes take place). The dispatchUpdateNotifications function is called using a coroutine
  * fan-out pattern so that multiple tables can be processed concurrently.
  */
-class ServerChangeLogMonitor(val db: DoorDatabase, private val repo: DoorDatabaseRepository,
+class ServerChangeLogMonitor(database: DoorDatabase, private val repo: DoorDatabaseRepository,
                              val numProcessors: Int = 5) {
 
-    val tablesChangedChannel: Channel<Int> = Channel(capacity = Channel.UNLIMITED)
+    private val db = if(database is DoorDatabaseSyncableReadOnlyWrapper) {
+        database.realDatabase
+    }else {
+        database
+    }
 
-    val tablesToProcessChannel: Channel<Int> = Channel(capacity = Channel.UNLIMITED)
+    private val tablesChangedChannel: Channel<Int> = Channel(capacity = Channel.UNLIMITED)
 
-    val dispatchJob: AtomicReference<Job?> = AtomicReference(null)
+    private val tablesToProcessChannel: Channel<Int> = Channel(capacity = Channel.UNLIMITED)
 
-    val changeListenerRequest: DoorDatabase.ChangeListenerRequest
+    private val dispatchJob: AtomicReference<Job?> = AtomicReference(null)
 
-    val logPrefix: String = "[ServerChangeLogMonitor@${this.doorIdentityHashCode}]"
+    private val changeListenerRequest: DoorDatabase.ChangeListenerRequest
+
+    private val logPrefix: String = "[ServerChangeLogMonitor@${this.doorIdentityHashCode}]"
 
     init {
         Napier.d("$logPrefix init", tag = DoorTag.LOG_TAG)

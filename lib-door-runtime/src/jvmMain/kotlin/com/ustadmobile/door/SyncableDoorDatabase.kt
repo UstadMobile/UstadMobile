@@ -19,7 +19,7 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
         File("attachments").absolutePath //TODO: look this up from JNDI
     }
 
-    val db = if(this is SyncableDoorDatabaseWrapper<*>) {
+    val db = if(this is DoorDatabaseSyncableReadOnlyWrapper) {
         this.unwrap(dbClass)
     }else {
         this
@@ -40,11 +40,11 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
  */
 @Suppress("UNCHECKED_CAST")
 actual fun <T: SyncableDoorDatabase> T.wrap(dbClass: KClass<T>) : T {
-    val wrapperClass = Class.forName("${dbClass.qualifiedName}_DbWrapper") as Class<T>
+    val wrapperClass = Class.forName("${dbClass.qualifiedName}${DoorDatabaseSyncableReadOnlyWrapper.SUFFIX}") as Class<T>
     return wrapperClass.getConstructor(dbClass.java).newInstance(this)
 }
 
 @Suppress("UNCHECKED_CAST")
 actual fun <T: SyncableDoorDatabase> T.unwrap(dbClass: KClass<T>): T {
-    return (this as SyncableDoorDatabaseWrapper<*>).realDatabase as T
+    return (this as DoorDatabaseSyncableReadOnlyWrapper).realDatabase as T
 }
