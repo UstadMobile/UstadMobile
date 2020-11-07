@@ -32,12 +32,23 @@ fun TypeName.isList() = (this is ParameterizedTypeName && this.rawType == List::
         || (this == List::class.asClassName())
 
 /**
- * Determines whether or not this TypeName is nullable when it is the
+ * Determines whether or not this TypeName is nullable when it is used as a return type for a select
+ * query. This will return false for any primitive, false for List types (which must be an empty list
+ * when there is no result), false for DataSource.Factory, and true for Strings and singular entity
+ * types.
  */
 val TypeName.isNullableAsSelectReturnResult
     get() = this != UNIT
             && !PRIMITIVE.contains(this)
             && !(this is ParameterizedTypeName)
+
+/**
+ * Determines whether or not this TypeName's generic type argument is nullable when used as a return
+ * type for a select query. This is useful for LiveData types. It applies the logic for
+ * isNullableAsSelectReturnResult to the type argument for LiveData
+ */
+val TypeName.isNullableParameterTypeAsSelectReturnResult
+    get() = this.isLiveData() && unwrapLiveDataOrDataSourceFactory().isNullableAsSelectReturnResult
 
 
 /**
@@ -107,3 +118,8 @@ fun TypeName.unwrapListOrArrayComponentType() =
  * the type of entity that is being used.
  */
 fun TypeName.unwrapQueryResultComponentType() = unwrapLiveDataOrDataSourceFactory().unwrapListOrArrayComponentType()
+
+/**
+ * Determine if this typename represents LiveData
+ */
+fun TypeName.isLiveData() = this is ParameterizedTypeName && rawType == DoorLiveData::class.asClassName()

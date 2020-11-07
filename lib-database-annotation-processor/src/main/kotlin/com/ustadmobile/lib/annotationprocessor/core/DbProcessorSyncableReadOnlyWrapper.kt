@@ -52,9 +52,12 @@ fun TypeSpec.Builder.addDaoFunctionDelegate(daoMethod: ExecutableElement,
 
     val methodResolved = daoMethod.asMemberOf(daoTypeEl, processingEnv)
 
+    val returnTypeName = methodResolved.suspendedSafeReturnType
+
     val overridingFunction = overrideAndConvertToKotlinTypes(daoMethod, daoTypeEl.asType() as DeclaredType,
             processingEnv,
-            forceNullableReturn = methodResolved.suspendedSafeReturnType.isNullableAsSelectReturnResult)
+            forceNullableReturn = returnTypeName.isNullableAsSelectReturnResult,
+            forceNullableParameterTypeArgs = returnTypeName.isNullableParameterTypeAsSelectReturnResult)
             .build()
 
     if(daoMethod.isDaoMethodModifyingSyncableEntity(daoTypeEl, processingEnv, allKnownEntityTypesMap)) {
