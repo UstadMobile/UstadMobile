@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import android.Manifest
@@ -48,6 +49,7 @@ import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 
+*/
 /**
  * Test class to make sure DownloadDialog and DownloadNotification behaves as expected on devices.
  *
@@ -62,7 +64,8 @@ import java.util.concurrent.TimeUnit
  * 1. Get your local machine IP personAddress
  * 2. buildconfig.local.properties and change test.um_http_testserver value to your acquired IP personAddress
  * 3. Start local test server by running this task = lib-http-testserver:runHttpTestServer
- */
+ *//*
+
 
 // TODO tests are disabled until jenkins are create its own server
 @ExperimentalStdlibApi
@@ -384,3 +387,4 @@ class DownloadDialogAndNotificationEspressoTest {
     }
 
 }
+*/

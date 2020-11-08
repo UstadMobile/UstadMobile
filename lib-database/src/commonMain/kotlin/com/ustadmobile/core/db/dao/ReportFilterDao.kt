@@ -30,7 +30,9 @@ abstract class ReportFilterDao : BaseDao<ReportFilter>, OneToManyJoinDao<ReportF
     abstract suspend fun updateAsyncList(reportFilterList: List<ReportFilter>)
 
 
-    @Query("UPDATE ReportFilter SET filterInactive = :active WHERE reportFilterUid = :holidayUid")
+    @Query("""UPDATE ReportFilter SET filterInactive = :active,
+            reportFilterLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            WHERE reportFilterUid = :holidayUid""")
     abstract fun updateActiveByUid(holidayUid: Long, active: Boolean)
 
     override suspend fun deactivateByUids(uidList: List<Long>) {

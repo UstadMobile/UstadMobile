@@ -167,6 +167,11 @@
         android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment" />
 
     <fragment
+        android:id="@+id/content_entry_list_select_folder"
+        android:name="com.ustadmobile.port.android.view.ContentEntryList2Fragment" />
+
+
+    <fragment
         android:id="@+id/content_entry_edit_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntryEdit2Fragment"
         android:label="@string/content" />

@@ -20,9 +20,7 @@
         <variable
             name="quizType"
             type="Integer" />
-        <variable
-            name="studentMode"
-            type="Boolean" />
+
 
     </data>
 
@@ -42,6 +40,7 @@
             android:layout_marginHorizontal="24dp"
             android:text="@{clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionText}"
             app:layout_constraintEnd_toEndOf="parent"
+            android:textAppearance="@style/UmTheme.TextAppearance.Subtitle2"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Question A" />
@@ -50,13 +49,15 @@
             android:id="@+id/item_clazzworkquestionandoptionswithresponse_answer_et"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="64dp"
+            android:layout_marginEnd="32dp"
             android:ems="10"
+            tools:text="Answer A"
             android:hint="@string/answer"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:inputType="text"
             android:enabled="@{(clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestionResponse.clazzWorkQuestionResponseUid == 0L)}"
             android:text="@={clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestionResponse.clazzWorkQuestionResponseText}"
-            android:visibility="@{((clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == freeTextType || clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == clazzWorkQuizType) &amp;&amp; studentMode)?View.VISIBLE:View.GONE}"
+            android:visibility="@{((clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == freeTextType || clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestion.clazzWorkQuestionType == clazzWorkQuizType) )?View.VISIBLE:View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="@+id/item_clazzworkquestionandoptionswithresponse_title_tv"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzworkquestionandoptionswithresponse_title_tv" />
@@ -74,7 +75,6 @@
             app:layout_constraintStart_toStartOf="@+id/item_clazzworkquestionandoptionswithresponse_title_tv"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzworkquestionandoptionswithresponse_answer_et"
             app:radioGroupOptions="@{clazzWorkQuestionAndOptionsWithResponse.options}"
-            app:radioGroupStudentMode="@{studentMode}"
             app:radioGroupOptionsResponse="@={clazzWorkQuestionAndOptionsWithResponse.clazzWorkQuestionResponse.clazzWorkQuestionResponseOptionSelected}"
             >
         </RadioGroup>

@@ -63,4 +63,10 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertWithReplace(parentChildJoinDao: ContentEntryParentChildJoin)
+
+    @Query("""UPDATE ContentEntryParentChildJoin 
+               SET cepcjParentContentEntryUid = :contentEntryUid, 
+               cepcjLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+               WHERE cepcjUid IN (:selectedItems)""")
+    abstract suspend fun moveListOfEntriesToNewParent(contentEntryUid: Long, selectedItems: List<Long>)
 }

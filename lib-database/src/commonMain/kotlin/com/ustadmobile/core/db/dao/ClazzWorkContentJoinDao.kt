@@ -16,7 +16,8 @@ abstract class ClazzWorkContentJoinDao : BaseDao<ClazzWorkContentJoin>, OneToMan
             "AND CAST(clazzWorkContentJoinInactive AS INTEGER) = 0")
     abstract suspend fun findByUidAsync(clazzWorkContentJoinUid: Long) : ClazzWorkContentJoin?
 
-    @Query("""UPDATE ClazzWorkContentJoin SET clazzWorkContentJoinInactive = 1 
+    @Query("""UPDATE ClazzWorkContentJoin SET clazzWorkContentJoinInactive = 1,
+        clazzWorkContentJoinLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
         WHERE clazzWorkContentJoinUid = :clazzWorkContentJoinUid
     """)
     abstract suspend fun deactivateJoin(clazzWorkContentJoinUid : Long ): Int
@@ -30,8 +31,9 @@ abstract class ClazzWorkContentJoinDao : BaseDao<ClazzWorkContentJoin>, OneToMan
     abstract fun findAllContentByClazzWorkUidDF(clazzWorkUid: Long, personUid : Long)
             :DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
-    @Query("UPDATE ClazzWorkContentJoin SET clazzWorkContentJoinInactive = :active " +
-            "WHERE clazzWorkContentJoinUid = :uid ")
+    @Query("""UPDATE ClazzWorkContentJoin SET clazzWorkContentJoinInactive = :active,
+            clazzWorkContentJoinLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            WHERE clazzWorkContentJoinUid = :uid """)
     abstract suspend fun updateInActiveByClazzWorkQuestionUid(uid: Long, active : Boolean)
 
 

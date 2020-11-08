@@ -30,7 +30,9 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     @Query("SELECT * FROM ClazzMember WHERE clazzMemberPersonUid = :personUid " + "AND clazzMemberClazzUid = :clazzUid")
     abstract suspend fun findByPersonUidAndClazzUidAsync(personUid: Long, clazzUid: Long): ClazzMember?
 
-    @Query("UPDATE ClazzMember SET clazzMemberDateLeft = :endDate WHERE clazzMemberUid = :clazzMemberUid")
+    @Query("""UPDATE ClazzMember SET clazzMemberDateLeft = :endDate,
+            clazzMemberLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            WHERE clazzMemberUid = :clazzMemberUid""")
     abstract suspend fun updateDateLeftByUid(clazzMemberUid: Long, endDate: Long)
 
     @Update
@@ -104,7 +106,9 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int, ClazzMemberWithPerson>
 
 
-    @Query("UPDATE ClazzMember SET clazzMemberActive = :enrolled WHERE " + "clazzMemberPersonUid = :personUid AND clazzMemberClazzUid = :clazzUid")
+    @Query("""UPDATE ClazzMember SET clazzMemberActive = :enrolled,
+                clazzMemberLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                WHERE clazzMemberPersonUid = :personUid AND clazzMemberClazzUid = :clazzUid""")
     abstract fun updateClazzMemberActiveForPersonAndClazz(personUid: Long, clazzUid: Long, enrolled: Int): Int
 
     fun updateClazzMemberActiveForPersonAndClazz(personUid: Long, clazzUid: Long, enrolled: Boolean): Int {
@@ -115,7 +119,9 @@ abstract class ClazzMemberDao : BaseDao<ClazzMember> {
         }
     }
 
-    @Query("UPDATE ClazzMember SET clazzMemberActive = :enrolled WHERE clazzMemberUid = :clazzMemberUid")
+    @Query("""UPDATE ClazzMember SET clazzMemberActive = :enrolled,
+            clazzMemberLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            WHERE clazzMemberUid = :clazzMemberUid""")
     abstract fun updateClazzMemberActiveForClazzMember(clazzMemberUid: Long, enrolled: Int): Int
 
     fun updateClazzMemberActiveForClazzMember(clazzMemberUid: Long, enrolled: Boolean): Int {

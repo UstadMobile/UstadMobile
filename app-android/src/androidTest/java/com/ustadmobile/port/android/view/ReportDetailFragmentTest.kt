@@ -8,13 +8,16 @@ import androidx.test.espresso.IdlingRegistry
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.networkmanager.initPicasso
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.port.android.screen.ReportDetailScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.UstadSingleEntityFragmentIdlingResource
@@ -30,7 +33,7 @@ import org.junit.runners.Parameterized
 
 @AdbScreenRecord("Report Detail Screen Test")
 @RunWith(Parameterized::class)
-class ReportDetailFragmentTest(val report: Report){
+class ReportDetailFragmentTest(val report: Report) : TestCase() {
 
     @JvmField
     @Rule
@@ -44,16 +47,6 @@ class ReportDetailFragmentTest(val report: Report){
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
-    lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
-
     @Before
     fun setup() {
         runBlocking {
@@ -65,23 +58,25 @@ class ReportDetailFragmentTest(val report: Report){
     @AdbScreenRecord("show report on detail")
     @Test
     fun givenReportExists_whenLaunched_thenShouldShowReport() {
-        val reportUid = dbRule.db.reportDao.insert(report)
 
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(ARG_ENTITY_UID to reportUid)) {
-            ReportDetailFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(it)
-                IdlingRegistry.getInstance().register(fragmentIdlingResource)
+
+        init{
+            val reportUid = dbRule.db.reportDao.insert(report)
+            launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(ARG_ENTITY_UID to reportUid)) {
+                ReportDetailFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }.run {
 
-        onView(withId(R.id.fragment_detail_report_list)).check(matches(isDisplayed()))
+            ReportDetailScreen{
+                reportList{
+                    isDisplayed()
+                }
+            }
 
-        onIdle()
-
-        IdlingRegistry.getInstance().unregister(fragmentIdlingResource)
+        }
 
     }
 

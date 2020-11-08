@@ -34,8 +34,8 @@ import org.junit.runner.RunWith
 import java.io.File
 
 
-@AdbScreenRecord("KAS Epub content screen test")
-class EpubContentActivityKasTest : TestCase() {
+@AdbScreenRecord("Epub content screen test")
+class EpubContentActivityTest : TestCase() {
 
     private lateinit var container: Container
 
@@ -71,7 +71,7 @@ class EpubContentActivityKasTest : TestCase() {
         }
         containerTmpDir = tempFileRule.newFolder("epubContent${System.currentTimeMillis()}")
         val testFile = tempFileRule.newFile("test${System.currentTimeMillis()}.epub")
-        val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/test2.epub")
+        val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/test.epub")
         testFile.outputStream().use { input?.copyTo(it) }
 
         val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,
@@ -88,31 +88,41 @@ class EpubContentActivityKasTest : TestCase() {
         val activityScenario = ActivityScenario.launch<EpubContentActivity>(intent)
         activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 
-        EpubScreen {
+        init {
+            
+        }.run {
 
-            epubTitle {
-                hasText("ರುಮ್ನಿಯಾ")
-                isDisplayed()
-            }
-            activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
+            EpubScreen {
 
-            recycler {
+                epubTitle {
+                    hasText("ರುಮ್ನಿಯಾ")
+                    isDisplayed()
+                }
+                activityScenario.clickOptionMenu(R.id.menu_epub_content_showtoc)
 
-                firstChild<EpubScreen.EpubPage> {
-                    KWebView {
-                        withTag("1.xhtml")
-                        withId(R.id.epub_contentview)
-                    }.invoke {
-                        ViewMatchers.isDisplayed()
-                        ViewMatchers.isJavascriptEnabled()
-                        withElement(Locator.CLASS_NAME, "authors") {
-                            hasText("Rukmini Banerji")
+                recycler {
+
+                    firstChild<EpubScreen.EpubPage> {
+                        KWebView {
+                            withTag("1.xhtml")
+                            withId(R.id.epub_contentview)
+                        }.invoke {
+                            ViewMatchers.isDisplayed()
+                            ViewMatchers.isJavascriptEnabled()
+                            withElement(Locator.CLASS_NAME, "authors") {
+                                hasText("Rukmini Banerji")
+                            }
                         }
                     }
                 }
+
             }
 
+
+
         }
+
+
     }
 
     @AdbScreenRecord("Given valid epub content opened when table of content item is clicked should be loaded to the view")

@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import androidx.recyclerview.widget.RecyclerView
@@ -34,4 +35,4 @@ class RecyclerViewIdlingResource(recyclerView: RecyclerView?, var minItemCount :
         resourceCallback = callback
     }
 
-}
+}*/

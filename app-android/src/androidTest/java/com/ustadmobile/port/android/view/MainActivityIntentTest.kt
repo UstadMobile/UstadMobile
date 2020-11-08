@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.port.android.view
 
 import android.content.Intent
@@ -27,6 +28,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @AdbScreenRecord("MainActivityIntent tests")
 class MainActivityIntentTest {
+
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
@@ -74,8 +76,6 @@ class MainActivityIntentTest {
         var implDestId = systemImplNavRule.navController.currentDestination?.id
         var implDestName : String? = null
         activityScenario.onActivity { implDestName = it.resources.getResourceName(implDestId?:0) }
-
-
 
 
         assertEquals("It navigated to joinWithcode",
@@ -158,3 +158,4 @@ class MainActivityIntentTest {
 
 
 }
+*/
