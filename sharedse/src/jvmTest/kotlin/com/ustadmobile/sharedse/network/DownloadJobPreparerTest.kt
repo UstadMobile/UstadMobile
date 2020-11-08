@@ -1,12 +1,15 @@
 package com.ustadmobile.sharedse.network
 
 import com.github.aakira.napier.Napier
+import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.rest.umRestApplication
@@ -18,10 +21,8 @@ import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
 import org.junit.*
 import org.junit.Assert.*
-import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
+import org.kodein.di.*
+import org.kodein.di.ktor.di
 
 class DownloadJobPreparerTest {
 
@@ -41,15 +42,20 @@ class DownloadJobPreparerTest {
 
     private lateinit var clientRepo: UmAppDatabase
 
+    private lateinit var serverRepo: UmAppDatabase
+
 
     @Before
     fun setup(){
         Napier.baseDebugIfNotEnabled()
         serverDb = UmAppDatabase.getInstance(Any())
         serverDb.clearAllTables()
+        serverRepo = serverDb.asRepository(Any(), "http://localhost/dummy",
+            "", defaultHttpClient())
 
         di = DI {
             import(ustadTestRule.diModule)
+            bind<NetworkManagerBle>() with singleton { mock<NetworkManagerBle>() }
         }
 
         accountManager = di.direct.instance()
@@ -74,7 +80,7 @@ class DownloadJobPreparerTest {
 
     @Test
     fun givenContentEntriesExistOnServerNotClient_whenPrepareCalled_thenDownloadJobtemsAreCreated() = runBlocking{
-        val contentEntrySet = insertTestContentEntries(serverDb, System.currentTimeMillis())
+        val contentEntrySet = insertTestContentEntries(serverRepo, System.currentTimeMillis())
         val downloadJob = DownloadJob(contentEntrySet.rootEntry.contentEntryUid,
                 System.currentTimeMillis())
 

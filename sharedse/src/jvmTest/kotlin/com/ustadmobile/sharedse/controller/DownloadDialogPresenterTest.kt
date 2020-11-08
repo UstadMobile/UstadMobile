@@ -1,7 +1,6 @@
 package com.ustadmobile.sharedse.controller
 
 
-import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.JobStatus
@@ -101,7 +100,7 @@ class DownloadDialogPresenterTest {
         val accountManager: UstadAccountManager by di.instance()
         db =  di.on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
         repo = di.on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
-        contentEntrySet = insertTestContentEntries(db, System.currentTimeMillis())
+        contentEntrySet = insertTestContentEntries(repo, System.currentTimeMillis())
     }
 
     @Test

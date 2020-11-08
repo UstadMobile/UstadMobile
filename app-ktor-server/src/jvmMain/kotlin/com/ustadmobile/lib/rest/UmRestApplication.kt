@@ -119,10 +119,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                         isPrimary = true, sqliteDir = File(storageRoot, context.identifier(dbMode)))
             }
 
-            UmAppDatabase.getInstance(Any(), dbName).also {
-                it.preload()
-                it.ktorInit(File(storageRoot, context.identifier(dbMode)).absolutePath)
-            }
+            UmAppDatabase.getInstance(Any(), dbName)
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
@@ -135,6 +132,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 "", defaultHttpClient(), File(".").absolutePath,
                 instance(), false)
             ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
+            repo.preload()
+            repo.ktorInit(File(storageRoot, context.identifier(dbMode)).absolutePath)
             repo
         }
 
