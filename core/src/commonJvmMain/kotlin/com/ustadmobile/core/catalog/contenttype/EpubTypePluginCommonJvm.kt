@@ -69,7 +69,7 @@ class EpubTypePluginCommonJvm : EpubTypePlugin() {
 
     override suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>,
                                            contentEntryUid: Long, mimeType: String,
-                                           containerBaseDir: String,
+                                           containerBaseDir: String, context: Any,
                                            db: UmAppDatabase, repo: UmAppDatabase,
                                            progressListener: (Int) -> Unit): Container {
         return withContext(Dispatchers.Default) {
