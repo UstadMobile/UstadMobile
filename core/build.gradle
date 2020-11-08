@@ -191,6 +191,7 @@ kotlin {
                 implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.github.aakira:napier:$version_napier"
+                implementation "io.ktor:ktor-gson:$version_ktor"
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation project(':lib-door-runtime')
@@ -254,6 +255,8 @@ kotlin {
 
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
+
+                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
                 /*
                   For this to work in the IDE, these need to be API instead of implementation
