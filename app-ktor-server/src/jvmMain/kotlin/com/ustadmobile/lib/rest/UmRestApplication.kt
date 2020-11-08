@@ -137,7 +137,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
             ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(),
                     XapiTypePluginCommonJvm(), VideoTypePluginJvm(),
-                    H5PTypePluginCommonJvm(Any())),
+                    H5PTypePluginCommonJvm()),
                     Any(), context, di)
         }
 

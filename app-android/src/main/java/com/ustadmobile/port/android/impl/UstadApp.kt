@@ -139,7 +139,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
             ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),
                     XapiTypePluginCommonJvm(), VideoTypePluginAndroid(),
-                    H5PTypePluginCommonJvm(applicationContext)),
+                    H5PTypePluginCommonJvm()),
                     applicationContext, context, di)
         }
 

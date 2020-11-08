@@ -274,6 +274,7 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
                 //end SharedSE Android and JVM dependencies
             }
         }
@@ -296,6 +297,8 @@ kotlin {
                 //Image loading library
                 implementation "com.squareup.picasso:picasso:$version_android_picasso"
                 implementation "io.ktor:ktor-client-android:$version_ktor"
+
+                implementation 'com.linkedin.android.litr:litr:1.4.3'
 
                 //dependency injection
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"

@@ -18,7 +18,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.instance
 import org.kodein.di.on
 
-open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>, context: Any, val endpoint: Endpoint,
+open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>, val context: Any, val endpoint: Endpoint,
                                     final override val di: DI) : ContentImportManager, DIAware {
 
     private val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
@@ -58,8 +58,6 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
         }
 
     }
-
-    //TODO: most implementation can go here as platform specific stuff is handled by the ContentTypePlugin itself
 
     //This can also container the LiveDataWorkQueue and host ImportJobRunner here in core.
     //You can replace the dependency on NetworkManagerBle with a dependency network status livedata
@@ -102,7 +100,7 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
                     ?: return@forEach
 
             return it.importToContainer(filePath, conversionParams, contentEntryUid, mimeType,
-                    containerBaseDir, db, repo, progressListener)
+                    containerBaseDir, context, db, repo, progressListener)
         }
         return null
     }

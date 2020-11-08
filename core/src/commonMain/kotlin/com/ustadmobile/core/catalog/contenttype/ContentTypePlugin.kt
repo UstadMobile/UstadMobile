@@ -62,7 +62,8 @@ interface ContentTypePlugin {
     suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>,
                                   contentEntryUid: Long, mimeType: String,
                                   containerBaseDir: String,
-                                  db: UmAppDatabase, repo: UmAppDatabase,
+                                  context: Any, db: UmAppDatabase,
+                                  repo: UmAppDatabase,
                                   progressListener: (Int) -> Unit): Container
 
 

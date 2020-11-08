@@ -20,7 +20,7 @@ open class H5PTypePlugin : ContentTypePlugin {
         TODO("Not yet implemented")
     }
 
-    override suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>, contentEntryUid: Long, mimeType: String, containerBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase, progressListener: (Int) -> Unit): Container {
+    override suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>, contentEntryUid: Long, mimeType: String, containerBaseDir: String, context: Any, db: UmAppDatabase, repo: UmAppDatabase, progressListener: (Int) -> Unit): Container {
         TODO("Not yet implemented")
     }
 

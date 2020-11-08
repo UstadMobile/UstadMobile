@@ -36,7 +36,7 @@ val licenseMap = mapOf(
         "U" to ContentEntry.LICENSE_TYPE_OTHER
 )
 
-class H5PTypePluginCommonJvm(val context: Any): H5PTypePlugin() {
+class H5PTypePluginCommonJvm(): H5PTypePlugin() {
 
     override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default){
@@ -95,6 +95,7 @@ class H5PTypePluginCommonJvm(val context: Any): H5PTypePlugin() {
 
     override suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>,
                                            contentEntryUid: Long, mimeType: String, containerBaseDir: String,
+                                           context: Any,
                                            db: UmAppDatabase, repo: UmAppDatabase,
                                            progressListener: (Int) -> Unit): Container {
         val file = File(filePath)
