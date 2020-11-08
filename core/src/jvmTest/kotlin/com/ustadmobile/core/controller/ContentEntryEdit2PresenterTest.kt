@@ -203,7 +203,7 @@ class ContentEntryEdit2PresenterTest {
     @Test
     fun givenPresenterCreatedAndEntryCreated_whenClickSave_shouldUpdateAnEntry() {
         createMockView()
-        contentEntry.contentEntryUid = db.contentEntryDao.insert(contentEntry)
+        contentEntry.contentEntryUid = repo.contentEntryDao.insert(contentEntry)
         val presenter = ContentEntryEdit2Presenter(context,
                 mapOf(ARG_ENTITY_UID to contentEntry.contentEntryUid.toString(),
                         UstadView.ARG_PARENT_ENTRY_UID to parentUid.toString()), mockView, mockLifecycleOwner, di)

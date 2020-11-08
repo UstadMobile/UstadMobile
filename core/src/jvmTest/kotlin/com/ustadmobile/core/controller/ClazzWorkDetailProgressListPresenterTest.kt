@@ -89,13 +89,13 @@ class ClazzWorkDetailProgressListPresenterTest {
         }
 
         testClazzWork = runBlocking {
-            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                     true,0,false, true)
         }
 
         val contentEntriesWithJoin = runBlocking {
-            db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
+            repo.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
         }
         val contentList = contentEntriesWithJoin.contentList
     }
