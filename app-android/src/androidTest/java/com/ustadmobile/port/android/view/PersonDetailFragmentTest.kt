@@ -1,10 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.matcher.ViewMatchers
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -16,7 +12,6 @@ import com.ustadmobile.port.android.screen.PersonDetailScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import junit.framework.Assert
 import junit.framework.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -27,7 +22,7 @@ class PersonDetailFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -182,7 +177,7 @@ class PersonDetailFragmentTest : TestCase() {
                 username = "jones.doe"
             }
             personUid = mPersonUid
-            dbRule.db.personDao.insert(this)
+            dbRule.repo.personDao.insert(this)
         }
 
         if(!sameUser){
@@ -192,7 +187,7 @@ class PersonDetailFragmentTest : TestCase() {
                 username = "admin.user"
                 personUid = 42
                 admin = isAdmin
-                dbRule.db.personDao.insert(this)
+                dbRule.repo.personDao.insert(this)
             }
         }
 

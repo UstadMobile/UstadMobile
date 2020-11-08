@@ -33,7 +33,7 @@ class PersonAccountEditFragmentTest : TestCase(){
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -55,7 +55,6 @@ class PersonAccountEditFragmentTest : TestCase(){
 
     @Before
     fun setUp(){
-        dbRule.repo.clearAllTables()
         mockWebServer = MockWebServer()
         mockWebServer.start()
         serverUrl = mockWebServer.url("/").toString()

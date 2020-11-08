@@ -20,7 +20,7 @@ class ClazzDetailOverviewFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -38,7 +38,7 @@ class ClazzDetailOverviewFragmentTest : TestCase() {
                 clazzDesc = "Test Description"
                 clazzStartTime = (DateTime.now() - 14.days).unixMillisLong
                 clazzEndTime = (DateTime.now() + 14.days).unixMillisLong
-                clazzUid = dbRule.db.clazzDao.insert(this)
+                clazzUid = dbRule.repo.clazzDao.insert(this)
             }
 
             val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,

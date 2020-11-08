@@ -13,7 +13,8 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
-import com.ustadmobile.lib.rest.ext.ktorInit
+import com.ustadmobile.lib.rest.ext.ktorInitDb
+import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
@@ -119,7 +120,9 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                         isPrimary = true, sqliteDir = File(storageRoot, context.identifier(dbMode)))
             }
 
-            UmAppDatabase.getInstance(Any(), dbName)
+            UmAppDatabase.getInstance(Any(), dbName).also {
+                it.ktorInitDb()
+            }
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
@@ -133,7 +136,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 instance(), false)
             ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
             repo.preload()
-            repo.ktorInit(File(storageRoot, context.identifier(dbMode)).absolutePath)
+            db.ktorInitDbWithRepo(repo, File(storageRoot, context.identifier(dbMode)).absolutePath)
             repo
         }
 

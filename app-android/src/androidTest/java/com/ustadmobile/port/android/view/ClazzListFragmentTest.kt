@@ -21,7 +21,7 @@ class ClazzListFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -34,7 +34,7 @@ class ClazzListFragmentTest : TestCase() {
         val testEntity = Clazz().apply {
             clazzName = "Test Name"
             isClazzActive = true
-            clazzUid = dbRule.db.clazzDao.insert(this)
+            clazzUid = dbRule.repo.clazzDao.insert(this)
         }
 
 

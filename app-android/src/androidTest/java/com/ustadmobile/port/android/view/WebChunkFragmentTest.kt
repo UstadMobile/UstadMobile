@@ -6,8 +6,6 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isJavascriptEnabled
-import androidx.test.espresso.web.sugar.Web.onWebView
-import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
 import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.rule.GrantPermissionRule
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -21,15 +19,10 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.screen.WebChunkScreen
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
-import org.hamcrest.core.AllOf.allOf
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
@@ -42,7 +35,7 @@ class WebChunkFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -80,12 +73,12 @@ class WebChunkFragmentTest : TestCase() {
         targetEntry.author = "borrachera"
         targetEntry.primaryLanguageUid = 53
         targetEntry.leaf = true
-        targetEntry.contentEntryUid = dbRule.db.contentEntryDao.insert(targetEntry)
+        targetEntry.contentEntryUid = dbRule.repo.contentEntryDao.insert(targetEntry)
 
         container = Container()
         container.mimeType = "application/webchunk+zip"
         container.containerContentEntryUid = targetEntry.contentEntryUid
-        container.containerUid = dbRule.db.containerDao.insert(container)
+        container.containerUid = dbRule.repo.containerDao.insert(container)
 
         val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,
                 tmpDir.absolutePath)
