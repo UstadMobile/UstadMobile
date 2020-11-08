@@ -5,113 +5,104 @@ import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
+import com.ustadmobile.core.catalog.contenttype.XapiTypePluginCommonJvm
+import com.ustadmobile.core.container.TestContainer.assertContainersHaveSameContent
+import com.ustadmobile.core.contentformats.ContentImportManager
+import com.ustadmobile.core.contentformats.ContentImportManagerImpl
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.ContainerUploaderCommon
+import com.ustadmobile.core.networkmanager.ImportJobRunner
+import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.DoorTag.Companion.TAG_DB
+import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
-import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.rest.ContainerUpload
 import com.ustadmobile.lib.rest.ResumableUploadRoute
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.lib.rest.TAG_UPLOAD_DIR
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.sharedse.ext.TestContainer.assertContainersHaveSameContent
-import com.ustadmobile.core.networkmanager.ContainerUploaderCommon
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
-import com.ustadmobile.sharedse.network.containeruploader.UploadJobRunner
-import io.ktor.application.ApplicationCall
-import io.ktor.application.install
-import io.ktor.features.ContentNegotiation
+import org.kodein.di.ktor.DIFeature
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
-import io.ktor.http.ContentType
-import io.ktor.http.HttpStatusCode
-import io.ktor.request.header
-import io.ktor.routing.Routing
-import io.ktor.server.engine.ApplicationEngine
-import io.ktor.server.engine.embeddedServer
-import io.ktor.server.netty.Netty
+import io.ktor.application.*
+import io.ktor.features.*
+import io.ktor.http.*
+import io.ktor.request.*
+import io.ktor.routing.*
+import io.ktor.server.engine.*
+import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import org.kodein.di.ktor.DIFeature
 import java.io.File
 import java.util.*
-import javax.naming.InitialContext
 
 class ImportJobRunnerTest {
 
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
+
+    private lateinit var contentImportManager: ContentImportManager
+
     private lateinit var endpoint: String
-    private lateinit var serverFolder: File
-    private lateinit var repo: UmAppDatabase
+    private lateinit var uploadServerFolder: File
+    private lateinit var serverDb: UmAppDatabase
     lateinit var server: ApplicationEngine
 
     private val defaultPort = 8098
 
-    private lateinit var epubContainer: Container
-    private lateinit var containerManager: ContainerManager
     private lateinit var appDb: UmAppDatabase
     private lateinit var clientFolder: File
     private lateinit var fileToUpload: File
-
-    private lateinit var connectivityStatusLiveData: DoorMutableLiveData<ConnectivityStatus>
+    private lateinit var serverContainerFolder: File
 
     private lateinit var di: DI
 
-    lateinit var mockNetworkManager: NetworkManagerBle
-
-    private lateinit var networkManager: NetworkManagerBle
-
-    private val context = Any()
-
     private lateinit var containerImportJob: ContainerImportJob
 
+    private lateinit var connectivityStatusLiveData: DoorMutableLiveData<ConnectivityStatus>
     @JvmField
     @Rule
     val temporaryFolder = TemporaryFolder()
 
+    private lateinit var metadata: ImportedContentEntryMetaData
+
     @Before
     fun setup() {
-        repo = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase").build()
-        repo.clearAllTables()
+        serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase").build()
+        serverDb.clearAllTables()
 
         val endpointScope = EndpointScope()
+
+        clientFolder = temporaryFolder.newFolder("upload")
+        uploadServerFolder = temporaryFolder.newFolder("server")
+        di = DI {
+            import(ustadTestRule.diModule)
+            bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
+            bind<ContentImportManager>() with scoped(endpointScope).singleton {
+                ContentImportManagerImpl(listOf(H5PTypePluginCommonJvm(), XapiTypePluginCommonJvm()), context, this.context, di)
+            }
+        }
 
         connectivityStatusLiveData = DoorMutableLiveData(ConnectivityStatus().apply {
             connectedOrConnecting = true
             connectivityState = ConnectivityStatus.STATE_UNMETERED
             wifiSsid = "wifi-mock"
         })
-
-        mockNetworkManager = mock {
-            on { connectivityStatus }.thenReturn(connectivityStatusLiveData)
-        }
-
-        clientFolder = temporaryFolder.newFolder("upload")
-        serverFolder = temporaryFolder.newFolder("server")
-
-        di = DI {
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
-                val dbName = sanitizeDbNameFromUrl(context.url)
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
-                    it.clearAllTables()
-                })
-            }
-            bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
-            bind<NetworkManagerBle>() with singleton { mockNetworkManager }
-        }
-
-        connectivityStatusLiveData.sendValue(ConnectivityStatus(ConnectivityStatus.STATE_METERED, true, null))
-
 
         server = embeddedServer(Netty, port = defaultPort) {
             install(ContentNegotiation) {
@@ -126,43 +117,74 @@ class ImportJobRunnerTest {
                 ResumableUploadRoute()
             }
 
-
             val serverEndpointScope = EndpointScope()
             install(DIFeature) {
                 bind<UmAppDatabase>(tag = TAG_DB) with scoped(serverEndpointScope).singleton {
-                    repo
+                    serverDb
+                }
+                bind<UmAppDatabase>(tag = TAG_REPO) with scoped(serverEndpointScope).singleton {
+                    spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(Any(), "http://localhost/dummy", "", defaultHttpClient(), null))
                 }
 
+
                 bind<File>(tag = TAG_UPLOAD_DIR) with scoped(serverEndpointScope).singleton {
-                    serverFolder
+                    uploadServerFolder
                 }
 
                 bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(serverEndpointScope).singleton {
-                    temporaryFolder.newFolder("servercontainerdir")
+                    serverContainerFolder = temporaryFolder.newFolder("servercontainerdir")
+                    serverContainerFolder
                 }
 
-                registerContextTranslator { call: ApplicationCall -> Endpoint(call.request.header("Host") ?: "nohost") }
+                registerContextTranslator { call: ApplicationCall ->
+                    Endpoint(call.request.header("Host") ?: "nohost")
+                }
             }
 
         }.start(wait = false)
 
-        fileToUpload = File(clientFolder, "tincan.zip")
-        UmFileUtilSe.extractResourceToFile(
-                "/com/ustadmobile/port/sharedse/contentformats/ustad-tincan.zip",
-                fileToUpload)
     }
 
-    private fun createContainer(appDb: UmAppDatabase) {
-        epubContainer = Container()
-        epubContainer.containerUid = appDb.containerDao.insert(epubContainer)
-        containerManager = ContainerManager(epubContainer, appDb, appDb, clientFolder.absolutePath)
-        runBlocking {
-            addEntriesFromZipToContainer(fileToUpload.absolutePath, containerManager)
+    private fun createImportJob(db: UmAppDatabase): ContainerImportJob {
+        return runBlocking {
+            ContainerImportJob().apply {
+                cijBytesSoFar = 0
+                this.cijFilePath = fileToUpload.absolutePath
+                this.cijContentEntryUid = metadata.contentEntry.contentEntryUid
+                this.cijMimeType = metadata.mimeType
+                this.cijContainerBaseDir = clientFolder.absolutePath
+                this.cijJobStatus = JobStatus.QUEUED
+                cijUid = db.containerImportJobDao.insertAsync(this)
+            }
         }
-        containerImportJob = ContainerImportJob().apply {
-            this.cijContainerUid = epubContainer.containerUid
-            this.cijUid = appDb.containerImportJobDao.insert(this)
+    }
+
+    fun importContainer(endpoint: Endpoint){
+
+        appDb = di.on(endpoint).direct.instance(UmAppDatabase.TAG_DB)
+        appDb.connectivityStatusDao.commitLiveConnectivityStatus(connectivityStatusLiveData)
+        appDb.connectivityStatusDao.insert(ConnectivityStatus().apply {
+            connectedOrConnecting = true
+            connectivityState = ConnectivityStatus.STATE_UNMETERED
+            wifiSsid = "wifi-mock"
+        })
+        val repo: UmAppDatabase = di.on(endpoint).direct.instance(UmAppDatabase.TAG_REPO)
+        contentImportManager = di.on(endpoint).direct.instance()
+
+        fileToUpload = File(clientFolder, "tincan.zip")
+        UmFileUtilSe.extractResourceToFile(
+                "/com/ustadmobile/core/container/ustad-tincan.zip",
+                fileToUpload)
+        metadata = runBlocking {
+            contentImportManager.extractMetadata(fileToUpload.path)!!
         }
+        metadata.contentEntry.contentEntryUid = runBlocking {
+            repo.contentEntryDao.insertAsync(metadata.contentEntry)
+        }
+
+        containerImportJob = createImportJob(appDb)
+
+
     }
 
     @After
@@ -174,15 +196,18 @@ class ImportJobRunnerTest {
     fun givenAnUploadJob_whenRunnerUploads_thenContentFromServerIsSameAsDb() {
 
         endpoint = "http://localhost:$defaultPort/"
-        appDb = di.on(Endpoint(endpoint)).direct.instance(tag = UmAppDatabase.TAG_DB)
-        createContainer(appDb)
+        importContainer(Endpoint(endpoint))
 
-        val runner = UploadJobRunner(containerImportJob, retryDelay, endpoint, di)
+        val runner = ImportJobRunner(containerImportJob, retryDelay, endpoint, di)
         runBlocking {
+            runner.importContainer()
             runner.startUpload()
         }
+        val containerUid = runBlocking {
+            appDb.containerImportJobDao.findByUid(containerImportJob.cijUid)!!.cijContainerUid
+        }
 
-        assertContainersHaveSameContent(epubContainer.containerUid, appDb, repo)
+        assertContainersHaveSameContent(containerUid, appDb, serverDb)
     }
 
     @Test
@@ -191,8 +216,7 @@ class ImportJobRunnerTest {
         mockWebServer.start()
 
         endpoint = mockWebServer.url("").toString()
-        appDb = di.on(Endpoint(endpoint)).direct.instance(tag = UmAppDatabase.TAG_DB)
-        createContainer(appDb)
+        importContainer(Endpoint(endpoint))
 
         // existing md5Sum response
         val md5List = appDb.containerEntryDao.findByContainerWithMd5(containerImportJob.cijContainerUid).map { it.cefMd5 }
@@ -208,9 +232,10 @@ class ImportJobRunnerTest {
             mockWebServer.enqueue(MockResponse().setResponseCode(HttpStatusCode.InternalServerError.value).setBody("Server error"))
         }
 
-        val runner = UploadJobRunner(containerImportJob, retryDelay, mockWebServer.url("").toString(), di)
+        val runner = ImportJobRunner(containerImportJob, retryDelay, endpoint, di)
         var status = 0
         runBlocking {
+            runner.importContainer()
             status = runner.startUpload()
         }
 
@@ -220,22 +245,32 @@ class ImportJobRunnerTest {
 
     @Test
     fun givenRunnerStarts_whenServerHasAllMd5_thenShouldCallFinalizeWithoutSession() {
-        endpoint = "http://localhost:$defaultPort/"
-        appDb = di.on(Endpoint(endpoint)).direct.instance(tag = UmAppDatabase.TAG_DB)
-        createContainer(repo)
-        createContainer(appDb)
 
-        val runner = UploadJobRunner(containerImportJob, retryDelay, endpoint, di)
-        var status = 0
+        endpoint = "http://localhost:$defaultPort/"
+        importContainer(Endpoint(endpoint))
+
+
         runBlocking {
-            status = runner.startUpload()
+            contentImportManager.importFileToContainer(fileToUpload.path, metadata.mimeType,
+                    metadata.contentEntry.contentEntryUid, uploadServerFolder.path, mapOf()) {
+
+            }
         }
 
-        assertContainersHaveSameContent(epubContainer.containerUid, appDb, repo)
+        val runner = ImportJobRunner(containerImportJob, retryDelay, endpoint, di)
+        runBlocking {
+            runner.importContainer()
+            runner.startUpload()
+        }
+        val containerUid = runBlocking {
+            appDb.containerImportJobDao.findByUid(containerImportJob.cijUid)!!.cijContainerUid
+        }
+
+        assertContainersHaveSameContent(containerUid, appDb, serverDb)
 
     }
 
-    companion object{
+    companion object {
         const val retryDelay = 10L
     }
 
