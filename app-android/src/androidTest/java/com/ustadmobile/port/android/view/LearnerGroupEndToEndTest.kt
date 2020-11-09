@@ -181,9 +181,10 @@ class LearnerGroupEndToEndTest : TestCase() {
                         .waitUntilWithActivityScenario(activityScenario!!){
                             it?.fullStatement?.contains("Group") == true
                         }
-                val groupActor = dbRule.repo.agentDao.getAgentByAnyId(account = "group:1", homepage = "http://localhost/")
+                val groupLearnerUid = statement!!.statementLearnerGroupUid
+                val groupActor = dbRule.repo.agentDao.getAgentByAnyId(account = "group:$groupLearnerUid", homepage = "http://localhost/")
                 Assert.assertEquals("Agent id matches on statement", groupActor!!.agentUid, statement!!.agentUid)
-                Assert.assertEquals("group id is same account name", "group:1", groupActor!!.agentAccountName)
+                Assert.assertEquals("group id is same account name", "group:$groupLearnerUid", groupActor!!.agentAccountName)
             }
             pressBack()
             ContentEntryDetailScreen {
