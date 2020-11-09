@@ -64,7 +64,7 @@ abstract class ProductDao : BaseDao<Product> {
     abstract fun findAllCategoriesOfProductUid(productUid: Long): DataSource.Factory<Int, Category>
 
     @Query(QUERY_FIND_ALL_CATEGORY_BY_PRODUCT)
-    abstract fun findAllCategoriesOfProductUidAsync(productUid: Long): List<Category>
+    abstract suspend  fun findAllCategoriesOfProductUidAsync(productUid: Long): List<Category>
 
 
     companion object {

@@ -1,20 +1,21 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ClazzWork
-import com.ustadmobile.lib.db.entities.Product
-import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.db.entities.Sale
+import com.ustadmobile.lib.db.entities.SaleListDetail
 import com.ustadmobile.lib.db.entities.UmAccount
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
-class ProductListPresenter(context: Any, arguments: Map<String, String>, view: ProductListView,
-                           di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<ProductListView, Product>(context, arguments, view, di, lifecycleOwner),
-        ProductListItemListener  {
+class SaleListPresenter(context: Any, arguments: Map<String, String>, view: SaleListView,
+                        di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<SaleListView, Sale>(context, arguments, view, di, lifecycleOwner)
+        , SaleListItemListener  {
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
@@ -23,54 +24,53 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
-    class ProductListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    class SaleListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         updateListOnView()
-        view.sortOptions = SortOrder.values().toList().map { ProductListSortOption(it, context) }
+        view.sortOptions = SortOrder.values().toList().map { SaleListSortOption(it, context) }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-//        TODO("check on add permission for this account: e.g. " +
-//                "repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)")
-
+        //TODO: this
         return true
     }
 
     private fun updateListOnView() {
         //TODO: add sort listing
-        view.list = repo.productDao.findAllActiveProductWithInventoryCount()
+        val loggedInPersonUid = accountManager.activeAccount.personUid
+        view.list = repo.saleDao.findAllSales(loggedInPersonUid)
     }
 
     override fun handleClickCreateNewFab() {
         //TODO: this
-        systemImpl.go(ProductEditView.VIEW_NAME, mapOf(), context)
-
+        //systemImpl.go(SaleDetailView.VIEW_NAME, mapOf(), context)
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? ProductListSortOption)?.sortOrder ?: return
+        val sortOrder = (sortOption as? SaleListSortOption)?.sortOrder ?: return
         if(sortOrder != currentSortOrder) {
             currentSortOrder = sortOrder
             updateListOnView()
         }
     }
 
-    override fun handleClickEntry(entry: Product) {
+    override fun handleClickEntry(entry: Sale) {
         when(mListMode) {
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
             ListViewMode.BROWSER -> {
 
                 //TODO: this
-//                systemImpl.go(ProductEditView.VIEW_NAME,
+//                systemImpl.go(SaleDetailView.VIEW_NAME,
 //                        mapOf(UstadView.ARG_ENTITY_UID to entry.productUid.toString()), context)
             }
         }
     }
 
-    override fun onClickProduct(product: ProductWithInventoryCount) {
-        //TODO
-
+    override fun onClickSale(sale: SaleListDetail) {
+        //TODO this
+        // systemImpl.go(SaleDetailView.VIEW_NAME,
+        //  mapOf(UstadView.ARG_ENTITY_UID to entry.productUid.toString()), context)
     }
 }

@@ -42,7 +42,8 @@ import kotlin.jvm.Volatile
 
     //Goldozi:
     ,Product::class, ProductCategoryJoin::class, InventoryItem::class, InventoryTransaction::class,
-    Category::class
+    Category::class, Sale::class, SaleDelivery::class, SaleItem::class, SaleItemReminder::class,
+    SalePayment::class
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
@@ -286,6 +287,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("productCategoryJoinDao")
     abstract val productCategoryJoinDao: ProductCategoryJoinDao
+
+    @JsName("saleDao")
+    abstract val saleDao: SaleDao
+
+    @JsName("saleItemDao")
+    abstract val saleItemDao: SaleItemDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

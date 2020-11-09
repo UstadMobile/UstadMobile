@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 142,
-    "identityHash": "bd02c608354fa1f9109146d5f9aef3bd",
+    "identityHash": "94e984a40a564c9c7ebaaa6133abecc5",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5731,6 +5731,448 @@
         "foreignKeys": []
       },
       {
+        "tableName": "Sale",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`saleUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `saleTitle` TEXT, `saleActive` INTEGER NOT NULL, `saleLocationUid` INTEGER NOT NULL, `saleCreationDate` INTEGER NOT NULL, `saleDueDate` INTEGER NOT NULL, `saleLastUpdateDate` INTEGER NOT NULL, `salePersonUid` INTEGER NOT NULL, `saleNotes` TEXT, `saleDone` INTEGER NOT NULL, `saleCancelled` INTEGER NOT NULL, `salePreOrder` INTEGER NOT NULL, `salePaymentDone` INTEGER NOT NULL, `saleDiscount` INTEGER NOT NULL, `saleSignature` TEXT, `saleCustomerUid` INTEGER NOT NULL, `saleMCSN` INTEGER NOT NULL, `saleLCSN` INTEGER NOT NULL, `saleLCB` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "saleUid",
+            "columnName": "saleUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleTitle",
+            "columnName": "saleTitle",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "saleActive",
+            "columnName": "saleActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleLocationUid",
+            "columnName": "saleLocationUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleCreationDate",
+            "columnName": "saleCreationDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleDueDate",
+            "columnName": "saleDueDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleLastUpdateDate",
+            "columnName": "saleLastUpdateDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salePersonUid",
+            "columnName": "salePersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleNotes",
+            "columnName": "saleNotes",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "saleDone",
+            "columnName": "saleDone",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleCancelled",
+            "columnName": "saleCancelled",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salePreOrder",
+            "columnName": "salePreOrder",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salePaymentDone",
+            "columnName": "salePaymentDone",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleDiscount",
+            "columnName": "saleDiscount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleSignature",
+            "columnName": "saleSignature",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "saleCustomerUid",
+            "columnName": "saleCustomerUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleMCSN",
+            "columnName": "saleMCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleLCSN",
+            "columnName": "saleLCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleLCB",
+            "columnName": "saleLCB",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "saleUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SaleDelivery",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`saleDeliveryUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `saleDeliverySaleUid` INTEGER NOT NULL, `saleDeliverySignature` TEXT NOT NULL, `saleDeliveryPersonUid` INTEGER NOT NULL, `saleDeliveryDate` INTEGER NOT NULL, `saleDeliveryActive` INTEGER NOT NULL, `saleDeliveryMCSN` INTEGER NOT NULL, `saleDeliveryLCSN` INTEGER NOT NULL, `saleDeliveryLCB` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "saleDeliveryUid",
+            "columnName": "saleDeliveryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleDeliverySaleUid",
+            "columnName": "saleDeliverySaleUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleDeliverySignature",
+            "columnName": "saleDeliverySignature",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleDeliveryPersonUid",
+            "columnName": "saleDeliveryPersonUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleDeliveryDate",
+            "columnName": "saleDeliveryDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleDeliveryActive",
+            "columnName": "saleDeliveryActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleDeliveryMCSN",
+            "columnName": "saleDeliveryMCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleDeliveryLCSN",
+            "columnName": "saleDeliveryLCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleDeliveryLCB",
+            "columnName": "saleDeliveryLCB",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "saleDeliveryUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SaleItem",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`saleItemUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `saleItemSaleUid` INTEGER NOT NULL, `saleItemProducerUid` INTEGER NOT NULL, `saleItemProductUid` INTEGER NOT NULL, `saleItemQuantity` INTEGER NOT NULL, `saleItemPricePerPiece` REAL NOT NULL, `saleItemCurrency` TEXT, `saleItemSold` INTEGER NOT NULL, `saleItemPreorder` INTEGER NOT NULL, `saleItemDiscount` REAL NOT NULL, `saleItemActive` INTEGER NOT NULL, `saleItemCreationDate` INTEGER NOT NULL, `saleItemDueDate` INTEGER NOT NULL, `saleItemSignature` TEXT, `saleItemMCSN` INTEGER NOT NULL, `saleItemLCSN` INTEGER NOT NULL, `saleItemLCB` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "saleItemUid",
+            "columnName": "saleItemUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemSaleUid",
+            "columnName": "saleItemSaleUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemProducerUid",
+            "columnName": "saleItemProducerUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemProductUid",
+            "columnName": "saleItemProductUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemQuantity",
+            "columnName": "saleItemQuantity",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemPricePerPiece",
+            "columnName": "saleItemPricePerPiece",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemCurrency",
+            "columnName": "saleItemCurrency",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "saleItemSold",
+            "columnName": "saleItemSold",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemPreorder",
+            "columnName": "saleItemPreorder",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemDiscount",
+            "columnName": "saleItemDiscount",
+            "affinity": "REAL",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemActive",
+            "columnName": "saleItemActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemCreationDate",
+            "columnName": "saleItemCreationDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemDueDate",
+            "columnName": "saleItemDueDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemSignature",
+            "columnName": "saleItemSignature",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "saleItemMCSN",
+            "columnName": "saleItemMCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemLCSN",
+            "columnName": "saleItemLCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemLCB",
+            "columnName": "saleItemLCB",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "saleItemUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SaleItemReminder",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`saleItemReminderUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `saleItemReminderSaleItemUid` INTEGER NOT NULL, `saleItemReminderDays` INTEGER NOT NULL, `saleItemReminderActive` INTEGER NOT NULL, `saleItemReminderMCSN` INTEGER NOT NULL, `saleItemReminderLCSN` INTEGER NOT NULL, `saleItemReminderLCB` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "saleItemReminderUid",
+            "columnName": "saleItemReminderUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemReminderSaleItemUid",
+            "columnName": "saleItemReminderSaleItemUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemReminderDays",
+            "columnName": "saleItemReminderDays",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemReminderActive",
+            "columnName": "saleItemReminderActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemReminderMCSN",
+            "columnName": "saleItemReminderMCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemReminderLCSN",
+            "columnName": "saleItemReminderLCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "saleItemReminderLCB",
+            "columnName": "saleItemReminderLCB",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "saleItemReminderUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SalePayment",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`salePaymentUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `salePaymentPaidDate` INTEGER NOT NULL, `salePaymentPaidAmount` INTEGER NOT NULL, `salePaymentCurrency` TEXT, `salePaymentSaleUid` INTEGER NOT NULL, `salePaymentDone` INTEGER NOT NULL, `salePaymentActive` INTEGER NOT NULL, `salePaymentMCSN` INTEGER NOT NULL, `salePaymentLCSN` INTEGER NOT NULL, `salePaymentLCB` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "salePaymentUid",
+            "columnName": "salePaymentUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salePaymentPaidDate",
+            "columnName": "salePaymentPaidDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salePaymentPaidAmount",
+            "columnName": "salePaymentPaidAmount",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salePaymentCurrency",
+            "columnName": "salePaymentCurrency",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "salePaymentSaleUid",
+            "columnName": "salePaymentSaleUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salePaymentDone",
+            "columnName": "salePaymentDone",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salePaymentActive",
+            "columnName": "salePaymentActive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salePaymentMCSN",
+            "columnName": "salePaymentMCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salePaymentLCSN",
+            "columnName": "salePaymentLCSN",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "salePaymentLCB",
+            "columnName": "salePaymentLCB",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "salePaymentUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "ClazzLog_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
@@ -9605,12 +10047,352 @@
           }
         ],
         "foreignKeys": []
+      },
+      {
+        "tableName": "Sale_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_Sale_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Sale_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SaleDelivery_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_SaleDelivery_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SaleDelivery_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SaleItem_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_SaleItem_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SaleItem_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SaleItemReminder_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_SaleItemReminder_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SaleItemReminder_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SalePayment_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_SalePayment_trk_clientId_epk_rx_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "rx",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SalePayment_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+          }
+        ],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'bd02c608354fa1f9109146d5f9aef3bd')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '94e984a40a564c9c7ebaaa6133abecc5')"
     ]
   }
 }

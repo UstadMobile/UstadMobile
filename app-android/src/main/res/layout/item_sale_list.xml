@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <import type="com.ustadmobile.lib.db.entities.SaleListDetail"/>
+        <import type="com.ustadmobile.port.android.view.SaleListFragment"/>
+        <import type="com.ustadmobile.port.android.view.SaleListRecyclerAdapter"/>
+
+        <variable
+            name="sale"
+            type="SaleListDetail" />
+
+        <variable
+            name="itemListener"
+            type="com.ustadmobile.core.controller.SaleListItemListener" />
+
+        <variable
+            name="selectablePagedListAdapter"
+            type="SaleListRecyclerAdapter" />
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, sale)}"
+        app:onSelectableItemClicked="@{() -> itemListener.onClickSale(sale)}"
+        android:background="@drawable/bg_listitem"
+        >
+
+        <TextView
+            android:id="@+id/item_sale_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:text="@{sale.saleTitleGen}"
+            tools:text="20x Pink Hat"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="18sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_sale_amount"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:text="@{`` + sale.saleAmount}"
+            tools:text="9,500 Afs"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            android:textSize="18sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_sale_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="@{sale.locationName}"
+            tools:text="Customer name"
+            app:layout_constraintBottom_toTopOf="@+id/item_sale_order_due_date"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_sale_title" />
+
+        <TextView
+            android:id="@+id/item_sale_order_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            app:dateLong="@{sale.saleCreationDate}"
+            tools:text="21.01.2020"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_sale_amount" />
+
+        <TextView
+            android:id="@+id/item_sale_order_due_date"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="Order due date"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Subtitle2"
+            android:textColor="@color/errorColor"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_sale_order_due_date_image"
+            app:layout_constraintTop_toBottomOf="@+id/item_sale_order_date" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:id="@+id/item_sale_order_due_date_image"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="10dp"
+            android:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_sale_location"
+            app:srcCompat="@drawable/ic_warning_black_24dp" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

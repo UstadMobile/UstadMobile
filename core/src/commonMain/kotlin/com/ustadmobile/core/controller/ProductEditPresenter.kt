@@ -31,7 +31,7 @@ class ProductEditPresenter(context: Any,
 
     val categoryEditHelper =
             DefaultOneToManyJoinEditHelper(Category::categoryUid,
-            "state_EntityClass_list", Category.serializer().list,
+            "state_Category_list", Category.serializer().list,
             Category.serializer().list, this) { categoryUid = it }
 
     fun handleAddOrEditCategory(categogy: Category) {

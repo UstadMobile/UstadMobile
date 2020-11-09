@@ -6,15 +6,10 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ProductListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.ProductListView
-import com.ustadmobile.core.view.UstadEditView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.Product
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
-import kotlinx.serialization.json.Json
 
 class ProductListFragment(): UstadListViewFragment<Product, ProductWithInventoryCount>(),
         ProductListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
