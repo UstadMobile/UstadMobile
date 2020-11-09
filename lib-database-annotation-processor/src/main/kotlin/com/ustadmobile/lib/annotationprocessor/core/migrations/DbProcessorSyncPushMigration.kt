@@ -80,7 +80,7 @@ private fun TypeSpec.Builder.addSyncPushMigrationFunction(dbTypeElement: TypeEle
                                             syncableEntity.asClassName(), processingEnv)
                                     addRecreateSqliteTriggerCode(syncableEntity, processingEnv)
                                     addReplaceSqliteChangeSeqNums("database.execSQL",
-                                        syncableEntityInfo)
+                                        syncableEntityInfo, preserveCurrentMaxLocalCsn = true)
                                     addInsertTableSyncStatus(syncableEntityInfo,
                                             "database.execSQL", processingEnv)
 

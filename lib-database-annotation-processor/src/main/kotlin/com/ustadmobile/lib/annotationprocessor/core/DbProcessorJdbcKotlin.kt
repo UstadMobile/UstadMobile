@@ -651,16 +651,6 @@ internal fun CodeBlock.Builder.addGenerateSqlitePrimaryKeyInsert(execSqlFn: Stri
             "(SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
 }
 
-/**
- * Add to the codeblock to create a line that will execute SQL to insert a row into SqliteChangeSeqNums
- * for the given SyncableEntity
- *
- * @param execSqlFn The name of the function to call to execute SQL e.g. "db.execSQL
- * @param syncableEntityInfo the syncableentityinfo for this row
- */
-internal fun CodeBlock.Builder.addReplaceSqliteChangeSeqNums(execSqlFn: String, syncableEntityInfo: SyncableEntityInfo)
-    = add("$execSqlFn(%S)\n", "REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary)" +
-        " VALUES(${syncableEntityInfo.tableId}, 1, 1)")
 
 
 /**

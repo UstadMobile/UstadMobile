@@ -270,3 +270,35 @@ fun CodeBlock.Builder.addSyncableEntityUpdateTriggersSqlite(execSqlFn: String, s
 
     return this
 }
+
+
+/**
+ * Add to the codeblock to create a line that will execute SQL to insert a row into SqliteChangeSeqNums
+ * for the given SyncableEntity
+ *
+ * @param execSqlFn The name of the function to call to execute SQL e.g. "db.execSQL
+ * @param syncableEntityInfo the syncableentityinfo for this row
+ * @param preserveCurrentMaxLocalCsn if true, then use a query to set the next local change sequence
+ * number to be one higher than the current maximum found in all rows. This should be true when this
+ * is used as part of a migration, false otherwise.
+ */
+internal fun CodeBlock.Builder.addReplaceSqliteChangeSeqNums(execSqlFn: String,
+                                                             syncableEntityInfo: SyncableEntityInfo,
+                                                             preserveCurrentMaxLocalCsn: Boolean = false): CodeBlock.Builder {
+    var replaceSql = "REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary)" +
+            " VALUES(${syncableEntityInfo.tableId}, "
+
+    if(preserveCurrentMaxLocalCsn) {
+        replaceSql += "(SELECT COALESCE(" +
+                "(SELECT MAX(${syncableEntityInfo.entityLocalCsnField.name}) FROM ${syncableEntityInfo.syncableEntity.simpleName})" +
+                ", 0) + 1),"
+    }else {
+        replaceSql += "1,"
+    }
+
+    replaceSql += " 1)"
+
+    add("$execSqlFn(%S)\n", replaceSql)
+
+    return this
+}
