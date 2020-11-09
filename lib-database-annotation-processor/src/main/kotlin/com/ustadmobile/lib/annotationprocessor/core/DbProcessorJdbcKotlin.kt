@@ -833,29 +833,18 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                 codeBlock.add("/* START MIGRATION: \n")
                         .add("_stmt.executeUpdate(%S)\n", "ALTER TABLE ${entityTypeSpec.name} RENAME to ${entityTypeSpec.name}_OLD")
                         .add("END MIGRATION */\n")
-                codeBlock.add("_stmt.executeUpdate(%S)\n", makeCreateTableStatement(
-                        entityTypeSpec, dbProductType))
+
+                codeBlock.addCreateTableCode(entityTypeSpec, "_stmt.executeUpdate",
+                    dbProductType)
                 codeBlock.add("/* START MIGRATION: \n")
                         .add("_stmt.executeUpdate(%S)\n", "INSERT INTO ${entityTypeSpec.name} ($fieldListStr) SELECT $fieldListStr FROM ${entityTypeSpec.name}_OLD")
                         .add("_stmt.executeUpdate(%S)\n", "DROP TABLE ${entityTypeSpec.name}_OLD")
                         .add("END MIGRATION*/\n")
 
-                codeBlock.add(generateCreateIndicesCodeBlock(
-                        entityType.getAnnotation(Entity::class.java)
-                                .indices.map { IndexMirror(it) }.toTypedArray(),
-                        entityType.simpleName.toString(), "_stmt.executeUpdate"))
-
-                for(field in fieldElements) {
-                    if(field.annotations.any { it.className == ColumnInfo::class.asClassName()
-                                    && it.members.findBooleanMemberValue("index") ?: false }) {
-                        codeBlock.add("_stmt.executeUpdate(%S)\n",
-                                "CREATE INDEX index_${entityType.simpleName}_${field.name} ON ${entityType.simpleName} (${field.name})")
-                    }
-                }
-
                 if(entityType.getAnnotation(SyncableEntity::class.java) != null) {
                     val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(),
                             processingEnv)
+
                     codeBlock.add(generateSyncTriggersCodeBlock(entityType.asClassName(),
                             "_stmt.executeUpdate", dbProductType))
                     if(dbProductType == DoorDbType.POSTGRES) {

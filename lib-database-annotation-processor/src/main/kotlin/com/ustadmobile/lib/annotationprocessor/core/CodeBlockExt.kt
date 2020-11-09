@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
+import android.arch.persistence.room.ColumnInfo
 import com.squareup.kotlinpoet.*
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
@@ -72,13 +73,21 @@ fun CodeBlock.Builder.addInsertTableSyncStatuses(dbType: TypeElement,
 
     syncableEntityTypesOnDb(dbType, processingEnv).forEach {
         val syncableEntityInfo = SyncableEntityInfo(it.asClassName(), processingEnv)
-        add("$execSqlFunName(\"INSERT·INTO·TableSyncStatus(tsTableId,·tsLastChanged,·tsLastSynced)·" +
-                "VALUES(${syncableEntityInfo.tableId},·\${%M()},·0)\")\n",
-            MemberName("com.ustadmobile.door.util", "systemTimeInMillis"))
+        addInsertTableSyncStatus(syncableEntityInfo, execSqlFunName, processingEnv)
     }
 
     return this
 }
+
+fun CodeBlock.Builder.addInsertTableSyncStatus(syncableEntityInfo: SyncableEntityInfo,
+                                               execSqlFunName: String = "_stmt.executeUpdate",
+                                               processingEnv: ProcessingEnvironment): CodeBlock.Builder {
+    add("$execSqlFunName(\"INSERT·INTO·TableSyncStatus(tsTableId,·tsLastChanged,·tsLastSynced)·" +
+            "VALUES(${syncableEntityInfo.tableId},·\${%M()},·0)\")\n",
+            MemberName("com.ustadmobile.door.util", "systemTimeInMillis"))
+    return this
+}
+
 
 /**
  * When generating code for a parameter we often want to add some statements that would run directly
@@ -114,6 +123,150 @@ fun CodeBlock.Builder.addRunCodeBlocksOnParamComponents(param: ParameterSpec, va
             add(it)
         }
     }
+
+    return this
+}
+
+/**
+ * Add code that will create the table using a function that executes SQL (e.g. stmt.executeUpdate or
+ * db.execSQL) to create a table and any indices specified. Indices can be specified by through
+ * the indices argument (e.g. for those that come from the Entity annotation) and via the
+ * entityTypeSpec for those that are specified using ColumnInfo(index=true) annotation.
+ *
+ * @param entityTypeSpec a TypeSpec that represents the entity a table is being created for
+ * @param execSqlFn the literal string that should be added to call a function that runs SQL
+ * @param dbProductType DoorDbType.SQLITE or POSTGRES
+ * @param indices a list of IndexMirror representing the indices that should be added.
+ */
+fun CodeBlock.Builder.addCreateTableCode(entityTypeSpec: TypeSpec, execSqlFn: String,
+                                         dbProductType: Int, indices: List<IndexMirror> = listOf()) : CodeBlock.Builder {
+    add("$execSqlFn(%S)\n", entityTypeSpec.toCreateTableSql(dbProductType))
+    indices.forEach {
+        val indexName = if(it.name != "") {
+            it.name
+        }else {
+            "index_${entityTypeSpec.name}_${it.value.joinToString(separator = "_", postfix = "", prefix = "")}"
+        }
+
+        add("$execSqlFn(%S)\n", """CREATE 
+                |${if(it.unique){ "UNIQUE" } else { "" } } INDEX $indexName 
+                |ON ${entityTypeSpec.name} (${it.value.joinToString()})""".trimMargin())
+    }
+
+    entityTypeSpec.entityFields().forEach { field ->
+        if(field.annotations.any { it.className == ColumnInfo::class.asClassName()
+                        && it.members.findBooleanMemberValue("index") ?: false }) {
+            add("_stmt.executeUpdate(%S)\n",
+                    "CREATE INDEX index_${entityTypeSpec.name}_${field.name} ON ${entityTypeSpec.name} (${field.name})")
+        }
+    }
+
+    return this
+}
+
+/**
+ * Adds code that will create the triggers (to increment change sequence numbers and, if
+ * required, insert into ChangeLog) on SQLite when a row on the given syncableEntityInfo is
+ * inserted.
+ *
+ * @param syncableEntityInfo SyncableEntityInfo for the entity annotated @SyncableEntity
+ * @param execSqlFn the code to run an SQL statement e.g. "db.execSQL"
+ * @return this
+ */
+fun CodeBlock.Builder.addSyncableEntityInsertTriggersSqlite(execSqlFn: String, syncableEntityInfo: SyncableEntityInfo): CodeBlock.Builder {
+    val localCsnFieldName = syncableEntityInfo.entityLocalCsnField.name
+    val primaryCsnFieldName = syncableEntityInfo.entityMasterCsnField.name
+    val entityName = syncableEntityInfo.syncableEntity.simpleName
+    val pkFieldName = syncableEntityInfo.entityPkField.name
+    val tableId = syncableEntityInfo.tableId
+
+    add("$execSqlFn(%S)\n", """
+            CREATE TRIGGER INS_LOC_${syncableEntityInfo.tableId}
+            AFTER INSERT ON $entityName
+            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                NEW.$localCsnFieldName = 0)
+            BEGIN
+                UPDATE $entityName
+                SET $primaryCsnFieldName = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId)
+                WHERE $pkFieldName = NEW.$pkFieldName;
+                
+                UPDATE SqliteChangeSeqNums
+                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                WHERE sCsnTableId = $tableId;
+            END
+        """.trimIndent())
+
+    add("$execSqlFn(%S)\n", """
+            CREATE TRIGGER INS_PRI_${syncableEntityInfo.tableId}
+            AFTER INSERT ON $entityName
+            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                NEW.$primaryCsnFieldName = 0)
+            BEGIN
+                UPDATE $entityName
+                SET $primaryCsnFieldName = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId)
+                WHERE $pkFieldName = NEW.$pkFieldName;
+                
+                UPDATE SqliteChangeSeqNums
+                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                WHERE sCsnTableId = $tableId;
+                
+                ${syncableEntityInfo.sqliteChangeLogInsertSql};
+            END
+        """.trimIndent())
+
+    return this
+}
+
+/**
+ * Adds code that will create the triggers (to increment change sequence numbers and, if
+ * required, insert into ChangeLog) on SQLite when a row on the given syncableEntityInfo is updated.
+ *
+ * @param syncableEntityInfo SyncableEntityInfo for the entity annotated @SyncableEntity
+ * @param execSqlFn the code to run an SQL statement e.g. "db.execSQL"
+ * @return this
+ */
+fun CodeBlock.Builder.addSyncableEntityUpdateTriggersSqlite(execSqlFn: String, syncableEntityInfo: SyncableEntityInfo) : CodeBlock.Builder {
+    val localCsnFieldName = syncableEntityInfo.entityLocalCsnField.name
+    val primaryCsnFieldName = syncableEntityInfo.entityMasterCsnField.name
+    val entityName = syncableEntityInfo.syncableEntity.simpleName
+    val pkFieldName = syncableEntityInfo.entityPkField.name
+    val tableId = syncableEntityInfo.tableId
+
+    add("$execSqlFn(%S)\n", """
+            CREATE TRIGGER UPD_LOC_$tableId
+            AFTER UPDATE ON $entityName
+            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                AND (NEW.$localCsnFieldName == OLD.$localCsnFieldName OR
+                    NEW.$localCsnFieldName == 0))
+            BEGIN
+                UPDATE $entityName
+                SET $localCsnFieldName = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId) 
+                WHERE $pkFieldName = NEW.$pkFieldName;
+                
+                UPDATE SqliteChangeSeqNums 
+                SET sCsnNextLocal = sCsnNextLocal + 1
+                WHERE sCsnTableId = $tableId;
+            END
+        """.trimIndent())
+
+    add("$execSqlFn(%S)\n", """
+            CREATE TRIGGER UPD_PRI_$tableId
+            AFTER UPDATE ON $entityName
+            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                AND (NEW.$primaryCsnFieldName == OLD.$primaryCsnFieldName OR
+                    NEW.$primaryCsnFieldName == 0))
+            BEGIN
+                UPDATE $entityName
+                SET $primaryCsnFieldName = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId)
+                WHERE $pkFieldName = NEW.$pkFieldName;
+                
+                UPDATE SqliteChangeSeqNums
+                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                WHERE sCsnTableId = $tableId;
+                
+                ${syncableEntityInfo.sqliteChangeLogInsertSql};
+            END
+        """.trimIndent())
 
     return this
 }

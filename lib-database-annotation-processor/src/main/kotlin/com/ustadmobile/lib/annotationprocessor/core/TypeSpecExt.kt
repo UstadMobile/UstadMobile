@@ -1,8 +1,10 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.Database
+import androidx.room.PrimaryKey
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.ustadmobile.door.DoorDbType
 import java.util.*
 import javax.lang.model.element.ExecutableElement
 import com.ustadmobile.door.RepositoryConnectivityListener
@@ -145,4 +147,74 @@ fun TypeSpec.Builder.addRoomCreateInvalidationTrackerFunction() : TypeSpec.Build
             .build())
 
     return this
+}
+
+/**
+ * Returns a list of the entity fields of a particular object. If getAutoIncLast is true, then
+ * any autoincrement primary key will always be returned at the end of the list, e.g. so that a
+ * preparedstatement insert with or without an autoincrement id can share the same code to set
+ * all other parameters.
+ *
+ * @param entityTypeElement The TypeElement representing the entity, from which we wish to get
+ * the field names
+ * @param getAutoIncLast if true, then always return any field that is auto increment at the very end
+ * @return List of VariableElement representing the entity fields that are persisted
+ */
+fun TypeSpec.entityFields(getAutoIncLast: Boolean = true): List<PropertySpec> {
+    val propertyList = propertySpecs.toMutableList()
+
+    if(getAutoIncLast) {
+        val autoIncPropIdx = propertyList
+                .indexOfFirst { it.annotations.any { it.className == PrimaryKey::class.asClassName()
+                        && it.members.any { it.toString().contains("autoGenerate") }} }
+
+        if(autoIncPropIdx >= 0) {
+            val autoIncField = propertyList.removeAt(autoIncPropIdx)
+            propertyList.add(autoIncField)
+        }
+    }
+
+    return propertyList
+}
+
+/**
+ * Where the given TypeSpec represents an entity, generate a string for the CREATE TABLE SQL
+ *
+ * @param dbType Integer constant as per DoorDbType
+ */
+fun TypeSpec.toCreateTableSql(dbType: Int): String {
+    var sql = "CREATE TABLE IF NOT EXISTS ${name} ("
+    var commaNeeded = false
+
+    entityFields(getAutoIncLast = true).forEach {fieldEl ->
+        sql += """${if(commaNeeded) "," else " "} ${fieldEl.name} """
+        val pkAutoGenerate = fieldEl.annotations
+                .firstOrNull { it.className == PrimaryKey::class.asClassName() }
+                ?.members?.findBooleanMemberValue("autoGenerate") ?: false
+        if(pkAutoGenerate) {
+            when(dbType) {
+                DoorDbType.SQLITE -> sql += " INTEGER "
+                DoorDbType.POSTGRES -> sql += (if(fieldEl.type == LONG) { " BIGSERIAL " } else { " SERIAL " })
+            }
+        }else {
+            sql += " ${fieldEl.type.toSqlType(dbType)} "
+        }
+
+        if(fieldEl.annotations.any { it.className == PrimaryKey::class.asClassName()} ) {
+            sql += " PRIMARY KEY "
+            if(pkAutoGenerate && dbType == DoorDbType.SQLITE)
+                sql += " AUTOINCREMENT "
+
+        }
+
+        if(!fieldEl.type.isNullableAsSelectReturnResult) {
+            sql += " NOT NULL "
+        }
+
+        commaNeeded = true
+    }
+
+    sql += ")"
+
+    return sql
 }

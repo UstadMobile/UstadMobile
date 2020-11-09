@@ -34,6 +34,16 @@ class SyncableEntityInfo {
 
     var notifyOnUpdate: Array<String>
 
+    /**
+     * Creates an SQL statement that will insert a row into the ChangeLog table. This SQL should
+     * be included in the SQL that is run by the change triggers.
+     */
+    val sqliteChangeLogInsertSql: String
+        get() = """
+                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                SELECT ${tableId}, NEW.${entityPkField.name}, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000)
+            """.trimIndent()
+
     constructor(syncableEntityParam: ClassName, processingEnv: ProcessingEnvironment) {
         syncableEntity = syncableEntityParam
         val syncableEntityEl = processingEnv.elementUtils.getTypeElement(syncableEntity.canonicalName)

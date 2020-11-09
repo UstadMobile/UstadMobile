@@ -2904,12 +2904,13 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_42_33 = UmAppDatabase_SyncPushMigration()
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
-                    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42)
+                    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_33)
 
 
 

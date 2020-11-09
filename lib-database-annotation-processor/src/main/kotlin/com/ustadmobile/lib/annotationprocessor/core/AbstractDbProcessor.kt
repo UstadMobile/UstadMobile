@@ -905,125 +905,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
         return codeBlock.build()
     }
 
-    /**
-     * Creates an SQL statement that will insert a row into the ChangeLog table. This SQL should
-     * be included in the SQL that is run by the change triggers.
-     */
-    val SyncableEntityInfo.sqliteChangeLogInsertSql: String
-        get() = """
-            INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
-            SELECT ${tableId}, NEW.${entityPkField.name}, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000)
-        """.trimIndent()
-
-
-    /**
-     * Adds code that will create the triggers (to increment change sequence numbers and, if
-     * required, insert into ChangeLog) on SQLite when a row on the given syncableEntityInfo is updated.
-     *
-     * @param syncableEntityInfo SyncableEntityInfo for the entity annotated @SyncableEntity
-     * @param execSqlFn the code to run an SQL statement e.g. "db.execSQL"
-     * @return this
-     */
-    fun CodeBlock.Builder.addSyncableEntityUpdateTriggersSqlite(execSqlFn: String, syncableEntityInfo: SyncableEntityInfo) : CodeBlock.Builder {
-        val localCsnFieldName = syncableEntityInfo.entityLocalCsnField.name
-        val primaryCsnFieldName = syncableEntityInfo.entityMasterCsnField.name
-        val entityName = syncableEntityInfo.syncableEntity.simpleName
-        val pkFieldName = syncableEntityInfo.entityPkField.name
-        val tableId = syncableEntityInfo.tableId
-
-        add("$execSqlFn(%S)\n", """
-            CREATE TRIGGER UPD_LOC_$tableId
-            AFTER UPDATE ON $entityName
-            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
-                AND (NEW.$localCsnFieldName == OLD.$localCsnFieldName OR
-                    NEW.$localCsnFieldName == 0))
-            BEGIN
-                UPDATE $entityName
-                SET $localCsnFieldName = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId) 
-                WHERE $pkFieldName = NEW.$pkFieldName;
-                
-                UPDATE SqliteChangeSeqNums 
-                SET sCsnNextLocal = sCsnNextLocal + 1
-                WHERE sCsnTableId = $tableId;
-            END
-        """.trimIndent())
-
-        add("$execSqlFn(%S)\n", """
-            CREATE TRIGGER UPD_PRI_$tableId
-            AFTER UPDATE ON $entityName
-            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
-                AND (NEW.$primaryCsnFieldName == OLD.$primaryCsnFieldName OR
-                    NEW.$primaryCsnFieldName == 0))
-            BEGIN
-                UPDATE $entityName
-                SET $primaryCsnFieldName = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId)
-                WHERE $pkFieldName = NEW.$pkFieldName;
-                
-                UPDATE SqliteChangeSeqNums
-                SET sCsnNextPrimary = sCsnNextPrimary + 1
-                WHERE sCsnTableId = $tableId;
-                
-                ${syncableEntityInfo.sqliteChangeLogInsertSql};
-            END
-        """.trimIndent())
-
-        return this
-    }
-
-    /**
-     * Adds code that will create the triggers (to increment change sequence numbers and, if
-     * required, insert into ChangeLog) on SQLite when a row on the given syncableEntityInfo is
-     * inserted.
-     *
-     * @param syncableEntityInfo SyncableEntityInfo for the entity annotated @SyncableEntity
-     * @param execSqlFn the code to run an SQL statement e.g. "db.execSQL"
-     * @return this
-     */
-    fun CodeBlock.Builder.addSyncableEntityInsertTriggersSqlite(execSqlFn: String, syncableEntityInfo: SyncableEntityInfo): CodeBlock.Builder {
-        val localCsnFieldName = syncableEntityInfo.entityLocalCsnField.name
-        val primaryCsnFieldName = syncableEntityInfo.entityMasterCsnField.name
-        val entityName = syncableEntityInfo.syncableEntity.simpleName
-        val pkFieldName = syncableEntityInfo.entityPkField.name
-        val tableId = syncableEntityInfo.tableId
-
-        add("$execSqlFn(%S)\n", """
-            CREATE TRIGGER INS_LOC_${syncableEntityInfo.tableId}
-            AFTER INSERT ON $entityName
-            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
-                NEW.$localCsnFieldName = 0)
-            BEGIN
-                UPDATE $entityName
-                SET $primaryCsnFieldName = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId)
-                WHERE $pkFieldName = NEW.$pkFieldName;
-                
-                UPDATE SqliteChangeSeqNums
-                SET sCsnNextPrimary = sCsnNextPrimary + 1
-                WHERE sCsnTableId = $tableId;
-            END
-        """.trimIndent())
-
-        add("$execSqlFn(%S)\n", """
-            CREATE TRIGGER INS_PRI_${syncableEntityInfo.tableId}
-            AFTER INSERT ON $entityName
-            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
-                NEW.$primaryCsnFieldName = 0)
-            BEGIN
-                UPDATE $entityName
-                SET $primaryCsnFieldName = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId)
-                WHERE $pkFieldName = NEW.$pkFieldName;
-                
-                UPDATE SqliteChangeSeqNums
-                SET sCsnNextPrimary = sCsnNextPrimary + 1
-                WHERE sCsnTableId = $tableId;
-                
-                ${syncableEntityInfo.sqliteChangeLogInsertSql};
-            END
-        """.trimIndent())
-
-        return this
-    }
-
-
     protected fun generateSyncTriggersCodeBlock(entityClass: ClassName, execSqlFn: String, dbType: Int): CodeBlock {
         val codeBlock = CodeBlock.builder()
         val syncableEntityInfo = SyncableEntityInfo(entityClass, processingEnv)
@@ -1852,7 +1733,13 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * on Unix, ; on Windows)
      */
     protected fun FileSpec.writeToDirsFromArg(argName: String, useFilerAsDefault: Boolean = true) {
-        (processingEnv.options[argName]?.split(File.pathSeparator) ?: listOf(processingEnv.options["kapt.kotlin.generated"]!!)).forEach {
+        val fallbackDirs = if(useFilerAsDefault) {
+            //kapt.kotlin.generated is always specified by the annotation processor
+            listOf(processingEnv.options["kapt.kotlin.generated"]!!)
+        }else {
+            listOf()
+        }
+        (processingEnv.options[argName]?.split(File.pathSeparator) ?: fallbackDirs).forEach {
             writeTo(File(it))
         }
     }

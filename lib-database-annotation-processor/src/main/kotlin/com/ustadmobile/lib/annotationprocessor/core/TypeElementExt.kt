@@ -27,6 +27,15 @@ internal fun TypeElement.asEntityTypeSpecBuilder(): TypeSpec.Builder {
     return typeSpecBuilder
 }
 
+/**
+ * Provides a list of the indexes that are on a given table. Using the Index value itself can lead
+ * to classnotfound errors. Adding this to a TypeSpec leads to having to parse strings with arrays,
+ * quotes, etc.
+ */
+internal fun TypeElement.indicesAsIndexMirrorList() =
+        getAnnotation(Entity::class.java).indices.map { IndexMirror(it) }
+
+
 internal fun TypeElement.asEntityTypeSpec() = this.asEntityTypeSpecBuilder().build()
 
 internal fun TypeElement.hasDataSourceFactory(paramTypeFilter: (List<TypeName>) -> Boolean = {true})
