@@ -35,8 +35,27 @@ fun FileSpec.Builder.addSyncPushMigrationType(dbTypeElement: TypeElement,
  * Generates the main Migration.migrate function that will migrate the given database to the new
  * syncpush system
  */
+private val NEW_SYNC_HELPER_ENTITIES = listOf(ChangeLog::class, SqliteChangeSeqNums::class,
+        TableSyncStatus::class, UpdateNotification::class)
+
 private fun TypeSpec.Builder.addSyncPushMigrationFunction(dbTypeElement: TypeElement,
                                                   processingEnv: ProcessingEnvironment) : TypeSpec.Builder {
+
+    //Drop the old index for entity tracker tables and create the new ones. This function is only
+    //required within addSyncPushMigrationFunction, hence encapsulating it here.
+    fun CodeBlock.Builder.addRecreateTrkIndexes(entityName: String) : CodeBlock.Builder {
+        add("database.execSQL(%S)\n",
+                "DROP INDEX IF EXISTS index_${entityName}_trk_clientId_epk_rx_csn")
+        add("database.execSQL(%S)\n",
+                "CREATE INDEX index_${entityName}_trk_clientId_epk_csn " +
+                        " ON ${entityName}_trk (clientId, epk, csn)")
+        add("database.execSQL(%S)\n",
+                "CREATE UNIQUE INDEX index_${entityName}_trk_epk_clientId " +
+                        "ON ${entityName}_trk (epk, clientId)")
+
+        return this
+    }
+
     addFunction(FunSpec.builder("migrate")
             .addModifiers(KModifier.OVERRIDE)
             .addParameter("database", DoorSqlDatabase::class)
@@ -46,8 +65,7 @@ private fun TypeSpec.Builder.addSyncPushMigrationFunction(dbTypeElement: TypeEle
                         DoorDbType::class)
                     .apply {
                         //Add the helper entities
-                        listOf(ChangeLog::class, SqliteChangeSeqNums::class, TableSyncStatus::class,
-                                UpdateNotification::class).forEach {entityClass ->
+                        NEW_SYNC_HELPER_ENTITIES.forEach {entityClass ->
                             val entityTypeEl = entityClass.asTypeElement(processingEnv)
                             addCreateTableCode(entityTypeEl.asEntityTypeSpec(),
                                     "database.execSQL", DoorDbType.SQLITE,
@@ -66,18 +84,27 @@ private fun TypeSpec.Builder.addSyncPushMigrationFunction(dbTypeElement: TypeEle
                                     addInsertTableSyncStatus(syncableEntityInfo,
                                             "database.execSQL", processingEnv)
 
-                                    //Drop the old index for entity tracker tables and create the new ones
-                                    add("database.execSQL(%S)\n",
-                                            "DROP INDEX IF EXISTS index_${syncableEntity.simpleName}_trk_clientId_epk_rx_csn")
-                                    add("database.execSQL(%S)\n",
-                                        "CREATE INDEX index_${syncableEntity.simpleName}_trk_clientId_epk_csn " +
-                                            " ON ${syncableEntity.simpleName}_trk (clientId, epk, csn)")
-                                    add("database.execSQL(%S)\n",
-                                        "CREATE UNIQUE INDEX index_${syncableEntity.simpleName}_trk_epk_clientId " +
-                                                "ON ${syncableEntity.simpleName}_trk (epk, clientId)")
+                                    addRecreateTrkIndexes(syncableEntity.simpleName.toString())
                                 }
                     }
+                    .nextControlFlow("else")
+                    .apply {
+                        //Handle postgres
+                        NEW_SYNC_HELPER_ENTITIES.forEach {entityClass ->
+                            val entityTypeEl = entityClass.asTypeElement(processingEnv)
+                            addCreateTableCode(entityTypeEl.asEntityTypeSpec(),
+                                    "database.execSQL", DoorDbType.POSTGRES,
+                                    entityTypeEl.indicesAsIndexMirrorList())
+                        }
 
+                        dbTypeElement.allDbEntities(processingEnv)
+                                .filter { it.hasAnnotation(SyncableEntity::class.java) }
+                                .forEach { syncableEntity ->
+
+                            addRecreateTrkIndexes(syncableEntity.simpleName.toString())
+                        }
+
+                    }
                     .endControlFlow()
                     .build())
             .build())
@@ -97,7 +124,6 @@ private fun CodeBlock.Builder.addRecreateSqliteTriggerCode(typeElement: TypeElem
     addSyncableEntityUpdateTriggersSqlite("database.execSQL", syncableEntityInfo)
     return this
 }
-
 
 /**
  * Generates a migration that handles a database being upgraded to the new instant sync (syncpush)
