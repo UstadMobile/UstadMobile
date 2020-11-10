@@ -3,6 +3,8 @@ package com.ustadmobile.lib.annotationprocessor.core
 import com.squareup.kotlinpoet.AnnotationSpec
 import com.squareup.kotlinpoet.CodeBlock
 import org.apache.commons.text.StringEscapeUtils
+import androidx.room.Query
+import com.squareup.kotlinpoet.asClassName
 
 /**
  * Searches a list of the codeblocks that are associated with an annotation spec.
@@ -29,3 +31,11 @@ fun AnnotationSpec.valueMemberToString(): String {
 
     return strValue
 }
+
+/**
+ * Where the given list of annotation specs contains a Query annotation, get the
+ * query SQL as a String
+ */
+fun List<AnnotationSpec>.daoQuerySql() =
+    first { it.className == Query::class.asClassName() }.valueMemberToString()
+

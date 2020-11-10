@@ -9,7 +9,11 @@ import javax.lang.model.type.ExecutableType
 import androidx.room.*
 import com.ustadmobile.door.SyncableDoorDatabase
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER
+import java.util.*
 import javax.lang.model.type.TypeMirror
+
+val ALL_QUERY_ANNOTATIONS = listOf(Query::class.java, Update::class.java, Delete::class.java,
+        Insert::class.java)
 
 internal fun TypeElement.asEntityTypeSpecBuilder(): TypeSpec.Builder {
     val typeSpecBuilder = TypeSpec.classBuilder(this.simpleName.toString())
@@ -170,3 +174,37 @@ fun TypeElement.isDbSyncable(processingEnv: ProcessingEnvironment): Boolean {
 val TypeElement.daoKtorHelperDaoClassNames: Map<String, ClassName>
     get() = mapOf("Master" to this.asClassNameWithSuffix("${SUFFIX_KTOR_HELPER}Master"),
         "Local" to this.asClassNameWithSuffix("${SUFFIX_KTOR_HELPER}Local"))
+
+
+/**
+ * Where this TypeElement represents a DAO, this is a shorthand to provide a list of all methods on
+ * the DAO which are annotated with any kind of Query (inc Query, Delete, Update, Insert)
+ */
+fun TypeElement.allDaoQueryMethods() = allMethodsWithAnnotation(ALL_QUERY_ANNOTATIONS)
+
+/**
+ * Convert this TypeElement into a Kotlin Poet FunSpec that can be used to generate implementations.
+ * TypeSpecs are often used as the basis for generation logic because we can generate it (eg. for
+ * SyncDaos etc). This extension function converts a TypeElement from the annotation processor
+ * environment into an equivalent TypeSpec.
+ */
+fun TypeElement.asImplementableTypeSpec(processingEnv: ProcessingEnvironment): TypeSpec {
+    val declaredType = this.asType() as DeclaredType
+    val thisTypeEl = this
+    return TypeSpec.classBuilder(asClassName())
+            .applyIf(Modifier.ABSTRACT in modifiers) {
+                addModifiers(KModifier.ABSTRACT)
+            }
+            .apply {
+                allOverridableMethods(processingEnv).forEach {executableEl ->
+                    val resolvedType = executableEl.asMemberOf(thisTypeEl, processingEnv)
+                    val returnTypeName = resolvedType.suspendedSafeReturnType
+
+                    addFunction(executableEl.asFunSpecConvertedToKotlinTypes(declaredType,
+                        processingEnv, forceNullableReturn = returnTypeName.isNullableAsSelectReturnResult,
+                        forceNullableParameterTypeArgs = returnTypeName.isNullableParameterTypeAsSelectReturnResult)
+                            .build())
+                }
+            }
+            .build()
+}

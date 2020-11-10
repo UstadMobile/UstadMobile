@@ -95,6 +95,7 @@ fun defaultSqlQueryVal(typeName: TypeName) = if(typeName in SQL_NUMERIC_TYPES) {
  * }
  * </pre>
  */
+@Deprecated("Use ClassNameExt.findAllSyncableEntities")
 fun findSyncableEntities(entityType: ClassName, processingEnv: ProcessingEnvironment,
                          embedPath: List<String> = listOf()) =
         findEntitiesWithAnnotation(entityType, SyncableEntity::class.java, processingEnv,
@@ -248,6 +249,7 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
 /**
  * Determine if the given
  */
+@Deprecated("Use TypeNameExt.isHttpQueryQueryParam instead")
 internal fun isQueryParam(typeName: TypeName) = typeName in QUERY_SINGULAR_TYPES
         || (typeName is ParameterizedTypeName
         && (typeName.rawType == List::class.asClassName() && typeName.typeArguments[0] in QUERY_SINGULAR_TYPES))
@@ -1336,8 +1338,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * @param daoTypeEl The DAO element that this is being generated for: optional for error logging purposes
      *
      */
-    fun generateKtorRouteSelectCodeBlock(daoMethod: FunSpec, daoTypeEl: TypeElement? = null,
-                                         syncHelperDaoVarName: String = "_syncHelper",
+    @Deprecated("Use DbProcessKtorServer addKtorRouteSelectCodeBlock")
+    fun generateKtorRouteSelectCodeBlock(daoMethod: FunSpec, syncHelperDaoVarName: String = "_syncHelper",
                                          serverType: Int = DbProcessorKtorServer.SERVER_TYPE_KTOR) : CodeBlock {
         val codeBlock = CodeBlock.builder()
         val resultType = resolveQueryResultType(daoMethod.returnType!!)

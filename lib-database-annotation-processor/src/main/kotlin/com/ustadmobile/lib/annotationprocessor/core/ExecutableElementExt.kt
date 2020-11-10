@@ -1,7 +1,8 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.Query
-import com.squareup.kotlinpoet.CodeBlock
+import com.squareup.kotlinpoet.*
+import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import java.util.*
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.ExecutableElement
@@ -9,6 +10,9 @@ import javax.lang.model.element.TypeElement
 import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.annotation.SyncableEntity
+import org.jetbrains.annotations.Nullable
+import javax.lang.model.element.Modifier
+import javax.lang.model.element.VariableElement
 
 /**
  * An ExecutableElement could be a normal Kotlin function, or it could be a getter method. If it is
@@ -67,4 +71,67 @@ fun ExecutableElement.accessAsPropertyOrFunctionInvocationCall(): String {
     }else {
         return "$simpleName()"
     }
+}
+
+/**
+ * Create a Kotlin Poet FunSpec based on this ExecutableElement
+ */
+fun ExecutableElement.asFunSpecConvertedToKotlinTypes(enclosing: DeclaredType,
+                                    processingEnv: ProcessingEnvironment,
+                                    forceNullableReturn: Boolean = false,
+                                    forceNullableParameterTypeArgs: Boolean = false,
+                                    ignoreAbstract: Boolean = false): FunSpec.Builder {
+
+    val funSpec = FunSpec.builder(simpleName.toString())
+
+    if(!ignoreAbstract && Modifier.ABSTRACT in this.modifiers) {
+        funSpec.addModifiers(KModifier.ABSTRACT)
+    }
+
+    funSpec.takeIf { Modifier.PROTECTED in this.modifiers }?.addModifiers(KModifier.PROTECTED)
+
+    funSpec.takeIf { Modifier.PROTECTED in this.modifiers }?.addModifiers(KModifier.PRIVATE)
+
+    val resolvedExecutableType = processingEnv.typeUtils.asMemberOf(enclosing, this) as ExecutableType
+
+    var suspendedReturnType = null as TypeName?
+    var suspendedParamEl = null as VariableElement?
+    for(i in 0 until parameters.size) {
+        val resolvedTypeName = resolvedExecutableType.parameterTypes[i].asTypeName().javaToKotlinType()
+
+        if(isContinuationParam(resolvedTypeName)) {
+            suspendedParamEl= parameters[i]
+            suspendedReturnType = resolveReturnTypeIfSuspended(resolvedExecutableType)
+            funSpec.addModifiers(KModifier.SUSPEND)
+        }else {
+            funSpec.addParameter(parameters[i].simpleName.toString(),
+                    resolvedTypeName.copy(nullable = (parameters[i].getAnnotation(Nullable::class.java) != null)))
+        }
+    }
+
+    if(suspendedReturnType != null && suspendedReturnType != UNIT) {
+        funSpec.returns(suspendedReturnType.copy(nullable = forceNullableReturn
+                || suspendedParamEl?.getAnnotation(Nullable::class.java) != null))
+    }else if(suspendedReturnType == null) {
+        var returnType = resolvedExecutableType.returnType.asTypeName().javaToKotlinType()
+                .copy(nullable = forceNullableReturn || getAnnotation(Nullable::class.java) != null)
+        if(forceNullableParameterTypeArgs && returnType is ParameterizedTypeName) {
+            returnType = returnType.rawType.parameterizedBy(*returnType.typeArguments.map { it.copy(nullable = true)}.toTypedArray())
+        }
+
+        funSpec.returns(returnType)
+    }
+
+    funSpec.addAnnotations(annotationMirrors.map { AnnotationSpec.get(it) })
+
+    return funSpec
+}
+
+fun ExecutableElement.asOverridingFunSpecConvertedToKotlinTypes(enclosing: DeclaredType,
+                                                                processingEnv: ProcessingEnvironment,
+                                                                forceNullableReturn: Boolean = false,
+                                                                forceNullableParameterTypeArgs: Boolean = false) : FunSpec.Builder {
+    return asFunSpecConvertedToKotlinTypes(enclosing, processingEnv, forceNullableReturn,
+            forceNullableParameterTypeArgs, ignoreAbstract = true)
+            .addModifiers(KModifier.OVERRIDE)
 }

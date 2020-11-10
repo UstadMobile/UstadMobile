@@ -8,6 +8,7 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.DoorDbType
+import javax.annotation.processing.ProcessingEnvironment
 
 /**
  * Provides the appropriate SQL type name as a string for this type name
@@ -136,3 +137,56 @@ fun TypeName.unwrapQueryResultComponentType() = unwrapLiveDataOrDataSourceFactor
  * Determine if this typename represents LiveData
  */
 fun TypeName.isLiveData() = this is ParameterizedTypeName && rawType == DoorLiveData::class.asClassName()
+
+/**
+ * Finds any syncable entities that are part of this TypeName. This works even if the TypeName
+ * represents a parameterized type (e.g. List, LiveData, DataSource.Factory etc).
+ */
+fun TypeName.syncableEntities(processingEnv: ProcessingEnvironment) : List<ClassName>{
+    val unwrappedType = unwrapQueryResultComponentType()
+    return (unwrappedType as? ClassName)?.findAllSyncableEntities(processingEnv)?.values?.toList() ?: listOf()
+}
+
+/**
+ * Checks if the given TypeName is an entity that is either annotated with SyncableEntity
+ * itself, is the descendant of any class with the syncable entity annotation, or contains
+ * embedded syncable entities
+ */
+fun TypeName.hasSyncableEntities(processingEnv: ProcessingEnvironment) = syncableEntities(processingEnv).isNotEmpty()
+
+/**
+ * Check if this TypeName should be sent as query parameters when passed over http. This is true
+ * for primitive types, strings, and lists thereof. It is false for other types (e.g. entities themselves)
+ */
+fun TypeName.isHttpQueryQueryParam(): Boolean {
+    return this in QUERY_SINGULAR_TYPES
+            || (this is ParameterizedTypeName
+            && (this.rawType == List::class.asClassName() && this.typeArguments[0] in QUERY_SINGULAR_TYPES))
+}
+
+/**
+ * Gets the default value for this typename. This is 0 for primitive numbers, false for booleans,
+ * null for strings, empty listOf for list types
+ */
+fun TypeName.defaultTypeValueCode(): CodeBlock {
+    val codeBlock = CodeBlock.builder()
+    val kotlinType = javaToKotlinType()
+    when(kotlinType) {
+        INT -> codeBlock.add("0")
+        LONG -> codeBlock.add("0L")
+        BYTE -> codeBlock.add("0.toByte()")
+        FLOAT -> codeBlock.add("0.toFloat()")
+        DOUBLE -> codeBlock.add("0.toDouble()")
+        BOOLEAN -> codeBlock.add("false")
+        String::class.asTypeName() -> codeBlock.add("null as String?")
+        else -> {
+            if(kotlinType is ParameterizedTypeName && kotlinType.rawType == List::class.asClassName()) {
+                codeBlock.add("mutableListOf<%T>()", kotlinType.typeArguments[0])
+            }else {
+                codeBlock.add("null as %T?", this)
+            }
+        }
+    }
+
+    return codeBlock.build()
+}

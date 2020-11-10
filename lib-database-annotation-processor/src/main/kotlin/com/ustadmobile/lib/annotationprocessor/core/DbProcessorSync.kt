@@ -7,19 +7,15 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.door.DoorDatabaseSyncRepository
-import com.ustadmobile.door.DoorSqlitePrimaryKeyManager
 import com.ustadmobile.door.SyncResult
 import com.ustadmobile.door.ServerUpdateNotificationManager
 import com.ustadmobile.door.annotation.EntityWithAttachment
 import com.ustadmobile.door.annotation.PgOnConflict
 import com.ustadmobile.door.annotation.SyncableEntity
-import com.ustadmobile.door.daos.ISyncHelperEntitiesDao
-import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_INSTANCE_MEMBER
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_ON_MEMBER
-import io.ktor.client.HttpClient
 import io.ktor.client.request.forms.InputProvider
 import io.ktor.content.TextContent
 import io.ktor.http.Headers
@@ -32,7 +28,6 @@ import java.io.FileInputStream
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.TypeElement
-import kotlin.reflect.KClass
 import com.ustadmobile.door.entities.UpdateNotificationSummary
 
 /**

@@ -9,7 +9,9 @@ import java.util.*
 import javax.lang.model.element.ExecutableElement
 import com.ustadmobile.door.RepositoryConnectivityListener
 import com.ustadmobile.door.TableChangeListener
+import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
+import androidx.room.Query
 
 /**
  * Add a method or property that overrides the given accessor. The ExecutableElement could be a
@@ -218,3 +220,27 @@ fun TypeSpec.toCreateTableSql(dbType: Int): String {
 
     return sql
 }
+
+/**
+ * Where the given TypeSpec represents a DAO, get a list of all the syncable entities that are
+ * part of this DAO
+ */
+fun TypeSpec.daoSyncableEntitiesInSelectResults(processingEnv: ProcessingEnvironment) : List<ClassName> {
+    val syncableEntities = mutableSetOf<ClassName>()
+    funSpecs.filter { it.hasAnnotation(Query::class.java) }.forEach { funSpec ->
+        val querySql = funSpec.daoQuerySql().toLowerCase(Locale.ROOT)
+        val returnType = funSpec.returnType
+        if (!querySql.startsWith("update") && !querySql.startsWith("delete") &&
+                returnType is ClassName) {
+            syncableEntities += returnType.entitySyncableTypes(processingEnv)
+        }
+    }
+
+    return syncableEntities.toList()
+}
+
+/**
+ * Provide a list of all functions that require implementation (e.g. DAO functions etc)
+ */
+fun TypeSpec.functionsToImplement() = funSpecs.filter { KModifier.ABSTRACT in it.modifiers }
+
