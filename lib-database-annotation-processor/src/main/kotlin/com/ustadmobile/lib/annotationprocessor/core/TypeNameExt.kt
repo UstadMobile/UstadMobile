@@ -94,6 +94,16 @@ val TypeElement.isDaoWithRepository: Boolean
             && this.getAnnotation(Repository::class.java) != null
 
 /**
+ * Determines if this DAO requires a KTOR Helper (it has return results with syncable entities and
+ * is annotated with @Repository)
+ *
+ * TODO: Check to make sure that at least one of the select queries returns a syncable entity type
+ */
+val TypeElement.isDaoThatRequiresKtorHelper: Boolean
+    get() = isDaoWithRepository
+
+
+/**
  * If the given TypeName represents typed LiveData or a DataSource Factory, unwrap it to the
  * raw type.
  *

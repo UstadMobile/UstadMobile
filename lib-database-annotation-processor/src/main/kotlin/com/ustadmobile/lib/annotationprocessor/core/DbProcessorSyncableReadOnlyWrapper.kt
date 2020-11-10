@@ -131,7 +131,7 @@ fun FileSpec.Builder.addDbWrapperTypeSpec(dbTypeEl: TypeElement,
                             addWrapperAccessorFunction(daoGetter, processingEnv, allKnownEntityTypesMap)
 
                             if(overrideKtorHelperDaos &&
-                                    daoGetter.returnType.asTypeElement(processingEnv)?.isDaoWithRepository == true) {
+                                    daoGetter.returnType.asTypeElement(processingEnv)?.isDaoThatRequiresKtorHelper == true) {
                                 addKtorHelperWrapperAccessorFunction(daoGetter, processingEnv)
                             }
                         }

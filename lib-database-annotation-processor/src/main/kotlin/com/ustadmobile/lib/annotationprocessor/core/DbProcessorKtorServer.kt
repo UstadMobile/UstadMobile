@@ -504,8 +504,7 @@ fun CodeBlock.Builder.addKtorDaoMethodCode(daoFunSpec: FunSpec, processingEnv: P
             .add("val _gson: %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
 
 
-    if(daoFunSpec.hasAnnotation(Query::class.java) &&
-            daoFunSpec.returnType?.hasSyncableEntities(processingEnv) == true) {
+    if(daoFunSpec.isQueryWithSyncableResults(processingEnv)) {
         addKtorRouteSelectCodeBlock(daoFunSpec, processingEnv, SERVER_TYPE_KTOR)
     }
 
@@ -554,11 +553,11 @@ fun CodeBlock.Builder.addKtorRouteSelectCodeBlock(daoMethod: FunSpec, processing
     val syncableEntitiesList = returnTypeName.syncableEntities(processingEnv)
 
     if(syncableEntitiesList.isNotEmpty()) {
-        add("val _reqId = %T().nextInt()\n", Random::class)
-                .addGetClientIdHeader("__clientId", serverType)
+        addGetClientIdHeader("__clientId", serverType)
         queryVarsList  += ParameterSpec.builder("clientId", INT).build()
     }
 
+    add("val _ktorHelperDao = _ktorHelperDaoFn(_db)\n")
 
     val modifiedQueryFunSpec = FunSpec.builder(daoMethod.name)
             .addParameters(queryVarsList)
@@ -570,10 +569,7 @@ fun CodeBlock.Builder.addKtorRouteSelectCodeBlock(daoMethod: FunSpec, processing
             processingEnv, daoVarName = "_ktorHelperDao",
             preexistingVarNames = listOf("clientId"), serverType = serverType, addRespondCall = false)
 
-    addRespondCall(resultType, "_result", serverType,
-            ktorBeforeRespondCodeBlock = CodeBlock.of("%M.response.header(%S, _reqId)\n",
-                    DbProcessorKtorServer.CALL_MEMBER, "X-reqid"),
-            nanoHttpdApplyCodeBlock = CodeBlock.of("addHeader(%S, _reqId.toString())\n", "X-reqid"))
+    addRespondCall(resultType, "_result", serverType)
 
     return this
 }
@@ -786,6 +782,28 @@ fun CodeBlock.Builder.addRespondCall(returnType: TypeName, varName: String, serv
 }
 
 /**
+ * Convert the given FunSpec to what is required for a KtorHelper function. This will add
+ * offset and limit parameters if the DAO uses DataSource.Factory, and it will add a clientId
+ * parameter.
+ *
+ * The return type will be the result type (e.g. DataSource.Factory or LiveData) will be unwrapped
+ */
+fun FunSpec.toKtorHelperFunSpec() : FunSpec {
+    val resultType = this.returnType?.unwrapLiveDataOrDataSourceFactory()
+    return this.toBuilder()
+            .applyIf(this.returnType?.isDataSourceFactory() ==true) {
+                addParameter(PARAM_NAME_OFFSET, INT)
+                addParameter(PARAM_NAME_LIMIT, INT)
+            }
+            .addParameter("clientId", INT)
+            .apply {
+                if(resultType != null)
+                    returns(resultType.copy(nullable = resultType.isNullableAsSelectReturnResult))
+            }
+            .build()
+}
+
+/**
  * This annotation processor generates a KTOR Route for each DAO, and a KTOR Route for each DAO
  * with subroutes for each DAO that is part of the database.
  *
@@ -810,6 +828,19 @@ fun CodeBlock.Builder.addRespondCall(returnType: TypeName, varName: String, serv
 
 class DbProcessorKtorServer: AbstractDbProcessor() {
 
+    fun FileSpec.Builder.addKtorHelperInterface(daoTypeSpec: TypeSpec, daoClassName: ClassName,
+                                                processingEnv: ProcessingEnvironment) : FileSpec.Builder {
+
+        addType(TypeSpec.interfaceBuilder(daoClassName.withSuffix(SUFFIX_KTOR_HELPER))
+                .apply {
+                    daoTypeSpec.funSpecs.filter { it.isQueryWithSyncableResults(processingEnv) }.forEach {
+                        addFunction(it.toKtorHelperFunSpec())
+                    }
+                }
+                .build())
+
+        return this
+    }
 
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
@@ -817,11 +848,22 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
         daos.filter { it is TypeElement && it.isDaoWithRepository }.map { it as TypeElement }.forEach {daoTypeEl ->
+            val daoBaseName = daoTypeEl.simpleName.toString()
+            val daoTypeSpec = daoTypeEl.asImplementableTypeSpec(processingEnv)
+
             FileSpec.builder(daoTypeEl.packageName, "${daoTypeEl.simpleName}$SUFFIX_KTOR_ROUTE")
-                    .addDaoKtorRouteFun(daoTypeEl.asImplementableTypeSpec(processingEnv),
+                    .addDaoKtorRouteFun(daoTypeSpec,
                         daoTypeEl.asClassName(), processingEnv)
                     .build()
                     .writeToDirsFromArg(OPTION_KTOR_OUTPUT)
+
+            if(daoTypeEl.isDaoThatRequiresKtorHelper) {
+                FileSpec.builder(daoTypeEl.packageName, "$daoBaseName$SUFFIX_KTOR_HELPER")
+                        .addKtorHelperInterface(daoTypeSpec, daoTypeEl.asClassName(),
+                                processingEnv)
+                        .build()
+                        .writeToDirsFromArg(OPTION_KTOR_OUTPUT)
+            }
         }
 
 
