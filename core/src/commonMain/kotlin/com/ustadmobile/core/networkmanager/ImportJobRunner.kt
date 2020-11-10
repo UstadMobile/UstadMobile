@@ -1,14 +1,18 @@
 package com.ustadmobile.core.networkmanager
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.getFirstValue
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
+import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.db.entities.ContainerWithContainerEntryWithMd5
 import io.ktor.client.request.header
@@ -17,9 +21,9 @@ import io.ktor.client.request.post
 import io.ktor.client.request.url
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.HttpStatusCode
+import kotlinx.atomicfu.AtomicLong
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.kodein.di.DI
@@ -46,6 +50,19 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
     val connectivityStatus: DoorLiveData<ConnectivityStatus>
         get() = _connectivityStatus
 
+    private val importProgress = atomic(0L)
+
+    private val IMPORT_RUNNER_TAG = "ImportJobRunner"
+
+
+    suspend fun progressUpdater() = coroutineScope {
+        while (isActive) {
+            Napier.d(tag = IMPORT_RUNNER_TAG, message = "progress updating at value ${importProgress.value}")
+            db.containerImportJobDao.updateProgress(importProgress.value, 100, containerImportJob.cijUid)
+            delay(1000L)
+        }
+    }
+
     /**
      * Lock used for any operation that is changing the status of the Fetch download
      */
@@ -63,13 +80,24 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
         val containerBaseDir = containerImportJob.cijContainerBaseDir ?: throw IllegalArgumentException("container folder not given")
         val contentEntryUid = containerImportJob.cijContentEntryUid.takeIf { it != 0L } ?: throw IllegalArgumentException("contentEntryUid not given")
 
-        val container = contentImportManager.importFileToContainer(
+        val importerJob = GlobalScope.async { progressUpdater() }
+        var container: Container? = null
+        try{
+            container = contentImportManager.importFileToContainer(
                 filePath,
                 mimeType,
                 contentEntryUid,
-                containerBaseDir, mapOf()){
+                containerBaseDir, mapOf()) {
+                    importProgress.value = it.toLong()
+            }
+        }finally {
+            Napier.d(tag = IMPORT_RUNNER_TAG, message = "cancelled importJob")
+            importerJob.cancel()
+        }
 
-        } ?: return
+        if(container == null){
+            return
+        }
         containerImportJob.cijContainerUid = container.containerUid
         db.containerImportJobDao.updateImportComplete(importJobUid = containerImportJob.cijUid)
 
@@ -159,7 +187,9 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
             } catch (e: Exception) {
 
                 println("${e.cause?.message}")
-                val connectivityState = connectivityStatus.getValue()?.connectivityState
+
+                val status = connectivityStatus.getValue()
+                val connectivityState = status?.connectivityState
                 if (connectivityState != ConnectivityStatus.STATE_UNMETERED && connectivityState != ConnectivityStatus.STATE_METERED) {
                     return JobStatus.QUEUED
                 }

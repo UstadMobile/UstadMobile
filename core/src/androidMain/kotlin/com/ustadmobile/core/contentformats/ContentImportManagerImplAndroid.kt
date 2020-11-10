@@ -10,7 +10,7 @@ import com.ustadmobile.core.networkmanager.DownloadNotificationService
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 import org.kodein.di.DI
 
-class ContentImportManagerImplAndroid(contentPlugins: List<ContentTypePlugin>, val context: Any, endpoint: Endpoint, di: DI) : ContentImportManagerImpl(contentPlugins, context,endpoint, di) {
+class ContentImportManagerImplAndroid(contentPlugins: List<ContentTypePlugin>, context: Any, endpoint: Endpoint, di: DI) : ContentImportManagerImpl(contentPlugins, context,endpoint, di) {
 
     override suspend fun queueImportContentFromFile(filePath: String,
                                                     metadata: ImportedContentEntryMetaData,
