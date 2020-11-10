@@ -228,10 +228,8 @@ fun TypeSpec.toCreateTableSql(dbType: Int): String {
 fun TypeSpec.daoSyncableEntitiesInSelectResults(processingEnv: ProcessingEnvironment) : List<ClassName> {
     val syncableEntities = mutableSetOf<ClassName>()
     funSpecs.filter { it.hasAnnotation(Query::class.java) }.forEach { funSpec ->
-        val querySql = funSpec.daoQuerySql().toLowerCase(Locale.ROOT)
-        val returnType = funSpec.returnType
-        if (!querySql.startsWith("update") && !querySql.startsWith("delete") &&
-                returnType is ClassName) {
+        val returnType = funSpec.returnType?.unwrapQueryResultComponentType()
+        if (!funSpec.daoQuerySql().isSQLAModifyingQuery() && returnType is ClassName) {
             syncableEntities += returnType.entitySyncableTypes(processingEnv)
         }
     }
@@ -244,3 +242,10 @@ fun TypeSpec.daoSyncableEntitiesInSelectResults(processingEnv: ProcessingEnviron
  */
 fun TypeSpec.functionsToImplement() = funSpecs.filter { KModifier.ABSTRACT in it.modifiers }
 
+
+/**
+ * Convenience wrapper to get a list of all FunSpecs that represent a function annotated with
+ * Query that have SyncableEntity in their results
+ */
+fun TypeSpec.funSpecsWithSyncableSelectResults(processingEnv: ProcessingEnvironment): List<FunSpec>
+        = funSpecs.filter { it.isQueryWithSyncableResults(processingEnv) }

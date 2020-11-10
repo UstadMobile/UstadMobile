@@ -39,6 +39,12 @@ import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Compan
 import org.kodein.di.DI
 import java.lang.IllegalArgumentException
 import javax.annotation.processing.ProcessingEnvironment
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.SUFFIX_JDBC_KT
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER_LOCAL
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER_MASTER
+import kotlin.reflect.KClass
 
 /**
  * Generates a codeblock that will get a parameter from a request and add it to the codeblock
@@ -308,6 +314,7 @@ fun CodeBlock.Builder.addRequestDi(diVarName: String = "_di", dbVarName: String 
     return this
 }
 
+@Deprecated("We are not using request id as a means to track entities received anymore")
 internal fun generateUpdateTrackerReceivedCodeBlock(trackerClassName: ClassName, syncHelperVarName: String = "_syncHelper",
                                                     syncHelperFnName: String = "_syncHelperFn",
                                                     dbVarName: String = "_db",
@@ -324,6 +331,7 @@ internal fun generateUpdateTrackerReceivedCodeBlock(trackerClassName: ClassName,
             .apply { takeIf { serverType == SERVER_TYPE_NANOHTTPD }?.add(CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE) }
             .build()
 
+@Deprecated("Use CodeBlock.Builder.addEntitiesAckCodeBlock")
 internal fun generateReceiveEntitiesAckCodeBlock(trackerClassName: ClassName,
                                                  syncHelperVarName: String = "_syncHelper",
                                                  syncHelperFnName: String = "_syncHelperFn",
@@ -360,6 +368,7 @@ internal fun generateUpdateTrackerReceivedKtorRoute(trackerClassName: ClassName,
             .endControlFlow()
             .build()
 
+@Deprecated("Use CodeBlock.addEntitiesAckKtorRoute")
 internal fun generateEntitiesAckKtorRoute(trackerClassName: ClassName,
                                           entityClassName: ClassName,
                                           syncHelperVarName: String = "_syncHelper",
@@ -471,9 +480,13 @@ fun FileSpec.Builder.addDaoKtorRouteFun(daoTypeSpec: TypeSpec, daoClassName: Cla
                         MemberName("io.ktor.routing", "route"),
                         daoClassName.simpleName)
                     .apply {
-                        //TODO: create endpoints for all query functions etc.
                         daoTypeSpec.funSpecs.forEach {daoFunSpec ->
                             addKtorDaoMethodCode(daoFunSpec, processingEnv)
+                        }
+
+                        daoTypeSpec.daoSyncableEntitiesInSelectResults(processingEnv).forEach {syncableEntity ->
+                            val syncableEntityInfo = SyncableEntityInfo(syncableEntity, processingEnv)
+                            addEntitiesAckKtorRoute(syncableEntityInfo.tracker, syncableEntity)
                         }
                     }
                     .endControlFlow()
@@ -506,6 +519,8 @@ fun CodeBlock.Builder.addKtorDaoMethodCode(daoFunSpec: FunSpec, processingEnv: P
 
     if(daoFunSpec.isQueryWithSyncableResults(processingEnv)) {
         addKtorRouteSelectCodeBlock(daoFunSpec, processingEnv, SERVER_TYPE_KTOR)
+    }else {
+        addHttpServerPassToDaoCodeBlock(daoFunSpec, processingEnv, serverType = SERVER_TYPE_KTOR)
     }
 
     endControlFlow()
@@ -608,7 +623,7 @@ fun CodeBlock.Builder.addHttpServerPassToDaoCodeBlock(daoMethod: FunSpec,
     val getVarsCodeBlock = CodeBlock.builder()
     val callCodeBlock = CodeBlock.builder()
 
-    val returnType = daoMethod.returnType
+    val returnType = daoMethod.returnType ?: UNIT
     if(returnType != UNIT) {
         callCodeBlock.add("val _result = ")
     }
@@ -665,8 +680,8 @@ fun CodeBlock.Builder.addHttpServerPassToDaoCodeBlock(daoMethod: FunSpec,
 
     callCodeBlock.takeIf { useRunBlocking }?.endControlFlow()
 
-    var respondResultType = resolveQueryResultType(returnType!!)
-    respondResultType = respondResultType.copy(nullable = isNullableResultType(respondResultType))
+    var respondResultType = returnType.unwrapLiveDataOrDataSourceFactory()
+    respondResultType = respondResultType.copy(nullable = respondResultType.isNullableAsSelectReturnResult)
 
     add(getVarsCodeBlock.build())
     add(beforeDaoCallCode)
@@ -674,7 +689,6 @@ fun CodeBlock.Builder.addHttpServerPassToDaoCodeBlock(daoMethod: FunSpec,
     add(afterDaoCallCode)
     if(addRespondCall) {
         addRespondCall(respondResultType, "_result", serverType)
-        //add(generateRespondCall(respondResultType, "_result", serverType))
     }
 
     return this
@@ -787,10 +801,25 @@ fun CodeBlock.Builder.addRespondCall(returnType: TypeName, varName: String, serv
  * parameter.
  *
  * The return type will be the result type (e.g. DataSource.Factory or LiveData) will be unwrapped
+ * @param overrides true if this is an override (e.g. abstract DAO or implementation)
+ * @param annotationSpecs if not null, this replaces the original annotations for the function
+ * with the given list
  */
-fun FunSpec.toKtorHelperFunSpec() : FunSpec {
+fun FunSpec.toKtorHelperFunSpec(overrides: Boolean = false,
+                                annotationSpecs: List<AnnotationSpec>? = null,
+                                isAbstract: Boolean = true) : FunSpec {
     val resultType = this.returnType?.unwrapLiveDataOrDataSourceFactory()
     return this.toBuilder()
+            .applyIf(annotationSpecs != null) {
+                annotations.clear()
+                annotationSpecs?.also  { annotations.addAll(it) }
+            }
+            .applyIf(!isAbstract) {
+                modifiers.remove(KModifier.ABSTRACT)
+            }
+            .applyIf(overrides) {
+                addModifiers(KModifier.OVERRIDE)
+            }
             .applyIf(this.returnType?.isDataSourceFactory() ==true) {
                 addParameter(PARAM_NAME_OFFSET, INT)
                 addParameter(PARAM_NAME_LIMIT, INT)
@@ -801,6 +830,128 @@ fun FunSpec.toKtorHelperFunSpec() : FunSpec {
                     returns(resultType.copy(nullable = resultType.isNullableAsSelectReturnResult))
             }
             .build()
+}
+
+/**
+ * Used for generating the KTOR helper abstract DAO and implementation functions.
+ * This will find the annotated query SQL and refactor it using
+ * refactorSyncSelectSql.
+ *
+ * @param processingEnv processing environment
+ * @param csnAnnotationClass MasterChangeSeqNum::class or LocalChangeSeqNum::class
+ */
+fun FunSpec.filterAnnotationSpecsAndRefactorToSyncableSql(processingEnv: ProcessingEnvironment,
+    csnAnnotationClass: KClass<out Annotation>) : List<AnnotationSpec>{
+    val resultEntityClassName = returnType?.unwrapQueryResultComponentType()
+            as? ClassName
+            ?: throw IllegalArgumentException("${name} return type is null")
+    val isDataSource = returnType?.isDataSourceFactory() ?: false
+
+    return annotations.mapNotNull {annotationSpec ->
+        if(annotationSpec.className == Query::class.asClassName()) {
+            val sql = refactorSyncSelectSql(daoQuerySql(), resultEntityClassName, processingEnv,
+                    csnAnnotationClass, addOffsetAndLimitParam = isDataSource)
+            AnnotationSpec.builder(Query::class.asClassName())
+                    .addMember("%S", sql).build()
+        }else {
+            null
+        }
+    }
+}
+
+/**
+ * Add a KTOR route codeblock that implements the acknwoledge (ack) entities function.
+ */
+fun CodeBlock.Builder.addEntitiesAckKtorRoute(trackerClassName: ClassName,
+                                          entityClassName: ClassName,
+                                          syncHelperVarName: String = "_syncHelper",
+                                          syncHelperFnName: String = "_syncHelperFn",
+                                          dbVarName: String = "_db",
+                                          serverType: Int = SERVER_TYPE_KTOR) : CodeBlock.Builder {
+    beginControlFlow("%M(%S)",
+            DbProcessorKtorServer.POST_MEMBER, "_ack${entityClassName.simpleName}Received")
+            .addRequestDi()
+            .add("val _gson: %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
+            .addEntitiesAckCodeBlock(trackerClassName, syncHelperVarName,
+                    syncHelperFnName = syncHelperFnName, dbVarName = dbVarName, serverType = serverType)
+            .endControlFlow()
+
+    return this
+}
+
+/**
+ * Add code block that implements acknowledging (ack) entities received by the client
+ */
+internal fun CodeBlock.Builder.addEntitiesAckCodeBlock(trackerClassName: ClassName,
+                                        syncHelperVarName: String = "_syncHelper",
+                                        syncHelperFnName: String = "_syncHelperFn",
+                                        dbVarName: String = "_db",
+                                        serverType: Int = SERVER_TYPE_KTOR): CodeBlock.Builder {
+
+    addGetClientIdHeader("_clientId", serverType)
+    addGetParamFromHttpRequest(INT, "reqId", "_requestId",
+            serverType = serverType)
+    add("val _ackList: %T<%T> = ", List::class.asClassName(), EntityAck::class.asClassName())
+    addGetParamFromHttpRequest(
+            List::class.asClassName().parameterizedBy(EntityAck::class.asClassName()),
+            "ackList", serverType = serverType)
+    add("\n")
+    takeIf { serverType == SERVER_TYPE_KTOR }?.add("val $syncHelperVarName = $syncHelperFnName($dbVarName)\n")
+    beginControlFlow("$syncHelperVarName._replace${trackerClassName.simpleName}(_ackList.map  ")
+    add("%T(clientId = _clientId, csn = it.csn, epk = it.epk, rx = true)\n", trackerClassName)
+    endControlFlow()
+    add(")\n")
+    takeIf { serverType == SERVER_TYPE_KTOR }?.add(CODEBLOCK_KTOR_NO_CONTENT_RESPOND)
+    takeIf { serverType == SERVER_TYPE_NANOHTTPD }?.add(CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE)
+
+    return this
+}
+
+/**
+ * Adds the Ktor helper interface for the given DAO to the FileSpec
+ */
+fun FileSpec.Builder.addKtorHelperInterface(daoTypeSpec: TypeSpec, daoClassName: ClassName,
+                                            processingEnv: ProcessingEnvironment) : FileSpec.Builder {
+
+    addType(TypeSpec.interfaceBuilder(daoClassName.withSuffix(SUFFIX_KTOR_HELPER))
+            .apply {
+                daoTypeSpec.funSpecsWithSyncableSelectResults(processingEnv).forEach {
+                    addFunction(it.toKtorHelperFunSpec(annotationSpecs = listOf()))
+                }
+            }
+            .build())
+
+    return this
+}
+
+/**
+ * Adds a ktor helper abstract dao to the FileSpec. This is the local or primary variant
+ * which contains all the queries that are needed by KTOR endpoints handling syncable select
+ * results.
+ */
+fun FileSpec.Builder.addKtorAbstractDao(daoTypeSpec: TypeSpec, daoClassName: ClassName,
+                                        csnAnnotationClass: KClass<out Annotation>,
+                                        processingEnv: ProcessingEnvironment): FileSpec.Builder {
+    val suffix = if(csnAnnotationClass == MasterChangeSeqNum::class) {
+        SUFFIX_KTOR_HELPER_MASTER
+    }else {
+        SUFFIX_KTOR_HELPER_LOCAL
+    }
+
+    addType(TypeSpec.classBuilder(daoClassName.withSuffix(suffix))
+            .addModifiers(KModifier.ABSTRACT)
+            .addSuperinterface(daoClassName.withSuffix(SUFFIX_KTOR_HELPER))
+            .apply {
+                daoTypeSpec.funSpecsWithSyncableSelectResults(processingEnv).forEach {funSpec ->
+                    addFunction(funSpec.toKtorHelperFunSpec(overrides = true,
+                        annotationSpecs = funSpec.filterAnnotationSpecsAndRefactorToSyncableSql(
+                                processingEnv, csnAnnotationClass)))
+                }
+            }
+            .build()
+    )
+
+    return this
 }
 
 /**
@@ -828,20 +979,35 @@ fun FunSpec.toKtorHelperFunSpec() : FunSpec {
 
 class DbProcessorKtorServer: AbstractDbProcessor() {
 
-    fun FileSpec.Builder.addKtorHelperInterface(daoTypeSpec: TypeSpec, daoClassName: ClassName,
-                                                processingEnv: ProcessingEnvironment) : FileSpec.Builder {
 
-        addType(TypeSpec.interfaceBuilder(daoClassName.withSuffix(SUFFIX_KTOR_HELPER))
+    /**
+     * Adds the JDBC implementation for the KTOR Helper (primary or local)
+     */
+    fun FileSpec.Builder.addKtorHelperDaoImplementation(daoTypeSpec: TypeSpec,
+                                                        daoClassName: ClassName,
+                                                        csnAnnotationClass: KClass<out Annotation>,
+                                                        processingEnv: ProcessingEnvironment): FileSpec.Builder {
+
+        val suffix = if(csnAnnotationClass == MasterChangeSeqNum::class) {
+            SUFFIX_KTOR_HELPER_MASTER
+        }else {
+            SUFFIX_KTOR_HELPER_LOCAL
+        }
+
+        val jdbcImplTypeSpec = TypeSpec.classBuilder(daoClassName.withSuffix("${suffix}"))
                 .apply {
-                    daoTypeSpec.funSpecs.filter { it.isQueryWithSyncableResults(processingEnv) }.forEach {
-                        addFunction(it.toKtorHelperFunSpec())
+                    daoTypeSpec.funSpecsWithSyncableSelectResults(processingEnv).forEach {
+                        addFunction(it.toKtorHelperFunSpec(overrides = true, isAbstract =  false,
+                            annotationSpecs =
+                            it.filterAnnotationSpecsAndRefactorToSyncableSql(processingEnv, csnAnnotationClass)))
                     }
-                }
-                .build())
+                }.build()
+
+        addType(generateJdbcDaoImpl(jdbcImplTypeSpec,
+                "${daoClassName.simpleName}${suffix}_$SUFFIX_JDBC_KT", daoClassName.packageName))
 
         return this
     }
-
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
         setupDb(roundEnv)
@@ -852,8 +1018,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
             val daoTypeSpec = daoTypeEl.asImplementableTypeSpec(processingEnv)
 
             FileSpec.builder(daoTypeEl.packageName, "${daoTypeEl.simpleName}$SUFFIX_KTOR_ROUTE")
-                    .addDaoKtorRouteFun(daoTypeSpec,
-                        daoTypeEl.asClassName(), processingEnv)
+                    .addDaoKtorRouteFun(daoTypeSpec, daoTypeEl.asClassName(), processingEnv)
                     .build()
                     .writeToDirsFromArg(OPTION_KTOR_OUTPUT)
 
@@ -861,6 +1026,29 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
                 FileSpec.builder(daoTypeEl.packageName, "$daoBaseName$SUFFIX_KTOR_HELPER")
                         .addKtorHelperInterface(daoTypeSpec, daoTypeEl.asClassName(),
                                 processingEnv)
+                        .build()
+                        .writeToDirsFromArg(OPTION_KTOR_OUTPUT)
+                FileSpec.builder(daoTypeEl.packageName, "$daoBaseName$SUFFIX_KTOR_HELPER_MASTER")
+                        .addKtorAbstractDao(daoTypeSpec, daoTypeEl.asClassName(),
+                            MasterChangeSeqNum::class, processingEnv)
+                        .build()
+                        .writeToDirsFromArg(OPTION_KTOR_OUTPUT)
+                FileSpec.builder(daoTypeEl.packageName, "$daoBaseName$SUFFIX_KTOR_HELPER_LOCAL")
+                        .addKtorAbstractDao(daoTypeSpec, daoTypeEl.asClassName(),
+                            LocalChangeSeqNum::class, processingEnv)
+                        .build()
+                        .writeToDirsFromArg(OPTION_KTOR_OUTPUT)
+                FileSpec.builder(daoTypeEl.packageName,
+                        "$daoBaseName$SUFFIX_KTOR_HELPER_MASTER$SUFFIX_JDBC_KT")
+                        .addKtorHelperDaoImplementation(daoTypeSpec, daoTypeEl.asClassName(),
+                            MasterChangeSeqNum::class, processingEnv)
+                        .build()
+                        .writeToDirsFromArg(OPTION_KTOR_OUTPUT)
+
+                FileSpec.builder(daoTypeEl.packageName,
+                        "$daoBaseName$SUFFIX_KTOR_HELPER_LOCAL$SUFFIX_JDBC_KT")
+                        .addKtorHelperDaoImplementation(daoTypeSpec, daoTypeEl.asClassName(),
+                                LocalChangeSeqNum::class, processingEnv)
                         .build()
                         .writeToDirsFromArg(OPTION_KTOR_OUTPUT)
             }

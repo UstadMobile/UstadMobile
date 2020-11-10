@@ -36,6 +36,9 @@ fun AnnotationSpec.valueMemberToString(): String {
  * Where the given list of annotation specs contains a Query annotation, get the
  * query SQL as a String
  */
-fun List<AnnotationSpec>.daoQuerySql() =
-    first { it.className == Query::class.asClassName() }.valueMemberToString()
+fun List<AnnotationSpec>.daoQuerySql() : String {
+    val queryValueMember = first { it.className == Query::class.asClassName() }.valueMemberToString()
+    return queryValueMember.trim().removePrefix("value").trim().removePrefix("=")
+            .trim().removePrefix("\"").removeSuffix("\"")
+}
 
