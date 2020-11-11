@@ -39,6 +39,5 @@ fun AnnotationSpec.valueMemberToString(): String {
 fun List<AnnotationSpec>.daoQuerySql() : String {
     val queryValueMember = first { it.className == Query::class.asClassName() }.valueMemberToString()
     return queryValueMember.trim().removePrefix("value").trim().removePrefix("=")
-            .trim().removePrefix("\"").removeSuffix("\"")
+            .trim().removeAllPrefixedInstancesOf("\"").removeAllSuffixedInstancesOf("\"")
 }
-
