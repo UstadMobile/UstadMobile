@@ -23,10 +23,7 @@ import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.port.android.util.ext.createTempDirForDestination
-import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.util.ext.getFileName
-import com.ustadmobile.port.android.util.ext.unregisterDestinationTempFile
+import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
 import kotlinx.coroutines.GlobalScope
@@ -144,7 +141,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 try {
                     GlobalScope.launch {
                         val input = requireContext().contentResolver.openInputStream(uri)
-                        val tmpDir = findNavController().createTempDirForDestination(requireContext(),
+                        val tmpDir = findNavController().createTempAppDirForDestination(requireContext(),
                                 "import-${System.currentTimeMillis()}")
 
                         val tmpFile = File(tmpDir, requireContext().contentResolver.getFileName(uri))
@@ -154,7 +151,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                         output.close()
                         input?.close()
 
-                        mPresenter?.handleFileSelection(tmpFile.absolutePath)
+                        mPresenter?.handleFileSelection(tmpFile.path)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

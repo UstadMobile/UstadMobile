@@ -70,38 +70,44 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
 
     suspend fun importContainer(markContainerAsDownloaded: Boolean = false) {
 
-        val filePathWithoutPrefix = if(markContainerAsDownloaded)
+        val filePathWithoutPrefix = if (markContainerAsDownloaded)
             containerImportJob.cijFilePath?.removePrefix("file://")
         else
             containerImportJob.cijFilePath
 
         val filePath = filePathWithoutPrefix ?: throw IllegalArgumentException("filePath not given")
-        val mimeType = containerImportJob.cijMimeType ?: throw IllegalArgumentException("mimeType not given")
-        val containerBaseDir = containerImportJob.cijContainerBaseDir ?: throw IllegalArgumentException("container folder not given")
-        val contentEntryUid = containerImportJob.cijContentEntryUid.takeIf { it != 0L } ?: throw IllegalArgumentException("contentEntryUid not given")
+        val mimeType = containerImportJob.cijMimeType
+                ?: throw IllegalArgumentException("mimeType not given")
+        val containerBaseDir = containerImportJob.cijContainerBaseDir
+                ?: throw IllegalArgumentException("container folder not given")
+        val contentEntryUid = containerImportJob.cijContentEntryUid.takeIf { it != 0L }
+                ?: throw IllegalArgumentException("contentEntryUid not given")
 
         val importerJob = GlobalScope.async { progressUpdater() }
         var container: Container? = null
-        try{
+        try {
             container = contentImportManager.importFileToContainer(
-                filePath,
-                mimeType,
-                contentEntryUid,
-                containerBaseDir, mapOf()) {
-                    importProgress.value = it.toLong()
+                    filePath,
+                    mimeType,
+                    contentEntryUid,
+                    containerBaseDir, mapOf()) {
+                importProgress.value = it.toLong()
             }
-        }finally {
+        } catch (e: Exception) {
+            Napier.e(tag = IMPORT_RUNNER_TAG, throwable = e, message = e.message?: "")
+            throw e
+        } finally {
             Napier.d(tag = IMPORT_RUNNER_TAG, message = "cancelled importJob")
             importerJob.cancel()
         }
 
-        if(container == null){
+        if (container == null) {
             return
         }
         containerImportJob.cijContainerUid = container.containerUid
         db.containerImportJobDao.updateImportComplete(importJobUid = containerImportJob.cijUid)
 
-        if(markContainerAsDownloaded){
+        if (markContainerAsDownloaded) {
             containerManager.handleContainerLocalImport(container)
         }
     }
@@ -169,7 +175,7 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
                     val code = currentHttpClient.post<HttpStatement>() {
                         url(UMFileUtil.joinPaths(endpointUrl,
                                 "/ContainerUpload/finalizeEntries/"))
-                        if(!job?.cijSessionId.isNullOrEmpty()){
+                        if (!job?.cijSessionId.isNullOrEmpty()) {
                             parameter("sessionId", job?.cijSessionId)
                         }
                         header("content-type", "application/json")

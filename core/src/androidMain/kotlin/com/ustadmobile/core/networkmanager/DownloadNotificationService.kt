@@ -10,6 +10,7 @@ import android.os.Looper
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.R
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
@@ -248,6 +249,7 @@ class DownloadNotificationService : Service(), DIAware {
                 totalBytes = t.cijContentLength
 
                 val progress = (bytesSoFar.toDouble() / totalBytes * 100).toInt()
+                Napier.d(tag = "NotificationService", message = "container import changed new progress: $progress")
                 builder.setProgress(MAX_PROGRESS_VALUE, progress, false)
 
                 contentText = if(t.cijImportCompleted) impl.getString(
@@ -256,6 +258,7 @@ class DownloadNotificationService : Service(), DIAware {
                     impl.getString(
                             MessageID.processing, this@DownloadNotificationService)
 
+                Napier.d(tag = "NotificationService", message = "container import changed desc is $contentText")
                 builder.setContentText(contentText)
 
                 doNotify()

@@ -26,7 +26,7 @@ class EpubTypePluginCommonJvm : EpubTypePlugin() {
         return withContext(Dispatchers.Default) {
             var contentEntry: ContentEntryWithLanguage? = null
             try {
-                val file = File(filePath)
+                val file = File(filePath.removePrefix("file://"))
                 ZipInputStream(FileInputStream(file)).use {
                     var zipEntry: ZipEntry? = null
                     while ({ zipEntry = it.nextEntry; zipEntry }() != null) {

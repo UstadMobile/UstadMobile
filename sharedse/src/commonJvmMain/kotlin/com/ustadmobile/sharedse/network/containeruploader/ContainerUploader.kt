@@ -37,8 +37,11 @@ class ContainerUploader(val request: ContainerUploaderRequest,
     private val logPrefix: String
         get() = "[ContainerUploader #${request.uploadJobUid} - ${System.identityHashCode(this)}]"
 
+    private val UPLOADER_JOB_TAG = "ContainerUploader"
+
     suspend fun progressUpdater() = coroutineScope {
         while (isActive) {
+            Napier.d(tag = UPLOADER_JOB_TAG, message = "upload progress updating at value ${bytesSoFar.get()}")
             db.containerImportJobDao.updateProgress(bytesSoFar.get(), contentLength.get(), request.uploadJobUid)
             delay(500L)
         }
@@ -140,6 +143,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                     } while (responseCode != HttpStatusCode.NoContent.value)
 
                 val endedAt = bytesSoFar.get() + readRange
+                Napier.d(tag = UPLOADER_JOB_TAG, message = "uploading, last ended at $endedAt")
                 uploadJob.cijBytesSoFar = endedAt
                 bytesSoFar.set(endedAt)
 

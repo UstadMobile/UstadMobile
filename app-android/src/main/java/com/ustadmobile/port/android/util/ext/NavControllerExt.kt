@@ -68,3 +68,12 @@ fun NavController.createTempDirForDestination(context: Context, name: String,
     registerDestinationTempFile(context, newTmpDir, destination)
     return newTmpDir
 }
+
+
+fun NavController.createTempAppDirForDestination(context: Context, name: String,
+destination: NavDestination? = this.currentDestination): File {
+    val newTmpDir = File(context.filesDir, name)
+    newTmpDir.mkdirs()
+    registerDestinationTempFile(context, newTmpDir, destination)
+    return newTmpDir
+}

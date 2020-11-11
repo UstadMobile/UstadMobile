@@ -32,7 +32,7 @@ class VideoTypePluginJvm: VideoTypePlugin() {
                                            context: Any, db: UmAppDatabase, repo: UmAppDatabase, progressListener: (Int) -> Unit): Container {
         return withContext(Dispatchers.Default) {
 
-            val file = File(filePath)
+            val file = File(filePath.removePrefix("file://"))
             val container = Container().apply {
                 containerContentEntryUid = contentEntryUid
                 cntLastModified = System.currentTimeMillis()
