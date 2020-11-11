@@ -105,6 +105,7 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
 
             videoCompleted.await()
             mediaTransformer.release()
+
             Napier.d(tag = VIDEO_ANDROID, message = "released transform with new file size " +
                     "at ${newVideo.length()} with old size at ${file.length()}")
 
@@ -119,6 +120,9 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
             val containerManager = ContainerManager(container, db, repo, containerBaseDir)
 
             containerManager.addEntries(ContainerManager.FileEntrySource(newVideo, newVideo.name))
+
+            file.delete()
+            newVideo.delete()
 
             container
         }
