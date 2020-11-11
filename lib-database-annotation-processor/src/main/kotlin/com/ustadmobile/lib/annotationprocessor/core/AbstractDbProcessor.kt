@@ -1735,13 +1735,18 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
      * on Unix, ; on Windows)
      */
     protected fun FileSpec.writeToDirsFromArg(argName: String, useFilerAsDefault: Boolean = true) {
-        val fallbackDirs = if(useFilerAsDefault) {
-            //kapt.kotlin.generated is always specified by the annotation processor
-            listOf(processingEnv.options["kapt.kotlin.generated"]!!)
-        }else {
-            listOf()
+        writeToDirsFromArg(listOf(argName), useFilerAsDefault)
+    }
+
+    protected fun FileSpec.writeToDirsFromArg(argNames: List<String>, useFilerAsDefault: Boolean = true) {
+        var outputArgDirs = argNames.flatMap {argName ->
+            processingEnv.options[argName]?.split(File.pathSeparator) ?: listOf()
         }
-        (processingEnv.options[argName]?.split(File.pathSeparator) ?: fallbackDirs).forEach {
+        if(useFilerAsDefault && outputArgDirs.isEmpty()) {
+            outputArgDirs = listOf(processingEnv.options["kapt.kotlin.generated"]!!)
+        }
+
+        outputArgDirs.forEach {
             writeTo(File(it))
         }
     }

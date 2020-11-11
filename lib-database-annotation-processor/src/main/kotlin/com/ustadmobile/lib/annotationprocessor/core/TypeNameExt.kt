@@ -85,25 +85,6 @@ internal fun TypeName.asComponentClassNameIfList() : ClassName {
 
 
 /**
- * Check to see if this represents a TypeElement for a Dao which is annotated with Repository.
- *
- * This means that repository classes for this should be generated.
- */
-val TypeElement.isDaoWithRepository: Boolean
-    get() = this.getAnnotation(Dao::class.java) != null
-            && this.getAnnotation(Repository::class.java) != null
-
-/**
- * Determines if this DAO requires a KTOR Helper (it has return results with syncable entities and
- * is annotated with @Repository)
- *
- * TODO: Check to make sure that at least one of the select queries returns a syncable entity type
- */
-val TypeElement.isDaoThatRequiresKtorHelper: Boolean
-    get() = isDaoWithRepository
-
-
-/**
  * If the given TypeName represents typed LiveData or a DataSource Factory, unwrap it to the
  * raw type.
  *

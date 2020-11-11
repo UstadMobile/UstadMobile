@@ -8,6 +8,7 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import androidx.room.*
 import com.ustadmobile.door.SyncableDoorDatabase
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER
 import java.util.*
 import javax.lang.model.type.TypeMirror
@@ -80,6 +81,15 @@ fun TypeElement.allOverridableMethods(processingEnv: ProcessingEnvironment,
 fun TypeElement.allDbClassDaoGetters(processingEnv: ProcessingEnvironment) =
         allOverridableMethods(processingEnv)
             .filter { it.returnType.asTypeElement(processingEnv)?.hasAnnotation(Dao::class.java) == true}
+
+/**
+ * Where this TypeElement represents a Database, this is a shorthand that gives all the DAO classes
+ * that require a repository
+ */
+fun TypeElement.allDbClassDaoGettersWithRepo(processingEnv: ProcessingEnvironment) =
+        allDbClassDaoGetters(processingEnv).filter {
+            it.returnType.asTypeElement(processingEnv)?.isDaoWithRepository == true
+        }
 
 /**
  * Gets a list of all ancestor parent classes and interfaces.
@@ -207,4 +217,31 @@ fun TypeElement.asImplementableTypeSpec(processingEnv: ProcessingEnvironment): T
                 }
             }
             .build()
+}
+
+/**
+ * Check to see if this represents a TypeElement for a Dao which is annotated with Repository.
+ *
+ * This means that repository classes for this should be generated.
+ */
+val TypeElement.isDaoWithRepository: Boolean
+    get() = this.getAnnotation(Dao::class.java) != null
+            && this.getAnnotation(Repository::class.java) != null
+
+/**
+ * Determines if this DAO requires a KTOR Helper (it has return results with syncable entities and
+ * is annotated with @Repository)
+ *
+ * TODO: Check to make sure that at least one of the select queries returns a syncable entity type
+ */
+val TypeElement.isDaoThatRequiresKtorHelper: Boolean
+    get() = isDaoWithRepository
+
+
+fun TypeElement.daoSyncableEntitiesInSelectResults(processingEnv: ProcessingEnvironment) : List<ClassName> {
+    return asImplementableTypeSpec(processingEnv).daoSyncableEntitiesInSelectResults(processingEnv)
+}
+
+fun TypeElement.isDaoThatRequiresSyncHelper(processingEnv: ProcessingEnvironment): Boolean {
+    return daoSyncableEntitiesInSelectResults(processingEnv).isNotEmpty()
 }
