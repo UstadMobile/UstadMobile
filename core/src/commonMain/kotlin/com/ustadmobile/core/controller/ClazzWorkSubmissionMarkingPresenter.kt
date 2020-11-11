@@ -1,8 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.UMCalendarUtil
-import com.ustadmobile.core.util.ext.getQuestionListForView
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -12,7 +10,6 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -20,6 +17,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission
+import com.ustadmobile.lib.db.entities.ClazzWorkSubmission
+import com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission
+import com.ustadmobile.lib.db.entities.ClazzWork
+import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
+import com.ustadmobile.core.util.ext.*
 
 
 class ClazzWorkSubmissionMarkingPresenter(context: Any,
@@ -65,16 +69,15 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             //If submitted - show view data
             if(clazzMemberAndClazzWorkWithSubmission.submission != null
                     && clazzMemberAndClazzWorkWithSubmission.submission?.clazzWorkSubmissionUid != 0L){
-                view.takeIf { it.quizSubmissionViewData == null
-                }?.quizSubmissionViewData = DoorMutableLiveData(
+                view.takeIf { it.viewOnlyQuizQuestions == null
+                }?.viewOnlyQuizQuestions = DoorMutableLiveData(
                         questionsAndOptionsWithResponseList)
             }else{
                 //No submission
-                view.takeIf { it.quizSubmissionViewData == null
-                }?.quizSubmissionViewData = DoorMutableLiveData(
-                        listOf())
-                view.takeIf { it.quizSubmissionEditData == null
-                }?.quizSubmissionEditData = DoorMutableLiveData(
+                view.takeIf { it.viewOnlyQuizQuestions == null
+                }?.viewOnlyQuizQuestions = DoorMutableLiveData(listOf())
+                view.takeIf { it.editableQuizQuestions == null
+                }?.editableQuizQuestions = DoorMutableLiveData(
                         questionsAndOptionsWithResponseList)
             }
         }
@@ -146,10 +149,44 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         }
 
 
+        //Visibility stuff
+        //If there is a submission
+        val submission = clazzMemberAndClazzWorkWithSubmission?.submission
+
+        if(submission != null && submission.clazzWorkSubmissionUid != 0L){
+
+            //Don't show record for student
+            view.showRecordForStudent = false
+            //Show submission heading if type not none
+            if(clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkSubmissionType !=
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE){
+                view.showSubmissionHeading = true
+            }
+        }else{ //No submission.
+            //Show marking if type not none and dont show record for student.
+            if(clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkSubmissionType ==
+                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE){
+                view.showRecordForStudent = false
+            }
+        }
+
+        when (clazzMemberAndClazzWorkWithSubmission?.clazzWork?.clazzWorkSubmissionType) {
+            ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE -> {
+                //Hide submission heading and record button
+                view.showSubmissionHeading = false
+                view.showRecordForStudent = false
+            }
+            else -> {
+
+            }
+        }
+
+
+
         return clazzMemberAndClazzWorkWithSubmission
     }
 
-    fun createSubmissionIfDoesNotExist(){
+    private fun createSubmissionIfDoesNotExist(){
         GlobalScope.launch {
             val clazzMemberWithSubmission = withTimeoutOrNull(2000) {
                 db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(filterByClazzWorkUid,
@@ -209,7 +246,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
 
     fun handleClickSubmitOnBehalf(){
         val questionsWithOptionsAndResponse =
-                view.quizSubmissionEditData?.getValue()?: listOf()
+                view.editableQuizQuestions?.getValue()?: listOf()
         val newOptionsAndResponse = mutableListOf<ClazzWorkQuestionAndOptionWithResponse>()
 
         val updatedShortTextSubmission = view.updatedSubmission?.clazzWorkSubmission
@@ -265,7 +302,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
             clazzWorkWithSubmission?.submission = submission
             view.runOnUiThread(Runnable {
                 view.entity = clazzWorkWithSubmission
-                view.quizSubmissionEditData = DoorMutableLiveData(newOptionsAndResponse)
+                view.editableQuizQuestions = DoorMutableLiveData(newOptionsAndResponse)
             })
 
         }
@@ -289,6 +326,24 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                             ARG_CLAZZMEMBER_UID to nextClazzMemberUid.toString()),
                     context)
         }
+    }
+
+    fun handleClickRecordForStudent(){
+        view.showSimpleTwoButton = true
+        view.showRecordForStudent = false
+        view.setSubmissionFreeTextMarking = false
+
+        if(entity?.clazzWork?.clazzWorkSubmissionType ==
+                ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT ){
+            view.showSubmissionFreeText = true
+            view.setSubmissionFreeTextMarking = false
+            createSubmissionIfDoesNotExist()
+
+        }else if(entity?.clazzWork?.clazzWorkSubmissionType ==
+                ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ){
+            view.setQuizEditList = true
+        }
+        view.showRecordForStudent = false
     }
 
     private fun handleClickSaveWithMovement(entity: ClazzMemberAndClazzWorkWithSubmission,

@@ -6,35 +6,16 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzworksubmissionMarkingButtonWithExtraBinding
 import com.ustadmobile.core.controller.ClazzWorkSubmissionMarkingPresenter
-import com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 
 class ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter(clazzWork: ClazzWorkWithMetrics?,
-                     clazzMemberAndClazzWorkWithSubmission: ClazzMemberAndClazzWorkWithSubmission?,
-                     presenter: ClazzWorkSubmissionMarkingPresenter?,
-                     visible: Boolean = true, markingLeft: Boolean)
+                     presenter: ClazzWorkSubmissionMarkingPresenter?, markingLeft: Boolean)
     : ListAdapter<ClazzWorkWithMetrics,
         ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter.ClazzWorkProgressViewHolder>(
         ClazzWorkDetailProgressListFragment.DU_CLAZZWORKWITHMETRICS) {
 
-    var visible: Boolean = visible
-        set(value) {
-            //TODO: what is the point of this setter function, it doesn't do anything other than store the value
-            if(field == value)
-                return
-
-            field = value
-        }
-
 
     var showNext: Boolean = markingLeft
-        set(value) {
-            //TODO: what is the point of this setter function, it doesn't do anything other than store the value
-            if(field == value)
-                return
-
-            field = value
-        }
 
     class ClazzWorkProgressViewHolder(var itemBinding: ItemClazzworksubmissionMarkingButtonWithExtraBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
@@ -56,11 +37,6 @@ class ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter(clazzWork: Claz
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         viewHolder = null
-    }
-
-    //TODO: This should not be overriden in ListAdapter. We should submit an empty list
-    override fun getItemCount(): Int {
-        return if(visible) 1 else 0
     }
 
     override fun onBindViewHolder(holder: ClazzWorkProgressViewHolder, position: Int) {

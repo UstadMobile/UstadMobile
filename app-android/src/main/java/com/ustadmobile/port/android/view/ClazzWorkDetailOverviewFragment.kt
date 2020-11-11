@@ -357,9 +357,6 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
 
-
-
-
     override var entity: ClazzWorkWithSubmission? = null
         set(value) {
             field = value

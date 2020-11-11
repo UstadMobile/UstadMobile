@@ -8,12 +8,10 @@ interface ClazzWorkSubmissionMarkingView: UstadEditView<ClazzMemberAndClazzWorkW
 
     var privateComments: DataSource.Factory<Int, CommentsWithPerson>?
 
-    //TODO: can we call these editableQuizQuestions (the submission is another entity)
-    var quizSubmissionEditData
+    var editableQuizQuestions
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>?
 
-    //TODO: can we call these viewOnlyQuizQuestions (the submission is another entity)
-    var quizSubmissionViewData
+    var viewOnlyQuizQuestions
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>?
 
     var isMarkingFinished: Boolean
@@ -27,6 +25,18 @@ interface ClazzWorkSubmissionMarkingView: UstadEditView<ClazzMemberAndClazzWorkW
     // visibility of the recordForStudent button etc.
 
     //eg var recordForStudentVisible
+
+    var showRecordForStudent: Boolean
+
+    var showSubmissionHeading: Boolean
+
+    var showSimpleTwoButton: Boolean
+
+    var showSubmissionFreeText: Boolean
+
+    var setSubmissionFreeTextMarking : Boolean
+
+    var setQuizEditList : Boolean
 
     companion object {
 

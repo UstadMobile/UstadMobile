@@ -7,26 +7,24 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionScoreEditBinding
 import com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission
 import com.ustadmobile.lib.db.entities.ClazzWork
+import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
-class ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWork: ClazzMemberAndClazzWorkWithSubmission?,
-                                                  visible: Boolean = false)
-    : ListAdapter<ClazzMemberAndClazzWorkWithSubmission,
-        ClazzWorkSubmissionScoreEditRecyclerAdapter.ScoreEditViewHolder>(
-            ClazzWorkDetailOverviewFragment.DU_CLAZZMEMBERANDCLAZZWORKWITHSUBMISSION) {
+class ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWork: ClazzMemberAndClazzWorkWithSubmission?)
+    : SingleItemRecyclerViewAdapter<ClazzWorkSubmissionScoreEditRecyclerAdapter.ScoreEditViewHolder>() {
 
     class ScoreEditViewHolder(var itemBinding: ItemClazzworkSubmissionScoreEditBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
-    //TODO: this is never set
     private var viewHolder: ScoreEditViewHolder? = null
-    var clazzWorkVal : ClazzMemberAndClazzWorkWithSubmission? = clazzWork
 
-    var visible: Boolean = visible
-        set(value) {
+    var clazzWorkVal : ClazzMemberAndClazzWorkWithSubmission? = clazzWork
+        set(value){
             if(field == value)
                 return
-
             field = value
+            viewHolder?.itemBinding?.clazzWorkWithSubmission = value
+            viewHolder?.itemBinding?.noneType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScoreEditViewHolder {
@@ -38,25 +36,16 @@ class ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWork: ClazzMemberAndClazz
                 })
     }
 
-    override fun getItemCount(): Int {
-        return if(visible) 1 else 0
-    }
-
-
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         viewHolder = null
     }
 
     override fun onBindViewHolder(holder: ScoreEditViewHolder, position: Int) {
+        super.onBindViewHolder(holder, position)
+        holder.itemBinding.clazzWorkWithSubmission = clazzWorkVal
+        holder.itemView.tag = clazzWorkVal?.submission?.clazzWorkSubmissionUid?:0L
 
-        if(currentList.size > 0){
-            holder.itemBinding.clazzWorkWithSubmission = clazzWorkVal
-            holder.itemView.tag = clazzWorkVal?.submission?.clazzWorkSubmissionUid?:0L
-        }else {
-            holder.itemBinding.clazzWorkWithSubmission = clazzWorkVal
-            holder.itemView.tag = clazzWorkVal?.submission?.clazzWorkSubmissionUid?:0L
-        }
 
 
     }

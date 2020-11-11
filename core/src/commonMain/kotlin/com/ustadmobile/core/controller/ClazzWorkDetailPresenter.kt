@@ -15,9 +15,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 
-//TODO: Here it seems like the Android Fragment (View) is doing thinking. The view doesn't need
-// to know or care if the user is a student, it just needs to be told what tabs to display. That
-// logic is common
 
 // Suggestion: Add a property to the view called 'tabs' which is a List<String>, then move the logic
 // that determines visibility to the presenter.
