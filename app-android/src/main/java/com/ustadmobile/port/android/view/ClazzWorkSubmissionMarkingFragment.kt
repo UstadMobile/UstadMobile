@@ -349,7 +349,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
     }
 
 
-
     //Submit class work on behalf of student
     override fun onClickPrimary(view: View) {
         simpleTwoButtonRecyclerAdapter?.visible = false
