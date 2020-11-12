@@ -64,18 +64,20 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
             Napier.d(tag = VIDEO_ANDROID, message = "width of old video is $originalWidth, height of old video is $originalHeight")
             Napier.d(tag = VIDEO_ANDROID, message = "width of new video is ${pairDimensions.first}, height of new video is ${pairDimensions.second}")
 
-            val videoTarget = MediaFormat.createVideoFormat("video/avc", pairDimensions.first, pairDimensions.second)
-            videoTarget.setInteger(MediaFormat.KEY_BIT_RATE, 128000)
-            videoTarget.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5)
-            videoTarget.setInteger(MediaFormat.KEY_FRAME_RATE, 25)
-            videoTarget.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
+            val videoTarget = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, pairDimensions.first, pairDimensions.second).apply {
+                setInteger(MediaFormat.KEY_BIT_RATE, 128000)
+                setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5)
+                setInteger(MediaFormat.KEY_FRAME_RATE, 25)
+                setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
+            }
 
-            val audioTarget = MediaFormat.createAudioFormat("audio/raw", 8000, 2)
-            audioTarget.setInteger(MediaFormat.KEY_BIT_RATE, 128000)
+            val audioTarget = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, 8000, 2).apply {
+                setInteger(MediaFormat.KEY_BIT_RATE, 128000)
+            }
 
             val mediaTransformer = MediaTransformer(context as Context)
             mediaTransformer.transform(contentEntryUid.toString(), file.toUri(), newVideo.absolutePath,
-                    videoTarget, null, object : TransformationListener {
+                    videoTarget, audioTarget, object : TransformationListener {
                 override fun onStarted(id: String) {
                     Napier.d(tag = VIDEO_ANDROID, message = "started transform")
                 }

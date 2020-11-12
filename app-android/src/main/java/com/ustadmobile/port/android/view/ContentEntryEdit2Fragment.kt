@@ -141,10 +141,13 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 try {
                     GlobalScope.launch {
                         val input = requireContext().contentResolver.openInputStream(uri)
-                        val tmpDir = findNavController().createTempAppDirForDestination(requireContext(),
-                                "import-${System.currentTimeMillis()}")
+                        val importFolder = File(requireContext().filesDir, "import")
+                        val importTmpFolder = File(importFolder, "import-${System.currentTimeMillis()}")
+                        importTmpFolder.mkdirs()
+                        findNavController().registerDestinationTempFile(requireContext(),
+                                importTmpFolder)
 
-                        val tmpFile = File(tmpDir, requireContext().contentResolver.getFileName(uri))
+                        val tmpFile = File(importTmpFolder, requireContext().contentResolver.getFileName(uri))
                         val output = tmpFile.outputStream()
                         input?.copyTo(tmpFile.outputStream())
                         output.flush()

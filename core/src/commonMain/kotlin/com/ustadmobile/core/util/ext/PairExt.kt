@@ -2,7 +2,7 @@ package com.ustadmobile.core.util.ext
 
 import kotlin.math.abs
 
-val validResolutions = listOf(Pair(640,360), Pair(320,180))
+val validResolutions = listOf(Pair(480,360), Pair(176,144))
 
 fun Pair<Int, Int>.variance(other: Pair<Int, Int>): Int = abs(this.first - other.first) + abs(this.second - other.second)
 
