@@ -32,7 +32,7 @@ import org.junit.runners.Parameterized
 import java.io.File
 
 @ExperimentalStdlibApi
-@RunWith(Parameterized::class)
+//@RunWith(Parameterized::class)
 class VideoTest(val fileLocation: String) {
 
     private val videoCompleted = CompletableDeferred<Boolean>()
@@ -47,7 +47,7 @@ class VideoTest(val fileLocation: String) {
 
     lateinit var container: Container
 
-    @Test
+    //@Test
     fun test(){
 
         val tmpDir = UmFileUtilSe.makeTempDir("testVideoPlayer",

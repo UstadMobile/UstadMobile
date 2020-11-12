@@ -66,7 +66,7 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
             val pluginResult = it.extractMetadata(filePath)
             val languageCode = pluginResult?.language?.iso_639_1_standard
             if (languageCode != null) {
-                pluginResult.language = db.languageDao.findByTwoCode(languageCode)
+                pluginResult.language = db.languageDao.findByTwoCodeAsync(languageCode)
             }
             if (pluginResult != null) {
                 pluginResult.contentFlags = ContentEntry.FLAG_IMPORTED
