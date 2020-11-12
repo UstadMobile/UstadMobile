@@ -186,8 +186,8 @@ class ContentEntryEndtoEnd : TestCase() {
         }
     }
 
-    @AdbScreenRecord("given a list of items when menu option show hidden items selected then show all items in list")
-    @Test
+    //@AdbScreenRecord("given a list of items when menu option show hidden items selected then show all items in list")
+    //@Test
     fun givenListOfEntry_whenMenuOptionShowHiddenItemsSelected_thenShowAllItemsInList(){
 
         init {
