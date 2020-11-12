@@ -16,6 +16,7 @@ import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploader.Companion.DEFAULT_CHUNK_SIZE
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.sharedse.util.UstadTestRule
 import io.ktor.http.HttpStatusCode
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
@@ -36,7 +37,10 @@ class ContainerUploaderTest {
     private lateinit var epubContainer: Container
     private lateinit var entryListStr: String
     private lateinit var containerManager: ContainerManager
+
     private lateinit var appDb: UmAppDatabase
+
+    private lateinit var appRepo: UmAppDatabase
 
     @JvmField
     @Rule
@@ -54,21 +58,20 @@ class ContainerUploaderTest {
 
     private val context = Any()
 
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
+
     @Before
     fun setup() {
         networkManager = mock()
         val endpointScope = EndpointScope()
         di = DI {
             bind<NetworkManagerBle>() with singleton { networkManager }
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
-                val dbName = sanitizeDbNameFromUrl(context.url)
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
-                    it.clearAllTables()
-                })
-            }
+            import(ustadTestRule.diModule)
         }
         appDb = di.on(Endpoint(TEST_ENDPOINT)).direct.instance(tag = UmAppDatabase.TAG_DB)
+        appRepo = di.on(Endpoint(TEST_ENDPOINT)).direct.instance(tag = UmAppDatabase.TAG_REPO)
 
         tmpFolder = tmpFolderRule.newFolder()
         fileToUpload = File(tmpFolder, "thelittlechicks.epub")
@@ -78,8 +81,8 @@ class ContainerUploaderTest {
 
 
         epubContainer = Container()
-        epubContainer.containerUid = appDb.containerDao.insert(epubContainer)
-        containerManager = ContainerManager(epubContainer, appDb, appDb, tmpFolder.absolutePath)
+        epubContainer.containerUid = appRepo.containerDao.insert(epubContainer)
+        containerManager = ContainerManager(epubContainer, appDb, appRepo, tmpFolder.absolutePath)
         runBlocking {
             addEntriesFromZipToContainer(fileToUpload.absolutePath, containerManager)
             val entryList = containerManager.allEntries.distinctBy { it.containerEntryFile!!.cefMd5 }

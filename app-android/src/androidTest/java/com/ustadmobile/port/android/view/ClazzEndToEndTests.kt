@@ -25,7 +25,7 @@ class ClazzEndToEndTests : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -38,7 +38,7 @@ class ClazzEndToEndTests : TestCase() {
 
         var calendarUid = 0L
         init {
-            calendarUid = dbRule.db.holidayCalendarDao.insert(HolidayCalendar().apply {
+            calendarUid = dbRule.repo.holidayCalendarDao.insert(HolidayCalendar().apply {
                 this.umCalendarName = "Test Calendar"
             })
 

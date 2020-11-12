@@ -60,14 +60,14 @@ class ContentEntryOpenerTest {
 
 
         contentEntry = ContentEntry()
-        contentEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(contentEntry)
+        contentEntry.contentEntryUid = umAppRepository.contentEntryDao.insert(contentEntry)
 
         var container = Container()
         container.containerContentEntryUid = contentEntry.contentEntryUid
         container.fileSize = 10
         container.mimeType = "video/mp4"
         container.cntLastModified = System.currentTimeMillis()
-        container.containerUid = umAppDatabase.containerDao.insert(container)
+        container.containerUid = umAppRepository.containerDao.insert(container)
 
         var dj = DownloadJobItem()
         dj.djiContainerUid = container.containerUid
@@ -90,14 +90,14 @@ class ContentEntryOpenerTest {
         runBlocking {
 
             var contentEntry = ContentEntry()
-            contentEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(contentEntry)
+            contentEntry.contentEntryUid = umAppRepository.contentEntryDao.insert(contentEntry)
 
             var container = Container()
             container.containerContentEntryUid = contentEntry.contentEntryUid
             container.fileSize = 10
             container.mimeType = "video/mp4"
             container.cntLastModified = System.currentTimeMillis()
-            container.containerUid = umAppDatabase.containerDao.insert(container)
+            container.containerUid = umAppRepository.containerDao.insert(container)
 
             var dj = DownloadJobItem()
             dj.djiContainerUid = container.containerUid
@@ -136,14 +136,14 @@ class ContentEntryOpenerTest {
         runBlocking {
 
             var contentEntry = ContentEntry()
-            contentEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(contentEntry)
+            contentEntry.contentEntryUid = umAppRepository.contentEntryDao.insert(contentEntry)
 
             var container = Container()
             container.containerContentEntryUid = contentEntry.contentEntryUid
             container.fileSize = 10
             container.mimeType = "video/wav"
             container.cntLastModified = System.currentTimeMillis()
-            container.containerUid = umAppDatabase.containerDao.insert(container)
+            container.containerUid = umAppRepository.containerDao.insert(container)
 
             var containerEntryFile = ContainerEntryFile()
             containerEntryFile.cefPath = "hello"

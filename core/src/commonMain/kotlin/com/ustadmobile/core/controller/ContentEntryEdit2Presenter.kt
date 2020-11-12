@@ -164,11 +164,12 @@ class ContentEntryEdit2Presenter(context: Any,
                             downloadJob.timeRequested = getSystemTimeInMillis()
                             downloadJob.bytesDownloadedSoFar = container.fileSize
                             downloadJob.totalBytesToDownload = container.fileSize
-                            downloadJob.djUid = repo.downloadJobDao.insertAsync(downloadJob).toInt()
+                            downloadJob.djUid = db.downloadJobDao.insertAsync(downloadJob).toInt()
 
                             val downloadJobItem = DownloadJobItem(downloadJob, entity.contentEntryUid,
                                     container.containerUid, container.fileSize)
-                            downloadJobItem.djiUid = repo.downloadJobItemDao.insertAsync(downloadJobItem).toInt()
+                            downloadJobItem.djiUid = db.downloadJobItemDao
+                                    .insertAsync(downloadJobItem).toInt()
                             downloadJobItem.djiStatus = JobStatus.COMPLETE
                             downloadJobItem.downloadedSoFar = container.fileSize
 

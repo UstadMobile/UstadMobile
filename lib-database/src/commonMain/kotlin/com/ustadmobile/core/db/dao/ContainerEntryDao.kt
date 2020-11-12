@@ -1,15 +1,13 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmRestAccessible
-import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 
 @Dao
-@UmRepository
 abstract class ContainerEntryDao : BaseDao<ContainerEntry> {
 
 

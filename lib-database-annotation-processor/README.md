@@ -54,13 +54,48 @@ including simple-jndi. Jndi.properties must be in the resources path of
 the module, and this should contain a datasource (this is done using
 the jndi-config directory for tests).
 
+## Implementation of realtime update notifications:
+
+Door supports immediate client to server and server to client notifications of changes. This is done
+as follows.
+
+### Server to client:
+
+1. The SyncableEntity must be annotated with a notifyOnUpdate query that returns a list of device
+ids that will be notified (and uses the ChangeLog table to determine which entities were changed).
+
+```
+@SyncableEntity(tableId = TABLE_ID,
+    notifyOnUpdate = """SELECT DISTINCT deviceId
+                            FROM AccessGrant
+                            WHERE entityUid IN (SELECT chEntityPk FROM ChangeLog WHERE chTableId = 42 AND CAST(dispatched AS BOOLEAN) = false)
+                            AND tableId = 42""")
+```
+
+2. The generated create table SQL will add a trigger that will insert into the ChangeLog table
+(which contains the entity primary key and the table id)
+
+3. The ChangeLogMonitor (added using dependency injection on the server side) will receive the
+onTablesChanged event and collect a list of tables changed. It will wait 100ms to collect any further
+changes (so that UpdateNotifications are batched, thus reducing the workload), and it will then call
+repo.dispatchUpdateNotifications once for each table on which any change has occurred. It uses a
+coroutine fan-out to call repo.dispatchUpdateNotifications so this can be done concurrently.
+
+4. The generated repo.dispatchUpdateNotifications will use generated code that uses the
+notifyOnUpdateQuery from the @SyncableEntity annotation. This will insert entities into the
+UpdateNotification table. It will also notify the UpdateNotificationManager singleton which will
+dispatch this notification live to any client that is listening.
+
+
 ## Debugging the annotation processor using IntelliJ
 
 ### Using kapt
 
 ```
-./gradlew -Dkotlin.daemon.jvm.options="-Xdebug,-Xrunjdwp:transport=dt_socket\,address=5006\,server=y\,suspend=n" lib-database-annotation-processor:clean lib-database-annotation-processor:test
+./gradlew -Dorg.gradle.debug=true -Dkotlin.daemon.jvm.options="-Xdebug,-Xrunjdwp:transport=dt_socket\,address=5005\,server=y\,suspend=n" lib-database-annotation-processor:clean lib-database-annotation-processor:test
 ```
+
+Note: kapt.use.worker.api=true must be set in gradle.properties for this to work.
 
 In IntelliJ select Run, Debug..., Add a remote configuration, and 
 enter the por as per org.gradle.jvmargs (e.g. 5006)

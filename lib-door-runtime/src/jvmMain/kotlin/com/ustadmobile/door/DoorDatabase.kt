@@ -11,70 +11,113 @@ import java.util.regex.Pattern
 import javax.naming.InitialContext
 import javax.sql.DataSource
 
-actual abstract class DoorDatabase {
+actual abstract class DoorDatabase actual constructor(){
 
     protected lateinit var dataSource: DataSource
 
     abstract val dbVersion: Int
 
+    /**
+     * Sometimes we want to create a new instance of the database that is just a wrapper e.g.
+     * SyncableReadOnlyWrapper, possibly a transaction wrapper. When this happens, all calls to
+     * listen for changes, opening connections, etc. should be redirected to the source database
+     */
+    var sourceDatabase: DoorDatabase? = null
+        protected set
+
+    /**
+     * Convenience variable that will be the sourceDatabase if it is not null, or this database
+     * itself otherwise
+     */
+    protected val effectiveDatabase: DoorDatabase
+        get() = sourceDatabase ?: this
+
     var jdbcDbType: Int = -1
+        get() = sourceDatabase?.jdbcDbType ?: field
         protected set
 
     var arraySupported: Boolean = false
+        get() = sourceDatabase?.arraySupported ?: field
         private set
 
     var context: Any? = null
 
-    val jdbcArraySupported by lazy {
-        var connection = null as Connection?
-        var sqlArray = null as java.sql.Array?
-        try {
-            connection = openConnection()
-            sqlArray = connection?.createArrayOf("VARCHAR", arrayOf("hello"))
-        }finally {
-            connection?.close()
+    val jdbcArraySupported: Boolean by lazy {
+        val delegatedDatabaseVal = sourceDatabase
+        if(delegatedDatabaseVal != null) {
+            delegatedDatabaseVal.jdbcArraySupported
+        }else {
+            var connection = null as Connection?
+            var sqlArray = null as java.sql.Array?
+            try {
+                connection = openConnection()
+                sqlArray = connection?.createArrayOf("VARCHAR", arrayOf("hello"))
+            }finally {
+                connection?.close()
+            }
+
+            sqlArray != null
         }
 
-        sqlArray != null
+
     }
 
+    /**
+     * A request to listen for changes. This is used by LiveData and other items. The onChange
+     * function will be run when a table is changed.
+     *
+     * @param tableNames A list (case sensitive) of the table names on which this listener should be invoked.
+     * An empty list will result in the onChange method always being called
+     *
+     * @param onChange A function that will be executed when after a change has happened on a table.
+     */
     data class ChangeListenerRequest(val tableNames: List<String>, val onChange: (List<String>) -> Unit)
 
     val changeListeners = CopyOnWriteArrayList<ChangeListenerRequest>() as MutableList<ChangeListenerRequest>
 
     val tableNames: List<String> by lazy {
-        var con = null as Connection?
-        var tableNamesList = mutableListOf<String>()
-        var tableResult = null as ResultSet?
-        try {
-            con = openConnection()
-            val metadata = con.metaData
-            tableResult = metadata.getTables(null, null, "%", arrayOf("TABLE"))
-            while(tableResult.next()) {
-                tableNamesList.add(tableResult.getString("TABLE_NAME"))
+        val delegatedDatabaseVal = sourceDatabase
+        if(delegatedDatabaseVal != null) {
+            delegatedDatabaseVal.tableNames
+        }else {
+            var con = null as Connection?
+            val tableNamesList = mutableListOf<String>()
+            var tableResult = null as ResultSet?
+            try {
+                con = openConnection()
+                val metadata = con.metaData
+                tableResult = metadata.getTables(null, null, "%", arrayOf("TABLE"))
+                while(tableResult.next()) {
+                    tableNamesList.add(tableResult.getString("TABLE_NAME"))
+                }
+            }finally {
+                con?.close()
             }
-        }finally {
-            con?.close()
+
+            tableNamesList.toList()
         }
 
-        tableNamesList.toList()
     }
 
-    actual constructor() {
 
-    }
 
-    constructor(dataSource: DataSource) {
-        this.dataSource = dataSource
-        setupFromDataSource()
-    }
 
-    constructor(context: Any, dbName: String) {
-        this.context = context
-        val iContext = InitialContext()
-        dataSource = iContext.lookup("java:/comp/env/jdbc/${dbName}") as DataSource
-        setupFromDataSource()
-    }
+//    actual constructor() {
+//
+//    }
+
+//    constructor(dataSource: DataSource) {
+//        this.dataSource = dataSource
+//        setupFromDataSource()
+//    }
+//
+//    constructor(context: Any, dbName: String) {
+//        this.context = context
+//        val iContext = InitialContext()
+//        dataSource = iContext.lookup("java:/comp/env/jdbc/${dbName}") as DataSource
+//        setupFromDataSource()
+//    }
+
 
     inner class DoorSqlDatabaseImpl : DoorSqlDatabase {
         override fun execSQL(sql: String) {
@@ -122,7 +165,7 @@ actual abstract class DoorDatabase {
     }
 
 
-    fun openConnection() = dataSource.connection
+    fun openConnection() =  effectiveDatabase.dataSource.connection
 
     abstract fun createAllTables()
 
@@ -132,18 +175,18 @@ actual abstract class DoorDatabase {
         runnable.run()
     }
 
-    fun addChangeListener(changeListenerRequest: ChangeListenerRequest) {
+    open fun addChangeListener(changeListenerRequest: ChangeListenerRequest) = effectiveDatabase.apply {
         changeListeners.add(changeListenerRequest)
     }
 
-    fun removeChangeListener(changeListenerRequest: ChangeListenerRequest) {
+    open fun removeChangeListener(changeListenerRequest: ChangeListenerRequest) = effectiveDatabase.apply {
         changeListeners.remove(changeListenerRequest)
-
     }
 
-    fun handleTableChanged(changeTableNames: List<String>) {
+
+    open fun handleTableChanged(changeTableNames: List<String>) = effectiveDatabase.apply {
         GlobalScope.launch {
-            changeListeners.filter { it.tableNames.any { changeTableNames.contains(it) } }.forEach {
+            changeListeners.filter { it.tableNames.isEmpty() || it.tableNames.any { changeTableNames.contains(it) } }.forEach {
                 it.onChange.invoke(changeTableNames)
             }
         }

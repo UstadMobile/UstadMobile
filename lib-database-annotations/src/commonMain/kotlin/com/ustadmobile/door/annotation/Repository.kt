@@ -3,6 +3,13 @@ package com.ustadmobile.door.annotation
 @Retention(AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION)
 
+/**
+ * Indicates that a repository should be generated for this DAO. The repository manages getting
+ * data over http. It leads to the generation of an HTTP server endpoint and a client repository
+ * that can fetch data over http.
+ *
+ * This annotation must be added to any DAO where one wishes to use a repository.
+ */
 annotation class Repository(val methodType: Int = 0) {
 
     companion object {

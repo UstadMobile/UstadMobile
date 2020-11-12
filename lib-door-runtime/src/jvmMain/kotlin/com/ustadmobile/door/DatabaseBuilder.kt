@@ -82,7 +82,12 @@ actual class DatabaseBuilder<T: DoorDatabase>(private var context: Any, private 
         }
 
         callbacks.forEach { it.onOpen(doorDb.sqlDatabaseImpl)}
-        return doorDb
+
+        return if(doorDb is SyncableDoorDatabase) {
+            doorDb.wrap(dbClass as KClass<SyncableDoorDatabase>) as T
+        }else {
+            doorDb
+        }
     }
 
     actual fun addCallback(callback: DoorDatabaseCallback) : DatabaseBuilder<T>{

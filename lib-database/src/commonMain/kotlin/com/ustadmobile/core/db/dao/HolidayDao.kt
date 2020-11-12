@@ -3,9 +3,11 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.Holiday
 
 @Dao
+@Repository
 abstract class HolidayDao: BaseDao<Holiday>, OneToManyJoinDao<Holiday> {
 
     @Query("SELECT * FROM Holiday WHERE holHolidayCalendarUid = :holidayCalendarUid")

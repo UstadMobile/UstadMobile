@@ -4,7 +4,6 @@ import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
-import com.ustadmobile.door.SyncNode
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.impl.BaseUstadApp
@@ -17,10 +16,9 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import java.net.URL
-import kotlin.random.Random
 
-class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "theanswer","", "http://localhost/"),
-                                     val useDbAsRepo: Boolean = false, val controlServerUrl: String? = null) : TestWatcher()  {
+class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "theanswer", "", "http://localhost/"),
+                                     val controlServerUrl: String? = null) : TestWatcher()  {
 
     private var dbInternal: UmAppDatabase? = null
 
@@ -32,7 +30,7 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
         get() = dbInternal ?: throw IllegalStateException("Rule not started!")
 
     val repo: UmAppDatabase
-        get() = (if(useDbAsRepo) db else repoInternal) ?: throw IllegalStateException("Rule not started!")
+        get() =  repoInternal ?: throw IllegalStateException("Rule not started!")
 
     var endpointUrl: String? = null
         private set
@@ -53,13 +51,9 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
         val accountManager: UstadAccountManager by di.instance()
         accountManager.activeAccount = account
 
-        dbInternal = di.direct.on(accountManager.activeAccount).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).apply {
-            clearAllTables()
-            val _nodeId = Random.nextInt(1, Int.MAX_VALUE)
-            syncNodeDao.replace(SyncNode(_nodeId, false))
-        }
+        dbInternal = di.direct.on(accountManager.activeAccount).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB)
 
-        repoInternal = if(useDbAsRepo && appDbServer == null) dbInternal else di.direct.on(accountManager.activeAccount).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
+        repoInternal = di.direct.on(accountManager.activeAccount).instance<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO)
     }
 
 
@@ -77,7 +71,7 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
 
     fun insertPersonForActiveUser(person: Person) {
         person.personUid = account.personUid
-        dbInternal!!.personDao.insert(person)
+        repoInternal!!.personDao.insert(person)
     }
 
 
