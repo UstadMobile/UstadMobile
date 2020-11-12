@@ -83,7 +83,6 @@ class EpubTypePluginCommonJvm : EpubTypePlugin() {
                 containerUid = repo.containerDao.insert(this)
             }
 
-
             val containerManager = ContainerManager(container, db, repo, containerBaseDir)
 
             addEntriesFromZipToContainer(file.absolutePath, containerManager, "")

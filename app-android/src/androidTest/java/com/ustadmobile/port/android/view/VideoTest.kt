@@ -39,7 +39,7 @@ class VideoTest(val fileLocation: String) {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -86,7 +86,7 @@ class VideoTest(val fileLocation: String) {
 
         val mediaTransformer = MediaTransformer(context)
         mediaTransformer.transform("1", videoFile.toUri(), newVideo.absolutePath,
-                videoTarget, audioTarget, object: TransformationListener {
+                videoTarget, null, object: TransformationListener {
             override fun onStarted(id: String) {
                 Napier.d(tag = "VIDEO_ANDROID", message = "started transform")
             }

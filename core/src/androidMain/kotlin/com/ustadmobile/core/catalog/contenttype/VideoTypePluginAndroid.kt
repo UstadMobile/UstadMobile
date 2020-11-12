@@ -48,9 +48,8 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
                                            context: Any, db: UmAppDatabase, repo: UmAppDatabase, progressListener: (Int) -> Unit): Container {
         return withContext(Dispatchers.Default) {
 
-
             val file = File(filePath.removePrefix("file://"))
-            val newVideo = File(file.parentFile, "new${file.nameWithoutExtension}.mp4")
+      /*      val newVideo = File(file.parentFile, "new${file.nameWithoutExtension}.mp4")
 
             Napier.d(tag = VIDEO_ANDROID, message = "start import for new video file $newVideo.name")
 
@@ -109,22 +108,19 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
             mediaTransformer.release()
 
             Napier.d(tag = VIDEO_ANDROID, message = "released transform with new file size " +
-                    "at ${newVideo.length()} with old size at ${file.length()}")
+                    "at ${newVideo.length()} with old size at ${file.length()}")*/
 
             val container = Container().apply {
                 containerContentEntryUid = contentEntryUid
                 cntLastModified = System.currentTimeMillis()
-                fileSize = newVideo.length()
+                fileSize = file.length()
                 this.mimeType = mimeType
                 containerUid = repo.containerDao.insert(this)
             }
 
             val containerManager = ContainerManager(container, db, repo, containerBaseDir)
 
-            containerManager.addEntries(ContainerManager.FileEntrySource(newVideo, newVideo.name))
-
-            file.delete()
-            newVideo.delete()
+            containerManager.addEntries(ContainerManager.FileEntrySource(file, file.name))
 
             container
         }
