@@ -29,7 +29,7 @@ class ProductEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    val categoryEditHelper =
+    private val categoryEditHelper =
             DefaultOneToManyJoinEditHelper(Category::categoryUid,
             "state_Category_list", Category.serializer().list,
             Category.serializer().list, this) { categoryUid = it }

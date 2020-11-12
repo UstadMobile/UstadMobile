@@ -294,6 +294,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("saleItemDao")
     abstract val saleItemDao: SaleItemDao
 
+    @JsName("saleDeliveryDao")
+    abstract val saleDeliveryDao: SaleDeliveryDao
+
+    @JsName("salePaymentDao")
+    abstract val salePaymentDao: SalePaymentDao
+
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
 
