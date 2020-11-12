@@ -51,7 +51,7 @@ class H5PTypePluginTest {
         di = DI {
             import(ustadTestRule.diModule)
             bind<ContentImportManager>() with scoped(ustadTestRule.endpointScope!!).singleton {
-                ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(), H5PTypePluginCommonJvm(context)), context, this.context, di)
+                ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(), H5PTypePluginCommonJvm()), context, this.context, di)
             }
         }
         val accountManager: UstadAccountManager by di.instance()
@@ -69,7 +69,7 @@ class H5PTypePluginTest {
         val tempH5pFile = File(tempFolder, "dialog-cards-620.h5p")
         tempH5pFile.copyInputStreamToFile(inputStream)
 
-        val h5pPlugin = H5PTypePluginCommonJvm(context)
+        val h5pPlugin = H5PTypePluginCommonJvm()
         val contentEntry = runBlocking {
             h5pPlugin.extractMetadata(tempH5pFile.path)
         }

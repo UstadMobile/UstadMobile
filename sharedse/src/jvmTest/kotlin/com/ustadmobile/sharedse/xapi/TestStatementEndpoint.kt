@@ -2,29 +2,21 @@ package com.ustadmobile.sharedse.xapi
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
+import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContextXObjectStatementJoinDao
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
-import com.ustadmobile.core.contentformats.xapi.Statement
-import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.parse8601Duration
-import com.ustadmobile.door.asRepository
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
-import com.ustadmobile.sharedse.network.NetworkManagerBle
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
 import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
@@ -36,7 +28,6 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
-import javax.naming.InitialContext
 
 class TestStatementEndpoint {
 
