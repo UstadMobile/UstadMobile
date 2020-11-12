@@ -60,7 +60,6 @@ class DownloadJobPreparerTest {
 
         di = DI {
             import(ustadTestRule.diModule)
-            bind<NetworkManagerBle>() with singleton { mock<NetworkManagerBle>() }
         }
 
         accountManager = di.direct.instance()
