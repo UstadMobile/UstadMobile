@@ -4,20 +4,22 @@ import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.C
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_JS_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_JVM_DIRS
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_KTOR_OUTPUT
+import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_MIGRATIONS_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_SOURCE_PATH
+import com.ustadmobile.lib.annotationprocessor.core.migrations.DbProcessorSyncPushMigration
 import javax.annotation.processing.*
 import javax.lang.model.SourceVersion
 import javax.lang.model.element.TypeElement
-import javax.tools.Diagnostic
 
 @SupportedAnnotationTypes("androidx.room.Database")
 @SupportedSourceVersion(SourceVersion.RELEASE_8)
 @SupportedOptions(value = [OPTION_JVM_DIRS, OPTION_ANDROID_OUTPUT, OPTION_KTOR_OUTPUT,
-    OPTION_JS_OUTPUT, OPTION_SOURCE_PATH, "kapt.kotlin.generated"])
+    OPTION_JS_OUTPUT, OPTION_SOURCE_PATH, OPTION_MIGRATIONS_OUTPUT, "kapt.kotlin.generated"])
 class AnnotationProcessorWrapper: AbstractProcessor() {
 
     val processors = listOf(DbProcessorJdbcKotlin(), DbProcessorKtorServer(),
-            DbProcessorRepository(), DbProcessorSync(), DbProcessorAndroid(), DbProcessorJs())
+            DbProcessorRepository(), DbProcessorSync(), DbProcessorAndroid(), DbProcessorJs(),
+            DbProcessorSyncableReadOnlyWrapper(), DbProcessorSyncPushMigration())
 
     lateinit var messager: Messager
 
@@ -47,6 +49,9 @@ class AnnotationProcessorWrapper: AbstractProcessor() {
         const val OPTION_NANOHTTPD_OUTPUT = "doordb_nanohttpd_out"
 
         const val OPTION_JS_OUTPUT = "doordb_js_out"
+
+        const val OPTION_MIGRATIONS_OUTPUT = "doordb_migrations_out"
+
     }
 
 }

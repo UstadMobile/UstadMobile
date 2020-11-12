@@ -4,14 +4,18 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.util.test.extractTestResourceToFile
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import java.io.File
 
 class DeleteDownloadJobTest{
@@ -40,13 +44,19 @@ class DeleteDownloadJobTest{
 
     lateinit var dwchildofparent: DownloadJobItem
 
+    @Rule
+    @JvmField
+    var tmpFolderRule = TemporaryFolder()
+
     @Before
     fun setup(){
 
         db = UmAppDatabase.getInstance(Any())
         db.clearAllTables()
+        val repo = db.asRepository(Any(), "http://localhost/dummy", "",
+                defaultHttpClient())
 
-        containerTmpDir = UmFileUtilSe.makeTempDir("clientContainerDir", "" + System.currentTimeMillis())
+        containerTmpDir = tmpFolderRule.newFolder("clientContainerDir")
 
         commonFile = File(containerTmpDir, "testfile1.png")
         extractTestResourceToFile(commonFilePath, commonFile)
@@ -54,8 +64,6 @@ class DeleteDownloadJobTest{
         zombieFile = File(containerTmpDir, "testfile2.png")
         extractTestResourceToFile(zombieFilePath, zombieFile)
 
-        var containerDao = db.containerDao
-        var entryDao = db.contentEntryDao
         var dwItemDao = db.downloadJobItemDao
         var dwJoinDao = db.downloadJobItemParentChildJoinDao
         var statusDao = db.contentEntryStatusDao
@@ -77,14 +85,14 @@ class DeleteDownloadJobTest{
 
         standAloneEntry = ContentEntry()
         standAloneEntry.contentEntryUid = 3
-        entryDao.insert(standAloneEntry)
+        repo.contentEntryDao.insert(standAloneEntry)
 
         var containerOfStandAlone = Container()
         containerOfStandAlone.containerUid = standaloneChild.djiContainerUid
         containerOfStandAlone.containerContentEntryUid = standAloneEntry.contentEntryUid
-        containerDao.insert(containerOfStandAlone)
+        repo.containerDao.insert(containerOfStandAlone)
 
-        var containerManager = ContainerManager(containerOfStandAlone, db, db, containerTmpDir.path)
+        var containerManager = ContainerManager(containerOfStandAlone, db, repo, containerTmpDir.path)
         runBlocking {
             containerManager.addEntries(ContainerManager.FileEntrySource(commonFile, "testfile1.png"))
         }
@@ -100,7 +108,7 @@ class DeleteDownloadJobTest{
 
         rootContentEntry = ContentEntry()
         rootContentEntry.contentEntryUid = 1
-        entryDao.insert(rootContentEntry)
+        repo.contentEntryDao.insert(rootContentEntry)
 
         var rootStatus = ContentEntryStatus()
         rootStatus.cesUid = rootContentEntry.contentEntryUid
@@ -115,7 +123,7 @@ class DeleteDownloadJobTest{
 
         var parentEntry = ContentEntry()
         parentEntry.contentEntryUid = 2
-        entryDao.insert(parentEntry)
+        repo.contentEntryDao.insert(parentEntry)
 
         var parentEntryStatus = ContentEntryStatus()
         parentEntryStatus.cesUid = parentEntry.contentEntryUid
@@ -137,7 +145,7 @@ class DeleteDownloadJobTest{
 
         var childOfParent = ContentEntry()
         childOfParent.contentEntryUid = 5
-        entryDao.insert(childOfParent)
+        repo.contentEntryDao.insert(childOfParent)
 
         var childOfparentStatus = ContentEntryStatus()
         childOfparentStatus.cesUid = childOfParent.contentEntryUid
@@ -152,9 +160,10 @@ class DeleteDownloadJobTest{
         var containerchildofparent = Container()
         containerchildofparent.containerUid = 8
         containerchildofparent.containerContentEntryUid = childOfParent.contentEntryUid
-        containerDao.insert(containerchildofparent)
+        repo.containerDao.insert(containerchildofparent)
 
-        var parentContainerManager = ContainerManager(containerchildofparent, db, db, containerTmpDir.path)
+        var parentContainerManager = ContainerManager(containerchildofparent, db, repo,
+                containerTmpDir.path)
         runBlocking {
             parentContainerManager.addEntries(ContainerManager.FileEntrySource(zombieFile, "testfile2.png"))
             parentContainerManager.addEntries(ContainerManager.FileEntrySource(commonFile, "testfile1.png"))

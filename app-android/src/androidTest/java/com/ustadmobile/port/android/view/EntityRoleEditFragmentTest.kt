@@ -23,6 +23,9 @@ import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import okhttp3.mockwebserver.MockWebServer
+import org.junit.After
+import org.junit.Before
 import org.junit.Rule
 
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -40,7 +43,7 @@ class EntityRoleEditFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -68,15 +71,15 @@ class EntityRoleEditFragmentTest : TestCase() {
 
         val newRole = Role().apply {
             roleName = "Role A"
-            roleUid= dbRule.db.roleDao.insert(this)
+            roleUid= dbRule.repo.roleDao.insert(this)
         }
         val schoolA = School().apply {
             schoolName = "School A"
             schoolActive = true
-            schoolUid = dbRule.db.schoolDao.insert(this)
+            schoolUid = dbRule.repo.schoolDao.insert(this)
         }
 
-        val person =  dbRule.db.insertPersonOnlyAndGroup(Person().apply {
+        val person =  dbRule.repo.insertPersonOnlyAndGroup(Person().apply {
             firstNames = "Person"
             lastName = "Two"
             admin = false

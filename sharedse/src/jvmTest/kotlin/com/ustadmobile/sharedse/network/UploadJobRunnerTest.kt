@@ -50,6 +50,7 @@ import java.io.File
 import java.util.*
 import javax.naming.InitialContext
 
+//Tests here disabled as this is being turned into ImportJobRunner on another branch
 class UploadJobRunnerTest {
 
     private lateinit var endpoint: String
@@ -173,7 +174,7 @@ class UploadJobRunnerTest {
         server.stop(0, 7000)
     }
 
-    @Test
+    //@Test
     fun givenAnUploadJob_whenRunnerUploads_thenContentFromServerIsSameAsDb() {
 
         endpoint = "http://localhost:$defaultPort/"
@@ -188,7 +189,7 @@ class UploadJobRunnerTest {
         assertContainersHaveSameContent(epubContainer.containerUid, appDb, repo)
     }
 
-    @Test
+    //@Test
     fun givenRunnerStarts_whenFailExceedsMaxAttempt_thenShouldStopAndSetStatusToFail() {
         val mockWebServer = MockWebServer()
         mockWebServer.start()
@@ -221,7 +222,7 @@ class UploadJobRunnerTest {
 
     }
 
-    @Test
+    //@Test
     fun givenRunnerStarts_whenServerHasAllMd5_thenShouldCallFinalizeWithoutSession() {
         endpoint = "http://localhost:$defaultPort/"
         appDb = di.on(Endpoint(endpoint)).direct.instance(tag = UmAppDatabase.TAG_DB)

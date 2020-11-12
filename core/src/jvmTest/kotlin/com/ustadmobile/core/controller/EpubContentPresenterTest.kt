@@ -102,7 +102,7 @@ class EpubContentPresenterTest {
         val db: UmAppDatabase by di.activeDbInstance()
 
         contentEntry = ContentEntry("Test epub", "test", true, true).apply {
-            contentEntryUid = db.contentEntryDao.insert(this)
+            contentEntryUid = repo.contentEntryDao.insert(this)
         }
 
         epubContainer = Container().apply {

@@ -4,13 +4,6 @@ import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.contrib.RecyclerViewActions
-import androidx.test.espresso.matcher.ViewMatchers
-import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -21,19 +14,14 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.ContentEntryListScreen
-import com.ustadmobile.port.android.view.binding.updateDateOnEditTextWithExtraText
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.insertContentEntryWithParentChildJoinAndMostRecentContainer
-import it.xabaras.android.espresso.recyclerviewchildactions.RecyclerViewChildActions
-import junit.framework.Assert
 import junit.framework.Assert.assertEquals
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -44,7 +32,7 @@ class ContentEntryList2FragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -58,7 +46,6 @@ class ContentEntryList2FragmentTest : TestCase() {
 
     @Before
     fun setup() {
-        dbRule.db.clearAllTables()
         dbRule.insertPersonForActiveUser(Person().apply {
             firstNames = "Test"
             lastName = "User"
@@ -73,7 +60,7 @@ class ContentEntryList2FragmentTest : TestCase() {
     fun givenContentEntryPresent_whenClickOnContentEntry_thenShouldNavigateToContentEntryDetail() {
 
         GlobalScope.launch {
-            dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(4, parentEntryUid)
+            dbRule.repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(4, parentEntryUid)
         }
 
         launchFragment(bundleOf(UstadView.ARG_PARENT_ENTRY_UID to parentEntryUid.toString(),
@@ -103,7 +90,7 @@ class ContentEntryList2FragmentTest : TestCase() {
         init {
 
             runBlocking {
-                dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(4, parentEntryUid)
+                dbRule.repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(4, parentEntryUid)
             }
 
             launchFragment()
@@ -145,11 +132,11 @@ class ContentEntryList2FragmentTest : TestCase() {
     @Test
     fun givenContentEntryListOpenedInPickerMode_whenFolderEntryClicked_thenShouldOpenItAndAllowEntrySelection() {
         val createdEntries = runBlocking {
-            dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3, parentEntryUid,
+            dbRule.repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(3, parentEntryUid,
                     nonLeafIndexes = mutableListOf(0))
         }
         runBlocking {
-            dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(6,
+            dbRule.repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(6,
                     createdEntries[0].contentEntryUid)
         }
 
@@ -178,11 +165,11 @@ class ContentEntryList2FragmentTest : TestCase() {
     @Test
     fun givenContentEntryListOpenedInPickerMode_whenOnBackPressedWhileInAFolder_thenShouldGoBackToThePreviousParentFolder() {
         val createdEntries = runBlocking {
-            dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(3, parentEntryUid,
+            dbRule.repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(3, parentEntryUid,
                     nonLeafIndexes = mutableListOf(0))
         }
         runBlocking {
-            dbRule.db.insertContentEntryWithParentChildJoinAndMostRecentContainer(6,
+            dbRule.repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(6,
                     createdEntries[0].contentEntryUid)
         }
 

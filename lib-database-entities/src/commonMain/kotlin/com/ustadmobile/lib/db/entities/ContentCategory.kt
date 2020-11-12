@@ -16,7 +16,11 @@ import kotlinx.serialization.Serializable
  * * with a dropdown list for each different schema.
  */
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = TABLE_ID,
+        notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${TABLE_ID} AS tableId FROM DeviceSession
+    """]
+)
 //shortcode = ctnCat
 @Serializable
 class ContentCategory() {

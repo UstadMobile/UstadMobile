@@ -84,7 +84,7 @@ class ClazzWorkDetailOverviewPresenterTest {
     fun givenClazzWorkExists_whenOnCreateCalled_thenClazzWorkIsSetOnView() {
 
         val testClazzWork = runBlocking {
-            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     ClazzWork(), true, -1, true, 0,
             false, true)
         }
@@ -124,7 +124,7 @@ class ClazzWorkDetailOverviewPresenterTest {
     @Test
     fun givenClazzWorkExists_whenClickAddPublicComment_thenShouldPersistComment(){
         val testClazzWork = runBlocking {
-            db.insertTestClazzWork(ClazzWork())
+            repo.insertTestClazzWork(ClazzWork())
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testClazzWork.clazzWork.clazzWorkUid.toString())
@@ -147,7 +147,7 @@ class ClazzWorkDetailOverviewPresenterTest {
     @Test
     fun givenClazzWorkExists_whenClickSubmit_thenShouldPersistSubmissionResult(){
         val testClazzWork = runBlocking {
-            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     ClazzWork().apply {
                         clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ
                     }, true, -1, true, 0,
@@ -198,7 +198,7 @@ class ClazzWorkDetailOverviewPresenterTest {
 
         val testEntity = ClazzWork().apply {
             //set variables here
-            clazzWorkUid = db.clazzWorkDao.insert(this)
+            clazzWorkUid = repo.clazzWorkDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzWorkUid.toString())
         val presenter = ClazzWorkDetailOverviewPresenter(context,

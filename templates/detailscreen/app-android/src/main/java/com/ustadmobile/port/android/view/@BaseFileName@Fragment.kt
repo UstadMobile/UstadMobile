@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.@Entity@DetailView
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.core.view.EditButtonMode
+import com.ustadmobile.port.android.util.ext.*
 @DisplayEntity_Import@
 
 interface @BaseFileName@FragmentEventHandler {
@@ -32,11 +33,8 @@ class @BaseFileName@Fragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@De
         }
 
         mPresenter = @Entity@DetailPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+                viewLifecycleOwner, di)
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
         return rootView
     }

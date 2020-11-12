@@ -4,16 +4,13 @@ import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.impl.UmResultCallback
 import com.ustadmobile.core.networkmanager.ContainerUploadManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMUUID
-
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
@@ -25,12 +22,11 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-import io.ktor.client.request.header
-import io.ktor.client.request.parameter
-import io.ktor.client.request.post
-import io.ktor.client.request.url
-import io.ktor.client.statement.HttpStatement
-import kotlinx.coroutines.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instanceOrNull
@@ -84,16 +80,9 @@ class ContentEntryEdit2Presenter(context: Any,
         super.onCreate(savedState)
         view.licenceOptions = LicenceOptions.values().map { LicenceMessageIdOptions(it, context) }
         parentEntryUid = arguments[ARG_PARENT_ENTRY_UID]?.toLong() ?: 0
-        systemImpl.getStorageDirs(context, object : UmResultCallback<List<UMStorageDir>> {
-            override fun onDone(result: List<UMStorageDir>?) {
-                storageOptions = result
-                if (result != null) {
-                    view.runOnUiThread(Runnable {
-                        view.storageOptions = result
-                    })
-                }
-            }
-        })
+        GlobalScope.launch(doorMainDispatcher()){
+            view.storageOptions = systemImpl.getStorageDirsAsync(context)
+        }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ContentEntryWithLanguage? {
@@ -175,11 +164,12 @@ class ContentEntryEdit2Presenter(context: Any,
                             downloadJob.timeRequested = getSystemTimeInMillis()
                             downloadJob.bytesDownloadedSoFar = container.fileSize
                             downloadJob.totalBytesToDownload = container.fileSize
-                            downloadJob.djUid = repo.downloadJobDao.insertAsync(downloadJob).toInt()
+                            downloadJob.djUid = db.downloadJobDao.insertAsync(downloadJob).toInt()
 
                             val downloadJobItem = DownloadJobItem(downloadJob, entity.contentEntryUid,
                                     container.containerUid, container.fileSize)
-                            downloadJobItem.djiUid = repo.downloadJobItemDao.insertAsync(downloadJobItem).toInt()
+                            downloadJobItem.djiUid = db.downloadJobItemDao
+                                    .insertAsync(downloadJobItem).toInt()
                             downloadJobItem.djiStatus = JobStatus.COMPLETE
                             downloadJobItem.downloadedSoFar = container.fileSize
 

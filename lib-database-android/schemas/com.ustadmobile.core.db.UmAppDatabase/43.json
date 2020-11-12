@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 43,
-    "identityHash": "51fe5970e2b5802384ce3372e08d3dae",
+    "identityHash": "91331e3ca7ac6ef400ed18120f496224",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5101,32 +5101,6 @@
         "foreignKeys": []
       },
       {
-        "tableName": "SqliteSyncablePrimaryKey",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sspTableId` INTEGER NOT NULL, `sspNextPrimaryKey` INTEGER NOT NULL, PRIMARY KEY(`sspTableId`))",
-        "fields": [
-          {
-            "fieldPath": "sspTableId",
-            "columnName": "sspTableId",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "sspNextPrimaryKey",
-            "columnName": "sspNextPrimaryKey",
-            "affinity": "INTEGER",
-            "notNull": true
-          }
-        ],
-        "primaryKey": {
-          "columnNames": [
-            "sspTableId"
-          ],
-          "autoGenerate": false
-        },
-        "indices": [],
-        "foreignKeys": []
-      },
-      {
         "tableName": "LearnerGroup",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`learnerGroupUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `learnerGroupName` TEXT, `learnerGroupDescription` TEXT, `learnerGroupActive` INTEGER NOT NULL, `learnerGroupMCSN` INTEGER NOT NULL, `learnerGroupCSN` INTEGER NOT NULL, `learnerGroupLCB` INTEGER NOT NULL)",
         "fields": [
@@ -5301,6 +5275,214 @@
         "foreignKeys": []
       },
       {
+        "tableName": "SqliteSyncablePrimaryKey",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sspTableId` INTEGER NOT NULL, `sspNextPrimaryKey` INTEGER NOT NULL, PRIMARY KEY(`sspTableId`))",
+        "fields": [
+          {
+            "fieldPath": "sspTableId",
+            "columnName": "sspTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sspNextPrimaryKey",
+            "columnName": "sspNextPrimaryKey",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "sspTableId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "SqliteChangeSeqNums",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sCsnTableId` INTEGER NOT NULL, `sCsnNextLocal` INTEGER NOT NULL, `sCsnNextPrimary` INTEGER NOT NULL, PRIMARY KEY(`sCsnTableId`))",
+        "fields": [
+          {
+            "fieldPath": "sCsnTableId",
+            "columnName": "sCsnTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sCsnNextLocal",
+            "columnName": "sCsnNextLocal",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "sCsnNextPrimary",
+            "columnName": "sCsnNextPrimary",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "sCsnTableId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [
+          {
+            "name": "index_SqliteChangeSeqNums_sCsnNextLocal",
+            "unique": false,
+            "columnNames": [
+              "sCsnNextLocal"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SqliteChangeSeqNums_sCsnNextLocal` ON `${TABLE_NAME}` (`sCsnNextLocal`)"
+          },
+          {
+            "name": "index_SqliteChangeSeqNums_sCsnNextPrimary",
+            "unique": false,
+            "columnNames": [
+              "sCsnNextPrimary"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SqliteChangeSeqNums_sCsnNextPrimary` ON `${TABLE_NAME}` (`sCsnNextPrimary`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "UpdateNotification",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pnUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `pnDeviceId` INTEGER NOT NULL, `pnTableId` INTEGER NOT NULL, `pnTimestamp` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pnUid",
+            "columnName": "pnUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pnDeviceId",
+            "columnName": "pnDeviceId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pnTableId",
+            "columnName": "pnTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "pnTimestamp",
+            "columnName": "pnTimestamp",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pnUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_UpdateNotification_pnDeviceId_pnTableId",
+            "unique": true,
+            "columnNames": [
+              "pnDeviceId",
+              "pnTableId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_UpdateNotification_pnDeviceId_pnTableId` ON `${TABLE_NAME}` (`pnDeviceId`, `pnTableId`)"
+          },
+          {
+            "name": "index_UpdateNotification_pnDeviceId_pnTimestamp",
+            "unique": false,
+            "columnNames": [
+              "pnDeviceId",
+              "pnTimestamp"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_UpdateNotification_pnDeviceId_pnTimestamp` ON `${TABLE_NAME}` (`pnDeviceId`, `pnTimestamp`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "TableSyncStatus",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`tsTableId` INTEGER NOT NULL, `tsLastChanged` INTEGER NOT NULL, `tsLastSynced` INTEGER NOT NULL, PRIMARY KEY(`tsTableId`))",
+        "fields": [
+          {
+            "fieldPath": "tsTableId",
+            "columnName": "tsTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tsLastChanged",
+            "columnName": "tsLastChanged",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "tsLastSynced",
+            "columnName": "tsLastSynced",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "tsTableId"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ChangeLog",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`changeLogUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `chTableId` INTEGER NOT NULL, `chEntityPk` INTEGER NOT NULL, `dispatched` INTEGER NOT NULL, `chTime` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "changeLogUid",
+            "columnName": "changeLogUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chTableId",
+            "columnName": "chTableId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chEntityPk",
+            "columnName": "chEntityPk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "dispatched",
+            "columnName": "dispatched",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "chTime",
+            "columnName": "chTime",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "changeLogUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "ClazzLog_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
@@ -5355,15 +5537,23 @@
         },
         "indices": [
           {
-            "name": "index_ClazzLog_trk_clientId_epk_rx_csn",
+            "name": "index_ClazzLog_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLog_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLog_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzLog_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzLog_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -5423,15 +5613,23 @@
         },
         "indices": [
           {
-            "name": "index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn",
+            "name": "index_ClazzLogAttendanceRecord_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzLogAttendanceRecord_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzLogAttendanceRecord_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzLogAttendanceRecord_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -5491,15 +5689,23 @@
         },
         "indices": [
           {
-            "name": "index_Schedule_trk_clientId_epk_rx_csn",
+            "name": "index_Schedule_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Schedule_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Schedule_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Schedule_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Schedule_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -5559,15 +5765,23 @@
         },
         "indices": [
           {
-            "name": "index_DateRange_trk_clientId_epk_rx_csn",
+            "name": "index_DateRange_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_DateRange_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_DateRange_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_DateRange_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_DateRange_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -5627,15 +5841,23 @@
         },
         "indices": [
           {
-            "name": "index_HolidayCalendar_trk_clientId_epk_rx_csn",
+            "name": "index_HolidayCalendar_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_HolidayCalendar_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_HolidayCalendar_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_HolidayCalendar_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_HolidayCalendar_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -5695,15 +5917,23 @@
         },
         "indices": [
           {
-            "name": "index_Holiday_trk_clientId_epk_rx_csn",
+            "name": "index_Holiday_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Holiday_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Holiday_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Holiday_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Holiday_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -5763,15 +5993,23 @@
         },
         "indices": [
           {
-            "name": "index_ScheduledCheck_trk_clientId_epk_rx_csn",
+            "name": "index_ScheduledCheck_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ScheduledCheck_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ScheduledCheck_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ScheduledCheck_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ScheduledCheck_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -5831,15 +6069,23 @@
         },
         "indices": [
           {
-            "name": "index_AuditLog_trk_clientId_epk_rx_csn",
+            "name": "index_AuditLog_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_AuditLog_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AuditLog_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_AuditLog_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_AuditLog_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -5899,15 +6145,23 @@
         },
         "indices": [
           {
-            "name": "index_CustomField_trk_clientId_epk_rx_csn",
+            "name": "index_CustomField_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_CustomField_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CustomField_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_CustomField_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_CustomField_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -5967,15 +6221,23 @@
         },
         "indices": [
           {
-            "name": "index_CustomFieldValue_trk_clientId_epk_rx_csn",
+            "name": "index_CustomFieldValue_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_CustomFieldValue_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CustomFieldValue_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_CustomFieldValue_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_CustomFieldValue_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6035,15 +6297,23 @@
         },
         "indices": [
           {
-            "name": "index_CustomFieldValueOption_trk_clientId_epk_rx_csn",
+            "name": "index_CustomFieldValueOption_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_CustomFieldValueOption_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_CustomFieldValueOption_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_CustomFieldValueOption_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_CustomFieldValueOption_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6103,15 +6373,23 @@
         },
         "indices": [
           {
-            "name": "index_Person_trk_clientId_epk_rx_csn",
+            "name": "index_Person_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Person_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Person_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Person_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Person_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6171,15 +6449,23 @@
         },
         "indices": [
           {
-            "name": "index_Clazz_trk_clientId_epk_rx_csn",
+            "name": "index_Clazz_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Clazz_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Clazz_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Clazz_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Clazz_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6239,15 +6525,23 @@
         },
         "indices": [
           {
-            "name": "index_ClazzMember_trk_clientId_epk_rx_csn",
+            "name": "index_ClazzMember_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzMember_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzMember_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzMember_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzMember_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6307,15 +6601,23 @@
         },
         "indices": [
           {
-            "name": "index_PersonCustomFieldValue_trk_clientId_epk_rx_csn",
+            "name": "index_PersonCustomFieldValue_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonCustomFieldValue_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonCustomFieldValue_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_PersonCustomFieldValue_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonCustomFieldValue_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6375,15 +6677,23 @@
         },
         "indices": [
           {
-            "name": "index_ContentEntry_trk_clientId_epk_rx_csn",
+            "name": "index_ContentEntry_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntry_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntry_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentEntry_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentEntry_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6443,15 +6753,23 @@
         },
         "indices": [
           {
-            "name": "index_ContentEntryContentCategoryJoin_trk_clientId_epk_rx_csn",
+            "name": "index_ContentEntryContentCategoryJoin_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryContentCategoryJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryContentCategoryJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentEntryContentCategoryJoin_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentEntryContentCategoryJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6511,15 +6829,23 @@
         },
         "indices": [
           {
-            "name": "index_ContentEntryParentChildJoin_trk_clientId_epk_rx_csn",
+            "name": "index_ContentEntryParentChildJoin_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentEntryParentChildJoin_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentEntryParentChildJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6579,15 +6905,23 @@
         },
         "indices": [
           {
-            "name": "index_ContentEntryRelatedEntryJoin_trk_clientId_epk_rx_csn",
+            "name": "index_ContentEntryRelatedEntryJoin_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryRelatedEntryJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryRelatedEntryJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentEntryRelatedEntryJoin_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentEntryRelatedEntryJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6647,15 +6981,23 @@
         },
         "indices": [
           {
-            "name": "index_ContentCategorySchema_trk_clientId_epk_rx_csn",
+            "name": "index_ContentCategorySchema_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentCategorySchema_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentCategorySchema_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentCategorySchema_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentCategorySchema_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6715,15 +7057,23 @@
         },
         "indices": [
           {
-            "name": "index_ContentCategory_trk_clientId_epk_rx_csn",
+            "name": "index_ContentCategory_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentCategory_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentCategory_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentCategory_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentCategory_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6783,15 +7133,23 @@
         },
         "indices": [
           {
-            "name": "index_Language_trk_clientId_epk_rx_csn",
+            "name": "index_Language_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Language_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Language_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Language_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Language_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6851,15 +7209,23 @@
         },
         "indices": [
           {
-            "name": "index_LanguageVariant_trk_clientId_epk_rx_csn",
+            "name": "index_LanguageVariant_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_LanguageVariant_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LanguageVariant_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_LanguageVariant_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_LanguageVariant_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6919,15 +7285,23 @@
         },
         "indices": [
           {
-            "name": "index_Role_trk_clientId_epk_rx_csn",
+            "name": "index_Role_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Role_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Role_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Role_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Role_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -6987,15 +7361,23 @@
         },
         "indices": [
           {
-            "name": "index_EntityRole_trk_clientId_epk_rx_csn",
+            "name": "index_EntityRole_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_EntityRole_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_EntityRole_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_EntityRole_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7055,15 +7437,23 @@
         },
         "indices": [
           {
-            "name": "index_PersonGroup_trk_clientId_epk_rx_csn",
+            "name": "index_PersonGroup_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroup_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroup_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_PersonGroup_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonGroup_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7123,15 +7513,23 @@
         },
         "indices": [
           {
-            "name": "index_PersonGroupMember_trk_clientId_epk_rx_csn",
+            "name": "index_PersonGroupMember_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroupMember_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonGroupMember_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_PersonGroupMember_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonGroupMember_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7191,15 +7589,23 @@
         },
         "indices": [
           {
-            "name": "index_PersonPicture_trk_clientId_epk_rx_csn",
+            "name": "index_PersonPicture_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonPicture_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_PersonPicture_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_PersonPicture_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonPicture_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7259,15 +7665,23 @@
         },
         "indices": [
           {
-            "name": "index_Container_trk_clientId_epk_rx_csn",
+            "name": "index_Container_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Container_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Container_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Container_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Container_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7327,15 +7741,23 @@
         },
         "indices": [
           {
-            "name": "index_VerbEntity_trk_clientId_epk_rx_csn",
+            "name": "index_VerbEntity_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_VerbEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_VerbEntity_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_VerbEntity_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_VerbEntity_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7395,15 +7817,23 @@
         },
         "indices": [
           {
-            "name": "index_XObjectEntity_trk_clientId_epk_rx_csn",
+            "name": "index_XObjectEntity_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_XObjectEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_XObjectEntity_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_XObjectEntity_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_XObjectEntity_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7463,15 +7893,23 @@
         },
         "indices": [
           {
-            "name": "index_StatementEntity_trk_clientId_epk_rx_csn",
+            "name": "index_StatementEntity_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StatementEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StatementEntity_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_StatementEntity_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_StatementEntity_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7531,15 +7969,23 @@
         },
         "indices": [
           {
-            "name": "index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn",
+            "name": "index_ContextXObjectStatementJoin_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContextXObjectStatementJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContextXObjectStatementJoin_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContextXObjectStatementJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7599,15 +8045,23 @@
         },
         "indices": [
           {
-            "name": "index_AgentEntity_trk_clientId_epk_rx_csn",
+            "name": "index_AgentEntity_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_AgentEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_AgentEntity_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_AgentEntity_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_AgentEntity_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7667,15 +8121,23 @@
         },
         "indices": [
           {
-            "name": "index_StateEntity_trk_clientId_epk_rx_csn",
+            "name": "index_StateEntity_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StateEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StateEntity_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_StateEntity_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_StateEntity_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7735,15 +8197,23 @@
         },
         "indices": [
           {
-            "name": "index_StateContentEntity_trk_clientId_epk_rx_csn",
+            "name": "index_StateContentEntity_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StateContentEntity_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StateContentEntity_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_StateContentEntity_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_StateContentEntity_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7803,15 +8273,23 @@
         },
         "indices": [
           {
-            "name": "index_XLangMapEntry_trk_clientId_epk_rx_csn",
+            "name": "index_XLangMapEntry_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_XLangMapEntry_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_XLangMapEntry_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7871,15 +8349,23 @@
         },
         "indices": [
           {
-            "name": "index_School_trk_clientId_epk_rx_csn",
+            "name": "index_School_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_School_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_School_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_School_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_School_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -7939,15 +8425,23 @@
         },
         "indices": [
           {
-            "name": "index_SchoolMember_trk_clientId_epk_rx_csn",
+            "name": "index_SchoolMember_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_SchoolMember_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SchoolMember_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_SchoolMember_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_SchoolMember_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8007,15 +8501,23 @@
         },
         "indices": [
           {
-            "name": "index_ClazzWork_trk_clientId_epk_rx_csn",
+            "name": "index_ClazzWork_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWork_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWork_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzWork_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzWork_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8075,15 +8577,23 @@
         },
         "indices": [
           {
-            "name": "index_ClazzWorkContentJoin_trk_clientId_epk_rx_csn",
+            "name": "index_ClazzWorkContentJoin_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkContentJoin_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkContentJoin_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzWorkContentJoin_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzWorkContentJoin_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8143,15 +8653,23 @@
         },
         "indices": [
           {
-            "name": "index_Comments_trk_clientId_epk_rx_csn",
+            "name": "index_Comments_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Comments_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Comments_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Comments_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Comments_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8211,15 +8729,23 @@
         },
         "indices": [
           {
-            "name": "index_ClazzWorkQuestion_trk_clientId_epk_rx_csn",
+            "name": "index_ClazzWorkQuestion_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkQuestion_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkQuestion_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzWorkQuestion_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzWorkQuestion_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8279,15 +8805,23 @@
         },
         "indices": [
           {
-            "name": "index_ClazzWorkQuestionOption_trk_clientId_epk_rx_csn",
+            "name": "index_ClazzWorkQuestionOption_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkQuestionOption_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkQuestionOption_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzWorkQuestionOption_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzWorkQuestionOption_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8347,15 +8881,23 @@
         },
         "indices": [
           {
-            "name": "index_ClazzWorkSubmission_trk_clientId_epk_rx_csn",
+            "name": "index_ClazzWorkSubmission_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkSubmission_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkSubmission_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzWorkSubmission_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzWorkSubmission_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8415,15 +8957,23 @@
         },
         "indices": [
           {
-            "name": "index_ClazzWorkQuestionResponse_trk_clientId_epk_rx_csn",
+            "name": "index_ClazzWorkQuestionResponse_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkQuestionResponse_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzWorkQuestionResponse_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ClazzWorkQuestionResponse_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ClazzWorkQuestionResponse_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8483,15 +9033,23 @@
         },
         "indices": [
           {
-            "name": "index_ContentEntryProgress_trk_clientId_epk_rx_csn",
+            "name": "index_ContentEntryProgress_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryProgress_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ContentEntryProgress_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ContentEntryProgress_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ContentEntryProgress_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8551,15 +9109,23 @@
         },
         "indices": [
           {
-            "name": "index_Report_trk_clientId_epk_rx_csn",
+            "name": "index_Report_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_Report_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Report_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_Report_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Report_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8619,15 +9185,23 @@
         },
         "indices": [
           {
-            "name": "index_ReportFilter_trk_clientId_epk_rx_csn",
+            "name": "index_ReportFilter_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_ReportFilter_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ReportFilter_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ReportFilter_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ReportFilter_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8687,15 +9261,23 @@
         },
         "indices": [
           {
-            "name": "index_LearnerGroup_trk_clientId_epk_rx_csn",
+            "name": "index_LearnerGroup_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_LearnerGroup_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LearnerGroup_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_LearnerGroup_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_LearnerGroup_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8755,15 +9337,23 @@
         },
         "indices": [
           {
-            "name": "index_LearnerGroupMember_trk_clientId_epk_rx_csn",
+            "name": "index_LearnerGroupMember_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_LearnerGroupMember_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_LearnerGroupMember_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_LearnerGroupMember_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_LearnerGroupMember_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8823,15 +9413,23 @@
         },
         "indices": [
           {
-            "name": "index_GroupLearningSession_trk_clientId_epk_rx_csn",
+            "name": "index_GroupLearningSession_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
-              "rx",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_GroupLearningSession_trk_clientId_epk_rx_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `rx`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_GroupLearningSession_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_GroupLearningSession_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_GroupLearningSession_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -8840,7 +9438,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '51fe5970e2b5802384ce3372e08d3dae')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '91331e3ca7ac6ef400ed18120f496224')"
     ]
   }
 }

@@ -71,7 +71,8 @@ class ReportDetailPresenterTest {
 
     @Test
     fun givenReportExists_whenOnCreateCalled_thenReportIsSetOnView() {
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
         val testEntity = ReportWithFilters().apply {
             //set variables here
             chartType = Report.BAR_CHART
@@ -92,7 +93,7 @@ class ReportDetailPresenterTest {
                         entityType = ReportFilter.CONTENT_FILTER
                     }
             )
-            reportUid = db.reportDao.insert(this)
+            reportUid = repo.reportDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())
         val presenter = ReportDetailPresenter(context,
@@ -156,7 +157,7 @@ class ReportDetailPresenterTest {
 
     @Test
     fun givenReportExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
         val testEntity = ReportWithFilters().apply {
@@ -179,7 +180,7 @@ class ReportDetailPresenterTest {
                         entityType = ReportFilter.CONTENT_FILTER
                     }
             )
-            reportUid = db.reportDao.insert(this)
+            reportUid = repo.reportDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())
         val presenter = ReportDetailPresenter(context,

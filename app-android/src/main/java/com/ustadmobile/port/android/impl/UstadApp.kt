@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.impl
 
 import android.content.Context
+import android.os.Build
 import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
@@ -52,6 +53,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
+import io.ktor.client.features.json.*
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
 
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParser
@@ -59,6 +63,7 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -83,7 +88,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
             instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
-                    context.url, "", defaultHttpClient()).also {
+                    context.url, "", defaultHttpClient(), useClientSyncManager = true).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
             }
         }
@@ -151,6 +156,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
             builder.create()
         }
 
+        bind<GsonSerializer>() with singleton {
+            GsonSerializer()
+        }
+
         bind<XapiStatementEndpoint>() with scoped(EndpointScope.Default).singleton {
             XapiStatementEndpointImpl(endpoint = context, di = di)
         }
@@ -173,6 +182,21 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<XmlSerializer>() with provider {
             instance<XmlPullParserFactory>().newSerializer()
         }
+
+        //OKHttp does not work on versions below 5.0
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            bind<OkHttpClient>() with singleton {
+                OkHttpClient.Builder()
+                        .dispatcher(Dispatcher().also {
+                            it.maxRequests = 30
+                            it.maxRequestsPerHost = 10
+                        })
+                        .connectTimeout(45, TimeUnit.SECONDS)
+                        .readTimeout(45, TimeUnit.SECONDS)
+                        .build()
+            }
+        }
+
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 

@@ -88,7 +88,7 @@ class ClazzWorkSubmissionMarkingPresenterTest {
         val dateNow: Long = UMCalendarUtil.getDateInMilliPlusDays(0)
 
         testClazzWork = runBlocking {
-            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     clazzWork, true, -1,
                     true,0, submitted = true,
                     isStudentToClazz = true, dateNow = dateNow, marked = false)
@@ -96,7 +96,7 @@ class ClazzWorkSubmissionMarkingPresenterTest {
 
         //Add content
         runBlocking {
-            db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
+            repo.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
         }
 
         val accountManager: UstadAccountManager by di.instance<UstadAccountManager>()

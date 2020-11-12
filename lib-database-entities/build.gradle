@@ -61,6 +61,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation project(":lib-database-annotations")
+                implementation project(":lib-door-runtime")
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
                 compileOnly project(":lib-room-annotations")
 

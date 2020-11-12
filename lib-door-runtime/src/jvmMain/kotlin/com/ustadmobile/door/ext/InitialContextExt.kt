@@ -32,7 +32,7 @@ fun InitialContext.bindNewSqliteDataSourceIfNotExisting(dbName: String,
     }catch(e: Exception) {
         val newDatasource = SQLiteDataSource(SQLiteConfig().apply{
             setJournalMode(SQLiteConfig.JournalMode.WAL)
-            setBusyTimeout("30000")
+            setBusyTimeout(30000)
             setSynchronous(SQLiteConfig.SynchronousMode.OFF)
         })
 

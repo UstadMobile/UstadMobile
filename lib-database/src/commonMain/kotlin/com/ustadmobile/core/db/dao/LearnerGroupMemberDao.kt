@@ -2,14 +2,12 @@ package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.Dao
-import androidx.room.Insert
 import androidx.room.Query
-import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.LearnerGroupMember
 import com.ustadmobile.lib.db.entities.LearnerGroupMemberWithPerson
 
-@UmRepository
+@Repository
 @Dao
 abstract class LearnerGroupMemberDao : BaseDao<LearnerGroupMember> {
 

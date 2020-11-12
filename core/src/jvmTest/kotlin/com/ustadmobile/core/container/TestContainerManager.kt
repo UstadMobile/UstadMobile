@@ -1,7 +1,9 @@
 package com.ustadmobile.core.container
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_NONE
@@ -42,7 +44,8 @@ class TestContainerManager {
     fun setup() {
         checkJndiSetup()
         db = UmAppDatabase.Companion.getInstance(context)
-        repo = db
+        repo = db.asRepository(Any(), "http://localhost/dummy", "",
+            defaultHttpClient(), null, null, false)
         db.clearAllTables()
 
         containerTmpDir = File.createTempFile("testcontainerdir", "tmp")
@@ -79,7 +82,7 @@ class TestContainerManager {
     @Test
     fun `Given file entry added WHEN getInputStream called THEN should return input`() {
         val container = Container()
-        container.containerUid = db.containerDao.insert(container)
+        container.containerUid = repo.containerDao.insert(container)
 
 
         val containerManager = ContainerManager(container, db, repo, containerTmpDir.absolutePath)
@@ -202,7 +205,7 @@ class TestContainerManager {
             val entry = ContentEntry()
             entry.title = "Sample Entry Title"
             entry.leaf = true
-            entry.contentEntryUid = db.contentEntryDao.insert(entry)
+            entry.contentEntryUid = repo.contentEntryDao.insert(entry)
             val container = Container()
             container.containerContentEntryUid = entry.contentEntryUid
             container.containerUid = repo.containerDao.insert(container)
@@ -241,7 +244,7 @@ class TestContainerManager {
         //test that the content is gzipped, but then, when using getInputStream, should be inflated
 
         val container = Container()
-        container.containerUid = db.containerDao.insert(container)
+        container.containerUid = repo.containerDao.insert(container)
 
         val containerManager = ContainerManager(container, db, repo, containerTmpDir.absolutePath)
         runBlocking {
@@ -264,7 +267,7 @@ class TestContainerManager {
     @Test
     fun givenNonCompressableEntry_whenAdded_thenShouldNotBeGzipped() {
         val container = Container()
-        container.containerUid = db.containerDao.insert(container)
+        container.containerUid = repo.containerDao.insert(container)
 
         val containerManager = ContainerManager(container, db, repo, containerTmpDir.absolutePath)
         runBlocking {
@@ -287,12 +290,12 @@ class TestContainerManager {
     fun givenFileExistsInOtherContainer_whenLinkExistingItemsCalled_thenShouldCreateContentEntryAndReturnNonExistingItems() {
         runBlocking {
             val container1 = Container();
-            container1.containerUid = db.containerDao.insert(container1)
+            container1.containerUid = repo.containerDao.insert(container1)
             val container1Manager = ContainerManager(container1, db, repo, containerTmpDir.absolutePath)
             container1Manager.addEntries(ContainerManager.FileEntrySource(testFiles[0], testFiles[0].name))
 
             val container2 = Container()
-            container2.containerUid = db.containerDao.insert(container2)
+            container2.containerUid = repo.containerDao.insert(container2)
             val container2Manager = ContainerManager(container2, db, repo, containerTmpDir.absolutePath)
             val container1Entry = container1Manager.getEntry(testFiles[0].name)!!
             val entryToDownload1= ContainerEntryWithMd5(cefMd5 = container1Entry.containerEntryFile!!.cefMd5)
@@ -315,7 +318,7 @@ class TestContainerManager {
     fun givenFileAlreadyInContainer_whenLinkExistingItemsCalled_thenShouldDoNothingAndReturnNonExistingItems() {
         runBlocking {
             val container1 = Container();
-            container1.containerUid = db.containerDao.insert(container1)
+            container1.containerUid = repo.containerDao.insert(container1)
             val container1Manager = ContainerManager(container1, db, repo, containerTmpDir.absolutePath)
             container1Manager.addEntries(ContainerManager.FileEntrySource(testFiles[0], testFiles[0].name))
             val numEntriesBefore = container1Manager.allEntries.size
@@ -345,7 +348,7 @@ class TestContainerManager {
             val entry = ContentEntry()
             entry.title = "Sample Entry Title"
             entry.leaf = true
-            entry.contentEntryUid = db.contentEntryDao.insert(entry)
+            entry.contentEntryUid = repo.contentEntryDao.insert(entry)
             val container = Container()
             container.containerContentEntryUid = entry.contentEntryUid
             container.containerUid = repo.containerDao.insert(container)

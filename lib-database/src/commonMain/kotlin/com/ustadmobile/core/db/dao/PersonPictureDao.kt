@@ -4,13 +4,13 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.GetAttachmentData
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.SetAttachmentData
-import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.PersonPicture
 
 
 @Dao
-@UmRepository
+@Repository
 abstract class PersonPictureDao : BaseDao<PersonPicture> {
 
     @SetAttachmentData

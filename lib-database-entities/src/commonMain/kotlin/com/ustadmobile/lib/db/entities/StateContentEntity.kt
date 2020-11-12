@@ -12,6 +12,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
 @Serializable
+//TODO
 class StateContentEntity {
 
     @PrimaryKey(autoGenerate = true)

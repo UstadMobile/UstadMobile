@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
@@ -9,8 +10,7 @@ import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionRow
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponseRow
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
-@UmRepository
+@Repository
 @Dao
 abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinDao<ClazzWorkQuestion> {
 
@@ -21,8 +21,9 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
     abstract suspend fun findByUidAsync(uid: Long) : ClazzWorkQuestion?
 
 
-    @Query("UPDATE ClazzWorkQuestion SET clazzWorkQuestionActive = :active " +
-            "WHERE clazzWorkQuestionUid = :clazzWorkQuestionUid ")
+    @Query("""UPDATE ClazzWorkQuestion SET clazzWorkQuestionActive = :active,
+            clazzWorkQuestionLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            WHERE clazzWorkQuestionUid = :clazzWorkQuestionUid """)
     abstract suspend fun updateActiveByClazzWorkQuestionUid(clazzWorkQuestionUid: Long, active : Boolean)
 
     @Query("""
