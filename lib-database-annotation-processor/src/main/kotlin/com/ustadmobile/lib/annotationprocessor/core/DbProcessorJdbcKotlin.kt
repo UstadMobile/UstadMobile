@@ -645,7 +645,7 @@ internal fun generateInsertTableSyncStatusCodeBlock(dbType: TypeElement,
 internal fun CodeBlock.Builder.addGenerateSqlitePrimaryKeyInsert(execSqlFn: String,
                                                         syncableEntityInfo: SyncableEntityInfo) : CodeBlock.Builder{
     return add("$execSqlFn(%S)\n",
-            "REPLACE INTO SqliteSyncablePrimaryKey (sspTableId, sspNextPrimaryKey) " +
+            "REPLACE INTO SqliteSyncablePk (sspTableId, sspNextPrimaryKey) " +
             "VALUES (${syncableEntityInfo.tableId}, (SELECT COALESCE((SELECT MAX(${syncableEntityInfo.entityPkField.name}) + 1 " +
             "FROM ${syncableEntityInfo.syncableEntity.simpleName} WHERE " +
             "${syncableEntityInfo.entityPkField.name} & (SELECT nodeClientId << 32 FROM SyncNode) = " +
@@ -826,7 +826,7 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                         .add("END MIGRATION */\n")
 
                 codeBlock.addCreateTableCode(entityTypeSpec, "_stmt.executeUpdate",
-                    dbProductType)
+                    dbProductType, entityType.indicesAsIndexMirrorList())
                 codeBlock.add("/* START MIGRATION: \n")
                         .add("_stmt.executeUpdate(%S)\n", "INSERT INTO ${entityTypeSpec.name} ($fieldListStr) SELECT $fieldListStr FROM ${entityTypeSpec.name}_OLD")
                         .add("_stmt.executeUpdate(%S)\n", "DROP TABLE ${entityTypeSpec.name}_OLD")

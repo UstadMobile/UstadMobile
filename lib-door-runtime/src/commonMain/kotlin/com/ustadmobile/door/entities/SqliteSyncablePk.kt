@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
  * range for this device is below that.
  */
 @Entity
-data class SqliteSyncablePrimaryKey(
+data class SqliteSyncablePk(
         /**
          * TableId as per SyncableEntity annotation
          */
