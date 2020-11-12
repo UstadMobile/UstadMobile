@@ -318,7 +318,8 @@ class ContentEntryEndtoEnd : TestCase() {
 
     }
 
-    @Test
+    //Disabled 12/Nov
+    //@Test
     fun givenListOfEntries_whenUserMovesEntriesToAnotherFolder_thenMoveToNewFolder(){
 
         init {
