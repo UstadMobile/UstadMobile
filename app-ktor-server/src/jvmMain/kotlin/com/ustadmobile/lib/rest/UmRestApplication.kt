@@ -1,5 +1,7 @@
 package com.ustadmobile.lib.rest
 
+import com.github.aakira.napier.DebugAntilog
+import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
@@ -11,10 +13,12 @@ import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
-import com.ustadmobile.lib.rest.ext.ktorInit
+import com.ustadmobile.lib.rest.ext.ktorInitDb
+import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
@@ -69,6 +73,9 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
     install(CallLogging)
 
+    //TODO: Put in a proper log filter here
+    Napier.base(DebugAntilog())
+
     install(ContentNegotiation) {
         gson {
             register(ContentType.Application.Json, GsonConverter())
@@ -118,15 +125,22 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             }
 
             UmAppDatabase.getInstance(Any(), dbName).also {
-                it.preload()
-                it.ktorInit(File(storageRoot, context.identifier(dbMode)).absolutePath)
+                it.ktorInitDb()
             }
+        }
+
+        bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
+            ServerUpdateNotificationManagerImpl()
         }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-            val repo = db.asRepository<UmAppDatabase>(Any(), "http://localhost/",
-                    "", defaultHttpClient(), File(".").absolutePath)
+            val repo = db.asRepository(Any(), "http://localhost/",
+                "", defaultHttpClient(), File(".").absolutePath,
+                instance(), false)
+            ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
+            repo.preload()
+            db.ktorInitDbWithRepo(repo, File(storageRoot, context.identifier(dbMode)).absolutePath)
             repo
         }
 

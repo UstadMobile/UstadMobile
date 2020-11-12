@@ -64,13 +64,13 @@ class ClazzLogListAttendancePresenterTest {
 
     @Test
     fun givenClazzUidFilter_whenOnCreateCalled_thenShouldFindByClazzUidAndSetList() {
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
 
         val testClazz = Clazz("Test Clazz").apply {
             clazzUid = 42L
             clazzTimeZone = "Asia/Dubai"
         }
-        db.clazzDao.insert(testClazz)
+        repo.clazzDao.insert(testClazz)
 
 
         val presenter = ClazzLogListAttendancePresenter(context,
@@ -84,11 +84,11 @@ class ClazzLogListAttendancePresenterTest {
 
     @Test
     fun givenExistingCompletedClazzLogs_whenOnCreateCalled_thenShouldSetGraphDataAndSetFabVisible() {
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
 
         val testClazz = Clazz("Test Clazz").apply {
             clazzTimeZone = "Asia/Dubai"
-            clazzUid = db.clazzDao.insert(this)
+            clazzUid = repo.clazzDao.insert(this)
         }
 
         val oneDayInMs = (1000 * 60 * 60 * 24)
@@ -97,7 +97,7 @@ class ClazzLogListAttendancePresenterTest {
 
         //make five ClazzLogs showing attendance
         val numInClazz = 10
-        val clazzLogs = runBlocking { db.insertClazzLogs(testClazz.clazzUid, 5) {index ->
+        val clazzLogs = runBlocking { repo.insertClazzLogs(testClazz.clazzUid, 5) {index ->
             ClazzLog().apply {
                 logDate = timeRange.first + (index * oneDayInMs)
                 clazzLogNumAbsent = if(index.rem(2) == 0) 2 else 4

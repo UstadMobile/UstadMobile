@@ -8,8 +8,11 @@ class DoorTag {
 
         const val TAG_REPO = 2
 
-
         const val TAG_ATTACHMENT_DIR = 4
+
+        const val TAG_DB_UNWRAPPED = 8
+
+        const val LOG_TAG = "DoorLog"
 
     }
 }

@@ -22,7 +22,7 @@ class SortListFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -41,16 +41,16 @@ class SortListFragmentTest : TestCase() {
             this.username = "theanswer"
             this.admin = true
             this.firstNames = "LMNOP"
-            dbRule.db.personDao.insert(this)
+            dbRule.repo.personDao.insert(this)
         }
 
         val abc = Person().apply {
             this.firstNames = "ABC"
-            personUid = dbRule.db.personDao.insert(this)
+            personUid = dbRule.repo.personDao.insert(this)
         }
         val xyz = Person().apply {
             this.firstNames = "XYZ"
-            personUid = dbRule.db.personDao.insert(this)
+            personUid = dbRule.repo.personDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(

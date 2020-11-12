@@ -38,7 +38,7 @@ class LearnerGroupEndToEndTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -46,7 +46,6 @@ class LearnerGroupEndToEndTest : TestCase() {
 
     @Before
     fun setup() {
-        dbRule.db.clearAllTables()
         dbRule.insertPersonForActiveUser(Person().apply {
             admin = true
             firstNames = "Test"
@@ -70,7 +69,7 @@ class LearnerGroupEndToEndTest : TestCase() {
         val container = Container().apply {
             containerContentEntryUid = 1
             mimeType = "application/tincan+zip"
-            containerUid = dbRule.db.containerDao.insert(this)
+            containerUid = dbRule.repo.containerDao.insert(this)
         }
         val containerTmpDir = UmFileUtilSe.makeTempDir("xapicontent", "${System.currentTimeMillis()}")
         val testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)
@@ -182,9 +181,10 @@ class LearnerGroupEndToEndTest : TestCase() {
                         .waitUntilWithActivityScenario(activityScenario!!){
                             it?.fullStatement?.contains("Group") == true
                         }
-                val groupActor = dbRule.repo.agentDao.getAgentByAnyId(account = "group:1", homepage = "http://localhost/")
+                val groupLearnerUid = statement!!.statementLearnerGroupUid
+                val groupActor = dbRule.repo.agentDao.getAgentByAnyId(account = "group:$groupLearnerUid", homepage = "http://localhost/")
                 Assert.assertEquals("Agent id matches on statement", groupActor!!.agentUid, statement!!.agentUid)
-                Assert.assertEquals("group id is same account name", "group:1", groupActor!!.agentAccountName)
+                Assert.assertEquals("group id is same account name", "group:$groupLearnerUid", groupActor!!.agentAccountName)
             }
             pressBack()
             ContentEntryDetailScreen {

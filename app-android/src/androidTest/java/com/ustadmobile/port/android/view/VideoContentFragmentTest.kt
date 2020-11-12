@@ -5,10 +5,6 @@ import android.content.res.Configuration
 import android.media.session.PlaybackState.STATE_BUFFERING
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.rule.GrantPermissionRule
 import com.google.android.exoplayer2.Player.STATE_READY
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -22,19 +18,14 @@ import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.port.android.screen.VideoContentScreen
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.insertVideoContent
 import kotlinx.android.synthetic.main.fragment_video_content.*
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
-import org.hamcrest.core.AllOf.allOf
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -48,7 +39,7 @@ class VideoContentFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -76,9 +67,9 @@ class VideoContentFragmentTest : TestCase() {
                 videoFile)
 
         runBlocking {
-            container = dbRule.db.insertVideoContent()
+            container = dbRule.repo.insertVideoContent()
             val manager = ContainerManager(container!!, dbRule.db,
-                    dbRule.db, tmpDir.absolutePath)
+                    dbRule.repo, tmpDir.absolutePath)
             manager.addEntries(ContainerManager.FileEntrySource(videoFile, "video.mp4"))
         }
     }

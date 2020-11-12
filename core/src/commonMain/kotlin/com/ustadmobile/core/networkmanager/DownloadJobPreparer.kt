@@ -1,23 +1,25 @@
 package com.ustadmobile.core.networkmanager
 
-import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.DownloadJobItemDao
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
+import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin
+import com.ustadmobile.lib.db.entities.DownloadJobItemWithParents
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.RepositoryLoadHelper
 import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
-import io.ktor.client.request.get
-import io.ktor.client.request.header
-import io.ktor.client.request.parameter
-import io.ktor.client.statement.HttpStatement
-import io.ktor.http.takeFrom
+import kotlin.collections.ArrayList
+import kotlin.collections.HashMap
+import kotlin.collections.HashSet
+import kotlin.collections.List
+import kotlin.collections.joinToString
+import kotlin.collections.listOf
+import kotlin.collections.mutableListOf
+import kotlin.collections.set
 
 
 interface IDownloadJobPreparer {
@@ -30,89 +32,7 @@ interface IDownloadJobPreparer {
  * This runnable sets up a download job so it's ready to run. It starts from a root content entry uid,
  * and then adds all
  */
-class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
-                          val statusAfterPreparation: Int = JobStatus.QUEUED,
-                          val downloadJobUid: Int) : IDownloadJobPreparer {
-
-    private val fetchEntitiesLimit = 1000
-
-    suspend fun downloadJobContentEntries(contentEntryUid: Long, db: UmAppDatabase, dbRepo: UmAppDatabase): Int {
-        val repo = dbRepo as DoorDatabaseSyncRepository
-        val endpoint = (dbRepo as DoorDatabaseRepository).endpoint
-        var numEntriesReceived = -1
-
-        val repoLoadHelper =
-                RepositoryLoadHelper(dbRepo) {endpointUrl ->
-                    val _httpStatement = _httpClient.get<HttpStatement> {
-                        url {
-                            takeFrom(endpointUrl)
-                            encodedPath =
-                                    "${encodedPath}${repo.dbPath}/ContentEntryDao/getAllEntriesRecursively"
-                        }
-                        header("X-nid", repo.clientId)
-                        dbVersionHeader(db)
-                        parameter("contentEntryUid", contentEntryUid)
-
-                        parameter("limit", fetchEntitiesLimit)
-
-                    }
-                    var _requestId = -1
-                    val _httpResult = _httpStatement.execute {
-                        _requestId = it.headers.get("X-reqid")?.toInt() ?: -1
-                        it.receive<List<ContentEntryWithParentChildJoinAndMostRecentContainer>>()
-                    }
-
-                    db.containerDao.replaceList(_httpResult
-                            .filter { it.mostRecentContainer != null }
-                            .map { it.mostRecentContainer as Container }
-                    )
-                    _httpClient.get<Unit> {
-                        url {
-                            takeFrom(endpointUrl)
-                            encodedPath =
-                                    "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContainer_trkReceived"
-                        }
-                        parameter("reqId", _requestId)
-                        dbVersionHeader(db)
-                    }
-                    db.contentEntryParentChildJoinDao.replaceList(_httpResult
-                            .filter { it.contentEntryParentChildJoin != null }
-                            .map { it.contentEntryParentChildJoin as ContentEntryParentChildJoin }
-                    )
-                    _httpClient.get<Unit> {
-                        url {
-                            takeFrom(endpointUrl)
-                            encodedPath =
-                                    "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContentEntryParentChildJoin_trkReceived"
-                        }
-                        parameter("reqId", _requestId)
-                        dbVersionHeader(db)
-                    }
-                    db.contentEntryDao.replaceList(_httpResult)
-                    _httpClient.get<Unit> {
-                        url {
-                            takeFrom(endpointUrl)
-                            encodedPath =
-                                    "${encodedPath}${repo.dbPath}/ContentEntryDao/_updateContentEntry_trkReceived"
-                        }
-                        parameter("reqId", _requestId)
-                        dbVersionHeader(db)
-                    }
-
-                    _httpResult
-        }
-
-        try {
-            val entriesLoaded = repoLoadHelper.doRequest()
-            numEntriesReceived = entriesLoaded.size
-        }catch(e: Exception) {
-            UMLog.l(UMLog.ERROR, 0, "Exception preparing", e)
-        }finally {
-
-        }
-
-        return numEntriesReceived
-    }
+class DownloadJobPreparer(val downloadJobUid: Int) : IDownloadJobPreparer {
 
     override suspend fun prepare(downloadManager: ContainerDownloadManager,
                                  appDatabase: UmAppDatabase,
@@ -123,18 +43,13 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
             throw IllegalArgumentException("DownloadJobUid does not exist!")
         }
 
-
-        var numItemsFetched = 0
-        do {
-            numItemsFetched = downloadJobContentEntries(downloadJob.djRootContentEntryUid,
-                    appDatabase, appDatabaseRepo)
-        }while(numItemsFetched == fetchEntitiesLimit)
+        val entriesToDownload = appDatabaseRepo.contentEntryDao
+                .getAllEntriesRecursivelyAsList(downloadJob.djRootContentEntryUid)
 
         UMLog.l(UMLog.DEBUG, 420, "DownloadJobPreparer: start " +
                 "entry uid = " + downloadJob.djRootContentEntryUid + " download job uid = " + downloadJobUid)
         val jobItemDao = appDatabase.downloadJobItemDao
         var childItemsToCreate: List<DownloadJobItemDao.DownloadJobItemToBeCreated2>
-        //TODO: Start a foreground notification on Android to show progress to the user and prevent it being killed
 
         var numItemsCreated = 0
 
@@ -150,9 +65,7 @@ class DownloadJobPreparer(val _httpClient: HttpClient = defaultHttpClient(),
 
         val createdJoinCepjUids = HashSet<Long>()
 
-        val statusList = mutableListOf<ContentEntryStatus>()
         do {
-            statusList.clear()
             childItemsToCreate = jobItemDao.findByParentContentEntryUuids(parentUids)
             UMLog.l(UMLog.DEBUG, 420, "DownloadJobPreparer: found " +
                     childItemsToCreate.size + " child items on from parents " +

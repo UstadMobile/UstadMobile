@@ -8,7 +8,26 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
-@SyncableEntity(tableId = 203)
+@SyncableEntity(tableId = ClazzWorkQuestionOption.TABLE_ID,
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzWorkQuestionOption.TABLE_ID} AS tableId FROM 
+        ChangeLog
+        JOIN ClazzWorkQuestionOption ON ChangeLog.chTableId = ${ClazzWorkQuestionOption.TABLE_ID} AND ClazzWorkQuestionOption.clazzWorkQuestionOptionUid = ChangeLog.chEntityPk 
+        JOIN ClazzWorkQuestion ON ClazzWorkQuestion.clazzWorkQuestionUid = clazzWorkQuestionOptionQuestionUid  
+        JOIN ClazzWork ON ClazzWork.clazzWorkUid = ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid
+        JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
+        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZWORK_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid"""],
+    syncFindAllQuery = """
+        SELECT ClazzWorkQuestionOption.* FROM
+        ClazzWorkQuestionOption
+        JOIN ClazzWorkQuestion ON ClazzWorkQuestion.clazzWorkQuestionUid = clazzWorkQuestionOptionQuestionUid
+        JOIN ClazzWork ON ClazzWork.clazzWorkUid = ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid
+        JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid
+        JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZWORK_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+    """)
 @Entity
 @Serializable
 open class ClazzWorkQuestionOption {
@@ -56,6 +75,10 @@ open class ClazzWorkQuestionOption {
         result = 31 * result + clazzWorkQuestionOptionLastChangedBy
         result = 31 * result + clazzWorkQuestionOptionActive.hashCode()
         return result
+    }
+
+    companion object {
+        const val TABLE_ID = 203
     }
 
 

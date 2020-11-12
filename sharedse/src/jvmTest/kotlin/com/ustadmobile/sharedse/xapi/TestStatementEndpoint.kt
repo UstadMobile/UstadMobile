@@ -22,6 +22,10 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
+import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
+import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import org.junit.Assert
@@ -60,18 +64,7 @@ class TestStatementEndpoint {
         val endpointScope = EndpointScope()
         val endpointUrl = Endpoint("http://localhost:8087/")
         di = DI {
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
-                val dbName = sanitizeDbNameFromUrl(context.url)
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
-                    it.clearAllTables()
-                    it.preload()
-                })
-            }
-
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
-            }
+            bindDbAndRepoWithEndpoint(endpointScope, clientMode = true)
 
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
@@ -86,7 +79,7 @@ class TestStatementEndpoint {
         }
 
         gson = di.direct.instance()
-        repo = di.on(endpointUrl).direct.instance(tag = UmAppDatabase.TAG_DB)
+        repo = di.on(endpointUrl).direct.instance(tag = UmAppDatabase.TAG_REPO)
         endpoint = di.on(endpointUrl).direct.instance()
     }
 

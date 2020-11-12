@@ -243,7 +243,7 @@ class JoinWithCodePresenterTest {
             firstNames = "Test"
             lastName = "User"
             username = "testuser2"
-            personUid = db.personDao.insert(this)
+            personUid = repo.personDao.insert(this)
         }
 
 
@@ -278,7 +278,7 @@ class JoinWithCodePresenterTest {
             firstNames = "Test"
             lastName = "User"
             username = "testuser2"
-            personUid = db.personDao.insert(this)
+            personUid = repo.personDao.insert(this)
         }
 
         apiUrl = accountManager.activeAccount.endpointUrl

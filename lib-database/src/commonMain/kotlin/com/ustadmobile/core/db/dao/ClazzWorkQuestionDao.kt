@@ -2,13 +2,13 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionRow
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
-@UmRepository
+@Repository
 @Dao
 abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinDao<ClazzWorkQuestion> {
 

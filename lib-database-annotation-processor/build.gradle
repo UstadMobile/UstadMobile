@@ -131,6 +131,8 @@ dependencies {
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
     implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
+    implementation "com.github.aakira:napier-jvm:$version_napier"
+
     //KaptTest does not
     //kaptTest project(":lib-database-annotation-processor")
     kaptTest files("build/libs/lib-database-annotation-processor.jar")
@@ -139,6 +141,7 @@ dependencies {
     testImplementation "junit:junit:$version_junit"
     testImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     testImplementation "com.google.code.gson:gson:$version_gson"
+    testImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
 }
 
 sourceCompatibility = "1.8"

@@ -157,7 +157,8 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
 
             override fun areContentsTheSame(oldItem: PersonWithDisplayDetails,
                                             newItem: PersonWithDisplayDetails): Boolean {
-                return oldItem == newItem
+                return oldItem.firstNames == newItem.firstNames &&
+                        oldItem.lastName == newItem.lastName
             }
         }
     }

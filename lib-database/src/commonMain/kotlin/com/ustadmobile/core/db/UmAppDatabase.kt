@@ -4,7 +4,7 @@ import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.MinSyncVersion
-import com.ustadmobile.door.entities.SqliteSyncablePrimaryKey
+import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.*
@@ -37,13 +37,20 @@ import kotlin.jvm.Volatile
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
     Report::class, ReportFilter::class,
     DeviceSession::class, WorkSpace::class, ContainerImportJob::class,
-    SqliteSyncablePrimaryKey::class, LearnerGroup::class, LearnerGroupMember::class,
-    GroupLearningSession::class
+    LearnerGroup::class, LearnerGroupMember::class,
+    GroupLearningSession::class,
+
+    //Door Helper entities
+    SqliteSyncablePrimaryKey::class,
+    SqliteChangeSeqNums::class,
+    UpdateNotification::class,
+    TableSyncStatus::class,
+    ChangeLog::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 43)
+], version = 44)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -2897,7 +2904,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_42_43 = object : DoorMigration(42, 43) {
+        val MIGRATION_42_33 = UmAppDatabase_SyncPushMigration()
+
+        val MIGRATION_43_44 = object : DoorMigration(43, 44) {
             override fun migrate(database: DoorSqlDatabase) {
 
                 database.execSQL("DROP TABLE ContainerUploadJob")
@@ -2914,7 +2923,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
-                    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43)
+                    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_33,
+                    MIGRATION_43_44)
 
 
 

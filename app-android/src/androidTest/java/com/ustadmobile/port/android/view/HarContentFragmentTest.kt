@@ -3,16 +3,12 @@ package com.ustadmobile.port.android.view
 import android.Manifest
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isJavascriptEnabled
-import androidx.test.espresso.web.sugar.Web.onWebView
-import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
 import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.rule.GrantPermissionRule
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
-import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.view.UstadView
@@ -21,15 +17,11 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.screen.HarContentScreen
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
-import org.hamcrest.core.AllOf
-import org.hamcrest.core.AllOf.allOf
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -41,7 +33,7 @@ class HarContentFragmentTest {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -77,12 +69,12 @@ class HarContentFragmentTest {
         targetEntry.author = "borrachera"
         targetEntry.primaryLanguageUid = 53
         targetEntry.leaf = true
-        targetEntry.contentEntryUid = dbRule.db.contentEntryDao.insert(targetEntry)
+        targetEntry.contentEntryUid = dbRule.repo.contentEntryDao.insert(targetEntry)
 
         container = Container()
         container?.mimeType = "application/har+zip"
         container?.containerContentEntryUid = targetEntry.contentEntryUid
-        container?.containerUid = dbRule.db.containerDao.insert(container!!)
+        container?.containerUid = dbRule.repo.containerDao.insert(container!!)
 
         val containerManager = ContainerManager(container!!, dbRule.db, dbRule.repo,
                 tmpDir.absolutePath)

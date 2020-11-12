@@ -80,14 +80,14 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                 } else if(line.contains("//#DOORDB_SYNCDAO")) {
                     lineOut += "//Generated section: add SyncDao getter, boundary callback getters, and http (ktor) helper DAO getters\n"
                     lineOut += "abstract fun _syncDao(): ${dbTypeEl.simpleName}${SUFFIX_SYNCDAO_ABSTRACT}\n\n"
+                    lineOut += "abstract fun _syncHelperEntitiesDao(): com.ustadmobile.door.daos.SyncHelperEntitiesDao\n\n"
+
                     //add boundary callbacks and http sync (KTOR) helper DAOs
                     methodsToImplement(dbTypeEl, dbTypeEl.asType() as DeclaredType, processingEnv).forEach {
                         val execEl = it as ExecutableElement
                         val returnTypeEl = processingEnv.typeUtils.asElement(execEl.returnType)
 
-                        if(returnTypeEl != null && returnTypeEl is TypeElement
-                                && syncableEntitiesOnDao(returnTypeEl.asClassName(), processingEnv).isNotEmpty()) {
-
+                        if(returnTypeEl is TypeElement && returnTypeEl.isDaoWithRepository) {
                             listOf(SUFFIX_KTOR_HELPER_MASTER, SUFFIX_KTOR_HELPER_LOCAL).forEach {suffix ->
                                 lineOut += "abstract fun _${returnTypeEl.simpleName}$suffix() : ${returnTypeEl.qualifiedName}$suffix\n\n"
                             }
@@ -228,6 +228,8 @@ class DbProcessorAndroid: AbstractDbProcessor() {
                 .addModifiers(KModifier.OVERRIDE)
                 .addCode(generateInsertNodeIdFun(dbTypeEl, DoorDbType.SQLITE, "db.execSQL",
                         processingEnv))
+                .addCode(CodeBlock.builder().addInsertTableSyncStatuses(dbTypeEl,
+                        "db.execSQL", processingEnv).build())
                 .build())
 
         onCreateFunSpec.addCode(codeBlock.build())

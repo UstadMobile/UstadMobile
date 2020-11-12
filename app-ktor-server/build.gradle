@@ -59,6 +59,8 @@ kotlin {
                   implementation "org.kodein.di:kodein-di:$version_kodein_di"
                   implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
+                  implementation "com.github.aakira:napier-jvm:$version_napier"
+
                   implementation project(":core")
                   implementation project(":sharedse")
                   implementation project(":lib-database")

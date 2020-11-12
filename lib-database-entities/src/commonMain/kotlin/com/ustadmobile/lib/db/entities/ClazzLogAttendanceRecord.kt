@@ -8,7 +8,29 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
-@SyncableEntity(tableId = 15)
+@SyncableEntity(tableId = ClazzLogAttendanceRecord.TABLE_ID,
+    notifyOnUpdate = [
+        """
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzLogAttendanceRecord.TABLE_ID} AS tableId FROM 
+            ChangeLog
+            JOIN ClazzLogAttendanceRecord ON ChangeLog.chTableId = ${ClazzLogAttendanceRecord.TABLE_ID} AND ChangeLog.chEntityPk = ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
+            JOIN ClazzMember ON ClazzMember.clazzMemberUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid 
+            JOIN Person ON Person.personUid = ClazzMember.clazzMemberPersonUid
+            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        """
+    ],
+    syncFindAllQuery = """
+            SELECT ClazzLogAttendanceRecord.* FROM
+            ClazzLogAttendanceRecord
+            JOIN ClazzMember ON ClazzMember.clazzMemberUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid 
+            JOIN Person ON Person.personUid = ClazzMember.clazzMemberPersonUid
+            JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+                ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+            WHERE DeviceSession.dsDeviceId = :clientId
+        """)
 @Entity
 @Serializable
 open class ClazzLogAttendanceRecord() {
@@ -31,14 +53,6 @@ open class ClazzLogAttendanceRecord() {
     @LastChangedBy
     var clazzLogAttendanceRecordLastChangedBy: Int = 0
 
-    companion object {
-
-        const val STATUS_ATTENDED = 1
-
-        const val STATUS_ABSENT = 2
-
-        const val STATUS_PARTIAL = 4
-    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -66,6 +80,18 @@ open class ClazzLogAttendanceRecord() {
         result = 31 * result + clazzLogAttendanceRecordLocalChangeSeqNum.hashCode()
         result = 31 * result + clazzLogAttendanceRecordLastChangedBy
         return result
+    }
+
+
+    companion object {
+
+        const val TABLE_ID = 15
+
+        const val STATUS_ATTENDED = 1
+
+        const val STATUS_ABSENT = 2
+
+        const val STATUS_PARTIAL = 4
     }
 
 

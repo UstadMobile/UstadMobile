@@ -63,11 +63,12 @@ class ClazzListPresenterTest {
     @Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val accountManager: UstadAccountManager by di.instance<UstadAccountManager>()
 
         val testEntity = Clazz().apply {
             //set variables here
-            clazzUid = db.clazzDao.insert(this)
+            clazzUid = repo.clazzDao.insert(this)
         }
 
         val presenterArgs = mapOf<String,String>()
@@ -104,23 +105,24 @@ class ClazzListPresenterTest {
     @Test
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
         val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
         val activePerson = Person().apply {
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
-            personUid = db.insertPersonOnlyAndGroup(this).personUid
+            personUid = repo.insertPersonOnlyAndGroup(this).personUid
         }
 
         val presenterArgs = mapOf<String,String>()
         val testEntity = Clazz().apply {
             //set variables here
-            clazzUid = db.clazzDao.insert(this)
+            clazzUid = repo.clazzDao.insert(this)
         }
 
         runBlocking {
-            db.insertPersonWithRole(activePerson,
+            repo.insertPersonWithRole(activePerson,
                     Role().apply {
                         rolePermissions = Role.PERMISSION_CLAZZ_OPEN
                     }, EntityRole().apply {

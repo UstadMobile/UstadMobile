@@ -2,12 +2,6 @@ package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withTagValue
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
@@ -20,7 +14,6 @@ import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.Matchers.equalTo
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -31,7 +24,7 @@ class ReportListFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -45,7 +38,7 @@ class ReportListFragmentTest : TestCase() {
     @Before
     fun setup() {
         runBlocking {
-            dbRule.db.insertTestStatements()
+            dbRule.repo.insertTestStatements()
         }
     }
 
@@ -59,7 +52,7 @@ class ReportListFragmentTest : TestCase() {
             xAxis = Report.MONTH
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
-            reportUid = dbRule.db.reportDao.insert(this)
+            reportUid = dbRule.repo.reportDao.insert(this)
         }
 
         init {

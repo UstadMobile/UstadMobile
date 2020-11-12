@@ -2,14 +2,14 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.Transaction
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.entities.ReportFilter
+import com.ustadmobile.lib.db.entities.ReportFilterWithDisplayDetails
 
 @Dao
-@UmRepository
+@Repository
 abstract class ReportFilterDao : BaseDao<ReportFilter>, OneToManyJoinDao<ReportFilter> {
 
     @Query("""SELECT ReportFilter.*, Person.*, VerbEntity.*, 

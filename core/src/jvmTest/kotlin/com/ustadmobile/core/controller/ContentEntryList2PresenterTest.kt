@@ -73,9 +73,9 @@ class ContentEntryList2PresenterTest {
     }
 
     private fun createEntries(nonLeafs: MutableList<Int> = mutableListOf()){
-        val db: UmAppDatabase by di.activeRepoInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         createdEntries = runBlocking {
-            db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+            repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6,parentEntryUid, nonLeafIndexes = nonLeafs)
         }
     }
@@ -133,11 +133,11 @@ class ContentEntryList2PresenterTest {
     @Test
     fun givenPresenterCreatedInPickerMode_whenOnClickEntryCalledOnAFolder_thenShouldOpenIt(){
         createEntries(mutableListOf(0))
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val accountManager: UstadAccountManager by di.instance()
 
         runBlocking {
-            db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+            repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6, createdEntries?.get(0)?.contentEntryUid!!)
         }
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
@@ -158,10 +158,10 @@ class ContentEntryList2PresenterTest {
     @Test
     fun givenPresenterCreatedInPickerMode_whenOnClickEntryCalledOnAFolderForEntrySelection_thenShouldOpenItAndFinishWithResultWhenSelected(){
         createEntries(mutableListOf(0))
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
 
         val createdChildEntries = runBlocking {
-            db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+            repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6, createdEntries?.get(0)?.contentEntryUid!!)
         }
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
@@ -186,11 +186,11 @@ class ContentEntryList2PresenterTest {
     @Test
     fun givenPresenterCreatedInPickerMode_whenOnBackPressedWhileInAFolder_thenShouldGoBackToThePreviousParentEntry(){
         createEntries(mutableListOf(0))
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val accountManager: UstadAccountManager by di.instance()
 
         val createdChildEntries = runBlocking {
-            db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+            repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6, createdEntries?.get(0)?.contentEntryUid!!)
         }
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())

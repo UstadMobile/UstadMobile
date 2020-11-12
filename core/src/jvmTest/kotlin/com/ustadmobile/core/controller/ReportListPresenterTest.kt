@@ -62,10 +62,10 @@ class ReportListPresenterTest {
 
     @Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val testEntity = Report().apply {
             //set variables here
-            reportUid = db.reportDao.insert(this)
+            reportUid = repo.reportDao.insert(this)
         }
 
         val presenterArgs = mapOf<String,String>()
@@ -82,13 +82,13 @@ class ReportListPresenterTest {
 
     @Test
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
         val presenterArgs = mapOf<String,String>()
         val testEntity = Report().apply {
             //set variables here
-            reportUid = db.reportDao.insert(this)
+            reportUid = repo.reportDao.insert(this)
         }
         val presenter = ReportListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)

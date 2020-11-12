@@ -5,13 +5,11 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.rule.GrantPermissionRule
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -28,8 +26,6 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.android.screen.ContentEntryDetailScreen
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.*
 import com.ustadmobile.util.test.ext.insertContentEntryWithTranslations
@@ -40,7 +36,6 @@ import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.Matchers.not
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -53,8 +48,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true,
-            controlServerUrl = "http://${BuildConfig.TEST_HOST}:${BuildConfig.TEST_PORT}")
+    var dbRule = UmAppDatabaseAndroidClientRule(controlServerUrl = "http://${BuildConfig.TEST_HOST}:${BuildConfig.TEST_PORT}")
 
     @JvmField
     @Rule
@@ -86,7 +80,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
                 title = entryTitle
                 description = "Dummy description"
                 leaf = true
-                contentEntryUid = dbRule.db.contentEntryDao.insert(this)
+                contentEntryUid = dbRule.repo.contentEntryDao.insert(this)
             }
 
             val accountManager: UstadAccountManager by di.instance()
@@ -98,7 +92,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
                 contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED
                 contentEntryProgressActive = true
                 contentEntryProgressPersonUid = activeAccount.personUid
-                contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insert(this)
+                contentEntryProgressUid = dbRule.repo.contentEntryProgressDao.insert(this)
             }
 
 
@@ -144,7 +138,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
                 title = entryTitle
                 description = "Dummy description"
                 leaf = true
-                contentEntryUid = dbRule.db.contentEntryDao.insert(this)
+                contentEntryUid = dbRule.repo.contentEntryDao.insert(this)
             }
 
             launchFragmentInContainer(themeResId = R.style.UmTheme_App,
@@ -187,7 +181,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
         var testEntry: ContentEntry? = null
         init {
             testEntry = runBlocking {
-                dbRule.db.insertContentEntryWithTranslations(totalTranslations, parentUid)
+                dbRule.repo.insertContentEntryWithTranslations(totalTranslations, parentUid)
             }
 
             launchFragmentInContainer(themeResId = R.style.UmTheme_App,
@@ -227,7 +221,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
         val parentUid = 10001L
         val totalTranslations = 6
         val testEntry = runBlocking {
-            dbRule.db.insertContentEntryWithTranslations(totalTranslations, parentUid)
+            dbRule.repo.insertContentEntryWithTranslations(totalTranslations, parentUid)
         }
 
         launchFragmentInContainer(themeResId = R.style.UmTheme_App,

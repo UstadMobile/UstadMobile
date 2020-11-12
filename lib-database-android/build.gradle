@@ -23,7 +23,8 @@ android {
     }
 
     sourceSets {
-        main.java.srcDirs += ["build/generated/source/door"]
+        main.java.srcDirs += ["build/generated/source/door",
+                              "../lib-door-runtime/src/commonMain/resources/daos"]
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 
@@ -96,7 +97,7 @@ dependencies {
     implementation project(":lib-database-annotations")
     implementation project(':lib-util')
 
-    //Kotlin
+    //Kotlin 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
     //Repository dependencies
@@ -118,6 +119,9 @@ dependencies {
     kapt "androidx.room:room-compiler:$version_android_room"
     //compileOnly  "androidx.room:room-compiler:$version_android_room"
 
+
+    //Logging
+    implementation "com.github.aakira:napier-android:$version_napier"
 
 
 

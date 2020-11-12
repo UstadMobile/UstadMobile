@@ -5,13 +5,13 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
 
-@UmDao
-@UmRepository
 @Dao
+@Repository
 abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
     @Query("SELECT * FROM ClazzWork WHERE clazzWorkUid = :clazzWorkUid " +
