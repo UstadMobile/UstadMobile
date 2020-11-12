@@ -54,6 +54,7 @@ fun Route.PersonAuthRegisterRoute() {
 
         post("register"){
             val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
+            val repo: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_REPO)
             val gson: Gson by di().instance()
 
             val personString = call.request.queryParameters["person"]
@@ -75,10 +76,10 @@ fun Route.PersonAuthRegisterRoute() {
 
             if(person == null) {
                 mPerson.apply {
-                    personUid = db.insertPersonAndGroup(mPerson).personUid
+                    personUid = repo.insertPersonAndGroup(mPerson).personUid
                 }
             } else {
-                db.personDao.update(mPerson)
+                repo.personDao.update(mPerson)
             }
             val personAuth = PersonAuth(mPerson.personUid,
                     PersonAuthDao.PLAIN_PASS_PREFIX+mPerson.newPassword)
