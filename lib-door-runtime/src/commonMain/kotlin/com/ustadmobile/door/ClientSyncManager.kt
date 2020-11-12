@@ -3,7 +3,6 @@ package com.ustadmobile.door
 import com.github.aakira.napier.Napier
 import com.ustadmobile.door.DoorConstants.HEADER_DBVERSION
 import com.ustadmobile.door.DoorDatabaseRepository.Companion.STATUS_CONNECTED
-import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.DoorTag.Companion.LOG_TAG
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.sse.DoorEventListener
@@ -18,7 +17,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import kotlin.jvm.Synchronized
 import kotlin.math.min
 
 /**
@@ -28,10 +26,19 @@ import kotlin.math.min
  */
 class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int,
                         initialConnectivityStatus: Int,
-                        private val syncDaoSubscribePath: String,
-                        private val syncDaoNotificationReceivedPath: String,
                         val httpClient: HttpClient,
-                        val maxProcessors: Int = 5): TableChangeListener {
+                        val maxProcessors: Int = 5,
+                        /**
+                         * The suffix that is added to the repo's endpoint url to determine the path
+                         * of the Server Sent Events URL (Generally UpdateNotifications/update-events
+                         */
+                        private val endpointSuffixUpdates: String = "${repo.dbPath}/$ENDPOINT_SUFFIX_UPDATES",
+                        /**
+                         * The suffix that is added to the repo's endpoint url to determine the path
+                         * to the endpoint for the client to acknowledge receipt of update events.
+                         * Generally UpdateNotifications/update-ack
+                         */
+                        private val endpointSuffixAck: String = "${repo.dbPath}/$ENDPOINT_SUFFIX_ACK"): TableChangeListener {
 
     val updateCheckJob: AtomicRef<Job?> = atomic(null)
 
@@ -112,7 +119,7 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
             if(eventSource.value != null)
                 return
 
-            val url = "${repo.endpoint}$syncDaoSubscribePath?deviceId=${repo.clientId}&$HEADER_DBVERSION=$dbVersion"
+            val url = "${repo.endpoint}$endpointSuffixUpdates?deviceId=${repo.clientId}&$HEADER_DBVERSION=$dbVersion"
             Napier.v("$logPrefix subscribing to updates from $url", tag = LOG_TAG)
             eventSource.value = DoorEventSource(url,
                     object : DoorEventListener {
@@ -133,7 +140,7 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
                             repo.syncHelperEntitiesDao.updateTableSyncStatusLastChanged(tableId,
                                     systemTimeInMillis())
                             invalidate()
-                            httpClient.get<Unit>("${repo.endpoint}$syncDaoNotificationReceivedPath?" +
+                            httpClient.get<Unit>("${repo.endpoint}$endpointSuffixAck?" +
                                     "deviceId=${repo.clientId}&$HEADER_DBVERSION=$dbVersion&tableId=$tableId&lastModTimestamp=$lastModified")
                         }
                     }
@@ -193,6 +200,18 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
          * update.
          */
         const val TABLEID_SYNC_ALL_TABLES = -1
+
+        const val API_UPDATE_NOTIFICATION_ROUTE = "UpdateNotification"
+
+        const val SUFFIX_UPDATE_EVENTS = "update-events"
+
+        const val SUFFIX_UPDATE_ACK = "update-ack"
+
+        const val ENDPOINT_SUFFIX_UPDATES = "$API_UPDATE_NOTIFICATION_ROUTE/$SUFFIX_UPDATE_EVENTS"
+
+        const val ENDPOINT_SUFFIX_ACK = "$API_UPDATE_NOTIFICATION_ROUTE/$SUFFIX_UPDATE_ACK"
+
+
 
 
     }

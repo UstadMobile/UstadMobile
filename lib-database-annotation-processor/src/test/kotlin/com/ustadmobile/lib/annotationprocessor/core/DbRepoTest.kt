@@ -579,10 +579,7 @@ class DbRepoTest {
                 "token", httpClient).asConnectedRepository<ExampleDatabase2>()
 
         val clientSyncManager = ClientSyncManager(clientRepo as DoorDatabaseSyncRepository,
-            2, STATUS_CONNECTED,
-                "ExampleDatabase2/ExampleDatabase2SyncDao/${DbProcessorSync.ENDPOINT_POSTFIX_UPDATES}",
-                "ExampleDatabase2/ExampleDatabase2SyncDao/${DbProcessorSync.ENDPOINT_POSTFIX_DELETE_UPDATE}",
-                httpClient)
+            2, STATUS_CONNECTED, httpClient)
 
 
         val testUid = 42L
@@ -707,6 +704,9 @@ class DbRepoTest {
                 clientDb2.exampleSyncableDao().findByUid(exampleEntity.esUid)?.esName == "Hello Updated Notification"
             }
         }
+
+        val entityOnServerAfterUpdate = serverDb.exampleSyncableDao().findByUid(exampleEntity.esUid)
+        println(entityOnServerAfterUpdate)
 
         Assert.assertNotNull("Entity reached server after creation", entityOnServer)
         Assert.assertNotNull("Entity reached client2 after creation", entityOnClient2AfterCreation)

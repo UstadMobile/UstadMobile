@@ -53,7 +53,7 @@ class ClientSyncManagerTest {
         }
 
         val clientSyncManager = ClientSyncManager(mockRepo, 2, STATUS_CONNECTED,
-                "none", "none", HttpClient())
+                HttpClient())
 
         //wait for the initial load
         verify(mockSyncHelperEntitiesDao, timeout(4000)).findTablesToSync()
@@ -139,9 +139,7 @@ class ClientSyncManagerTest {
 
         val httpClient = HttpClient()
 
-        val clientSyncManager = ClientSyncManager(mockRepo, 2,  STATUS_CONNECTED,
-            "ExampleDatabaseSyncDao/_subscribe",
-                "ExampleDatabaseSyncDao/_deleteNotification",
+        val clientSyncManager = ClientSyncManager(mockRepo, 2, STATUS_CONNECTED,
                 httpClient)
 
         runBlocking {

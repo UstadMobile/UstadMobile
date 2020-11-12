@@ -5,6 +5,7 @@ import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
+import com.sun.corba.se.impl.orbutil.concurrent.Sync
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.SyncResult
@@ -12,6 +13,8 @@ import com.ustadmobile.door.ServerUpdateNotificationManager
 import com.ustadmobile.door.annotation.EntityWithAttachment
 import com.ustadmobile.door.annotation.PgOnConflict
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_INSTANCE_MEMBER
@@ -29,6 +32,12 @@ import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.TypeElement
 import com.ustadmobile.door.entities.UpdateNotificationSummary
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.SUFFIX_JDBC_KT
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER_LOCAL
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER_MASTER
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_ROUTE
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_ABSTRACT
 
 /**
  * Generate a Tracker Entity for a Syncable Entity
@@ -93,6 +102,38 @@ internal fun generateTrackerEntity(entityClass: TypeElement, processingEnv: Proc
 
 }
 
+fun TypeElement.asKtorSyncDaoTypeSpec(processingEnv: ProcessingEnvironment) : TypeSpec {
+    val dbTypeEl = this
+    return TypeSpec.classBuilder("$simpleName$SUFFIX_SYNCDAO_ABSTRACT")
+            .addModifiers(KModifier.ABSTRACT)
+            .apply {
+                dbTypeEl.allDbEntities(processingEnv).filter { it.hasAnnotation(SyncableEntity::class.java) }.forEach {entityType ->
+                    val syncFindAllSql = entityType.getAnnotation(SyncableEntity::class.java)?.syncFindAllQuery
+                    val getAllSql = if(syncFindAllSql?.isNotEmpty() == true) {
+                        syncFindAllSql
+                    }else {
+                        "SELECT * FROM ${entityType.simpleName}"
+                    }
+
+                    addFunction(FunSpec.builder("_findMasterUnsent${entityType.simpleName}")
+                            .addModifiers(KModifier.ABSTRACT)
+                            .returns(List::class.asClassName().parameterizedBy(entityType.asClassName()))
+                            .addAnnotation(AnnotationSpec.builder(Query::class)
+                                    .addMember("%S", getAllSql).build())
+                            .build())
+                    addFunction(FunSpec.builder("_replace${entityType.simpleName}")
+                            .addModifiers(KModifier.ABSTRACT)
+                            .addAnnotation(AnnotationSpec.builder(Insert::class)
+                                    .build())
+                            .addParameter("entities",
+                                    List::class.asClassName().parameterizedBy(entityType.asClassName()))
+                            .build())
+                }
+            }
+            .build()
+
+}
+
 class DbProcessorSync: AbstractDbProcessor() {
 
     data class OutputDirs(val abstractOutputArg: String?, val implOutputArg: String?,
@@ -129,10 +170,49 @@ class DbProcessorSync: AbstractDbProcessor() {
             writeFileSpecToOutputDirs(syncRepoFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT,
                     useFilerAsDefault = false)
 
-            val syncRouteFileSpec = generateSyncKtorRoute(dbTypeEl as TypeElement)
-            syncRouteFileSpec.writeAllSpecs(writeImpl = true, writeKtor = true,
-                    outputSpecArgName = AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT,
-                    useFilerAsDefault = true)
+            val syncDaoClassName = dbTypeEl.asClassNameWithSuffix(SUFFIX_SYNCDAO_ABSTRACT)
+            val ktorDaoTypeSpec = dbTypeEl.asKtorSyncDaoTypeSpec(processingEnv)
+            FileSpec.builder(dbTypeEl.packageName,
+                    "${dbTypeEl.simpleName}$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_KTOR_ROUTE")
+                    .addDaoKtorRouteFun(ktorDaoTypeSpec, syncDaoClassName,
+                            syncDaoClassName, processingEnv)
+                    .build()
+                    .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
+
+            FileSpec.builder(dbTypeEl.packageName,
+                "${dbTypeEl.simpleName}$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_KTOR_HELPER")
+                    .addKtorHelperInterface(ktorDaoTypeSpec, syncDaoClassName, processingEnv)
+                    .build()
+                    .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
+
+            FileSpec.builder(dbTypeEl.packageName,
+                    "${dbTypeEl.simpleName}$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_KTOR_HELPER_MASTER")
+                    .addKtorAbstractDao(ktorDaoTypeSpec, syncDaoClassName,
+                            MasterChangeSeqNum::class, processingEnv)
+                    .build()
+                    .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
+
+            FileSpec.builder(dbTypeEl.packageName,
+                    "${dbTypeEl.simpleName}$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_KTOR_HELPER_LOCAL")
+                    .addKtorAbstractDao(ktorDaoTypeSpec, syncDaoClassName,
+                        LocalChangeSeqNum::class, processingEnv)
+                    .build()
+                    .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
+
+            FileSpec.builder(dbTypeEl.packageName,
+                "${dbTypeEl.simpleName}${SUFFIX_SYNCDAO_ABSTRACT}${SUFFIX_KTOR_HELPER_MASTER}_${SUFFIX_JDBC_KT}")
+                    .addKtorHelperDaoImplementation(ktorDaoTypeSpec, syncDaoClassName,
+                        MasterChangeSeqNum::class, processingEnv)
+                    .build()
+                    .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
+
+            FileSpec.builder(dbTypeEl.packageName,
+                    "${dbTypeEl.simpleName}${SUFFIX_SYNCDAO_ABSTRACT}${SUFFIX_KTOR_HELPER_LOCAL}_${SUFFIX_JDBC_KT}")
+                    .addKtorHelperDaoImplementation(ktorDaoTypeSpec, syncDaoClassName,
+                            LocalChangeSeqNum::class, processingEnv)
+                    .build()
+                    .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
+
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
@@ -185,158 +265,6 @@ class DbProcessorSync: AbstractDbProcessor() {
                 .addType(syncHelperInterface.build())
                 .build()
     }
-
-
-    fun generateSyncKtorRoute(dbType: TypeElement): KtorDaoFileSpecs {
-        val abstractDaoSimpleName = "${dbType.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"
-        val packageName = dbType.asClassName().packageName
-        val specs = KtorDaoSpecs(packageName, abstractDaoSimpleName)
-
-        val abstractDaoClassName = ClassName(packageName,
-                abstractDaoSimpleName)
-        specs.ktorRoute.fileSpec.addImport("io.ktor.response", "header")
-
-
-        val ktorHelperDaoClassName = ClassName(packageName, "$abstractDaoClassName${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}")
-        val daoRouteFn = FunSpec.builder("${dbType.simpleName}$SUFFIX_SYNC_ROUTE")
-                .receiver(Route::class)
-                .addTypeVariable(TypeVariableName.invoke("T", DoorDatabase::class))
-                .addParameter("_typeToken", TypeToken::class.asClassName().parameterizedBy(TypeVariableName("T")))
-                .addParameter("_daoFn", LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
-                    returnType = abstractDaoClassName))
-                .addParameter("_ktorHelperDaoFn", LambdaTypeName.get(
-                        parameters = *arrayOf(TypeVariableName("T")),
-                        returnType = ktorHelperDaoClassName))
-
-        val codeBlock = CodeBlock.builder()
-        codeBlock.beginControlFlow("%M(%S)",
-                MemberName("io.ktor.routing", "route"), abstractDaoSimpleName)
-
-        //Route for clients to subscribe for updates
-        codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER, ENDPOINT_POSTFIX_UPDATES)
-                .add("val _repo: %T by %M().%M(call).%M(tag = %T.TAG_REPO)\n",
-                    dbType, MemberName("org.kodein.di.ktor", "di"),
-                    DI_ON_MEMBER, DI_INSTANCE_MEMBER, DoorTag::class)
-                .add("call.%M(_repo as %T)\n",
-                        MemberName("com.ustadmobile.door.ktor", "respondUpdateNotifications"),
-                        DoorDatabaseSyncRepository::class)
-                .endControlFlow()
-
-        //Route for clients to callback to notify that they have received an update
-        codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER, ENDPOINT_POSTFIX_DELETE_UPDATE)
-                .add("val _repo: %T by %M().%M(call).%M(tag = %T.TAG_REPO)\n",
-                        dbType, MemberName("org.kodein.di.ktor", "di"),
-                        DI_ON_MEMBER, DI_INSTANCE_MEMBER, DoorTag::class)
-                .add("call.%M(_repo as %T)",
-                    MemberName("com.ustadmobile.door.ktor","respondUpdateNotificationReceived"),
-                    DoorDatabaseSyncRepository::class)
-                .endControlFlow()
-
-        //Route for clients to acknowledge an update notification as received
-        codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER,
-                "_updateNotificationReceived")
-                .add("val _repo: %T by %M().%M(call).%M(tag = %T.TAG_REPO)\n",
-                        dbType, MemberName("org.kodein.di.ktor", "di"),
-                        DI_ON_MEMBER, DI_INSTANCE_MEMBER, DoorTag::class)
-                .add("call.%M(_repo as %T)",
-                        MemberName("com.ustadmobile.door.ktor", "respondUpdateNotificationReceived"),
-                        DoorDatabaseSyncRepository::class)
-                .endControlFlow()
-
-
-        syncableEntityTypesOnDb(dbType, processingEnv).forEach { entityType ->
-            val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
-            val entityTypeListClassName = List::class.asClassName().parameterizedBy(entityType.asClassName())
-            val syncFindAllSql = entityType.getAnnotation(SyncableEntity::class.java)?.syncFindAllQuery
-            val getAllSql = if(syncFindAllSql?.isNotEmpty() == true) {
-                syncFindAllSql
-            }else {
-                "SELECT * FROM ${entityType.simpleName}"
-            }
-            val getAllFunSpec = FunSpec.builder("_findMasterUnsent${entityType.simpleName}")
-                    .returns(entityTypeListClassName)
-                    .addAnnotation(AnnotationSpec.builder(Query::class)
-                            .addMember("%S", getAllSql).build())
-                    .build()
-            codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER,
-                    "_findMasterUnsent${entityType.simpleName}")
-                    .addRequestDi()
-                    .add("val _dao = _daoFn(_db)\n")
-                    .add("val _ktorHelperDao = _ktorHelperDaoFn(_db)\n")
-                .add(generateKtorRouteSelectCodeBlock(getAllFunSpec, syncHelperDaoVarName = "_dao"))
-                .endControlFlow()
-            val helperFunSpec = getAllFunSpec.toBuilder()
-            helperFunSpec.annotations.clear()
-            helperFunSpec.addParameter("clientId", INT)
-            specs.addHelperQueryFun(helperFunSpec.build(), getAllSql, entityType.asClassName(), false)
-
-            val replaceEntityFunSpec = FunSpec.builder("_replace${entityType.simpleName}")
-                    .addParameter("entities", entityTypeListClassName)
-                    .returns(UNIT)
-                    .build()
-
-            codeBlock.beginControlFlow("%M(%S)", DbProcessorKtorServer.POST_MEMBER,
-                    "_replace${entityType.simpleName}")
-                    .addRequestDi()
-                    .add("val _dao = _daoFn(_db)\n")
-                    .add("val _gson: %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
-            val hasAttachments = findEntitiesWithAnnotation(entityType.asClassName(), EntityWithAttachment::class.java,
-                    processingEnv).isNotEmpty()
-
-            if(hasAttachments) {
-                val multipartHelperVarName = "_multipartHelper"
-                codeBlock.add("val _attachmentsDir: String by _di.%M(call).%M(tag = %T.TAG_ATTACHMENT_DIR)\n",
-                                DI_ON_MEMBER, DI_INSTANCE_MEMBER, DoorTag::class)
-                        .add("val $multipartHelperVarName = %T()\n",
-                        ClassName("com.ustadmobile.door", "DoorAttachmentsMultipartHelper"))
-                        .add("_multipartHelper.digestMultipart(%M.%M())\n",
-                                DbProcessorKtorServer.CALL_MEMBER,
-                                MemberName("io.ktor.request", "receiveMultipart"))
-                val entityParamName = "__" + replaceEntityFunSpec.parameters[0].name
-                val pkEl = processingEnv.elementUtils.getTypeElement(
-                    entityType.qualifiedName).enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null}
-                codeBlock.add(generateHttpServerPassToDaoCodeBlock(replaceEntityFunSpec, processingEnv,
-                        multipartHelperVarName,
-                        beforeDaoCallCode = CodeBlock.builder()
-                                .beginControlFlow("if(_multipartHelper.containsAllAttachments($entityParamName.map{it.${pkEl.simpleName}.toString()}))")
-                                .add("_multipartHelper.moveTmpFiles(%T(_attachmentsDir, %S))\n",
-                                        File::class, entityType.simpleName)
-                                .build(),
-                        afterDaoCallCode = CodeBlock.builder()
-                                .nextControlFlow("else")
-                                .add("%M.%M(%T.BadRequest, \"\")\n", DbProcessorKtorServer.CALL_MEMBER,
-                                    DbProcessorKtorServer.RESPOND_MEMBER, HttpStatusCode::class)
-                                .endControlFlow()
-                                .build()))
-            }else {
-                codeBlock.add(generateHttpServerPassToDaoCodeBlock(replaceEntityFunSpec,
-                        processingEnv, resetChangeSequenceNumbers = true))
-            }
-
-            //Tell the repo to dispatch events that should take place when entities are received via sync
-//            codeBlock.add("val _repo: %T by _di.%M(call).%M(_typeToken, tag = %T.TAG_REPO)\n",
-//                    TypeVariableName.invoke("T"), DI_ON_MEMBER,
-//                    DbProcessorKtorServer.DI_INSTANCE_TYPETOKEN_MEMBER, DoorTag::class)
-//                .add("(_repo as %T).handleSyncEntitiesReceived(%T::class, __entities)\n",
-//                    DoorDatabaseSyncRepository::class, entityType)
-
-
-            codeBlock.endControlFlow()
-            if(hasAttachments) {
-                codeBlock.add(generateGetAttachmentDataCodeBlock(entityType))
-            }
-            codeBlock.add(generateEntitiesAckKtorRoute(syncableEntityInfo.tracker,
-                    syncableEntityInfo.syncableEntity, syncHelperVarName = "_dao",
-                    syncHelperFnName = "_daoFn"))
-
-        }
-        codeBlock.endControlFlow()
-
-        daoRouteFn.addCode(codeBlock.build())
-        specs.ktorRoute.fileSpec.addFunction(daoRouteFn.build())
-        return specs.toBuiltFileSpecs()
-    }
-
 
     data class SyncFileSpecs(val abstractFileSpec: FileSpec, val daoImplFileSpec: FileSpec, val repoImplFileSpec: FileSpec)
 

@@ -267,6 +267,7 @@ fun getPreparedStatementSetterGetterTypeName(typeName: TypeName): String? {
         DOUBLE -> return "Double"
         BOOLEAN -> return "Boolean"
         String::class.asTypeName() -> return "String"
+        String::class.asTypeName().copy(nullable = true) -> return "String"
         else -> {
             if(kotlinType.isListOrArray()) {
                 return "Array"

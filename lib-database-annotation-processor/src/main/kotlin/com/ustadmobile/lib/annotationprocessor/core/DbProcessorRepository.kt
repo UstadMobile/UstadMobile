@@ -18,8 +18,6 @@ import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.GetAttachmentData
 import com.ustadmobile.door.annotation.SetAttachmentData
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.SUFFIX_JDBC_KT
-import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.ENDPOINT_POSTFIX_DELETE_UPDATE
-import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.ENDPOINT_POSTFIX_UPDATES
 import kotlinx.coroutines.newSingleThreadContext
 import kotlinx.coroutines.runBlocking
 import java.io.File
@@ -191,10 +189,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         PropertySpec.builder("_clientSyncManager",
                                 ClientSyncManager::class.asClassName().copy(nullable = true))
                                 .initializer(CodeBlock.builder().beginControlFlow("if(_useClientSyncManager)")
-                                        .add("%T(this, _db.%M(), _repositoryHelper.connectivityStatus, %S, %S, httpClient)\n",
-                                            ClientSyncManager::class, MemberName("com.ustadmobile.door.ext", "dbSchemaVersion"),
-                                            "${dbTypeElement.simpleName}/${dbTypeElement.simpleName}SyncDao/$ENDPOINT_POSTFIX_UPDATES",
-                                            "${dbTypeElement.simpleName}/${dbTypeElement.simpleName}SyncDao/$ENDPOINT_POSTFIX_DELETE_UPDATE")
+                                        .add("%T(this, _db.%M(), _repositoryHelper.connectivityStatus, httpClient)\n",
+                                            ClientSyncManager::class, MemberName("com.ustadmobile.door.ext", "dbSchemaVersion"))
                                         .nextControlFlow("else")
                                         .add("null\n")
                                         .endControlFlow()
