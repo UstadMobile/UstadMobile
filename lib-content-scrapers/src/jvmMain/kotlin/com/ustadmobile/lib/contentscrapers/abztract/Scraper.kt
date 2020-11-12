@@ -28,6 +28,8 @@ abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentCon
 
     val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
 
+    val repo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+
     val containerFolder: File by di.on(endpoint).instance(tag = DiTag.TAG_CONTAINER_DIR)
 
     val mimeTypeToContentFlag: Map<String, Int> = mapOf(
@@ -41,20 +43,15 @@ abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentCon
             MIMETYPE_EPUB to ContentEntry.TYPE_EBOOK
     )
 
-    val contentEntryParentChildJoinDao = db.contentEntryParentChildJoinDao
-    val contentEntryDao = db.contentEntryDao
-    val containerDao = db.containerDao
-    val scrapeQueueDao = db.scrapeQueueItemDao
-
     var contentEntry: ContentEntry? = null
     var parentContentEntry: ContentEntry? = null
     var scrapeQueueItem: ScrapeQueueItem? = null
 
     init {
         runBlocking {
-            contentEntry = contentEntryDao.findByUid(contentEntryUid)
-            parentContentEntry = contentEntryDao.findByUid(parentContentEntryUid)
-            scrapeQueueItem = scrapeQueueDao.findByUid(sqiUid)
+            contentEntry = db.contentEntryDao.findByUid(contentEntryUid)
+            parentContentEntry = db.contentEntryDao.findByUid(parentContentEntryUid)
+            scrapeQueueItem = db.scrapeQueueItemDao.findByUid(sqiUid)
         }
     }
 
@@ -69,20 +66,20 @@ abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentCon
             mobileOptimized = true
             cntLastModified = System.currentTimeMillis()
         }
-        container.containerUid = containerDao.insert(container)
+        container.containerUid = repo.containerDao.insert(container)
         return container
     }
 
     fun hideContentEntry() {
-        contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
+        repo.contentEntryDao.updateContentEntryInActive(contentEntryUid, true)
     }
 
     fun showContentEntry() {
-        contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
+        repo.contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
     }
 
     fun setScrapeDone(successful: Boolean, errorCode: Int) {
-        scrapeQueueDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, errorCode)
+        db.scrapeQueueItemDao.updateSetStatusById(sqiUid, if (successful) ScrapeQueueItemDao.STATUS_DONE else ScrapeQueueItemDao.STATUS_FAILED, errorCode)
     }
 
     data class HeadRequestValues(val isUpdated: Boolean, val etag: String, val mimeType: String, val lastModified: Long)

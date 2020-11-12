@@ -48,7 +48,7 @@ class KhanVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid
 
         var entry: ContentEntry? = null
         runBlocking {
-            entry = contentEntryDao.findByUidAsync(contentEntryUid)
+            entry = db.contentEntryDao.findByUidAsync(contentEntryUid)
         }
 
         if (entry == null) {
@@ -104,7 +104,7 @@ class KhanVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid
 
         val sourceId = entry!!.sourceUrl!!
         val commonSourceUrl = "%${sourceId.substringBefore(".")}%"
-        val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
+        val commonEntryList = db.contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
         commonEntryList.forEach {
 
             if (it.sourceUrl == sourceId) {

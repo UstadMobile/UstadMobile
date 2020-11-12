@@ -53,9 +53,9 @@ class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Lon
                         metadataContentEntry.description, true, "",
                         metadataContentEntry.thumbnailUrl, "",
                         "",
-                        metadataContentEntry.contentTypeFlag, contentEntryDao)
+                        metadataContentEntry.contentTypeFlag, repo.contentEntryDao)
 
-                ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
+                ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
 
                 contentImportManager.importFileToContainer(file.path, metadata.mimeType, fileEntry.contentEntryUid, containerFolder.path, mapOf()){
 

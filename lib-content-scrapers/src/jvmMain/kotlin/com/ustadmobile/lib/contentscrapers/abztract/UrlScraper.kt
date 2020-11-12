@@ -34,7 +34,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
         val url = URL(sourceUrl)
 
-        val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
+        val recentContainer = db.containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
         val headRequestValues = isUrlContentUpdated(url, recentContainer)
 
         if(recentContainer != null){
@@ -82,9 +82,9 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
                         metadataContentEntry.thumbnailUrl.alternative(contentEntry?.thumbnailUrl ?: ""),
                         "",
                         "",
-                        metadataContentEntry.contentTypeFlag, contentEntryDao)
+                        metadataContentEntry.contentTypeFlag, repo.contentEntryDao)
                 Napier.d("$logPrefix new entry created/updated with entryUid ${entry.contentEntryUid} with title $name", tag = SCRAPER_TAG)
-                ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, entry, 0)
+                ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, entry, 0)
                 entry
             }
 

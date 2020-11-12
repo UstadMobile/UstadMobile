@@ -11,7 +11,7 @@ import org.kodein.di.DI
 @ExperimentalStdlibApi
 class HabFrontPageIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntry, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
-    private val arabicLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "ar")
+    private val arabicLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(repo.languageDao, "ar")
 
     private var playlistCount = 0
 
@@ -23,9 +23,9 @@ class HabFrontPageIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, co
                 sourceUrl, HAB, ContentEntry.LICENSE_TYPE_OTHER, arabicLang.langUid, null,
                 "Free and open educational resources for Afghanistan", false, HAB,
                 "https://www.expo2020dubai.com/-/media/expo2020/expo-live/global-innovators/habaybna/habaybna-logo.png",
-                "", "", 0, contentEntryDao)
+                "", "", 0, repo.contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, parentHab, 10)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, parentHab, 10)
 
         createEntryAndQueue("https://www.youtube.com/playlist?list=PLFhWybf5UzoxBVZtZc7tvt8ET5PnRtLYa", "سهى الطبال")
         createEntryAndQueue("https://www.youtube.com/playlist?list=PLFhWybf5Uzowd6hrJuumTVxaJJGRcBdzd", "رنا شعبان")
@@ -44,9 +44,9 @@ class HabFrontPageIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, co
         val playlist = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl.substringAfter("="), title,
                 sourceUrl, HAB, ContentEntry.LICENSE_TYPE_OTHER, arabicLang.langUid, null,
                 "", false, "", "",
-                "", "", 0, contentEntryDao)
+                "", "", 0, repo.contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentHab, playlist, playlistCount++)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentHab, playlist, playlistCount++)
 
         createQueueItem(sourceUrl, playlist, ScraperTypes.HAB_PLAYLIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentHab.contentEntryUid)
     }

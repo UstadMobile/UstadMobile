@@ -3,6 +3,7 @@ package com.ustadmobile.core.network
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
+import com.nhaarman.mockitokotlin2.whenever
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
@@ -74,7 +75,6 @@ class ImportJobRunnerTest {
 
     private lateinit var containerImportJob: ContainerImportJob
 
-    private lateinit var connectivityStatusLiveData: DoorMutableLiveData<ConnectivityStatus>
     @JvmField
     @Rule
     val temporaryFolder = TemporaryFolder()
@@ -97,12 +97,6 @@ class ImportJobRunnerTest {
                 ContentImportManagerImpl(listOf(H5PTypePluginCommonJvm(), XapiTypePluginCommonJvm()), context, this.context, di)
             }
         }
-
-        connectivityStatusLiveData = DoorMutableLiveData(ConnectivityStatus().apply {
-            connectedOrConnecting = true
-            connectivityState = ConnectivityStatus.STATE_UNMETERED
-            wifiSsid = "wifi-mock"
-        })
 
         server = embeddedServer(Netty, port = defaultPort) {
             install(ContentNegotiation) {
@@ -162,12 +156,14 @@ class ImportJobRunnerTest {
     fun importContainer(endpoint: Endpoint){
 
         appDb = di.on(endpoint).direct.instance(UmAppDatabase.TAG_DB)
-        appDb.connectivityStatusDao.commitLiveConnectivityStatus(connectivityStatusLiveData)
-        appDb.connectivityStatusDao.insert(ConnectivityStatus().apply {
+        val status = ConnectivityStatus().apply {
             connectedOrConnecting = true
             connectivityState = ConnectivityStatus.STATE_UNMETERED
             wifiSsid = "wifi-mock"
-        })
+        }
+        appDb.connectivityStatusDao.insert(status)
+        val  connectivityStatusLiveData = DoorMutableLiveData<ConnectivityStatus>()
+        connectivityStatusLiveData.sendValue(status)
         val repo: UmAppDatabase = di.on(endpoint).direct.instance(UmAppDatabase.TAG_REPO)
         contentImportManager = di.on(endpoint).direct.instance()
 

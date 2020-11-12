@@ -23,9 +23,9 @@ class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, c
                 sourceUrl, ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC, englishLang.langUid, null,
                 "You can learn anything.\n" + "For free. For everyone. Forever.", false, "",
                 "https://cdn.kastatic.org/images/khan-logo-dark-background.new.png",
-                "", "", 0, contentEntryDao)
+                "", "", 0, repo.contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, parentEntry, 12)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, parentEntry, 12)
 
         khanLiteMap.values.forEach{
             createQueueItem(it.url, parentEntry, ScraperTypes.KHAN_LITE_INDEXER,  ScrapeQueueItem.ITEM_TYPE_INDEX, parentContentEntryUid.alternative(-4103245208651563007L))

@@ -7,9 +7,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
-import com.ustadmobile.core.db.dao.ScrapeRunDao
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.LiveDataWorkQueue
@@ -51,11 +49,9 @@ import kotlin.system.exitProcess
 @ExperimentalStdlibApi
 class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpoint, override val di: DI) : DIAware {
 
-    private var runDao: ScrapeRunDao
-    private var contentEntryDao: ContentEntryDao
-    private var queueDao: ScrapeQueueItemDao
-
     private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+
+    private val repo: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
 
     private val apiKey: String by di.instance(tag = DiTag.TAG_GOOGLE_API)
 
@@ -66,22 +62,18 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
     init {
 
-        runDao = db.scrapeRunDao
-        queueDao = db.scrapeQueueItemDao
-        contentEntryDao = db.contentEntryDao
-
         Napier.base(DebugAntilog())
 
-        LiveDataWorkQueue(queueDao.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_INDEX),
+        LiveDataWorkQueue(db.scrapeQueueItemDao.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_INDEX),
                 { item1, item2 -> item1.sqiUid == item2.sqiUid },
                 indexTotal) {
 
-            queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING, 0)
+            db.scrapeQueueItemDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING, 0)
 
             val startTime = System.currentTimeMillis()
             Napier.i("$logPrefix Started indexer url ${it.scrapeUrl} at start time: $startTime", tag = SCRAPER_TAG)
 
-            queueDao.setTimeStarted(it.sqiUid, startTime)
+            db.scrapeQueueItemDao.setTimeStarted(it.sqiUid, startTime)
             try {
 
                 val indexerClazz = ScraperTypes.indexerTypeMap[it.contentType]
@@ -93,7 +85,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                 Napier.e("$logPrefix ${ExceptionUtils.getStackTrace(e)}", tag = SCRAPER_TAG)
             }
 
-            queueDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
+            db.scrapeQueueItemDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
             val duration = System.currentTimeMillis() - startTime
             Napier.e("$logPrefix Ended indexer for url ${it.scrapeUrl} in duration: $duration", tag = SCRAPER_TAG)
         }.also { indexQueue ->
@@ -103,15 +95,15 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
         }
 
 
-        LiveDataWorkQueue(queueDao.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_SCRAPE),
+        LiveDataWorkQueue( db.scrapeQueueItemDao.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_SCRAPE),
                 { item1, item2 -> item1.sqiUid == item2.sqiUid }, scraperTotal) {
 
-            queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING, 0)
+            db.scrapeQueueItemDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING, 0)
 
             val startTime = System.currentTimeMillis()
             Napier.i("$logPrefix Started scraper url ${it.scrapeUrl} at start time: $startTime", tag = SCRAPER_TAG)
 
-            queueDao.setTimeStarted(it.sqiUid, startTime)
+            db.scrapeQueueItemDao.setTimeStarted(it.sqiUid, startTime)
             var obj: Scraper? = null
             try {
                 withTimeout(900000) {
@@ -122,20 +114,20 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     obj?.scrapeUrl(it.scrapeUrl!!)
                 }
             } catch (t: TimeoutCancellationException) {
-                queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, ERROR_TYPE_TIMEOUT)
-                contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
+                db.scrapeQueueItemDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, ERROR_TYPE_TIMEOUT)
+                repo.contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
             } catch (s: ScraperException) {
                 Napier.e("$logPrefix Known Exception ${s.message}", tag = SCRAPER_TAG)
             } catch (e: Exception) {
-                queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, 0)
-                contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
+                db.scrapeQueueItemDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, 0)
+                repo.contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
                 Napier.e("$logPrefix Exception running scrapeContent ${it.scrapeUrl}", tag = SCRAPER_TAG)
                 Napier.e("$logPrefix ${ExceptionUtils.getStackTrace(e)}", tag = SCRAPER_TAG)
             } finally {
                 obj?.close()
             }
 
-            queueDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
+            db.scrapeQueueItemDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
             val duration = System.currentTimeMillis() - startTime
             Napier.i("$logPrefix Ended scrape for url ${it.scrapeUrl} in duration: $duration", tag = SCRAPER_TAG)
 
@@ -147,7 +139,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
     }
 
     fun start(startingUrl: String, scraperType: String, parentUid: Long, contentEntryUid: Long, overrideEntry: Boolean = false) {
-        val runId = runDao.insert(ScrapeRun(scraperType,
+        val runId = db.scrapeRunDao.insert(ScrapeRun(scraperType,
                 ScrapeQueueItemDao.STATUS_PENDING)).toInt()
 
         val isIndexer = ScraperTypes.indexerTypeMap.keys.find { it == scraperType }
@@ -170,7 +162,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
             this.itemType = itemType
             timeAdded = System.currentTimeMillis()
         }
-        queueDao.insert(scrapeQueue)
+        db.scrapeQueueItemDao.insert(scrapeQueue)
     }
 
     suspend fun extractMetadata(urlString: String): ImportedContentEntryMetaData? {

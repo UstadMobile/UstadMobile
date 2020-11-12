@@ -51,9 +51,9 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
                     ContentEntry.LICENSE_TYPE_OTHER, englishLang.langUid, null,
                     "", false, "",
                     "", "",
-                    "", ContentEntry.TYPE_COLLECTION, contentEntryDao)
+                    "", ContentEntry.TYPE_COLLECTION, repo.contentEntryDao)
             Napier.d("$logPrefix new entry created/updated with entryUid ${entry.contentEntryUid} with title $folderTitle", tag = SCRAPER_TAG)
-            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, entry, 0)
+            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, entry, 0)
             entry
         }
 

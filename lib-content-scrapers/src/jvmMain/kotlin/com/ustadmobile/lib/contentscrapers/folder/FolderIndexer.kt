@@ -45,18 +45,18 @@ class FolderIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
                                 ?: englishLang.langUid,
                         contentEntry?.languageVariantUid,
                         "", false, contentEntry?.author ?: "", "", "",
-                        "", ContentEntry.TYPE_COLLECTION, contentEntryDao)
+                        "", ContentEntry.TYPE_COLLECTION, repo.contentEntryDao)
 
             }else{
 
                 folderEntry = ContentScraperUtil.createOrUpdateContentEntry(name, name,
                         folder.path, name, ContentEntry.LICENSE_TYPE_OTHER, englishLang.langUid, null,
                         "", false, "", "", "",
-                        "", ContentEntry.TYPE_COLLECTION, contentEntryDao)
+                        "", ContentEntry.TYPE_COLLECTION, repo.contentEntryDao)
 
             }
 
-            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, folderEntry, 0)
+            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, folderEntry, 0)
 
 
             if (fileList == null || fileList.isEmpty()) {
@@ -73,7 +73,7 @@ class FolderIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
                 contentImportManager.getMimeTypeSupported().find { fileMimeType -> fileMimeType == mimeType }
                         ?: return@forEach
 
-                val childEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, file.path, folderEntry.primaryLanguageUid, file.name)
+                val childEntry = ContentScraperUtil.insertTempContentEntry(repo.contentEntryDao, file.path, folderEntry.primaryLanguageUid, file.name)
                 if (file.isDirectory) {
                     createQueueItem(file.path, childEntry, ScraperTypes.FOLDER_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, folderEntry.contentEntryUid)
                 } else if (file.isFile) {

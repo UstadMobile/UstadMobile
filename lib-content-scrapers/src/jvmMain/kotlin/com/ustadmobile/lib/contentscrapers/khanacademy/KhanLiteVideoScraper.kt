@@ -24,7 +24,7 @@ class KhanLiteVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntr
 
         var entry: ContentEntry? = null
         runBlocking {
-            entry = contentEntryDao.findByUidAsync(contentEntryUid)
+            entry = db.contentEntryDao.findByUidAsync(contentEntryUid)
         }
 
         if (entry == null) {
@@ -51,7 +51,7 @@ class KhanLiteVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntr
 
         } else {
 
-            val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
+            val recentContainer = db.containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
 
             val headRequestValues = isUrlContentUpdated(url, recentContainer)
 

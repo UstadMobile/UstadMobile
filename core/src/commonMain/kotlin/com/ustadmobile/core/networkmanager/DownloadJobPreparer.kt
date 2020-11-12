@@ -6,19 +6,7 @@ import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.lib.db.entities.DownloadJobItemParentChildJoin
 import com.ustadmobile.lib.db.entities.DownloadJobItemWithParents
-import com.ustadmobile.door.DoorDatabaseRepository
-import com.ustadmobile.door.DoorDatabaseSyncRepository
-import com.ustadmobile.door.RepositoryLoadHelper
-import com.ustadmobile.door.ext.dbVersionHeader
-import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-import kotlin.collections.ArrayList
-import kotlin.collections.HashMap
-import kotlin.collections.HashSet
-import kotlin.collections.List
-import kotlin.collections.joinToString
-import kotlin.collections.listOf
-import kotlin.collections.mutableListOf
 import kotlin.collections.set
 
 

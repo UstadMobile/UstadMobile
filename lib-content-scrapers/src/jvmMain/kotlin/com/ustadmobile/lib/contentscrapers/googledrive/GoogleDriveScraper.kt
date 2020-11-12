@@ -62,7 +62,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                 contentImportManager.getMimeTypeSupported().find { fileMimeType -> fileMimeType == file.mimeType }
                         ?: return@execute
 
-                val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
+                val recentContainer = db.containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
                 val googleModifiedTime = file.modifiedTime
                 val parsedModifiedTime: Long = if (googleModifiedTime != null) googleDriveFormat.parse(googleModifiedTime).local.unixMillisLong else 1
                 val isUpdated = parsedModifiedTime > recentContainer?.cntLastModified ?: 0
@@ -122,9 +122,9 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                                 metadataContentEntry.thumbnailUrl.alternative(contentEntry?.thumbnailUrl
                                         ?: file.thumbnailLink ?: ""),
                                 "", "",
-                                metadataContentEntry.contentTypeFlag, contentEntryDao)
+                                metadataContentEntry.contentTypeFlag, repo.contentEntryDao)
                         Napier.d("$logPrefix new entry created/updated with entryUid ${fileEntry.contentEntryUid} with title ${file.name}", tag = SCRAPER_TAG)
-                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
+                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
                     }
                     metadata.contentEntry.contentEntryUid = fileEntry.contentEntryUid
 

@@ -16,6 +16,7 @@ import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.rest.umRestApplication
 import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
+import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.network.insertTestContentEntries
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import io.ktor.server.engine.ApplicationEngine

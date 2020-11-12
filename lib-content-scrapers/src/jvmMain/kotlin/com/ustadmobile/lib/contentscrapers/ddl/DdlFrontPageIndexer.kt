@@ -16,15 +16,15 @@ class DdlFrontPageIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int,
 
     override fun indexUrl(sourceUrl: String) {
 
-        val farsiLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "fa")
-        val pashtoLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "ps")
+        val farsiLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(repo.languageDao, "fa")
+        val pashtoLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(repo.languageDao, "ps")
 
         val parentDdl = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, "Darakht-e Danesh",
                 sourceUrl, IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, englishLang.langUid, null,
                 "Free and open educational resources for Afghanistan", false, "",
-                "https://ddl.af/storage/files/logo-dd.png", "", "", 0, contentEntryDao)
+                "https://ddl.af/storage/files/logo-dd.png", "", "", 0, repo.contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, parentDdl, 2)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, parentDdl, 2)
 
         createLangEntry("English", englishLang, parentDdl)
         createLangEntry("فارسی", farsiLang, parentDdl)
@@ -40,9 +40,9 @@ class DdlFrontPageIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int,
         val langEntry = ContentScraperUtil.createOrUpdateContentEntry("${langEntity.iso_639_1_standard}/resources/list", langName,
                 url, IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, langEntity.langUid, null,
                 "", false, "", "",
-                "", "", 0, contentEntryDao)
+                "", "", 0, repo.contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentDdl, langEntry, langCount++)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentDdl, langEntry, langCount++)
 
         createQueueItem(url, langEntry, DDL_SUBJECT_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentDdl.contentEntryUid)
     }
