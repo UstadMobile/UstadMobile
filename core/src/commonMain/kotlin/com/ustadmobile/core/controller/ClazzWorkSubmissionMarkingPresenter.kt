@@ -25,7 +25,6 @@ import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 import com.ustadmobile.core.util.ext.*
 
-
 class ClazzWorkSubmissionMarkingPresenter(context: Any,
               arguments: Map<String, String>, view: ClazzWorkSubmissionMarkingView, di: DI,
               lifecycleOwner: DoorLifecycleOwner,
@@ -153,7 +152,9 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         //If there is a submission
         val submission = clazzMemberAndClazzWorkWithSubmission?.submission
 
+        //If already submitted
         if(submission != null && submission.clazzWorkSubmissionUid != 0L){
+
 
             //Don't show record for student
             view.showRecordForStudent = false
@@ -180,8 +181,6 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
 
             }
         }
-
-
 
         return clazzMemberAndClazzWorkWithSubmission
     }
@@ -214,8 +213,17 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 submission.clazzWorkSubmissionDateTimeFinished = getSystemTimeInMillis()
                 clazzWorkWithSubmission.clazzWorkSubmission = submission
 
+                var submissionOnView = view?.entity
+                submissionOnView?.submission = submission
+
+                val showShortTextEditView = submission?.clazzWorkSubmissionUid == 0L &&
+                        clazzWorkWithSubmission?.clazzWorkSubmissionType ==
+                        ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
                 view.runOnUiThread(Runnable {
-                    view.updatedSubmission = clazzWorkWithSubmission
+
+                    //view.showShortTextEditable = showShortTextEditView
+                    view.showShortTextSubmission = true
+                    view.entity = submissionOnView
                 })
 
             }
@@ -249,7 +257,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
                 view.editableQuizQuestions?.getValue()?: listOf()
         val newOptionsAndResponse = mutableListOf<ClazzWorkQuestionAndOptionWithResponse>()
 
-        val updatedShortTextSubmission = view.updatedSubmission?.clazzWorkSubmission
+        val updatedShortTextSubmission = view.entity?.submission
 
         val clazzWorkWithSubmission = entity
         GlobalScope.launch {
@@ -331,12 +339,9 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
     fun handleClickRecordForStudent(){
         view.showSimpleTwoButton = true
         view.showRecordForStudent = false
-        view.setSubmissionFreeTextMarking = false
 
         if(entity?.clazzWork?.clazzWorkSubmissionType ==
                 ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT ){
-            view.showSubmissionFreeText = true
-            view.setSubmissionFreeTextMarking = false
             createSubmissionIfDoesNotExist()
 
         }else if(entity?.clazzWork?.clazzWorkSubmissionType ==

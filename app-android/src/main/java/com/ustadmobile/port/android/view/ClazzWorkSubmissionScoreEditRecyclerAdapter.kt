@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionScoreEditBinding
 import com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission

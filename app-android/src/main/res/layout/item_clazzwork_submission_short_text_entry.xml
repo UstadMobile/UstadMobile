@@ -9,10 +9,10 @@
 
         <variable
             name="clazzWorkWithSubmission"
-            type="com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission" />
+            type="com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission" />
 
         <variable
-            name="editable"
+            name="showEdit"
             type="Boolean" />
 
         <variable
@@ -29,7 +29,6 @@
         android:id="@+id/item_clazzwork_submission_text_entry_cl"
         >
 
-        <!-- TODO: the visibility expression here is quite complex and should be controlled by the presenter, via the view interface -->
         <EditText
             android:id="@+id/item_clazzwork_submission_text_entry_et"
             android:layout_width="0dp"
@@ -40,15 +39,13 @@
             android:hint="@string/submit_your_answer"
             android:inputType="textCapSentences"
             android:singleLine="true"
-            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid ==0L &amp;&amp; clazzWorkWithSubmission.clazzWorkSubmissionType == freeText &amp;&amp; editable == true) ? View.VISIBLE : View.GONE}"
-            android:text="@={clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionText}"
-            android:enabled="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid == 0L)}"
+            android:text="@={clazzWorkWithSubmission.submission.clazzWorkSubmissionText}"
+            android:enabled="@{(clazzWorkWithSubmission.submission.clazzWorkSubmissionUid == 0L)}"
             app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="@{showEdit?View.VISIBLE:View.GONE}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-
-        <!-- TODO: the visibility expression here is quite complex and should be controlled by the presenter, via the view interface -->
         <TextView
             android:id="@+id/item_clazzwork_submission_text_entry_tv"
             android:layout_width="0dp"
@@ -56,8 +53,8 @@
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginVertical="@dimen/dimen_8dp"
             android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
-            android:text="@={clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionText}"
-            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid != 0L &amp;&amp; clazzWorkWithSubmission.clazzWorkSubmissionType == freeText)?View.VISIBLE:View.GONE}"
+            android:text="@={clazzWorkWithSubmission.submission.clazzWorkSubmissionText}"
+            android:visibility="@{showEdit?View.GONE:View.VISIBLE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
