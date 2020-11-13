@@ -46,12 +46,29 @@ private fun TypeSpec.Builder.addSyncPushMigrationFunction(dbTypeElement: TypeEle
     fun CodeBlock.Builder.addRecreateTrkIndexes(entityName: String) : CodeBlock.Builder {
         add("database.execSQL(%S)\n",
                 "DROP INDEX IF EXISTS index_${entityName}_trk_clientId_epk_rx_csn")
+
+        //Create a temporary, non-unique index to avoid a performance bottleneck on deleting
+        add("database.execSQL(%S)\n",
+                "CREATE INDEX index_${entityName}_trk_epk_clientId_tmp " +
+                        "ON ${entityName}_trk (epk, clientId)")
+        add("database.execSQL(%S)\n", """
+            DELETE FROM ${entityName}_trk 
+              WHERE 
+              pk != 
+              (SELECT ${entityName}_trk_nest.pk FROM ${entityName}_trk ${entityName}_trk_nest 
+              WHERE ${entityName}_trk_nest.clientId = ${entityName}_trk.clientId AND
+              ${entityName}_trk_nest.epk = ${entityName}_trk.epk ORDER BY CSN DESC LIMIT 1) 
+        """.trimIndent())
         add("database.execSQL(%S)\n",
                 "CREATE INDEX index_${entityName}_trk_clientId_epk_csn " +
                         " ON ${entityName}_trk (clientId, epk, csn)")
         add("database.execSQL(%S)\n",
                 "CREATE UNIQUE INDEX index_${entityName}_trk_epk_clientId " +
                         "ON ${entityName}_trk (epk, clientId)")
+
+        //Drop temporary index
+        add("database.execSQL(%S)\n",
+                "DROP INDEX index_${entityName}_trk_epk_clientId_tmp")
 
         return this
     }

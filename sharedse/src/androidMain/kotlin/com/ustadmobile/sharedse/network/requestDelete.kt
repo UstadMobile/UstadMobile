@@ -3,6 +3,7 @@ package com.ustadmobile.sharedse.network
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import com.ustadmobile.core.networkmanager.DownloadNotificationService
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 
 

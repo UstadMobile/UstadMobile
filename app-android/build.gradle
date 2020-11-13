@@ -356,6 +356,8 @@ dependencies {
     //Crash reporting
     implementation "ch.acra:acra-http:$version_android_acra"
 
+    implementation 'com.linkedin.android.litr:litr:1.4.3'
+
 
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
     implementation "androidx.appcompat:appcompat:$version_androidx_appcompat"

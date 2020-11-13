@@ -28,6 +28,8 @@ abstract class ContainerDownloadManager {
 
     abstract suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem, autoCommit: Boolean = true)
 
+    abstract suspend fun handleContainerLocalImport(container: Container)
+
     /**
      * This is only for handling changes that have been made externally (e.g. change to save directory)
      */
