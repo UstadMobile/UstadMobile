@@ -5,10 +5,14 @@ import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.catalog.contenttype.*
+import com.ustadmobile.core.contentformats.ContentImportManager
+import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
@@ -142,6 +146,13 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<ScraperManager>() with scoped(EndpointScope.Default).singleton {
             ScraperManager(endpoint = context, di = di)
+        }
+
+        bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
+            ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm(),
+                    XapiTypePluginCommonJvm(), VideoTypePluginJvm(),
+                    H5PTypePluginCommonJvm()),
+                    Any(), context, di)
         }
 
         registerContextTranslator { call: ApplicationCall -> Endpoint(call.request.header("Host") ?: "nohost") }

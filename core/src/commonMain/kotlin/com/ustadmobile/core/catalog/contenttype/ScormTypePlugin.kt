@@ -1,11 +1,15 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+
 
 /**
  * Created by mike on 1/6/18.
  */
 
-class ScormTypePlugin : ContentTypePlugin {
+open class ScormTypePlugin : ContentTypePlugin {
 
     override val viewName: String
         get() = "ScormViewTodo"
@@ -15,6 +19,14 @@ class ScormTypePlugin : ContentTypePlugin {
 
     override val fileExtensions: Array<String>
         get() = arrayOf("zip")
+
+    override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun importToContainer(filePath: String, conversionParams: Map<String, String>, contentEntryUid: Long, mimeType: String, containerBaseDir: String, context: Any, db: UmAppDatabase, repo: UmAppDatabase, progressListener: (Int) -> Unit): Container {
+        TODO("Not yet implemented")
+    }
 
     companion object {
 

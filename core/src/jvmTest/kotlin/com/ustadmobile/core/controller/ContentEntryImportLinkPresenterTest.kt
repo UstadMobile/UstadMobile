@@ -62,7 +62,7 @@ class ContentEntryImportLinkPresenterTest {
 
         var importedContentEntryMetaData = ImportedContentEntryMetaData(
                 ContentEntryWithLanguage(), "application/epub+zip",
-                "file://abc.zip", 1, "googleDriveScraper")
+                "file://abc.zip", "googleDriveScraper")
 
         var response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json")
         response.body = Buffer().write(Json.stringify(ImportedContentEntryMetaData.serializer(),

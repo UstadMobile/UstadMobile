@@ -4,9 +4,10 @@ import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.ContainerUploaderRequest
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.lib.db.entities.ContainerUploadJob
+import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 import io.ktor.http.HttpStatusCode
@@ -36,9 +37,12 @@ class ContainerUploader(val request: ContainerUploaderRequest,
     private val logPrefix: String
         get() = "[ContainerUploader #${request.uploadJobUid} - ${System.identityHashCode(this)}]"
 
+    private val UPLOADER_JOB_TAG = "ContainerUploader"
+
     suspend fun progressUpdater() = coroutineScope {
         while (isActive) {
-            db.containerUploadJobDao.updateProgress(bytesSoFar.get(), contentLength.get(), request.uploadJobUid)
+            Napier.d(tag = UPLOADER_JOB_TAG, message = "upload progress updating at value ${bytesSoFar.get()}")
+            db.containerImportJobDao.updateProgress(bytesSoFar.get(), contentLength.get(), request.uploadJobUid)
             delay(500L)
         }
     }
@@ -57,25 +61,25 @@ class ContainerUploader(val request: ContainerUploaderRequest,
             urlConnection.requestMethod = "GET"
             urlConnection.connect()
 
-            val uploadJob = db.containerUploadJobDao.findByUid(request.uploadJobUid)
-                    ?: ContainerUploadJob()
+            val uploadJob = db.containerImportJobDao.findByUid(request.uploadJobUid)
+                    ?: ContainerImportJob()
 
             val fileSize = db.containerEntryFileDao.generateConcatenatedFilesResponse(request.fileList).contentLength
 
-            if (uploadJob.sessionId.isNullOrEmpty()) {
+            if (uploadJob.cijSessionId.isNullOrEmpty()) {
                 val sessionId = String(UMIOUtils.readStreamToByteArray(urlConnection.inputStream))
-                uploadJob.sessionId = sessionId
-                uploadJob.bytesSoFar = 0
-                uploadJob.contentLength = fileSize
-                db.containerUploadJobDao.update(uploadJob)
+                uploadJob.cijSessionId = sessionId
+                uploadJob.cijBytesSoFar = 0
+                uploadJob.cijContentLength = fileSize
+                db.containerImportJobDao.update(uploadJob)
             }
 
             urlConnection.disconnect()
 
             Napier.i( message = { "$logPrefix Start upload URL=${request.uploadToUrl} " +
-                    "SessionID=${uploadJob.sessionId} FileList=${request.fileList}" } )
+                    "SessionID=${uploadJob.cijSessionId} FileList=${request.fileList}" } )
 
-            val start = uploadJob.bytesSoFar
+            val start = uploadJob.cijBytesSoFar
 
             bytesSoFar.set(start)
             contentLength.set(fileSize)
@@ -119,7 +123,7 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                         urlConnection.requestMethod = "PUT"
                         urlConnection.setRequestProperty("Content-Length", readRange.toString())
                         urlConnection.setRequestProperty("Range", "bytes=${bytesSoFar.get()}-$end")
-                        urlConnection.setRequestProperty("SessionId", uploadJob.sessionId)
+                        urlConnection.setRequestProperty("SessionId", uploadJob.cijSessionId)
                         urlConnection.outputStream.write(buffer)
                         urlConnection.outputStream.flush()
                         urlConnection.outputStream.close()
@@ -139,7 +143,8 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                     } while (responseCode != HttpStatusCode.NoContent.value)
 
                 val endedAt = bytesSoFar.get() + readRange
-                uploadJob.bytesSoFar = endedAt
+                Napier.d(tag = UPLOADER_JOB_TAG, message = "uploading, last ended at $endedAt")
+                uploadJob.cijBytesSoFar = endedAt
                 bytesSoFar.set(endedAt)
 
             }
@@ -152,8 +157,8 @@ class ContainerUploader(val request: ContainerUploaderRequest,
                 JobStatus.FAILED
             }
 
-            uploadJob.jobStatus = downloadStatus
-            db.containerUploadJobDao.updateStatus(downloadStatus, uploadJob.cujUid)
+            uploadJob.cijJobStatus = downloadStatus
+            db.containerImportJobDao.updateStatus(downloadStatus, uploadJob.cijUid)
 
         }catch(e: Exception) {
             Napier.e("$logPrefix exception", e)

@@ -22,8 +22,6 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var entryMetaData: ImportedContentEntryMetaData?
 
-    suspend fun saveContainerOnExit(entryUid: Long,selectedBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase): Container?
-
     companion object {
 
         const val VIEW_NAME = "ContentEntryEdit2EditView"

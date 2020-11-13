@@ -1,5 +1,8 @@
 package com.ustadmobile.door
 
+import com.github.aakira.napier.Napier
+import com.ustadmobile.door.ext.DoorTag.Companion.LOG_TAG
+import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import java.sql.Connection
@@ -8,7 +11,6 @@ import java.sql.SQLException
 import java.sql.Statement
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.regex.Pattern
-import javax.naming.InitialContext
 import javax.sql.DataSource
 
 actual abstract class DoorDatabase actual constructor(){
@@ -124,11 +126,16 @@ actual abstract class DoorDatabase actual constructor(){
             var dbConnection = null as Connection?
             var stmt = null as Statement?
             try {
+                Napier.d("execSQL: $sql\n", tag = LOG_TAG)
+                val startTime = systemTimeInMillis()
                 dbConnection = openConnection()
                 stmt = dbConnection.createStatement()
                 stmt.executeUpdate(sql)
+                Napier.d("execSQL complete in ${systemTimeInMillis() - startTime}ms")
             } catch (sqle: SQLException) {
+                Napier.e("Exception running execSQL")
                 sqle.printStackTrace()
+                throw sqle
             } finally {
                 stmt?.close()
                 dbConnection?.close()

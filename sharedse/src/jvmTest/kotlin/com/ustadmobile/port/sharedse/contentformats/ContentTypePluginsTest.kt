@@ -1,14 +1,25 @@
 package com.ustadmobile.port.sharedse.contentformats
 
+import com.nhaarman.mockitokotlin2.mock
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
+import com.ustadmobile.core.contentformats.ContentImportManager
+import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import org.junit.Assert
-import org.junit.Test
+import com.ustadmobile.port.sharedse.util.UmFileUtilSe.makeTempContainerFromClassResource
+import com.ustadmobile.sharedse.util.UstadTestRule
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
+import org.junit.Test
 import org.junit.rules.TemporaryFolder
+import org.kodein.di.*
 import java.nio.file.Files
 
 class ContentTypePluginsTest {
@@ -17,7 +28,29 @@ class ContentTypePluginsTest {
 
     @JvmField
     @Rule
+    var ustadTestRule = UstadTestRule()
+
+    private lateinit var di: DI
+
+    private lateinit var contentImportManager: ContentImportManager
+
+    @JvmField
+    @Rule
     var temporaryFolder = TemporaryFolder()
+
+    @Before
+    fun setup(){
+
+        di = DI {
+            import(ustadTestRule.diModule)
+            bind<ContentImportManager>() with scoped(ustadTestRule.endpointScope!!).singleton {
+                ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm()), context, this.context, di)
+            }
+        }
+        val accountManager: UstadAccountManager by di.instance()
+        contentImportManager =  di.on(accountManager.activeAccount).direct.instance()
+
+    }
 
 
     @Test
@@ -36,9 +69,12 @@ class ContentTypePluginsTest {
 
         runBlocking {
             //TODO: Make this more rigorous
-            val (contentEntry, container) = importContentEntryFromFile(tempEpubFile, db, dbRepo,
-                    containerTmpDir.absolutePath, Any())!!
-            Assert.assertNotNull(contentEntry)
+            val metadata = contentImportManager.extractMetadata(tempEpubFile.path)!!
+            val container = contentImportManager.importFileToContainer(tempEpubFile.path,
+                    metadata.mimeType, 0, containerTmpDir.absolutePath, mapOf()){
+
+            }
+            Assert.assertNotNull(metadata.contentEntry)
             Assert.assertNotNull(container)
         }
 
@@ -55,7 +91,7 @@ class ContentTypePluginsTest {
         db.clearAllTables()
 
         val contentEntry =  runBlocking {
-            extractContentEntryMetadataFromFile(emptyFile, db)
+           contentImportManager.extractMetadata(emptyFile.path)?.contentEntry
         }
 
         Assert.assertNull("Given unsupported file, extractContentEntryMetaData returns null",
