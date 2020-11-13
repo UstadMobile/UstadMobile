@@ -124,7 +124,7 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
         UMIOUtils.closeInputStream(distIn)
         UMIOUtils.closeOutputStream(outputStream)
 
-        addEntriesFromZipToContainer(tempDistFile.absolutePath, containerManager, "workspace/")
+        addEntriesFromZipToContainer(tempDistFile.absolutePath, containerManager, "")
 
         // generate tincan.xml
         val tinCan = """

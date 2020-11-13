@@ -26,7 +26,7 @@ open class H5PTypePlugin : ContentTypePlugin {
 
     companion object {
 
-        val MIME_TYPES = arrayOf("application/tincan+zip", "application/zip")
+        val MIME_TYPES = arrayOf("application/h5p-tincan+zip","application/tincan+zip", "application/zip")
 
         val EXTENSIONS = arrayOf("h5p")
 
