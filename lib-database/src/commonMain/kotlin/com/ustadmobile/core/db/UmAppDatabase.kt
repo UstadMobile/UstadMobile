@@ -2908,7 +2908,13 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         val MIGRATION_43_44 = object : DoorMigration(43, 44) {
             override fun migrate(database: DoorSqlDatabase) {
-                database.execSQL("ALTER TABLE SqliteSyncablePrimaryKey RENAME to SqliteSyncablePk")
+                try {
+                    //Sometimes the permission on this goes horribly wrong for no apparent reason
+                    database.execSQL("ALTER TABLE SqliteSyncablePrimaryKey RENAME to SqliteSyncablePk")
+                }catch(e: Exception) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SqliteSyncablePk (  sspTableId  INTEGER  PRIMARY KEY  NOT NULL , sspNextPrimaryKey  INTEGER  NOT NULL )")
+                }
+
             }
         }
 

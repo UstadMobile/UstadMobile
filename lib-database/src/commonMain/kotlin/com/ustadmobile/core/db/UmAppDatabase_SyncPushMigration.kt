@@ -6,40 +6,36 @@ import com.ustadmobile.door.DoorSqlDatabase
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
 
-/**
- * This class was generated 9/Nov by DbProcessorSyncPush. It migrates UmAppDatabase to the new
- * syncpush system.
- */
 class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
-  override fun migrate(database: DoorSqlDatabase) {
-    if(database.dbType() == DoorDbType.SQLITE) {
-      database.execSQL("CREATE TABLE IF NOT EXISTS ChangeLog (  chTableId  INTEGER  NOT NULL , chEntityPk  INTEGER  NOT NULL , dispatched  INTEGER  NOT NULL , chTime  INTEGER  NOT NULL , changeLogUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-      database.execSQL("CREATE TABLE IF NOT EXISTS SqliteChangeSeqNums (  sCsnTableId  INTEGER  PRIMARY KEY  NOT NULL , sCsnNextLocal  INTEGER  NOT NULL , sCsnNextPrimary  INTEGER  NOT NULL )")
-      database.execSQL("""
+    override fun migrate(database: DoorSqlDatabase) {
+        if(database.dbType() == DoorDbType.SQLITE) {
+            database.execSQL("CREATE TABLE IF NOT EXISTS ChangeLog (  chTableId  INTEGER  NOT NULL , chEntityPk  INTEGER  NOT NULL , dispatched  INTEGER  NOT NULL , chTime  INTEGER  NOT NULL , changeLogUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            database.execSQL("CREATE TABLE IF NOT EXISTS SqliteChangeSeqNums (  sCsnTableId  INTEGER  PRIMARY KEY  NOT NULL , sCsnNextLocal  INTEGER  NOT NULL , sCsnNextPrimary  INTEGER  NOT NULL )")
+            database.execSQL("""
       |CREATE 
       | INDEX index_SqliteChangeSeqNums_sCsnNextLocal 
       |ON SqliteChangeSeqNums (sCsnNextLocal)
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE 
       | INDEX index_SqliteChangeSeqNums_sCsnNextPrimary 
       |ON SqliteChangeSeqNums (sCsnNextPrimary)
       """.trimMargin())
-      database.execSQL("CREATE TABLE IF NOT EXISTS TableSyncStatus (  tsTableId  INTEGER  PRIMARY KEY  NOT NULL , tsLastChanged  INTEGER  NOT NULL , tsLastSynced  INTEGER  NOT NULL )")
-      database.execSQL("CREATE TABLE IF NOT EXISTS UpdateNotification (  pnDeviceId  INTEGER  NOT NULL , pnTableId  INTEGER  NOT NULL , pnTimestamp  INTEGER  NOT NULL , pnUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-      database.execSQL("""
+            database.execSQL("CREATE TABLE IF NOT EXISTS TableSyncStatus (  tsTableId  INTEGER  PRIMARY KEY  NOT NULL , tsLastChanged  INTEGER  NOT NULL , tsLastSynced  INTEGER  NOT NULL )")
+            database.execSQL("CREATE TABLE IF NOT EXISTS UpdateNotification (  pnDeviceId  INTEGER  NOT NULL , pnTableId  INTEGER  NOT NULL , pnTimestamp  INTEGER  NOT NULL , pnUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+            database.execSQL("""
       |CREATE 
       |UNIQUE INDEX index_UpdateNotification_pnDeviceId_pnTableId 
       |ON UpdateNotification (pnDeviceId, pnTableId)
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE 
       | INDEX index_UpdateNotification_pnDeviceId_pnTimestamp 
       |ON UpdateNotification (pnDeviceId, pnTimestamp)
       """.trimMargin())
-      database.execSQL("DROP TRIGGER IF EXISTS INS_14")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_14")
-      database.execSQL("""
+            database.execSQL("DROP TRIGGER IF EXISTS INS_14")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_14")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_14
       |AFTER INSERT ON ClazzLog
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -54,7 +50,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 14;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_14
       |            AFTER INSERT ON ClazzLog
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -72,7 +68,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 14, NEW.clazzLogUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_14
       |AFTER UPDATE ON ClazzLog
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -88,7 +84,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 14;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_14
       |            AFTER UPDATE ON ClazzLog
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -107,14 +103,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 14, NEW.clazzLogUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(14, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(14, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzLog_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzLog_trk_clientId_epk_csn  ON ClazzLog_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzLog_trk_epk_clientId ON ClazzLog_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_15")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_15")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(14, (SELECT COALESCE((SELECT MAX(clazzLogLCSN) FROM ClazzLog), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(14, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzLog_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzLog_trk_epk_clientId_tmp ON ClazzLog_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzLog_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzLog_trk_nest.pk FROM ClazzLog_trk ClazzLog_trk_nest 
+      |  WHERE ClazzLog_trk_nest.clientId = ClazzLog_trk.clientId AND
+      |  ClazzLog_trk_nest.epk = ClazzLog_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzLog_trk_clientId_epk_csn  ON ClazzLog_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzLog_trk_epk_clientId ON ClazzLog_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzLog_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_15")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_15")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_15
       |AFTER INSERT ON ClazzLogAttendanceRecord
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -129,7 +135,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 15;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_15
       |            AFTER INSERT ON ClazzLogAttendanceRecord
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -147,7 +153,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 15, NEW.clazzLogAttendanceRecordUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_15
       |AFTER UPDATE ON ClazzLogAttendanceRecord
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -163,7 +169,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 15;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_15
       |            AFTER UPDATE ON ClazzLogAttendanceRecord
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -182,14 +188,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 15, NEW.clazzLogAttendanceRecordUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(15, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(15, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzLogAttendanceRecord_trk_clientId_epk_csn  ON ClazzLogAttendanceRecord_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId ON ClazzLogAttendanceRecord_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_21")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_21")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(15, (SELECT COALESCE((SELECT MAX(clazzLogAttendanceRecordLocalChangeSeqNum) FROM ClazzLogAttendanceRecord), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(15, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId_tmp ON ClazzLogAttendanceRecord_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzLogAttendanceRecord_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzLogAttendanceRecord_trk_nest.pk FROM ClazzLogAttendanceRecord_trk ClazzLogAttendanceRecord_trk_nest 
+      |  WHERE ClazzLogAttendanceRecord_trk_nest.clientId = ClazzLogAttendanceRecord_trk.clientId AND
+      |  ClazzLogAttendanceRecord_trk_nest.epk = ClazzLogAttendanceRecord_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzLogAttendanceRecord_trk_clientId_epk_csn  ON ClazzLogAttendanceRecord_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId ON ClazzLogAttendanceRecord_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_21")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_21")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_21
       |AFTER INSERT ON Schedule
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -204,7 +220,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 21;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_21
       |            AFTER INSERT ON Schedule
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -222,7 +238,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 21, NEW.scheduleUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_21
       |AFTER UPDATE ON Schedule
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -238,7 +254,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 21;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_21
       |            AFTER UPDATE ON Schedule
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -257,14 +273,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 21, NEW.scheduleUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(21, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(21, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_Schedule_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Schedule_trk_clientId_epk_csn  ON Schedule_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Schedule_trk_epk_clientId ON Schedule_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_17")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_17")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(21, (SELECT COALESCE((SELECT MAX(scheduleLocalChangeSeqNum) FROM Schedule), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(21, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_Schedule_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Schedule_trk_epk_clientId_tmp ON Schedule_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Schedule_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Schedule_trk_nest.pk FROM Schedule_trk Schedule_trk_nest 
+      |  WHERE Schedule_trk_nest.clientId = Schedule_trk.clientId AND
+      |  Schedule_trk_nest.epk = Schedule_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Schedule_trk_clientId_epk_csn  ON Schedule_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Schedule_trk_epk_clientId ON Schedule_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Schedule_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_17")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_17")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_17
       |AFTER INSERT ON DateRange
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -279,7 +305,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 17;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_17
       |            AFTER INSERT ON DateRange
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -297,7 +323,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 17, NEW.dateRangeUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_17
       |AFTER UPDATE ON DateRange
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -313,7 +339,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 17;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_17
       |            AFTER UPDATE ON DateRange
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -332,14 +358,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 17, NEW.dateRangeUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(17, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(17, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_DateRange_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_DateRange_trk_clientId_epk_csn  ON DateRange_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_DateRange_trk_epk_clientId ON DateRange_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_28")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_28")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(17, (SELECT COALESCE((SELECT MAX(dateRangeLocalChangeSeqNum) FROM DateRange), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(17, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_DateRange_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_DateRange_trk_epk_clientId_tmp ON DateRange_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM DateRange_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT DateRange_trk_nest.pk FROM DateRange_trk DateRange_trk_nest 
+      |  WHERE DateRange_trk_nest.clientId = DateRange_trk.clientId AND
+      |  DateRange_trk_nest.epk = DateRange_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_DateRange_trk_clientId_epk_csn  ON DateRange_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_DateRange_trk_epk_clientId ON DateRange_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_DateRange_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_28")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_28")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_28
       |AFTER INSERT ON HolidayCalendar
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -354,7 +390,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 28;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_28
       |            AFTER INSERT ON HolidayCalendar
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -372,7 +408,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 28, NEW.umCalendarUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_28
       |AFTER UPDATE ON HolidayCalendar
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -388,7 +424,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 28;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_28
       |            AFTER UPDATE ON HolidayCalendar
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -407,14 +443,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 28, NEW.umCalendarUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(28, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(28, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_HolidayCalendar_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_HolidayCalendar_trk_clientId_epk_csn  ON HolidayCalendar_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_HolidayCalendar_trk_epk_clientId ON HolidayCalendar_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_99")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_99")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(28, (SELECT COALESCE((SELECT MAX(umCalendarLocalChangeSeqNum) FROM HolidayCalendar), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(28, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_HolidayCalendar_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_HolidayCalendar_trk_epk_clientId_tmp ON HolidayCalendar_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM HolidayCalendar_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT HolidayCalendar_trk_nest.pk FROM HolidayCalendar_trk HolidayCalendar_trk_nest 
+      |  WHERE HolidayCalendar_trk_nest.clientId = HolidayCalendar_trk.clientId AND
+      |  HolidayCalendar_trk_nest.epk = HolidayCalendar_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_HolidayCalendar_trk_clientId_epk_csn  ON HolidayCalendar_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_HolidayCalendar_trk_epk_clientId ON HolidayCalendar_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_HolidayCalendar_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_99")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_99")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_99
       |AFTER INSERT ON Holiday
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -429,7 +475,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 99;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_99
       |            AFTER INSERT ON Holiday
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -447,7 +493,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 99, NEW.holUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_99
       |AFTER UPDATE ON Holiday
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -463,7 +509,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 99;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_99
       |            AFTER UPDATE ON Holiday
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -482,14 +528,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 99, NEW.holUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(99, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(99, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_Holiday_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Holiday_trk_clientId_epk_csn  ON Holiday_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Holiday_trk_epk_clientId ON Holiday_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_173")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_173")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(99, (SELECT COALESCE((SELECT MAX(holLocalCsn) FROM Holiday), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(99, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_Holiday_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Holiday_trk_epk_clientId_tmp ON Holiday_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Holiday_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Holiday_trk_nest.pk FROM Holiday_trk Holiday_trk_nest 
+      |  WHERE Holiday_trk_nest.clientId = Holiday_trk.clientId AND
+      |  Holiday_trk_nest.epk = Holiday_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Holiday_trk_clientId_epk_csn  ON Holiday_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Holiday_trk_epk_clientId ON Holiday_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Holiday_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_173")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_173")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_173
       |AFTER INSERT ON ScheduledCheck
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -504,7 +560,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 173;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_173
       |            AFTER INSERT ON ScheduledCheck
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -522,7 +578,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 173, NEW.scheduledCheckUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_173
       |AFTER UPDATE ON ScheduledCheck
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -538,7 +594,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 173;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_173
       |            AFTER UPDATE ON ScheduledCheck
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -557,14 +613,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 173, NEW.scheduledCheckUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(173, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(173, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ScheduledCheck_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ScheduledCheck_trk_clientId_epk_csn  ON ScheduledCheck_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ScheduledCheck_trk_epk_clientId ON ScheduledCheck_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_53")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_53")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(173, (SELECT COALESCE((SELECT MAX(scheduledCheckLocalCsn) FROM ScheduledCheck), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(173, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ScheduledCheck_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ScheduledCheck_trk_epk_clientId_tmp ON ScheduledCheck_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ScheduledCheck_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ScheduledCheck_trk_nest.pk FROM ScheduledCheck_trk ScheduledCheck_trk_nest 
+      |  WHERE ScheduledCheck_trk_nest.clientId = ScheduledCheck_trk.clientId AND
+      |  ScheduledCheck_trk_nest.epk = ScheduledCheck_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ScheduledCheck_trk_clientId_epk_csn  ON ScheduledCheck_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ScheduledCheck_trk_epk_clientId ON ScheduledCheck_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ScheduledCheck_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_53")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_53")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_53
       |AFTER INSERT ON AuditLog
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -579,7 +645,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 53;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_53
       |            AFTER INSERT ON AuditLog
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -597,7 +663,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 53, NEW.auditLogUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_53
       |AFTER UPDATE ON AuditLog
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -613,7 +679,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 53;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_53
       |            AFTER UPDATE ON AuditLog
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -632,14 +698,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 53, NEW.auditLogUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(53, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(53, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_AuditLog_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_AuditLog_trk_clientId_epk_csn  ON AuditLog_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_AuditLog_trk_epk_clientId ON AuditLog_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_56")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_56")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(53, (SELECT COALESCE((SELECT MAX(auditLogLocalChangeSeqNum) FROM AuditLog), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(53, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_AuditLog_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_AuditLog_trk_epk_clientId_tmp ON AuditLog_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM AuditLog_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT AuditLog_trk_nest.pk FROM AuditLog_trk AuditLog_trk_nest 
+      |  WHERE AuditLog_trk_nest.clientId = AuditLog_trk.clientId AND
+      |  AuditLog_trk_nest.epk = AuditLog_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_AuditLog_trk_clientId_epk_csn  ON AuditLog_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_AuditLog_trk_epk_clientId ON AuditLog_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_AuditLog_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_56")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_56")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_56
       |AFTER INSERT ON CustomField
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -654,7 +730,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 56;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_56
       |            AFTER INSERT ON CustomField
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -672,7 +748,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 56, NEW.customFieldUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_56
       |AFTER UPDATE ON CustomField
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -688,7 +764,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 56;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_56
       |            AFTER UPDATE ON CustomField
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -707,14 +783,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 56, NEW.customFieldUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(56, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(56, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_CustomField_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_CustomField_trk_clientId_epk_csn  ON CustomField_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_CustomField_trk_epk_clientId ON CustomField_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_57")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_57")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(56, (SELECT COALESCE((SELECT MAX(customFieldLCSN) FROM CustomField), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(56, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_CustomField_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_CustomField_trk_epk_clientId_tmp ON CustomField_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM CustomField_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT CustomField_trk_nest.pk FROM CustomField_trk CustomField_trk_nest 
+      |  WHERE CustomField_trk_nest.clientId = CustomField_trk.clientId AND
+      |  CustomField_trk_nest.epk = CustomField_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_CustomField_trk_clientId_epk_csn  ON CustomField_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_CustomField_trk_epk_clientId ON CustomField_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_CustomField_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_57")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_57")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_57
       |AFTER INSERT ON CustomFieldValue
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -729,7 +815,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 57;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_57
       |            AFTER INSERT ON CustomFieldValue
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -747,7 +833,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 57, NEW.customFieldValueUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_57
       |AFTER UPDATE ON CustomFieldValue
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -763,7 +849,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 57;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_57
       |            AFTER UPDATE ON CustomFieldValue
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -782,14 +868,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 57, NEW.customFieldValueUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(57, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(57, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_CustomFieldValue_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_CustomFieldValue_trk_clientId_epk_csn  ON CustomFieldValue_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_CustomFieldValue_trk_epk_clientId ON CustomFieldValue_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_55")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_55")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(57, (SELECT COALESCE((SELECT MAX(customFieldValueLCSN) FROM CustomFieldValue), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(57, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_CustomFieldValue_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_CustomFieldValue_trk_epk_clientId_tmp ON CustomFieldValue_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM CustomFieldValue_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT CustomFieldValue_trk_nest.pk FROM CustomFieldValue_trk CustomFieldValue_trk_nest 
+      |  WHERE CustomFieldValue_trk_nest.clientId = CustomFieldValue_trk.clientId AND
+      |  CustomFieldValue_trk_nest.epk = CustomFieldValue_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_CustomFieldValue_trk_clientId_epk_csn  ON CustomFieldValue_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_CustomFieldValue_trk_epk_clientId ON CustomFieldValue_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_CustomFieldValue_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_55")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_55")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_55
       |AFTER INSERT ON CustomFieldValueOption
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -804,7 +900,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 55;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_55
       |            AFTER INSERT ON CustomFieldValueOption
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -822,7 +918,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 55, NEW.customFieldValueOptionUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_55
       |AFTER UPDATE ON CustomFieldValueOption
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -838,7 +934,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 55;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_55
       |            AFTER UPDATE ON CustomFieldValueOption
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -857,14 +953,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 55, NEW.customFieldValueOptionUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(55, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(55, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_CustomFieldValueOption_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_CustomFieldValueOption_trk_clientId_epk_csn  ON CustomFieldValueOption_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_CustomFieldValueOption_trk_epk_clientId ON CustomFieldValueOption_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_9")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_9")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(55, (SELECT COALESCE((SELECT MAX(customFieldValueOptionLCSN) FROM CustomFieldValueOption), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(55, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_CustomFieldValueOption_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_CustomFieldValueOption_trk_epk_clientId_tmp ON CustomFieldValueOption_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM CustomFieldValueOption_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT CustomFieldValueOption_trk_nest.pk FROM CustomFieldValueOption_trk CustomFieldValueOption_trk_nest 
+      |  WHERE CustomFieldValueOption_trk_nest.clientId = CustomFieldValueOption_trk.clientId AND
+      |  CustomFieldValueOption_trk_nest.epk = CustomFieldValueOption_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_CustomFieldValueOption_trk_clientId_epk_csn  ON CustomFieldValueOption_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_CustomFieldValueOption_trk_epk_clientId ON CustomFieldValueOption_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_CustomFieldValueOption_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_9")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_9")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_9
       |AFTER INSERT ON Person
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -879,7 +985,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 9;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_9
       |            AFTER INSERT ON Person
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -897,7 +1003,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 9, NEW.personUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_9
       |AFTER UPDATE ON Person
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -913,7 +1019,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 9;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_9
       |            AFTER UPDATE ON Person
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -932,14 +1038,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 9, NEW.personUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(9, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(9, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_Person_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Person_trk_clientId_epk_csn  ON Person_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Person_trk_epk_clientId ON Person_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_6")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_6")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(9, (SELECT COALESCE((SELECT MAX(personLocalChangeSeqNum) FROM Person), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(9, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_Person_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Person_trk_epk_clientId_tmp ON Person_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Person_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Person_trk_nest.pk FROM Person_trk Person_trk_nest 
+      |  WHERE Person_trk_nest.clientId = Person_trk.clientId AND
+      |  Person_trk_nest.epk = Person_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Person_trk_clientId_epk_csn  ON Person_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Person_trk_epk_clientId ON Person_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Person_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_6")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_6")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_6
       |AFTER INSERT ON Clazz
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -954,7 +1070,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 6;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_6
       |            AFTER INSERT ON Clazz
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -972,7 +1088,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 6, NEW.clazzUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_6
       |AFTER UPDATE ON Clazz
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -988,7 +1104,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 6;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_6
       |            AFTER UPDATE ON Clazz
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1007,14 +1123,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 6, NEW.clazzUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(6, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(6, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_Clazz_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Clazz_trk_clientId_epk_csn  ON Clazz_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Clazz_trk_epk_clientId ON Clazz_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_65")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_65")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(6, (SELECT COALESCE((SELECT MAX(clazzLocalChangeSeqNum) FROM Clazz), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(6, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_Clazz_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Clazz_trk_epk_clientId_tmp ON Clazz_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Clazz_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Clazz_trk_nest.pk FROM Clazz_trk Clazz_trk_nest 
+      |  WHERE Clazz_trk_nest.clientId = Clazz_trk.clientId AND
+      |  Clazz_trk_nest.epk = Clazz_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Clazz_trk_clientId_epk_csn  ON Clazz_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Clazz_trk_epk_clientId ON Clazz_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Clazz_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_65")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_65")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_65
       |AFTER INSERT ON ClazzMember
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1029,7 +1155,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 65;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_65
       |            AFTER INSERT ON ClazzMember
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1047,7 +1173,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 65, NEW.clazzMemberUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_65
       |AFTER UPDATE ON ClazzMember
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1063,7 +1189,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 65;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_65
       |            AFTER UPDATE ON ClazzMember
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1082,14 +1208,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 65, NEW.clazzMemberUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(65, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(65, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzMember_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzMember_trk_clientId_epk_csn  ON ClazzMember_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzMember_trk_epk_clientId ON ClazzMember_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_178")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_178")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(65, (SELECT COALESCE((SELECT MAX(clazzMemberLocalChangeSeqNum) FROM ClazzMember), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(65, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzMember_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzMember_trk_epk_clientId_tmp ON ClazzMember_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzMember_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzMember_trk_nest.pk FROM ClazzMember_trk ClazzMember_trk_nest 
+      |  WHERE ClazzMember_trk_nest.clientId = ClazzMember_trk.clientId AND
+      |  ClazzMember_trk_nest.epk = ClazzMember_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzMember_trk_clientId_epk_csn  ON ClazzMember_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzMember_trk_epk_clientId ON ClazzMember_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzMember_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_178")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_178")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_178
       |AFTER INSERT ON PersonCustomFieldValue
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1104,7 +1240,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 178;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_178
       |            AFTER INSERT ON PersonCustomFieldValue
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1122,7 +1258,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 178, NEW.personCustomFieldValueUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_178
       |AFTER UPDATE ON PersonCustomFieldValue
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1138,7 +1274,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 178;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_178
       |            AFTER UPDATE ON PersonCustomFieldValue
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1157,14 +1293,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 178, NEW.personCustomFieldValueUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(178, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(178, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_PersonCustomFieldValue_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_PersonCustomFieldValue_trk_clientId_epk_csn  ON PersonCustomFieldValue_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_PersonCustomFieldValue_trk_epk_clientId ON PersonCustomFieldValue_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_42")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_42")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(178, (SELECT COALESCE((SELECT MAX(personCustomFieldValueLocalChangeSeqNum) FROM PersonCustomFieldValue), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(178, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_PersonCustomFieldValue_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_PersonCustomFieldValue_trk_epk_clientId_tmp ON PersonCustomFieldValue_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM PersonCustomFieldValue_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT PersonCustomFieldValue_trk_nest.pk FROM PersonCustomFieldValue_trk PersonCustomFieldValue_trk_nest 
+      |  WHERE PersonCustomFieldValue_trk_nest.clientId = PersonCustomFieldValue_trk.clientId AND
+      |  PersonCustomFieldValue_trk_nest.epk = PersonCustomFieldValue_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_PersonCustomFieldValue_trk_clientId_epk_csn  ON PersonCustomFieldValue_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_PersonCustomFieldValue_trk_epk_clientId ON PersonCustomFieldValue_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_PersonCustomFieldValue_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_42")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_42")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_42
       |AFTER INSERT ON ContentEntry
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1179,7 +1325,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 42;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_42
       |            AFTER INSERT ON ContentEntry
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1197,7 +1343,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 42, NEW.contentEntryUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_42
       |AFTER UPDATE ON ContentEntry
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1213,7 +1359,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 42;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_42
       |            AFTER UPDATE ON ContentEntry
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1232,14 +1378,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 42, NEW.contentEntryUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(42, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(42, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentEntry_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentEntry_trk_clientId_epk_csn  ON ContentEntry_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentEntry_trk_epk_clientId ON ContentEntry_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_3")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_3")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(42, (SELECT COALESCE((SELECT MAX(contentEntryLocalChangeSeqNum) FROM ContentEntry), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(42, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentEntry_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentEntry_trk_epk_clientId_tmp ON ContentEntry_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentEntry_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentEntry_trk_nest.pk FROM ContentEntry_trk ContentEntry_trk_nest 
+      |  WHERE ContentEntry_trk_nest.clientId = ContentEntry_trk.clientId AND
+      |  ContentEntry_trk_nest.epk = ContentEntry_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentEntry_trk_clientId_epk_csn  ON ContentEntry_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentEntry_trk_epk_clientId ON ContentEntry_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentEntry_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_3")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_3")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_3
       |AFTER INSERT ON ContentEntryContentCategoryJoin
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1254,7 +1410,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 3;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_3
       |            AFTER INSERT ON ContentEntryContentCategoryJoin
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1272,7 +1428,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 3, NEW.ceccjUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_3
       |AFTER UPDATE ON ContentEntryContentCategoryJoin
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1288,7 +1444,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 3;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_3
       |            AFTER UPDATE ON ContentEntryContentCategoryJoin
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1307,14 +1463,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 3, NEW.ceccjUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(3, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(3, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentEntryContentCategoryJoin_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentEntryContentCategoryJoin_trk_clientId_epk_csn  ON ContentEntryContentCategoryJoin_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId ON ContentEntryContentCategoryJoin_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_7")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_7")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(3, (SELECT COALESCE((SELECT MAX(ceccjLocalChangeSeqNum) FROM ContentEntryContentCategoryJoin), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(3, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentEntryContentCategoryJoin_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId_tmp ON ContentEntryContentCategoryJoin_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentEntryContentCategoryJoin_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentEntryContentCategoryJoin_trk_nest.pk FROM ContentEntryContentCategoryJoin_trk ContentEntryContentCategoryJoin_trk_nest 
+      |  WHERE ContentEntryContentCategoryJoin_trk_nest.clientId = ContentEntryContentCategoryJoin_trk.clientId AND
+      |  ContentEntryContentCategoryJoin_trk_nest.epk = ContentEntryContentCategoryJoin_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentEntryContentCategoryJoin_trk_clientId_epk_csn  ON ContentEntryContentCategoryJoin_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId ON ContentEntryContentCategoryJoin_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_7")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_7")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_7
       |AFTER INSERT ON ContentEntryParentChildJoin
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1329,7 +1495,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 7;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_7
       |            AFTER INSERT ON ContentEntryParentChildJoin
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1347,7 +1513,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 7, NEW.cepcjUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_7
       |AFTER UPDATE ON ContentEntryParentChildJoin
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1363,7 +1529,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 7;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_7
       |            AFTER UPDATE ON ContentEntryParentChildJoin
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1382,14 +1548,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 7, NEW.cepcjUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(7, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(7, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentEntryParentChildJoin_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentEntryParentChildJoin_trk_clientId_epk_csn  ON ContentEntryParentChildJoin_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentEntryParentChildJoin_trk_epk_clientId ON ContentEntryParentChildJoin_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_8")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_8")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(7, (SELECT COALESCE((SELECT MAX(cepcjLocalChangeSeqNum) FROM ContentEntryParentChildJoin), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(7, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentEntryParentChildJoin_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentEntryParentChildJoin_trk_epk_clientId_tmp ON ContentEntryParentChildJoin_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentEntryParentChildJoin_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentEntryParentChildJoin_trk_nest.pk FROM ContentEntryParentChildJoin_trk ContentEntryParentChildJoin_trk_nest 
+      |  WHERE ContentEntryParentChildJoin_trk_nest.clientId = ContentEntryParentChildJoin_trk.clientId AND
+      |  ContentEntryParentChildJoin_trk_nest.epk = ContentEntryParentChildJoin_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentEntryParentChildJoin_trk_clientId_epk_csn  ON ContentEntryParentChildJoin_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentEntryParentChildJoin_trk_epk_clientId ON ContentEntryParentChildJoin_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentEntryParentChildJoin_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_8")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_8")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_8
       |AFTER INSERT ON ContentEntryRelatedEntryJoin
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1404,7 +1580,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 8;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_8
       |            AFTER INSERT ON ContentEntryRelatedEntryJoin
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1422,7 +1598,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 8, NEW.cerejUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_8
       |AFTER UPDATE ON ContentEntryRelatedEntryJoin
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1438,7 +1614,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 8;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_8
       |            AFTER UPDATE ON ContentEntryRelatedEntryJoin
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1457,14 +1633,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 8, NEW.cerejUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(8, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(8, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentEntryRelatedEntryJoin_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentEntryRelatedEntryJoin_trk_clientId_epk_csn  ON ContentEntryRelatedEntryJoin_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId ON ContentEntryRelatedEntryJoin_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_2")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_2")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(8, (SELECT COALESCE((SELECT MAX(cerejLocalChangeSeqNum) FROM ContentEntryRelatedEntryJoin), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(8, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentEntryRelatedEntryJoin_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId_tmp ON ContentEntryRelatedEntryJoin_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentEntryRelatedEntryJoin_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentEntryRelatedEntryJoin_trk_nest.pk FROM ContentEntryRelatedEntryJoin_trk ContentEntryRelatedEntryJoin_trk_nest 
+      |  WHERE ContentEntryRelatedEntryJoin_trk_nest.clientId = ContentEntryRelatedEntryJoin_trk.clientId AND
+      |  ContentEntryRelatedEntryJoin_trk_nest.epk = ContentEntryRelatedEntryJoin_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentEntryRelatedEntryJoin_trk_clientId_epk_csn  ON ContentEntryRelatedEntryJoin_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId ON ContentEntryRelatedEntryJoin_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_2")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_2")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_2
       |AFTER INSERT ON ContentCategorySchema
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1479,7 +1665,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 2;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_2
       |            AFTER INSERT ON ContentCategorySchema
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1497,7 +1683,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 2, NEW.contentCategorySchemaUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_2
       |AFTER UPDATE ON ContentCategorySchema
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1513,7 +1699,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 2;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_2
       |            AFTER UPDATE ON ContentCategorySchema
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1532,14 +1718,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 2, NEW.contentCategorySchemaUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(2, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(2, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentCategorySchema_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentCategorySchema_trk_clientId_epk_csn  ON ContentCategorySchema_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentCategorySchema_trk_epk_clientId ON ContentCategorySchema_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_1")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_1")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(2, (SELECT COALESCE((SELECT MAX(contentCategorySchemaLocalChangeSeqNum) FROM ContentCategorySchema), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(2, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentCategorySchema_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentCategorySchema_trk_epk_clientId_tmp ON ContentCategorySchema_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentCategorySchema_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentCategorySchema_trk_nest.pk FROM ContentCategorySchema_trk ContentCategorySchema_trk_nest 
+      |  WHERE ContentCategorySchema_trk_nest.clientId = ContentCategorySchema_trk.clientId AND
+      |  ContentCategorySchema_trk_nest.epk = ContentCategorySchema_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentCategorySchema_trk_clientId_epk_csn  ON ContentCategorySchema_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentCategorySchema_trk_epk_clientId ON ContentCategorySchema_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentCategorySchema_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_1")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_1")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_1
       |AFTER INSERT ON ContentCategory
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1554,7 +1750,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 1;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_1
       |            AFTER INSERT ON ContentCategory
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1572,7 +1768,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 1, NEW.contentCategoryUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_1
       |AFTER UPDATE ON ContentCategory
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1588,7 +1784,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 1;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_1
       |            AFTER UPDATE ON ContentCategory
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1607,14 +1803,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 1, NEW.contentCategoryUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(1, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(1, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentCategory_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentCategory_trk_clientId_epk_csn  ON ContentCategory_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentCategory_trk_epk_clientId ON ContentCategory_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_13")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_13")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(1, (SELECT COALESCE((SELECT MAX(contentCategoryLocalChangeSeqNum) FROM ContentCategory), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(1, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentCategory_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentCategory_trk_epk_clientId_tmp ON ContentCategory_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentCategory_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentCategory_trk_nest.pk FROM ContentCategory_trk ContentCategory_trk_nest 
+      |  WHERE ContentCategory_trk_nest.clientId = ContentCategory_trk.clientId AND
+      |  ContentCategory_trk_nest.epk = ContentCategory_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentCategory_trk_clientId_epk_csn  ON ContentCategory_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentCategory_trk_epk_clientId ON ContentCategory_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentCategory_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_13")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_13")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_13
       |AFTER INSERT ON Language
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1629,7 +1835,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 13;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_13
       |            AFTER INSERT ON Language
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1647,7 +1853,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 13, NEW.langUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_13
       |AFTER UPDATE ON Language
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1663,7 +1869,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 13;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_13
       |            AFTER UPDATE ON Language
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1682,14 +1888,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 13, NEW.langUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(13, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(13, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_Language_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Language_trk_clientId_epk_csn  ON Language_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Language_trk_epk_clientId ON Language_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_10")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_10")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(13, (SELECT COALESCE((SELECT MAX(langLocalChangeSeqNum) FROM Language), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(13, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_Language_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Language_trk_epk_clientId_tmp ON Language_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Language_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Language_trk_nest.pk FROM Language_trk Language_trk_nest 
+      |  WHERE Language_trk_nest.clientId = Language_trk.clientId AND
+      |  Language_trk_nest.epk = Language_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Language_trk_clientId_epk_csn  ON Language_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Language_trk_epk_clientId ON Language_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Language_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_10")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_10")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_10
       |AFTER INSERT ON LanguageVariant
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1704,7 +1920,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 10;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_10
       |            AFTER INSERT ON LanguageVariant
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1722,7 +1938,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 10, NEW.langVariantUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_10
       |AFTER UPDATE ON LanguageVariant
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1738,7 +1954,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 10;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_10
       |            AFTER UPDATE ON LanguageVariant
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1757,14 +1973,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 10, NEW.langVariantUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(10, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(10, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_LanguageVariant_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_LanguageVariant_trk_clientId_epk_csn  ON LanguageVariant_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_LanguageVariant_trk_epk_clientId ON LanguageVariant_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_45")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_45")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(10, (SELECT COALESCE((SELECT MAX(langVariantLocalChangeSeqNum) FROM LanguageVariant), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(10, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_LanguageVariant_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_LanguageVariant_trk_epk_clientId_tmp ON LanguageVariant_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM LanguageVariant_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT LanguageVariant_trk_nest.pk FROM LanguageVariant_trk LanguageVariant_trk_nest 
+      |  WHERE LanguageVariant_trk_nest.clientId = LanguageVariant_trk.clientId AND
+      |  LanguageVariant_trk_nest.epk = LanguageVariant_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_LanguageVariant_trk_clientId_epk_csn  ON LanguageVariant_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_LanguageVariant_trk_epk_clientId ON LanguageVariant_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_LanguageVariant_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_45")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_45")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_45
       |AFTER INSERT ON Role
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1779,7 +2005,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 45;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_45
       |            AFTER INSERT ON Role
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1797,7 +2023,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 45, NEW.roleUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_45
       |AFTER UPDATE ON Role
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1813,7 +2039,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 45;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_45
       |            AFTER UPDATE ON Role
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1832,14 +2058,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 45, NEW.roleUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(45, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(45, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_Role_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Role_trk_clientId_epk_csn  ON Role_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Role_trk_epk_clientId ON Role_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_47")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_47")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(45, (SELECT COALESCE((SELECT MAX(roleLocalCsn) FROM Role), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(45, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_Role_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Role_trk_epk_clientId_tmp ON Role_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Role_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Role_trk_nest.pk FROM Role_trk Role_trk_nest 
+      |  WHERE Role_trk_nest.clientId = Role_trk.clientId AND
+      |  Role_trk_nest.epk = Role_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Role_trk_clientId_epk_csn  ON Role_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Role_trk_epk_clientId ON Role_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Role_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_47")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_47")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_47
       |AFTER INSERT ON EntityRole
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1854,7 +2090,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 47;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_47
       |            AFTER INSERT ON EntityRole
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1872,7 +2108,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 47, NEW.erUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_47
       |AFTER UPDATE ON EntityRole
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1888,7 +2124,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 47;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_47
       |            AFTER UPDATE ON EntityRole
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1907,14 +2143,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 47, NEW.erUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(47, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(47, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_EntityRole_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_EntityRole_trk_clientId_epk_csn  ON EntityRole_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_EntityRole_trk_epk_clientId ON EntityRole_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_43")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_43")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(47, (SELECT COALESCE((SELECT MAX(erLocalCsn) FROM EntityRole), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(47, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_EntityRole_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_EntityRole_trk_epk_clientId_tmp ON EntityRole_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM EntityRole_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT EntityRole_trk_nest.pk FROM EntityRole_trk EntityRole_trk_nest 
+      |  WHERE EntityRole_trk_nest.clientId = EntityRole_trk.clientId AND
+      |  EntityRole_trk_nest.epk = EntityRole_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_EntityRole_trk_clientId_epk_csn  ON EntityRole_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_EntityRole_trk_epk_clientId ON EntityRole_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_EntityRole_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_43")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_43")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_43
       |AFTER INSERT ON PersonGroup
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -1929,7 +2175,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 43;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_43
       |            AFTER INSERT ON PersonGroup
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -1947,7 +2193,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 43, NEW.groupUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_43
       |AFTER UPDATE ON PersonGroup
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -1963,7 +2209,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 43;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_43
       |            AFTER UPDATE ON PersonGroup
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -1982,14 +2228,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 43, NEW.groupUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(43, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(43, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_PersonGroup_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_PersonGroup_trk_clientId_epk_csn  ON PersonGroup_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_PersonGroup_trk_epk_clientId ON PersonGroup_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_44")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_44")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(43, (SELECT COALESCE((SELECT MAX(groupLocalCsn) FROM PersonGroup), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(43, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_PersonGroup_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_PersonGroup_trk_epk_clientId_tmp ON PersonGroup_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM PersonGroup_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT PersonGroup_trk_nest.pk FROM PersonGroup_trk PersonGroup_trk_nest 
+      |  WHERE PersonGroup_trk_nest.clientId = PersonGroup_trk.clientId AND
+      |  PersonGroup_trk_nest.epk = PersonGroup_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_PersonGroup_trk_clientId_epk_csn  ON PersonGroup_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_PersonGroup_trk_epk_clientId ON PersonGroup_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_PersonGroup_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_44")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_44")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_44
       |AFTER INSERT ON PersonGroupMember
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2004,7 +2260,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 44;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_44
       |            AFTER INSERT ON PersonGroupMember
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2022,7 +2278,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 44, NEW.groupMemberUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_44
       |AFTER UPDATE ON PersonGroupMember
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2038,7 +2294,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 44;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_44
       |            AFTER UPDATE ON PersonGroupMember
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2057,14 +2313,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 44, NEW.groupMemberUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(44, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(44, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_PersonGroupMember_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_PersonGroupMember_trk_clientId_epk_csn  ON PersonGroupMember_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_PersonGroupMember_trk_epk_clientId ON PersonGroupMember_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_50")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_50")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(44, (SELECT COALESCE((SELECT MAX(groupMemberLocalCsn) FROM PersonGroupMember), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(44, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_PersonGroupMember_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_PersonGroupMember_trk_epk_clientId_tmp ON PersonGroupMember_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM PersonGroupMember_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT PersonGroupMember_trk_nest.pk FROM PersonGroupMember_trk PersonGroupMember_trk_nest 
+      |  WHERE PersonGroupMember_trk_nest.clientId = PersonGroupMember_trk.clientId AND
+      |  PersonGroupMember_trk_nest.epk = PersonGroupMember_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_PersonGroupMember_trk_clientId_epk_csn  ON PersonGroupMember_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_PersonGroupMember_trk_epk_clientId ON PersonGroupMember_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_PersonGroupMember_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_50")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_50")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_50
       |AFTER INSERT ON PersonPicture
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2079,7 +2345,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 50;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_50
       |            AFTER INSERT ON PersonPicture
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2097,7 +2363,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 50, NEW.personPictureUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_50
       |AFTER UPDATE ON PersonPicture
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2113,7 +2379,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 50;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_50
       |            AFTER UPDATE ON PersonPicture
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2132,14 +2398,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 50, NEW.personPictureUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(50, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(50, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_PersonPicture_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_PersonPicture_trk_clientId_epk_csn  ON PersonPicture_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_PersonPicture_trk_epk_clientId ON PersonPicture_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_51")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_51")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(50, (SELECT COALESCE((SELECT MAX(personPictureLocalCsn) FROM PersonPicture), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(50, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_PersonPicture_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_PersonPicture_trk_epk_clientId_tmp ON PersonPicture_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM PersonPicture_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT PersonPicture_trk_nest.pk FROM PersonPicture_trk PersonPicture_trk_nest 
+      |  WHERE PersonPicture_trk_nest.clientId = PersonPicture_trk.clientId AND
+      |  PersonPicture_trk_nest.epk = PersonPicture_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_PersonPicture_trk_clientId_epk_csn  ON PersonPicture_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_PersonPicture_trk_epk_clientId ON PersonPicture_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_PersonPicture_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_51")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_51")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_51
       |AFTER INSERT ON Container
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2154,7 +2430,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 51;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_51
       |            AFTER INSERT ON Container
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2172,7 +2448,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 51, NEW.containerUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_51
       |AFTER UPDATE ON Container
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2188,7 +2464,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 51;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_51
       |            AFTER UPDATE ON Container
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2207,14 +2483,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 51, NEW.containerUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(51, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(51, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_Container_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Container_trk_clientId_epk_csn  ON Container_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Container_trk_epk_clientId ON Container_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_62")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_62")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(51, (SELECT COALESCE((SELECT MAX(cntLocalCsn) FROM Container), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(51, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_Container_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Container_trk_epk_clientId_tmp ON Container_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Container_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Container_trk_nest.pk FROM Container_trk Container_trk_nest 
+      |  WHERE Container_trk_nest.clientId = Container_trk.clientId AND
+      |  Container_trk_nest.epk = Container_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Container_trk_clientId_epk_csn  ON Container_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Container_trk_epk_clientId ON Container_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Container_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_62")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_62")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_62
       |AFTER INSERT ON VerbEntity
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2229,7 +2515,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 62;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_62
       |            AFTER INSERT ON VerbEntity
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2247,7 +2533,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 62, NEW.verbUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_62
       |AFTER UPDATE ON VerbEntity
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2263,7 +2549,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 62;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_62
       |            AFTER UPDATE ON VerbEntity
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2282,14 +2568,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 62, NEW.verbUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(62, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(62, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_VerbEntity_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_VerbEntity_trk_clientId_epk_csn  ON VerbEntity_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_VerbEntity_trk_epk_clientId ON VerbEntity_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_64")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_64")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(62, (SELECT COALESCE((SELECT MAX(verbLocalChangeSeqNum) FROM VerbEntity), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(62, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_VerbEntity_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_VerbEntity_trk_epk_clientId_tmp ON VerbEntity_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM VerbEntity_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT VerbEntity_trk_nest.pk FROM VerbEntity_trk VerbEntity_trk_nest 
+      |  WHERE VerbEntity_trk_nest.clientId = VerbEntity_trk.clientId AND
+      |  VerbEntity_trk_nest.epk = VerbEntity_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_VerbEntity_trk_clientId_epk_csn  ON VerbEntity_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_VerbEntity_trk_epk_clientId ON VerbEntity_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_VerbEntity_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_64")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_64")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_64
       |AFTER INSERT ON XObjectEntity
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2304,7 +2600,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 64;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_64
       |            AFTER INSERT ON XObjectEntity
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2322,7 +2618,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 64, NEW.xObjectUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_64
       |AFTER UPDATE ON XObjectEntity
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2338,7 +2634,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 64;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_64
       |            AFTER UPDATE ON XObjectEntity
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2357,14 +2653,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 64, NEW.xObjectUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(64, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(64, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_XObjectEntity_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_XObjectEntity_trk_clientId_epk_csn  ON XObjectEntity_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_XObjectEntity_trk_epk_clientId ON XObjectEntity_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_60")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_60")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(64, (SELECT COALESCE((SELECT MAX(xObjectocalChangeSeqNum) FROM XObjectEntity), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(64, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_XObjectEntity_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_XObjectEntity_trk_epk_clientId_tmp ON XObjectEntity_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM XObjectEntity_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT XObjectEntity_trk_nest.pk FROM XObjectEntity_trk XObjectEntity_trk_nest 
+      |  WHERE XObjectEntity_trk_nest.clientId = XObjectEntity_trk.clientId AND
+      |  XObjectEntity_trk_nest.epk = XObjectEntity_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_XObjectEntity_trk_clientId_epk_csn  ON XObjectEntity_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_XObjectEntity_trk_epk_clientId ON XObjectEntity_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_XObjectEntity_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_60")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_60")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_60
       |AFTER INSERT ON StatementEntity
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2379,7 +2685,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 60;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_60
       |            AFTER INSERT ON StatementEntity
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2397,7 +2703,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 60, NEW.statementUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_60
       |AFTER UPDATE ON StatementEntity
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2413,7 +2719,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 60;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_60
       |            AFTER UPDATE ON StatementEntity
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2432,14 +2738,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 60, NEW.statementUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(60, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(60, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_StatementEntity_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_StatementEntity_trk_clientId_epk_csn  ON StatementEntity_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_StatementEntity_trk_epk_clientId ON StatementEntity_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_66")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_66")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(60, (SELECT COALESCE((SELECT MAX(statementLocalChangeSeqNum) FROM StatementEntity), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(60, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_StatementEntity_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_StatementEntity_trk_epk_clientId_tmp ON StatementEntity_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM StatementEntity_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT StatementEntity_trk_nest.pk FROM StatementEntity_trk StatementEntity_trk_nest 
+      |  WHERE StatementEntity_trk_nest.clientId = StatementEntity_trk.clientId AND
+      |  StatementEntity_trk_nest.epk = StatementEntity_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_StatementEntity_trk_clientId_epk_csn  ON StatementEntity_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_StatementEntity_trk_epk_clientId ON StatementEntity_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_StatementEntity_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_66")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_66")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_66
       |AFTER INSERT ON ContextXObjectStatementJoin
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2454,7 +2770,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 66;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_66
       |            AFTER INSERT ON ContextXObjectStatementJoin
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2472,7 +2788,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 66, NEW.contextXObjectStatementJoinUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_66
       |AFTER UPDATE ON ContextXObjectStatementJoin
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2488,7 +2804,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 66;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_66
       |            AFTER UPDATE ON ContextXObjectStatementJoin
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2507,14 +2823,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 66, NEW.contextXObjectStatementJoinUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(66, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(66, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContextXObjectStatementJoin_trk_clientId_epk_csn  ON ContextXObjectStatementJoin_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContextXObjectStatementJoin_trk_epk_clientId ON ContextXObjectStatementJoin_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_68")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_68")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(66, (SELECT COALESCE((SELECT MAX(verbLocalChangeSeqNum) FROM ContextXObjectStatementJoin), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(66, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContextXObjectStatementJoin_trk_epk_clientId_tmp ON ContextXObjectStatementJoin_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContextXObjectStatementJoin_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContextXObjectStatementJoin_trk_nest.pk FROM ContextXObjectStatementJoin_trk ContextXObjectStatementJoin_trk_nest 
+      |  WHERE ContextXObjectStatementJoin_trk_nest.clientId = ContextXObjectStatementJoin_trk.clientId AND
+      |  ContextXObjectStatementJoin_trk_nest.epk = ContextXObjectStatementJoin_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContextXObjectStatementJoin_trk_clientId_epk_csn  ON ContextXObjectStatementJoin_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContextXObjectStatementJoin_trk_epk_clientId ON ContextXObjectStatementJoin_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContextXObjectStatementJoin_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_68")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_68")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_68
       |AFTER INSERT ON AgentEntity
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2529,7 +2855,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 68;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_68
       |            AFTER INSERT ON AgentEntity
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2547,7 +2873,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 68, NEW.agentUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_68
       |AFTER UPDATE ON AgentEntity
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2563,7 +2889,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 68;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_68
       |            AFTER UPDATE ON AgentEntity
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2582,14 +2908,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 68, NEW.agentUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(68, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(68, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_AgentEntity_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_AgentEntity_trk_clientId_epk_csn  ON AgentEntity_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_AgentEntity_trk_epk_clientId ON AgentEntity_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_70")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_70")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(68, (SELECT COALESCE((SELECT MAX(statementLocalChangeSeqNum) FROM AgentEntity), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(68, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_AgentEntity_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_AgentEntity_trk_epk_clientId_tmp ON AgentEntity_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM AgentEntity_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT AgentEntity_trk_nest.pk FROM AgentEntity_trk AgentEntity_trk_nest 
+      |  WHERE AgentEntity_trk_nest.clientId = AgentEntity_trk.clientId AND
+      |  AgentEntity_trk_nest.epk = AgentEntity_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_AgentEntity_trk_clientId_epk_csn  ON AgentEntity_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_AgentEntity_trk_epk_clientId ON AgentEntity_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_AgentEntity_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_70")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_70")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_70
       |AFTER INSERT ON StateEntity
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2604,7 +2940,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 70;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_70
       |            AFTER INSERT ON StateEntity
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2622,7 +2958,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 70, NEW.stateUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_70
       |AFTER UPDATE ON StateEntity
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2638,7 +2974,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 70;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_70
       |            AFTER UPDATE ON StateEntity
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2657,14 +2993,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 70, NEW.stateUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(70, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(70, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_StateEntity_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_StateEntity_trk_clientId_epk_csn  ON StateEntity_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_StateEntity_trk_epk_clientId ON StateEntity_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_72")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_72")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(70, (SELECT COALESCE((SELECT MAX(stateLocalChangeSeqNum) FROM StateEntity), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(70, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_StateEntity_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_StateEntity_trk_epk_clientId_tmp ON StateEntity_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM StateEntity_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT StateEntity_trk_nest.pk FROM StateEntity_trk StateEntity_trk_nest 
+      |  WHERE StateEntity_trk_nest.clientId = StateEntity_trk.clientId AND
+      |  StateEntity_trk_nest.epk = StateEntity_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_StateEntity_trk_clientId_epk_csn  ON StateEntity_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_StateEntity_trk_epk_clientId ON StateEntity_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_StateEntity_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_72")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_72")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_72
       |AFTER INSERT ON StateContentEntity
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2679,7 +3025,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 72;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_72
       |            AFTER INSERT ON StateContentEntity
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2697,7 +3043,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 72, NEW.stateContentUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_72
       |AFTER UPDATE ON StateContentEntity
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2713,7 +3059,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 72;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_72
       |            AFTER UPDATE ON StateContentEntity
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2732,14 +3078,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 72, NEW.stateContentUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(72, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(72, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_StateContentEntity_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_StateContentEntity_trk_clientId_epk_csn  ON StateContentEntity_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_StateContentEntity_trk_epk_clientId ON StateContentEntity_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_74")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_74")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(72, (SELECT COALESCE((SELECT MAX(stateContentLocalChangeSeqNum) FROM StateContentEntity), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(72, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_StateContentEntity_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_StateContentEntity_trk_epk_clientId_tmp ON StateContentEntity_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM StateContentEntity_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT StateContentEntity_trk_nest.pk FROM StateContentEntity_trk StateContentEntity_trk_nest 
+      |  WHERE StateContentEntity_trk_nest.clientId = StateContentEntity_trk.clientId AND
+      |  StateContentEntity_trk_nest.epk = StateContentEntity_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_StateContentEntity_trk_clientId_epk_csn  ON StateContentEntity_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_StateContentEntity_trk_epk_clientId ON StateContentEntity_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_StateContentEntity_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_74")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_74")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_74
       |AFTER INSERT ON XLangMapEntry
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2754,7 +3110,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 74;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_74
       |            AFTER INSERT ON XLangMapEntry
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2772,7 +3128,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 74, NEW.statementLangMapUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_74
       |AFTER UPDATE ON XLangMapEntry
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2788,7 +3144,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 74;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_74
       |            AFTER UPDATE ON XLangMapEntry
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2807,14 +3163,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 74, NEW.statementLangMapUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(74, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(74, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_XLangMapEntry_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_XLangMapEntry_trk_clientId_epk_csn  ON XLangMapEntry_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_XLangMapEntry_trk_epk_clientId ON XLangMapEntry_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_164")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_164")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(74, (SELECT COALESCE((SELECT MAX(statementLangMapLocalCsn) FROM XLangMapEntry), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(74, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_XLangMapEntry_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_XLangMapEntry_trk_epk_clientId_tmp ON XLangMapEntry_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM XLangMapEntry_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT XLangMapEntry_trk_nest.pk FROM XLangMapEntry_trk XLangMapEntry_trk_nest 
+      |  WHERE XLangMapEntry_trk_nest.clientId = XLangMapEntry_trk.clientId AND
+      |  XLangMapEntry_trk_nest.epk = XLangMapEntry_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_XLangMapEntry_trk_clientId_epk_csn  ON XLangMapEntry_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_XLangMapEntry_trk_epk_clientId ON XLangMapEntry_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_XLangMapEntry_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_164")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_164")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_164
       |AFTER INSERT ON School
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2829,7 +3195,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 164;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_164
       |            AFTER INSERT ON School
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2847,7 +3213,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 164, NEW.schoolUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_164
       |AFTER UPDATE ON School
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2863,7 +3229,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 164;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_164
       |            AFTER UPDATE ON School
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2882,14 +3248,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 164, NEW.schoolUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(164, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(164, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_School_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_School_trk_clientId_epk_csn  ON School_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_School_trk_epk_clientId ON School_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_200")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_200")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(164, (SELECT COALESCE((SELECT MAX(schoolLocalChangeSeqNum) FROM School), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(164, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_School_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_School_trk_epk_clientId_tmp ON School_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM School_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT School_trk_nest.pk FROM School_trk School_trk_nest 
+      |  WHERE School_trk_nest.clientId = School_trk.clientId AND
+      |  School_trk_nest.epk = School_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_School_trk_clientId_epk_csn  ON School_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_School_trk_epk_clientId ON School_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_School_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_200")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_200")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_200
       |AFTER INSERT ON SchoolMember
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2904,7 +3280,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 200;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_200
       |            AFTER INSERT ON SchoolMember
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2922,7 +3298,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 200, NEW.schoolMemberUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_200
       |AFTER UPDATE ON SchoolMember
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -2938,7 +3314,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 200;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_200
       |            AFTER UPDATE ON SchoolMember
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -2957,14 +3333,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 200, NEW.schoolMemberUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(200, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(200, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_SchoolMember_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_SchoolMember_trk_clientId_epk_csn  ON SchoolMember_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_SchoolMember_trk_epk_clientId ON SchoolMember_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_201")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_201")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(200, (SELECT COALESCE((SELECT MAX(schoolMemberLocalChangeSeqNum) FROM SchoolMember), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(200, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_SchoolMember_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_SchoolMember_trk_epk_clientId_tmp ON SchoolMember_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM SchoolMember_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT SchoolMember_trk_nest.pk FROM SchoolMember_trk SchoolMember_trk_nest 
+      |  WHERE SchoolMember_trk_nest.clientId = SchoolMember_trk.clientId AND
+      |  SchoolMember_trk_nest.epk = SchoolMember_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_SchoolMember_trk_clientId_epk_csn  ON SchoolMember_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_SchoolMember_trk_epk_clientId ON SchoolMember_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_SchoolMember_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_201")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_201")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_201
       |AFTER INSERT ON ClazzWork
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -2979,7 +3365,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 201;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_201
       |            AFTER INSERT ON ClazzWork
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -2997,7 +3383,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 201, NEW.clazzWorkUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_201
       |AFTER UPDATE ON ClazzWork
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3013,7 +3399,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 201;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_201
       |            AFTER UPDATE ON ClazzWork
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3032,14 +3418,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 201, NEW.clazzWorkUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(201, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(201, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzWork_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzWork_trk_clientId_epk_csn  ON ClazzWork_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzWork_trk_epk_clientId ON ClazzWork_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_204")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_204")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(201, (SELECT COALESCE((SELECT MAX(clazzWorkLocalChangeSeqNum) FROM ClazzWork), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(201, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzWork_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzWork_trk_epk_clientId_tmp ON ClazzWork_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzWork_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzWork_trk_nest.pk FROM ClazzWork_trk ClazzWork_trk_nest 
+      |  WHERE ClazzWork_trk_nest.clientId = ClazzWork_trk.clientId AND
+      |  ClazzWork_trk_nest.epk = ClazzWork_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzWork_trk_clientId_epk_csn  ON ClazzWork_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzWork_trk_epk_clientId ON ClazzWork_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzWork_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_204")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_204")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_204
       |AFTER INSERT ON ClazzWorkContentJoin
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -3054,7 +3450,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 204;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_204
       |            AFTER INSERT ON ClazzWorkContentJoin
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -3072,7 +3468,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 204, NEW.clazzWorkContentJoinUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_204
       |AFTER UPDATE ON ClazzWorkContentJoin
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3088,7 +3484,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 204;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_204
       |            AFTER UPDATE ON ClazzWorkContentJoin
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3107,14 +3503,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 204, NEW.clazzWorkContentJoinUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(204, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(204, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkContentJoin_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzWorkContentJoin_trk_clientId_epk_csn  ON ClazzWorkContentJoin_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkContentJoin_trk_epk_clientId ON ClazzWorkContentJoin_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_208")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_208")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(204, (SELECT COALESCE((SELECT MAX(clazzWorkContentJoinLCSN) FROM ClazzWorkContentJoin), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(204, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkContentJoin_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzWorkContentJoin_trk_epk_clientId_tmp ON ClazzWorkContentJoin_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzWorkContentJoin_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzWorkContentJoin_trk_nest.pk FROM ClazzWorkContentJoin_trk ClazzWorkContentJoin_trk_nest 
+      |  WHERE ClazzWorkContentJoin_trk_nest.clientId = ClazzWorkContentJoin_trk.clientId AND
+      |  ClazzWorkContentJoin_trk_nest.epk = ClazzWorkContentJoin_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzWorkContentJoin_trk_clientId_epk_csn  ON ClazzWorkContentJoin_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkContentJoin_trk_epk_clientId ON ClazzWorkContentJoin_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzWorkContentJoin_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_208")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_208")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_208
       |AFTER INSERT ON Comments
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -3129,7 +3535,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 208;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_208
       |            AFTER INSERT ON Comments
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -3147,7 +3553,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 208, NEW.commentsUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_208
       |AFTER UPDATE ON Comments
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3163,7 +3569,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 208;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_208
       |            AFTER UPDATE ON Comments
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3182,14 +3588,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 208, NEW.commentsUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(208, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(208, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_Comments_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Comments_trk_clientId_epk_csn  ON Comments_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Comments_trk_epk_clientId ON Comments_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_202")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_202")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(208, (SELECT COALESCE((SELECT MAX(commentsLCSN) FROM Comments), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(208, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_Comments_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Comments_trk_epk_clientId_tmp ON Comments_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Comments_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Comments_trk_nest.pk FROM Comments_trk Comments_trk_nest 
+      |  WHERE Comments_trk_nest.clientId = Comments_trk.clientId AND
+      |  Comments_trk_nest.epk = Comments_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Comments_trk_clientId_epk_csn  ON Comments_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Comments_trk_epk_clientId ON Comments_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Comments_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_202")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_202")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_202
       |AFTER INSERT ON ClazzWorkQuestion
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -3204,7 +3620,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 202;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_202
       |            AFTER INSERT ON ClazzWorkQuestion
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -3222,7 +3638,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 202, NEW.clazzWorkQuestionUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_202
       |AFTER UPDATE ON ClazzWorkQuestion
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3238,7 +3654,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 202;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_202
       |            AFTER UPDATE ON ClazzWorkQuestion
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3257,14 +3673,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 202, NEW.clazzWorkQuestionUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(202, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(202, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestion_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzWorkQuestion_trk_clientId_epk_csn  ON ClazzWorkQuestion_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestion_trk_epk_clientId ON ClazzWorkQuestion_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_203")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_203")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(202, (SELECT COALESCE((SELECT MAX(clazzWorkQuestionLCSN) FROM ClazzWorkQuestion), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(202, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestion_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzWorkQuestion_trk_epk_clientId_tmp ON ClazzWorkQuestion_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzWorkQuestion_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzWorkQuestion_trk_nest.pk FROM ClazzWorkQuestion_trk ClazzWorkQuestion_trk_nest 
+      |  WHERE ClazzWorkQuestion_trk_nest.clientId = ClazzWorkQuestion_trk.clientId AND
+      |  ClazzWorkQuestion_trk_nest.epk = ClazzWorkQuestion_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzWorkQuestion_trk_clientId_epk_csn  ON ClazzWorkQuestion_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestion_trk_epk_clientId ON ClazzWorkQuestion_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzWorkQuestion_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_203")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_203")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_203
       |AFTER INSERT ON ClazzWorkQuestionOption
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -3279,7 +3705,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 203;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_203
       |            AFTER INSERT ON ClazzWorkQuestionOption
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -3297,7 +3723,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 203, NEW.clazzWorkQuestionOptionUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_203
       |AFTER UPDATE ON ClazzWorkQuestionOption
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3313,7 +3739,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 203;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_203
       |            AFTER UPDATE ON ClazzWorkQuestionOption
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3332,14 +3758,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 203, NEW.clazzWorkQuestionOptionUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(203, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(203, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestionOption_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzWorkQuestionOption_trk_clientId_epk_csn  ON ClazzWorkQuestionOption_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestionOption_trk_epk_clientId ON ClazzWorkQuestionOption_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_206")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_206")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(203, (SELECT COALESCE((SELECT MAX(clazzWorkQuestionOptionLocalChangeSeqNum) FROM ClazzWorkQuestionOption), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(203, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestionOption_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzWorkQuestionOption_trk_epk_clientId_tmp ON ClazzWorkQuestionOption_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzWorkQuestionOption_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzWorkQuestionOption_trk_nest.pk FROM ClazzWorkQuestionOption_trk ClazzWorkQuestionOption_trk_nest 
+      |  WHERE ClazzWorkQuestionOption_trk_nest.clientId = ClazzWorkQuestionOption_trk.clientId AND
+      |  ClazzWorkQuestionOption_trk_nest.epk = ClazzWorkQuestionOption_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzWorkQuestionOption_trk_clientId_epk_csn  ON ClazzWorkQuestionOption_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestionOption_trk_epk_clientId ON ClazzWorkQuestionOption_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzWorkQuestionOption_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_206")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_206")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_206
       |AFTER INSERT ON ClazzWorkSubmission
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -3354,7 +3790,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 206;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_206
       |            AFTER INSERT ON ClazzWorkSubmission
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -3372,7 +3808,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 206, NEW.clazzWorkSubmissionUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_206
       |AFTER UPDATE ON ClazzWorkSubmission
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3388,7 +3824,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 206;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_206
       |            AFTER UPDATE ON ClazzWorkSubmission
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3407,14 +3843,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 206, NEW.clazzWorkSubmissionUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(206, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(206, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkSubmission_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzWorkSubmission_trk_clientId_epk_csn  ON ClazzWorkSubmission_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkSubmission_trk_epk_clientId ON ClazzWorkSubmission_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_209")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_209")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(206, (SELECT COALESCE((SELECT MAX(clazzWorkSubmissionLCSN) FROM ClazzWorkSubmission), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(206, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkSubmission_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzWorkSubmission_trk_epk_clientId_tmp ON ClazzWorkSubmission_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzWorkSubmission_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzWorkSubmission_trk_nest.pk FROM ClazzWorkSubmission_trk ClazzWorkSubmission_trk_nest 
+      |  WHERE ClazzWorkSubmission_trk_nest.clientId = ClazzWorkSubmission_trk.clientId AND
+      |  ClazzWorkSubmission_trk_nest.epk = ClazzWorkSubmission_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzWorkSubmission_trk_clientId_epk_csn  ON ClazzWorkSubmission_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkSubmission_trk_epk_clientId ON ClazzWorkSubmission_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzWorkSubmission_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_209")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_209")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_209
       |AFTER INSERT ON ClazzWorkQuestionResponse
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -3429,7 +3875,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 209;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_209
       |            AFTER INSERT ON ClazzWorkQuestionResponse
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -3447,7 +3893,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 209, NEW.clazzWorkQuestionResponseUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_209
       |AFTER UPDATE ON ClazzWorkQuestionResponse
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3463,7 +3909,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 209;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_209
       |            AFTER UPDATE ON ClazzWorkQuestionResponse
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3482,14 +3928,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 209, NEW.clazzWorkQuestionResponseUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(209, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(209, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestionResponse_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzWorkQuestionResponse_trk_clientId_epk_csn  ON ClazzWorkQuestionResponse_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId ON ClazzWorkQuestionResponse_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_210")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_210")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(209, (SELECT COALESCE((SELECT MAX(clazzWorkQuestionResponseLCSN) FROM ClazzWorkQuestionResponse), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(209, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestionResponse_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId_tmp ON ClazzWorkQuestionResponse_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzWorkQuestionResponse_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzWorkQuestionResponse_trk_nest.pk FROM ClazzWorkQuestionResponse_trk ClazzWorkQuestionResponse_trk_nest 
+      |  WHERE ClazzWorkQuestionResponse_trk_nest.clientId = ClazzWorkQuestionResponse_trk.clientId AND
+      |  ClazzWorkQuestionResponse_trk_nest.epk = ClazzWorkQuestionResponse_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzWorkQuestionResponse_trk_clientId_epk_csn  ON ClazzWorkQuestionResponse_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId ON ClazzWorkQuestionResponse_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_210")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_210")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_210
       |AFTER INSERT ON ContentEntryProgress
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -3504,7 +3960,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 210;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_210
       |            AFTER INSERT ON ContentEntryProgress
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -3522,7 +3978,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 210, NEW.contentEntryProgressUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_210
       |AFTER UPDATE ON ContentEntryProgress
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3538,7 +3994,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 210;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_210
       |            AFTER UPDATE ON ContentEntryProgress
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3557,14 +4013,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 210, NEW.contentEntryProgressUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(210, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(210, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentEntryProgress_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentEntryProgress_trk_clientId_epk_csn  ON ContentEntryProgress_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentEntryProgress_trk_epk_clientId ON ContentEntryProgress_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_101")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_101")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(210, (SELECT COALESCE((SELECT MAX(contentEntryProgressLocalChangeSeqNum) FROM ContentEntryProgress), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(210, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentEntryProgress_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentEntryProgress_trk_epk_clientId_tmp ON ContentEntryProgress_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentEntryProgress_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentEntryProgress_trk_nest.pk FROM ContentEntryProgress_trk ContentEntryProgress_trk_nest 
+      |  WHERE ContentEntryProgress_trk_nest.clientId = ContentEntryProgress_trk.clientId AND
+      |  ContentEntryProgress_trk_nest.epk = ContentEntryProgress_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentEntryProgress_trk_clientId_epk_csn  ON ContentEntryProgress_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentEntryProgress_trk_epk_clientId ON ContentEntryProgress_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentEntryProgress_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_101")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_101")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_101
       |AFTER INSERT ON Report
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -3579,7 +4045,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 101;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_101
       |            AFTER INSERT ON Report
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -3597,7 +4063,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 101, NEW.reportUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_101
       |AFTER UPDATE ON Report
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3613,7 +4079,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 101;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_101
       |            AFTER UPDATE ON Report
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3632,14 +4098,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 101, NEW.reportUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(101, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(101, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_Report_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Report_trk_clientId_epk_csn  ON Report_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Report_trk_epk_clientId ON Report_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_102")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_102")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(101, (SELECT COALESCE((SELECT MAX(reportLocalChangeSeqNum) FROM Report), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(101, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_Report_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Report_trk_epk_clientId_tmp ON Report_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Report_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Report_trk_nest.pk FROM Report_trk Report_trk_nest 
+      |  WHERE Report_trk_nest.clientId = Report_trk.clientId AND
+      |  Report_trk_nest.epk = Report_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Report_trk_clientId_epk_csn  ON Report_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Report_trk_epk_clientId ON Report_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Report_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_102")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_102")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_102
       |AFTER INSERT ON ReportFilter
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -3654,7 +4130,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 102;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_102
       |            AFTER INSERT ON ReportFilter
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -3672,7 +4148,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 102, NEW.reportFilterUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_102
       |AFTER UPDATE ON ReportFilter
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3688,7 +4164,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 102;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_102
       |            AFTER UPDATE ON ReportFilter
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3707,14 +4183,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 102, NEW.reportFilterUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(102, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(102, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_ReportFilter_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ReportFilter_trk_clientId_epk_csn  ON ReportFilter_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ReportFilter_trk_epk_clientId ON ReportFilter_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_301")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_301")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(102, (SELECT COALESCE((SELECT MAX(reportFilterLocalChangeSeqNum) FROM ReportFilter), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(102, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_ReportFilter_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ReportFilter_trk_epk_clientId_tmp ON ReportFilter_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ReportFilter_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ReportFilter_trk_nest.pk FROM ReportFilter_trk ReportFilter_trk_nest 
+      |  WHERE ReportFilter_trk_nest.clientId = ReportFilter_trk.clientId AND
+      |  ReportFilter_trk_nest.epk = ReportFilter_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ReportFilter_trk_clientId_epk_csn  ON ReportFilter_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ReportFilter_trk_epk_clientId ON ReportFilter_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ReportFilter_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_301")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_301")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_301
       |AFTER INSERT ON LearnerGroup
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -3729,7 +4215,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 301;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_301
       |            AFTER INSERT ON LearnerGroup
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -3747,7 +4233,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 301, NEW.learnerGroupUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_301
       |AFTER UPDATE ON LearnerGroup
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3763,7 +4249,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 301;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_301
       |            AFTER UPDATE ON LearnerGroup
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3782,14 +4268,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 301, NEW.learnerGroupUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(301, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(301, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_LearnerGroup_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_LearnerGroup_trk_clientId_epk_csn  ON LearnerGroup_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_LearnerGroup_trk_epk_clientId ON LearnerGroup_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_300")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_300")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(301, (SELECT COALESCE((SELECT MAX(learnerGroupCSN) FROM LearnerGroup), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(301, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_LearnerGroup_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_LearnerGroup_trk_epk_clientId_tmp ON LearnerGroup_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM LearnerGroup_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT LearnerGroup_trk_nest.pk FROM LearnerGroup_trk LearnerGroup_trk_nest 
+      |  WHERE LearnerGroup_trk_nest.clientId = LearnerGroup_trk.clientId AND
+      |  LearnerGroup_trk_nest.epk = LearnerGroup_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_LearnerGroup_trk_clientId_epk_csn  ON LearnerGroup_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_LearnerGroup_trk_epk_clientId ON LearnerGroup_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_LearnerGroup_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_300")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_300")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_300
       |AFTER INSERT ON LearnerGroupMember
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -3804,7 +4300,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 300;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_300
       |            AFTER INSERT ON LearnerGroupMember
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -3822,7 +4318,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 300, NEW.learnerGroupMemberUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_300
       |AFTER UPDATE ON LearnerGroupMember
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3838,7 +4334,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 300;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_300
       |            AFTER UPDATE ON LearnerGroupMember
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3857,14 +4353,24 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 300, NEW.learnerGroupMemberUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(300, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(300, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_LearnerGroupMember_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_LearnerGroupMember_trk_clientId_epk_csn  ON LearnerGroupMember_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_LearnerGroupMember_trk_epk_clientId ON LearnerGroupMember_trk (epk, clientId)")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_302")
-      database.execSQL("DROP TRIGGER IF EXISTS INS_302")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(300, (SELECT COALESCE((SELECT MAX(learnerGroupMemberCSN) FROM LearnerGroupMember), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(300, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_LearnerGroupMember_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_LearnerGroupMember_trk_epk_clientId_tmp ON LearnerGroupMember_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM LearnerGroupMember_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT LearnerGroupMember_trk_nest.pk FROM LearnerGroupMember_trk LearnerGroupMember_trk_nest 
+      |  WHERE LearnerGroupMember_trk_nest.clientId = LearnerGroupMember_trk.clientId AND
+      |  LearnerGroupMember_trk_nest.epk = LearnerGroupMember_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_LearnerGroupMember_trk_clientId_epk_csn  ON LearnerGroupMember_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_LearnerGroupMember_trk_epk_clientId ON LearnerGroupMember_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_LearnerGroupMember_trk_epk_clientId_tmp")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_302")
+            database.execSQL("DROP TRIGGER IF EXISTS INS_302")
+            database.execSQL("""
       |CREATE TRIGGER INS_LOC_302
       |AFTER INSERT ON GroupLearningSession
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -3879,7 +4385,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 302;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER INS_PRI_302
       |            AFTER INSERT ON GroupLearningSession
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -3897,7 +4403,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 302, NEW.groupLearningSessionUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE TRIGGER UPD_LOC_302
       |AFTER UPDATE ON GroupLearningSession
       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -3913,7 +4419,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |    WHERE sCsnTableId = 302;
       |END
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |            CREATE TRIGGER UPD_PRI_302
       |            AFTER UPDATE ON GroupLearningSession
       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -3932,192 +4438,722 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |SELECT 302, NEW.groupLearningSessionUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
       |            END
       """.trimMargin())
-      database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(302, 1, 1)")
-      database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(302, ${systemTimeInMillis()}, 0)")
-      database.execSQL("DROP INDEX IF EXISTS index_GroupLearningSession_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_GroupLearningSession_trk_clientId_epk_csn  ON GroupLearningSession_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_GroupLearningSession_trk_epk_clientId ON GroupLearningSession_trk (epk, clientId)")
-    } else {
-      database.execSQL("CREATE TABLE IF NOT EXISTS ChangeLog (  chTableId  INTEGER  NOT NULL , chEntityPk  BIGINT  NOT NULL , dispatched  BOOL  NOT NULL , chTime  BIGINT  NOT NULL , changeLogUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-      database.execSQL("CREATE TABLE IF NOT EXISTS SqliteChangeSeqNums (  sCsnTableId  INTEGER  PRIMARY KEY  NOT NULL , sCsnNextLocal  INTEGER  NOT NULL , sCsnNextPrimary  INTEGER  NOT NULL )")
-      database.execSQL("""
+            database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(302, (SELECT COALESCE((SELECT MAX(groupLearningSessionCSN) FROM GroupLearningSession), 0) + 1), 1)")
+            database.execSQL("INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced) VALUES(302, ${systemTimeInMillis()}, 0)")
+            database.execSQL("DROP INDEX IF EXISTS index_GroupLearningSession_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_GroupLearningSession_trk_epk_clientId_tmp ON GroupLearningSession_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM GroupLearningSession_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT GroupLearningSession_trk_nest.pk FROM GroupLearningSession_trk GroupLearningSession_trk_nest 
+      |  WHERE GroupLearningSession_trk_nest.clientId = GroupLearningSession_trk.clientId AND
+      |  GroupLearningSession_trk_nest.epk = GroupLearningSession_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_GroupLearningSession_trk_clientId_epk_csn  ON GroupLearningSession_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_GroupLearningSession_trk_epk_clientId ON GroupLearningSession_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_GroupLearningSession_trk_epk_clientId_tmp")
+        } else {
+            database.execSQL("CREATE TABLE IF NOT EXISTS ChangeLog (  chTableId  INTEGER  NOT NULL , chEntityPk  BIGINT  NOT NULL , dispatched  BOOL  NOT NULL , chTime  BIGINT  NOT NULL , changeLogUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            database.execSQL("CREATE TABLE IF NOT EXISTS SqliteChangeSeqNums (  sCsnTableId  INTEGER  PRIMARY KEY  NOT NULL , sCsnNextLocal  INTEGER  NOT NULL , sCsnNextPrimary  INTEGER  NOT NULL )")
+            database.execSQL("""
       |CREATE 
       | INDEX index_SqliteChangeSeqNums_sCsnNextLocal 
       |ON SqliteChangeSeqNums (sCsnNextLocal)
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE 
       | INDEX index_SqliteChangeSeqNums_sCsnNextPrimary 
       |ON SqliteChangeSeqNums (sCsnNextPrimary)
       """.trimMargin())
-      database.execSQL("CREATE TABLE IF NOT EXISTS TableSyncStatus (  tsTableId  INTEGER  PRIMARY KEY  NOT NULL , tsLastChanged  BIGINT  NOT NULL , tsLastSynced  BIGINT  NOT NULL )")
-      database.execSQL("CREATE TABLE IF NOT EXISTS UpdateNotification (  pnDeviceId  INTEGER  NOT NULL , pnTableId  INTEGER  NOT NULL , pnTimestamp  BIGINT  NOT NULL , pnUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-      database.execSQL("""
+            database.execSQL("CREATE TABLE IF NOT EXISTS TableSyncStatus (  tsTableId  INTEGER  PRIMARY KEY  NOT NULL , tsLastChanged  BIGINT  NOT NULL , tsLastSynced  BIGINT  NOT NULL )")
+            database.execSQL("CREATE TABLE IF NOT EXISTS UpdateNotification (  pnDeviceId  INTEGER  NOT NULL , pnTableId  INTEGER  NOT NULL , pnTimestamp  BIGINT  NOT NULL , pnUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+            database.execSQL("""
       |CREATE 
       |UNIQUE INDEX index_UpdateNotification_pnDeviceId_pnTableId 
       |ON UpdateNotification (pnDeviceId, pnTableId)
       """.trimMargin())
-      database.execSQL("""
+            database.execSQL("""
       |CREATE 
       | INDEX index_UpdateNotification_pnDeviceId_pnTimestamp 
       |ON UpdateNotification (pnDeviceId, pnTimestamp)
       """.trimMargin())
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzLog_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzLog_trk_clientId_epk_csn  ON ClazzLog_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzLog_trk_epk_clientId ON ClazzLog_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzLogAttendanceRecord_trk_clientId_epk_csn  ON ClazzLogAttendanceRecord_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId ON ClazzLogAttendanceRecord_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_Schedule_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Schedule_trk_clientId_epk_csn  ON Schedule_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Schedule_trk_epk_clientId ON Schedule_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_DateRange_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_DateRange_trk_clientId_epk_csn  ON DateRange_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_DateRange_trk_epk_clientId ON DateRange_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_HolidayCalendar_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_HolidayCalendar_trk_clientId_epk_csn  ON HolidayCalendar_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_HolidayCalendar_trk_epk_clientId ON HolidayCalendar_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_Holiday_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Holiday_trk_clientId_epk_csn  ON Holiday_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Holiday_trk_epk_clientId ON Holiday_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ScheduledCheck_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ScheduledCheck_trk_clientId_epk_csn  ON ScheduledCheck_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ScheduledCheck_trk_epk_clientId ON ScheduledCheck_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_AuditLog_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_AuditLog_trk_clientId_epk_csn  ON AuditLog_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_AuditLog_trk_epk_clientId ON AuditLog_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_CustomField_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_CustomField_trk_clientId_epk_csn  ON CustomField_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_CustomField_trk_epk_clientId ON CustomField_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_CustomFieldValue_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_CustomFieldValue_trk_clientId_epk_csn  ON CustomFieldValue_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_CustomFieldValue_trk_epk_clientId ON CustomFieldValue_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_CustomFieldValueOption_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_CustomFieldValueOption_trk_clientId_epk_csn  ON CustomFieldValueOption_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_CustomFieldValueOption_trk_epk_clientId ON CustomFieldValueOption_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_Person_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Person_trk_clientId_epk_csn  ON Person_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Person_trk_epk_clientId ON Person_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_Clazz_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Clazz_trk_clientId_epk_csn  ON Clazz_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Clazz_trk_epk_clientId ON Clazz_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzMember_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzMember_trk_clientId_epk_csn  ON ClazzMember_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzMember_trk_epk_clientId ON ClazzMember_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_PersonCustomFieldValue_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_PersonCustomFieldValue_trk_clientId_epk_csn  ON PersonCustomFieldValue_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_PersonCustomFieldValue_trk_epk_clientId ON PersonCustomFieldValue_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentEntry_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentEntry_trk_clientId_epk_csn  ON ContentEntry_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentEntry_trk_epk_clientId ON ContentEntry_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentEntryContentCategoryJoin_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentEntryContentCategoryJoin_trk_clientId_epk_csn  ON ContentEntryContentCategoryJoin_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId ON ContentEntryContentCategoryJoin_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentEntryParentChildJoin_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentEntryParentChildJoin_trk_clientId_epk_csn  ON ContentEntryParentChildJoin_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentEntryParentChildJoin_trk_epk_clientId ON ContentEntryParentChildJoin_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentEntryRelatedEntryJoin_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentEntryRelatedEntryJoin_trk_clientId_epk_csn  ON ContentEntryRelatedEntryJoin_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId ON ContentEntryRelatedEntryJoin_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentCategorySchema_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentCategorySchema_trk_clientId_epk_csn  ON ContentCategorySchema_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentCategorySchema_trk_epk_clientId ON ContentCategorySchema_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentCategory_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentCategory_trk_clientId_epk_csn  ON ContentCategory_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentCategory_trk_epk_clientId ON ContentCategory_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_Language_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Language_trk_clientId_epk_csn  ON Language_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Language_trk_epk_clientId ON Language_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_LanguageVariant_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_LanguageVariant_trk_clientId_epk_csn  ON LanguageVariant_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_LanguageVariant_trk_epk_clientId ON LanguageVariant_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_Role_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Role_trk_clientId_epk_csn  ON Role_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Role_trk_epk_clientId ON Role_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_EntityRole_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_EntityRole_trk_clientId_epk_csn  ON EntityRole_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_EntityRole_trk_epk_clientId ON EntityRole_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_PersonGroup_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_PersonGroup_trk_clientId_epk_csn  ON PersonGroup_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_PersonGroup_trk_epk_clientId ON PersonGroup_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_PersonGroupMember_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_PersonGroupMember_trk_clientId_epk_csn  ON PersonGroupMember_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_PersonGroupMember_trk_epk_clientId ON PersonGroupMember_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_PersonPicture_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_PersonPicture_trk_clientId_epk_csn  ON PersonPicture_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_PersonPicture_trk_epk_clientId ON PersonPicture_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_Container_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Container_trk_clientId_epk_csn  ON Container_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Container_trk_epk_clientId ON Container_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_VerbEntity_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_VerbEntity_trk_clientId_epk_csn  ON VerbEntity_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_VerbEntity_trk_epk_clientId ON VerbEntity_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_XObjectEntity_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_XObjectEntity_trk_clientId_epk_csn  ON XObjectEntity_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_XObjectEntity_trk_epk_clientId ON XObjectEntity_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_StatementEntity_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_StatementEntity_trk_clientId_epk_csn  ON StatementEntity_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_StatementEntity_trk_epk_clientId ON StatementEntity_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContextXObjectStatementJoin_trk_clientId_epk_csn  ON ContextXObjectStatementJoin_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContextXObjectStatementJoin_trk_epk_clientId ON ContextXObjectStatementJoin_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_AgentEntity_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_AgentEntity_trk_clientId_epk_csn  ON AgentEntity_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_AgentEntity_trk_epk_clientId ON AgentEntity_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_StateEntity_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_StateEntity_trk_clientId_epk_csn  ON StateEntity_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_StateEntity_trk_epk_clientId ON StateEntity_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_StateContentEntity_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_StateContentEntity_trk_clientId_epk_csn  ON StateContentEntity_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_StateContentEntity_trk_epk_clientId ON StateContentEntity_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_XLangMapEntry_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_XLangMapEntry_trk_clientId_epk_csn  ON XLangMapEntry_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_XLangMapEntry_trk_epk_clientId ON XLangMapEntry_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_School_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_School_trk_clientId_epk_csn  ON School_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_School_trk_epk_clientId ON School_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_SchoolMember_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_SchoolMember_trk_clientId_epk_csn  ON SchoolMember_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_SchoolMember_trk_epk_clientId ON SchoolMember_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzWork_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzWork_trk_clientId_epk_csn  ON ClazzWork_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzWork_trk_epk_clientId ON ClazzWork_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkContentJoin_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzWorkContentJoin_trk_clientId_epk_csn  ON ClazzWorkContentJoin_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkContentJoin_trk_epk_clientId ON ClazzWorkContentJoin_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_Comments_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Comments_trk_clientId_epk_csn  ON Comments_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Comments_trk_epk_clientId ON Comments_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestion_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzWorkQuestion_trk_clientId_epk_csn  ON ClazzWorkQuestion_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestion_trk_epk_clientId ON ClazzWorkQuestion_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestionOption_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzWorkQuestionOption_trk_clientId_epk_csn  ON ClazzWorkQuestionOption_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestionOption_trk_epk_clientId ON ClazzWorkQuestionOption_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkSubmission_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzWorkSubmission_trk_clientId_epk_csn  ON ClazzWorkSubmission_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkSubmission_trk_epk_clientId ON ClazzWorkSubmission_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestionResponse_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ClazzWorkQuestionResponse_trk_clientId_epk_csn  ON ClazzWorkQuestionResponse_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId ON ClazzWorkQuestionResponse_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ContentEntryProgress_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ContentEntryProgress_trk_clientId_epk_csn  ON ContentEntryProgress_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ContentEntryProgress_trk_epk_clientId ON ContentEntryProgress_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_Report_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_Report_trk_clientId_epk_csn  ON Report_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_Report_trk_epk_clientId ON Report_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_ReportFilter_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_ReportFilter_trk_clientId_epk_csn  ON ReportFilter_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_ReportFilter_trk_epk_clientId ON ReportFilter_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_LearnerGroup_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_LearnerGroup_trk_clientId_epk_csn  ON LearnerGroup_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_LearnerGroup_trk_epk_clientId ON LearnerGroup_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_LearnerGroupMember_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_LearnerGroupMember_trk_clientId_epk_csn  ON LearnerGroupMember_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_LearnerGroupMember_trk_epk_clientId ON LearnerGroupMember_trk (epk, clientId)")
-      database.execSQL("DROP INDEX IF EXISTS index_GroupLearningSession_trk_clientId_epk_rx_csn")
-      database.execSQL("CREATE INDEX index_GroupLearningSession_trk_clientId_epk_csn  ON GroupLearningSession_trk (clientId, epk, csn)")
-      database.execSQL("CREATE UNIQUE INDEX index_GroupLearningSession_trk_epk_clientId ON GroupLearningSession_trk (epk, clientId)")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzLog_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzLog_trk_epk_clientId_tmp ON ClazzLog_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzLog_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzLog_trk_nest.pk FROM ClazzLog_trk ClazzLog_trk_nest 
+      |  WHERE ClazzLog_trk_nest.clientId = ClazzLog_trk.clientId AND
+      |  ClazzLog_trk_nest.epk = ClazzLog_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzLog_trk_clientId_epk_csn  ON ClazzLog_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzLog_trk_epk_clientId ON ClazzLog_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzLog_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId_tmp ON ClazzLogAttendanceRecord_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzLogAttendanceRecord_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzLogAttendanceRecord_trk_nest.pk FROM ClazzLogAttendanceRecord_trk ClazzLogAttendanceRecord_trk_nest 
+      |  WHERE ClazzLogAttendanceRecord_trk_nest.clientId = ClazzLogAttendanceRecord_trk.clientId AND
+      |  ClazzLogAttendanceRecord_trk_nest.epk = ClazzLogAttendanceRecord_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzLogAttendanceRecord_trk_clientId_epk_csn  ON ClazzLogAttendanceRecord_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId ON ClazzLogAttendanceRecord_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_Schedule_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Schedule_trk_epk_clientId_tmp ON Schedule_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Schedule_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Schedule_trk_nest.pk FROM Schedule_trk Schedule_trk_nest 
+      |  WHERE Schedule_trk_nest.clientId = Schedule_trk.clientId AND
+      |  Schedule_trk_nest.epk = Schedule_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Schedule_trk_clientId_epk_csn  ON Schedule_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Schedule_trk_epk_clientId ON Schedule_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Schedule_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_DateRange_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_DateRange_trk_epk_clientId_tmp ON DateRange_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM DateRange_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT DateRange_trk_nest.pk FROM DateRange_trk DateRange_trk_nest 
+      |  WHERE DateRange_trk_nest.clientId = DateRange_trk.clientId AND
+      |  DateRange_trk_nest.epk = DateRange_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_DateRange_trk_clientId_epk_csn  ON DateRange_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_DateRange_trk_epk_clientId ON DateRange_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_DateRange_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_HolidayCalendar_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_HolidayCalendar_trk_epk_clientId_tmp ON HolidayCalendar_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM HolidayCalendar_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT HolidayCalendar_trk_nest.pk FROM HolidayCalendar_trk HolidayCalendar_trk_nest 
+      |  WHERE HolidayCalendar_trk_nest.clientId = HolidayCalendar_trk.clientId AND
+      |  HolidayCalendar_trk_nest.epk = HolidayCalendar_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_HolidayCalendar_trk_clientId_epk_csn  ON HolidayCalendar_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_HolidayCalendar_trk_epk_clientId ON HolidayCalendar_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_HolidayCalendar_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_Holiday_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Holiday_trk_epk_clientId_tmp ON Holiday_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Holiday_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Holiday_trk_nest.pk FROM Holiday_trk Holiday_trk_nest 
+      |  WHERE Holiday_trk_nest.clientId = Holiday_trk.clientId AND
+      |  Holiday_trk_nest.epk = Holiday_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Holiday_trk_clientId_epk_csn  ON Holiday_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Holiday_trk_epk_clientId ON Holiday_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Holiday_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ScheduledCheck_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ScheduledCheck_trk_epk_clientId_tmp ON ScheduledCheck_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ScheduledCheck_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ScheduledCheck_trk_nest.pk FROM ScheduledCheck_trk ScheduledCheck_trk_nest 
+      |  WHERE ScheduledCheck_trk_nest.clientId = ScheduledCheck_trk.clientId AND
+      |  ScheduledCheck_trk_nest.epk = ScheduledCheck_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ScheduledCheck_trk_clientId_epk_csn  ON ScheduledCheck_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ScheduledCheck_trk_epk_clientId ON ScheduledCheck_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ScheduledCheck_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_AuditLog_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_AuditLog_trk_epk_clientId_tmp ON AuditLog_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM AuditLog_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT AuditLog_trk_nest.pk FROM AuditLog_trk AuditLog_trk_nest 
+      |  WHERE AuditLog_trk_nest.clientId = AuditLog_trk.clientId AND
+      |  AuditLog_trk_nest.epk = AuditLog_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_AuditLog_trk_clientId_epk_csn  ON AuditLog_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_AuditLog_trk_epk_clientId ON AuditLog_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_AuditLog_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_CustomField_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_CustomField_trk_epk_clientId_tmp ON CustomField_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM CustomField_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT CustomField_trk_nest.pk FROM CustomField_trk CustomField_trk_nest 
+      |  WHERE CustomField_trk_nest.clientId = CustomField_trk.clientId AND
+      |  CustomField_trk_nest.epk = CustomField_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_CustomField_trk_clientId_epk_csn  ON CustomField_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_CustomField_trk_epk_clientId ON CustomField_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_CustomField_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_CustomFieldValue_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_CustomFieldValue_trk_epk_clientId_tmp ON CustomFieldValue_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM CustomFieldValue_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT CustomFieldValue_trk_nest.pk FROM CustomFieldValue_trk CustomFieldValue_trk_nest 
+      |  WHERE CustomFieldValue_trk_nest.clientId = CustomFieldValue_trk.clientId AND
+      |  CustomFieldValue_trk_nest.epk = CustomFieldValue_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_CustomFieldValue_trk_clientId_epk_csn  ON CustomFieldValue_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_CustomFieldValue_trk_epk_clientId ON CustomFieldValue_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_CustomFieldValue_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_CustomFieldValueOption_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_CustomFieldValueOption_trk_epk_clientId_tmp ON CustomFieldValueOption_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM CustomFieldValueOption_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT CustomFieldValueOption_trk_nest.pk FROM CustomFieldValueOption_trk CustomFieldValueOption_trk_nest 
+      |  WHERE CustomFieldValueOption_trk_nest.clientId = CustomFieldValueOption_trk.clientId AND
+      |  CustomFieldValueOption_trk_nest.epk = CustomFieldValueOption_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_CustomFieldValueOption_trk_clientId_epk_csn  ON CustomFieldValueOption_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_CustomFieldValueOption_trk_epk_clientId ON CustomFieldValueOption_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_CustomFieldValueOption_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_Person_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Person_trk_epk_clientId_tmp ON Person_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Person_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Person_trk_nest.pk FROM Person_trk Person_trk_nest 
+      |  WHERE Person_trk_nest.clientId = Person_trk.clientId AND
+      |  Person_trk_nest.epk = Person_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Person_trk_clientId_epk_csn  ON Person_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Person_trk_epk_clientId ON Person_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Person_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_Clazz_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Clazz_trk_epk_clientId_tmp ON Clazz_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Clazz_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Clazz_trk_nest.pk FROM Clazz_trk Clazz_trk_nest 
+      |  WHERE Clazz_trk_nest.clientId = Clazz_trk.clientId AND
+      |  Clazz_trk_nest.epk = Clazz_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Clazz_trk_clientId_epk_csn  ON Clazz_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Clazz_trk_epk_clientId ON Clazz_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Clazz_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzMember_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzMember_trk_epk_clientId_tmp ON ClazzMember_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzMember_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzMember_trk_nest.pk FROM ClazzMember_trk ClazzMember_trk_nest 
+      |  WHERE ClazzMember_trk_nest.clientId = ClazzMember_trk.clientId AND
+      |  ClazzMember_trk_nest.epk = ClazzMember_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzMember_trk_clientId_epk_csn  ON ClazzMember_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzMember_trk_epk_clientId ON ClazzMember_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzMember_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_PersonCustomFieldValue_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_PersonCustomFieldValue_trk_epk_clientId_tmp ON PersonCustomFieldValue_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM PersonCustomFieldValue_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT PersonCustomFieldValue_trk_nest.pk FROM PersonCustomFieldValue_trk PersonCustomFieldValue_trk_nest 
+      |  WHERE PersonCustomFieldValue_trk_nest.clientId = PersonCustomFieldValue_trk.clientId AND
+      |  PersonCustomFieldValue_trk_nest.epk = PersonCustomFieldValue_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_PersonCustomFieldValue_trk_clientId_epk_csn  ON PersonCustomFieldValue_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_PersonCustomFieldValue_trk_epk_clientId ON PersonCustomFieldValue_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_PersonCustomFieldValue_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentEntry_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentEntry_trk_epk_clientId_tmp ON ContentEntry_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentEntry_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentEntry_trk_nest.pk FROM ContentEntry_trk ContentEntry_trk_nest 
+      |  WHERE ContentEntry_trk_nest.clientId = ContentEntry_trk.clientId AND
+      |  ContentEntry_trk_nest.epk = ContentEntry_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentEntry_trk_clientId_epk_csn  ON ContentEntry_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentEntry_trk_epk_clientId ON ContentEntry_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentEntry_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentEntryContentCategoryJoin_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId_tmp ON ContentEntryContentCategoryJoin_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentEntryContentCategoryJoin_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentEntryContentCategoryJoin_trk_nest.pk FROM ContentEntryContentCategoryJoin_trk ContentEntryContentCategoryJoin_trk_nest 
+      |  WHERE ContentEntryContentCategoryJoin_trk_nest.clientId = ContentEntryContentCategoryJoin_trk.clientId AND
+      |  ContentEntryContentCategoryJoin_trk_nest.epk = ContentEntryContentCategoryJoin_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentEntryContentCategoryJoin_trk_clientId_epk_csn  ON ContentEntryContentCategoryJoin_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId ON ContentEntryContentCategoryJoin_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentEntryParentChildJoin_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentEntryParentChildJoin_trk_epk_clientId_tmp ON ContentEntryParentChildJoin_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentEntryParentChildJoin_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentEntryParentChildJoin_trk_nest.pk FROM ContentEntryParentChildJoin_trk ContentEntryParentChildJoin_trk_nest 
+      |  WHERE ContentEntryParentChildJoin_trk_nest.clientId = ContentEntryParentChildJoin_trk.clientId AND
+      |  ContentEntryParentChildJoin_trk_nest.epk = ContentEntryParentChildJoin_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentEntryParentChildJoin_trk_clientId_epk_csn  ON ContentEntryParentChildJoin_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentEntryParentChildJoin_trk_epk_clientId ON ContentEntryParentChildJoin_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentEntryParentChildJoin_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentEntryRelatedEntryJoin_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId_tmp ON ContentEntryRelatedEntryJoin_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentEntryRelatedEntryJoin_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentEntryRelatedEntryJoin_trk_nest.pk FROM ContentEntryRelatedEntryJoin_trk ContentEntryRelatedEntryJoin_trk_nest 
+      |  WHERE ContentEntryRelatedEntryJoin_trk_nest.clientId = ContentEntryRelatedEntryJoin_trk.clientId AND
+      |  ContentEntryRelatedEntryJoin_trk_nest.epk = ContentEntryRelatedEntryJoin_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentEntryRelatedEntryJoin_trk_clientId_epk_csn  ON ContentEntryRelatedEntryJoin_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId ON ContentEntryRelatedEntryJoin_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentCategorySchema_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentCategorySchema_trk_epk_clientId_tmp ON ContentCategorySchema_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentCategorySchema_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentCategorySchema_trk_nest.pk FROM ContentCategorySchema_trk ContentCategorySchema_trk_nest 
+      |  WHERE ContentCategorySchema_trk_nest.clientId = ContentCategorySchema_trk.clientId AND
+      |  ContentCategorySchema_trk_nest.epk = ContentCategorySchema_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentCategorySchema_trk_clientId_epk_csn  ON ContentCategorySchema_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentCategorySchema_trk_epk_clientId ON ContentCategorySchema_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentCategorySchema_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentCategory_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentCategory_trk_epk_clientId_tmp ON ContentCategory_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentCategory_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentCategory_trk_nest.pk FROM ContentCategory_trk ContentCategory_trk_nest 
+      |  WHERE ContentCategory_trk_nest.clientId = ContentCategory_trk.clientId AND
+      |  ContentCategory_trk_nest.epk = ContentCategory_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentCategory_trk_clientId_epk_csn  ON ContentCategory_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentCategory_trk_epk_clientId ON ContentCategory_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentCategory_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_Language_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Language_trk_epk_clientId_tmp ON Language_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Language_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Language_trk_nest.pk FROM Language_trk Language_trk_nest 
+      |  WHERE Language_trk_nest.clientId = Language_trk.clientId AND
+      |  Language_trk_nest.epk = Language_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Language_trk_clientId_epk_csn  ON Language_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Language_trk_epk_clientId ON Language_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Language_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_LanguageVariant_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_LanguageVariant_trk_epk_clientId_tmp ON LanguageVariant_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM LanguageVariant_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT LanguageVariant_trk_nest.pk FROM LanguageVariant_trk LanguageVariant_trk_nest 
+      |  WHERE LanguageVariant_trk_nest.clientId = LanguageVariant_trk.clientId AND
+      |  LanguageVariant_trk_nest.epk = LanguageVariant_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_LanguageVariant_trk_clientId_epk_csn  ON LanguageVariant_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_LanguageVariant_trk_epk_clientId ON LanguageVariant_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_LanguageVariant_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_Role_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Role_trk_epk_clientId_tmp ON Role_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Role_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Role_trk_nest.pk FROM Role_trk Role_trk_nest 
+      |  WHERE Role_trk_nest.clientId = Role_trk.clientId AND
+      |  Role_trk_nest.epk = Role_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Role_trk_clientId_epk_csn  ON Role_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Role_trk_epk_clientId ON Role_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Role_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_EntityRole_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_EntityRole_trk_epk_clientId_tmp ON EntityRole_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM EntityRole_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT EntityRole_trk_nest.pk FROM EntityRole_trk EntityRole_trk_nest 
+      |  WHERE EntityRole_trk_nest.clientId = EntityRole_trk.clientId AND
+      |  EntityRole_trk_nest.epk = EntityRole_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_EntityRole_trk_clientId_epk_csn  ON EntityRole_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_EntityRole_trk_epk_clientId ON EntityRole_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_EntityRole_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_PersonGroup_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_PersonGroup_trk_epk_clientId_tmp ON PersonGroup_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM PersonGroup_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT PersonGroup_trk_nest.pk FROM PersonGroup_trk PersonGroup_trk_nest 
+      |  WHERE PersonGroup_trk_nest.clientId = PersonGroup_trk.clientId AND
+      |  PersonGroup_trk_nest.epk = PersonGroup_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_PersonGroup_trk_clientId_epk_csn  ON PersonGroup_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_PersonGroup_trk_epk_clientId ON PersonGroup_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_PersonGroup_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_PersonGroupMember_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_PersonGroupMember_trk_epk_clientId_tmp ON PersonGroupMember_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM PersonGroupMember_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT PersonGroupMember_trk_nest.pk FROM PersonGroupMember_trk PersonGroupMember_trk_nest 
+      |  WHERE PersonGroupMember_trk_nest.clientId = PersonGroupMember_trk.clientId AND
+      |  PersonGroupMember_trk_nest.epk = PersonGroupMember_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_PersonGroupMember_trk_clientId_epk_csn  ON PersonGroupMember_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_PersonGroupMember_trk_epk_clientId ON PersonGroupMember_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_PersonGroupMember_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_PersonPicture_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_PersonPicture_trk_epk_clientId_tmp ON PersonPicture_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM PersonPicture_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT PersonPicture_trk_nest.pk FROM PersonPicture_trk PersonPicture_trk_nest 
+      |  WHERE PersonPicture_trk_nest.clientId = PersonPicture_trk.clientId AND
+      |  PersonPicture_trk_nest.epk = PersonPicture_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_PersonPicture_trk_clientId_epk_csn  ON PersonPicture_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_PersonPicture_trk_epk_clientId ON PersonPicture_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_PersonPicture_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_Container_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Container_trk_epk_clientId_tmp ON Container_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Container_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Container_trk_nest.pk FROM Container_trk Container_trk_nest 
+      |  WHERE Container_trk_nest.clientId = Container_trk.clientId AND
+      |  Container_trk_nest.epk = Container_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Container_trk_clientId_epk_csn  ON Container_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Container_trk_epk_clientId ON Container_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Container_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_VerbEntity_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_VerbEntity_trk_epk_clientId_tmp ON VerbEntity_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM VerbEntity_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT VerbEntity_trk_nest.pk FROM VerbEntity_trk VerbEntity_trk_nest 
+      |  WHERE VerbEntity_trk_nest.clientId = VerbEntity_trk.clientId AND
+      |  VerbEntity_trk_nest.epk = VerbEntity_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_VerbEntity_trk_clientId_epk_csn  ON VerbEntity_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_VerbEntity_trk_epk_clientId ON VerbEntity_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_VerbEntity_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_XObjectEntity_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_XObjectEntity_trk_epk_clientId_tmp ON XObjectEntity_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM XObjectEntity_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT XObjectEntity_trk_nest.pk FROM XObjectEntity_trk XObjectEntity_trk_nest 
+      |  WHERE XObjectEntity_trk_nest.clientId = XObjectEntity_trk.clientId AND
+      |  XObjectEntity_trk_nest.epk = XObjectEntity_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_XObjectEntity_trk_clientId_epk_csn  ON XObjectEntity_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_XObjectEntity_trk_epk_clientId ON XObjectEntity_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_XObjectEntity_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_StatementEntity_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_StatementEntity_trk_epk_clientId_tmp ON StatementEntity_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM StatementEntity_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT StatementEntity_trk_nest.pk FROM StatementEntity_trk StatementEntity_trk_nest 
+      |  WHERE StatementEntity_trk_nest.clientId = StatementEntity_trk.clientId AND
+      |  StatementEntity_trk_nest.epk = StatementEntity_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_StatementEntity_trk_clientId_epk_csn  ON StatementEntity_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_StatementEntity_trk_epk_clientId ON StatementEntity_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_StatementEntity_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContextXObjectStatementJoin_trk_epk_clientId_tmp ON ContextXObjectStatementJoin_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContextXObjectStatementJoin_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContextXObjectStatementJoin_trk_nest.pk FROM ContextXObjectStatementJoin_trk ContextXObjectStatementJoin_trk_nest 
+      |  WHERE ContextXObjectStatementJoin_trk_nest.clientId = ContextXObjectStatementJoin_trk.clientId AND
+      |  ContextXObjectStatementJoin_trk_nest.epk = ContextXObjectStatementJoin_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContextXObjectStatementJoin_trk_clientId_epk_csn  ON ContextXObjectStatementJoin_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContextXObjectStatementJoin_trk_epk_clientId ON ContextXObjectStatementJoin_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContextXObjectStatementJoin_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_AgentEntity_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_AgentEntity_trk_epk_clientId_tmp ON AgentEntity_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM AgentEntity_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT AgentEntity_trk_nest.pk FROM AgentEntity_trk AgentEntity_trk_nest 
+      |  WHERE AgentEntity_trk_nest.clientId = AgentEntity_trk.clientId AND
+      |  AgentEntity_trk_nest.epk = AgentEntity_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_AgentEntity_trk_clientId_epk_csn  ON AgentEntity_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_AgentEntity_trk_epk_clientId ON AgentEntity_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_AgentEntity_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_StateEntity_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_StateEntity_trk_epk_clientId_tmp ON StateEntity_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM StateEntity_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT StateEntity_trk_nest.pk FROM StateEntity_trk StateEntity_trk_nest 
+      |  WHERE StateEntity_trk_nest.clientId = StateEntity_trk.clientId AND
+      |  StateEntity_trk_nest.epk = StateEntity_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_StateEntity_trk_clientId_epk_csn  ON StateEntity_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_StateEntity_trk_epk_clientId ON StateEntity_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_StateEntity_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_StateContentEntity_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_StateContentEntity_trk_epk_clientId_tmp ON StateContentEntity_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM StateContentEntity_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT StateContentEntity_trk_nest.pk FROM StateContentEntity_trk StateContentEntity_trk_nest 
+      |  WHERE StateContentEntity_trk_nest.clientId = StateContentEntity_trk.clientId AND
+      |  StateContentEntity_trk_nest.epk = StateContentEntity_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_StateContentEntity_trk_clientId_epk_csn  ON StateContentEntity_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_StateContentEntity_trk_epk_clientId ON StateContentEntity_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_StateContentEntity_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_XLangMapEntry_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_XLangMapEntry_trk_epk_clientId_tmp ON XLangMapEntry_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM XLangMapEntry_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT XLangMapEntry_trk_nest.pk FROM XLangMapEntry_trk XLangMapEntry_trk_nest 
+      |  WHERE XLangMapEntry_trk_nest.clientId = XLangMapEntry_trk.clientId AND
+      |  XLangMapEntry_trk_nest.epk = XLangMapEntry_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_XLangMapEntry_trk_clientId_epk_csn  ON XLangMapEntry_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_XLangMapEntry_trk_epk_clientId ON XLangMapEntry_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_XLangMapEntry_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_School_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_School_trk_epk_clientId_tmp ON School_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM School_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT School_trk_nest.pk FROM School_trk School_trk_nest 
+      |  WHERE School_trk_nest.clientId = School_trk.clientId AND
+      |  School_trk_nest.epk = School_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_School_trk_clientId_epk_csn  ON School_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_School_trk_epk_clientId ON School_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_School_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_SchoolMember_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_SchoolMember_trk_epk_clientId_tmp ON SchoolMember_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM SchoolMember_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT SchoolMember_trk_nest.pk FROM SchoolMember_trk SchoolMember_trk_nest 
+      |  WHERE SchoolMember_trk_nest.clientId = SchoolMember_trk.clientId AND
+      |  SchoolMember_trk_nest.epk = SchoolMember_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_SchoolMember_trk_clientId_epk_csn  ON SchoolMember_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_SchoolMember_trk_epk_clientId ON SchoolMember_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_SchoolMember_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzWork_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzWork_trk_epk_clientId_tmp ON ClazzWork_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzWork_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzWork_trk_nest.pk FROM ClazzWork_trk ClazzWork_trk_nest 
+      |  WHERE ClazzWork_trk_nest.clientId = ClazzWork_trk.clientId AND
+      |  ClazzWork_trk_nest.epk = ClazzWork_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzWork_trk_clientId_epk_csn  ON ClazzWork_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzWork_trk_epk_clientId ON ClazzWork_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzWork_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkContentJoin_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzWorkContentJoin_trk_epk_clientId_tmp ON ClazzWorkContentJoin_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzWorkContentJoin_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzWorkContentJoin_trk_nest.pk FROM ClazzWorkContentJoin_trk ClazzWorkContentJoin_trk_nest 
+      |  WHERE ClazzWorkContentJoin_trk_nest.clientId = ClazzWorkContentJoin_trk.clientId AND
+      |  ClazzWorkContentJoin_trk_nest.epk = ClazzWorkContentJoin_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzWorkContentJoin_trk_clientId_epk_csn  ON ClazzWorkContentJoin_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkContentJoin_trk_epk_clientId ON ClazzWorkContentJoin_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzWorkContentJoin_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_Comments_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Comments_trk_epk_clientId_tmp ON Comments_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Comments_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Comments_trk_nest.pk FROM Comments_trk Comments_trk_nest 
+      |  WHERE Comments_trk_nest.clientId = Comments_trk.clientId AND
+      |  Comments_trk_nest.epk = Comments_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Comments_trk_clientId_epk_csn  ON Comments_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Comments_trk_epk_clientId ON Comments_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Comments_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestion_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzWorkQuestion_trk_epk_clientId_tmp ON ClazzWorkQuestion_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzWorkQuestion_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzWorkQuestion_trk_nest.pk FROM ClazzWorkQuestion_trk ClazzWorkQuestion_trk_nest 
+      |  WHERE ClazzWorkQuestion_trk_nest.clientId = ClazzWorkQuestion_trk.clientId AND
+      |  ClazzWorkQuestion_trk_nest.epk = ClazzWorkQuestion_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzWorkQuestion_trk_clientId_epk_csn  ON ClazzWorkQuestion_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestion_trk_epk_clientId ON ClazzWorkQuestion_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzWorkQuestion_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestionOption_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzWorkQuestionOption_trk_epk_clientId_tmp ON ClazzWorkQuestionOption_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzWorkQuestionOption_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzWorkQuestionOption_trk_nest.pk FROM ClazzWorkQuestionOption_trk ClazzWorkQuestionOption_trk_nest 
+      |  WHERE ClazzWorkQuestionOption_trk_nest.clientId = ClazzWorkQuestionOption_trk.clientId AND
+      |  ClazzWorkQuestionOption_trk_nest.epk = ClazzWorkQuestionOption_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzWorkQuestionOption_trk_clientId_epk_csn  ON ClazzWorkQuestionOption_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestionOption_trk_epk_clientId ON ClazzWorkQuestionOption_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzWorkQuestionOption_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkSubmission_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzWorkSubmission_trk_epk_clientId_tmp ON ClazzWorkSubmission_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzWorkSubmission_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzWorkSubmission_trk_nest.pk FROM ClazzWorkSubmission_trk ClazzWorkSubmission_trk_nest 
+      |  WHERE ClazzWorkSubmission_trk_nest.clientId = ClazzWorkSubmission_trk.clientId AND
+      |  ClazzWorkSubmission_trk_nest.epk = ClazzWorkSubmission_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzWorkSubmission_trk_clientId_epk_csn  ON ClazzWorkSubmission_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkSubmission_trk_epk_clientId ON ClazzWorkSubmission_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzWorkSubmission_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestionResponse_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId_tmp ON ClazzWorkQuestionResponse_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ClazzWorkQuestionResponse_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ClazzWorkQuestionResponse_trk_nest.pk FROM ClazzWorkQuestionResponse_trk ClazzWorkQuestionResponse_trk_nest 
+      |  WHERE ClazzWorkQuestionResponse_trk_nest.clientId = ClazzWorkQuestionResponse_trk.clientId AND
+      |  ClazzWorkQuestionResponse_trk_nest.epk = ClazzWorkQuestionResponse_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ClazzWorkQuestionResponse_trk_clientId_epk_csn  ON ClazzWorkQuestionResponse_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId ON ClazzWorkQuestionResponse_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ContentEntryProgress_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ContentEntryProgress_trk_epk_clientId_tmp ON ContentEntryProgress_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ContentEntryProgress_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ContentEntryProgress_trk_nest.pk FROM ContentEntryProgress_trk ContentEntryProgress_trk_nest 
+      |  WHERE ContentEntryProgress_trk_nest.clientId = ContentEntryProgress_trk.clientId AND
+      |  ContentEntryProgress_trk_nest.epk = ContentEntryProgress_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ContentEntryProgress_trk_clientId_epk_csn  ON ContentEntryProgress_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ContentEntryProgress_trk_epk_clientId ON ContentEntryProgress_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ContentEntryProgress_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_Report_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_Report_trk_epk_clientId_tmp ON Report_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM Report_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT Report_trk_nest.pk FROM Report_trk Report_trk_nest 
+      |  WHERE Report_trk_nest.clientId = Report_trk.clientId AND
+      |  Report_trk_nest.epk = Report_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_Report_trk_clientId_epk_csn  ON Report_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_Report_trk_epk_clientId ON Report_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_Report_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_ReportFilter_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_ReportFilter_trk_epk_clientId_tmp ON ReportFilter_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM ReportFilter_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT ReportFilter_trk_nest.pk FROM ReportFilter_trk ReportFilter_trk_nest 
+      |  WHERE ReportFilter_trk_nest.clientId = ReportFilter_trk.clientId AND
+      |  ReportFilter_trk_nest.epk = ReportFilter_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_ReportFilter_trk_clientId_epk_csn  ON ReportFilter_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_ReportFilter_trk_epk_clientId ON ReportFilter_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_ReportFilter_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_LearnerGroup_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_LearnerGroup_trk_epk_clientId_tmp ON LearnerGroup_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM LearnerGroup_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT LearnerGroup_trk_nest.pk FROM LearnerGroup_trk LearnerGroup_trk_nest 
+      |  WHERE LearnerGroup_trk_nest.clientId = LearnerGroup_trk.clientId AND
+      |  LearnerGroup_trk_nest.epk = LearnerGroup_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_LearnerGroup_trk_clientId_epk_csn  ON LearnerGroup_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_LearnerGroup_trk_epk_clientId ON LearnerGroup_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_LearnerGroup_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_LearnerGroupMember_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_LearnerGroupMember_trk_epk_clientId_tmp ON LearnerGroupMember_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM LearnerGroupMember_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT LearnerGroupMember_trk_nest.pk FROM LearnerGroupMember_trk LearnerGroupMember_trk_nest 
+      |  WHERE LearnerGroupMember_trk_nest.clientId = LearnerGroupMember_trk.clientId AND
+      |  LearnerGroupMember_trk_nest.epk = LearnerGroupMember_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_LearnerGroupMember_trk_clientId_epk_csn  ON LearnerGroupMember_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_LearnerGroupMember_trk_epk_clientId ON LearnerGroupMember_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_LearnerGroupMember_trk_epk_clientId_tmp")
+            database.execSQL("DROP INDEX IF EXISTS index_GroupLearningSession_trk_clientId_epk_rx_csn")
+            database.execSQL("CREATE INDEX index_GroupLearningSession_trk_epk_clientId_tmp ON GroupLearningSession_trk (epk, clientId)")
+            database.execSQL("""
+      |DELETE FROM GroupLearningSession_trk 
+      |  WHERE 
+      |  pk != 
+      |  (SELECT GroupLearningSession_trk_nest.pk FROM GroupLearningSession_trk GroupLearningSession_trk_nest 
+      |  WHERE GroupLearningSession_trk_nest.clientId = GroupLearningSession_trk.clientId AND
+      |  GroupLearningSession_trk_nest.epk = GroupLearningSession_trk.epk ORDER BY CSN DESC LIMIT 1) 
+      """.trimMargin())
+            database.execSQL("CREATE INDEX index_GroupLearningSession_trk_clientId_epk_csn  ON GroupLearningSession_trk (clientId, epk, csn)")
+            database.execSQL("CREATE UNIQUE INDEX index_GroupLearningSession_trk_epk_clientId ON GroupLearningSession_trk (epk, clientId)")
+            database.execSQL("DROP INDEX index_GroupLearningSession_trk_epk_clientId_tmp")
+        }
     }
-  }
 }
