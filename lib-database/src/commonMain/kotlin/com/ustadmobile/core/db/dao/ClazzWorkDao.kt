@@ -30,6 +30,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             ClazzWorkSubmission.clazzWorkSubmissionClazzMemberUid = ClazzMember.clazzMemberUid
              AND ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
 		WHERE ClazzWork.clazzWorkUid = :uid 
+        ORDER BY ClazzWorkSubmission.clazzWorkSubmissionDateTimeStarted DESC LIMIT 1
     """)
     abstract suspend fun findWithSubmissionByUidAndPerson(uid: Long, personUid: Long): ClazzWorkWithSubmission?
 
@@ -146,13 +147,13 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                 AND ClazzMember.clazzMemberRole = ${ClazzMember.ROLE_STUDENT} 
             ) as totalStudents, 
             (
-                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE
+                SELECT COUNT(DISTINCT clazzWorkSubmissionClazzMemberUid) FROM ClazzWorkSubmission WHERE
                 clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
             ) as submittedStudents, 
             0 as notSubmittedStudents,
             0 as completedStudents, 
             (
-                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
+                SELECT COUNT(DISTINCT clazzWorkSubmissionClazzMemberUid) FROM ClazzWorkSubmission WHERE 
                 ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
                 AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
             ) as markedStudents,

@@ -50,7 +50,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 45)
+], version = 46)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -2904,7 +2904,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_42_33 = UmAppDatabase_SyncPushMigration()
+        val MIGRATION_42_43 = UmAppDatabase_SyncPushMigration()
 
         val MIGRATION_43_44 = object : DoorMigration(43, 44) {
             override fun migrate(database: DoorSqlDatabase) {
@@ -2931,12 +2931,28 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_45_46 = object : DoorMigration(45, 46) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("""
+                        Update ClazzWorkQuestionResponse
+                        SET clazzWorkQuestionResponseLCB = (SELECT nodeClientId from SyncNode)
+                        WHERE
+                        clazzWorkQuestionResponseLCB = 0
+                    """.trimIndent())
+
+                }
+            }
+        }
+
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
-                    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_33,
-                    MIGRATION_43_44, MIGRATION_44_45)
+                    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
+                    MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46)
 
 
 

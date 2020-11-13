@@ -15,10 +15,6 @@
             type="com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics" />
 
         <variable
-            name="clazzMemberAndClazzWorkWithSubmission"
-            type="com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission" />
-
-        <variable
             name="showNext"
             type="Boolean" />
 
