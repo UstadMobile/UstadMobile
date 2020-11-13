@@ -36,7 +36,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
 
     @JvmField
@@ -74,14 +74,14 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
             }
 
             testClazzWork = runBlocking {
-                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                dbRule.repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                         clazzWork!!, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                         true, 0, false, true)
             }
 
             //Assign content
             val contentEntriesWithJoin = runBlocking {
-                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork, 2)
+                dbRule.repo.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork, 2)
             }
             contentList = contentEntriesWithJoin.contentList
 
@@ -91,7 +91,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
             //Insert public and private comments
             runBlocking {
-                dbRule.db.insertPublicAndPrivateComments(UMCalendarUtil.getDateInMilliPlusDays(0),
+                dbRule.repo.insertPublicAndPrivateComments(UMCalendarUtil.getDateInMilliPlusDays(0),
                         testClazzWork!!.clazzWork, testClazzWork!!.clazzAndMembers)
             }
 
@@ -130,14 +130,14 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
             }
 
             testClazzWork = runBlocking {
-                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                dbRule.repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                         clazzWork!!, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                         true, 0, false, true)
             }
 
             //Assign content
             val contentEntriesWithJoin = runBlocking {
-                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork, 2)
+                dbRule.repo.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork, 2)
             }
             contentList = contentEntriesWithJoin.contentList
 
@@ -147,14 +147,14 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
             //Insert public and private comments
             runBlocking {
-                dbRule.db.insertPublicAndPrivateComments(UMCalendarUtil.getDateInMilliPlusDays(0),
+                dbRule.repo.insertPublicAndPrivateComments(UMCalendarUtil.getDateInMilliPlusDays(0),
                         testClazzWork!!.clazzWork, testClazzWork!!.clazzAndMembers)
             }
 
 
             clazzWork!!.clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
             runBlocking {
-                dbRule.db.clazzWorkDao.updateAsync(clazzWork!!)
+                dbRule.repo.clazzWorkDao.updateAsync(clazzWork!!)
             }
 
 
@@ -194,14 +194,14 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
             }
 
             testClazzWork = runBlocking {
-                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                dbRule.repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                         clazzWork!!, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                         true, 0, false, true)
             }
 
             //Assign content
             val contentEntriesWithJoin = runBlocking {
-                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork, 2)
+                dbRule.repo.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork, 2)
             }
             contentList = contentEntriesWithJoin.contentList
 
@@ -211,14 +211,14 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
             //Insert public and private comments
             runBlocking {
-                dbRule.db.insertPublicAndPrivateComments(UMCalendarUtil.getDateInMilliPlusDays(0),
+                dbRule.repo.insertPublicAndPrivateComments(UMCalendarUtil.getDateInMilliPlusDays(0),
                         testClazzWork!!.clazzWork, testClazzWork!!.clazzAndMembers)
             }
 
 
             clazzWork!!.clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
             runBlocking {
-                dbRule.db.clazzWorkDao.updateAsync(clazzWork!!)
+                dbRule.repo.clazzWorkDao.updateAsync(clazzWork!!)
             }
 
 
@@ -231,7 +231,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
             //Change type to quiz
             var clazzWorkQuizStuff: TestClazzWorkWithQuestionAndOptionsAndResponse? = null
             runBlocking {
-                clazzWorkQuizStuff = dbRule.db.insertQuizQuestionsAndOptions(clazzWork!!, false, 0,
+                clazzWorkQuizStuff = dbRule.repo.insertQuizQuestionsAndOptions(clazzWork!!, false, 0,
                         0, 0, true)
                 clazzWork = clazzWorkQuizStuff?.clazzWork!!
             }
@@ -268,13 +268,13 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
             }
 
             testClazzWork = runBlocking {
-                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                dbRule.repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                         clazzWork!!, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                         true, 0, false, false)
             }
 
             val contentEntriesWithJoin = runBlocking {
-                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork,
+                dbRule.repo.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork,
                         2)
             }
             contentList = contentEntriesWithJoin.contentList
@@ -317,13 +317,13 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
             }
 
             testClazzWork = runBlocking {
-                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                dbRule.repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                         clazzWork!!, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                         true, 0, false, false)
             }
 
             val contentEntriesWithJoin = runBlocking {
-                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork,
+                dbRule.repo.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork,
                         2)
             }
             contentList = contentEntriesWithJoin.contentList
@@ -341,7 +341,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
             //Change type:
             clazzWork!!.clazzWorkSubmissionType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
             runBlocking {
-                dbRule.db.clazzWorkDao.updateAsync(clazzWork!!)
+                dbRule.repo.clazzWorkDao.updateAsync(clazzWork!!)
             }
 
             reloadFragment(testClazzWork!!.clazzWork)
@@ -377,13 +377,13 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 //            }
 //
 //            testClazzWork = runBlocking {
-//                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+//                dbRule.repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
 //                        clazzWork!!, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
 //                        true, 0, false, false)
 //            }
 //
 //            val contentEntriesWithJoin = runBlocking {
-//                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork,
+//                dbRule.repo.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork,
 //                        2)
 //            }
 //            contentList = contentEntriesWithJoin.contentList
@@ -400,7 +400,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 //            //Change type to quiz
 //            var clazzWorkQuizStuff: TestClazzWorkWithQuestionAndOptionsAndResponse? = null
 //            runBlocking {
-//                clazzWorkQuizStuff = dbRule.db.insertQuizQuestionsAndOptions(clazzWork!!,
+//                clazzWorkQuizStuff = dbRule.repo.insertQuizQuestionsAndOptions(clazzWork!!,
 //                        false, 0,
 //                        0, 0, true)
 //                clazzWork = clazzWorkQuizStuff!!.clazzWork
@@ -436,13 +436,13 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
             }
 
             testClazzWork = runBlocking {
-                dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+                dbRule.repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                         clazzWork!!, false, -1, true,
                         0, false, true)
             }
 
             val contentEntriesWithJoin = runBlocking {
-                dbRule.db.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork,
+                dbRule.repo.createTestContentEntriesAndJoinToClazzWork(testClazzWork!!.clazzWork,
                         2)
             }
             contentList = contentEntriesWithJoin.contentList
@@ -603,7 +603,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
         }
 
         val testClazzWork = runBlocking {
-            dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            dbRule.repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     clazzWork, true, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ,
                     true,0,true, true)
         }
@@ -648,7 +648,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
         }
 
         val testClazzWork = runBlocking {
-            dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            dbRule.repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                     true,
                     0,false, true)
@@ -667,7 +667,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
                 commentsPersonUid = studentMember1.clazzMemberPersonUid
-                commentsUid = dbRule.db.commentsDao.insertAsync(this)
+                commentsUid = dbRule.repo.commentsDao.insertAsync(this)
             }
             Comments().apply {
                 commentsText = "Student 2 private comment"
@@ -676,7 +676,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
                 commentsPersonUid = studentMember2.clazzMemberPersonUid
-                commentsUid = dbRule.db.commentsDao.insertAsync(this)
+                commentsUid = dbRule.repo.commentsDao.insertAsync(this)
             }
 
         }
@@ -726,7 +726,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
         }
 
         val testClazzWork = runBlocking {
-            dbRule.db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            dbRule.repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                     true,
                     0,false, true)
@@ -745,7 +745,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
                 commentsPersonUid = studentMember1.clazzMemberPersonUid
-                commentsUid = dbRule.db.commentsDao.insertAsync(this)
+                commentsUid = dbRule.repo.commentsDao.insertAsync(this)
             }
             Comments().apply {
                 commentsText = "Student 2 private comment"
@@ -754,7 +754,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
                 commentsPersonUid = studentMember2.clazzMemberPersonUid
-                commentsUid = dbRule.db.commentsDao.insertAsync(this)
+                commentsUid = dbRule.repo.commentsDao.insertAsync(this)
             }
 
         }

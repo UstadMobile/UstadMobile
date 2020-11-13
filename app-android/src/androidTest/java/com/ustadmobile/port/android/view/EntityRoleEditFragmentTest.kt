@@ -29,7 +29,6 @@ import org.junit.Before
 import org.junit.Rule
 
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
-import org.junit.Before
 import org.junit.Test
 import java.lang.Thread.sleep
 

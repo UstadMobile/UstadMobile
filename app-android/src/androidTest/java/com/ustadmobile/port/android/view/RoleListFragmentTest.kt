@@ -21,7 +21,7 @@ class RoleListFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -37,7 +37,7 @@ class RoleListFragmentTest : TestCase() {
             roleName = "Role A"
             roleActive = true
             rolePermissions = Role.PERMISSION_CLAZZ_SELECT or Role.PERMISSION_CLAZZ_ADD_TEACHER
-            roleUid = dbRule.db.roleDao.insert(this)
+            roleUid = dbRule.repo.roleDao.insert(this)
         }
 
         val testRoleB = Role().apply{
@@ -46,7 +46,7 @@ class RoleListFragmentTest : TestCase() {
             rolePermissions = Role.PERMISSION_SCHOOL_SELECT or
                     Role.PERMISSION_SCHOOL_ADD_STAFF or Role.PERMISSION_SCHOOL_ADD_STUDENT or
                     Role.PERMISSION_SCHOOL_UPDATE
-            roleUid = dbRule.db.roleDao.insert(this)
+            roleUid = dbRule.repo.roleDao.insert(this)
         }
 
         init {
