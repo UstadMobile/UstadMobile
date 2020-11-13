@@ -174,7 +174,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
     @AdbScreenRecord("ClazzWorkDetailOverview: When logged in as student should " +
             "show all fields in Quiz type ClazzWork")
-    @Test
+    //@Test
     fun givenValidClazzWorkUidQuizType_whenLoadedAsStudent_thenShouldShow() {
 
         var clazzWork: ClazzWork? = null
