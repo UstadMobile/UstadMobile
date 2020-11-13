@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 44,
-    "identityHash": "b048ea205a882ca648cc6df4c679bd4c",
+    "identityHash": "9b2dec9a7c899a18896a777e946c785d",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5045,91 +5045,55 @@
         "foreignKeys": []
       },
       {
-        "tableName": "ContainerImportJob",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cijUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cijContainerUid` INTEGER NOT NULL, `cijFilePath` TEXT, `cijContainerBaseDir` TEXT, `cijContentEntryUid` INTEGER NOT NULL, `cijMimeType` TEXT, `cijSessionId` TEXT, `cijJobStatus` INTEGER NOT NULL, `cijBytesSoFar` INTEGER NOT NULL, `cijImportCompleted` INTEGER NOT NULL, `cijContentLength` INTEGER NOT NULL, `cijContainerEntryFileUids` TEXT, `cijConversionParams` TEXT)",
+        "tableName": "ContainerUploadJob",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`cujUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cujContainerUid` INTEGER NOT NULL, `sessionId` TEXT, `jobStatus` INTEGER NOT NULL, `bytesSoFar` INTEGER NOT NULL, `contentLength` INTEGER NOT NULL, `containerEntryFileUids` TEXT)",
         "fields": [
           {
-            "fieldPath": "cijUid",
-            "columnName": "cijUid",
+            "fieldPath": "cujUid",
+            "columnName": "cujUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "cijContainerUid",
-            "columnName": "cijContainerUid",
+            "fieldPath": "cujContainerUid",
+            "columnName": "cujContainerUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "cijFilePath",
-            "columnName": "cijFilePath",
+            "fieldPath": "sessionId",
+            "columnName": "sessionId",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "cijContainerBaseDir",
-            "columnName": "cijContainerBaseDir",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "cijContentEntryUid",
-            "columnName": "cijContentEntryUid",
+            "fieldPath": "jobStatus",
+            "columnName": "jobStatus",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "cijMimeType",
-            "columnName": "cijMimeType",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "cijSessionId",
-            "columnName": "cijSessionId",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "cijJobStatus",
-            "columnName": "cijJobStatus",
+            "fieldPath": "bytesSoFar",
+            "columnName": "bytesSoFar",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "cijBytesSoFar",
-            "columnName": "cijBytesSoFar",
+            "fieldPath": "contentLength",
+            "columnName": "contentLength",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "cijImportCompleted",
-            "columnName": "cijImportCompleted",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cijContentLength",
-            "columnName": "cijContentLength",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "cijContainerEntryFileUids",
-            "columnName": "cijContainerEntryFileUids",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "cijConversionParams",
-            "columnName": "cijConversionParams",
+            "fieldPath": "containerEntryFileUids",
+            "columnName": "containerEntryFileUids",
             "affinity": "TEXT",
             "notNull": false
           }
         ],
         "primaryKey": {
           "columnNames": [
-            "cijUid"
+            "cujUid"
           ],
           "autoGenerate": true
         },
@@ -5311,7 +5275,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "SqliteSyncablePrimaryKey",
+        "tableName": "SqliteSyncablePk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sspTableId` INTEGER NOT NULL, `sspNextPrimaryKey` INTEGER NOT NULL, PRIMARY KEY(`sspTableId`))",
         "fields": [
           {
@@ -9474,7 +9438,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b048ea205a882ca648cc6df4c679bd4c')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9b2dec9a7c899a18896a777e946c785d')"
     ]
   }
 }

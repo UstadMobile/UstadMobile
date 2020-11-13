@@ -17,7 +17,7 @@ import db2.ExampleDatabase2.Companion.DB_VERSION
     AccessGrant::class,
     UpdateNotification::class,
     TableSyncStatus::class,
-    SqliteSyncablePrimaryKey::class,
+    SqliteSyncablePk::class,
     SqliteChangeSeqNums::class
     //#DOORDB_TRACKER_ENTITIES
 
