@@ -206,6 +206,12 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to clearAllTables!")
                         .build())
+                .applyIf(isDbTypeSyncable) {
+                    addFunction(FunSpec.builder("invalidateAllTables")
+                            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                            .addCode("_clientSyncManager?.invalidateAllTables()\n")
+                            .build())
+                }
                 .addType(TypeSpec.companionObjectBuilder()
                         .addProperty(PropertySpec.builder(DB_NAME_VAR, String::class)
                                 .addModifiers(KModifier.CONST)

@@ -163,7 +163,7 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
         }
     }
 
-    fun invalidate() {
+    private fun invalidate() {
         if(updateCheckJob.value == null) {
             updateCheckJob.value = GlobalScope.async {
                 delay(300)
@@ -171,6 +171,16 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
                 checkQueue()
             }
         }
+    }
+
+    /**
+     * Forces a resync on all tables. This should be used when the client knows that permissions
+     * have changed e.g. after login/logout.
+     */
+    suspend fun invalidateAllTables() {
+        repo.syncHelperEntitiesDao.updateTableSyncStatusLastChanged(TABLEID_SYNC_ALL_TABLES,
+                systemTimeInMillis())
+        invalidate()
     }
 
     fun checkQueue() {
