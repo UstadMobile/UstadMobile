@@ -24,6 +24,12 @@ interface DoorDatabaseSyncRepository: DoorDatabaseRepository {
     suspend fun getAndIncrementSqlitePk(tableId: Int, increment: Int): Long
 
     /**
+     * If this is a client repository, then force the client to resync all tables.
+     * This is done using ClientSyncManager.invalidateAllTables
+     */
+    suspend fun invalidateAllTables()
+
+    /**
      * Listen for incoming sync changes. This can be used to trigger logic that is required to
      * update clients (e.g. when a permission change happens granting a client access to an entity
      * it didn't have access to before).

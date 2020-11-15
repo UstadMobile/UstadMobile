@@ -206,6 +206,12 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to clearAllTables!")
                         .build())
+                .applyIf(isDbTypeSyncable) {
+                    addFunction(FunSpec.builder("invalidateAllTables")
+                            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                            .addCode("_clientSyncManager?.invalidateAllTables()\n")
+                            .build())
+                }
                 .addType(TypeSpec.companionObjectBuilder()
                         .addProperty(PropertySpec.builder(DB_NAME_VAR, String::class)
                                 .addModifiers(KModifier.CONST)
@@ -643,19 +649,35 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .enclosedElements.firstOrNull { it.kind == ElementKind.FIELD && it.getAnnotation(LastChangedBy::class.java) != null}
             isListOrArrayParam =  entityParam.type.isListOrArray()
 
+
             if(lastChangedByField != null) {
-                if(isListOrArrayParam) {
-                    codeBlock.add("${entityParam.name}.forEach { it.${lastChangedByField.simpleName} = _clientId }\n")
-                }else {
-                    codeBlock.add("${entityParam.name}.${lastChangedByField.simpleName} = _clientId\n")
-                }
+                val paramVarName = if(isListOrArrayParam) "it" else entityParam.name
+                syncableEntityInfo = SyncableEntityInfo(entityType, processingEnv)
+                codeBlock
+                        .applyIf(daoFunSpec.hasAnnotation(Update::class.java)) {
+                            add("val _isSyncablePrimary = _db.%M\n",
+                                    MemberName("com.ustadmobile.door.ext", "syncableAndPrimary"))
+                        }
+                        .applyIf(isListOrArrayParam) {
+                            beginControlFlow("${entityParam.name}.forEach")
+                        }
+                        .add("$paramVarName.${lastChangedByField.simpleName} = _clientId\n")
+                        .applyIf(daoFunSpec.hasAnnotation(Update::class.java)) {
+                            beginControlFlow("if(_isSyncablePrimary)")
+                            add("$paramVarName.${syncableEntityInfo.entityMasterCsnField.name} = 0\n")
+                            nextControlFlow("else")
+                            add("$paramVarName.${syncableEntityInfo.entityLocalCsnField.name} = 0\n")
+                            endControlFlow()
+                        }
+                        .applyIf(isListOrArrayParam) {
+                            endControlFlow()
+                        }
 
 
                 //Use the SQLite Primary key manager if this is an SQLite insert
                 if(daoFunSpec.annotations.any { it.className == Insert::class.asClassName() }) {
                     codeBlock.takeIf { !isAlwaysSqlite }?.beginControlFlow("if(_db.jdbcDbType == %T.SQLITE)",
                             DoorDbType::class)
-                    syncableEntityInfo = SyncableEntityInfo(entityType, processingEnv)
                     val isSuspendFn = daoFunSpec.modifiers.contains(KModifier.SUSPEND)
                     if(isListOrArrayParam) {
                         codeBlock.add("var _nextPk = ")

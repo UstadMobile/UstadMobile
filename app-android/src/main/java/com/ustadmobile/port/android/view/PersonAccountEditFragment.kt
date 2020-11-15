@@ -79,7 +79,7 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
         set(value) {
             field = value
             mBinding?.person = value
-            if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
+            if(view != null && viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
                 (activity as? AppCompatActivity)?.supportActionBar?.title = value?.firstNames + " " + value?.lastName
             mBinding?.currentPasswordTextinputlayout?.isEnabled = value != null && !value.admin
         }

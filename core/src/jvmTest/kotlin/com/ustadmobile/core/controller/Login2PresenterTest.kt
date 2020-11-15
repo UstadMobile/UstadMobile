@@ -2,8 +2,11 @@ package com.ustadmobile.core.controller
 
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -15,6 +18,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
+import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.util.test.ext.bindJndiForActiveEndpoint
@@ -25,9 +30,7 @@ import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
-import org.kodein.di.DI
-import org.kodein.di.bind
-import org.kodein.di.singleton
+import org.kodein.di.*
 import org.mockito.ArgumentMatchers
 import javax.naming.InitialContext
 
@@ -51,6 +54,8 @@ class Login2PresenterTest {
 
     private lateinit var di : DI
 
+    private lateinit var mockRepo: UmAppDatabase
+
     @Before
     fun setUp(){
         view = mock {
@@ -60,14 +65,29 @@ class Login2PresenterTest {
             }
         }
         impl = mock ()
-        accountManager = mock{}
+        accountManager = mock{
+            onBlocking { login(eq(VALID_USER), eq(VALID_PASS), any(), any()) }.thenAnswer {
+                val url = it.arguments[2] as String
+                UmAccount(personUid = 42,
+                        username = VALID_USER, firstName = "user", lastName = "last", endpointUrl = url)
+            }
+        }
+
+
+
         mockPersonDao = mock {}
         mockWebServer = MockWebServer()
         mockWebServer.start()
+        mockRepo = mock(extraInterfaces = arrayOf(DoorDatabaseSyncRepository::class)) {}
 
+        val endpointScope = EndpointScope()
         di = DI {
             bind<UstadAccountManager>() with singleton { accountManager }
             bind<UstadMobileSystemImpl>() with singleton { impl }
+            bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
+                mockRepo
+            }
+            registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
     }
 
@@ -156,7 +176,7 @@ class Login2PresenterTest {
     }
 
     @Test
-    fun givenValidUsernameAndPassword_whenFromDestinationArgumentIsProvidedAndHandleLoginClicked_shouldGoToNextScreen() {
+    fun givenValidUsernameAndPassword_whenFromDestinationArgumentIsProvidedAndHandleLoginClicked_shouldGoToNextScreenAndInvalidateSync() {
         val nextDestination = "nextDummyDestination"
         val fromDestination = "fromDummyDestination"
         enQueueLoginResponse()
@@ -182,7 +202,8 @@ class Login2PresenterTest {
 //                    fromDestination, firstValue)
 //        }
 
-        verifyBlocking(accountManager) { login(VALID_USER, VALID_PASS, httpUrl) }
+        verifyBlocking(accountManager, timeout(defaultTimeout)) { login(VALID_USER, VALID_PASS, httpUrl) }
+        verifyBlocking(mockRepo as DoorDatabaseSyncRepository, timeout(defaultTimeout)) { invalidateAllTables() }
     }
 
     @Test

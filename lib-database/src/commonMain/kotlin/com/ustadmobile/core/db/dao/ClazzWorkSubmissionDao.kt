@@ -36,7 +36,7 @@ abstract class ClazzWorkSubmissionDao : BaseDao<ClazzWorkSubmission> {
                     SELECT * FROM ClazzWorkSubmission WHERE 
                     ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = :clazzWorkUid 
                     AND CAST(clazzWorkSubmissionInactive AS INTEGER) = 0
-                    AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked == 0
+                    AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked = 0
                     ORDER BY clazzWorkSubmissionDateTimeFinished DESC
                 """
     }
