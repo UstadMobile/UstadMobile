@@ -818,25 +818,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         "CREATE SEQUENCE IF NOT EXISTS ${syncableEntityInfo.syncableEntity.simpleName}_${it}csn_seq")
                 }
 
-                codeBlock.add("$execSqlFn(%S)\n", """CREATE OR REPLACE FUNCTION 
-                    | inccsn_${syncableEntityInfo.tableId}_fn() RETURNS trigger AS $$
-                    | BEGIN  
-                    | UPDATE ${syncableEntityInfo.syncableEntity.simpleName} SET ${syncableEntityInfo.entityLocalCsnField.name} =
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.${syncableEntityInfo.entityLocalCsnField.name} 
-                    | ELSE NEXTVAL('${syncableEntityInfo.syncableEntity.simpleName}_lcsn_seq') END),
-                    | ${syncableEntityInfo.entityMasterCsnField.name} = 
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-                    | THEN NEXTVAL('${syncableEntityInfo.syncableEntity.simpleName}_mcsn_seq') 
-                    | ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END)
-                    | WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name};
-                    | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
-                    | SELECT ${syncableEntityInfo.tableId}, NEW.${syncableEntityInfo.entityPkField.name}, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
-                    | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
-                    | RETURN null;
-                    | END $$
-                    | LANGUAGE plpgsql
-                """.trimMargin())
-                        .add("$execSqlFn(%S)\n", """CREATE TRIGGER inccsn_${syncableEntityInfo.tableId}_trig 
+                codeBlock.addSyncableEntityFunctionPostgres(execSqlFn, syncableEntityInfo)
+                    .add("$execSqlFn(%S)\n", """CREATE TRIGGER inccsn_${syncableEntityInfo.tableId}_trig 
                             |AFTER UPDATE OR INSERT ON ${syncableEntityInfo.syncableEntity.simpleName} 
                             |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                             |EXECUTE PROCEDURE inccsn_${syncableEntityInfo.tableId}_fn()

@@ -160,8 +160,10 @@ class PersonDetailFragmentTest : TestCase() {
                     click()
                 }
             }
-            assertEquals("It navigated to person account screen",
-                    R.id.person_account_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+            flakySafely {
+                assertEquals("It navigated to person account screen",
+                        R.id.person_account_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+            }
         }
     }
 
