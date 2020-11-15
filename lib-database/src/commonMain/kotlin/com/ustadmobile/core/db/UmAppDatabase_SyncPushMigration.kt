@@ -34,7 +34,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       |ON UpdateNotification (pnDeviceId, pnTimestamp)
       """.trimMargin())
             database.execSQL("DROP TRIGGER IF EXISTS INS_14")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_14")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_14")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_14
       |AFTER INSERT ON ClazzLog
@@ -119,7 +119,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ClazzLog_trk_epk_clientId ON ClazzLog_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzLog_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_15")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_15")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_15")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_15
       |AFTER INSERT ON ClazzLogAttendanceRecord
@@ -204,7 +204,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId ON ClazzLogAttendanceRecord_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_21")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_21")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_21")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_21
       |AFTER INSERT ON Schedule
@@ -289,7 +289,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_Schedule_trk_epk_clientId ON Schedule_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Schedule_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_17")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_17")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_17")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_17
       |AFTER INSERT ON DateRange
@@ -374,7 +374,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_DateRange_trk_epk_clientId ON DateRange_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_DateRange_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_28")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_28")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_28")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_28
       |AFTER INSERT ON HolidayCalendar
@@ -459,7 +459,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_HolidayCalendar_trk_epk_clientId ON HolidayCalendar_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_HolidayCalendar_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_99")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_99")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_99")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_99
       |AFTER INSERT ON Holiday
@@ -544,7 +544,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_Holiday_trk_epk_clientId ON Holiday_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Holiday_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_173")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_173")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_173")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_173
       |AFTER INSERT ON ScheduledCheck
@@ -629,7 +629,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ScheduledCheck_trk_epk_clientId ON ScheduledCheck_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ScheduledCheck_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_53")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_53")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_53")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_53
       |AFTER INSERT ON AuditLog
@@ -714,7 +714,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_AuditLog_trk_epk_clientId ON AuditLog_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_AuditLog_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_56")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_56")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_56")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_56
       |AFTER INSERT ON CustomField
@@ -799,7 +799,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_CustomField_trk_epk_clientId ON CustomField_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_CustomField_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_57")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_57")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_57")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_57
       |AFTER INSERT ON CustomFieldValue
@@ -884,7 +884,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_CustomFieldValue_trk_epk_clientId ON CustomFieldValue_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_CustomFieldValue_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_55")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_55")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_55")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_55
       |AFTER INSERT ON CustomFieldValueOption
@@ -969,7 +969,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_CustomFieldValueOption_trk_epk_clientId ON CustomFieldValueOption_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_CustomFieldValueOption_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_9")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_9")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_9")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_9
       |AFTER INSERT ON Person
@@ -1054,7 +1054,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_Person_trk_epk_clientId ON Person_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Person_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_6")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_6")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_6")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_6
       |AFTER INSERT ON Clazz
@@ -1139,7 +1139,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_Clazz_trk_epk_clientId ON Clazz_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Clazz_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_65")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_65")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_65")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_65
       |AFTER INSERT ON ClazzMember
@@ -1224,7 +1224,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ClazzMember_trk_epk_clientId ON ClazzMember_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzMember_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_178")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_178")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_178")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_178
       |AFTER INSERT ON PersonCustomFieldValue
@@ -1309,7 +1309,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_PersonCustomFieldValue_trk_epk_clientId ON PersonCustomFieldValue_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_PersonCustomFieldValue_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_42")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_42")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_42")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_42
       |AFTER INSERT ON ContentEntry
@@ -1394,7 +1394,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ContentEntry_trk_epk_clientId ON ContentEntry_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentEntry_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_3")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_3")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_3")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_3
       |AFTER INSERT ON ContentEntryContentCategoryJoin
@@ -1479,7 +1479,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId ON ContentEntryContentCategoryJoin_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_7")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_7")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_7")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_7
       |AFTER INSERT ON ContentEntryParentChildJoin
@@ -1564,7 +1564,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ContentEntryParentChildJoin_trk_epk_clientId ON ContentEntryParentChildJoin_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentEntryParentChildJoin_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_8")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_8")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_8")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_8
       |AFTER INSERT ON ContentEntryRelatedEntryJoin
@@ -1649,7 +1649,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId ON ContentEntryRelatedEntryJoin_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_2")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_2")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_2")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_2
       |AFTER INSERT ON ContentCategorySchema
@@ -1734,7 +1734,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ContentCategorySchema_trk_epk_clientId ON ContentCategorySchema_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentCategorySchema_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_1")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_1")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_1")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_1
       |AFTER INSERT ON ContentCategory
@@ -1819,7 +1819,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ContentCategory_trk_epk_clientId ON ContentCategory_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentCategory_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_13")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_13")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_13")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_13
       |AFTER INSERT ON Language
@@ -1904,7 +1904,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_Language_trk_epk_clientId ON Language_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Language_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_10")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_10")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_10")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_10
       |AFTER INSERT ON LanguageVariant
@@ -1989,7 +1989,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_LanguageVariant_trk_epk_clientId ON LanguageVariant_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_LanguageVariant_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_45")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_45")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_45")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_45
       |AFTER INSERT ON Role
@@ -2074,7 +2074,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_Role_trk_epk_clientId ON Role_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Role_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_47")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_47")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_47")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_47
       |AFTER INSERT ON EntityRole
@@ -2159,7 +2159,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_EntityRole_trk_epk_clientId ON EntityRole_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_EntityRole_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_43")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_43")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_43")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_43
       |AFTER INSERT ON PersonGroup
@@ -2244,7 +2244,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_PersonGroup_trk_epk_clientId ON PersonGroup_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_PersonGroup_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_44")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_44")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_44")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_44
       |AFTER INSERT ON PersonGroupMember
@@ -2329,7 +2329,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_PersonGroupMember_trk_epk_clientId ON PersonGroupMember_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_PersonGroupMember_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_50")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_50")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_50")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_50
       |AFTER INSERT ON PersonPicture
@@ -2414,7 +2414,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_PersonPicture_trk_epk_clientId ON PersonPicture_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_PersonPicture_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_51")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_51")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_51")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_51
       |AFTER INSERT ON Container
@@ -2499,7 +2499,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_Container_trk_epk_clientId ON Container_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Container_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_62")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_62")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_62")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_62
       |AFTER INSERT ON VerbEntity
@@ -2584,7 +2584,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_VerbEntity_trk_epk_clientId ON VerbEntity_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_VerbEntity_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_64")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_64")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_64")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_64
       |AFTER INSERT ON XObjectEntity
@@ -2669,7 +2669,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_XObjectEntity_trk_epk_clientId ON XObjectEntity_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_XObjectEntity_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_60")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_60")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_60")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_60
       |AFTER INSERT ON StatementEntity
@@ -2754,7 +2754,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_StatementEntity_trk_epk_clientId ON StatementEntity_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_StatementEntity_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_66")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_66")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_66")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_66
       |AFTER INSERT ON ContextXObjectStatementJoin
@@ -2839,7 +2839,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ContextXObjectStatementJoin_trk_epk_clientId ON ContextXObjectStatementJoin_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContextXObjectStatementJoin_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_68")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_68")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_68")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_68
       |AFTER INSERT ON AgentEntity
@@ -2924,7 +2924,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_AgentEntity_trk_epk_clientId ON AgentEntity_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_AgentEntity_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_70")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_70")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_70")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_70
       |AFTER INSERT ON StateEntity
@@ -3009,7 +3009,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_StateEntity_trk_epk_clientId ON StateEntity_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_StateEntity_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_72")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_72")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_72")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_72
       |AFTER INSERT ON StateContentEntity
@@ -3094,7 +3094,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_StateContentEntity_trk_epk_clientId ON StateContentEntity_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_StateContentEntity_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_74")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_74")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_74")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_74
       |AFTER INSERT ON XLangMapEntry
@@ -3179,7 +3179,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_XLangMapEntry_trk_epk_clientId ON XLangMapEntry_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_XLangMapEntry_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_164")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_164")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_164")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_164
       |AFTER INSERT ON School
@@ -3264,7 +3264,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_School_trk_epk_clientId ON School_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_School_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_200")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_200")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_200")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_200
       |AFTER INSERT ON SchoolMember
@@ -3349,7 +3349,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_SchoolMember_trk_epk_clientId ON SchoolMember_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_SchoolMember_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_201")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_201")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_201")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_201
       |AFTER INSERT ON ClazzWork
@@ -3434,7 +3434,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ClazzWork_trk_epk_clientId ON ClazzWork_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzWork_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_204")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_204")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_204")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_204
       |AFTER INSERT ON ClazzWorkContentJoin
@@ -3519,7 +3519,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkContentJoin_trk_epk_clientId ON ClazzWorkContentJoin_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzWorkContentJoin_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_208")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_208")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_208")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_208
       |AFTER INSERT ON Comments
@@ -3604,7 +3604,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_Comments_trk_epk_clientId ON Comments_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Comments_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_202")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_202")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_202")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_202
       |AFTER INSERT ON ClazzWorkQuestion
@@ -3689,7 +3689,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestion_trk_epk_clientId ON ClazzWorkQuestion_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzWorkQuestion_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_203")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_203")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_203")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_203
       |AFTER INSERT ON ClazzWorkQuestionOption
@@ -3774,7 +3774,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestionOption_trk_epk_clientId ON ClazzWorkQuestionOption_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzWorkQuestionOption_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_206")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_206")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_206")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_206
       |AFTER INSERT ON ClazzWorkSubmission
@@ -3859,7 +3859,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkSubmission_trk_epk_clientId ON ClazzWorkSubmission_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzWorkSubmission_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_209")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_209")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_209")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_209
       |AFTER INSERT ON ClazzWorkQuestionResponse
@@ -3944,7 +3944,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId ON ClazzWorkQuestionResponse_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_210")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_210")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_210")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_210
       |AFTER INSERT ON ContentEntryProgress
@@ -4029,7 +4029,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ContentEntryProgress_trk_epk_clientId ON ContentEntryProgress_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentEntryProgress_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_101")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_101")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_101")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_101
       |AFTER INSERT ON Report
@@ -4114,7 +4114,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_Report_trk_epk_clientId ON Report_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Report_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_102")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_102")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_102")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_102
       |AFTER INSERT ON ReportFilter
@@ -4199,7 +4199,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_ReportFilter_trk_epk_clientId ON ReportFilter_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ReportFilter_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_301")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_301")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_301")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_301
       |AFTER INSERT ON LearnerGroup
@@ -4284,7 +4284,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_LearnerGroup_trk_epk_clientId ON LearnerGroup_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_LearnerGroup_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_300")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_300")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_300")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_300
       |AFTER INSERT ON LearnerGroupMember
@@ -4369,7 +4369,7 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE UNIQUE INDEX index_LearnerGroupMember_trk_epk_clientId ON LearnerGroupMember_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_LearnerGroupMember_trk_epk_clientId_tmp")
             database.execSQL("DROP TRIGGER IF EXISTS INS_302")
-            database.execSQL("DROP TRIGGER IF EXISTS INS_302")
+            database.execSQL("DROP TRIGGER IF EXISTS UPD_302")
             database.execSQL("""
       |CREATE TRIGGER INS_LOC_302
       |AFTER INSERT ON GroupLearningSession
