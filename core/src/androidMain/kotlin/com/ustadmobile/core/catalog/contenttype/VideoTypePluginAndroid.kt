@@ -3,7 +3,6 @@ package com.ustadmobile.core.catalog.contenttype
 import android.content.Context
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
-import android.media.MediaMetadataRetriever
 import androidx.core.net.toUri
 import com.github.aakira.napier.Napier
 import com.linkedin.android.litr.MediaTransformer
@@ -11,6 +10,7 @@ import com.linkedin.android.litr.TransformationListener
 import com.linkedin.android.litr.analytics.TrackTransformationInfo
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.extractVideoResolutionMetadata
 import com.ustadmobile.core.util.ext.fitWithin
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -25,13 +25,17 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
 
     private val VIDEO_ANDROID = "VideoPluginAndroid"
 
-    private val videoCompleted = CompletableDeferred<Boolean>()
-
     override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default) {
             val file = File(filePath)
 
             if (!fileExtensions.any { file.name.endsWith(it, true) }) {
+                return@withContext null
+            }
+
+            val fileVideoDimensions = file.extractVideoResolutionMetadata()
+
+            if(fileVideoDimensions.first == 0 || fileVideoDimensions.second == 0){
                 return@withContext null
             }
 
@@ -48,34 +52,32 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
                                            context: Any, db: UmAppDatabase, repo: UmAppDatabase, progressListener: (Int) -> Unit): Container {
         return withContext(Dispatchers.Default) {
 
-            val file = File(filePath.removePrefix("file://"))
-      /*      val newVideo = File(file.parentFile, "new${file.nameWithoutExtension}.mp4")
+            val videoFile = File(filePath.removePrefix("file://"))
+            val newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
 
             Napier.d(tag = VIDEO_ANDROID, message = "start import for new video file $newVideo.name")
 
-            val metaRetriever = MediaMetadataRetriever()
-            metaRetriever.setDataSource(file.path)
-            val originalHeight = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT).toInt()
-            val originalWidth = metaRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH).toInt()
+            val originalVideoDimensions = videoFile.extractVideoResolutionMetadata()
+            val newVideoDimensions = originalVideoDimensions.fitWithin()
 
-            val pairDimensions = Pair(originalWidth, originalHeight).fitWithin()
+            Napier.d(tag = VIDEO_ANDROID, message = "width of old video is ${originalVideoDimensions.first}, height of old video is ${originalVideoDimensions.second}")
+            Napier.d(tag = VIDEO_ANDROID, message = "width of new video is ${newVideoDimensions.first}, height of new video is ${newVideoDimensions.second}")
 
-            Napier.d(tag = VIDEO_ANDROID, message = "width of old video is $originalWidth, height of old video is $originalHeight")
-            Napier.d(tag = VIDEO_ANDROID, message = "width of new video is ${pairDimensions.first}, height of new video is ${pairDimensions.second}")
-
-            val videoTarget = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, pairDimensions.first, pairDimensions.second).apply {
-                setInteger(MediaFormat.KEY_BIT_RATE, 128000)
-                setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 5)
-                setInteger(MediaFormat.KEY_FRAME_RATE, 25)
+            val videoTarget = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, newVideoDimensions.first, newVideoDimensions.second).apply {
+                setInteger(MediaFormat.KEY_BIT_RATE, VIDEO_BIT_RATE)
+                setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, VIDEO_FRAME_INTERVAL)
+                setInteger(MediaFormat.KEY_FRAME_RATE, VIDEO_FRAME_RATE)
                 setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
             }
 
-            val audioTarget = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, 8000, 2).apply {
-                setInteger(MediaFormat.KEY_BIT_RATE, 128000)
+            val audioTarget = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, AUDIO_SAMPLE_RATE, AUDIO_CHANNEL_COUNT).apply {
+                setInteger(MediaFormat.KEY_BIT_RATE, AUDIO_BIT_RATE)
             }
 
+            val videoCompleted = CompletableDeferred<Boolean>()
+
             val mediaTransformer = MediaTransformer(context as Context)
-            mediaTransformer.transform(contentEntryUid.toString(), file.toUri(), newVideo.absolutePath,
+            mediaTransformer.transform(contentEntryUid.toString(), videoFile.toUri(), newVideo.absolutePath,
                     videoTarget, audioTarget, object : TransformationListener {
                 override fun onStarted(id: String) {
                     Napier.d(tag = VIDEO_ANDROID, message = "started transform")
@@ -98,29 +100,36 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
 
                 override fun onError(id: String, cause: Throwable?, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
                     videoCompleted.completeExceptionally(cause
-                            ?: throw Exception("error on video id: $id"))
+                            ?: RuntimeException("error on video id: $id"))
                 }
 
             }, MediaTransformer.GRANULARITY_DEFAULT, null)
 
 
-            videoCompleted.await()
-            mediaTransformer.release()
+            try {
+                videoCompleted.await()
+            }catch (e: Exception) {
+                Napier.e(tag = VIDEO_ANDROID, throwable = e, message = e.message?: "")
+            }finally {
+                mediaTransformer.release()
+            }
 
             Napier.d(tag = VIDEO_ANDROID, message = "released transform with new file size " +
-                    "at ${newVideo.length()} with old size at ${file.length()}")*/
+                    "at ${newVideo.length()} with old size at ${videoFile.length()}")
 
             val container = Container().apply {
                 containerContentEntryUid = contentEntryUid
                 cntLastModified = System.currentTimeMillis()
-                fileSize = file.length()
+                fileSize = newVideo.length()
                 this.mimeType = mimeType
                 containerUid = repo.containerDao.insert(this)
             }
 
             val containerManager = ContainerManager(container, db, repo, containerBaseDir)
 
-            containerManager.addEntries(ContainerManager.FileEntrySource(file, file.name))
+            containerManager.addEntries(ContainerManager.FileEntrySource(newVideo, newVideo.name))
+
+            videoFile.delete()
 
             container
         }

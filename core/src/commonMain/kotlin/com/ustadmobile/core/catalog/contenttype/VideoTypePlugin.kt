@@ -26,4 +26,22 @@ open class VideoTypePlugin : ContentTypePlugin {
     }
 
 
+    companion object {
+
+        const val VIDEO_BIT_RATE = 250000
+
+        const val VIDEO_FRAME_INTERVAL = 5
+
+        const val VIDEO_FRAME_RATE = 30
+
+        const val AUDIO_SAMPLE_RATE = 48000
+
+        const val AUDIO_CHANNEL_COUNT = 2
+
+        const val AUDIO_BIT_RATE = 64000
+
+
+    }
+
+
 }
