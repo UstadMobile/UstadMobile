@@ -52,7 +52,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 
         var entry: ContentEntry? = null
         runBlocking {
-            entry = contentEntryDao.findByUidAsync(contentEntryUid)
+            entry = db.contentEntryDao.findByUidAsync(contentEntryUid)
         }
 
         if (entry == null) {
@@ -102,7 +102,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
         val dateModified = ContentScraperUtil.parseServerDate(content.dateModified
                 ?: content.creationDate!!)
 
-        val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
+        val recentContainer = db.containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
 
         val isContentUpdated = if (recentContainer == null) true else {
             recentContainer.mimeType != MIMETYPE_HAR && dateModified > recentContainer.cntLastModified
@@ -110,7 +110,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 
         val sourceId = entry!!.sourceUrl!!
         val commonSourceUrl = "%${sourceId.substringBefore(".")}%"
-        val commonEntryList = contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
+        val commonEntryList = db.contentEntryDao.findSimilarIdEntryForKhan(commonSourceUrl)
         commonEntryList.forEach {
 
             if (it.sourceUrl == sourceId) {

@@ -22,12 +22,12 @@ class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false,
             field = value
         }
 
-    var markingMode: Boolean = marking
+    var shortTextEditable: Boolean = marking
         set(value){
             if(field == value)
                 return
             field = value
-            viewHolder?.itemBinding?.markingMode = value
+            viewHolder?.itemBinding?.editable = value
             viewHolder?.itemBinding?.freeText = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
 
         }
@@ -45,7 +45,7 @@ class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false,
                 ItemClazzworkSubmissionTextEntryBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
                     it.freeText = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
-                    it.markingMode = markingMode
+                    it.editable = shortTextEditable
                 })
     }
 
@@ -61,6 +61,6 @@ class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false,
     override fun onBindViewHolder(holder: SubmissionTextEntryWithResultViewHolder, position: Int) {
         holder.itemBinding.clazzWorkWithSubmission = getItem(position)
         holder.itemView.tag = getItem(position).clazzWorkUid ?: 0L
-        holder.itemBinding.markingMode = markingMode
+        holder.itemBinding.editable = shortTextEditable
     }
 }

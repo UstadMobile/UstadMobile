@@ -76,7 +76,6 @@ class ClazzWorkQuestionAndOptionsEditPresenter(context: Any,
         val clazzWorkQuestionOption = ClazzWorkQuestionOption().apply {
             clazzWorkQuestionOptionText= ""
             clazzWorkQuestionOptionActive = true
-//            clazzWorkQuestionOptionQuestionUid = entity?.clazzWorkQuestion?.clazzWorkQuestionUid?:0L
         }
         val currentList =
                 view.clazzWorkQuestionOptionList?.getValue()?.toMutableList()?:mutableListOf<ClazzWorkQuestionOption>()

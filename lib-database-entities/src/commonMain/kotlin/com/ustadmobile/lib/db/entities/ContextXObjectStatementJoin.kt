@@ -12,6 +12,7 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = TABLE_ID)
 @Serializable
+//TODO: check this
 class ContextXObjectStatementJoin {
 
     @PrimaryKey(autoGenerate = true)

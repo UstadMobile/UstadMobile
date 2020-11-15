@@ -1,33 +1,33 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
+import ScraperTypes
 import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
-import com.ustadmobile.core.db.dao.ScrapeRunDao
-import com.ustadmobile.lib.contentscrapers.UMLogUtil
-import com.ustadmobile.lib.contentscrapers.abztract.Scraper.Companion.ERROR_TYPE_TIMEOUT
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import com.ustadmobile.lib.db.entities.ScrapeRun
+import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.LiveDataWorkQueue
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
+import com.ustadmobile.lib.contentscrapers.UMLogUtil
+import com.ustadmobile.lib.contentscrapers.abztract.Scraper.Companion.ERROR_TYPE_TIMEOUT
 import com.ustadmobile.lib.contentscrapers.googledrive.GoogleFile
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
-import com.ustadmobile.sharedse.util.LiveDataWorkQueue
-import io.ktor.client.call.receive
-import io.ktor.client.request.get
-import io.ktor.client.request.parameter
-import io.ktor.client.statement.HttpStatement
-import kotlinx.coroutines.*
+import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import com.ustadmobile.lib.db.entities.ScrapeRun
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.TimeoutCancellationException
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeout
 import org.apache.commons.cli.*
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
@@ -40,7 +40,6 @@ import org.kodein.di.on
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
-import java.lang.IllegalArgumentException
 import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLDecoder
@@ -50,34 +49,31 @@ import kotlin.system.exitProcess
 @ExperimentalStdlibApi
 class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpoint, override val di: DI) : DIAware {
 
-    private var runDao: ScrapeRunDao
-    private var contentEntryDao: ContentEntryDao
-    private var queueDao: ScrapeQueueItemDao
-
     private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
 
+    private val repo: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
+
     private val apiKey: String by di.instance(tag = DiTag.TAG_GOOGLE_API)
+
+    private val contentImportManager: ContentImportManager by on(endpoint).instance()
+
 
     private val logPrefix = "[ScraperManager endpoint url: ${endpoint.url}] "
 
     init {
 
-        runDao = db.scrapeRunDao
-        queueDao = db.scrapeQueueItemDao
-        contentEntryDao = db.contentEntryDao
-
         Napier.base(DebugAntilog())
 
-        LiveDataWorkQueue(queueDao.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_INDEX),
+        LiveDataWorkQueue(db.scrapeQueueItemDao.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_INDEX),
                 { item1, item2 -> item1.sqiUid == item2.sqiUid },
                 indexTotal) {
 
-            queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING, 0)
+            db.scrapeQueueItemDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING, 0)
 
             val startTime = System.currentTimeMillis()
             Napier.i("$logPrefix Started indexer url ${it.scrapeUrl} at start time: $startTime", tag = SCRAPER_TAG)
 
-            queueDao.setTimeStarted(it.sqiUid, startTime)
+            db.scrapeQueueItemDao.setTimeStarted(it.sqiUid, startTime)
             try {
 
                 val indexerClazz = ScraperTypes.indexerTypeMap[it.contentType]
@@ -89,7 +85,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                 Napier.e("$logPrefix ${ExceptionUtils.getStackTrace(e)}", tag = SCRAPER_TAG)
             }
 
-            queueDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
+            db.scrapeQueueItemDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
             val duration = System.currentTimeMillis() - startTime
             Napier.e("$logPrefix Ended indexer for url ${it.scrapeUrl} in duration: $duration", tag = SCRAPER_TAG)
         }.also { indexQueue ->
@@ -99,15 +95,15 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
         }
 
 
-        LiveDataWorkQueue(queueDao.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_SCRAPE),
+        LiveDataWorkQueue( db.scrapeQueueItemDao.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_SCRAPE),
                 { item1, item2 -> item1.sqiUid == item2.sqiUid }, scraperTotal) {
 
-            queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING, 0)
+            db.scrapeQueueItemDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_RUNNING, 0)
 
             val startTime = System.currentTimeMillis()
             Napier.i("$logPrefix Started scraper url ${it.scrapeUrl} at start time: $startTime", tag = SCRAPER_TAG)
 
-            queueDao.setTimeStarted(it.sqiUid, startTime)
+            db.scrapeQueueItemDao.setTimeStarted(it.sqiUid, startTime)
             var obj: Scraper? = null
             try {
                 withTimeout(900000) {
@@ -118,20 +114,20 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     obj?.scrapeUrl(it.scrapeUrl!!)
                 }
             } catch (t: TimeoutCancellationException) {
-                queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, ERROR_TYPE_TIMEOUT)
-                contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
+                db.scrapeQueueItemDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, ERROR_TYPE_TIMEOUT)
+                repo.contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
             } catch (s: ScraperException) {
                 Napier.e("$logPrefix Known Exception ${s.message}", tag = SCRAPER_TAG)
             } catch (e: Exception) {
-                queueDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, 0)
-                contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
+                db.scrapeQueueItemDao.updateSetStatusById(it.sqiUid, ScrapeQueueItemDao.STATUS_FAILED, 0)
+                repo.contentEntryDao.updateContentEntryInActive(it.sqiContentEntryParentUid, true)
                 Napier.e("$logPrefix Exception running scrapeContent ${it.scrapeUrl}", tag = SCRAPER_TAG)
                 Napier.e("$logPrefix ${ExceptionUtils.getStackTrace(e)}", tag = SCRAPER_TAG)
             } finally {
                 obj?.close()
             }
 
-            queueDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
+            db.scrapeQueueItemDao.setTimeFinished(it.sqiUid, System.currentTimeMillis())
             val duration = System.currentTimeMillis() - startTime
             Napier.i("$logPrefix Ended scrape for url ${it.scrapeUrl} in duration: $duration", tag = SCRAPER_TAG)
 
@@ -143,7 +139,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
     }
 
     fun start(startingUrl: String, scraperType: String, parentUid: Long, contentEntryUid: Long, overrideEntry: Boolean = false) {
-        val runId = runDao.insert(ScrapeRun(scraperType,
+        val runId = db.scrapeRunDao.insert(ScrapeRun(scraperType,
                 ScrapeQueueItemDao.STATUS_PENDING)).toInt()
 
         val isIndexer = ScraperTypes.indexerTypeMap.keys.find { it == scraperType }
@@ -166,7 +162,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
             this.itemType = itemType
             timeAdded = System.currentTimeMillis()
         }
-        queueDao.insert(scrapeQueue)
+        db.scrapeQueueItemDao.insert(scrapeQueue)
     }
 
     suspend fun extractMetadata(urlString: String): ImportedContentEntryMetaData? {
@@ -221,7 +217,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     return null
                 }
 
-                mimeTypeSupported.find { fileMimeType -> fileMimeType == file.mimeType }
+                contentImportManager.getMimeTypeSupported().find { fileMimeType -> fileMimeType == file.mimeType }
                         ?: return null
 
                 Napier.d("$logPrefix mimetype found for google drive link: ${file.mimeType}", tag = SCRAPER_TAG)
@@ -242,7 +238,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                 }
                 stream.close()
 
-                val metadata = extractContentEntryMetadataFromFile(googleFile, db)
+                val metadata = contentImportManager.extractMetadata(googleFile.path)
                 metadata?.scraperType = ScraperTypes.GOOGLE_DRIVE_SCRAPE
                 metadata?.uri = apiCall
                 metadata?.contentEntry?.sourceUrl = apiCall
@@ -274,13 +270,13 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                 entry.contentTypeFlag = ContentEntry.TYPE_COLLECTION
                 Napier.e("$logPrefix metadata uri for apacheIndexer: $urlWithEndingSlash", tag = SCRAPER_TAG)
 
-                return ImportedContentEntryMetaData(entry, "text/html", urlWithEndingSlash, 0, ScraperTypes.APACHE_INDEXER)
+                return ImportedContentEntryMetaData(entry, "text/html", urlWithEndingSlash, ScraperTypes.APACHE_INDEXER)
 
             }
 
             else -> {
 
-                val metaData = extractContentEntryMetadataFromFile(contentFile, db)
+                val metaData = contentImportManager.extractMetadata(contentFile.path)
                 metaData?.scraperType = ScraperTypes.URL_SCRAPER
                 metaData?.uri = urlString
                 metaData?.contentEntry?.sourceUrl = urlString

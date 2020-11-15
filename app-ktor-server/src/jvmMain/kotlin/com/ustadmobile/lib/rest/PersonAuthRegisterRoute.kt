@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.rest
 
+import com.google.gson.Gson
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
@@ -53,13 +54,16 @@ fun Route.PersonAuthRegisterRoute() {
 
         post("register"){
             val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
+            val repo: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_REPO)
+            val gson: Gson by di().instance()
+
             val personString = call.request.queryParameters["person"]
             if(personString == null){
                 call.respond(HttpStatusCode.BadRequest, "No person information provided")
                 return@post
             }
 
-            val mPerson = Json.parse(PersonWithAccount.serializer(),personString)
+            val mPerson = gson.fromJson(personString, PersonWithAccount::class.java)
 
             val person = if(mPerson.personUid != 0L) db.personDao.findByUid(mPerson.personUid)
             else db.personDao.findByUsername(mPerson.username)
@@ -72,10 +76,10 @@ fun Route.PersonAuthRegisterRoute() {
 
             if(person == null) {
                 mPerson.apply {
-                    personUid = db.insertPersonAndGroup(mPerson).personUid
+                    personUid = repo.insertPersonAndGroup(mPerson).personUid
                 }
             } else {
-                db.personDao.update(mPerson)
+                repo.personDao.update(mPerson)
             }
             val personAuth = PersonAuth(mPerson.personUid,
                     PersonAuthDao.PLAIN_PASS_PREFIX+mPerson.newPassword)

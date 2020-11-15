@@ -5,12 +5,9 @@ import android.content.res.Configuration
 import android.media.session.PlaybackState.STATE_BUFFERING
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.rule.GrantPermissionRule
 import com.google.android.exoplayer2.Player.STATE_READY
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -18,20 +15,17 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTAINER_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntryProgress
+import com.ustadmobile.port.android.screen.VideoContentScreen
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.insertVideoContent
 import kotlinx.android.synthetic.main.fragment_video_content.*
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
-import org.hamcrest.core.AllOf.allOf
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -41,11 +35,11 @@ import java.io.File
 
 @AdbScreenRecord("Video Content Screen Test")
 @ExperimentalStdlibApi
-class VideoContentFragmentTest {
+class VideoContentFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -53,15 +47,7 @@ class VideoContentFragmentTest {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
     val screenRecordRule = AdbScreenRecordRule()
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
     @get:Rule
     var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
@@ -81,9 +67,9 @@ class VideoContentFragmentTest {
                 videoFile)
 
         runBlocking {
-            container = dbRule.db.insertVideoContent()
+            container = dbRule.repo.insertVideoContent()
             val manager = ContainerManager(container!!, dbRule.db,
-                    dbRule.db, tmpDir.absolutePath)
+                    dbRule.repo, tmpDir.absolutePath)
             manager.addEntries(ContainerManager.FileEntrySource(videoFile, "video.mp4"))
         }
     }
@@ -96,34 +82,47 @@ class VideoContentFragmentTest {
             VideoContentFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
-
-        onView(withId(R.id.activity_video_player_description)).check(matches(isDisplayed()))
-
-        onView(allOf(withId(R.id.exo_play),
-                isDescendantOfA(withId(R.id.player_view_controls))))
-                .perform(click())
-
-        fragmentScenario.onFragment {
-            val playState = it.activity_video_player_view.player?.playbackState
-            Assert.assertTrue("player is playing", playState == STATE_BUFFERING || playState == STATE_READY)
         }
 
-        fragmentScenario.letOnFragment {
-            it.onConfigurationChanged(Configuration().apply {
-                orientation = Configuration.ORIENTATION_LANDSCAPE
-            })
+        init{
+
+        }.run{
+
+            VideoContentScreen{
+
+                desc {
+                    isDisplayed()
+                }
+                exoPlayButton{
+                    click()
+                }
+                fragmentScenario.onFragment {
+                    val playState = it.activity_video_player_view.player?.playbackState
+                    Assert.assertTrue("player is playing", playState == STATE_BUFFERING || playState == STATE_READY)
+                }
+
+                fragmentScenario.letOnFragment {
+                    it.onConfigurationChanged(Configuration().apply {
+                        orientation = Configuration.ORIENTATION_LANDSCAPE
+                    })
+                }
+
+                desc{
+                    isGone()
+                }
+                playerControls{
+                    isGone()
+                }
+
+                var contentProgress: ContentEntryProgress? = null
+                while(contentProgress == null){
+                    contentProgress = dbRule.db.contentEntryProgressDao.getProgressByContentAndPerson(container!!.containerContentEntryUid, dbRule.account.personUid)
+                }
+                Assert.assertEquals("progress started since user pressed play", 0, contentProgress.contentEntryProgressProgress)
+
+            }
+
         }
-
-        onView(withId(R.id.activity_video_player_description))
-                .check(matches(withEffectiveVisibility(Visibility.GONE)))
-
-        onView(withId(R.id.player_view_controls))
-                .check(matches(withEffectiveVisibility(Visibility.GONE)))
-
-        val contentProgress = dbRule.db.contentEntryProgressDao.getProgressByContentAndPerson(container!!.containerContentEntryUid, dbRule.account.personUid)
-        Assert.assertEquals("progress started since user pressed play", 0, contentProgress!!.contentEntryProgressProgress)
 
     }
 

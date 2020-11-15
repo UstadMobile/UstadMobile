@@ -20,7 +20,10 @@ enum class ListViewAddMode {
  */
 enum class SelectionOption(val messageId: Int, val commandId: Int) {
     EDIT(MessageID.edit, 1),
-    DELETE(MessageID.delete, 2)
+    DELETE(MessageID.delete, 2),
+    MOVE(MessageID.move,3),
+    HIDE(MessageID.hide, 4),
+    UNHIDE(MessageID.unhide, 5)
 }
 
 /**

@@ -107,6 +107,13 @@ class ClazzWorkQuestionAndOptionsEditFragment: UstadEditFragment<ClazzWorkQuesti
         }
     }
 
+    override var errorMessage: String? = null
+        set(value) {
+            field = value
+
+            mBinding?.errorText = value
+        }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentClazzWorkQuestionAndOptionsEditBinding.inflate(inflater, container, false).also {

@@ -9,6 +9,7 @@ import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
+import kotlinx.coroutines.withTimeoutOrNull
 
 fun UmAppDatabase.runPreload() {
     preload()
@@ -279,4 +280,41 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
     }else{
         return matches[0]
     }
+}
+
+
+suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzWorkWithSubmission,
+                                                 clazzMemberUid: Long, responsePersonUid : Long)
+        : List<ClazzWorkQuestionAndOptionWithResponse>{
+
+    val questionsAndOptionsWithResponses :List<ClazzWorkQuestionAndOptionWithResponseRow> = withTimeoutOrNull(2000){
+        clazzWorkQuestionDao.findAllQuestionsAndOptionsWithResponse(clazzWorkWithSubmission.clazzWorkUid?:0L,
+                clazzMemberUid)
+    } ?: listOf()
+
+    val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
+            questionsAndOptionsWithResponses.groupBy { it.clazzWorkQuestion }.entries
+                    .map {
+                        val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
+
+                        ClazzWorkQuestionAndOptionWithResponse(
+                                clazzWorkWithSubmission ,
+                                it.key ?: ClazzWorkQuestion(),
+                                it.value.map {
+                                    it.clazzWorkQuestionOption ?: ClazzWorkQuestionOption()
+                                },
+                                it.value.map {
+                                    it.clazzWorkQuestionOptionResponse
+                                }.first()?: ClazzWorkQuestionResponse().apply {
+                                    clazzWorkQuestionResponseQuestionUid = questionUid?:0L
+                                    clazzWorkQuestionResponsePersonUid = responsePersonUid
+                                    clazzWorkQuestionResponseClazzMemberUid = clazzMemberUid
+                                            ?: 0L
+                                    clazzWorkQuestionResponseClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
+                                            ?: 0L
+                                })
+                    }
+
+
+    return questionsAndOptionsWithResponseList
 }

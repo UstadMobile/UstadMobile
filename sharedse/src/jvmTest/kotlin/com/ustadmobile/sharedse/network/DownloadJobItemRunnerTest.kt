@@ -1,6 +1,5 @@
 package com.ustadmobile.sharedse.network
 
-import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
@@ -21,6 +20,7 @@ import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadMana
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTED_LOCAL
@@ -292,32 +292,24 @@ class DownloadJobItemRunnerTest {
                 cloudMockWebServer.url("/").toString())
 
         clientDb =  clientDi.on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
+        clientRepo = clientDi.on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         containerDownloadManager = clientDi.on(accountManager.activeAccount).direct.instance()
 
         serverDb = UmAppDatabase.getInstance(context).also {
             it.clearAllTables()
         }
+
+        serverRepo = serverDb.asRepository(context, "http://localhost/dummy", "",
+            defaultHttpClient())
+
         mockLocalAvailabilityManager = clientDi.on(accountManager.activeAccount).direct.instance()
-
-
-
-//        clientDb = UmAppDatabase.getInstance(context, "clientdb")
-//        clientDb.clearAllTables()
-
-
-
 
         clientContainerDir = UmFileUtilSe.makeTempDir("clientContainerDir", "" + System.currentTimeMillis())
 
-        //clientRepo = clientDb//.getRepository("http://localhost/dummy/", "")
         networkNode = NetworkNode()
         networkNode.bluetoothMacAddress = "00:3F:2F:64:C6:4F"
         networkNode.lastUpdateTimeStamp = System.currentTimeMillis()
         networkNode.nodeId = clientDb.networkNodeDao.replace(networkNode)
-
-//        serverDb = UmAppDatabase.getInstance(context)
-//        serverDb.clearAllTables()
-//        serverRepo = serverDb//.getRepository("http://localhost/dummy/", "")
 
         webServerTmpDir = UmFileUtilSe.makeTempDir("webServerTmpDir",
                 "" + System.currentTimeMillis())
@@ -328,20 +320,18 @@ class DownloadJobItemRunnerTest {
         containerTmpDir = UmFileUtilSe.makeTempDir("containerTmpDir",
                 "" + System.currentTimeMillis())
 
-        //mockedNetworkManager = spy<NetworkManagerBleCommon>(NetworkManagerBleCommon::class.java!!)
-
         val contentEntry = ContentEntry()
         contentEntry.title = "Test entry"
-        contentEntry.contentEntryUid = clientDb.contentEntryDao.insert(contentEntry)
+        contentEntry.contentEntryUid = clientRepo.contentEntryDao.insert(contentEntry)
 
         container = Container(contentEntry)
-        container.containerUid = serverDb.containerDao.insert(container)
-        containerManager = ContainerManager(container, serverDb, serverDb,
+        container.containerUid = serverRepo.containerDao.insert(container)
+        containerManager = ContainerManager(container, serverDb, serverRepo,
                 webServerTmpDir.absolutePath)
         addEntriesFromZipToContainer(webServerTmpContentEntryFile.absolutePath, containerManager)
 
         //add the container itself to the client database (would normally happen via sync/preload)
-        clientDb.containerDao.insert(container)
+        clientRepo.containerDao.insert(container)
 
 
 
@@ -361,53 +351,13 @@ class DownloadJobItemRunnerTest {
 
         downloadJobItem.djiUid = clientDb.downloadJobItemDao.insert(downloadJobItem).toInt()
 
-//        val peerDb = UmAppDatabase.getInstance(context, "peerdb")
-//        peerDb.clearAllTables()
-//        peerServer = EmbeddedHTTPD(0, context, peerDb)
-
-
-
-
-        //TODO: ContainerDownloadManager should
-//        val containerDownloaderImpl = ContainerFetcherBuilder(mockedNetworkManager).build()
-//        whenever(mockedNetworkManager.containerFetcher).thenReturn(containerDownloaderImpl)
 
         mockedNetworkManagerBleWorking.set(true)
 
         mockedNetworkManagerWifiConnectWorking.set(true)
 
-
-
-//        val httpd = EmbeddedHTTPD(0, context)
-//        httpd.start()
-
-
-//        cloudServer = EmbeddedHTTPD(0, serverDi)
-//        cloudServer.start()
-
-
-
-
-//        cloudMockDispatcher = ReverseProxyDispatcher(HttpUrl.parse(cloudServer.localURL)!!)
-//        cloudMockWebServer.setDispatcher(cloudMockDispatcher)
-
         cloudEndPoint = cloudMockWebServer.url("/").toString()
 
-
-
-//        val peerRepo = peerDb//.getRepository("http://localhost/dummy/", "")
-//        peerRepo.containerDao.insert(container)
-//        peerContainerFileTmpDir = UmFileUtilSe.makeTempDir("peerContainerFileTmpDir",
-//                "" + System.currentTimeMillis())
-//        val peerContainerManager = ContainerManager(container,
-//                peerDb, peerRepo, peerContainerFileTmpDir.absolutePath)
-//
-//        peerTmpContentEntryFile = File.createTempFile("peerTmpContentEntryFile",
-//                "" + System.currentTimeMillis() + ".zip")
-//        extractTestResourceToFile(TEST_FILE_RESOURCE_PATH, peerTmpContentEntryFile)
-//        val peerZipFile = ZipFile(peerTmpContentEntryFile)
-//        addEntriesFromZipToContainer(peerTmpContentEntryFile.absolutePath, peerContainerManager)
-//        peerZipFile.close()
     }
 
     @Test

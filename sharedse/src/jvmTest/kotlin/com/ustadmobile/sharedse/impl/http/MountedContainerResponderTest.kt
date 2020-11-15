@@ -4,6 +4,8 @@ import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.ContainerManagerCommon
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.ext.dataInflatedIfRequired
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -37,7 +39,7 @@ class MountedContainerResponderTest {
 
     private lateinit var container: Container
 
-    private var containerManager: ContainerManager? = null
+    private lateinit var containerManager: ContainerManager
 
     @JvmField
     @Rule
@@ -49,12 +51,13 @@ class MountedContainerResponderTest {
         containerTmpDir = temporaryFolder.newFolder("TestMountedContainerResponder-containerTmp")
 
         db = UmAppDatabase.getInstance(Any())
-        repo = db
+        repo = db.asRepository(Any(), "http://localhost/dummy", "",
+                defaultHttpClient())
         db.clearAllTables()
 
         container = Container()
         container.containerUid = repo.containerDao.insert(container)
-        containerManager = ContainerManager(container!!, db!!, repo!!,
+        containerManager = ContainerManager(container, db, repo,
                 containerTmpDir.absolutePath)
 
         val tmpFiles = (1..2).map {index ->
@@ -65,7 +68,7 @@ class MountedContainerResponderTest {
         }
 
         runBlocking {
-            containerManager!!.addEntries(ContainerManagerCommon.AddEntryOptions(dontUpdateTotals = false),
+            containerManager.addEntries(ContainerManagerCommon.AddEntryOptions(dontUpdateTotals = false),
                     ContainerManager.FileEntrySource(tmpFiles[0], "subfolder/testfile1.png"),
                     ContainerManager.FileEntrySource(tmpFiles[1], "subfolder/test file2.png"))
         }
@@ -114,8 +117,8 @@ class MountedContainerResponderTest {
         val response = responder.get(mockUriResource, mutableMapOf(), mockSession)
         val gzipHeader = response.getHeader("Content-Encoding")
         Assert.assertEquals("Content was gzipped", "gzip", gzipHeader)
-        val containerIn = containerManager!!.getInputStream(
-                containerManager!!.getEntry("subfolder/testfile1.png")!!)
+        val containerIn = containerManager.getInputStream(
+                containerManager.getEntry("subfolder/testfile1.png")!!)
         Assert.assertArrayEquals("Data returned by URI responder matches actual container entry",
                 containerIn.use { it.readBytes() },
                 response.dataInflatedIfRequired().use { it.readBytes() })
@@ -164,8 +167,8 @@ class MountedContainerResponderTest {
 
         val response = responder.get(mockUriResource, mutableMapOf(), mockSession)
 
-        val containerIn = containerManager!!.getInputStream(
-                containerManager!!.getEntry("subfolder/testfile1.png")!!)
+        val containerIn = containerManager.getInputStream(
+                containerManager.getEntry("subfolder/testfile1.png")!!)
         Assert.assertArrayEquals("Data returned by URI responder matches actual container entry",
                 containerIn.use { it.readBytes() },
                 response.data.use { it.readBytes() })

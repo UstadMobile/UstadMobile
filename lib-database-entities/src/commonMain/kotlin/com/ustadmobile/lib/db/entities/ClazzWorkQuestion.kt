@@ -8,7 +8,23 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
-@SyncableEntity(tableId = 202)
+@SyncableEntity(tableId = ClazzWorkQuestion.TABLE_ID,
+        notifyOnUpdate = ["""
+            SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzWorkQuestion.TABLE_ID} AS tableId FROM 
+            ChangeLog
+            JOIN ClazzWorkQuestion ON ChangeLog.chTableId = ${ClazzWorkQuestion.TABLE_ID} AND ClazzWorkQuestion.clazzWorkQuestionUid = ChangeLog.chEntityPk
+            JOIN ClazzWork ON ClazzWork.clazzWorkUid = ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid
+            JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
+            JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZWORK_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid"""],
+        syncFindAllQuery = """
+            SELECT ClazzWorkQuestion.* FROM
+            ClazzWorkQuestion
+            JOIN ClazzWork ON ClazzWork.clazzWorkUid = ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid
+            JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid
+            JOIN Person ON Person.personUid IN  (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_CLAZZWORK_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+            WHERE DeviceSession.dsDeviceId = :clientId""")
 @Entity
 @Serializable
 open class ClazzWorkQuestion {
@@ -34,11 +50,6 @@ open class ClazzWorkQuestion {
 
     @LastChangedBy
     var clazzWorkQuestionLCB: Int = 0
-
-    companion object{
-        const val CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT = 1
-        const val CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE = 2
-    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -70,6 +81,15 @@ open class ClazzWorkQuestion {
         result = 31 * result + clazzWorkQuestionLCSN.hashCode()
         result = 31 * result + clazzWorkQuestionLCB
         return result
+    }
+
+
+    companion object{
+
+        const val TABLE_ID = 202
+
+        const val CLAZZ_WORK_QUESTION_TYPE_FREE_TEXT = 1
+        const val CLAZZ_WORK_QUESTION_TYPE_MULTIPLE_CHOICE = 2
     }
 
 

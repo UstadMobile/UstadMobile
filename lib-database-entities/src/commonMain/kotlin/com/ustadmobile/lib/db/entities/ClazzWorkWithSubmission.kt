@@ -28,7 +28,7 @@ class ClazzWorkWithSubmission : ClazzWork() {
         clazzWorkInstructions = cw.clazzWorkInstructions
         clazzWorkActive = cw.clazzWorkActive
         clazzWorkLocalChangeSeqNum = cw.clazzWorkLocalChangeSeqNum
-        clazzWorkLocalChangeSeqNum = cw.clazzWorkLocalChangeSeqNum
+        clazzWorkMasterChangeSeqNum = cw.clazzWorkMasterChangeSeqNum
         clazzWorkLastChangedBy = cw.clazzWorkLastChangedBy
 
         return this

@@ -108,7 +108,7 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
             throw ScraperException(ERROR_TYPE_MIME_TYPE_NOT_SUPPORTED, "Video type not supported for $mimetype")
         }
 
-        val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
+        val recentContainer = db.containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
 
         if (recentContainer != null) {
             val isUpdated = videoFile.lastModified() > recentContainer.cntLastModified
@@ -137,7 +137,7 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 
         var entry: ContentEntry? = null
         runBlocking {
-            entry = contentEntryDao.findByUidAsync(contentEntryUid)
+            entry = db.contentEntryDao.findByUidAsync(contentEntryUid)
         }
 
         if (entry == null) {
@@ -160,7 +160,7 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                 entry?.publisher ?: "", entry?.licenseType ?: 0,
                 entry?.primaryLanguageUid ?: 0, entry?.languageVariantUid,
                 data.description, true, "", data.thumbnail, "", "",
-                ContentEntry.TYPE_VIDEO, contentEntryDao)
+                ContentEntry.TYPE_VIDEO, repo.contentEntryDao)
 
         scrapeYoutubeVideo(sourceUrl)
 

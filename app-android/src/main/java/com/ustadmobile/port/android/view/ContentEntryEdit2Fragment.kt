@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.LayoutInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.ActivityResultRegistry
@@ -12,31 +13,22 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
-import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.controller.ContentEntryEdit2Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UMStorageDir
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.sharedse.contentformats.*
 import kotlinx.android.synthetic.main.fragment_content_entry_edit2.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.kodein.di.instance
-import org.kodein.di.on
 import java.io.File
-import java.net.URI
 
 
 interface ContentEntryEdit2FragmentEventHandler {
@@ -132,6 +124,15 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     }
 
+    /**
+     * removes the temp folder from being deleted in the backstack
+     */
+    private fun unregisterFileFromTemp() {
+        if(entryMetaData?.uri?.startsWith("file://") == true) {
+            findNavController().unregisterDestinationTempFile(requireContext(), File(entryMetaData?.uri?.removePrefix("file://")).parentFile)
+        }
+    }
+
 
     internal fun handleFileSelection() {
         registerForActivityResult(ActivityResultContracts.GetContent(),
@@ -140,32 +141,20 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 try {
                     GlobalScope.launch {
                         val input = requireContext().contentResolver.openInputStream(uri)
-                        val tmpDir = findNavController().createTempDirForDestination(requireContext(),
-                                "import-${System.currentTimeMillis()}")
+                        val importFolder = File(requireContext().filesDir, "import")
+                        val importTmpFolder = File(importFolder, "import-${System.currentTimeMillis()}")
+                        importTmpFolder.mkdirs()
+                        findNavController().registerDestinationTempFile(requireContext(),
+                                importTmpFolder)
 
-                        val tmpFile = File(tmpDir, requireContext().contentResolver.getFileName(uri))
+                        val tmpFile = File(importTmpFolder, requireContext().contentResolver.getFileName(uri))
                         val output = tmpFile.outputStream()
                         input?.copyTo(tmpFile.outputStream())
                         output.flush()
                         output.close()
                         input?.close()
 
-                        val accountManager: UstadAccountManager by instance()
-                        val db: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_DB)
-                        val metaData = extractContentEntryMetadataFromFile(tmpFile, db)
-                        entryMetaData = metaData
-                        when (entryMetaData) {
-                            null -> {
-                                showSnackBar(getString(R.string.import_link_content_not_supported))
-                            }
-                        }
-                        val entry = entryMetaData?.contentEntry
-                        val entryUid = arguments?.get(ARG_ENTITY_UID)
-                        if (entry != null) {
-                            if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
-                            fileImportErrorVisible = false
-                            entity = entry
-                        }
+                        mPresenter?.handleFileSelection(tmpFile.path)
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -180,23 +169,9 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
     }
 
-
     private fun handleLinkSelection() {
         onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(ImportedContentEntryMetaData::class.java, R.id.import_link_view)
-    }
-
-
-    override suspend fun saveContainerOnExit(entryUid: Long, selectedBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase): Container? {
-        val fileUri = entryMetaData?.uri
-        val importMode = entryMetaData?.importMode
-        val container = if (fileUri != null && importMode != null) {
-            withContext(Dispatchers.IO) {
-                importContainerFromFile(entryUid, entryMetaData?.mimeType, selectedBaseDir, File(URI(fileUri).path), db, repo, importMode, requireContext())
-            }
-        } else null
-        loading = true
-        return container
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -239,7 +214,15 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             }
         }
 
+    }
 
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        if(item.itemId == R.id.menu_done){
+            if(entity?.let { mPresenter?.isImportValid(it) } == true){
+                unregisterFileFromTemp()
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onDestroyView() {

@@ -28,6 +28,8 @@ import org.apache.commons.io.IOUtils
 import org.apache.commons.lang.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import org.openqa.selenium.By
 import org.openqa.selenium.NoSuchElementException
 import org.openqa.selenium.TimeoutException
@@ -51,11 +53,6 @@ import java.util.*
 @ExperimentalStdlibApi
 class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : HarScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
-    private val categorySchemaDao: ContentCategorySchemaDao
-    private val contentCategoryDao: ContentCategoryDao
-    private val containerEtagDao: ContainerETagDao
-    private val repository: UmAppDatabase = db
-
     private val licenseList = listOf(
             "CC 0" to LICENSE_TYPE_PUBLIC_DOMAIN,
             "public domain" to LICENSE_TYPE_PUBLIC_DOMAIN,
@@ -66,12 +63,6 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
             "CC BY-ND" to LICENSE_TYPE_CC_BY_ND,
             "CC BY-NC-SA" to LICENSE_TYPE_CC_BY_NC_SA,
             "CC BY-NC-ND" to LICENSE_TYPE_CC_BY_NC_ND)
-
-    init {
-        categorySchemaDao = repository.contentCategorySchemaDao
-        contentCategoryDao = repository.contentCategoryDao
-        containerEtagDao = repository.containerETagDao
-    }
 
     override fun scrapeUrl(sourceUrl: String) {
 
@@ -178,7 +169,7 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
 
                 contentEntry = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl, doc.title(),
                         sourceUrl, publisher, licenseType, langEntity.langUid, null, description, true, author,
-                        thumbnail, "", "", ContentEntry.TYPE_ARTICLE, contentEntryDao)
+                        thumbnail, "", "", ContentEntry.TYPE_ARTICLE, repo.contentEntryDao)
 
                 if (licenseType == 0) {
                     hideContentEntry()
@@ -195,7 +186,7 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
                     else -> "Resource Level"
                 }
 
-                val ddlSchema = ContentScraperUtil.insertOrUpdateSchema(categorySchemaDao, schemeName, "ddl/resource-level/$twoLangCode")
+                val ddlSchema = ContentScraperUtil.insertOrUpdateSchema(repo.contentCategorySchemaDao, schemeName, "ddl/resource-level/$twoLangCode")
 
                 val subjectList = subjectContainer.select("a")
 
@@ -203,7 +194,7 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
 
                     val title = subject.attr("title")
 
-                    val categoryEntry = ContentScraperUtil.insertOrUpdateCategoryContent(contentCategoryDao, ddlSchema, title)
+                    val categoryEntry = ContentScraperUtil.insertOrUpdateCategoryContent(repo.contentCategoryDao, ddlSchema, title)
                     ContentScraperUtil.insertOrUpdateChildWithMultipleCategoriesJoin(
                             db.contentEntryContentCategoryJoinDao, categoryEntry, contentEntry!!)
 
@@ -217,7 +208,7 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
                     val index = relatedHref.indexOf("af/")
                     val relatedUrl = StringBuilder(relatedHref).insert(index + 3, "$twoLangCode/").toString()
 
-                    val relatedEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, relatedUrl, contentEntry?.primaryLanguageUid ?: 0, element.text()
+                    val relatedEntry = ContentScraperUtil.insertTempContentEntry(repo.contentEntryDao, relatedUrl, contentEntry?.primaryLanguageUid ?: 0, element.text()
                             ?: "")
 
                     ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, relatedEntry, contentEntry!!, REL_TYPE_SEE_ALSO)
@@ -236,7 +227,7 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
                         val relatedTwoCode = element.attr("hreflang")
                         val relatedLink = element.attr("href")
 
-                        val translatedEntry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, relatedLink, ContentScraperUtil.insertOrUpdateLanguageByTwoCode(db.languageDao, relatedTwoCode).langUid, "")
+                        val translatedEntry = ContentScraperUtil.insertTempContentEntry(repo.contentEntryDao, relatedLink, ContentScraperUtil.insertOrUpdateLanguageByTwoCode(db.languageDao, relatedTwoCode).langUid, "")
                         ContentScraperUtil.insertOrUpdateRelatedContentJoin(db.contentEntryRelatedEntryJoinDao, translatedEntry, contentEntry!!,
                                 REL_TYPE_TRANSLATED_VERSION)
 
@@ -270,7 +261,7 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
                 val entryETag = fileEntry.response.headers.find { valuePair -> valuePair.name == ETAG }
                 eTagValue = entryETag?.value
 
-                val container = containerDao.getMostRecentContainerForContentEntry(contentEntry?.contentEntryUid ?: 0)
+                val container = db.containerDao.getMostRecentContainerForContentEntry(contentEntry?.contentEntryUid ?: 0)
                         ?: return@startHarScrape true
 
                 return@startHarScrape isContentUpdated(fileEntry, container)
@@ -308,12 +299,12 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
 
             val entry = containerManager.allEntries[0]
             val mimeType = Files.probeContentType(File(entry.cePath ?: "").toPath())
-            val container = containerDao.findByUid(containerManager.containerUid)
-            contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
-            containerDao.updateMimeType(mimeType, container?.containerUid ?: 0)
+            val container = db.containerDao.findByUid(containerManager.containerUid)
+            repo.contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
+            repo.containerDao.updateMimeType(mimeType, container?.containerUid ?: 0)
             if (!eTagValue.isNullOrEmpty()) {
                 val etagContainer = ContainerETag(container?.containerUid ?: 0, eTagValue!!)
-                containerEtagDao.insert(etagContainer)
+                db.containerETagDao.insert(etagContainer)
             }
 
         }

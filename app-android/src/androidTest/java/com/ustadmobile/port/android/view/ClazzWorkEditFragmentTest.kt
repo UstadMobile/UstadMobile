@@ -1,17 +1,11 @@
+/*
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.doesNotExist
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions.*
 import androidx.test.espresso.matcher.BoundedMatcher
-import androidx.test.espresso.matcher.ViewMatchers.*
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -20,10 +14,7 @@ import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
-import com.ustadmobile.lib.db.entities.Comments
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.port.android.view.binding.dateWithTimeFormat
-import com.ustadmobile.port.android.view.binding.dateWithTimeFormatWithPrepend
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
@@ -35,7 +26,6 @@ import com.ustadmobile.util.test.ext.*
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.Description
 import org.hamcrest.Matcher
-import org.hamcrest.Matchers.*
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -279,11 +269,11 @@ class ClazzWorkEditFragmentTest {
 
     private fun withTagInQuestion(quid: Long): Matcher<RecyclerView.ViewHolder?>? {
         return object : BoundedMatcher<RecyclerView.ViewHolder?,
-                ClazzWorkQuestionAndOptionsWithResponseRA.ClazzWorkQuestionViewHolder>(
-                ClazzWorkQuestionAndOptionsWithResponseRA.
+                ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder>(
+                ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.
                 ClazzWorkQuestionViewHolder::class.java) {
             override fun matchesSafely(
-                    item: ClazzWorkQuestionAndOptionsWithResponseRA
+                    item: ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter
                     .ClazzWorkQuestionViewHolder): Boolean {
                 return item.itemView.tag.equals(quid)
             }
@@ -295,4 +285,4 @@ class ClazzWorkEditFragmentTest {
     }
 
 
-}
+}*/

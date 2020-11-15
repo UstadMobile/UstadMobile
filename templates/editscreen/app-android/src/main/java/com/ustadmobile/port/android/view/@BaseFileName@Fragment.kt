@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.@BaseFileName@View
 import com.ustadmobile.lib.db.entities.@Entity@
+import com.ustadmobile.port.android.util.ext.*
 @EditEntity_Import@
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
@@ -35,11 +36,8 @@ class @BaseFileName@Fragment: UstadEditFragment<@Entity@>(), @BaseFileName@View,
         }
 
         mPresenter = @BaseFileName@Presenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+                viewLifecycleOwner, di)
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
         return rootView
     }

@@ -11,7 +11,10 @@ object PersonDetailScreen : KScreen<PersonDetailScreen>() {
     override val viewClass: Class<*>?
         get() = PersonDetailFragment::class.java
 
-    val changePassView: KView = KView { withId(R.id.change_account_password_view) }
+    val changePassView: KView = KView {
+        withId(R.id.change_account_password_view)
+        withDescendant { withText("Change Password") }
+    }
 
     val createAccView: KView = KView { withId(R.id.create_account_view) }
 
