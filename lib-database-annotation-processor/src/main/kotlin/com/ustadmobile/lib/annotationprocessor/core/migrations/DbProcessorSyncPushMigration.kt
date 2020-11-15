@@ -136,7 +136,7 @@ private fun CodeBlock.Builder.addRecreateSqliteTriggerCode(typeElement: TypeElem
                                                            processingEnv: ProcessingEnvironment) : CodeBlock.Builder{
     val syncableEntityInfo = SyncableEntityInfo(typeElement.asClassName(), processingEnv)
     add("database.execSQL(%S)\n", "DROP TRIGGER IF EXISTS INS_${syncableEntityInfo.tableId}")
-    add("database.execSQL(%S)\n", "DROP TRIGGER IF EXISTS INS_${syncableEntityInfo.tableId}")
+    add("database.execSQL(%S)\n", "DROP TRIGGER IF EXISTS UPD_${syncableEntityInfo.tableId}")
     addSyncableEntityInsertTriggersSqlite("database.execSQL", syncableEntityInfo)
     addSyncableEntityUpdateTriggersSqlite("database.execSQL", syncableEntityInfo)
     return this
