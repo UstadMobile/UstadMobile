@@ -12,8 +12,10 @@ import com.ustadmobile.port.android.screen.LoginScreen
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import junit.framework.Assert.assertEquals
+import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
+import okhttp3.mockwebserver.RecordedRequest
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
@@ -173,10 +175,13 @@ class Login2FragmentTest : TestCase(){
         }.run {
 
             LoginScreen {
-
-                mockWebServer.enqueue(MockResponse()
-                        .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", "")))
-                        .setHeader("Content-Type", "application/json"))
+                mockWebServer.setDispatcher(object : Dispatcher() {
+                    override fun dispatch(request: RecordedRequest?): MockResponse {
+                        return MockResponse()
+                                .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", "")))
+                                .setHeader("Content-Type", "application/json")
+                    }
+                })
 
                 val httpUrl = mockWebServer.url("/").toString()
 
@@ -202,8 +207,11 @@ class Login2FragmentTest : TestCase(){
 
 
         init{
-
-            mockWebServer.enqueue(MockResponse().setResponseCode(403))
+            mockWebServer.setDispatcher(object: Dispatcher() {
+                override fun dispatch(request: RecordedRequest?): MockResponse {
+                    return MockResponse().setResponseCode(403)
+                }
+            })
 
         }.run {
 

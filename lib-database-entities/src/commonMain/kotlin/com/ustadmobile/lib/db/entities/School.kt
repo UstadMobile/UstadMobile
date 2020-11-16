@@ -7,12 +7,27 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
-import com.ustadmobile.lib.db.entities.School.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = School.TABLE_ID,
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${School.TABLE_ID} AS tableId FROM
+        ChangeLog 
+        JOIN School ON ChangeLog.chTableId = ${School.TABLE_ID} AND ChangeLog.chEntityPk = School.schoolUid
+        JOIN Person ON Person.personUid IN 
+            (${School.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_SCHOOL_SELECT} ${School.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid"""],
+    syncFindAllQuery = """
+        SELECT School.* FROM
+        School
+        JOIN Person ON Person.personUid IN 
+            (${School.ENTITY_PERSONS_WITH_PERMISSION_PT1} ${Role.PERMISSION_SCHOOL_SELECT} ${School.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+    """
+)
 @Serializable
 open class School() {
 
@@ -74,18 +89,6 @@ open class School() {
         this.schoolActive = false
     }
 
-    companion object {
-
-        const val TABLE_ID = 164
-
-        const val SCHOOL_FEATURE_ATTENDANCE: Long  = 1
-
-        const val SCHOOL_GENDER_MALE : Int = 1
-        const val SCHOOL_GENDER_FEMALE : Int = 2
-        const val SCHOOL_GENDER_MIXED : Int = 3
-
-    }
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -116,5 +119,31 @@ open class School() {
         return result
     }
 
+    companion object {
+        const val TABLE_ID = 164
+
+        const val SCHOOL_FEATURE_ATTENDANCE: Long  = 1
+
+        const val SCHOOL_GENDER_MALE : Int = 1
+        const val SCHOOL_GENDER_FEMALE : Int = 2
+        const val SCHOOL_GENDER_MIXED : Int = 3
+
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
+            SELECT DISTINCT Person.PersonUid FROM Person
+            LEFT JOIN PersonGroupMember ON Person.personUid = PersonGroupMember.groupMemberPersonUid
+            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
+            WHERE 
+            CAST(Person.admin AS INTEGER) = 1
+            OR 
+            (EntityRole.ertableId = ${School.TABLE_ID} AND 
+            EntityRole.erEntityUid = School.schoolUid AND
+            (Role.rolePermissions &  
+        """
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 = ") > 0)"
+
+    }
 
 }

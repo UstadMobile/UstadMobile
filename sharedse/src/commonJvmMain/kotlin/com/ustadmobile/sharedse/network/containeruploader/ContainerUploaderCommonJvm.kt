@@ -1,5 +1,7 @@
 package com.ustadmobile.sharedse.network.containeruploader
 
+import com.ustadmobile.core.networkmanager.ContainerUploaderCommon
+import com.ustadmobile.core.networkmanager.ContainerUploaderRequest
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.GlobalScope
@@ -15,8 +17,6 @@ class ContainerUploaderCommonJvm(override val di: DI) : ContainerUploaderCommon(
     private val executorService = Executors.newCachedThreadPool()
 
     private val coroutineCtx = executorService.asCoroutineDispatcher()
-
-    private val networkManager: NetworkManagerBle by di.instance()
 
     override suspend fun enqueue(request: ContainerUploaderRequest): Deferred<Int> {
         return GlobalScope.async(coroutineCtx) {

@@ -27,6 +27,16 @@ fun NavController.registerDestinationTempFile(context: Context, file: File,
     }
 }
 
+
+/**
+ * Removes the given file from the tmpFile registration
+ */
+fun NavController.unregisterDestinationTempFile(context: Context, file: File){
+    context.getSharedPreferences(SHAREDPREF_TMPFILE_REG, Context.MODE_PRIVATE).edit {
+        remove(file.absolutePath)
+    }
+}
+
 /**
  * Create a temp file that will be deleted once the given destination has been popped from the back
  * stack. This will save an entry to a sharedpreference key in a dedicated SharedPreferences.

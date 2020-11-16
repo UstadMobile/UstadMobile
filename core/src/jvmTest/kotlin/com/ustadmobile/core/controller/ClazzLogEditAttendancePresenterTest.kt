@@ -61,8 +61,8 @@ class ClazzLogEditAttendancePresenterTest {
 
     @Test
     fun givenExistingClazzWithStudentsAndNoAttendanceLogsYet_whenLoadedFromDbAndAttendanceSet_thenShouldSetListWithAllMembersAndSaveToDatabase() {
-        val testClazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5, 1) }
-        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid) }
+        val testClazzAndMembers = runBlocking { repo.insertTestClazzAndMembers(5, 1) }
+        val testClazzLog = runBlocking { repo.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid) }
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,
@@ -88,10 +88,10 @@ class ClazzLogEditAttendancePresenterTest {
 
     @Test
     fun givenExistingClazWithStudentsAndAttendanceLogsInDb_whenLoadedFromDb_thenShouldSetListWithAllMembers() {
-        val testClazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5, 1) }
-        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid) }
+        val testClazzAndMembers = runBlocking { repo.insertTestClazzAndMembers(5, 1) }
+        val testClazzLog = runBlocking { repo.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid) }
         val testAttendanceLogs = runBlocking {
-            db.clazzLogAttendanceRecordDao.insertTestRecordsForClazzLog(testClazzLog,
+            repo.clazzLogAttendanceRecordDao.insertTestRecordsForClazzLog(testClazzLog,
                     testClazzAndMembers.studentList)
         }
 
@@ -111,18 +111,20 @@ class ClazzLogEditAttendancePresenterTest {
     @Test
     fun givenExistingClazzLoaded_whenUserSelectsNextClazzDay_currentValuesAreSavedAndNextDayIsDisplayed() {
         val testClazzAndMembers = runBlocking {
-            db.insertTestClazzAndMembers(
+            repo.insertTestClazzAndMembers(
                     5, 1, (DateTime.now() - 36.hours).unixMillisLong)
         }
-        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid) }
+        val testClazzLog = runBlocking {
+            repo.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid)
+        }
         val prevTestClazzLog = ClazzLog().apply {
             logDate = System.currentTimeMillis() - 12.hours.millisecondsLong
             clazzLogClazzUid = testClazzAndMembers.clazz.clazzUid
-            clazzLogUid = db.clazzLogDao.insert(this)
+            clazzLogUid = repo.clazzLogDao.insert(this)
         }
 
         val testAttendanceLogs = runBlocking {
-            db.clazzLogAttendanceRecordDao.insertTestRecordsForClazzLog(testClazzLog,
+            repo.clazzLogAttendanceRecordDao.insertTestRecordsForClazzLog(testClazzLog,
                     testClazzAndMembers.studentList)
         }
 
@@ -179,8 +181,8 @@ class ClazzLogEditAttendancePresenterTest {
 
     @Test
     fun givenExistingClazzWithStudents_whenClickMarkAllThenSavedCalled_thenShouldSetAllAndSaveToDatabase() {
-        val testClazzAndMembers = runBlocking { db.insertTestClazzAndMembers(5, 1) }
-        val testClazzLog = runBlocking { db.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid) }
+        val testClazzAndMembers = runBlocking { repo.insertTestClazzAndMembers(5, 1) }
+        val testClazzLog = runBlocking { repo.clazzLogDao.insertTestClazzLog(testClazzAndMembers.clazz.clazzUid) }
 
         val presenter = ClazzLogEditAttendancePresenter(context,
                 mapOf(UstadView.ARG_ENTITY_UID to testClazzLog.clazzLogUid.toString()), mockView,

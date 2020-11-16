@@ -3,7 +3,9 @@ package com.ustadmobile.port.android
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.DownloadJob
@@ -20,6 +22,8 @@ class DownloadJobConnectivityChangeTriggerEventsTest {
 
 
     private lateinit var umAppDatabase: UmAppDatabase
+
+    private lateinit var repo: UmAppDatabase
 
     private lateinit var context: Context
 
@@ -53,8 +57,11 @@ class DownloadJobConnectivityChangeTriggerEventsTest {
         umAppDatabase = UmAppDatabase.getInstance(context)
         umAppDatabase.clearAllTables()
 
+        repo = umAppDatabase.asRepository(context, "http://localhost/dummy", "",
+            defaultHttpClient(), null)
+
         entry = ContentEntry("title 2", "title 2", leaf = true, publik = true)
-        entry.contentEntryUid = umAppDatabase.contentEntryDao.insert(entry)
+        entry.contentEntryUid = repo.contentEntryDao.insert(entry)
 
         downloadJob = DownloadJob(entry.contentEntryUid, System.currentTimeMillis())
         downloadJob.djUid = umAppDatabase.downloadJobDao.insert(downloadJob).toInt()

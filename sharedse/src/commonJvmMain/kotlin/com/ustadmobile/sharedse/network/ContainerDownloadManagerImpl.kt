@@ -25,6 +25,8 @@ import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.sharedse.io.FileSe
 
+import com.ustadmobile.lib.util.getSystemTimeInMillis
+
 /**
  * This class manages a download queue for a given endpoint.
  */
@@ -269,6 +271,25 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         appDb.downloadJobDao.updateStatusAndProgressList(jobsToCommit.toList())
         entriesToCommit.clear()
         jobsToCommit.clear()
+    }
+
+    override suspend fun handleContainerLocalImport(container: Container) {
+
+        val downloadJob = DownloadJob(container.containerContentEntryUid, getSystemTimeInMillis())
+        downloadJob.djStatus = JobStatus.COMPLETE
+        downloadJob.timeRequested = getSystemTimeInMillis()
+        downloadJob.bytesDownloadedSoFar = container.fileSize
+        downloadJob.totalBytesToDownload = container.fileSize
+        downloadJob.djUid = appDb.downloadJobDao.insertAsync(downloadJob).toInt()
+
+        val downloadJobItem = DownloadJobItem(downloadJob, container.containerContentEntryUid,
+                container.containerUid, container.fileSize)
+        downloadJobItem.djiUid = appDb.downloadJobItemDao.insertAsync(downloadJobItem).toInt()
+        downloadJobItem.djiStatus = JobStatus.COMPLETE
+        downloadJobItem.downloadedSoFar = container.fileSize
+
+        handleDownloadJobItemUpdated(downloadJobItem)
+
     }
 
 

@@ -72,8 +72,8 @@ class ClazzMemberListPresenterTest {
         db = di.on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
         repo = di.on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
 
-        repoClazzMemberDaoSpy = spy(db.clazzMemberDao)
-        whenever(db.clazzMemberDao).thenReturn(repoClazzMemberDaoSpy)
+        repoClazzMemberDaoSpy = spy(repo.clazzMemberDao)
+        whenever(repo.clazzMemberDao).thenReturn(repoClazzMemberDaoSpy)
 
         //TODO: insert any entities required for all tests
     }
@@ -83,7 +83,7 @@ class ClazzMemberListPresenterTest {
         //TODO: insert any entities that are used only in this test
         val testEntity = ClazzMember().apply {
             //set variables here
-            clazzMemberUid = db.clazzMemberDao.insert(this)
+            clazzMemberUid = repo.clazzMemberDao.insert(this)
         }
 
         val presenterArgs = mapOf<String,String>(ARG_FILTER_BY_CLAZZUID to "42")
@@ -107,18 +107,18 @@ class ClazzMemberListPresenterTest {
     @Test
     fun givenActiveAccountHasAddPermissions_whenOnCreateCalled_thenShouldSetAddOptionsToBeVisible() {
         val testClazz = Clazz("Test clazz").apply {
-            clazzUid = db.clazzDao.insert(this)
+            clazzUid = repo.clazzDao.insert(this)
         }
 
         val activePerson = Person().apply {
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
-            personUid = db.insertPersonOnlyAndGroup(this).personUid
+            personUid = repo.insertPersonOnlyAndGroup(this).personUid
         }
 
         runBlocking {
-            db.insertPersonWithRole(activePerson,
+            repo.insertPersonWithRole(activePerson,
             Role().apply {
                 rolePermissions = Role.PERMISSION_CLAZZ_ADD_STUDENT or Role.PERMISSION_CLAZZ_ADD_TEACHER
             }, EntityRole().apply {
@@ -143,28 +143,28 @@ class ClazzMemberListPresenterTest {
     @Test
     fun givenActiveAccountHasAddPermissions_whenPendingStudentApproved_thenShouldUpdate() {
         val testClazz = Clazz("Test clazz")
-        runBlocking { db.createNewClazzAndGroups(testClazz, di.direct.instance(), context) }
+        runBlocking { repo.createNewClazzAndGroups(testClazz, di.direct.instance(), context) }
 
         val activePerson = Person().apply {
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
-            personUid = db.insertPersonOnlyAndGroup(this).personUid
+            personUid = repo.insertPersonOnlyAndGroup(this).personUid
         }
 
         val pendingPerson = Person().apply {
             firstNames = "Pending"
             lastName = "Student"
             username = "pending"
-            personUid = db.insertPersonOnlyAndGroup(this).personUid
+            personUid = repo.insertPersonOnlyAndGroup(this).personUid
         }
 
         var pendingMember: ClazzMember? = null
         runBlocking {
-            pendingMember = db.enrolPersonIntoClazzAtLocalTimezone(pendingPerson, testClazz.clazzUid,
+            pendingMember = repo.enrolPersonIntoClazzAtLocalTimezone(pendingPerson, testClazz.clazzUid,
                     ClazzMember.ROLE_STUDENT_PENDING)
 
-            db.insertPersonWithRole(activePerson,
+            repo.insertPersonWithRole(activePerson,
                     Role().apply {
                         rolePermissions = Role.PERMISSION_CLAZZ_ADD_STUDENT or Role.PERMISSION_CLAZZ_ADD_TEACHER
                     }, EntityRole().apply {
@@ -199,7 +199,7 @@ class ClazzMemberListPresenterTest {
             }
         }
 
-        val clazzMember = runBlocking { db.clazzMemberDao.findByPersonUidAndClazzUidAsync(pendingMember!!.clazzMemberPersonUid,
+        val clazzMember = runBlocking { repo.clazzMemberDao.findByPersonUidAndClazzUidAsync(pendingMember!!.clazzMemberPersonUid,
                 testClazz.clazzUid) }
         Assert.assertEquals("Clazz member approved is now a student", ClazzMember.ROLE_STUDENT,
             clazzMember?.clazzMemberRole)

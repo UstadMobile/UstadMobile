@@ -29,6 +29,7 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val lifecycleHelperFactory: LifeCycleHelperFactory =
                                       {RepositoryLoadHelperLifecycleHelper(it)},
                               val uri: String = "",
+                              val listMaxItemsLimit: Int = -1,
                               val loadFn: suspend(endpoint: String) -> T) : RepositoryConnectivityListener {
 
     class NoConnectionException(message: String, cause: Throwable? = null): Exception(message, cause)

@@ -7,6 +7,8 @@ import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
+import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
@@ -54,18 +56,18 @@ class ClazzDetailPresenterTest {
     @Test
     fun givenUserHasAttendancePermissions_whenOnCreateCalled_thenShouldMakeTabVisible() {
         val accountManager: UstadAccountManager = di.direct.instance()
-        val db: UmAppDatabase = di.on(accountManager.activeAccount)
-                .direct.instance(tag = UmAppDatabase.TAG_DB)
+        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
 
         val testEntity = Clazz().apply {
-            clazzUid = db.clazzDao.insert(this)
+            clazzUid = repo.clazzDao.insert(this)
         }
 
         val activePerson = Person().apply {
             firstNames = "Officer"
             lastName = "Jones"
             username = "officer"
-            personUid = db.insertPersonOnlyAndGroup(this).personUid
+            personUid = repo.insertPersonOnlyAndGroup(this).personUid
 
         }
 
@@ -78,7 +80,7 @@ class ClazzDetailPresenterTest {
         accountManager.activeAccount = UmAccount(activePerson.personUid, activePerson.username,
                 "", endpointUrl, activePerson.firstNames, activePerson.lastName)
 
-        runBlocking { db.insertPersonWithRole(activePerson, roleWithAttendancePermission,
+        runBlocking { repo.insertPersonWithRole(activePerson, roleWithAttendancePermission,
                 EntityRole().apply {
                     erTableId = Clazz.TABLE_ID
                     erEntityUid = testEntity.clazzUid
@@ -97,19 +99,17 @@ class ClazzDetailPresenterTest {
 
     @Test
     fun givenUserDoesNotHaveAttendancePermissions_whenOnCreateCalled_thenTabsSetWithoutAttendance() {
-        val accountManager: UstadAccountManager = di.direct.instance()
-        val db: UmAppDatabase = di.on(accountManager.activeAccount)
-                .direct.instance(tag = UmAppDatabase.TAG_DB)
+        val repo: UmAppDatabase by di.activeRepoInstance()
 
         val testEntity = Clazz().apply {
-            clazzUid = db.clazzDao.insert(this)
+            clazzUid = repo.clazzDao.insert(this)
         }
 
         val activePerson = Person().apply {
             firstNames = "Officer"
             lastName = "Jones"
             username = "officer"
-            personUid = db.personDao.insert(this)
+            personUid = repo.personDao.insert(this)
         }
 
         val presenter = ClazzDetailPresenter(Any(),

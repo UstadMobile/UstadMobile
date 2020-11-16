@@ -30,6 +30,8 @@ abstract class ContainerDownloadManager {
 
     abstract suspend fun deleteDownloadJob(jobUid: Int, onprogress: (progress: Int) -> Unit): Boolean
 
+    abstract suspend fun handleContainerLocalImport(container: Container)
+
     /**
      * This is only for handling changes that have been made externally (e.g. change to save directory)
      */

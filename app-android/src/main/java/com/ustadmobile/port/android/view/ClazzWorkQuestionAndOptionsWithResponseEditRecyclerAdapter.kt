@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 class ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter()
     : ListAdapter<ClazzWorkQuestionAndOptionWithResponse,
         ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter.ClazzWorkQuestionViewHolder>(
-        ClazzWorkDetailOverviewFragment.DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE) {
+        ClazzWorkDetailOverviewFragment.DU_CLAZZWORKQUESTIONANDOPTIONWITHRESPONSE_EDIT) {
 
     class ClazzWorkQuestionViewHolder(val binding: ItemClazzworkquestionandoptionswithresponseBinding)
         : RecyclerView.ViewHolder(binding.root)

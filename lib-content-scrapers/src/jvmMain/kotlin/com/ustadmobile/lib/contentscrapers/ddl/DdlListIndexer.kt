@@ -18,7 +18,7 @@ class DdlListIndexer(parentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntr
         val document = Jsoup.connect(sourceUrl)
                 .header("X-Requested-With", "XMLHttpRequest").get()
 
-        val langCode = languageDao.findByUid(parentContentEntry?.primaryLanguageUid!!)?.iso_639_1_standard
+        val langCode = db.languageDao.findByUid(parentContentEntry?.primaryLanguageUid!!)?.iso_639_1_standard
 
         val resourceList = document.select("article a[href]")
 
@@ -38,9 +38,9 @@ class DdlListIndexer(parentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntr
 
                 val title = resource.selectFirst("div.resource-title")?.text()?: ""
 
-                val entry = ContentScraperUtil.insertTempContentEntry(contentEntryDao, url, parentContentEntry!!.primaryLanguageUid, title)
+                val entry = ContentScraperUtil.insertTempContentEntry(repo.contentEntryDao, url, parentContentEntry!!.primaryLanguageUid, title)
 
-                ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry!!, entry, counter++)
+                ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(repo.contentEntryParentChildJoinDao, parentContentEntry!!, entry, counter++)
 
                 createQueueItem(url,  entry, ScraperTypes.DDL_ARTICLE_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, parentContentEntryUid)
             }

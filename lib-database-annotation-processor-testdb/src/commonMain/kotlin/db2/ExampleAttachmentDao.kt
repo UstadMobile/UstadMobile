@@ -4,9 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.annotation.GetAttachmentData
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.SetAttachmentData
 
 @Dao
+@Repository
 abstract class ExampleAttachmentDao {
 
     @Insert

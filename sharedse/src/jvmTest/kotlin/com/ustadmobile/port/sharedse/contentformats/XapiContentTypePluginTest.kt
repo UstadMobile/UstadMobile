@@ -1,6 +1,7 @@
 package com.ustadmobile.port.sharedse.contentformats
 
-import com.ustadmobile.port.sharedse.contentformats.xapi.plugin.XapiPackageTypeFilePlugin
+import com.ustadmobile.core.catalog.contenttype.XapiTypePluginCommonJvm
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -25,8 +26,10 @@ class XapiContentTypePluginTest {
             }
         }
 
-        val xapiPlugin = XapiPackageTypeFilePlugin()
-        val contentEntry = xapiPlugin.getContentEntry(tempFile)
+        val xapiPlugin = XapiTypePluginCommonJvm()
+        val contentEntry = runBlocking {
+            xapiPlugin.extractMetadata(tempFile.path)
+        }
 
         Assert.assertEquals("Got expected title",
                 "Ustad Mobile", contentEntry?.title)

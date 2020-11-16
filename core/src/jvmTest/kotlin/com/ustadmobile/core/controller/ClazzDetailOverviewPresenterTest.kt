@@ -67,17 +67,18 @@ class ClazzDetailOverviewPresenterTest {
             whenever(repo.clazzDao).thenReturn(it)
         }
 
-        repoScheduleSpy = spy(db.scheduleDao).also {
-            whenever(db.scheduleDao).thenReturn(it)
+        repoScheduleSpy = spy(repo.scheduleDao).also {
+            whenever(repo.scheduleDao).thenReturn(it)
         }
     }
 
     @Test
     fun givenClazzExists_whenOnCreateCalled_thenClazzIsSetOnView() {
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
         val testEntity = Clazz().apply {
             //set variables here
-            clazzUid = db.clazzDao.insert(this)
+            clazzUid = repo.clazzDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())
         val presenter = ClazzDetailOverviewPresenter(context,
@@ -99,10 +100,10 @@ class ClazzDetailOverviewPresenterTest {
 
     @Test
     fun givenClazzExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled() {
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val testEntity = Clazz().apply {
             //set variables here
-            clazzUid = db.clazzDao.insert(this)
+            clazzUid = repo.clazzDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.clazzUid.toString())
         val presenter = ClazzDetailOverviewPresenter(context,

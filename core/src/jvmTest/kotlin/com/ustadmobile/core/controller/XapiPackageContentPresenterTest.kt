@@ -84,7 +84,7 @@ class XapiPackageContentPresenterTest {
         xapiContainer = Container().also {
             it.containerContentEntryUid = contentEntryUid
         }
-        xapiContainer.containerUid = db.containerDao.insert(xapiContainer)
+        xapiContainer.containerUid = repo.containerDao.insert(xapiContainer)
 
         xapiTmpFile = File.createTempFile("testxapipackagecontentpresenter",
                 "xapiTmpFile")

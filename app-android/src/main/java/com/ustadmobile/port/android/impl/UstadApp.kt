@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.impl
 
 import android.content.Context
+import android.os.Build
 import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
@@ -8,6 +9,10 @@ import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.catalog.contenttype.*
+import com.ustadmobile.core.contentformats.ContentImportManager
+import com.ustadmobile.core.contentformats.ContentImportManagerImpl
+import com.ustadmobile.core.contentformats.ContentImportManagerImplAndroid
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
@@ -19,12 +24,8 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.ContainerUploadManager
-import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
-import com.ustadmobile.core.networkmanager.initPicasso
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
 import com.ustadmobile.core.schedule.ClazzLogCreatorManagerAndroidImpl
 import com.ustadmobile.core.util.ContentEntryOpener
@@ -44,14 +45,16 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderManagerImpl
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
+import com.ustadmobile.core.networkmanager.*
+import io.ktor.client.features.json.*
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
 
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParser
@@ -59,6 +62,7 @@ import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 
 import java.io.File
+import java.util.concurrent.TimeUnit
 
 /**
  * Note: BaseUstadApp extends MultidexApplication on the multidex variant, but extends the
@@ -83,7 +87,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
             instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
-                    context.url, "", defaultHttpClient()).also {
+                    context.url, "", defaultHttpClient(), useClientSyncManager = true).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
             }
         }
@@ -116,10 +120,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ContainerDownloadManagerImpl(endpoint = context, di = di)
         }
 
-        bind<ContainerUploadManager>() with scoped(EndpointScope.Default).singleton {
-            ContainerUploaderManagerImpl(endpoint = context, di = di)
-        }
-
         bind<DownloadPreparationRequester>() with scoped(EndpointScope.Default).singleton {
             DownloadPreparationRequesterAndroidImpl(applicationContext, context)
         }
@@ -148,12 +148,24 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
         bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
 
+        bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
+            ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),
+                    XapiTypePluginCommonJvm(), VideoTypePluginAndroid(),
+                    H5PTypePluginCommonJvm()),
+                    applicationContext, context, di)
+        }
+
+
         bind<Gson>() with singleton {
             val builder = GsonBuilder()
             builder.registerTypeAdapter(Statement::class.java, StatementSerializer())
             builder.registerTypeAdapter(Statement::class.java, StatementDeserializer())
             builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
             builder.create()
+        }
+
+        bind<GsonSerializer>() with singleton {
+            GsonSerializer()
         }
 
         bind<XapiStatementEndpoint>() with scoped(EndpointScope.Default).singleton {
@@ -178,6 +190,21 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<XmlSerializer>() with provider {
             instance<XmlPullParserFactory>().newSerializer()
         }
+
+        //OKHttp does not work on versions below 5.0
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            bind<OkHttpClient>() with singleton {
+                OkHttpClient.Builder()
+                        .dispatcher(Dispatcher().also {
+                            it.maxRequests = 30
+                            it.maxRequestsPerHost = 10
+                        })
+                        .connectTimeout(45, TimeUnit.SECONDS)
+                        .readTimeout(45, TimeUnit.SECONDS)
+                        .build()
+            }
+        }
+
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 

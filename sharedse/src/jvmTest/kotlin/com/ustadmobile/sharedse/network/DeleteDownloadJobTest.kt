@@ -8,9 +8,11 @@ import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -22,8 +24,10 @@ import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.*
+import org.junit.rules.TemporaryFolder
 import java.io.File
 import javax.naming.InitialContext
 
@@ -52,6 +56,10 @@ class DeleteDownloadJobTest{
     lateinit var downloadJob: DownloadJob
 
     lateinit var dwchildofparent: DownloadJobItem
+
+    @Rule
+    @JvmField
+    var tmpFolderRule = TemporaryFolder()
 
     private lateinit var clientDi: DI
 
@@ -87,7 +95,7 @@ class DeleteDownloadJobTest{
         db =  clientDi.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
         containerDownloadManager = clientDi.on(accountManager.activeAccount).direct.instance()
 
-        containerTmpDir = UmFileUtilSe.makeTempDir("clientContainerDir", "" + System.currentTimeMillis())
+        containerTmpDir = tmpFolderRule.newFolder("clientContainerDir")
 
         commonFile = File(containerTmpDir, "testfile1.png")
         extractTestResourceToFile(commonFilePath, commonFile)
@@ -95,8 +103,6 @@ class DeleteDownloadJobTest{
         zombieFile = File(containerTmpDir, "testfile2.png")
         extractTestResourceToFile(zombieFilePath, zombieFile)
 
-        var containerDao = db.containerDao
-        var entryDao = db.contentEntryDao
         var dwItemDao = db.downloadJobItemDao
         var dwJoinDao = db.downloadJobItemParentChildJoinDao
         var dwDao = db.downloadJobDao
@@ -117,14 +123,14 @@ class DeleteDownloadJobTest{
 
         standAloneEntry = ContentEntry()
         standAloneEntry.contentEntryUid = 3
-        entryDao.insert(standAloneEntry)
+        repo.contentEntryDao.insert(standAloneEntry)
 
         var containerOfStandAlone = Container()
         containerOfStandAlone.containerUid = standaloneChild.djiContainerUid
         containerOfStandAlone.containerContentEntryUid = standAloneEntry.contentEntryUid
-        containerDao.insert(containerOfStandAlone)
+        repo.containerDao.insert(containerOfStandAlone)
 
-        var containerManager = ContainerManager(containerOfStandAlone, db, db, containerTmpDir.path)
+        var containerManager = ContainerManager(containerOfStandAlone, db, repo, containerTmpDir.path)
         runBlocking {
             containerManager.addEntries(ContainerManager.FileEntrySource(commonFile, "testfile1.png"))
         }
@@ -140,7 +146,7 @@ class DeleteDownloadJobTest{
 
         rootContentEntry = ContentEntry()
         rootContentEntry.contentEntryUid = 1
-        entryDao.insert(rootContentEntry)
+        repo.contentEntryDao.insert(rootContentEntry)
 
         var dwparent = DownloadJobItem()
         dwparent.djiUid = 2
@@ -151,7 +157,7 @@ class DeleteDownloadJobTest{
 
         var parentEntry = ContentEntry()
         parentEntry.contentEntryUid = 2
-        entryDao.insert(parentEntry)
+        repo.contentEntryDao.insert(parentEntry)
 
 
         var rootParentJoin = DownloadJobItemParentChildJoin()
@@ -170,7 +176,7 @@ class DeleteDownloadJobTest{
 
         var childOfParent = ContentEntry()
         childOfParent.contentEntryUid = 5
-        entryDao.insert(childOfParent)
+        repo.contentEntryDao.insert(childOfParent)
 
         var childOfParentJoin = DownloadJobItemParentChildJoin()
         childOfParentJoin.djiParentDjiUid = dwparent.djiUid
@@ -181,9 +187,10 @@ class DeleteDownloadJobTest{
         var containerchildofparent = Container()
         containerchildofparent.containerUid = 8
         containerchildofparent.containerContentEntryUid = childOfParent.contentEntryUid
-        containerDao.insert(containerchildofparent)
+        repo.containerDao.insert(containerchildofparent)
 
-        var parentContainerManager = ContainerManager(containerchildofparent, db, db, containerTmpDir.path)
+        var parentContainerManager = ContainerManager(containerchildofparent, db, repo,
+                containerTmpDir.path)
         runBlocking {
             parentContainerManager.addEntries(ContainerManager.FileEntrySource(zombieFile, "testfile2.png"))
             parentContainerManager.addEntries(ContainerManager.FileEntrySource(commonFile, "testfile1.png"))
@@ -201,7 +208,7 @@ class DeleteDownloadJobTest{
                 println(it)
             }
 
-            
+
 
             Assert.assertTrue("Delete job reports success", successful)
             Assert.assertTrue(File(commonFileContainerEntry.containerEntryFile!!.cefPath!!).exists())

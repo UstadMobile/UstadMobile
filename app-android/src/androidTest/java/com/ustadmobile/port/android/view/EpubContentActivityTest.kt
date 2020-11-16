@@ -4,12 +4,8 @@ import android.app.Application
 import android.content.Intent
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.action.ViewActions
-import androidx.test.espresso.assertion.ViewAssertions
 import androidx.test.espresso.matcher.ViewMatchers
 import androidx.test.espresso.web.webdriver.Locator
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.agoda.kakao.text.KTextView
 import com.agoda.kakao.web.KWebView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -24,13 +20,10 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.screen.EpubScreen
 import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
-import org.hamcrest.CoreMatchers
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.junit.runner.RunWith
 import java.io.File
 
 
@@ -51,7 +44,7 @@ class EpubContentActivityTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -61,13 +54,13 @@ class EpubContentActivityTest : TestCase() {
     fun setUp() {
         contentEntry = ContentEntry().apply {
             leaf = true
-            contentEntryUid = dbRule.db.contentEntryDao.insert(this)
+            contentEntryUid = dbRule.repo.contentEntryDao.insert(this)
         }
 
         container = Container().apply {
             containerContentEntryUid = contentEntry.contentEntryUid
             containerUid = 1000
-            dbRule.db.containerDao.insert(this)
+            dbRule.repo.containerDao.insert(this)
         }
         containerTmpDir = tempFileRule.newFolder("epubContent${System.currentTimeMillis()}")
         val testFile = tempFileRule.newFile("test${System.currentTimeMillis()}.epub")

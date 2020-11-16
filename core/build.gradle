@@ -78,7 +78,7 @@ task copyTestResources(type: Copy) {
  * for further information.
  */
 task prepareLocale {
-    inputs.files(fileTree(dir: project.file("locale")).matching { include '*.xml' })
+    inputs.files(fileTree(dir: project.file("locale")).matching { include '**/*.xml' })
     outputs.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
 
     doFirst {
@@ -191,6 +191,7 @@ kotlin {
                 implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.github.aakira:napier:$version_napier"
+                implementation "io.ktor:ktor-gson:$version_ktor"
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation project(':lib-door-runtime')
@@ -208,6 +209,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
@@ -254,6 +256,8 @@ kotlin {
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
 
+                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+
                 /*
                   For this to work in the IDE, these need to be API instead of implementation
                  */
@@ -273,6 +277,7 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
                 //end SharedSE Android and JVM dependencies
             }
         }
@@ -295,6 +300,8 @@ kotlin {
                 //Image loading library
                 implementation "com.squareup.picasso:picasso:$version_android_picasso"
                 implementation "io.ktor:ktor-client-android:$version_ktor"
+
+                implementation 'com.linkedin.android.litr:litr:1.4.3'
 
                 //dependency injection
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"

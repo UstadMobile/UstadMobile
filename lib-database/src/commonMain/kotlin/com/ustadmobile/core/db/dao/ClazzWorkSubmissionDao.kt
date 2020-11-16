@@ -1,17 +1,12 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.core.db.dao.ClazzWorkSubmissionDao.Companion.FIND_COMPLETED_UNMARKED_BY_CLAZZWORKUID
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.ClazzWorkQuestionOption
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzWorkSubmission
 
-@UmDao
-@UmRepository
+@Repository
 @Dao
 abstract class ClazzWorkSubmissionDao : BaseDao<ClazzWorkSubmission> {
 
@@ -41,7 +36,7 @@ abstract class ClazzWorkSubmissionDao : BaseDao<ClazzWorkSubmission> {
                     SELECT * FROM ClazzWorkSubmission WHERE 
                     ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = :clazzWorkUid 
                     AND CAST(clazzWorkSubmissionInactive AS INTEGER) = 0
-                    AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked == 0
+                    AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked = 0
                     ORDER BY clazzWorkSubmissionDateTimeFinished DESC
                 """
     }

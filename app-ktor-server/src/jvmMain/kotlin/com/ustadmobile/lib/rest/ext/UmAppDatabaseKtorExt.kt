@@ -10,10 +10,7 @@ import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomStringUtils
 import java.io.File
 
-fun UmAppDatabase.ktorInit(passwordFilePath: String) {
-    val adminuser = personDao.findByUsername("admin")
-
-
+fun UmAppDatabase.ktorInitDb() {
     if(workSpaceDao.getWorkSpace() == null) {
         workSpaceDao.insert(WorkSpace().apply {
             uid = 1L
@@ -22,12 +19,15 @@ fun UmAppDatabase.ktorInit(passwordFilePath: String) {
             registrationAllowed = true
         })
     }
+}
 
+fun UmAppDatabase.ktorInitDbWithRepo(repo: UmAppDatabase, passwordFilePath: String) {
+    val adminuser = personDao.findByUsername("admin")
 
     if (adminuser == null) {
         val adminPerson = Person("admin", "Admin", "User")
         adminPerson.admin = true
-        adminPerson.personUid = personDao.insert(adminPerson)
+        adminPerson.personUid = repo.personDao.insert(adminPerson)
 
         //Remove lower case l, upper case I, and the number 1
         val adminPass = RandomStringUtils.random(10, "abcdefghijkmnpqrstuvxwyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")
@@ -45,5 +45,7 @@ fun UmAppDatabase.ktorInit(passwordFilePath: String) {
         println("Saved admin password to ${adminPassFile.absolutePath}")
     }
 
-    runBlocking { roleDao.insertDefaultRolesIfRequired() }
+    runBlocking {
+        repo.roleDao.insertDefaultRolesIfRequired()
+    }
 }

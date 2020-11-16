@@ -43,10 +43,10 @@ class DdlSubjectIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, c
             val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(subjectId, title,
                     subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, parentContentEntry!!.primaryLanguageUid, null,
                     "", false, "", "",
-                    "", "", 0, contentEntryDao)
-            contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid, false)
+                    "", "", 0, repo.contentEntryDao)
+            repo.contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid, false)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry!!, subjectEntry, i)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry!!, subjectEntry, i)
 
             subjectSubTopicMap[subjectId] = subjectEntry
 
@@ -83,10 +83,10 @@ class DdlSubjectIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, c
                 val subjectEntry = ContentScraperUtil.createOrUpdateContentEntry(subTopicId, title,
                         subjectUrl.toString(), IndexDdlContent.DDL, ContentEntry.LICENSE_TYPE_CC_BY, parentContentEntry!!.primaryLanguageUid, null,
                         "", false, "", "",
-                        "", "", 0, contentEntryDao)
-                contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid, false)
+                        "", "", 0, repo.contentEntryDao)
+                repo.contentEntryDao.updateContentEntryInActive(subjectEntry.contentEntryUid, false)
 
-                ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentEntry!!, subjectEntry, i)
+                ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentEntry!!, subjectEntry, i)
 
                 createQueueItem(subjectUrl.toString(), subjectEntry, ScraperTypes.DDL_PAGES_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentEntry.contentEntryUid)
 

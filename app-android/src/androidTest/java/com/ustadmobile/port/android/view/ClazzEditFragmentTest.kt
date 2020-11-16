@@ -64,7 +64,7 @@ class ClazzEditFragmentTest : TestCase() {
 
             val existingHolidayCal = HolidayCalendar().apply {
                 umCalendarName = "Demo Calendar"
-                umCalendarUid = dbRule.db.holidayCalendarDao.insert(this)
+                umCalendarUid = dbRule.repo.holidayCalendarDao.insert(this)
             }
 
             val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
@@ -129,14 +129,14 @@ class ClazzEditFragmentTest : TestCase() {
 
                 val existingHolidayCal = HolidayCalendar().apply {
                     umCalendarName = "Demo Calendar"
-                    umCalendarUid = dbRule.db.holidayCalendarDao.insert(this)
+                    umCalendarUid = dbRule.repo.holidayCalendarDao.insert(this)
                 }
 
                 val existingClazz = ClazzWithHolidayCalendarAndSchool().apply {
                     clazzName = "New Clazz"
                     clazzDesc = "Clazz description"
                     clazzHolidayUMCalendarUid = existingHolidayCal.umCalendarUid
-                    clazzUid = dbRule.db.clazzDao.insert(this)
+                    clazzUid = dbRule.repo.clazzDao.insert(this)
                 }
 
                 val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,

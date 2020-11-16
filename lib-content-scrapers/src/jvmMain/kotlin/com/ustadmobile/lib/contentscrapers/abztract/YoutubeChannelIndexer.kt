@@ -105,12 +105,12 @@ class YoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: In
             }
 
             val playlistEntry = ContentScraperUtil.insertTempYoutubeContentEntry(
-                    contentEntryDao, entry.url!!,
+                    repo.contentEntryDao, entry.url!!,
                     parentContentEntry?.primaryLanguageUid?: 0, "",
                     parentContentEntry?.publisher?: "", parentContentEntry?.licenseType?: 0,
                     parentContentEntry?.languageVariantUid?: 0)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry!!, playlistEntry, counter)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry!!, playlistEntry, counter)
 
             createQueueItem(entry.url!!, playlistEntry, ScraperTypes.YOUTUBE_PLAYLIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentContentEntryUid)
         }
