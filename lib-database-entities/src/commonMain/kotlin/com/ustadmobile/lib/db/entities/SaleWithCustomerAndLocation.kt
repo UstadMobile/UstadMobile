@@ -7,11 +7,14 @@ import kotlinx.serialization.Serializable
  * SaleItem 's POJO representing itself on the view (and recycler views)
  */
 @Serializable
-class SaleItemWithProduct() : SaleItem() {
+class SaleWithCustomerAndLocation() : Sale() {
 
-    var deliveredCount = 0
 
     @Embedded
-    var saleItemProduct: Product? = null
+    var saleCustomer: Person? = null
+
+    @Embedded
+    var saleLocation: Location? = null
+
 
 }

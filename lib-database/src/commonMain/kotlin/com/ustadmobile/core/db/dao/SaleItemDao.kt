@@ -4,6 +4,7 @@ import androidx.paging.DataSource
 import androidx.room.*
 import com.ustadmobile.core.db.dao.SaleItemDao.Companion.SELECT_ACCOUNT_IS_ADMIN
 import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SaleItem
@@ -13,15 +14,35 @@ import com.ustadmobile.lib.db.entities.SaleItemWithProduct
         insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 @Dao
-abstract class SaleItemDao : BaseDao<SaleItem> {
+abstract class SaleItemDao : BaseDao<SaleItem>, OneToManyJoinDao<SaleItem> {
+
+
+    @Query("""UPDATE SaleItem SET saleItemSaleUid = 0
+        WHERE saleItemUid = :saleItemUid
+    """)
+    abstract suspend fun deactivateSaleFromSaleItem(saleItemUid : Long ): Int
+
+    override suspend fun deactivateByUids(uidList: List<Long>) {
+        uidList.forEach {
+            deactivateSaleFromSaleItem(it)
+        }
+    }
 
     @Update
     abstract suspend fun updateAsync(entity: SaleItem): Int
 
-
     @Query(QUERY_ALL_ACTIVE_SALE_ITEM_LIST)
     abstract fun findAllBySale(saleUid: Long): DataSource.Factory<Int,SaleItemWithProduct>
 
+    @Query("""
+            SELECT SUM(saleItemPricePerPiece * saleItemQuantity) FROM SaleItem 
+            WHERE saleItemSaleUid = :saleUid AND CAST(saleItemActive AS INTEGER) = 1 """)
+    abstract fun findTotalBySaleLive(saleUid: Long):DoorMutableLiveData<Long>
+
+    @Query("""
+            SELECT SUM(saleItemPricePerPiece * saleItemQuantity) FROM SaleItem 
+            WHERE saleItemSaleUid = :saleUid AND CAST(saleItemActive AS INTEGER) = 1 """)
+    abstract fun findTotalBySale(saleUid: Long): Long?
 
     companion object {
 
@@ -30,7 +51,6 @@ abstract class SaleItemDao : BaseDao<SaleItem> {
         const val SORT_NAME_DESC = 2
 
         const val SELECT_ACCOUNT_IS_ADMIN = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid)"
-
 
         const val QUERY_ALL_ACTIVE_SALE_ITEM_LIST =
                 """ 

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Sale
 import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleDelivery
@@ -15,6 +16,11 @@ interface SaleEditView: UstadEditView<Sale> {
 
     var salePaymentList: DoorMutableLiveData<List<SalePayment>>?
 
+    var totalAmountLive: DoorLiveData<Long>?
+
+    var totalAmount: Long?
+
+    var balanceDue: Long?
 
     companion object {
 

@@ -37,7 +37,6 @@ open class SaleDelivery() {
     var saleDeliveryLCB: Int = 0
 
 
-
     companion object{
         const val CATEGORY_TABLE_ID = 315
     }

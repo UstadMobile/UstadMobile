@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.SalePayment
         insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 @Dao
-abstract class SalePaymentDao : BaseDao<SalePayment> {
+abstract class SalePaymentDao : BaseDao<SalePayment>, OneToManyJoinDao<SalePayment> {
 
     @Update
     abstract suspend fun updateAsync(entity: SalePayment): Int
@@ -20,6 +20,19 @@ abstract class SalePaymentDao : BaseDao<SalePayment> {
 
     @Query(QUERY_ALL_ACTIVE_SALE_PAYMENT_LIST)
     abstract fun findAllBySale(saleUid: Long): DataSource.Factory<Int,SalePayment>
+
+
+    @Query("""UPDATE SalePayment SET salePaymentSaleUid = 0,
+        WHERE salePaymentUid = :salePaymentUid
+    """)
+    abstract suspend fun deactivateSaleFromSalePayment(salePaymentUid : Long ): Int
+
+    override suspend fun deactivateByUids(uidList: List<Long>) {
+        uidList.forEach {
+            deactivateSaleFromSalePayment(it)
+        }
+    }
+
 
 
     companion object {

@@ -5,14 +5,20 @@
 
     <data>
         <import type="android.view.View"/>
+        <import type="android.text.InputType" />
 
         <variable
             name="sale"
-            type="com.ustadmobile.lib.db.entities.Sale" />
+            type="com.ustadmobile.lib.db.entities.SaleWithCustomerAndLocation" />
 
         <variable
             name="loading"
             type="boolean" />
+
+        <variable
+            name="orderTotal"
+            type="Long"
+            />
 
         <variable
             name="fieldsEnabled"
@@ -38,10 +44,302 @@
             android:layout_height="wrap_content">
 
 
-            <!-- TODO: Put the actual view for editing Sale here using two-way data binding -->
-            <!-- Available templates:
-            onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-            -->
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_sale_edit_customer_til"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:hint="@string/customer">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/fragment_sale_edit_customer_tiet"
+                    android:onClick="@{() -> activityEventHandler.selectCustomer()}"
+                    android:text="@{sale.saleCustomer.fullName()}"
+                    app:runOnClickWhenFocused="@{true}"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_sale_edit_province_til"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_customer_til"
+                app:layout_constraintStart_toStartOf="parent"
+                android:hint="@string/province">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/fragment_sale_edit_province_tiet"
+                    android:onClick="@{() -> activityEventHandler.selectLocation()}"
+                    android:text="@{sale.saleLocation.title}"
+                    app:runOnClickWhenFocused="@{true}"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:id="@+id/fragment_sale_edit_title_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.AppCompat.SearchResult.Subtitle"
+                android:text="@string/items"
+                app:layout_constraintTop_toBottomOf="@id/fragment_sale_edit_province_til"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_sale_edit_saleitem_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_saleitem"
+                tools:itemCount="2"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_title_tv"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <include
+                layout="@layout/item_createnew"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:id="@+id/fragment_sale_edit_saleitem_createnew"
+                app:onClickNew="@{() -> activityEventHandler.addSaleItem()}"
+                app:createNewText="@{@string/item}"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_saleitem_rv"
+                app:layout_constraintStart_toStartOf="parent" />
+
+
+            <View
+                android:id="@+id/hline1"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_saleitem_createnew"
+                app:layout_constraintStart_toStartOf="parent"
+               />
+
+            <LinearLayout
+                android:id="@+id/fragment_sale_edit_total_ll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintTop_toBottomOf="@+id/hline1"
+                app:layout_constraintEnd_toEndOf="parent">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/order_total"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                />
+
+            <!-- This would have to be set programatically -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:text="17640"
+                android:text="@={`` + orderTotal}"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/fragment_sale_edit_discount_ll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="@+id/fragment_sale_edit_total_ll"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_total_ll">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/discount"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
+
+                <EditText
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="500"
+                    android:layout_marginHorizontal="@dimen/dimen_16dp"
+                    android:text="@={`` + sale.saleDiscount}" />
+
+            </LinearLayout>
+
+            <View
+                android:id="@+id/hline2"
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@android:color/darker_gray"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_discount_ll"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+
+            <LinearLayout
+                android:id="@+id/fragment_sale_edit_total2_ll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                app:layout_constraintTop_toBottomOf="@+id/hline2"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/total"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    />
+
+                <!-- This would have to be set programatically -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="17140"
+                    app:setSaleItemAfterDiscountTotal="@{sale}"
+                    app:totalSale="@{orderTotal}"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:layout_marginHorizontal="@dimen/dimen_16dp"
+                    />
+
+            </LinearLayout>
+
+            <TextView
+                android:id="@+id/fragment_sale_edit_delivery_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/deliveries"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fragment_sale_edit_total2_ll"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                style="@style/TextAppearance.AppCompat.SearchResult.Subtitle"
+                />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_sale_edit_delivery_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_saledelivery"
+                tools:itemCount="2"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_delivery_tv"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <include
+                layout="@layout/item_createnew"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:id="@+id/fragment_sale_edit_saledelivery_createnew"
+                app:onClickNew="@{() -> activityEventHandler.addDelivery()}"
+                app:createNewText="@{@string/delivery}"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_delivery_rv"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <TextView
+                android:id="@+id/fragment_sale_edit_payment_tv"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:text="@string/payments"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fragment_sale_edit_saledelivery_createnew"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                style="@style/TextAppearance.AppCompat.SearchResult.Subtitle"
+                />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/fragment_sale_edit_payment_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:listitem="@layout/item_salepayment"
+                tools:itemCount="2"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_payment_tv"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <include
+                layout="@layout/item_createnew"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:id="@+id/fragment_sale_edit_salepayment_createnew"
+                app:onClickNew="@{() -> activityEventHandler.addPayment()}"
+                app:createNewText="@{@string/delivery}"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_payment_rv"
+                app:layout_constraintStart_toStartOf="parent" />
+
+
+            <LinearLayout
+                android:id="@+id/fragment_sale_edit_balance_due_ll"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_salepayment_createnew"
+                android:orientation="horizontal"
+                >
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                style="@style/TextAppearance.AppCompat.Body1"
+                android:text = "@string/balance_due"
+                />
+
+                <!-- This will have to be set programatically -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    tools:text="16000"
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:layout_marginHorizontal="@dimen/dimen_16dp"
+                    />
+
+            </LinearLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_sale_edit_notes_til"
+                style="@style/Widget.MaterialComponents.TextInput   Layout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_balance_due_ll"
+                app:layout_constraintStart_toStartOf="parent"
+                android:hint="@string/order_notes">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fragment_sale_edit_notes_tiet"
+                android:onClick="@{() -> activityEventHandler.selectCustomer()}"
+                android:text="@={sale.saleNotes}"
+                app:runOnClickWhenFocused="@{true}"
+                android:inputType="@{InputType.TYPE_NULL}"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"/>
+
+
+        </com.google.android.material.textfield.TextInputLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

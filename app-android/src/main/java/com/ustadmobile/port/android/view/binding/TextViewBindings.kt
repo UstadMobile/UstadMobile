@@ -256,6 +256,16 @@ fun TextView.setMemberRoleName(clazzMember: ClazzMember?) {
 }
 
 
+@BindingAdapter("saleItemTotal")
+fun TextView.setSaleItemTotal(saleItem: SaleItem) {
+    text = "" + saleItem.saleItemQuantity * saleItem.saleItemPricePerPiece + saleItem.saleItemCurrency
+}
+
+@BindingAdapter(value = ["totalSale", "saleForTotalAfterDiscount"])
+fun TextView.setSaleItemAfterDiscountTotal(totalSale : Long, sale: Sale) {
+    text = "" + (totalSale - sale.saleDiscount) + " " + context.getString(R.string.afs)
+}
+
 @BindingAdapter("rolesAndPermissionsText")
 fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
     val scopeType = when (entityRole.erTableId) {

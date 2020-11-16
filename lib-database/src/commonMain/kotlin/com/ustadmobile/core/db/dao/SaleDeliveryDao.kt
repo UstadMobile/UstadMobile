@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.SaleDelivery
         insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 @Dao
-abstract class SaleDeliveryDao : BaseDao<SaleDelivery> {
+abstract class SaleDeliveryDao : BaseDao<SaleDelivery>, OneToManyJoinDao<SaleDelivery> {
 
     @Update
     abstract suspend fun updateAsync(entity: SaleDelivery): Int
@@ -21,6 +21,18 @@ abstract class SaleDeliveryDao : BaseDao<SaleDelivery> {
     @Query(QUERY_ALL_ACTIVE_SALE_DELIVERY_LIST)
     abstract fun findAllBySale(saleUid: Long): DataSource.Factory<Int,SaleDelivery>
 
+
+    @Query("""
+        UPDATE SaleDelivery SET saleDeliverySaleUid = 0 
+        WHERE saleDeliveryUid = :saleDeliveryUid
+    """)
+    abstract suspend fun deactivateSaleFromSaleDelivery(saleDeliveryUid: Long): Int
+
+    override suspend fun deactivateByUids(uidList: List<Long>) {
+        uidList.forEach {
+            deactivateSaleFromSaleDelivery(it)
+        }
+    }
 
     companion object {
 

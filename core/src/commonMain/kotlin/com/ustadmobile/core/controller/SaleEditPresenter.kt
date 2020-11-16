@@ -71,7 +71,6 @@ class SaleEditPresenter(context: Any,
     }
 
 
-
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
@@ -101,6 +100,16 @@ class SaleEditPresenter(context: Any,
             db.salePaymentDao.findAllBySale(entityUid)
         }
         salePaymentEditHelper.liveList.sendValue(salePaymentList)
+
+        val totalCountLive = withTimeout(2000){
+            db.saleItemDao.findTotalBySaleLive(entityUid)
+        }
+        val totalCount = withTimeout(2000){
+            db.saleItemDao.findTotalBySale(entityUid)
+        }
+
+        view.totalAmountLive = totalCountLive
+        view.totalAmount = totalCount
 
         return sale
 
@@ -132,8 +141,6 @@ class SaleEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: Sale) {
-        //TODO: Any validation that is needed before accepting / saving this entity
-        //TODO: Only save to the database when the persistence mode is PERSISTENCE_MODE.DB
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.saleUid == 0L) {
                 entity.saleUid = repo.saleDao.insertAsync(entity)
@@ -141,8 +148,43 @@ class SaleEditPresenter(context: Any,
                 repo.saleDao.updateAsync(entity)
             }
 
-            //TODO: Call commitToDatabase on any onetomany join helpers
-            view.finishWithResult(listOf(entity))
+            val saleItemsToInsert = saleItemEditHelper.entitiesToInsert
+            val saleItemstoDelete = saleItemEditHelper.primaryKeysToDeactivate
+            val saleItemstoUpdate = saleItemEditHelper.entitiesToUpdate
+
+            saleItemsToInsert.forEach {
+                it.saleItemSaleUid = entity.saleUid
+                it.saleItemUid = repo.saleItemDao.insertAsync(it)
+            }
+            repo.saleItemDao.updateListAsync(saleItemstoUpdate)
+            repo.saleItemDao.deactivateByUids(saleItemstoDelete)
+
+
+            val deliveriesToInsert = saleDeliveryEditHelper.entitiesToInsert
+            val deliveriesToUpdate = saleDeliveryEditHelper.entitiesToUpdate
+            val deliveriesToDelete = saleDeliveryEditHelper.primaryKeysToDeactivate
+
+            deliveriesToInsert.forEach {
+                it.saleDeliverySaleUid = entity.saleUid
+                it.saleDeliveryUid = repo.saleDeliveryDao.insertAsync(it)
+            }
+            repo.saleDeliveryDao.updateListAsync(deliveriesToUpdate)
+            repo.saleDeliveryDao.deactivateByUids(deliveriesToDelete)
+
+
+            val paymentsToInsert = salePaymentEditHelper.entitiesToInsert
+            val paymentsToUpdate = salePaymentEditHelper.entitiesToUpdate
+            val paymentsToDelete = salePaymentEditHelper.primaryKeysToDeactivate
+
+            paymentsToInsert.forEach {
+                it.salePaymentSaleUid = entity.saleUid
+                it.salePaymentUid = repo.salePaymentDao.insertAsync(it)
+            }
+            repo.salePaymentDao.updateListAsync(paymentsToUpdate)
+            repo.salePaymentDao.deactivateByUids(paymentsToDelete)
+
+            //TODO: this
+            //onFinish(SaleDetailView.VIEW_NAME, entity.saleUid, entity)
         }
     }
 
