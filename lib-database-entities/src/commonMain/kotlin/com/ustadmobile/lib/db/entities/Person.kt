@@ -199,6 +199,22 @@ open class Person() {
             AND (Role.rolePermissions & 
         """
 
+        const val FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1 = """
+            FROM
+            PersonGroupMember
+            JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+            JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions & """
+
+        const val FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2 = """) > 0
+            JOIN Person ON ((EntityRole.erTableId= 9 AND EntityRole.erEntityUid = Person.personUid)
+                        OR (EntityRole.erTableId = 6 AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))
+                        OR (EntityRole.erTableId = 164 AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.PersonUid)) OR
+                        (EntityRole.erTableId = 164 AND EntityRole.erEntityUid IN (
+                        SELECT DISTINCT Clazz.clazzSchoolUid 
+                        FROM Clazz
+                        JOIN ClazzMember ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberPersonUid = Person.personUid
+                        )))
+                        """
         const val ENTITY_PERSONS_WITH_PERMISSION_PT4 = ") > 0)"
 
     }
