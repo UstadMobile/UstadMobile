@@ -198,6 +198,35 @@ abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun insertPersonGroupMember(personGroupMember:PersonGroupMember):Long
 
     @Query("""
+         SELECT Person.* 
+         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+         WHERE
+         PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+         AND (:excludeClazz = 0 OR :excludeClazz NOT IN
+            (SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft ))
+            AND (:excludeSchool = 0 OR :excludeSchool NOT IN
+            (SELECT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
+            AND (Person.personUid NOT IN (:excludeSelected))
+            AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+         GROUP BY Person.personUid
+         ORDER BY CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
+                WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
+                ELSE ''
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
+                WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
+                ELSE ''
+            END DESC
+    """)
+    abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
+                                                 excludeSchool: Long, excludeSelected: List<Long>,
+                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int, PersonWithDisplayDetails>
+
+    @Query("""
         SELECT Person.* FROM Person 
             WHERE
             (:excludeClazz = 0 OR :excludeClazz NOT IN
@@ -220,9 +249,9 @@ abstract class PersonDao : BaseDao<Person> {
                 ELSE ''
             END DESC
     """)
-    abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
-                                                 excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int, PersonWithDisplayDetails>
+    abstract fun findPersonsWithPermissionAsList(timestamp: Long, excludeClazz: Long,
+                                           excludeSchool: Long, excludeSelected: List<Long>,
+                                           accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): List<Person>
 
 
     @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")

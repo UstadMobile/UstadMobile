@@ -1,6 +1,7 @@
 package db2
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
@@ -9,7 +10,7 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import db2.ExampleSyncableEntity.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
-@Entity
+@Entity(indices = [Index(value = ["esNumber", "esName"])])
 @SyncableEntity(tableId = TABLE_ID,
     notifyOnUpdate = ["""SELECT DISTINCT deviceId as deviceId, $TABLE_ID as tableId 
                             FROM AccessGrant 
