@@ -22,6 +22,8 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var entryMetaData: ImportedContentEntryMetaData?
 
+    var entryCompressed: Boolean
+
     companion object {
 
         const val VIEW_NAME = "ContentEntryEdit2EditView"

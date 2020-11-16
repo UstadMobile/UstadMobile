@@ -30,7 +30,7 @@ interface ContentImportManager {
      * @return ImportJob (that is saved into the database)
      */
     suspend fun queueImportContentFromFile(filePath: String, metadata: ImportedContentEntryMetaData,
-        containerBaseDir: String): ContainerImportJob
+        containerBaseDir: String, conversionParams: Map<String, String>): ContainerImportJob
 
 
     /**

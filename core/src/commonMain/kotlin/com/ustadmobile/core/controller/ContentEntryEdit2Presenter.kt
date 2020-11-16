@@ -148,7 +148,8 @@ class ContentEntryEdit2Presenter(context: Any,
 
                         metaData.contentEntry = entity
                         contentImportManager?.queueImportContentFromFile(uri, metaData,
-                                view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString())
+                                view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),
+                                mapOf("compress" to view.entryCompressed.toString()))
 
                         view.finishWithResult(listOf(entity))
                         return@launch

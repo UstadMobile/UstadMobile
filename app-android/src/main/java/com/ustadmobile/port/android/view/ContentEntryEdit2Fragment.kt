@@ -36,6 +36,9 @@ interface ContentEntryEdit2FragmentEventHandler {
     fun onClickContentImportSourceSelection()
 
     fun handleClickLanguage()
+
+    fun handleToggleCompress(checked: Boolean)
+
 }
 
 class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = null) : UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler {
@@ -62,6 +65,13 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 View.VISIBLE else View.GONE
             mBinding?.importedMetadata = value
             field = value
+        }
+
+    override var entryCompressed: Boolean = true
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.entryCompressed = value
         }
 
     override var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>? = null
@@ -124,6 +134,10 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     }
 
+    override fun handleToggleCompress(checked: Boolean) {
+        entryCompressed = checked
+    }
+
     /**
      * removes the temp folder from being deleted in the backstack
      */
@@ -180,6 +194,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             rootView = it.root
             it.fileImportInfoVisibility = View.GONE
             it.activityEventHandler = this
+            it.entryCompressed = true
         }
 
         return rootView
