@@ -15,10 +15,12 @@ fun makePersonPermissionClause(personUidFieldName: String = "Person.personUid",
            /* Put your SELECT here e.g. Person.*, ClazzMember.* etc, */
             FROM
             PersonGroupMember
-            JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-            JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions & $permissionRequired) > 0
-            JOIN Person ON 
-            ((EntityRole.erTableId= ${'$'}{Person.TABLE_ID} AND EntityRole.erEntityUid = $personUidFieldName)
+            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions & $permissionRequired) > 0
+            LEFT JOIN Person ON
+                        CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = $accountPersonUid) AS INTEGER) = 1
+                        OR ($personUidFieldName = $accountPersonUid)
+                        OR ((EntityRole.erTableId= ${'$'}{Person.TABLE_ID} AND EntityRole.erEntityUid = $personUidFieldName)
                         OR (EntityRole.erTableId = ${'$'}{Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = $personUidFieldName))
                         OR (EntityRole.erTableId = ${'$'}{School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = $personUidFieldName)) OR
                         (EntityRole.erTableId = ${'$'}{School.TABLE_ID} AND EntityRole.erEntityUid IN (

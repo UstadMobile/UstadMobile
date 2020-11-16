@@ -2956,6 +2956,40 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 database.execSQL("CREATE INDEX index_ClazzMember_clazzMemberClazzUid_clazzMemberPersonUid ON ClazzMember (clazzMemberClazzUid, clazzMemberPersonUid)")
                 database.execSQL("CREATE INDEX index_EntityRole_erGroupUid_erRoleUid_erTableId ON EntityRole (erGroupUid, erRoleUid, erTableId)")
                 database.execSQL("CREATE INDEX index_Role_rolePermissions ON Role(rolePermissions)")
+
+                //Add a PersonGroup for Admin
+                if(database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("""
+                        INSERT INTO PersonGroup(groupName, groupActive, personGroupFlag, groupMasterCsn, groupLocalCsn, groupLastChangedBy) 
+                        SELECT 'PGA' || person.personUid AS groupName, 
+                        true as groupActive,
+                        1 as personGroupFlag,
+                        0 as groupMasterCsn,
+                        0 as groupLocalCsn,
+                        (SELECT nodeClientId FROM SyncNode) as groupLastChangedBy
+                        FROM person
+                        where admin = true
+                        AND personGroupUid = 0""")
+                    database.execSQL("""
+                        UPDATE Person SET
+                        personGroupUid = (SELECT groupUid FROM PersonGroup WHERE groupName = ('PGA' || Person.personUid) LIMIT 1),
+                        personLastChangedBy = (SELECT nodeClientId FROM SyncNode) 
+                        WHERE
+                        admin = true AND personGroupUid = 0
+                    """)
+                    database.execSQL("""
+                        INSERT INTO PersonGroupMember(groupMemberPersonUid, groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, groupMemberLastChangedBy)
+                        SELECT Person.personUid AS groupMemberPersonUid,
+                        Person.personGroupUid AS groupMemberGroupUid,
+                        0 AS groupMemberMasterCsn,
+                        0 AS groupMemberLocalCsn,
+                        (SELECT nodeClientId FROM SyncNode) AS groupMemberLastChangedBy
+                        FROM Person
+                        WHERE admin = true
+                        AND (SELECT COUNT(*) FROM PersonGroupMember WHERE PersonGroupmember.groupMemberGroupUid = Person.personGroupUid) = 0
+                    """)
+                }
+
             }
         }
 
