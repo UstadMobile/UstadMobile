@@ -16,6 +16,7 @@ import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.sharedse.util.UstadTestRule
 import com.ustadmobile.util.test.extractTestResourceToFile
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -50,6 +51,7 @@ class DeleteDownloadJobTest{
     private var zombieFilePath = "/com/ustadmobile/port/sharedse/container/testfile2.png"
 
     lateinit var db: UmAppDatabase
+    lateinit var repo: UmAppDatabase
 
     lateinit var containerDownloadManager: ContainerDownloadManager
 
@@ -61,6 +63,10 @@ class DeleteDownloadJobTest{
     @JvmField
     var tmpFolderRule = TemporaryFolder()
 
+    @JvmField
+    @Rule
+    var ustadTestRule = UstadTestRule()
+
     private lateinit var clientDi: DI
 
     lateinit var mockNetworkManager: NetworkManagerBle
@@ -71,21 +77,12 @@ class DeleteDownloadJobTest{
         mockNetworkManager = mock{}
 
         clientDi = DI {
-            bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl.instance }
-            bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
-                val dbName = sanitizeDbNameFromUrl(context.url)
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
-                    it.clearAllTables()
-                })
-            }
+            import(ustadTestRule.diModule)
             bind<NetworkManagerBle>() with singleton { mockNetworkManager }
 
             bind<ContainerDownloadManager>() with scoped(endpointScope).singleton {
                 ContainerDownloadManagerImpl(endpoint = context, di = di)
             }
-            registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
         val cloudMockWebServer = MockWebServer()
         val accountManager: UstadAccountManager by clientDi.instance()
@@ -93,6 +90,7 @@ class DeleteDownloadJobTest{
                 cloudMockWebServer.url("/").toString())
 
         db =  clientDi.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_DB)
+        repo = clientDi.on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         containerDownloadManager = clientDi.on(accountManager.activeAccount).direct.instance()
 
         containerTmpDir = tmpFolderRule.newFolder("clientContainerDir")
