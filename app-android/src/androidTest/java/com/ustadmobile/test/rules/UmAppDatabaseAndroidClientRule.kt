@@ -72,7 +72,7 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
 
     fun insertPersonForActiveUser(person: Person) {
         person.personUid = account.personUid
-        runBlocking { repoInternal!!.insertPersonAndGroup(person) } }
+        runBlocking { repoInternal!!.insertPersonAndGroup(person) }
     }
 
 
