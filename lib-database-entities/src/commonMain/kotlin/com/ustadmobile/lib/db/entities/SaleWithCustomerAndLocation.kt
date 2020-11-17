@@ -11,10 +11,10 @@ class SaleWithCustomerAndLocation() : Sale() {
 
 
     @Embedded
-    var saleCustomer: Person? = null
+    var person: Person? = null
 
     @Embedded
-    var saleLocation: Location? = null
+    var location: Location? = null
 
 
 }

@@ -47,7 +47,8 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
     override val mEditPresenter: UstadEditPresenter<*, Product>?
         get() = mPresenter
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentProductEditBinding.inflate(inflater, container, false).also {
             rootView = it.root

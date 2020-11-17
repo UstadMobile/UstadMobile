@@ -1,16 +1,17 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Sale
 import com.ustadmobile.lib.db.entities.SaleItem
+import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 import com.ustadmobile.lib.db.entities.SaleDelivery
+import com.ustadmobile.lib.db.entities.SaleWithCustomerAndLocation
 import com.ustadmobile.lib.db.entities.SalePayment
 import com.ustadmobile.door.DoorMutableLiveData
 
-interface SaleEditView: UstadEditView<Sale> {
+interface SaleEditView: UstadEditView<SaleWithCustomerAndLocation> {
 
-    var saleItemList: DoorMutableLiveData<List<SaleItem>>?
+    var saleItemList: DoorMutableLiveData<List<SaleItemWithProduct>>?
 
     var saleDeliveryList: DoorMutableLiveData<List<SaleDelivery>>?
 

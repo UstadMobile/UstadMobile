@@ -1,33 +1,29 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.*
-import com.ustadmobile.core.db.dao.SaleDao.Companion.FIND_ALL_SALE_LIST_SALES
-import com.ustadmobile.core.db.dao.SaleDao.Companion.SELECT_ACCOUNT_IS_ADMIN
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.Sale
-import com.ustadmobile.lib.db.entities.SaleListDetail
-import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
+import com.ustadmobile.lib.db.entities.*
 
-@UmDao(updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN,
-        insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 @Dao
 abstract class SaleDao : BaseDao<Sale> {
 
-
     @Update
     abstract suspend fun updateAsync(entity: Sale): Int
 
-    @Query(FIND_BY_UID_QUERY)
-    abstract suspend fun findByUidAsync(uid: Long): Sale?
+    @Query(FIND_WITH_LOCATION_AND_CUSTOMER__BY_UID_QUERY)
+    abstract suspend fun findWithCustomerAndLocationByUidAsync(uid: Long): SaleWithCustomerAndLocation?
 
     @Query(FIND_ALL_SALE_LIST_SALES)
     abstract fun findAllSales(leUid: Long): DataSource.Factory<Int,SaleListDetail>
 
-
+    @Query(""" SELECT Sale.* FROM Sale WHERE CAST(Sale.saleActive AS INTEGER) = 1 """)
+    abstract fun findAllSalesList(): List<Sale>
 
 
 
@@ -41,6 +37,12 @@ abstract class SaleDao : BaseDao<Sale> {
 
         const val FIND_BY_UID_QUERY = """
             SELECT * FROM Sale WHERE Sale.saleUid = :uid AND CAST(Sale.saleActive AS INTEGER) = 1 
+        """
+        const val FIND_WITH_LOCATION_AND_CUSTOMER__BY_UID_QUERY = """
+            SELECT Sale.*, Person.*, Location.*  FROM Sale 
+            LEFT JOIN Person ON Person.personUid = Sale.saleCustomerUid 
+            LEFT JOIN Location ON Location.locationUid = Sale.saleLocationUid
+            WHERE Sale.saleUid = :uid AND CAST(Sale.saleActive AS INTEGER) = 1 
         """
 
         const val FIND_ALL_SALE_LIST_SALES = """

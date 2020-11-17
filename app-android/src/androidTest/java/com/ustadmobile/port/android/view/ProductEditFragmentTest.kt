@@ -92,6 +92,8 @@ class ProductEditFragmentTest : TestCase(){
                     it.isNotEmpty()
                 }
 
+                Thread.sleep(2000)
+
                 Assert.assertEquals("Product data set", "New Product",
                         productList!!.first().productName)
 

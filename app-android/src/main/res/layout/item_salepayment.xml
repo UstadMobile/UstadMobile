@@ -39,10 +39,23 @@
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginVertical="@dimen/dimen_16dp"
             app:dateLong="@{salePayment.salePaymentPaidDate}"
-            app:layout_constraintEnd_toStartOf="@+id/item_saledelivery_delete_iv"
+            app:layout_constraintEnd_toStartOf="@+id/item_salepayment_amount"
             app:layout_constraintStart_toEndOf="@id/item_saledelivery_image"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="12th December 2020" />
+
+        <TextView
+            android:id="@+id/item_salepayment_amount"
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
+            tools:text="15,500"
+            android:text="@{`` + salePayment.salePaymentPaidAmount}"
+            app:layout_constraintEnd_toStartOf="@+id/item_saledelivery_delete_iv"
+            app:layout_constraintTop_toTopOf="parent"
+            />
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_saledelivery_delete_iv"

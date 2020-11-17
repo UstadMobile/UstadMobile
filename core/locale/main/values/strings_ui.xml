@@ -882,5 +882,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="create_product">New product</string>
     <string name="sell">Sell</string>
     <string name="receive">Receive</string>
+    <string name="add_sale">Add Sale</string>
+    <string name="edit_sale">Edit Sale</string>
+    <string name="item">Item</string>
 
 </resources>

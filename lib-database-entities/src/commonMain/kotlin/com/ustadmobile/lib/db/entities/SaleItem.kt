@@ -46,7 +46,7 @@ open class SaleItem() {
 
     //If active or not (false is effectively deleted
     // and is usually set for sale items not saved during creation)
-    var saleItemActive: Boolean = false
+    var saleItemActive: Boolean = true
 
     //Date when the sale item was created (Usually current system time)
     var saleItemCreationDate: Long = 0

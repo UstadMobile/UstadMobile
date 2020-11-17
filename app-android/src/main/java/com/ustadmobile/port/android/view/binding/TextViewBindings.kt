@@ -262,8 +262,8 @@ fun TextView.setSaleItemTotal(saleItem: SaleItem) {
 }
 
 @BindingAdapter(value = ["totalSale", "saleForTotalAfterDiscount"])
-fun TextView.setSaleItemAfterDiscountTotal(totalSale : Long, sale: Sale) {
-    text = "" + (totalSale - sale.saleDiscount) + " " + context.getString(R.string.afs)
+fun TextView.setSaleItemAfterDiscountTotal(totalSale : Long, sale: Sale?) {
+    text = "" + (totalSale - (sale?.saleDiscount ?: 0L)) + " " + context.getString(R.string.afs)
 }
 
 @BindingAdapter("rolesAndPermissionsText")

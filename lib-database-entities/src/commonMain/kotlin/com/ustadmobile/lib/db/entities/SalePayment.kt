@@ -33,7 +33,7 @@ open class SalePayment() {
     var salePaymentDone: Boolean = false
 
     //If false, it wont show up on the app and reports - effectively deleted.
-    var salePaymentActive: Boolean = false
+    var salePaymentActive: Boolean = true
 
     @MasterChangeSeqNum
     var salePaymentMCSN: Long = 0
@@ -46,6 +46,40 @@ open class SalePayment() {
 
     companion object{
         const val CATEGORY_TABLE_ID = 317
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other == null || this::class != other::class) return false
+
+        other as SalePayment
+
+        if (salePaymentUid != other.salePaymentUid) return false
+        if (salePaymentPaidDate != other.salePaymentPaidDate) return false
+        if (salePaymentPaidAmount != other.salePaymentPaidAmount) return false
+        if (salePaymentCurrency != other.salePaymentCurrency) return false
+        if (salePaymentSaleUid != other.salePaymentSaleUid) return false
+        if (salePaymentDone != other.salePaymentDone) return false
+        if (salePaymentActive != other.salePaymentActive) return false
+        if (salePaymentMCSN != other.salePaymentMCSN) return false
+        if (salePaymentLCSN != other.salePaymentLCSN) return false
+        if (salePaymentLCB != other.salePaymentLCB) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = salePaymentUid.hashCode()
+        result = 31 * result + salePaymentPaidDate.hashCode()
+        result = 31 * result + salePaymentPaidAmount.hashCode()
+        result = 31 * result + (salePaymentCurrency?.hashCode() ?: 0)
+        result = 31 * result + salePaymentSaleUid.hashCode()
+        result = 31 * result + salePaymentDone.hashCode()
+        result = 31 * result + salePaymentActive.hashCode()
+        result = 31 * result + salePaymentMCSN.hashCode()
+        result = 31 * result + salePaymentLCSN.hashCode()
+        result = 31 * result + salePaymentLCB
+        return result
     }
 
 

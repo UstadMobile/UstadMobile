@@ -43,7 +43,7 @@ import kotlin.jvm.Volatile
     //Goldozi:
     ,Product::class, ProductCategoryJoin::class, InventoryItem::class, InventoryTransaction::class,
     Category::class, Sale::class, SaleDelivery::class, SaleItem::class, SaleItemReminder::class,
-    SalePayment::class
+    SalePayment::class, Location::class
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
@@ -299,6 +299,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("salePaymentDao")
     abstract val salePaymentDao: SalePaymentDao
+
+    @JsName("locationDao")
+    abstract val locationDao: LocationDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

@@ -1,17 +1,16 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
-import androidx.room.*
-import com.ustadmobile.core.db.dao.SaleItemDao.Companion.SELECT_ACCOUNT_IS_ADMIN
-import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.SaleItem
-import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 
-@UmDao(updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN,
-        insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
+import androidx.paging.DataSource
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.lib.db.entities.*
+
+
 @UmRepository
 @Dao
 abstract class SaleItemDao : BaseDao<SaleItem>, OneToManyJoinDao<SaleItem> {
@@ -34,15 +33,18 @@ abstract class SaleItemDao : BaseDao<SaleItem>, OneToManyJoinDao<SaleItem> {
     @Query(QUERY_ALL_ACTIVE_SALE_ITEM_LIST)
     abstract fun findAllBySale(saleUid: Long): DataSource.Factory<Int,SaleItemWithProduct>
 
+    @Query(QUERY_ALL_ACTIVE_SALE_ITEM_LIST)
+    abstract suspend fun findAllBySaleListAsList(saleUid: Long): List<SaleItemWithProduct>
+
     @Query("""
-            SELECT SUM(saleItemPricePerPiece * saleItemQuantity) FROM SaleItem 
+            SELECT SUM(saleItemPricePerPiece * saleItemQuantity) FROM SaleItem
             WHERE saleItemSaleUid = :saleUid AND CAST(saleItemActive AS INTEGER) = 1 """)
-    abstract fun findTotalBySaleLive(saleUid: Long):DoorMutableLiveData<Long>
+    abstract fun findTotalBySaleLive(saleUid: Long):DoorLiveData<Long>
 
     @Query("""
             SELECT SUM(saleItemPricePerPiece * saleItemQuantity) FROM SaleItem 
             WHERE saleItemSaleUid = :saleUid AND CAST(saleItemActive AS INTEGER) = 1 """)
-    abstract fun findTotalBySale(saleUid: Long): Long?
+    abstract fun findTotalBySale(saleUid: Long): Long
 
     companion object {
 

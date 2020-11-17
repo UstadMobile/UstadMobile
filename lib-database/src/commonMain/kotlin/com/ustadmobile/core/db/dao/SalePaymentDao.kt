@@ -8,8 +8,6 @@ import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SalePayment
 
-@UmDao(updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN,
-        insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 @Dao
 abstract class SalePaymentDao : BaseDao<SalePayment>, OneToManyJoinDao<SalePayment> {
@@ -21,8 +19,11 @@ abstract class SalePaymentDao : BaseDao<SalePayment>, OneToManyJoinDao<SalePayme
     @Query(QUERY_ALL_ACTIVE_SALE_PAYMENT_LIST)
     abstract fun findAllBySale(saleUid: Long): DataSource.Factory<Int,SalePayment>
 
+    @Query(QUERY_ALL_ACTIVE_SALE_PAYMENT_LIST)
+    abstract suspend fun findAllBySaleAsList(saleUid: Long): List<SalePayment>
 
-    @Query("""UPDATE SalePayment SET salePaymentSaleUid = 0,
+
+    @Query("""UPDATE SalePayment SET salePaymentSaleUid = 0
         WHERE salePaymentUid = :salePaymentUid
     """)
     abstract suspend fun deactivateSaleFromSalePayment(salePaymentUid : Long ): Int

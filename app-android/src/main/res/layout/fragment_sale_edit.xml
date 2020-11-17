@@ -58,7 +58,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/fragment_sale_edit_customer_tiet"
                     android:onClick="@{() -> activityEventHandler.selectCustomer()}"
-                    android:text="@{sale.saleCustomer.fullName()}"
+                    android:text="@{sale.person.fullName()}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     android:layout_width="match_parent"
@@ -80,7 +80,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/fragment_sale_edit_province_tiet"
                     android:onClick="@{() -> activityEventHandler.selectLocation()}"
-                    android:text="@{sale.saleLocation.title}"
+                    android:text="@{sale.location.title}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     android:layout_width="match_parent"
@@ -152,10 +152,13 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="17640"
-                android:text="@={`` + orderTotal}"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 />
+
+                <!--
+                android:text="@={`` + orderTotal}"
+                -->
 
             </LinearLayout>
 
@@ -175,11 +178,15 @@
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
 
                 <EditText
+                    android:id="@+id/fragment_sale_edit_discount_et"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     tools:text="500"
                     android:layout_marginHorizontal="@dimen/dimen_16dp"
-                    android:text="@={`` + sale.saleDiscount}" />
+                    android:text="@={`` + sale.saleDiscount}"
+                    android:inputType="number"
+                    android:autofillHints="@string/discount"
+                    tools:ignore="LabelFor" />
 
             </LinearLayout>
 
@@ -214,7 +221,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     tools:text="17140"
-                    app:setSaleItemAfterDiscountTotal="@{sale}"
+                    app:saleForTotalAfterDiscount="@{sale}"
                     app:totalSale="@{orderTotal}"
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:layout_marginHorizontal="@dimen/dimen_16dp"
@@ -249,7 +256,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:id="@+id/fragment_sale_edit_saledelivery_createnew"
+                android:id="@+id/fragment_sale_edit_saledelivery_rv_add"
                 app:onClickNew="@{() -> activityEventHandler.addDelivery()}"
                 app:createNewText="@{@string/delivery}"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_delivery_rv"
@@ -261,7 +268,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/payments"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@id/fragment_sale_edit_saledelivery_createnew"
+                app:layout_constraintTop_toBottomOf="@id/fragment_sale_edit_saledelivery_rv_add"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -284,7 +291,7 @@
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:id="@+id/fragment_sale_edit_salepayment_createnew"
                 app:onClickNew="@{() -> activityEventHandler.addPayment()}"
-                app:createNewText="@{@string/delivery}"
+                app:createNewText="@{@string/payment}"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_payment_rv"
                 app:layout_constraintStart_toStartOf="parent" />
 
@@ -308,6 +315,7 @@
 
                 <!-- This will have to be set programatically -->
                 <TextView
+                    android:id="@+id/fragment_sale_edit_balance_due_tv"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     tools:text="16000"
@@ -320,7 +328,7 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/fragment_sale_edit_notes_til"
-                style="@style/Widget.MaterialComponents.TextInput   Layout.OutlinedBox"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/dimen_8dp"

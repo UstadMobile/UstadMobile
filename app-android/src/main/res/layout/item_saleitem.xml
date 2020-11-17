@@ -93,7 +93,7 @@
                     android:layout_marginTop="@dimen/dimen_8dp"
                     android:layout_weight="1"
                     tools:text="21"
-                    android:text="@{saleItem.saleItemQuantity}"
+                    android:text="@{`` + saleItem.saleItemQuantity}"
                     android:textAppearance="@style/TextAppearance.AppCompat"
                     app:layout_constraintStart_toEndOf="@+id/textView19"
                     app:layout_constraintTop_toBottomOf="@+id/item_sale_item_quantity_title" />
