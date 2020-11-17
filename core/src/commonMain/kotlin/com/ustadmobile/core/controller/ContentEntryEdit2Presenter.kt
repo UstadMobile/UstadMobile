@@ -8,6 +8,7 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMUUID
+import com.ustadmobile.core.util.ext.convertToJsonObject
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
@@ -17,13 +18,16 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import org.kodein.di.DI
 import org.kodein.di.instanceOrNull
 import org.kodein.di.on
@@ -142,6 +146,7 @@ class ContentEntryEdit2Presenter(context: Any,
 
                 val metaData = view.entryMetaData
                 val uri = metaData?.uri
+                val conversionParams = mapOf("compress" to view.entryCompressed.toString())
                 if (metaData != null && uri != null) {
 
                     if (uri.startsWith("file://")) {
@@ -149,7 +154,7 @@ class ContentEntryEdit2Presenter(context: Any,
                         metaData.contentEntry = entity
                         contentImportManager?.queueImportContentFromFile(uri, metaData,
                                 view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),
-                                mapOf("compress" to view.entryCompressed.toString()))
+                                conversionParams)
 
                         view.finishWithResult(listOf(entity))
                         return@launch
@@ -162,6 +167,7 @@ class ContentEntryEdit2Presenter(context: Any,
                             parameter("parentUid", parentEntryUid)
                             parameter("scraperType", view.entryMetaData?.scraperType)
                             parameter("url", view.entryMetaData?.uri)
+                            parameter("conversionParams", Json.stringify(JsonObject.serializer(), conversionParams.convertToJsonObject()))
                             header("content-type", "application/json")
                             body = entity
                         }.execute()

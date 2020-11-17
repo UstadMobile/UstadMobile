@@ -7,15 +7,15 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.ImportJobRunner
 import com.ustadmobile.core.util.LiveDataWorkQueue
+import com.ustadmobile.core.util.ext.convertToJsonObject
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.MapSerializer
-import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -90,8 +90,7 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
             this.cijMimeType = metadata.mimeType
             this.cijContainerBaseDir = containerBaseDir
             this.cijJobStatus = JobStatus.QUEUED
-            this.cijConversionParams = Json.stringify(
-                    MapSerializer(String.serializer(), String.serializer()), conversionParams)
+            this.cijConversionParams = Json.stringify(JsonObject.serializer(), conversionParams.convertToJsonObject())
             cijUid = db.containerImportJobDao.insertAsync(this)
         }
     }

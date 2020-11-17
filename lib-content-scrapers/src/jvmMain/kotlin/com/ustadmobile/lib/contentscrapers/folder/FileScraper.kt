@@ -6,6 +6,9 @@ import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -56,8 +59,13 @@ class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Lon
                         metadataContentEntry.contentTypeFlag, repo.contentEntryDao)
 
                 ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
-
-                contentImportManager.importFileToContainer(file.path, metadata.mimeType, fileEntry.contentEntryUid, containerFolder.path, mapOf()){
+                val params = scrapeQueueItem?.scrapeRun?.conversionParams
+                var conversionParams = mapOf<String, String>()
+                if(params != null){
+                    conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+                }
+                contentImportManager.importFileToContainer(file.path, metadata.mimeType,
+                        fileEntry.contentEntryUid, containerFolder.path, conversionParams){
 
                 }
                 close()

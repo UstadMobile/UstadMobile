@@ -17,6 +17,9 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -128,7 +131,13 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     }
                     metadata.contentEntry.contentEntryUid = fileEntry.contentEntryUid
 
-                    contentImportManager.importFileToContainer(contentFile.path, metadata.mimeType, fileEntry.contentEntryUid, containerFolder.path, mapOf()){
+                    val params = scrapeQueueItem?.scrapeRun?.conversionParams
+                    var conversionParams = mapOf<String, String>()
+                    if(params != null){
+                        conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+                    }
+                    contentImportManager.importFileToContainer(contentFile.path, metadata.mimeType,
+                            fileEntry.contentEntryUid, containerFolder.path, conversionParams){
                     }
                     Napier.d("$logPrefix finished Scraping", tag = SCRAPER_TAG)
                     showContentEntry()
