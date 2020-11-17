@@ -53,69 +53,78 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
         return withContext(Dispatchers.Default) {
 
             val videoFile = File(filePath.removePrefix("file://"))
-            val newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
+            var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
+            val compressVideo: Boolean = conversionParams["compress"]?.toBoolean() ?: false
 
-            Napier.d(tag = VIDEO_ANDROID, message = "start import for new video file $newVideo.name")
+            Napier.d(tag = VIDEO_ANDROID, message = "conversion Params compress video is $compressVideo")
 
-            val originalVideoDimensions = videoFile.extractVideoResolutionMetadata()
-            val newVideoDimensions = originalVideoDimensions.fitWithin()
+            if(compressVideo) {
 
-            Napier.d(tag = VIDEO_ANDROID, message = "width of old video is ${originalVideoDimensions.first}, height of old video is ${originalVideoDimensions.second}")
-            Napier.d(tag = VIDEO_ANDROID, message = "width of new video is ${newVideoDimensions.first}, height of new video is ${newVideoDimensions.second}")
+                Napier.d(tag = VIDEO_ANDROID, message = "start import for new video file $newVideo.name")
 
-            val videoTarget = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, newVideoDimensions.first, newVideoDimensions.second).apply {
-                setInteger(MediaFormat.KEY_BIT_RATE, VIDEO_BIT_RATE)
-                setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, VIDEO_FRAME_INTERVAL)
-                setInteger(MediaFormat.KEY_FRAME_RATE, VIDEO_FRAME_RATE)
-                setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
+                val originalVideoDimensions = videoFile.extractVideoResolutionMetadata()
+                val newVideoDimensions = originalVideoDimensions.fitWithin()
+
+                Napier.d(tag = VIDEO_ANDROID, message = "width of old video is ${originalVideoDimensions.first}, height of old video is ${originalVideoDimensions.second}")
+                Napier.d(tag = VIDEO_ANDROID, message = "width of new video is ${newVideoDimensions.first}, height of new video is ${newVideoDimensions.second}")
+
+                val videoTarget = MediaFormat.createVideoFormat(MediaFormat.MIMETYPE_VIDEO_AVC, newVideoDimensions.first, newVideoDimensions.second).apply {
+                    setInteger(MediaFormat.KEY_BIT_RATE, VIDEO_BIT_RATE)
+                    setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, VIDEO_FRAME_INTERVAL)
+                    setInteger(MediaFormat.KEY_FRAME_RATE, VIDEO_FRAME_RATE)
+                    setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface)
+                }
+
+                val audioTarget = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, AUDIO_SAMPLE_RATE, AUDIO_CHANNEL_COUNT).apply {
+                    setInteger(MediaFormat.KEY_BIT_RATE, AUDIO_BIT_RATE)
+                }
+
+                val videoCompleted = CompletableDeferred<Boolean>()
+
+                val mediaTransformer = MediaTransformer(context as Context)
+                mediaTransformer.transform(contentEntryUid.toString(), videoFile.toUri(), newVideo.absolutePath,
+                        videoTarget, audioTarget, object : TransformationListener {
+                    override fun onStarted(id: String) {
+                        Napier.d(tag = VIDEO_ANDROID, message = "started transform")
+                    }
+
+                    override fun onProgress(id: String, progress: Float) {
+                        Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
+                        progressListener.invoke((progress * 100).toInt())
+                    }
+
+                    override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
+                        Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
+                        videoCompleted.complete(true)
+                    }
+
+                    override fun onCancelled(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
+                        Napier.d(tag = VIDEO_ANDROID, message = "cancelled transform")
+                        videoCompleted.complete(false)
+                    }
+
+                    override fun onError(id: String, cause: Throwable?, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
+                        videoCompleted.completeExceptionally(cause
+                                ?: RuntimeException("error on video id: $id"))
+                    }
+
+                }, MediaTransformer.GRANULARITY_DEFAULT, null)
+
+
+                try {
+                    videoCompleted.await()
+                } catch (e: Exception) {
+                    Napier.e(tag = VIDEO_ANDROID, throwable = e, message = e.message ?: "")
+                } finally {
+                    mediaTransformer.release()
+                }
+
+                Napier.d(tag = VIDEO_ANDROID, message = "released transform with new file size " +
+                        "at ${newVideo.length()} with old size at ${videoFile.length()}")
+            }else{
+                newVideo = videoFile
             }
 
-            val audioTarget = MediaFormat.createAudioFormat(MediaFormat.MIMETYPE_AUDIO_AAC, AUDIO_SAMPLE_RATE, AUDIO_CHANNEL_COUNT).apply {
-                setInteger(MediaFormat.KEY_BIT_RATE, AUDIO_BIT_RATE)
-            }
-
-            val videoCompleted = CompletableDeferred<Boolean>()
-
-            val mediaTransformer = MediaTransformer(context as Context)
-            mediaTransformer.transform(contentEntryUid.toString(), videoFile.toUri(), newVideo.absolutePath,
-                    videoTarget, audioTarget, object : TransformationListener {
-                override fun onStarted(id: String) {
-                    Napier.d(tag = VIDEO_ANDROID, message = "started transform")
-                }
-
-                override fun onProgress(id: String, progress: Float) {
-                    Napier.d(tag = VIDEO_ANDROID, message = "progress at value ${progress * 100}")
-                    progressListener.invoke((progress * 100).toInt())
-                }
-
-                override fun onCompleted(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
-                    Napier.d(tag = VIDEO_ANDROID, message = "completed transform")
-                    videoCompleted.complete(true)
-                }
-
-                override fun onCancelled(id: String, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
-                    Napier.d(tag = VIDEO_ANDROID, message = "cancelled transform")
-                    videoCompleted.complete(false)
-                }
-
-                override fun onError(id: String, cause: Throwable?, trackTransformationInfos: MutableList<TrackTransformationInfo>?) {
-                    videoCompleted.completeExceptionally(cause
-                            ?: RuntimeException("error on video id: $id"))
-                }
-
-            }, MediaTransformer.GRANULARITY_DEFAULT, null)
-
-
-            try {
-                videoCompleted.await()
-            }catch (e: Exception) {
-                Napier.e(tag = VIDEO_ANDROID, throwable = e, message = e.message?: "")
-            }finally {
-                mediaTransformer.release()
-            }
-
-            Napier.d(tag = VIDEO_ANDROID, message = "released transform with new file size " +
-                    "at ${newVideo.length()} with old size at ${videoFile.length()}")
 
             val container = Container().apply {
                 containerContentEntryUid = contentEntryUid

@@ -21,7 +21,7 @@ object ShrinkUtils {
 
         return System.getenv("PATH").split(File.pathSeparator).firstOrNull() {
             File(it, commandName).exists()
-        }?.let { "$it/$commandName" }
+        }?.let { File(it, commandName).path }
     }
 
     fun getVideoResolutionMetadata(srcFile: File): Pair<Int, Int> {

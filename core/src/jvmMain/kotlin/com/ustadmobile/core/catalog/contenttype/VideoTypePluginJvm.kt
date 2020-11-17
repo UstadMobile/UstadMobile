@@ -1,5 +1,6 @@
 package com.ustadmobile.core.catalog.contenttype
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ShrinkUtils
@@ -12,6 +13,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 class VideoTypePluginJvm: VideoTypePlugin() {
+
+    private val VIDEO_JVM = "VideoPluginJVM"
 
     override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default){
@@ -41,12 +44,19 @@ class VideoTypePluginJvm: VideoTypePlugin() {
         return withContext(Dispatchers.Default) {
 
             val videoFile = File(filePath.removePrefix("file://"))
-            val newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
+            var newVideo = File(videoFile.parentFile, "new${videoFile.nameWithoutExtension}.mp4")
 
-            val fileVideoDimensions = ShrinkUtils.getVideoResolutionMetadata(videoFile)
-            val newVideoDimensions = fileVideoDimensions.fitWithin()
+            val compressVideo: Boolean = conversionParams["compress"]?.toBoolean() ?: false
 
-            ShrinkUtils.optimiseVideo(videoFile, newVideo, newVideoDimensions)
+            Napier.d(tag = VIDEO_JVM, message = "conversion Params compress video is $compressVideo")
+
+            if(compressVideo) {
+                val fileVideoDimensions = ShrinkUtils.getVideoResolutionMetadata(videoFile)
+                val newVideoDimensions = fileVideoDimensions.fitWithin()
+                ShrinkUtils.optimiseVideo(videoFile, newVideo, newVideoDimensions)
+            }else{
+                newVideo = videoFile
+            }
 
             val container = Container().apply {
                 containerContentEntryUid = contentEntryUid
