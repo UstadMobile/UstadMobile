@@ -70,7 +70,7 @@ subprojects {
 
 
 //Major.minor.database version
-version = "0.3.15"
+version = "0.3.16"
 group = "com.ustadmobile.app"
 
 ext {
