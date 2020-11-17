@@ -118,6 +118,7 @@ class ContentEntryEdit2PresenterTest {
 
     private fun createMockView(isUriNull: Boolean = false) {
         mockView = mock {
+            on { entryCompressed }.thenAnswer{ true }
             on { selectedStorageIndex }.thenAnswer { 0 }
             on { storageOptions }.thenAnswer { runBlocking { systemImpl.getStorageDirsAsync(context) } }
             on { entryMetaData }.thenAnswer {
@@ -167,7 +168,7 @@ class ContentEntryEdit2PresenterTest {
         }
 
         verifyBlocking(contentImportManager, timeout(timeoutInMill)) {
-            queueImportContentFromFile(eq("file://Dummy"), any(), any())
+            queueImportContentFromFile(eq("file://Dummy"), any(), any(), eq(mapOf("compress" to true.toString())))
         }
 
 
@@ -192,7 +193,7 @@ class ContentEntryEdit2PresenterTest {
         }
 
         verifyBlocking(contentImportManager, times(0)) {
-            queueImportContentFromFile(eq("file://Dummy"), any(), any())
+            queueImportContentFromFile(eq("file://Dummy"), any(), any(), eq(mapOf("compress" to true.toString())))
         }
     }
 
@@ -218,7 +219,7 @@ class ContentEntryEdit2PresenterTest {
         }
 
         verifyBlocking(contentImportManager, timeout(timeoutInMill)) {
-            queueImportContentFromFile(eq("file://Dummy"), any(), any())
+            queueImportContentFromFile(eq("file://Dummy"), any(), any(), eq(mapOf("compress" to true.toString())))
         }
 
     }
