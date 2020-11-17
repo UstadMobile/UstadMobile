@@ -447,10 +447,10 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         }
     }
 
-    override suspend fun deleteDownloadJob(jobUid: Int, onprogress: (progress: Int) -> Unit): Boolean {
-        appDb.downloadJobDao.findByUid(jobUid)?: return false
+    override suspend fun deleteDownloadJobItem(downloadJobItemUid: Int, onprogress: (progress: Int) -> Unit): Boolean {
+        appDb.downloadJobItemDao.findByUid(downloadJobItemUid)?: return false
 
-        appDb.downloadJobItemDao.forAllChildDownloadJobItemsRecursiveAsync(jobUid) { childItems ->
+        appDb.downloadJobItemDao.forAllChildDownloadJobItemsRecursiveAsync(downloadJobItemUid) { childItems ->
             childItems.forEach {
                 appDb.containerEntryDao.deleteByContentEntryUid(it.djiContentEntryUid)
 

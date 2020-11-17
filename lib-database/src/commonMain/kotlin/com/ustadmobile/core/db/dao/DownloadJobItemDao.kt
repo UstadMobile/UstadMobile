@@ -160,6 +160,12 @@ abstract class DownloadJobItemDao {
     """)
     abstract suspend fun findMostRecentContainerDownloaded(contentEntryUid: Long): ContainerUidAndMimeType?
 
+
+    @Query("SELECT ContentEntry.title FROM DownloadJobItem " +
+            "LEFT JOIN ContentEntry ON DownloadJobItem.djiContentEntryUid = ContentEntry.contentEntryUid " +
+            "WHERE DownloadJobItem.djiUid = :downloadJobItemUid")
+    abstract suspend fun getEntryTitleByDownloadJobItemUidAsync(downloadJobItemUid: Int): String?
+
     @Query("SELECT DownloadJobItem.* " +
             "FROM DownloadJobItem " +
             "WHERE DownloadJobItem.djiUid IN (:contentEntryUids) " +

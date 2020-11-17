@@ -248,7 +248,7 @@ class DownloadDialogPresenter(context: Any,
         val currentDownloadJobItemVal = currentDownloadJobItem
         when {
             currentDownloadJobItem.isStatusCompletedSuccessfully() && currentDownloadJobItemVal != null ->
-                createDeleteJobAndRequestPreparation(currentDownloadJobItemVal.djiDjUid)
+                createDeleteJobAndRequestPreparation(currentDownloadJobItemVal.djiUid)
 
             currentDownloadJobItem.isStatusPaused() && currentDownloadJobItemVal != null -> GlobalScope.launch {
                 containerDownloadManager.enqueue(currentDownloadJobItemVal.djiDjUid)
@@ -260,9 +260,9 @@ class DownloadDialogPresenter(context: Any,
         }
     }
 
-    private fun createDeleteJobAndRequestPreparation(downloadUid: Int) {
+    private fun createDeleteJobAndRequestPreparation(downloadJobItemUid: Int) {
         val deleteRequester: DeletePreparationRequester by on(accountManager.activeAccount).instance()
-        deleteRequester.requestDelete(downloadUid)
+        deleteRequester.requestDelete(downloadJobItemUid)
     }
 
     /**

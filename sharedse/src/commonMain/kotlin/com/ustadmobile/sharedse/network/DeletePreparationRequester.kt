@@ -2,6 +2,6 @@ package com.ustadmobile.sharedse.network
 
 interface DeletePreparationRequester {
 
-    fun requestDelete(downloadJobUid: Int)
+    fun requestDelete(downloadJobItemUid: Int)
 
 }

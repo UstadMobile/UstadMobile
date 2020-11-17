@@ -28,7 +28,7 @@ abstract class ContainerDownloadManager {
 
     abstract suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem, autoCommit: Boolean = true)
 
-    abstract suspend fun deleteDownloadJob(jobUid: Int, onprogress: (progress: Int) -> Unit): Boolean
+    abstract suspend fun deleteDownloadJobItem(downloadJobItemUid: Int, onprogress: (progress: Int) -> Unit): Boolean
 
     abstract suspend fun handleContainerLocalImport(container: Container)
 
