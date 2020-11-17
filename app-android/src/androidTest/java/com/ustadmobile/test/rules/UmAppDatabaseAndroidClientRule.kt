@@ -4,6 +4,7 @@ import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.impl.BaseUstadApp
@@ -71,7 +72,7 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
 
     fun insertPersonForActiveUser(person: Person) {
         person.personUid = account.personUid
-        repoInternal!!.personDao.insert(person)
+        runBlocking { repoInternal!!.insertPersonAndGroup(person) } }
     }
 
 

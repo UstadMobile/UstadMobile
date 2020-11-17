@@ -25,12 +25,24 @@ import kotlinx.serialization.Serializable
             ( $ENTITY_PERSONS_WITH_PERMISSION_PT1 0 $ENTITY_PERSONS_WITH_PERMISSION_PT2 ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4 )
         JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
     syncFindAllQuery = """
-        SELECT Person.* FROM 
-        Person
-        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
-            ( $ENTITY_PERSONS_WITH_PERMISSION_PT1 0 $ENTITY_PERSONS_WITH_PERMISSION_PT2 ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4 )
-        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
-        WHERE DeviceSession.dsDeviceId = :clientId
+        SELECT Person.*
+        FROM
+         DeviceSession
+         JOIN PersonGroupMember ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+         LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+         LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0
+         LEFT JOIN Person ON CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = DeviceSession.dsPersonUid) AS INTEGER) = 1
+             OR (Person.personUid = DeviceSession.dsPersonUid)
+             OR ((EntityRole.erTableId= ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid)
+             OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))
+             OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid)) OR
+             (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
+             SELECT DISTINCT Clazz.clazzSchoolUid 
+             FROM Clazz
+             JOIN ClazzMember ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberPersonUid = Person.personUid
+             )))
+         WHERE
+         DeviceSession.dsDeviceId = :clientId
         """
     )
 @Serializable
