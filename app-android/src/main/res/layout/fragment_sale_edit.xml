@@ -342,7 +342,6 @@
                 android:onClick="@{() -> activityEventHandler.selectCustomer()}"
                 android:text="@={sale.saleNotes}"
                 app:runOnClickWhenFocused="@{true}"
-                android:inputType="@{InputType.TYPE_NULL}"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"/>
 

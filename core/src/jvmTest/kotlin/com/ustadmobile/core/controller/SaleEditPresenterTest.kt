@@ -5,14 +5,11 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.SaleEditView
-import com.ustadmobile.core.view.SaleDetailView
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.core.db.dao.SaleDao
-import com.ustadmobile.core.db.dao.SaleItemDao
-import com.ustadmobile.core.db.dao.SaleDeliveryDao
-import com.ustadmobile.core.db.dao.SalePaymentDao
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.Sale
 

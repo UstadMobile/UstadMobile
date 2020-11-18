@@ -25,7 +25,8 @@ abstract class SaleDao : BaseDao<Sale> {
     @Query(""" SELECT Sale.* FROM Sale WHERE CAST(Sale.saleActive AS INTEGER) = 1 """)
     abstract fun findAllSalesList(): List<Sale>
 
-
+    @Query(""" SELECT Sale.* FROM Sale WHERE CAST(Sale.saleActive AS INTEGER) = 1 """)
+    abstract fun findAllLive(): DoorLiveData<List<Sale>>
 
     companion object {
 

@@ -46,6 +46,16 @@ abstract class SaleItemDao : BaseDao<SaleItem>, OneToManyJoinDao<SaleItem> {
             WHERE saleItemSaleUid = :saleUid AND CAST(saleItemActive AS INTEGER) = 1 """)
     abstract fun findTotalBySale(saleUid: Long): Long
 
+
+    @Query(QUERY_FIND_WITH_PRODUCT_BY_UID)
+    abstract suspend fun findWithProductByUidAsync(uid: Long): SaleItemWithProduct?
+
+    @Query("SELECT * FROM SaleItem WHERE CAST(saleItemActive AS INTEGER) = 1 ")
+    abstract fun findAllActiveLive(): DoorLiveData<List<SaleItem>>
+
+    @Query(QUERY_FIND_WITH_PRODUCT_BY_UID)
+    abstract fun findWithProductByUidLive(uid: Long): DoorLiveData<SaleItemWithProduct?>
+
     companion object {
 
         const val SORT_NAME_ASC = 1
@@ -54,6 +64,11 @@ abstract class SaleItemDao : BaseDao<SaleItem>, OneToManyJoinDao<SaleItem> {
 
         const val SELECT_ACCOUNT_IS_ADMIN = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid)"
 
+        const val QUERY_FIND_WITH_PRODUCT_BY_UID = """
+            SELECT SaleItem.* , Product.*, 0 as deliveredCount FROM SaleItem 
+            LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid
+            WHERE SaleItem.saleItemUid = :uid AND CAST(SaleItem.saleItemActive AS INTEGER ) = 1
+        """
         const val QUERY_ALL_ACTIVE_SALE_ITEM_LIST =
                 """ 
                     SELECT SaleItem.*, 
