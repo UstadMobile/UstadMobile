@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.RoleEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
@@ -45,7 +46,7 @@ class RoleEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: Role? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(Role.serializer(), entityJsonStr)
+            editEntity = safeParse(di, Role.serializer(), entityJsonStr)
         }else {
             editEntity = Role()
         }

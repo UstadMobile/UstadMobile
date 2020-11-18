@@ -39,9 +39,47 @@ fun makePersonPermissionJoins(joinedEntity: String = "Person",
             GROUP BY Person.personUid
         """.trimIndent()
 
-fun makeClazzPermissionJoins() = """
-    
-""".trimIndent()
+fun makeClazzPermissionJoins(joinedEntity: String,
+                             clazzUidFieldName: String,
+                             permissionRequired: String,
+                             accountPersonUid: String = ":accountPersonUid"): String {
+
+    //If this query is joining school anyhow, then we can just use clazzSchoolUid
+    //otherwise we need to use a subquery to select it
+    val schoolUidSelect = if(joinedEntity.equals("clazz", ignoreCase = true)) {
+        "Clazz.clazzSchoolUid"
+    }else {
+        "(SELECT clazzSchoolUid FROM Clazz Clazz_Int WHERE Clazz_Int.clazzUid = $clazzUidFieldName)"
+    }
+
+    return """FROM 
+    PersonGroupMember
+    LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+    LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions &  $permissionRequired) > 0
+    LEFT JOIN $joinedEntity ON 
+        CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = $accountPersonUid) AS INTEGER) = 1
+    	OR (EntityRole.erTableId = ${'$'}{Clazz.TABLE_ID} AND EntityRole.erEntityUid = $clazzUidFieldName) 
+    	OR (EntityRole.erTableId = ${'$'}{School.TABLE_ID} AND EntityRole.erEntityUid = $schoolUidSelect)
+    WHERE
+    PersonGroupMember.groupMemberPersonUid = $accountPersonUid
+    """.trimIndent()
+}
+
+fun makeSchoolPermissionJoins(joinedEntity: String,
+                              schoolUidFieldName: String,
+                              permissionRequired: String,
+                              accountPersonUid: String): String =
+        """FROM 
+            PersonGroupMember
+            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions & $permissionRequired) > 0
+            LEFT JOIN $joinedEntity ON 
+                CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = $accountPersonUid) AS INTEGER) = 1
+                OR (EntityRole.erTableId = ${'$'}{School.TABLE_ID} AND EntityRole.erEntityUid = $schoolUidFieldName)
+            WHERE
+            PersonGroupMember.groupMemberPersonUid = $accountPersonUid
+        """.trimIndent()
+
 
 var repeat: Boolean = false
 do {
@@ -70,6 +108,49 @@ do {
             println(makePersonPermissionJoins(joinToEntityName, personUidFieldName, permissionRequired,
                     accountPersonUid, autoGrantPermissionToSelf != "n"))
         }
+
+        "clazz" -> {
+            println("What Entity are you selecting (e.g. Clazz, ClazzLog, ClazzWork, etc)?")
+            val joinToEntityName = readLine() ?: ""
+            println("What field in your query will contain the clazzUid field? This could be" +
+                    "Clazz.clazzUid itself, but you can also use the ClazzUid foreign key field" +
+                    "eg. ClazzLog.clazzLogClazzUid)?")
+            val clazzUidFieldName = readLine() ?: ""
+            println("What field or variable in the query would be used to refer to the Permission " +
+                    "that is required? This could be a variable in the query (e.g. :permissionRequired) " +
+                    "or it could be a constant (e.g. ${'$'}{Role.PERMISSION_PERSON_SELECT}.")
+            val permissionRequired = readLine() ?: ""
+            println("What field or variable in the query has the personUid for the account of the " +
+                    "active user against which we are checking for permission? E.g. :accountPersonUid " +
+                    "or DeviceSession.dsPersonUid")
+            val accountPersonUid = readLine() ?: ""
+            println(makeClazzPermissionJoins(joinToEntityName, clazzUidFieldName, permissionRequired,
+                accountPersonUid))
+        }
+
+        "school" -> {
+            println("What Entity are you selecting (e.g. School, SchoolMember, etc.)?")
+            val joinToEntityName = readLine() ?: ""
+
+            println("What field in your query will contain the schoolUid field? This could be" +
+                    "School.schoolUid itself, but you can also use the schoolUid foreign key field" +
+                    "eg. schoolMember.schoolMemberSchoolUid)?")
+            val schoolUidFieldName = readLine() ?: ""
+
+            println("What field or variable in the query would be used to refer to the Permission " +
+                    "that is required? This could be a variable in the query (e.g. :permissionRequired) " +
+                    "or it could be a constant (e.g. ${'$'}{Role.PERMISSION_PERSON_SELECT}.")
+            val permissionRequired = readLine() ?: ""
+
+            println("What field or variable in the query has the personUid for the account of the " +
+                    "active user against which we are checking for permission? E.g. :accountPersonUid " +
+                    "or DeviceSession.dsPersonUid")
+            val accountPersonUid = readLine() ?: ""
+            println(makeSchoolPermissionJoins(joinToEntityName, schoolUidFieldName, permissionRequired,
+                accountPersonUid))
+        }
+
+
 
         else -> {
             println("Didn't recognize $entityChoice")

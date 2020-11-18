@@ -1,10 +1,12 @@
 package com.ustadmobile.core.controller
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -69,7 +71,7 @@ class PersonAccountEditPresenter(context: Any,
         super.onLoadFromJson(bundle)
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         return  if(entityJsonStr != null) {
-            Json.parse(PersonWithAccount.serializer(), entityJsonStr)
+            safeParse(di, PersonWithAccount.serializer(), entityJsonStr)
         }else {
             PersonWithAccount()
         }
@@ -124,6 +126,7 @@ class PersonAccountEditPresenter(context: Any,
                 }
                 view.finishWithResult(listOf(entity))
             } catch (e: Exception){
+                Napier.e("Exception registering user", e)
                 when (e) {
                     is UnauthorizedException -> view.currentPasswordError =
                             impl.getString(MessageID.incorrect_current_password, context)

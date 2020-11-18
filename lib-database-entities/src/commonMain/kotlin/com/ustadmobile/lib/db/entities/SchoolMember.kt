@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
@@ -14,7 +15,10 @@ import kotlinx.serialization.Serializable
  * or a student. Each member has a joining date, and a leaving date.
  */
 
-@Entity
+@Entity(indices = [
+    //Index to optimize SchoolList where it selects a count of the members of each school by role.
+    Index(value = ["schoolMemberSchoolUid", "schoolMemberActive", "schoolMemberRole"])
+])
 @SyncableEntity(tableId = SchoolMember.TABLE_ID,
     notifyOnUpdate = ["""
         SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${SchoolMember.TABLE_ID} AS tableId FROM 

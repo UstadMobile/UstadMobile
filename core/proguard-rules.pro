@@ -9,6 +9,12 @@
     *;
 }
 
+# LongWrapper is serialized and deserialized with Gson, but is not itself an entity so we need to
+# explicitly exempt it from obfuscation
+-keep public class com.ustadmobile.core.util.LongWrapper {
+    *;
+}
+
 # Prevent proguard from stripping interface information from TypeAdapter, TypeAdapterFactory,
 # JsonSerializer, JsonDeserializer instances (so they can be used in @JsonAdapter)
 # as per https://github.com/google/gson/blob/master/examples/android-proguard-example/proguard.cfg

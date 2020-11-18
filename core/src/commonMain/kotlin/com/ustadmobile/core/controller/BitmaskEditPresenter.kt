@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.LongWrapper
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.BitmaskEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -45,7 +46,7 @@ class BitmaskEditPresenter(context: Any, arguments: Map<String, String>, view: B
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var longWrapper: LongWrapper? = null
         if(entityJsonStr != null) {
-            longWrapper = Json.parse(LongWrapper.serializer(), entityJsonStr)
+            longWrapper = safeParse(di, LongWrapper.serializer(), entityJsonStr)
         }else {
             longWrapper = LongWrapper(0L)
         }
