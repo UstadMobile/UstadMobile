@@ -113,11 +113,10 @@ class ContentEntryEdit2FragmentTest : TestCase() {
 
             ContentEntryEditScreen {
 
-                val container = createEntryFromFile("test.epub",
+                val entry = createEntryFromFile("test.epub",
                         systemImplNavRule = systemImplNavRule, dbRule = dbRule)
-                assertTrue("Container for an entry was created from a zipped file",
-                        container.fileSize > 0 && container.mimeType?.contains("zip")!!)
-
+                val entryFromDb = dbRule.db.contentEntryDao.findByUid(entry.contentEntryUid)
+                Assert.assertEquals("Entry's data set", "ರುಮ್ನಿಯಾ",entryFromDb!!.title)
             }
 
         }
@@ -133,11 +132,9 @@ class ContentEntryEdit2FragmentTest : TestCase() {
 
             ContentEntryEditScreen {
 
-                val container = createEntryFromFile("video.mp4", false,
+                val entry = createEntryFromFile("video.mp4", false,
                         systemImplNavRule = systemImplNavRule, dbRule = dbRule)
-                assertTrue("Container for an entry was created from a non zipped file",
-                        container.fileSize > 0 && !container.mimeType?.contains("zip")!!)
-
+                Assert.assertEquals("Entry's data set", "Dummy Title",entry.title)
             }
 
         }
