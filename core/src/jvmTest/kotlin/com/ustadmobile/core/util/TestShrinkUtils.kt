@@ -39,7 +39,7 @@ class TestShrinkUtils {
 
         val videoDimensions = ShrinkUtils.getVideoResolutionMetadata(fileToCheck)
         Assert.assertEquals("ffprobe found same dimensions in video",
-                Pair(1920, 1080), videoDimensions)
+                Triple(1920, 1080, "16:9"), videoDimensions)
 
     }
 
