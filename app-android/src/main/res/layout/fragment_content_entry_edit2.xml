@@ -59,6 +59,9 @@
         <variable name="showVideoPreview"
             type="boolean" />
 
+        <variable name="showWebPreview"
+            type="boolean" />
+
         <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.ContentEntryEdit2FragmentEventHandler" />
@@ -136,7 +139,7 @@
             <com.google.android.exoplayer2.ui.PlayerView
                 android:id="@+id/entry_edit_video_preview"
                 android:visibility="@{showVideoPreview ? View.VISIBLE: View.GONE}"
-                android:layout_width="0dp"
+                android:layout_width="@dimen/dimen_0dp"
                 android:layout_height="180dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
@@ -144,6 +147,25 @@
                 app:controller_layout_id="@layout/view_custom_exo_playback_control"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
+
+            <WebView
+                android:visibility="@{showWebPreview ? View.VISIBLE: View.GONE}"
+                android:id="@+id/entry_edit_web_preview"
+                android:layout_width="@dimen/dimen_0dp"
+                android:layout_height="180dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintTop_toBottomOf="@+id/supported_file_list"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/preview_barrier"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="entry_edit_web_preview,entry_edit_video_preview"
+                app:barrierDirection="bottom"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_marginTop="@dimen/dimen_20dp"
@@ -157,7 +179,7 @@
                 android:hint="@string/title"
                 app:hintEnabled="true"
                 app:errorTextColor="?colorError"
-                app:layout_constraintTop_toBottomOf="@+id/entry_edit_video_preview"
+                app:layout_constraintTop_toBottomOf="@id/preview_barrier"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 

@@ -9,6 +9,8 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebChromeClient
+import android.webkit.WebView
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -18,6 +20,7 @@ import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.source.hls.HlsMediaSource
+import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
@@ -72,6 +75,8 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     private var playbackPosition: Long = 0
 
+    private var webView: WebView?  = null
+
     override var entity: ContentEntryWithLanguage? = null
         get() = field
         set(value) {
@@ -120,30 +125,45 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     override var videoFilePath: String? = null
         get() = field
         set(value) {
-            mBinding?.showVideoPreview = value != null
+
             field = value
-            if (value != null) {
+            if(value == null) return
+            if (value.startsWith("http")) {
+                mBinding?.showVideoPreview = false
+                mBinding?.showWebPreview = true
+                prepareWeb(value)
+            }else{
+                mBinding?.showVideoPreview = true
+                mBinding?.showWebPreview = false
                 prepareVideo(value)
             }
         }
 
-    fun prepareVideo(filePath: String){
+    fun prepareVideo(filePath: String) {
         val uri = Uri.parse(filePath)
-        if(filePath.startsWith("http")){
-            val dataSourceFactory = DefaultHttpDataSourceFactory("exoplayer-codelab")
-            val mediaSource = HlsMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(uri)
-            player?.prepare(mediaSource)
-        }else{
-            val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(requireContext(), "UstadMobile")
-            val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
-                    .createMediaSource(uri)
-            player?.prepare(mediaSource)
-        }
+        val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(requireContext(), "UstadMobile")
+        val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(uri)
+        player?.prepare(mediaSource)
     }
 
-    override var videoDimensions: Pair<Int, Int> = Pair(0,0)
-        get(){
+    fun prepareWeb(filePath: String){
+        webView?.loadData("""
+            <!DOCTYPE html>
+            <html lang="en">
+            <body>
+            
+             <video id="video" width="100%" height="175px" controls>
+                <source src="$filePath" type="video/mp4"
+             </video> 
+            
+            </body>
+            </html>
+        """.trimIndent(), "text/html", "UTF-8")
+    }
+
+    override var videoDimensions: Pair<Int, Int> = Pair(0, 0)
+        get() {
             val width = mBinding?.entryEditVideoPreview?.videoSurfaceView?.width ?: 0
             val height = mBinding?.entryEditVideoPreview?.videoSurfaceView?.height ?: 0
             return Pair(width, height)
@@ -195,7 +215,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
      * removes the temp folder from being deleted in the backstack
      */
     private fun unregisterFileFromTemp() {
-        if(entryMetaData?.uri?.startsWith("file://") == true) {
+        if (entryMetaData?.uri?.startsWith("file://") == true) {
             findNavController().unregisterDestinationTempFile(requireContext(), File(entryMetaData?.uri?.removePrefix("file://")).parentFile)
         }
     }
@@ -249,7 +269,16 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             it.activityEventHandler = this
             it.entryCompressed = true
             it.showVideoPreview = false
+            it.showWebPreview = false
+            webView = it.entryEditWebPreview
+            webView?.webChromeClient = WebChromeClient()
             playerView = it.entryEditVideoPreview
+            webView?.settings?.javaScriptEnabled = true
+            webView?.settings?.domStorageEnabled = true
+            webView?.settings?.allowFileAccess = true
+            webView?.settings?.allowFileAccessFromFileURLs = true
+            webView?.settings?.allowUniversalAccessFromFileURLs = true
+            webView?.settings?.mediaPlaybackRequiresUserGesture = true
         }
 
         if (savedInstanceState != null) {
@@ -295,15 +324,15 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     }
 
     private fun initializePlayer() {
-        player = SimpleExoPlayer.Builder(viewContext as Context).build()
+        player = SimpleExoPlayer.Builder(requireContext()).build()
         playerView?.player = player
         player?.playWhenReady = playWhenReady
         player?.seekTo(currentWindow, playbackPosition)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.menu_done){
-            if(entity?.let { mPresenter?.isImportValid(it) } == true){
+        if (item.itemId == R.id.menu_done) {
+            if (entity?.let { mPresenter?.isImportValid(it) } == true) {
                 unregisterFileFromTemp()
             }
         }
@@ -358,6 +387,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         entity = null
         entryMetaData = null
         playerView = null
+        webView = null
         player = null
     }
 
