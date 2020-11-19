@@ -24,13 +24,13 @@ object ShrinkUtils {
         }?.let { File(it, commandName).path }
     }
 
-    fun getVideoResolutionMetadata(srcFile: File): Pair<Int, Int> {
+    fun getVideoResolutionMetadata(srcFile: File): Triple<Int, Int, String> {
 
         val ffprobePath = findInPath("ffprobe")
 
         val builder = ProcessBuilder(ffprobePath, "-v",
                 "error", "-select_streams", "v:0",
-                "-show_entries", "stream=width,height",
+                "-show_entries", "stream=width,height,display_aspect_ratio",
                 "-of", "default=nw=1:nk=1", srcFile.path)
 
         var process: Process? = null
@@ -40,31 +40,33 @@ object ShrinkUtils {
             val stream = BufferedReader(InputStreamReader(process.inputStream))
             val width = stream.readLine()
             val height = stream.readLine()
+            val ratio = stream.readLine()
             stream.close()
             process.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
                 Napier.e("Error Stream for src " + srcFile.path + String(UMIOUtils.readStreamToByteArray(process.errorStream)))
-                return Pair(0, 0)
+                return Triple(0, 0,"")
             }
             process.destroy()
-            return Pair(width.toInt(), height.toInt())
+            return Triple(width.toInt(), height.toInt(), ratio)
         } catch (e: InterruptedException) {
             Napier.e("ffprobe process interrupted", e)
         } finally {
             process?.destroy()
         }
-        return Pair(0, 0)
+        return Triple(0, 0,"")
     }
 
 
     fun optimiseVideo(srcVideo: File, destFile: File,
-                      resolution: Pair<Int, Int>) {
+                      resolution: Pair<Int, Int>, aspectRatio: String) {
 
         val ffmpegPath = findInPath("ffmpeg")
 
         val builder = ProcessBuilder(ffmpegPath, "-i",
                 srcVideo.path, "-vf", "scale=${resolution.first}x${resolution.second}",
+                "-aspect", aspectRatio,
                 "-framerate", VideoTypePlugin.VIDEO_FRAME_RATE.toString(),
                 "-c:v", "libx264", "-b:v", VideoTypePlugin.VIDEO_BIT_RATE.toString(),
                 "-c:a", "aac", "-b:a", VideoTypePlugin.AUDIO_BIT_RATE.toString(),

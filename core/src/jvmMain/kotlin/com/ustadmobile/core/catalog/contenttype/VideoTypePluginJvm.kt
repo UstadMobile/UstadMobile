@@ -51,9 +51,9 @@ class VideoTypePluginJvm: VideoTypePlugin() {
             Napier.d(tag = VIDEO_JVM, message = "conversion Params compress video is $compressVideo")
 
             if(compressVideo) {
-                val fileVideoDimensions = ShrinkUtils.getVideoResolutionMetadata(videoFile)
-                val newVideoDimensions = fileVideoDimensions.fitWithin()
-                ShrinkUtils.optimiseVideo(videoFile, newVideo, newVideoDimensions)
+                val fileVideoDimensionsAndAspectRatio = ShrinkUtils.getVideoResolutionMetadata(videoFile)
+                val newVideoDimensions = Pair(fileVideoDimensionsAndAspectRatio.first, fileVideoDimensionsAndAspectRatio.second).fitWithin()
+                ShrinkUtils.optimiseVideo(videoFile, newVideo, newVideoDimensions, fileVideoDimensionsAndAspectRatio.third)
             }else{
                 newVideo = videoFile
             }
