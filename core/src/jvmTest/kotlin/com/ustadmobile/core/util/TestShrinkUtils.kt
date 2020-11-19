@@ -53,9 +53,9 @@ class TestShrinkUtils {
                 videoFile)
 
         val fileVideoDimensions = ShrinkUtils.getVideoResolutionMetadata(videoFile)
-        val newVideoDimensions = fileVideoDimensions.fitWithin()
+        val newVideoDimensions = Pair(fileVideoDimensions.first, fileVideoDimensions.second).fitWithin()
 
-        ShrinkUtils.optimiseVideo(videoFile, newVideo, newVideoDimensions)
+        ShrinkUtils.optimiseVideo(videoFile, newVideo, newVideoDimensions, fileVideoDimensions.third)
 
         Assert.assertTrue("optimzed file", newVideo.length() < videoFile.length())
 
