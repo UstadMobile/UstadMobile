@@ -62,7 +62,12 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
 
                 Napier.d(tag = VIDEO_ANDROID, message = "start import for new video file $newVideo.name")
 
-                val originalVideoDimensions = videoFile.extractVideoResolutionMetadata()
+                val dimensionsArray = conversionParams["dimensions"]?.split("x") ?: listOf()
+                val originalVideoDimensions = if(dimensionsArray.isEmpty()){
+                    videoFile.extractVideoResolutionMetadata()
+                }else{
+                    Pair(dimensionsArray[0].toInt(), dimensionsArray[1].toInt())
+                }
                 val newVideoDimensions = originalVideoDimensions.fitWithin()
 
                 Napier.d(tag = VIDEO_ANDROID, message = "width of old video is ${originalVideoDimensions.first}, height of old video is ${originalVideoDimensions.second}")

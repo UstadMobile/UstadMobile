@@ -7,26 +7,27 @@ import kotlin.math.abs
  * Standard Low and High Quality Resolutions as per Android recommended
  * @ https://developer.android.com/guide/topics/media/media-formats
  */
-val VALID_RESOLUTIONS = listOf(Pair(480,360), Pair(176,144), Pair(360,480), Pair(144,176))
+val VALID_RESOLUTIONS = listOf(Pair(480,360), Pair(176,144), Pair(360,480),
+        Pair(144,176), Pair(640, 360), Pair(320, 180), Pair(360, 640), Pair(180, 640),
+        Pair(480,480), Pair(240, 240))
 
 fun Pair<Int, Int>.variance(other: Pair<Int, Int>): Int = abs(this.first - other.first) + abs(this.second - other.second)
 
 fun Pair<Int, Int>.fitWithin(): Pair<Int, Int>{
-    val maxWidth = 640
-    val maxHeight = 360
+    val maxDimension = 640
 
     val originalWidth = first
     val originalHeight = second
 
-    if(originalWidth > originalHeight && originalWidth > maxWidth) {
+    if(originalWidth >= originalHeight && originalWidth > maxDimension) {
 
-        val ratio = maxWidth.toFloat() / originalWidth.toFloat()
-        val newPair =  Pair(maxWidth, (originalHeight * ratio).toInt())
+        val ratio = maxDimension.toFloat() / originalWidth.toFloat()
+        val newPair =  Pair(maxDimension, (originalHeight * ratio).toInt())
         return VALID_RESOLUTIONS.minBy { it.variance(newPair) } ?: newPair
-    }else if(originalHeight > originalWidth && originalHeight > maxHeight){
+    }else if(originalHeight > originalWidth && originalHeight > maxDimension){
 
-        val ratio = maxHeight.toFloat() / originalHeight.toFloat()
-        val newPair = Pair((originalWidth * ratio).toInt(), maxHeight)
+        val ratio = maxDimension.toFloat() / originalHeight.toFloat()
+        val newPair = Pair((originalWidth * ratio).toInt(), maxDimension)
         return VALID_RESOLUTIONS.minBy { it.variance(newPair) } ?: newPair
     }
     return VALID_RESOLUTIONS.minBy { it.variance(this) } ?: this

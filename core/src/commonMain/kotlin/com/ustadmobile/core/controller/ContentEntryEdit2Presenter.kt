@@ -146,7 +146,8 @@ class ContentEntryEdit2Presenter(context: Any,
 
                 val metaData = view.entryMetaData
                 val uri = metaData?.uri
-                val conversionParams = mapOf("compress" to view.entryCompressed.toString())
+                val videoDimensions = view.videoDimensions
+                val conversionParams = mapOf("compress" to view.entryCompressed.toString(), "dimensions" to "${videoDimensions.first}x${videoDimensions.second}")
                 if (metaData != null && uri != null) {
 
                     if (uri.startsWith("file://")) {
@@ -214,6 +215,10 @@ class ContentEntryEdit2Presenter(context: Any,
                 if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
                 view.fileImportErrorVisible = false
                 view.entity = entry
+                if(metadata.mimeType == "video/mp4"){
+                    view.videoFilePath = filePath
+                }
+
             }
         }
     }
