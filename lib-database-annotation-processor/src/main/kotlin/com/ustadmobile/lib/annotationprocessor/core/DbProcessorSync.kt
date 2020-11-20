@@ -139,7 +139,6 @@ class DbProcessorSync: AbstractDbProcessor() {
     data class OutputDirs(val abstractOutputArg: String?, val implOutputArg: String?,
                           val ktorRouteOutputArg: String?)
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
-        setupDb(roundEnv)
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
 
         //For all databases that are being compiled now, find those entities that require tracker entities

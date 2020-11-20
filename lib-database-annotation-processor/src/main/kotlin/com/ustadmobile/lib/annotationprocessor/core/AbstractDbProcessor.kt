@@ -645,6 +645,10 @@ fun findEntityModifiedByQuery(querySql: String, allKnownEntityNames: List<String
     }
 }
 
+/**
+ * The parent class of all processors that generate implementations for door. Child processors
+ * should implement process.
+ */
 abstract class AbstractDbProcessor: AbstractProcessor() {
 
     protected lateinit var messager: Messager
@@ -653,15 +657,37 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
     /**
      * When we generate the code for a Query annotation function that performs an update or delete,
-     * we use this so that we can match the case of the table name.
+     * we use this so that we can match the case of the table name. This will be setup by
+     * AnnotationProcessorWrapper calling processDb.
      */
-    protected val allKnownEntityNames = mutableListOf<String>()
+    protected var allKnownEntityNames = mutableListOf<String>()
 
     /**
-     * Provides a map that can be used to find the TypeElement for a given table name.
+     * Provides a map that can be used to find the TypeElement for a given table name. This will be
+     * setup by AnnotationProcessorWrapper calling processDb.
      */
-    protected val allKnownEntityTypesMap = mutableMapOf<String, TypeElement>()
+    protected var allKnownEntityTypesMap = mutableMapOf<String, TypeElement>()
 
+    /**
+     * Initiates internal info about the databases that are being processed, then calls the main
+     * process function. This is called by AnnotationProcessorWrapper
+     *
+     * @param annotations as per the main annotation processor process method
+     * @param roundEnv as per the main annotation processor process method
+     * @param dbConnection a JDBC Connection object that can be used to run queries
+     * @param allKnownEntityNames as per the allKnownEntityNames property
+     * @param allKnownEntityTypesMap as per the allKnownEntityTypesMap property
+     */
+    fun processDb(annotations: MutableSet<out TypeElement>,
+                           roundEnv: RoundEnvironment,
+                           dbConnection: Connection,
+                           allKnownEntityNames: MutableList<String>,
+                           allKnownEntityTypesMap: MutableMap<String, TypeElement>)  : Boolean {
+        this.allKnownEntityNames = allKnownEntityNames
+        this.allKnownEntityTypesMap = allKnownEntityTypesMap
+        this.dbConnection = dbConnection
+        return process(annotations, roundEnv)
+    }
 
     /**
      * Adds the JDBC implementation for the KTOR Helper (primary or local)
@@ -703,52 +729,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
     override fun init(p0: ProcessingEnvironment) {
         super.init(p0)
         messager = p0.messager
-    }
-
-    /**
-     * Run create
-     */
-    internal fun setupDb(roundEnv: RoundEnvironment) {
-        val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
-        val dataSource = SQLiteDataSource()
-        val dbTmpFile = File.createTempFile("dbprocessorkt", ".db")
-        println("Db tmp file: ${dbTmpFile.absolutePath}")
-        dataSource.url = "jdbc:sqlite:${dbTmpFile.absolutePath}"
-
-        dbConnection = dataSource.connection
-        dbs.flatMap { entityTypesOnDb(it as TypeElement, processingEnv) }.forEach {entity ->
-            if(entity.getAnnotation(Entity::class.java) == null) {
-                logMessage(Diagnostic.Kind.ERROR,
-                        "Class ${entity.simpleName} used as entity on database does not have @Entity annotation",
-                        entity)
-            }
-
-            if(!entity.enclosedElements.any { it.getAnnotation(PrimaryKey::class.java) != null }) {
-                logMessage(Diagnostic.Kind.ERROR,
-                        "Class ${entity.simpleName} used as entity does not have a field annotated @PrimaryKey")
-            }
-
-            val stmt = dbConnection!!.createStatement()
-            stmt.use {
-                val typeEntitySpec = entity.asEntityTypeSpec()
-                val createTableSql = makeCreateTableStatement(typeEntitySpec, DoorDbType.SQLITE)
-                try {
-                    stmt.execute(createTableSql)
-                }catch(sqle: SQLException) {
-                    messager.printMessage(Diagnostic.Kind.ERROR, "SQLException creating table for:" +
-                            "${entity.simpleName} : ${sqle.message}. SQL was \"$createTableSql\"")
-                }
-
-                allKnownEntityNames.add(typeEntitySpec.name!!)
-                allKnownEntityTypesMap[typeEntitySpec.name!!] = entity
-
-                if(entity.getAnnotation(SyncableEntity::class.java) != null) {
-                    val trackerEntitySpec = generateTrackerEntity(entity, processingEnv)
-                    stmt.execute(makeCreateTableStatement(trackerEntitySpec, DoorDbType.SQLITE))
-                    allKnownEntityNames.add(trackerEntitySpec.name!!)
-                }
-            }
-        }
     }
 
     protected fun makeCreateTableStatement(entitySpec: TypeSpec, dbType: Int): String {
