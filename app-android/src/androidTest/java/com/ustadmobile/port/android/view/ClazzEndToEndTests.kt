@@ -9,11 +9,13 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.*
 import com.ustadmobile.test.port.android.util.setDateField
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -111,6 +113,12 @@ class ClazzEndToEndTests : TestCase() {
                     click()
                 }
 
+            }
+
+            runBlocking {
+                dbRule.db.waitUntil(5000L, listOf("Clazz")) {
+                    dbRule.db.clazzDao.findByClazzName("Test Class").isNotEmpty()
+                }
             }
 
             val createdClazz = dbRule.db.clazzDao.findByClazzName("Test Class").first()
