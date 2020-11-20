@@ -161,7 +161,10 @@ class ContentEntryEndtoEnd : TestCase() {
 
                 recycler{
 
-                    hasSize(3)
+                    flakySafely {
+                        hasSize(3)
+                    }
+
 
                     childWith<ContentEntryListScreen.MainItem> {
                         withDescendant { withText("Dummy folder title 1") }
@@ -177,7 +180,9 @@ class ContentEntryEndtoEnd : TestCase() {
                         click()
                     }
 
-                    hasSize(2)
+                    flakySafely {
+                        hasSize(2)
+                    }
 
                 }
 
