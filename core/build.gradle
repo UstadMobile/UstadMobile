@@ -27,8 +27,8 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
+        minSdkVersion 18
+        targetSdkVersion 29
         missingDimensionStrategy 'api', 'api18'
         multiDexEnabled true
     }

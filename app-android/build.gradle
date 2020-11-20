@@ -66,9 +66,8 @@ tasks.whenTaskAdded { task ->
 }
 
 android {
-    dataBinding {
-        enabled = true
-        enabledForTests = true
+    buildFeatures {
+        dataBinding true
     }
 
     kotlinOptions {
@@ -117,10 +116,6 @@ android {
 
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools
-
-    dataBinding {
-        enabled = true
-    }
 
     defaultConfig {
         //When using variables the build analyzer reports that major tasks reran because of a
