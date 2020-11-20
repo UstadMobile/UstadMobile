@@ -9,7 +9,6 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.*
@@ -37,7 +36,6 @@ class ClazzEndToEndTests : TestCase() {
             "fills in form, then it should go to the new class")
     @Test
     fun givenEmptyClazzList_whenUserClicksAddAndFillsInForm_thenClassIsCreatedAndGoneInto() {
-
         var calendarUid = 0L
         init {
             calendarUid = dbRule.repo.holidayCalendarDao.insert(HolidayCalendar().apply {
@@ -115,18 +113,10 @@ class ClazzEndToEndTests : TestCase() {
 
             }
 
-            runBlocking {
-                dbRule.db.waitUntil(5000L, listOf("Clazz")) {
-                    dbRule.db.clazzDao.findByClazzName("Test Class").isNotEmpty()
-                }
-            }
-
-            val createdClazz = dbRule.db.clazzDao.findByClazzName("Test Class").first()
-
             MainScreen{
 
                 toolBarTitle{
-                    hasDescendant { withText(createdClazz.clazzName!!) }
+                    hasDescendant { withText("Test Class") }
                     isDisplayed()
                 }
 
