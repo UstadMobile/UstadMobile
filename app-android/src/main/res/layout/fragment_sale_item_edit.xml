@@ -156,6 +156,7 @@
                     android:id="@+id/fragment_sale_item_edit_delivery_date_tiet"
                     android:inputType="@{InputType.TYPE_NULL}"
                     app:dateLong="@={saleItem.saleItemDueDate}"
+                    app:runOnClickWhenFocused="@{true}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
 

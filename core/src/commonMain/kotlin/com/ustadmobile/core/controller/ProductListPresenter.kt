@@ -23,7 +23,8 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
-    class ProductListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    class ProductListSortOption(val sortOrder: SortOrder, context: Any) :
+            MessageIdOption(sortOrder.messageId, context)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

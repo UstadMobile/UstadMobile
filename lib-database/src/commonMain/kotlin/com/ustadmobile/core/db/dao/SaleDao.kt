@@ -28,6 +28,10 @@ abstract class SaleDao : BaseDao<Sale> {
     @Query(""" SELECT Sale.* FROM Sale WHERE CAST(Sale.saleActive AS INTEGER) = 1 """)
     abstract fun findAllLive(): DoorLiveData<List<Sale>>
 
+
+    @Query(QUERY_WE_LIST)
+    abstract fun findAllPersonWithSaleInfo(leUid: Long): DataSource.Factory<Int, PersonWithSaleInfo>
+
     companion object {
 
         const val SORT_NAME_ASC = 1
@@ -44,6 +48,33 @@ abstract class SaleDao : BaseDao<Sale> {
             LEFT JOIN Person ON Person.personUid = Sale.saleCustomerUid 
             LEFT JOIN Location ON Location.locationUid = Sale.saleLocationUid
             WHERE Sale.saleUid = :uid AND CAST(Sale.saleActive AS INTEGER) = 1 
+        """
+
+        const val QUERY_WE_LIST = """
+            SELECT 
+                SUM((SaleItem.saleItemPricePerPiece)) - coalesce(SaleItem.saleItemDiscount, 0) AS totalSale, 
+                GROUP_CONCAT(DISTINCT Product.productName) AS topProducts, 
+                0 as personPictureUid ,
+                WE.* 
+            FROM PersonGroupMember 
+                LEFT JOIN Person AS LE ON LE.personUid = :leUid
+                LEFT JOIN Person AS WE ON WE.personUid = PersonGroupMember.groupMemberPersonUid 
+                LEFT JOIN InventoryItem ON 
+                    InventoryItem.InventoryItemWeUid = WE.personUid 
+                    AND InventoryItem.InventoryItemLeUid = LE.personUid AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+                LEFT JOIN InventoryTransaction ON 
+                    InventoryTransaction.InventoryTransactionInventoryItemUid = InventoryItem.InventoryItemUid 
+                    AND InventoryTransaction.inventoryTransactionFromLeUid = LE.personUid AND CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 1
+                LEFT JOIN SaleItem ON 
+                    SaleItem.saleItemUid = InventoryTransaction.inventoryTransactionSaleItemUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1
+                LEFT JOIN Sale ON 
+                    Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1 
+                LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid 
+                    AND CAST(Product.productActive AS INTEGER) = 1
+            WHERE PersonGroupMember.groupMemberGroupUid = LE.personGroupUid 
+            AND CAST(WE.active AS INTEGER) = 1  
+            GROUP BY(WE.personUid)  
+            
         """
 
         const val FIND_ALL_SALE_LIST_SALES = """

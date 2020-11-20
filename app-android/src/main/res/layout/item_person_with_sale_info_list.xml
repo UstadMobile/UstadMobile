@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="person"
+            type="com.ustadmobile.lib.db.entities.PersonWithSaleInfo" />
+
+        <variable
+            name="listener"
+            type="com.ustadmobile.core.controller.PersonWithSaleInfoListItemListener" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="@{() -> listener.onClickPersonWithSaleInfo(person)}"
+        android:background="?attr/selectableItemBackground"
+        >
+
+        <ImageView
+            android:id="@+id/item_personwithsaleinfo_imageview"
+            android:layout_width="@dimen/dimen_48dp"
+            android:layout_height="@dimen/dimen_48dp"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
+            android:src="@drawable/ic_launcher_icon"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/item_personwithsaleinfo_name"
+            style="@style/TextAppearance.AppCompat.Body1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:text="@{person.fullName()}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_personwithsaleinfo_imageview"
+            app:layout_constraintTop_toTopOf="@+id/item_personwithsaleinfo_imageview"
+            tools:text="Women Embrioderer Name" />
+
+        <TextView
+            android:id="@+id/item_personwithsaleinfo_totalsale"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_4dp"
+            app:weTotalSaleValue="@{person}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/item_personwithsaleinfo_imageview"
+            app:layout_constraintTop_toBottomOf="@+id/item_personwithsaleinfo_name"
+            tools:text="3000 AFN total sales" />
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

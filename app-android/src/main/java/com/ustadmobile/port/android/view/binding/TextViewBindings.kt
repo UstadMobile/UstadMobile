@@ -275,6 +275,12 @@ fun TextView.setSaleItemAfterDiscountTotal(totalSale : Long, sale: Sale?) {
     text = "" + (totalSale - (sale?.saleDiscount ?: 0L)) + " " + context.getString(R.string.afs)
 }
 
+@BindingAdapter("weTotalSaleValue")
+fun TextView.setWeTotalSale(personWithSaleInfo: PersonWithSaleInfo?){
+    text = personWithSaleInfo?.totalSale.toString() + " " + context.getString(R.string.afs) +
+            " " +  context.getString(R.string.total_sales)
+}
+
 @BindingAdapter("rolesAndPermissionsText")
 fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
     val scopeType = when (entityRole.erTableId) {
