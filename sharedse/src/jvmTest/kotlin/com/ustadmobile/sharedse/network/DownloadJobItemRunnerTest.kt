@@ -277,6 +277,8 @@ class DownloadJobItemRunnerTest {
 
             bind<ContainerFetcher>() with singleton { ContainerFetcherJvm(di) }
 
+            bind<Gson>() with singleton { Gson() }
+
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
 
