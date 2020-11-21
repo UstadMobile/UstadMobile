@@ -17,8 +17,8 @@ open class InventoryItem() {
     @PrimaryKey(autoGenerate = true)
     var inventoryItemUid: Long = 0
 
-    //The SaleProduct this inventory represents
-    var inventoryItemSaleProductUid : Long = 0
+    //The Product this inventory represents
+    var inventoryItemProductUid : Long = 0
 
     //The LE adding this
     var inventoryItemLeUid : Long = 0

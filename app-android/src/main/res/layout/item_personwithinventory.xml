@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="person"
+            type="com.ustadmobile.lib.db.entities.PersonWithInventory" />
+
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+
+        <TextView
+            android:id="@+id/view_producer_with_inventory_selection_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:text="@{person.fullName()}"
+            tools:text="Bob Dylan"
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/view_producer_with_inventory_selection_picture"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_name"
+            app:srcCompat="@drawable/ic_person_black_24dp" />
+
+        <SeekBar
+            android:id="@+id/view_producer_with_inventory_selection_seekbar"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:thumb="@drawable/seekbar_thumb"
+            app:layout_constraintEnd_toStartOf="@+id/view_producer_with_inventory_selection_selected_edittext"
+            app:layout_constraintStart_toEndOf="@+id/view_producer_with_inventory_selection_picture"
+            app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_name" />
+
+        <EditText
+            android:id="@+id/view_producer_with_inventory_selection_selected_edittext"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:ems="2"
+            android:inputType="number"
+            android:singleLine="false"
+            tools:text="42"
+            android:text="@={`` + person.inventoryCount}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_name" />
+
+        <TextView
+            android:id="@+id/view_producer_with_inventory_selection_stock_tv"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="8dp"
+            app:inStockAppend = "@{person.inventoryCount}"
+            tools:text="42 in stock"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/view_producer_with_inventory_selection_selected_edittext"
+            app:layout_constraintStart_toStartOf="@+id/view_producer_with_inventory_selection_seekbar"
+            app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_seekbar" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>

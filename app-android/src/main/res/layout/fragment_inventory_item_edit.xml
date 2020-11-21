@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+        <import type="android.view.View"/>
+
+        <variable
+            name="inventoryItem"
+            type="com.ustadmobile.lib.db.entities.InventoryItem" />
+
+        <variable
+            name="loading"
+            type="boolean" />
+
+        <variable
+            name="fieldsEnabled"
+            type="boolean" />
+
+        <variable
+            name="activityEventHandler"
+            type="com.ustadmobile.port.android.view.InventoryItemEditFragmentEventHandler" />
+
+    </data>
+
+
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/fragment_inventory_item_edit_edit_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/fragment_inventory_item_edit_edit_clx"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <include layout="@layout/item_createnew"
+                android:id="@+id/fragment_inventory_item_edit_new_we"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:onClickNew="@{() -> activityEventHandler.addWE()}"
+                app:createNewText="@{@string/add_category}"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:id="@+id/fragment_inventory_item_edit_edit_producers_rv"
+                tools:itemCount="2"
+                tools:listitem="@layout/item_personwithinventory"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_inventory_item_edit_new_we"
+                app:layout_constraintStart_toStartOf="parent" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+
+</layout>

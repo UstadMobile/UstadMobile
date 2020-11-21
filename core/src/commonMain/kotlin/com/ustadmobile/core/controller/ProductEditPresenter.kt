@@ -118,9 +118,5 @@ class ProductEditPresenter(context: Any,
         }
     }
 
-    companion object {
-
-
-    }
 
 }

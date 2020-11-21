@@ -270,6 +270,11 @@ fun TextView.setProductNameWithDeliveryCount(saleItemWithProduct: SaleItemWithPr
             saleItemWithProduct?.deliveredCount + " " + context.getString(R.string.in_stock) + " )"
 }
 
+@BindingAdapter("inStockAppend")
+fun TextView.setInStockAppend(stock: Int?){
+    text = stock.toString() + " " + context.getString(R.string.in_stock)
+}
+
 @BindingAdapter(value = ["totalSale", "saleForTotalAfterDiscount"])
 fun TextView.setSaleItemAfterDiscountTotal(totalSale : Long, sale: Sale?) {
     text = "" + (totalSale - (sale?.saleDiscount ?: 0L)) + " " + context.getString(R.string.afs)

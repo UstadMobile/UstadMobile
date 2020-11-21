@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 142,
-    "identityHash": "dcd912dea67b3ddff58e45f00fe70b21",
+    "identityHash": "3e5eedbc1ff1cc0929cad0daea255fcb",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -997,7 +997,7 @@
       },
       {
         "tableName": "Person",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `username` TEXT, `firstNames` TEXT, `lastName` TEXT, `emailAddr` TEXT, `phoneNum` TEXT, `gender` INTEGER NOT NULL, `active` INTEGER NOT NULL, `admin` INTEGER NOT NULL, `personNotes` TEXT, `fatherName` TEXT, `fatherNumber` TEXT, `motherName` TEXT, `motherNum` TEXT, `dateOfBirth` INTEGER NOT NULL, `personAddress` TEXT, `personOrgId` TEXT, `personGroupUid` INTEGER NOT NULL, `personGoldoziType` INTEGER NOT NULL, `personWeGroupUid` INTEGER NOT NULL, `personMasterChangeSeqNum` INTEGER NOT NULL, `personLocalChangeSeqNum` INTEGER NOT NULL, `personLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "personUid",
@@ -1104,6 +1104,18 @@
           {
             "fieldPath": "personGroupUid",
             "columnName": "personGroupUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "personGoldoziType",
+            "columnName": "personGoldoziType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "personWeGroupUid",
+            "columnName": "personWeGroupUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -5468,7 +5480,7 @@
       },
       {
         "tableName": "InventoryItem",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`inventoryItemUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `inventoryItemSaleProductUid` INTEGER NOT NULL, `inventoryItemLeUid` INTEGER NOT NULL, `inventoryItemWeUid` INTEGER NOT NULL, `inventoryItemDateAdded` INTEGER NOT NULL, `inventoryItemDayAdded` INTEGER NOT NULL, `inventoryItemActive` INTEGER NOT NULL, `inventoryItemMCSN` INTEGER NOT NULL, `inventoryItemLCSN` INTEGER NOT NULL, `inventoryItemLCB` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`inventoryItemUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `inventoryItemProductUid` INTEGER NOT NULL, `inventoryItemLeUid` INTEGER NOT NULL, `inventoryItemWeUid` INTEGER NOT NULL, `inventoryItemDateAdded` INTEGER NOT NULL, `inventoryItemDayAdded` INTEGER NOT NULL, `inventoryItemActive` INTEGER NOT NULL, `inventoryItemMCSN` INTEGER NOT NULL, `inventoryItemLCSN` INTEGER NOT NULL, `inventoryItemLCB` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "inventoryItemUid",
@@ -5477,8 +5489,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "inventoryItemSaleProductUid",
-            "columnName": "inventoryItemSaleProductUid",
+            "fieldPath": "inventoryItemProductUid",
+            "columnName": "inventoryItemProductUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -10540,7 +10552,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'dcd912dea67b3ddff58e45f00fe70b21')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3e5eedbc1ff1cc0929cad0daea255fcb')"
     ]
   }
 }

@@ -3,7 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
-import com.ustadmobile.core.db.dao.InventoryItemDao.Companion.SELECT_ACCOUNT_IS_ADMIN
+import androidx.room.Update
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.InventoryTransaction
@@ -11,11 +11,12 @@ import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
 import com.ustadmobile.lib.db.entities.PersonWithInventoryCount
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
 
-@UmDao(updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN,
-        insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
 @UmRepository
 @Dao
 abstract class InventoryTransactionDao : BaseDao<InventoryTransaction> {
+
+    @Update
+    abstract suspend fun updateAsync(entity: InventoryTransaction): Int
 
     @Query(QUERY_GET_STOCK_LIST_BY_PRODUCT)
     abstract fun getStockListByProduct(productUid: Long) :

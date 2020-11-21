@@ -56,8 +56,14 @@ open class Person() {
      */
     var personOrgId: String? = null
 
-    //This person's groupUid
+    //This person's individual group groupUid
     var personGroupUid: Long = 0L
+
+    //Suggests if a person is a customer or producer(WE) or an LE
+    var personGoldoziType: Int = GOLDOZI_TYPE_CUSTOMER
+
+    //This person's WE group
+    var personWeGroupUid: Long = 0L
 
     @MasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0
@@ -155,6 +161,12 @@ open class Person() {
         const val GENDER_MALE = 2
 
         const val GENDER_OTHER = 4
+
+        const val GOLDOZI_TYPE_CUSTOMER = 0
+        const val GOLDOZI_TYPE_LE = 1
+        const val GOLDOZI_TYPE_PRODUCER = 2
+        const val GOLDOZI_TYPE_STAFF = 3
+
     }
 
 

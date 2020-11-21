@@ -71,7 +71,7 @@ abstract class SaleDao : BaseDao<Sale> {
                     Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1 
                 LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid 
                     AND CAST(Product.productActive AS INTEGER) = 1
-            WHERE PersonGroupMember.groupMemberGroupUid = LE.personGroupUid 
+            WHERE PersonGroupMember.groupMemberGroupUid = LE.personWeGroupUid 
             AND CAST(WE.active AS INTEGER) = 1  
             GROUP BY(WE.personUid)  
             

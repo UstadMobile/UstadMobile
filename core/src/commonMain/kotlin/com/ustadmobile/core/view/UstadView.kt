@@ -135,6 +135,8 @@ interface UstadView {
 
         const val CURRENT_DEST = ""
 
+        const val ARG_PRODUCT_UID = "argProductUid"
+
         /**
          * Argument to pass to tell a fragment where on the back stack a result (e.g. entity selected
          * from a list or newly created) should be saved. This works along the principles outlined
