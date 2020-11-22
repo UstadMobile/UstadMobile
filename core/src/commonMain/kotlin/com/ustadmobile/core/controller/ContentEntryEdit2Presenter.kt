@@ -148,7 +148,8 @@ class ContentEntryEdit2Presenter(context: Any,
                 val metaData = view.entryMetaData
                 val uri = metaData?.uri
                 val videoDimensions = view.videoDimensions
-                val conversionParams = mapOf("compress" to view.entryCompressed.toString(), "dimensions" to "${videoDimensions.first}x${videoDimensions.second}")
+                val conversionParams = mapOf("compress" to view.compressionEnabled.toString(),
+                        "dimensions" to "${videoDimensions.first}x${videoDimensions.second}")
                 if (metaData != null && uri != null) {
 
                     if (uri.startsWith("file://")) {
@@ -164,18 +165,31 @@ class ContentEntryEdit2Presenter(context: Any,
 
                     } else {
 
-                        val client = defaultHttpClient().post<HttpStatement>() {
-                            url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl, "/import/downloadLink/"))
-                            parameter("parentUid", parentEntryUid)
-                            parameter("scraperType", view.entryMetaData?.scraperType)
-                            parameter("url", view.entryMetaData?.uri)
-                            parameter("conversionParams", Json.stringify(JsonObject.serializer(), conversionParams.convertToJsonObject()))
-                            header("content-type", "application/json")
-                            body = entity
-                        }.execute()
+                        var client: HttpResponse? = null
+                        try {
 
+                            client = defaultHttpClient().post<HttpStatement>() {
+                                url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
+                                        "/import/downloadLink/"))
+                                parameter("parentUid", parentEntryUid)
+                                parameter("scraperType", view.entryMetaData?.scraperType)
+                                parameter("url", view.entryMetaData?.uri)
+                                parameter("conversionParams",
+                                        Json.stringify(JsonObject.serializer(),
+                                                conversionParams.convertToJsonObject()))
+                                header("content-type", "application/json")
+                                body = entity
+                            }.execute()
+
+                        }catch (e: Exception){
+                            view.showSnackBar("${systemImpl.getString(MessageID.error, 
+                                    context)}: ${e.message ?: ""}", {})
+                            return@launch
+                        }
 
                         if (client.status.value != 200) {
+                            view.showSnackBar("${systemImpl.getString(MessageID.error,
+                                    context)}: ${e.message ?: ""}", {})
                             return@launch
                         }
 
@@ -216,8 +230,8 @@ class ContentEntryEdit2Presenter(context: Any,
                 if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
                 view.fileImportErrorVisible = false
                 view.entity = entry
-                if(metadata.mimeType == "video/mp4"){
-                    view.videoFilePath = filePath
+                if(metadata.mimeType.startsWith("video/")){
+                    view.videoUri = filePath
                 }
 
             }

@@ -121,7 +121,7 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
         }
     }
 
-    suspend fun startUpload(): Int {
+    suspend fun upload(): Int {
 
         var attemptNum = 0
         var uploadAttemptStatus = JobStatus.FAILED

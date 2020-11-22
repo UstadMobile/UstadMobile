@@ -33,7 +33,7 @@
             type="boolean" />
 
         <variable
-            name="entryCompressed"
+            name="compressionEnabled"
             type="boolean" />
 
         <variable
@@ -329,7 +329,7 @@
                     android:layout_height="match_parent" />
 
                 <androidx.appcompat.widget.SwitchCompat
-                    android:checked="@{entryCompressed}"
+                    android:checked="@{compressionEnabled}"
                     android:onCheckedChanged="@{(switch, checked) -> activityEventHandler.handleToggleCompress(checked)}"
                     android:layout_alignParentEnd="true"
                     android:id="@+id/entry_compress_switch"

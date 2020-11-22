@@ -46,7 +46,7 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
                 runner.importContainer(isFileImport)
                 var status = JobStatus.COMPLETE
                 if(isFileImport){
-                   status = runner.startUpload()
+                   status = runner.upload()
                 }
 
                 it.cijJobStatus = status

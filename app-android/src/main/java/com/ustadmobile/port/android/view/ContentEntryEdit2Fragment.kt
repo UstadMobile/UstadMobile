@@ -1,7 +1,6 @@
 package com.ustadmobile.port.android.view
 
 import android.app.AlertDialog
-import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.util.TypedValue
@@ -17,14 +16,10 @@ import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.fragment.findNavController
 import com.google.android.exoplayer2.SimpleExoPlayer
-import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
-import com.google.android.exoplayer2.source.hls.HlsMediaSource
-import com.google.android.exoplayer2.source.smoothstreaming.SsMediaSource
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
-import com.google.android.exoplayer2.upstream.DefaultHttpDataSourceFactory
 import com.google.android.exoplayer2.util.Util
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
@@ -93,11 +88,11 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             field = value
         }
 
-    override var entryCompressed: Boolean = true
-        get() = field
+    override var compressionEnabled: Boolean = true
+        get() = mBinding?.compressionEnabled ?: true
         set(value) {
             field = value
-            mBinding?.entryCompressed = value
+            mBinding?.compressionEnabled = value
         }
 
     override var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>? = null
@@ -122,7 +117,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             field = value
         }
 
-    override var videoFilePath: String? = null
+    override var videoUri: String? = null
         get() = field
         set(value) {
 
@@ -131,15 +126,15 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             if (value.startsWith("http")) {
                 mBinding?.showVideoPreview = false
                 mBinding?.showWebPreview = true
-                prepareWeb(value)
+                prepareVideoFromWeb(value)
             }else{
                 mBinding?.showVideoPreview = true
                 mBinding?.showWebPreview = false
-                prepareVideo(value)
+                prepareVideoFromFile(value)
             }
         }
 
-    fun prepareVideo(filePath: String) {
+    private fun prepareVideoFromFile(filePath: String) {
         val uri = Uri.parse(filePath)
         val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(requireContext(), "UstadMobile")
         val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
@@ -147,14 +142,14 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         player?.prepare(mediaSource)
     }
 
-    fun prepareWeb(filePath: String){
+    private fun prepareVideoFromWeb(filePath: String){
         webView?.loadData("""
             <!DOCTYPE html>
             <html lang="en">
             <body>
             
-             <video id="video" width="100%" height="175px" controls>
-                <source src="$filePath" type="video/mp4"
+             <video id="video" style="width: 100% height: 175px" controls>
+                <source src="$filePath"
              </video> 
             
             </body>
@@ -162,7 +157,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         """.trimIndent(), "text/html", "UTF-8")
     }
 
-    override var videoDimensions: Pair<Int, Int> = Pair(0, 0)
+    override val videoDimensions: Pair<Int, Int>
         get() {
             val width = mBinding?.entryEditVideoPreview?.videoSurfaceView?.width ?: 0
             val height = mBinding?.entryEditVideoPreview?.videoSurfaceView?.height ?: 0
@@ -208,7 +203,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     }
 
     override fun handleToggleCompress(checked: Boolean) {
-        entryCompressed = checked
+        compressionEnabled = checked
     }
 
     /**
@@ -267,18 +262,20 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             rootView = it.root
             it.fileImportInfoVisibility = View.GONE
             it.activityEventHandler = this
-            it.entryCompressed = true
+            it.compressionEnabled = true
             it.showVideoPreview = false
             it.showWebPreview = false
             webView = it.entryEditWebPreview
             webView?.webChromeClient = WebChromeClient()
             playerView = it.entryEditVideoPreview
-            webView?.settings?.javaScriptEnabled = true
-            webView?.settings?.domStorageEnabled = true
-            webView?.settings?.allowFileAccess = true
-            webView?.settings?.allowFileAccessFromFileURLs = true
-            webView?.settings?.allowUniversalAccessFromFileURLs = true
-            webView?.settings?.mediaPlaybackRequiresUserGesture = true
+            webView?.settings?.apply {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                allowFileAccess = true
+                allowFileAccessFromFileURLs = true
+                allowUniversalAccessFromFileURLs = true
+                mediaPlaybackRequiresUserGesture = true
+            }
         }
 
         if (savedInstanceState != null) {
@@ -316,7 +313,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
                 fileImportErrorVisible = false
                 entity = entry
-                videoFilePath = metadata.uri
+                videoUri = metadata.uri
             }
         }
         viewLifecycleOwner.lifecycle.addObserver(viewLifecycleObserver)

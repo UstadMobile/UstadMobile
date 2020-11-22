@@ -13,9 +13,7 @@ val VALID_RESOLUTIONS = listOf(Pair(480,360), Pair(176,144), Pair(360,480),
 
 fun Pair<Int, Int>.variance(other: Pair<Int, Int>): Int = abs(this.first - other.first) + abs(this.second - other.second)
 
-fun Pair<Int, Int>.fitWithin(): Pair<Int, Int>{
-    val maxDimension = 640
-
+fun Pair<Int, Int>.fitWithin(maxDimension: Int = 640): Pair<Int, Int>{
     val originalWidth = first
     val originalHeight = second
 
