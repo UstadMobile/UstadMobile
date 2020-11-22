@@ -145,6 +145,12 @@ fun FileSpec.Builder.addDbWrapperTypeSpec(dbTypeEl: TypeElement,
                             .addModifiers(KModifier.OVERRIDE)
                             .addCode("_db.clearAllTables()\n")
                             .build())
+                    .addFunction(FunSpec.builder("runInTransaction")
+                            .addModifiers(KModifier.OVERRIDE)
+                            .addParameter("body", ClassName("kotlinx.coroutines",
+                                    "Runnable"))
+                            .addCode("_db.runInTransaction(body)\n")
+                            .build())
                     .applyIf(dbTypeEl.isDbSyncable(processingEnv)) {
                         addProperty(PropertySpec.builder("master", Boolean::class)
                                 .addModifiers(KModifier.OVERRIDE)

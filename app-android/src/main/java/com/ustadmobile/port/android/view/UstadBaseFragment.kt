@@ -14,7 +14,9 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
+import com.ustadmobile.port.android.view.util.ProgressBarLifecycleObserver
 import com.ustadmobile.port.android.view.util.TitleLifecycleObserver
+import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import org.kodein.di.DIAware
 import org.kodein.di.android.x.di
 import java.util.*
@@ -34,12 +36,14 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     protected var searchManager: SearchViewManagerLifecycleObserver? = null
 
+    protected var progressBarManager: ProgressBarLifecycleObserver? = null
+
     override val di by di()
 
     override var loading: Boolean = false
         get() = field
         set(value) {
-            //TODO: set this on the main activity
+            progressBarManager?.visibility = if(value) View.VISIBLE else View.GONE
             field = value
         }
 
@@ -82,6 +86,12 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
         }
 
         searchManager = SearchViewManagerLifecycleObserver(searchView).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
+
+        progressBarManager = ProgressBarLifecycleObserver(
+                (activity as? UstadActivityWithProgressBar)?.activityProgressBar,
+                View.INVISIBLE).also {
             viewLifecycleOwner.lifecycle.addObserver(it)
         }
 
