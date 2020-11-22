@@ -2,6 +2,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.toughra.ustadmobile.launcher">
 
+
+    <!-- Used to find devices to connect to without requiring location permission -->
+    <uses-feature android:name="android.software.companion_device_setup"
+        android:required="false"/>
+
     <application
         android:name="com.ustadmobile.port.android.App"
         android:allowBackup="false"

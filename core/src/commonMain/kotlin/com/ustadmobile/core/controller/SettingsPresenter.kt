@@ -26,4 +26,8 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>?, view: Set
         impl.go(PersonListView.VIEW_NAME, args, context)
     }
 
+    fun handleClickNetworkNodeList() {
+        impl.go(NetworkNodeListView.VIEW_NAME, mapOf(), context)
+    }
+
 }

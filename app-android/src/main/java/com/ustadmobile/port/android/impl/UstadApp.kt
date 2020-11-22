@@ -52,6 +52,7 @@ import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.networkmanager.*
+import com.ustadmobile.port.android.netwokmanager.LocalAvailabilityManagerAndroidImpl
 import io.ktor.client.features.json.*
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
@@ -132,7 +133,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<CoroutineDispatcher>(tag = TAG_MAIN_COROUTINE_CONTEXT) with singleton { Dispatchers.Main }
 
         bind<LocalAvailabilityManager>() with scoped(EndpointScope.Default).singleton {
-            LocalAvailabilityManagerImpl(di, context)
+            LocalAvailabilityManagerAndroidImpl(context, applicationContext, di)
         }
 
         bind<ContainerFetcher>() with singleton { ContainerFetcherJvm(di) }

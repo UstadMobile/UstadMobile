@@ -15,6 +15,10 @@ open class NetworkNode() {
     @PrimaryKey(autoGenerate = true)
     var nodeId: Long = 0
 
+    var nodeName: String? = null
+
+    var bluetoothBondState: Int = 0
+
     /**
      * Method which is used to get NetworkNode's Bluetooth personAddress
      * @return String: Device bluetooth personAddress.

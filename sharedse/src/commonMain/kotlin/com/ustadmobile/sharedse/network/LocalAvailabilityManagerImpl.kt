@@ -10,6 +10,8 @@ import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.DoorLiveData
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.EntryStatusResponse
 import com.ustadmobile.lib.db.entities.LocallyAvailableContainer
 import com.ustadmobile.lib.db.entities.NetworkNode
@@ -43,6 +45,9 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
     private val localHttpPort: Int by di.instance(tag = TAG_LOCAL_HTTP_PORT)
 
     private val mirrorIdMap = mutableMapOf<String, Int>()
+
+    override var bluetoothScanningEnabled: Boolean = false
+    override val networkNodesLiveData: DoorLiveData<List<NetworkNode>> = DoorMutableLiveData(listOf())
 
     init {
         val networkNodes = networkManager.networkNodes

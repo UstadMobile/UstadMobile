@@ -14,6 +14,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.appcompat.view.ContextThemeWrapper
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import com.google.android.material.snackbar.Snackbar
@@ -79,14 +80,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     private var localeOnCreate: String? = null
 
     private var runAfterFileSelection: Runnable? = null
-
-    /**
-     * Can be used to check if the activity has been started.
-     *
-     * @return true if the activity is started. false if it has not been started yet, or it was started, but has since stopped
-     */
-    var isStarted = false
-        private set
 
     private var permissionRequestRationalesShown = false
 
@@ -289,21 +282,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         baseProgressBar.isIndeterminate = !isDeterminate
     }
 
-    protected fun setBaseController(baseController: UstadBaseController<*>) {
-        this.baseController = baseController
-    }
-
-
-    public override fun onStart() {
-        isStarted = true
-        super.onStart()
-    }
-
-    public override fun onStop() {
-        isStarted = false
-        super.onStop()
-    }
-
     public override fun onDestroy() {
         if (mSyncServiceBound) {
             unbindService(mSyncServiceConnection)
@@ -358,7 +336,14 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
             else
                 Locale(languageSetting)
             config.setLocale(locale)
-            super.attachBaseContext(newBase.createConfigurationContext(config))
+
+            if(Build.VERSION.SDK_INT > 24) {
+                //Using createNewConfigurationContext will cause CompanionDeviceManager to crash
+                applyOverrideConfiguration(config)
+                super.attachBaseContext(newBase)
+            }else {
+                super.attachBaseContext(newBase.createConfigurationContext(config))
+            }
         } else {
             super.attachBaseContext(newBase)
         }

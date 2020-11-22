@@ -7,6 +7,10 @@
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.SettingsPresenter" />
+
+        <variable
+            name="fragment"
+            type="com.ustadmobile.port.android.view.SettingsFragment"/>
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -19,6 +23,56 @@
             android:layout_height="wrap_content">
 
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/settings_networknodelist"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="?android:selectableItemBackground"
+                android:onClick="@{() -> fragment.handleClickNetworkNodeList()}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/networknode_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:tint="?colorOnIconTint"
+                    app:layout_constraintBottom_toTopOf="@+id/networknode_headline_text"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    app:srcCompat="@drawable/ic_baseline_connect_without_contact_24" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/networknode_headline_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:text="@string/nearby_devices"
+                    app:layout_constraintStart_toEndOf="@+id/networknode_icon"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    android:id="@+id/networknode_subheading"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:text="@string/nearby_devices_subheading"
+                    app:layout_constraintTop_toBottomOf="@+id/networknode_headline_text"
+                    app:layout_constraintStart_toEndOf="@+id/networknode_icon"
+                     />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
             <!-- Holiday Calendars-->
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/activity_settings2_holiday_calendar_cl"
@@ -29,7 +83,7 @@
                 android:onClick="@{() -> presenter.goToHolidayCalendarList()}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toBottomOf="@+id/settings_networknodelist">
 
                 <androidx.appcompat.widget.AppCompatImageView
                     android:id="@+id/imageView14"

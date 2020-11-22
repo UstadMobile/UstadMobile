@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+    </data>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/network_node_list_recycler"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical"
+        android:clipToPadding="false"
+        tools:itemCount="8"
+        tools:listitem="@layout/item_holiday_calendar"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+</layout>

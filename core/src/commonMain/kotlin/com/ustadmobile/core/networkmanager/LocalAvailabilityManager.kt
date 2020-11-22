@@ -1,5 +1,6 @@
 package com.ustadmobile.core.networkmanager
 
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.NetworkNode
 
 class AvailabilityMonitorRequest(val containerUidsToMonitor: List<Long>,
@@ -18,4 +19,9 @@ interface LocalAvailabilityManager {
     suspend fun areContentEntriesLocallyAvailable(containerUids: List<Long>) : Map<Long, Boolean>
 
     suspend fun findBestLocalNodeForContentEntryDownload(containerUid: Long): NetworkNode?
+
+    var bluetoothScanningEnabled: Boolean
+
+    val networkNodesLiveData: DoorLiveData<List<NetworkNode>>
+
 }

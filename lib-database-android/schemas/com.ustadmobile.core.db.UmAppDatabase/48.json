@@ -2,15 +2,27 @@
   "formatVersion": 1,
   "database": {
     "version": 48,
-    "identityHash": "12b43c64f2c1c6c5f013d417ebedc0df",
+    "identityHash": "995324ddfc82bbbbefbc6b3e5cca095f",
     "entities": [
       {
         "tableName": "NetworkNode",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nodeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bluetoothMacAddress` TEXT, `ipAddress` TEXT, `wifiDirectMacAddress` TEXT, `deviceWifiDirectName` TEXT, `endpointUrl` TEXT, `lastUpdateTimeStamp` INTEGER NOT NULL, `networkServiceLastUpdated` INTEGER NOT NULL, `nsdServiceName` TEXT, `port` INTEGER NOT NULL, `numFailureCount` INTEGER NOT NULL, `wifiDirectDeviceStatus` INTEGER NOT NULL, `groupSsid` TEXT)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`nodeId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `nodeName` TEXT, `bluetoothBondState` INTEGER NOT NULL, `bluetoothMacAddress` TEXT, `ipAddress` TEXT, `wifiDirectMacAddress` TEXT, `deviceWifiDirectName` TEXT, `endpointUrl` TEXT, `lastUpdateTimeStamp` INTEGER NOT NULL, `networkServiceLastUpdated` INTEGER NOT NULL, `nsdServiceName` TEXT, `port` INTEGER NOT NULL, `numFailureCount` INTEGER NOT NULL, `wifiDirectDeviceStatus` INTEGER NOT NULL, `groupSsid` TEXT)",
         "fields": [
           {
             "fieldPath": "nodeId",
             "columnName": "nodeId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "nodeName",
+            "columnName": "nodeName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "bluetoothBondState",
+            "columnName": "bluetoothBondState",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -9530,7 +9542,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '12b43c64f2c1c6c5f013d417ebedc0df')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '995324ddfc82bbbbefbc6b3e5cca095f')"
     ]
   }
 }

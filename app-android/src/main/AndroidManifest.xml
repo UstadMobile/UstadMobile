@@ -24,30 +24,34 @@
         android:name="android.hardware.camera"
         android:required="false" />
 
+    <!-- Used to find devices to connect to without requiring location permission -->
+    <uses-feature android:name="android.software.companion_device_setup"
+        android:required="false"/>
+
     <application
         android:supportsRtl="true"
         android:theme="@style/UmTheme.App"
         android:usesCleartextTraffic="true">
-        <activity android:name="com.ustadmobile.port.android.view.MainActivity"
+        <activity
+            android:name="com.ustadmobile.port.android.view.MainActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:launchMode="singleTask">
 
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:host="*" android:pathPattern="..*umclient/.*"
+
+                <data
+                    android:host="*"
+                    android:pathPattern="..*umclient/.*"
                     android:scheme="http" />
             </intent-filter>
-
-
-        </activity>
-
-        <!-- previously used: android:theme="@style/UmTheme.App.OnBoarding"  -->
+        </activity> <!-- previously used: android:theme="@style/UmTheme.App.OnBoarding" -->
         <activity
             android:name="com.ustadmobile.port.android.view.OnBoardingActivity"
-            android:noHistory="true"
-            />
+            android:noHistory="true" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
@@ -63,13 +67,9 @@
             android:name="com.ustadmobile.port.android.view.EpubContentActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="" />
-
         <activity
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
-
-
-
         <activity android:name="com.ustadmobile.port.android.view.ContentEditorActivity" />
 
         <service
@@ -81,12 +81,10 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale"
             android:label="@string/app_name"
             android:noHistory="true">
-
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
         </activity>
     </application>
 
