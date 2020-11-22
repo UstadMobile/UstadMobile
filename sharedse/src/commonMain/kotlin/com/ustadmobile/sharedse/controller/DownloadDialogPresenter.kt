@@ -25,7 +25,7 @@ import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobSizeInfo
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
-import com.ustadmobile.sharedse.network.DeletePreparationRequester
+import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.sharedse.network.DownloadPreparationRequester
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope

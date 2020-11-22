@@ -151,7 +151,7 @@ abstract class DownloadJobItemDao {
             "FROM DownloadJobItem " +
             "WHERE djiContentEntryUid = :contentEntryUid " +
             "ORDER BY DownloadJobItem.timeStarted DESC LIMIT 1")
-    abstract fun findByContentEntryUidLive(contentEntryUid: Long): DoorLiveData<DownloadJobItem?>
+    abstract suspend fun findByContentEntryUidAsync(contentEntryUid: Long): DownloadJobItem?
 
     @Query("""SELECT Container.containerUid, Container.mimeType from DownloadJobItem 
         LEFT JOIN Container ON DownloadJobItem.djiContainerUid = Container.containerUid 

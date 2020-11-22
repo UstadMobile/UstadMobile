@@ -1,4 +1,4 @@
-package com.ustadmobile.sharedse.network
+package com.ustadmobile.core.networkmanager
 
 interface DeletePreparationRequester {
 
