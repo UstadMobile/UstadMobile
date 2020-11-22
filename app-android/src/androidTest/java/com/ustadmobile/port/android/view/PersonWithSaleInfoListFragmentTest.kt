@@ -34,48 +34,51 @@ class PersonWithSaleInfoListFragmentTest : TestCase()  {
     val screenRecordRule = AdbScreenRecordRule()
 
 
-    @AdbScreenRecord("Given list when PersonWithSaleInfo clicked then navigate to PersonWithSaleInfoDetail")
-    @Test
-    fun givenPersonWithSaleInfoListPresent_whenClickOnPersonWithSaleInfo_thenShouldNavigateToPersonWithSaleInfoDetail() {
-        val testEntity = PersonWithSaleInfo().apply {
-            personWithSaleInfoName = "Test Name"
-            personWithSaleInfoUid = dbRule.db.clazzDao.insert(this)
-        }
-
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf()) {
-            PersonWithSaleInfoListFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
-
-        init{
-
-        }.run{
-
-            PersonWithSaleInfoListScreen{
-
-                recycler{
-
-                    childWith<PersonWithSaleInfoListScreen.PersonWithSaleInfo>{
-                        withDescendant { withTag(testEntity.personWithSaleInfoUid) }
-                    }perform {
-                        title {
-                            click()
-                        }
-                    }
-
-                }
-
-                flakySafely {
-                    Assert.assertEquals("After clicking on item, it navigates to detail view",
-                            R.id.person_with_sale_info_detail_dest, systemImplNavRule.navController.currentDestination?.id)
-                }
-
-
-            }
-
-        }
-    }
+    //TODO: Set up test
+//    @AdbScreenRecord("Given list when PersonWithSaleInfo clicked then navigate to PersonWithSaleInfoDetail")
+//    @Test
+//    fun givenPersonWithSaleInfoListPresent_whenClickOnPersonWithSaleInfo_thenShouldNavigateToPersonWithSaleInfoDetail() {
+//
+//
+//        val testEntity = PersonWithSaleInfo().apply {
+//            personWithSaleInfoName = "Test Name"
+//            personWithSaleInfoUid = dbRule.db.clazzDao.insert(this)
+//        }
+//
+//        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+//                fragmentArgs = bundleOf()) {
+//            PersonWithSaleInfoListFragment().also {
+//                it.installNavController(systemImplNavRule.navController)
+//            }
+//        }
+//
+//        init{
+//
+//        }.run{
+//
+//            PersonWithSaleInfoListScreen{
+//
+//                recycler{
+//
+//                    childWith<PersonWithSaleInfoListScreen.PersonWithSaleInfo>{
+//                        withDescendant { withTag(testEntity.personWithSaleInfoUid) }
+//                    }perform {
+//                        title {
+//                            click()
+//                        }
+//                    }
+//
+//                }
+//
+//                flakySafely {
+//                    Assert.assertEquals("After clicking on item, it navigates to detail view",
+//                            R.id.person_with_sale_info_detail_dest, systemImplNavRule.navController.currentDestination?.id)
+//                }
+//
+//
+//            }
+//
+//        }
+//    }
 
 }

@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.os.Bundle
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
@@ -145,26 +146,20 @@ class InventoryItemEditFragmentTest : TestCase(){
         dbRule.db.personGroupMemberDao.insert(
                 PersonGroupMember(leOne.personUid, leOne.personGroupUid))
 
+        dbRule.account.personUid = leOne.personUid
 
 
-
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
+        val fragmentScenario = launchFragmentInContainer( fragmentArgs =
+                bundleOf(UstadView.ARG_PRODUCT_UID to pinkHat.productUid.toString()),
+                themeResId = R.style.UmTheme_App) {
             InventoryItemEditFragment(). also {
                 it.installNavController(systemImplNavRule.navController)
             }
         }
 
-        val currentEntity = fragmentScenario.letOnFragment { it.entity }
+        val currentEntity = fragmentScenario.waitUntilLetOnFragment { it.entity }
 
 
-
-
-
-
-        val formVals = InventoryItem().apply {
-            //TODO: set the values that will be entered on the form here
-            //e.g. inventoryItemName = "New InventoryItem"
-        }
 
         init{
 
@@ -172,19 +167,14 @@ class InventoryItemEditFragmentTest : TestCase(){
 
             InventoryItemEditScreen{
 
-                fillFields(fragmentScenario, formVals, currentEntity,
-                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
-                        testContext = this@run)
+                Thread.sleep(5000)
+
+                //TODO: Fill in for every WE
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
 
-                val inventoryItemList = dbRule.db.clazzDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
-                    it.isNotEmpty()
-                }
-
-                Assert.assertEquals("InventoryItem data set", "New InventoryItem",
-                        inventoryItemList.first() .inventoryItemName)
+                //TODO: Assert
 
             }
 
@@ -192,55 +182,4 @@ class InventoryItemEditFragmentTest : TestCase(){
         }
     }
 
-
-    @AdbScreenRecord("given InventoryItem exists when updated then should be updated on database")
-    @Test
-    fun givenInventoryItemExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
-        val existingInventoryItem = InventoryItem().apply {
-            inventoryItemName = "New InventoryItem"
-            inventoryItemUid = dbRule.db.inventoryItemDao.insert(this)
-        }
-
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
-                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingInventoryItem.inventoryItemUid)) {
-            InventoryItemEditFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
-
-        //Freeze and serialize the value as it was first shown to the user
-        val entityLoadedByFragment = fragmentScenario.letOnFragment { it.entity }
-        val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
-        val newClazzValues = defaultGson().fromJson(entityLoadedJson, InventoryItem::class.java).apply {
-            inventoryItemName = "Updated InventoryItem"
-        }
-
-        init{
-
-
-        }.run{
-
-            InventoryItemEditScreen {
-
-                fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment,
-                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
-                        testContext = this@run)
-
-                fragmentScenario.clickOptionMenu(R.id.menu_done)
-
-                Assert.assertEquals("Entity in database was loaded for user",
-                        "New InventoryItem",
-                        defaultGson().fromJson(entityLoadedJson, InventoryItem::class.java).clazzName)
-
-                val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existingInventoryItem.inventoryItemUid)
-                        .waitUntilWithFragmentScenario(fragmentScenario) { it?.clazzName == "Updated InventoryItem" }
-                Assert.assertEquals("InventoryItem name is updated", "Updated InventoryItem",
-                        updatedEntityFromDb?.inventoryItemName)
-
-            }
-
-        }
-
-    }
 }

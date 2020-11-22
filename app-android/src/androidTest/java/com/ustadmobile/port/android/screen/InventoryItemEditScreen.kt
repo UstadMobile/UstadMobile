@@ -14,41 +14,16 @@ import com.ustadmobile.core.networkmanager.defaultGson
 object InventoryItemEditScreen : KScreen<InventoryItemEditScreen>() {
 
     override val layoutId: Int?
-        get() = R.layout.fragment_report_edit
+        get() = R.layout.fragment_inventory_item_edit
     override val viewClass: Class<*>?
         get() = InventoryItemEditFragment::class.java
 
-    val InventoryItemTitleInput = KTextInputLayout { withId(R.id.id_of_textfield_input_layout)}
 
 
-    fun fillFields(fragmentScenario: FragmentScenario<InventoryItemEditFragment>,
-                   inventoryItem: InventoryItem,
-                   inventoryItemOnForm: InventoryItem?,
-                   setFieldsRequiringNavigation: Boolean = true,
-                   impl: UstadMobileSystemImpl, context: Context,
-                   testContext: TestContext<Unit>) {
+    fun fillFields(fragmentScenario: FragmentScenario<InventoryItemEditFragment>) {
         //TODO: set these values on the form using Espresso.
 
-        inventoryItem.inventoryItemName?.takeIf {it != inventoryItemOnForm?.inventoryItemName }?.also {
-            InventoryItemTitleInput{
-                edit{
-                    clearText()
-                    typeText(it)
-                }
-            }
-        }
 
-        if(!setFieldsRequiringNavigation) {
-            return
-        }
-
-        //TODO: if required, use the savedstatehandle to add link entities
-
-        fragmentScenario.onFragment { fragment ->
-            fragment.takeIf {inventoryItem.relatedEntity != inventoryItemOnForm?.relatedEntity }
-                    ?.findNavController()?.currentBackStackEntry?.savedStateHandle
-                    ?.set("RelatedEntityName", defaultGson().toJson(listOf(inventoryItem.relatedEntity)))
-        }
 
     }
 
