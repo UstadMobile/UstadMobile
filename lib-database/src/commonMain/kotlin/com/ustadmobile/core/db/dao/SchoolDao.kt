@@ -35,47 +35,37 @@ abstract class SchoolDao : BaseDao<School> {
                                                        schoolUid: Long,
                                                       permission: Long) : Boolean
 
-    @Query("""SELECT School.*,
-         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND
-         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
-         AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STUDENT_UID}) as numStudents,
-         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND
-         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
-         AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STAFF_UID}) as numTeachers,
-         '' as locationName,
-          (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
-         FROM School WHERE CAST(schoolActive AS INTEGER) = 1
-             AND schoolName LIKE :searchBit
-             
-             AND :personUid IN (${ENTITY_PERSONS_WITH_PERMISSION} )
 
-             """)
-    abstract fun findAllActiveSchoolWithMemberCountAndLocation(searchBit: String,
-                        permission: Long, personUid: Long)
-            : DataSource.Factory<Int, SchoolWithMemberCountAndLocation>
-
-
-    @Query("""SELECT School.*, 
-         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
-         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
-         AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STUDENT_UID}) as numStudents,
-         (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
-         CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
-         AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STAFF_UID}) as numTeachers, 
-         '' as locationName,
-          (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
-         FROM School WHERE CAST(schoolActive AS INTEGER) = 1 
-             AND schoolName LIKE :searchBit 
-             AND :personUid IN (${ENTITY_PERSONS_WITH_PERMISSION} )
-            ORDER BY CASE(:sortOrder)
-                WHEN $SORT_NAME_ASC THEN School.schoolName
-                ELSE ''
-            END ASC,
-            CASE(:sortOrder)
-                WHEN $SORT_NAME_DESC THEN School.schoolName
-                ELSE ''
-            END DESC
-            """)
+    @Query("""
+        SELECT School.*, 
+            (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
+            CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
+            AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STUDENT_UID}) as numStudents,
+            (SELECT COUNT(*) FROM SchoolMember WHERE SchoolMember.schoolMemberSchoolUid = School.schoolUid AND 
+            CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1 
+            AND SchoolMember.schoolMemberRole = ${Role.ROLE_SCHOOL_STAFF_UID}) as numTeachers, 
+            '' as locationName,
+            (SELECT COUNT(*) FROM Clazz WHERE Clazz.clazzSchoolUid = School.schoolUid AND CAST(Clazz.clazzUid AS INTEGER) = 1 ) as clazzCount
+        FROM 
+            PersonGroupMember
+            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions & :permission) > 0
+            LEFT JOIN School ON 
+                CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = :personUid) AS INTEGER) = 1
+                OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = School.schoolUid)
+        WHERE
+            PersonGroupMember.groupMemberPersonUid = :personUid
+            AND CAST(schoolActive AS INTEGER) = 1
+            AND schoolName LIKE :searchBit
+        GROUP BY School.schoolUid
+        ORDER BY CASE(:sortOrder)
+            WHEN $SORT_NAME_ASC THEN School.schoolName
+            ELSE ''
+        END ASC,
+        CASE(:sortOrder)
+            WHEN $SORT_NAME_DESC THEN School.schoolName
+            ELSE ''
+        END DESC""")
     abstract fun findAllActiveSchoolWithMemberCountAndLocationName(searchBit: String,
                     personUid: Long, permission: Long, sortOrder: Int)
             : DataSource.Factory<Int, SchoolWithMemberCountAndLocation>

@@ -87,6 +87,11 @@ class Login2PresenterTest {
             bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(endpointScope).singleton {
                 mockRepo
             }
+
+            bind<Gson>() with singleton {
+                Gson()
+            }
+
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }
     }

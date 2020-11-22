@@ -14,8 +14,10 @@ pluginManagement {
 }
 
 
-include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':lib-database-annotation-processor-mpp-test', ':lib-database-annotation-processor-testdb',
-        ':app-angular',
+include ':app-android',
+        ':lib-database-annotations',
+        ':lib-door-runtime',
+        ':lib-database-annotation-processor-testdb',
         ':app-ktor-server',
         ':lib-test-common',
         ':core',
@@ -29,7 +31,6 @@ include ':app-android', ':lib-database-annotations', ':lib-door-runtime', ':lib-
         ':lib-database',
         ':lib-database-android',
         ':lib-room-annotations',
-        ':lib-content-editor',
         ':lib-content-scrapers'
 
 rootProject.name = "UstadMobile"

@@ -913,8 +913,6 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
-        setupDb(roundEnv)
-
         roundEnv.getElementsAnnotatedWith(Database::class.java).map { it as TypeElement}.forEach {dbTypeEl ->
             FileSpec.builder(dbTypeEl.packageName, "${dbTypeEl.simpleName}$SUFFIX_KTOR_ROUTE")
                     .addDbKtorRouteFunction(dbTypeEl, processingEnv)

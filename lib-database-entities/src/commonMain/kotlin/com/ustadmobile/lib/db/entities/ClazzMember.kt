@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.ColumnInfo
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 
 import com.ustadmobile.door.annotation.LastChangedBy
@@ -15,7 +16,14 @@ import kotlinx.serialization.Serializable
  * or a student. Each member has a joining date, and a leaving date.
  */
 
-@Entity
+@Entity(indices = [
+    //Index to streamline permission queries etc. that lookup a list of classes for a given person
+    Index(value = ["clazzMemberPersonUid", "clazzMemberClazzUid"]),
+    //Index to streamline finding which people are in a given clazzuid
+    Index(value = ["clazzMemberClazzUid", "clazzMemberPersonUid"]),
+    //Index for streamlining ClazzList where the number of users is counted by role
+    Index(value = ["clazzMemberClazzUid", "clazzMemberRole"])
+])
 @SyncableEntity(tableId = ClazzMember.TABLE_ID,
     /* If someone is newly added to a class this might mean that existing members of the class (e.g.
      * students and teachers) now have access to information in other tables that was not previously

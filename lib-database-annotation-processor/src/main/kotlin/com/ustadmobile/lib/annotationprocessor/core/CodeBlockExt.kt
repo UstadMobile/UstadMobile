@@ -148,9 +148,8 @@ fun CodeBlock.Builder.addCreateTableCode(entityTypeSpec: TypeSpec, execSqlFn: St
             "index_${entityTypeSpec.name}_${it.value.joinToString(separator = "_", postfix = "", prefix = "")}"
         }
 
-        add("$execSqlFn(%S)\n", """CREATE 
-                |${if(it.unique){ "UNIQUE" } else { "" } } INDEX $indexName 
-                |ON ${entityTypeSpec.name} (${it.value.joinToString()})""".trimMargin())
+        add("$execSqlFn(%S)\n", "CREATE ${if(it.unique){ "UNIQUE " } else { "" } }INDEX $indexName" +
+                " ON ${entityTypeSpec.name} (${it.value.joinToString()})")
     }
 
     entityTypeSpec.entityFields().forEach { field ->

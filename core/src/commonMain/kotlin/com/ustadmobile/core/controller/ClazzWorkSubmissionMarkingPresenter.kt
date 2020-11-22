@@ -24,6 +24,7 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzMember
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
 import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.core.util.safeParse
 
 class ClazzWorkSubmissionMarkingPresenter(context: Any,
               arguments: Map<String, String>, view: ClazzWorkSubmissionMarkingView, di: DI,
@@ -236,7 +237,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: ClazzMemberAndClazzWorkWithSubmission? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(ClazzMemberAndClazzWorkWithSubmission.serializer(), entityJsonStr)
+            editEntity = safeParse(di, ClazzMemberAndClazzWorkWithSubmission.serializer(), entityJsonStr)
         }else {
             editEntity = ClazzMemberAndClazzWorkWithSubmission()
         }

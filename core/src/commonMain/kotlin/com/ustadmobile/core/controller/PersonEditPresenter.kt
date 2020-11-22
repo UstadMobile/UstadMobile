@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.PersonEditView
@@ -23,6 +24,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import io.ktor.client.features.json.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -153,7 +155,7 @@ class PersonEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: Person? = null
         editEntity = if (entityJsonStr != null) {
-            Json.parse(PersonWithAccount.serializer(), entityJsonStr)
+            safeParse(di, PersonWithAccount.serializer(), entityJsonStr)
         } else {
             PersonWithAccount()
         }

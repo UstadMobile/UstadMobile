@@ -50,7 +50,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 46)
+], version = 48)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -2947,12 +2947,70 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        /**
+         * Add indexes to improve performance of queries that check permissions
+         */
+        val MIGRATION_46_47 = object : DoorMigration(46, 47) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("CREATE INDEX index_ClazzMember_clazzMemberPersonUid_clazzMemberClazzUid ON ClazzMember (clazzMemberPersonUid, clazzMemberClazzUid)")
+                database.execSQL("CREATE INDEX index_ClazzMember_clazzMemberClazzUid_clazzMemberPersonUid ON ClazzMember (clazzMemberClazzUid, clazzMemberPersonUid)")
+                database.execSQL("CREATE INDEX index_EntityRole_erGroupUid_erRoleUid_erTableId ON EntityRole (erGroupUid, erRoleUid, erTableId)")
+                database.execSQL("CREATE INDEX index_Role_rolePermissions ON Role(rolePermissions)")
+
+                //Add a PersonGroup for Admin
+                if(database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("""
+                        INSERT INTO PersonGroup(groupName, groupActive, personGroupFlag, groupMasterCsn, groupLocalCsn, groupLastChangedBy) 
+                        SELECT 'PGA' || person.personUid AS groupName, 
+                        true as groupActive,
+                        1 as personGroupFlag,
+                        0 as groupMasterCsn,
+                        0 as groupLocalCsn,
+                        (SELECT nodeClientId FROM SyncNode) as groupLastChangedBy
+                        FROM person
+                        where admin = true
+                        AND personGroupUid = 0""")
+                    database.execSQL("""
+                        UPDATE Person SET
+                        personGroupUid = (SELECT groupUid FROM PersonGroup WHERE groupName = ('PGA' || Person.personUid) LIMIT 1),
+                        personLastChangedBy = (SELECT nodeClientId FROM SyncNode) 
+                        WHERE
+                        admin = true AND personGroupUid = 0
+                    """)
+                    database.execSQL("""
+                        INSERT INTO PersonGroupMember(groupMemberPersonUid, groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, groupMemberLastChangedBy)
+                        SELECT Person.personUid AS groupMemberPersonUid,
+                        Person.personGroupUid AS groupMemberGroupUid,
+                        0 AS groupMemberMasterCsn,
+                        0 AS groupMemberLocalCsn,
+                        (SELECT nodeClientId FROM SyncNode) AS groupMemberLastChangedBy
+                        FROM Person
+                        WHERE admin = true
+                        AND (SELECT COUNT(*) FROM PersonGroupMember WHERE PersonGroupmember.groupMemberGroupUid = Person.personGroupUid) = 0
+                    """)
+                }
+
+            }
+        }
+
+        val MIGRATION_47_48 = object : DoorMigration(47, 48) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("CREATE INDEX " +
+                        "index_ClazzMember_clazzMemberClazzUid_clazzMemberRole " +
+                        "ON ClazzMember (clazzMemberClazzUid, clazzMemberRole)")
+                database.execSQL("CREATE INDEX " +
+                        "index_SchoolMember_schoolMemberSchoolUid_schoolMemberActive_schoolMemberRole " +
+                        "ON SchoolMember (schoolMemberSchoolUid, schoolMemberActive, schoolMemberRole)")
+            }
+        }
+
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
                     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
-                    MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46)
+                    MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
+                    MIGRATION_47_48)
 
 
 
