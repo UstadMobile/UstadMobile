@@ -18,6 +18,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.NetworkNode
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.launch
@@ -63,11 +64,15 @@ class LocalAvailabilityManagerAndroidImpl(val endpoint: Endpoint, val appContext
         BluetoothAdapter.getDefaultAdapter()
     }
 
-    private val serviceUUID : UUID by lazy {
+    private val serviceUUIDObj : UUID by lazy {
         UUID(endpoint.url.hashCode().toLong(), endpoint.url.hashCode().toLong())
     }
 
-    private val serviceName: String by lazy {
+    override val serviceUuid: String by lazy {
+        serviceUUIDObj.toString()
+    }
+
+    override val serviceName: String by lazy {
         "um${endpoint.url.hashCode().toString().replace('-', '_')}"
     }
 
@@ -80,21 +85,56 @@ class LocalAvailabilityManagerAndroidImpl(val endpoint: Endpoint, val appContext
         override fun run() {
             while(enabled) {
                 try {
+                    Napier.d("Bluetooth Server Starting for $serviceName UUID=$serviceUUIDObj", tag = LOGTAG)
                     serverSocket = btAdapter.listenUsingRfcommWithServiceRecord(serviceName,
-                        serviceUUID)
+                            serviceUUIDObj)
                     serverSocket?.accept()?.run {
                         ServerClientThread(this).start()
                     }
                 }catch(e: Exception) {
+                    Napier.e("Server Socket Exception", tag = LOGTAG)
+                }finally {
+                    serverSocket?.close()
+                }
+            }
+        }
 
+        fun close() {
+            enabled = false
+            serverSocket?.close()
+            serverSocket = null
+        }
+    }
+
+    private var serverAcceptThread: ServerAcceptThread? = null
+
+    private class ServerClientThread(private val client: BluetoothSocket) : Thread() {
+
+    }
+
+    internal val bluetoothStateBroadcastReceiver = object: BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val btState = intent?.getIntExtra(BluetoothAdapter.EXTRA_STATE, -1) ?: -1
+            val btAdapterVal = btAdapter ?: return
+            when(btState) {
+                BluetoothAdapter.STATE_ON -> {
+                    Napier.d("Bluetooth Adapter On: start RFComm server for ${endpoint.url}", tag = LOGTAG)
+                    if(serverAcceptThread == null) {
+                        serverAcceptThread = ServerAcceptThread(btAdapterVal).also {
+                            it.start()
+                        }
+                    }
+                }
+
+                BluetoothAdapter.STATE_TURNING_OFF -> {
+                    Napier.d("Bluetooth adapter off", tag = LOGTAG)
+                    serverAcceptThread?.close()
+                    serverAcceptThread = null
                 }
             }
         }
     }
 
-    private class ServerClientThread(private val client: BluetoothSocket) : Thread() {
-
-    }
 
     internal val bluetoothFoundBroadcastReceiver = object: BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
@@ -126,7 +166,7 @@ class LocalAvailabilityManagerAndroidImpl(val endpoint: Endpoint, val appContext
                 appContext.registerReceiver(bluetoothFoundBroadcastReceiver, discoveryFinishedFilter)
 
                 btAdapter?.startDiscovery()
-                Napier.d("Bluetooth discovery started")
+                Napier.d("Bluetooth discovery started", tag = LOGTAG)
             }else if(!value && field) {
                 //stop scanning
                 BluetoothAdapter.getDefaultAdapter()?.cancelDiscovery()
@@ -136,8 +176,20 @@ class LocalAvailabilityManagerAndroidImpl(val endpoint: Endpoint, val appContext
         }
 
 
+    init {
+        appContext.registerReceiver(bluetoothStateBroadcastReceiver,
+                IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED))
+        GlobalScope.launch(Dispatchers.Main) {
+            btAdapter?.state?.let {state ->
+                bluetoothStateBroadcastReceiver.onReceive(appContext, Intent(BluetoothAdapter.ACTION_STATE_CHANGED).apply {
+                    putExtra(BluetoothAdapter.EXTRA_STATE, state)
+                })
+            }
+        }
+    }
+
     override suspend fun onNewNodeDiscovered(node: NetworkNode) {
-        Napier.d("Found device: ${node.bluetoothMacAddress} / ${node.nodeName}")
+        Napier.d("Found device: ${node.bluetoothMacAddress} / ${node.nodeName}", tag = LOGTAG)
         node.nodeId = db.networkNodeDao.insertAsync(node)
         networkNodesMap[node.nodeId] = node
         networkNodesLiveDataInternal.sendValue(networkNodesMap.values.toList())
@@ -172,4 +224,9 @@ class LocalAvailabilityManagerAndroidImpl(val endpoint: Endpoint, val appContext
     override suspend fun findBestLocalNodeForContentEntryDownload(containerUid: Long): NetworkNode? {
         return null
     }
+
+    companion object {
+        const val LOGTAG = "LocalAvailibilityManagerAndroid"
+    }
+
 }

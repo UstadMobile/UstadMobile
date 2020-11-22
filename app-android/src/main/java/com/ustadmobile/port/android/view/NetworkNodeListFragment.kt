@@ -1,12 +1,15 @@
 package com.ustadmobile.port.android.view
 
+import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
 import android.companion.AssociationRequest
 import android.companion.BluetoothDeviceFilter
 import android.companion.CompanionDeviceManager
+import android.content.Intent
 import android.content.IntentSender
 import android.os.Build
 import android.os.Bundle
+import android.os.ParcelUuid
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -17,16 +20,22 @@ import androidx.annotation.RequiresApi
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.github.aakira.napier.Napier
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentNetworkNodeListBinding
 import com.toughra.ustadmobile.databinding.ItemNetworkNodeBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.NetworkNodeListPresenter
+import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.NetworkNodeListView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.NetworkNode
 import com.ustadmobile.port.android.view.util.ListSubmitObserver
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
 class NetworkNodeListFragment : UstadBaseFragment(), NetworkNodeListView {
 
@@ -39,12 +48,17 @@ class NetworkNodeListFragment : UstadBaseFragment(), NetworkNodeListView {
         }
 
         fun request() {
+            val serviceUuidVal = localAvailabilityManager?.serviceUuid ?:
+                throw IllegalStateException("Cannot find serviceuuid with no localavailabilitymanager")
             val deviceFilter = BluetoothDeviceFilter.Builder()
+                    .addServiceUuid(ParcelUuid.fromString(serviceUuidVal), null)
                     .build()
             val pairingRequest = AssociationRequest.Builder()
                     .addDeviceFilter(deviceFilter)
                     .setSingleDevice(false)
                     .build()
+
+            Napier.d("Companion device manager : associate for service uuid: $serviceUuidVal")
 
             companionDeviceManager.associate(pairingRequest, object : CompanionDeviceManager.Callback() {
 
@@ -108,6 +122,8 @@ class NetworkNodeListFragment : UstadBaseFragment(), NetworkNodeListView {
 
     private var companionDeviceHelper: CompanionDeviceHelper? = null
 
+    private var localAvailabilityManager: LocalAvailabilityManager? = null
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
         binding = FragmentNetworkNodeListBinding.inflate(LayoutInflater.from(requireContext()),
@@ -130,6 +146,9 @@ class NetworkNodeListFragment : UstadBaseFragment(), NetworkNodeListView {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        val accountManager : UstadAccountManager = di.direct.instance()
+        localAvailabilityManager = di.direct.on(accountManager.activeAccount).instance<LocalAvailabilityManager>()
+
         if(Build.VERSION.SDK_INT >= 26) {
             companionDeviceHelper = CompanionDeviceHelper()
         }
@@ -143,6 +162,10 @@ class NetworkNodeListFragment : UstadBaseFragment(), NetworkNodeListView {
         }
 
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+
+        startActivity(Intent(BluetoothAdapter.ACTION_REQUEST_DISCOVERABLE).apply {
+            putExtra(BluetoothAdapter.EXTRA_DISCOVERABLE_DURATION, 300)
+        })
     }
 
     override fun onDestroyView() {
@@ -163,6 +186,8 @@ class NetworkNodeListFragment : UstadBaseFragment(), NetworkNodeListView {
                         oldItem.bluetoothBondState == newItem.bluetoothBondState
             }
         }
+
+        const val LOGTAG = "LocalAvailabilityList"
 
         const val SELECT_DEVICE_REQUEST_CODE = 42
     }

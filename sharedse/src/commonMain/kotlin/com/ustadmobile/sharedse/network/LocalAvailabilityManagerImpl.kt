@@ -49,6 +49,11 @@ class LocalAvailabilityManagerImpl(override val di: DI, private val endpoint: En
     override var bluetoothScanningEnabled: Boolean = false
     override val networkNodesLiveData: DoorLiveData<List<NetworkNode>> = DoorMutableLiveData(listOf())
 
+    override val serviceUuid: String
+        get() = ""
+    override val serviceName: String
+        get() = ""
+
     init {
         val networkNodes = networkManager.networkNodes
         networkManager.addNetworkNodeListener(this)

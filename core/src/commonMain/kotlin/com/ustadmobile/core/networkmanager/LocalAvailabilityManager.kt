@@ -24,4 +24,9 @@ interface LocalAvailabilityManager {
 
     val networkNodesLiveData: DoorLiveData<List<NetworkNode>>
 
+    val serviceUuid: String
+
+    val serviceName: String
+
+
 }
