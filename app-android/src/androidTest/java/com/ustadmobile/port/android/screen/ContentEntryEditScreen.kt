@@ -11,10 +11,8 @@ import com.agoda.kakao.text.KButton
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorDatabaseSyncRepository
-import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.port.android.view.ContentEntryEdit2Fragment
@@ -24,9 +22,7 @@ import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import junit.framework.Assert
 import java.io.File
-import java.nio.file.Files
 
 object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
 
@@ -36,20 +32,20 @@ object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
     override val viewClass: Class<*>?
         get() = ContentEntryEdit2Fragment::class.java
 
-    val importButton = KButton { withId(R.id.content_entry_select_file)}
+    val importButton = KButton { withId(R.id.content_entry_select_file) }
 
-    val storageOption = KTextView { withId(R.id.storage_option)}
+    val storageOption = KTextView { withId(R.id.storage_option) }
 
-    val entryTitleTextInput = KTextInputLayout { withId(R.id.entry_title)}
+    val entryTitleTextInput = KTextInputLayout { withId(R.id.entry_title) }
 
-    val fileSelectedText = KTextView { withId(R.id.content_entry_select_file)}
+    val fileSelectedText = KTextView { withId(R.id.content_entry_select_file) }
 
-    val descTextInput = KTextInputLayout{withId(R.id.entry_description)}
+    val descTextInput = KTextInputLayout { withId(R.id.entry_description) }
 
-    fun createEntryFromFile(fileName: String, isZipped: Boolean = true,
-                                    systemImplNavRule : SystemImplTestNavHostRule,
-                                    dbRule: UmAppDatabaseAndroidClientRule): ContentEntryWithLanguage {
-        val tmpDir = UmFileUtilSe.makeTempDir("tmprDir","${System.currentTimeMillis()}")
+    fun createEntryFromFile(fileName: String, titleEntry: String,
+                            systemImplNavRule: SystemImplTestNavHostRule,
+                            dbRule: UmAppDatabaseAndroidClientRule): ContentEntry {
+        val tmpDir = UmFileUtilSe.makeTempDir("tmprDir", "${System.currentTimeMillis()}")
         val testFile = File(tmpDir, fileName)
         val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/$fileName")
         testFile.outputStream().use { input?.copyTo(it) }
@@ -66,26 +62,26 @@ object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
             }
         }
 
-        val fragmentScenario  = with(launchFragmentInContainer(
+        val fragmentScenario = with(launchFragmentInContainer(
                 fragmentArgs = bundleOf(UstadView.ARG_LEAF to true.toString(),
                         UstadView.ARG_PARENT_ENTRY_UID to 10000L.toString()), themeResId = R.style.UmTheme_App) {
             ContentEntryEdit2Fragment(registry).also {
                 it.installNavController(systemImplNavRule.navController)
-            } }) { onFragment { fragment -> fragment.handleFileSelection()}
+            }
+        }) {
+            onFragment { fragment -> fragment.handleFileSelection() }
         }
 
-        importButton{
+        importButton {
             isDisplayed()
         }
 
-        if(!isZipped){
-            entryTitleTextInput{
-                edit{
-                    hasText(fileName.substringBefore("."))
-                    clearText()
-                    typeText("Dummy Title")
-                    hasText("Dummy Title")
-                }
+        entryTitleTextInput {
+            edit {
+                hasAnyText()
+                clearText()
+                typeText(titleEntry)
+                hasText(titleEntry)
             }
         }
 
@@ -93,11 +89,9 @@ object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
         repo.clientId
         fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-        val entries = dbRule.repo.contentEntryDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario, 15000) {
-            it.isNotEmpty()
-        }
-
-        return entries?.first()!!
+        return dbRule.repo.contentEntryDao.findByTitle(titleEntry).waitUntilWithFragmentScenario(fragmentScenario, 15000) {
+            it != null
+        }!!
     }
 
 }

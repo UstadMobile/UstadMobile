@@ -2,6 +2,7 @@ package com.ustadmobile.core.util
 
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.catalog.contenttype.VideoTypePlugin
+import com.ustadmobile.core.util.ext.commandExists
 import java.io.BufferedReader
 import java.io.File
 import java.io.IOException
@@ -11,17 +12,32 @@ object ShrinkUtils {
 
     fun findInPath(commandName: String, systemPropName: String? = null): String? {
 
-        if(systemPropName != null){
-            return if(File(systemPropName).exists()){
+        if (systemPropName != null) {
+            return if (File(systemPropName).commandExists()) {
                 systemPropName
-            }else{
+            } else {
                 null
             }
         }
 
         return System.getenv("PATH").split(File.pathSeparator).firstOrNull() {
-            File(it, commandName).exists()
-        }?.let { File(it, commandName).path }
+            File(it, commandName).commandExists()
+        }?.let {
+
+            val osName = System.getProperty("os.name")
+            // checks linux
+            if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) {
+                File(it, commandName).path
+                // checks windows
+            } else if (osName.contains("win")) {
+                if (File(it, "$commandName.exe").exists()) {
+                    File(it, "$commandName.exe").path
+                } else if (File(it, "$commandName.bat").exists()) {
+                    File(it, "$commandName.bat").path
+                }
+            }
+            null
+        }
     }
 
     fun getVideoResolutionMetadata(srcFile: File): Triple<Int, Int, String> {
@@ -46,7 +62,7 @@ object ShrinkUtils {
             val exitValue = process.exitValue()
             if (exitValue != 0) {
                 Napier.e("Error Stream for src " + srcFile.path + String(UMIOUtils.readStreamToByteArray(process.errorStream)))
-                return Triple(0, 0,"")
+                return Triple(0, 0, "")
             }
             process.destroy()
             return Triple(width.toInt(), height.toInt(), ratio)
@@ -55,7 +71,7 @@ object ShrinkUtils {
         } finally {
             process?.destroy()
         }
-        return Triple(0, 0,"")
+        return Triple(0, 0, "")
     }
 
 

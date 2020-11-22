@@ -188,8 +188,8 @@ class ContentEntryEdit2Presenter(context: Any,
                         }
 
                         if (client.status.value != 200) {
-                            view.showSnackBar("${systemImpl.getString(MessageID.error,
-                                    context)}: ${e.message ?: ""}", {})
+                            view.showSnackBar(systemImpl.getString(MessageID.error,
+                                    context), {})
                             return@launch
                         }
 

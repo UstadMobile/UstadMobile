@@ -102,26 +102,7 @@ class ContentEntryEdit2FragmentTest : TestCase() {
         }
 
     }
-
-    @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects zipped file, should save to database")
-    @Test
-    fun givenNoEntryYet_whenFormFilledZippedFileSelectedAndSaveClicked_thenShouldSaveToDatabase() {
-
-        init {
-
-        }.run {
-
-            ContentEntryEditScreen {
-
-                val entry = createEntryFromFile("test.epub",
-                        systemImplNavRule = systemImplNavRule, dbRule = dbRule)
-                val entryFromDb = dbRule.db.contentEntryDao.findByUid(entry.contentEntryUid)
-                Assert.assertEquals("Entry's data set", "ರುಮ್ನಿಯಾ",entryFromDb!!.title)
-            }
-
-        }
-    }
-
+    
 
     @AdbScreenRecord("Given content entry does not exist, when user fills in form and selects non zipped file, should save to database")
     @Test
@@ -132,7 +113,7 @@ class ContentEntryEdit2FragmentTest : TestCase() {
 
             ContentEntryEditScreen {
 
-                val entry = createEntryFromFile("video.mp4", false,
+                val entry = createEntryFromFile("video.mp4", "Dummy Title",
                         systemImplNavRule = systemImplNavRule, dbRule = dbRule)
                 Assert.assertEquals("Entry's data set", "Dummy Title",entry.title)
             }
