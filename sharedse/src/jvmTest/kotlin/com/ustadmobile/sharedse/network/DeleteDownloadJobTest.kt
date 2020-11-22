@@ -34,6 +34,8 @@ import javax.naming.InitialContext
 
 class DeleteDownloadJobTest{
 
+    private lateinit var dwroot: DownloadJobItem
+    private lateinit var dwchildofparent: DownloadJobItem
     private lateinit var standAloneCommonContainerEntry: ContainerEntryWithContainerEntryFile
     private lateinit var commonFileContainerEntry: ContainerEntryWithContainerEntryFile
     private lateinit var zombieFileContainerEntry: ContainerEntryWithContainerEntryFile
@@ -42,9 +44,6 @@ class DeleteDownloadJobTest{
     private lateinit var commonFile: File
 
     private lateinit var containerTmpDir: File
-
-    private lateinit var rootContentEntry: ContentEntry
-    private lateinit var standAloneEntry: ContentEntry
 
     private var commonFilePath = "/com/ustadmobile/port/sharedse/container/testfile1.png"
 
@@ -55,9 +54,6 @@ class DeleteDownloadJobTest{
 
     lateinit var containerDownloadManager: ContainerDownloadManager
 
-    lateinit var downloadJob: DownloadJob
-
-    lateinit var dwchildofparent: DownloadJobItem
 
     @Rule
     @JvmField
@@ -79,7 +75,6 @@ class DeleteDownloadJobTest{
         clientDi = DI {
             import(ustadTestRule.diModule)
             bind<NetworkManagerBle>() with singleton { mockNetworkManager }
-
             bind<ContainerDownloadManager>() with scoped(endpointScope).singleton {
                 ContainerDownloadManagerImpl(endpoint = context, di = di)
             }
@@ -101,91 +96,77 @@ class DeleteDownloadJobTest{
         zombieFile = File(containerTmpDir, "testfile2.png")
         extractTestResourceToFile(zombieFilePath, zombieFile)
 
-        var dwItemDao = db.downloadJobItemDao
-        var dwJoinDao = db.downloadJobItemParentChildJoinDao
-        var dwDao = db.downloadJobDao
+        // start of standalone
+        val standAloneEntry = ContentEntry()
+        standAloneEntry.contentEntryUid = repo.contentEntryDao.insert(standAloneEntry)
 
-        downloadJob = DownloadJob()
-        downloadJob.djUid = 1
-        dwDao.insert(downloadJob)
-
-
-        // standalone child - should not be deleted by test, has a file called abc
-        var standaloneChild = DownloadJobItem()
-        standaloneChild.djiUid = 3
-        standaloneChild.timeStarted = 46366
-        standaloneChild.djiContainerUid = 7
-        standaloneChild.djiContentEntryUid = 3
-        standaloneChild.djiDjUid = 1
-        dwItemDao.insert(standaloneChild)
-
-        standAloneEntry = ContentEntry()
-        standAloneEntry.contentEntryUid = 3
-        repo.contentEntryDao.insert(standAloneEntry)
-
-        var containerOfStandAlone = Container()
-        containerOfStandAlone.containerUid = standaloneChild.djiContainerUid
+        val containerOfStandAlone = Container()
         containerOfStandAlone.containerContentEntryUid = standAloneEntry.contentEntryUid
-        repo.containerDao.insert(containerOfStandAlone)
+        containerOfStandAlone.containerUid = repo.containerDao.insert(containerOfStandAlone)
 
-        var containerManager = ContainerManager(containerOfStandAlone, db, repo, containerTmpDir.path)
+        val containerManager = ContainerManager(containerOfStandAlone, db, repo, containerTmpDir.path)
         runBlocking {
             containerManager.addEntries(ContainerManager.FileEntrySource(commonFile, "testfile1.png"))
         }
 
         standAloneCommonContainerEntry = containerManager.getEntry("testfile1.png")!!
 
-        var dwroot = DownloadJobItem()
-        dwroot.djiUid = 1
+        val downloadJob = DownloadJob()
+        downloadJob.djUid = db.downloadJobDao.insert(downloadJob).toInt()
+
+        // standalone child - should not be deleted by test, has a file called abc
+        val standaloneChild = DownloadJobItem()
+        standaloneChild.timeStarted = 46366
+        standaloneChild.djiContainerUid = containerOfStandAlone.containerUid
+        standaloneChild.djiContentEntryUid = standAloneEntry.contentEntryUid
+        standaloneChild.djiDjUid = downloadJob.djUid
+        standaloneChild.djiUid = db.downloadJobItemDao.insert(standaloneChild).toInt()
+        //end of standalone
+
+        // start of root
+        val rootContentEntry = ContentEntry()
+        rootContentEntry.contentEntryUid = repo.contentEntryDao.insert(rootContentEntry)
+
+        dwroot = DownloadJobItem()
         dwroot.timeStarted = 242353456
-        dwroot.djiContentEntryUid = 1
-        dwroot.djiDjUid = 1
-        dwItemDao.insert(dwroot)
+        dwroot.djiContentEntryUid = rootContentEntry.contentEntryUid
+        dwroot.djiDjUid = downloadJob.djUid
+        dwroot.djiUid = db.downloadJobItemDao.insert(dwroot).toInt()
 
-        rootContentEntry = ContentEntry()
-        rootContentEntry.contentEntryUid = 1
-        repo.contentEntryDao.insert(rootContentEntry)
+        val parentEntry = ContentEntry()
+        parentEntry.contentEntryUid = repo.contentEntryDao.insert(parentEntry)
 
-        var dwparent = DownloadJobItem()
-        dwparent.djiUid = 2
+        val dwparent = DownloadJobItem()
         dwparent.timeStarted = 54446
-        dwparent.djiContentEntryUid = 2
-        dwparent.djiDjUid = 1
-        dwItemDao.insert(dwparent)
+        dwparent.djiContentEntryUid = parentEntry.contentEntryUid
+        dwparent.djiDjUid = downloadJob.djUid
+        dwparent.djiUid = db.downloadJobItemDao.insert(dwparent).toInt()
 
-        var parentEntry = ContentEntry()
-        parentEntry.contentEntryUid = 2
-        repo.contentEntryDao.insert(parentEntry)
-
-
-        var rootParentJoin = DownloadJobItemParentChildJoin()
+        val rootParentJoin = DownloadJobItemParentChildJoin()
         rootParentJoin.djiParentDjiUid = dwroot.djiUid
         rootParentJoin.djiChildDjiUid =  dwparent.djiUid
         rootParentJoin.djiPcjUid = 1
-        dwJoinDao.insert(rootParentJoin)
+        db.downloadJobItemParentChildJoinDao.insert(rootParentJoin)
+
+        val childOfParent = ContentEntry()
+        childOfParent.contentEntryUid = repo.contentEntryDao.insert(childOfParent)
+
+        val containerchildofparent = Container()
+        containerchildofparent.containerContentEntryUid = childOfParent.contentEntryUid
+        containerchildofparent.containerUid = repo.containerDao.insert(containerchildofparent)
 
         dwchildofparent = DownloadJobItem()
-        dwchildofparent.djiUid = 5
         dwchildofparent.timeStarted = 54545
-        dwchildofparent.djiContentEntryUid = 5
-        dwchildofparent.djiContainerUid = 8
-        dwchildofparent.djiDjUid = 1
-        dwItemDao.insert(dwchildofparent)
+        dwchildofparent.djiContentEntryUid = childOfParent.contentEntryUid
+        dwchildofparent.djiContainerUid = containerchildofparent.containerUid
+        dwchildofparent.djiDjUid = downloadJob.djUid
+        dwchildofparent.djiUid = db.downloadJobItemDao.insert(dwchildofparent).toInt()
 
-        var childOfParent = ContentEntry()
-        childOfParent.contentEntryUid = 5
-        repo.contentEntryDao.insert(childOfParent)
-
-        var childOfParentJoin = DownloadJobItemParentChildJoin()
+        val childOfParentJoin = DownloadJobItemParentChildJoin()
         childOfParentJoin.djiParentDjiUid = dwparent.djiUid
         childOfParentJoin.djiChildDjiUid = dwchildofparent.djiUid
         childOfParentJoin.djiPcjUid = 3
-        dwJoinDao.insert(childOfParentJoin)
-
-        var containerchildofparent = Container()
-        containerchildofparent.containerUid = 8
-        containerchildofparent.containerContentEntryUid = childOfParent.contentEntryUid
-        repo.containerDao.insert(containerchildofparent)
+        db.downloadJobItemParentChildJoinDao.insert(childOfParentJoin)
 
         var parentContainerManager = ContainerManager(containerchildofparent, db, repo,
                 containerTmpDir.path)
@@ -202,15 +183,14 @@ class DeleteDownloadJobTest{
     @Test
     fun givenRootEntry_whenDeleted_checkAllChildrenDeleted(){
         runBlocking {
-            val successful = containerDownloadManager.deleteDownloadJob(downloadJob.djUid) {
+            val successful = containerDownloadManager.deleteDownloadJobItem(dwroot.djiUid) {
                 println(it)
             }
-
-
 
             Assert.assertTrue("Delete job reports success", successful)
             Assert.assertTrue(File(commonFileContainerEntry.containerEntryFile!!.cefPath!!).exists())
             Assert.assertFalse(File(zombieFileContainerEntry.containerEntryFile!!.cefPath!!).exists())
+            Assert.assertTrue(File(standAloneCommonContainerEntry.containerEntryFile!!.cefPath!!).exists())
         }
     }
 
@@ -218,13 +198,14 @@ class DeleteDownloadJobTest{
     fun givenSingleEntry_whenDeleted_checkDeleted(){
 
         runBlocking {
-            val successful = containerDownloadManager.deleteDownloadJob(downloadJob.djUid) {
+            val successful = containerDownloadManager.deleteDownloadJobItem(dwchildofparent.djiUid) {
                 println(it)
             }
 
             Assert.assertTrue("Delete job reports success", successful)
             Assert.assertTrue(File(commonFileContainerEntry.containerEntryFile!!.cefPath!!).exists())
             Assert.assertFalse(File(zombieFileContainerEntry.containerEntryFile!!.cefPath!!).exists())
+            Assert.assertTrue(File(standAloneCommonContainerEntry.containerEntryFile!!.cefPath!!).exists())
 
         }
     }

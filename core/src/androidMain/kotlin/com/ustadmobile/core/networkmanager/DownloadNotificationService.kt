@@ -437,7 +437,7 @@ class DownloadNotificationService : Service(), DIAware {
 
                 GlobalScope.async {
                     val containerDownloadManager: ContainerDownloadManager by on(endpointVal).instance()
-                    containerDownloadManager.deleteDownloadJobItem(downloadJobUid){
+                    containerDownloadManager.deleteDownloadJobItem(downloadJobItemUid){
                         deleteNotificationHolder.builder.setProgress(MAX_PROGRESS_VALUE, it, false)
                         deleteNotificationHolder.doNotify()
                     }
