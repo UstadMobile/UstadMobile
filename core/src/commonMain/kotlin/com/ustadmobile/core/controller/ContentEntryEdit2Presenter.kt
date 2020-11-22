@@ -233,8 +233,8 @@ class ContentEntryEdit2Presenter(context: Any,
                 if(metadata.mimeType.startsWith("video/")){
                     view.videoUri = filePath
                 }
-
             }
+            view.loading = false
         }
     }
 

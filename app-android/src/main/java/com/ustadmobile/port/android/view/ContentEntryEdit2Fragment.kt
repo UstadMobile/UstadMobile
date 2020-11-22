@@ -221,6 +221,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 registry ?: requireActivity().activityResultRegistry) { uri: Uri? ->
             if (uri != null) {
                 try {
+                    loading = true
                     GlobalScope.launch {
                         val input = requireContext().contentResolver.openInputStream(uri)
                         val importFolder = File(requireContext().filesDir, "import")
@@ -305,6 +306,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 ImportedContentEntryMetaData::class.java) {
             val metadata = it.firstOrNull() ?: return@observeResult
+            loading = true
             // back from navigate import
             entryMetaData = metadata
             val entry = entryMetaData?.contentEntry
@@ -315,6 +317,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 entity = entry
                 videoUri = metadata.uri
             }
+            loading = false
         }
         viewLifecycleOwner.lifecycle.addObserver(viewLifecycleObserver)
 
