@@ -148,7 +148,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             <html lang="en">
             <body>
             
-             <video id="video" style="width: 100% height: 175px" controls>
+             <video id="video" style="width: 100%;height: 175px" controls>
                 <source src="$filePath"
              </video> 
             
