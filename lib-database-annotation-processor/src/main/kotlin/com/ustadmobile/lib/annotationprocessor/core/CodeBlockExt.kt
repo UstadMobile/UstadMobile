@@ -148,9 +148,8 @@ fun CodeBlock.Builder.addCreateTableCode(entityTypeSpec: TypeSpec, execSqlFn: St
             "index_${entityTypeSpec.name}_${it.value.joinToString(separator = "_", postfix = "", prefix = "")}"
         }
 
-        add("$execSqlFn(%S)\n", """CREATE 
-                |${if(it.unique){ "UNIQUE" } else { "" } } INDEX $indexName 
-                |ON ${entityTypeSpec.name} (${it.value.joinToString()})""".trimMargin())
+        add("$execSqlFn(%S)\n", "CREATE ${if(it.unique){ "UNIQUE " } else { "" } }INDEX $indexName" +
+                " ON ${entityTypeSpec.name} (${it.value.joinToString()})")
     }
 
     entityTypeSpec.entityFields().forEach { field ->
@@ -216,6 +215,30 @@ fun CodeBlock.Builder.addSyncableEntityInsertTriggersSqlite(execSqlFn: String, s
 
     return this
 }
+
+fun CodeBlock.Builder.addSyncableEntityFunctionPostgres(execSqlFn: String, syncableEntityInfo: SyncableEntityInfo) : CodeBlock.Builder {
+    add("$execSqlFn(%S)\n", """CREATE OR REPLACE FUNCTION 
+                    | inccsn_${syncableEntityInfo.tableId}_fn() RETURNS trigger AS $$
+                    | BEGIN  
+                    | UPDATE ${syncableEntityInfo.syncableEntity.simpleName} SET ${syncableEntityInfo.entityLocalCsnField.name} =
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.${syncableEntityInfo.entityLocalCsnField.name} 
+                    | ELSE NEXTVAL('${syncableEntityInfo.syncableEntity.simpleName}_lcsn_seq') END),
+                    | ${syncableEntityInfo.entityMasterCsnField.name} = 
+                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                    | THEN NEXTVAL('${syncableEntityInfo.syncableEntity.simpleName}_mcsn_seq') 
+                    | ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END)
+                    | WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name};
+                    | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                    | SELECT ${syncableEntityInfo.tableId}, NEW.${syncableEntityInfo.entityPkField.name}, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+                    | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+                    | RETURN null;
+                    | END $$
+                    | LANGUAGE plpgsql
+                """.trimMargin())
+
+    return this
+}
+
 
 /**
  * Adds code that will create the triggers (to increment change sequence numbers and, if

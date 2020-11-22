@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -37,7 +38,7 @@ class ClazzDetailPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: Clazz? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(Clazz.serializer(), entityJsonStr)
+            editEntity = safeParse(di,  Clazz.serializer(), entityJsonStr)
         }else {
             editEntity = Clazz()
         }

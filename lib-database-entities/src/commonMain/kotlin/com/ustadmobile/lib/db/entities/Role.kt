@@ -1,6 +1,7 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.ClientSyncManager
 import com.ustadmobile.door.annotation.LastChangedBy
@@ -10,7 +11,10 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 
-@Entity
+@Entity(indices = [
+    //Index to handle permission queries
+    Index(value=["rolePermissions"])
+])
 @SyncableEntity(tableId = Role.TABLE_ID,
     notifyOnUpdate = ["""
         SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${Role.TABLE_ID} AS tableId 

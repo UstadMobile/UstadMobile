@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.HolidayEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -34,7 +35,7 @@ class HolidayEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: Holiday? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(Holiday.serializer(), entityJsonStr)
+            editEntity = safeParse(di, Holiday.serializer(), entityJsonStr)
         }else {
             editEntity = Holiday()
         }

@@ -645,6 +645,10 @@ fun findEntityModifiedByQuery(querySql: String, allKnownEntityNames: List<String
     }
 }
 
+/**
+ * The parent class of all processors that generate implementations for door. Child processors
+ * should implement process.
+ */
 abstract class AbstractDbProcessor: AbstractProcessor() {
 
     protected lateinit var messager: Messager
@@ -653,15 +657,37 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
 
     /**
      * When we generate the code for a Query annotation function that performs an update or delete,
-     * we use this so that we can match the case of the table name.
+     * we use this so that we can match the case of the table name. This will be setup by
+     * AnnotationProcessorWrapper calling processDb.
      */
-    protected val allKnownEntityNames = mutableListOf<String>()
+    protected var allKnownEntityNames = mutableListOf<String>()
 
     /**
-     * Provides a map that can be used to find the TypeElement for a given table name.
+     * Provides a map that can be used to find the TypeElement for a given table name. This will be
+     * setup by AnnotationProcessorWrapper calling processDb.
      */
-    protected val allKnownEntityTypesMap = mutableMapOf<String, TypeElement>()
+    protected var allKnownEntityTypesMap = mutableMapOf<String, TypeElement>()
 
+    /**
+     * Initiates internal info about the databases that are being processed, then calls the main
+     * process function. This is called by AnnotationProcessorWrapper
+     *
+     * @param annotations as per the main annotation processor process method
+     * @param roundEnv as per the main annotation processor process method
+     * @param dbConnection a JDBC Connection object that can be used to run queries
+     * @param allKnownEntityNames as per the allKnownEntityNames property
+     * @param allKnownEntityTypesMap as per the allKnownEntityTypesMap property
+     */
+    fun processDb(annotations: MutableSet<out TypeElement>,
+                           roundEnv: RoundEnvironment,
+                           dbConnection: Connection,
+                           allKnownEntityNames: MutableList<String>,
+                           allKnownEntityTypesMap: MutableMap<String, TypeElement>)  : Boolean {
+        this.allKnownEntityNames = allKnownEntityNames
+        this.allKnownEntityTypesMap = allKnownEntityTypesMap
+        this.dbConnection = dbConnection
+        return process(annotations, roundEnv)
+    }
 
     /**
      * Adds the JDBC implementation for the KTOR Helper (primary or local)
@@ -703,52 +729,6 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
     override fun init(p0: ProcessingEnvironment) {
         super.init(p0)
         messager = p0.messager
-    }
-
-    /**
-     * Run create
-     */
-    internal fun setupDb(roundEnv: RoundEnvironment) {
-        val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
-        val dataSource = SQLiteDataSource()
-        val dbTmpFile = File.createTempFile("dbprocessorkt", ".db")
-        println("Db tmp file: ${dbTmpFile.absolutePath}")
-        dataSource.url = "jdbc:sqlite:${dbTmpFile.absolutePath}"
-
-        dbConnection = dataSource.connection
-        dbs.flatMap { entityTypesOnDb(it as TypeElement, processingEnv) }.forEach {entity ->
-            if(entity.getAnnotation(Entity::class.java) == null) {
-                logMessage(Diagnostic.Kind.ERROR,
-                        "Class ${entity.simpleName} used as entity on database does not have @Entity annotation",
-                        entity)
-            }
-
-            if(!entity.enclosedElements.any { it.getAnnotation(PrimaryKey::class.java) != null }) {
-                logMessage(Diagnostic.Kind.ERROR,
-                        "Class ${entity.simpleName} used as entity does not have a field annotated @PrimaryKey")
-            }
-
-            val stmt = dbConnection!!.createStatement()
-            stmt.use {
-                val typeEntitySpec = entity.asEntityTypeSpec()
-                val createTableSql = makeCreateTableStatement(typeEntitySpec, DoorDbType.SQLITE)
-                try {
-                    stmt.execute(createTableSql)
-                }catch(sqle: SQLException) {
-                    messager.printMessage(Diagnostic.Kind.ERROR, "SQLException creating table for:" +
-                            "${entity.simpleName} : ${sqle.message}. SQL was \"$createTableSql\"")
-                }
-
-                allKnownEntityNames.add(typeEntitySpec.name!!)
-                allKnownEntityTypesMap[typeEntitySpec.name!!] = entity
-
-                if(entity.getAnnotation(SyncableEntity::class.java) != null) {
-                    val trackerEntitySpec = generateTrackerEntity(entity, processingEnv)
-                    stmt.execute(makeCreateTableStatement(trackerEntitySpec, DoorDbType.SQLITE))
-                    allKnownEntityNames.add(trackerEntitySpec.name!!)
-                }
-            }
-        }
     }
 
     protected fun makeCreateTableStatement(entitySpec: TypeSpec, dbType: Int): String {
@@ -818,25 +798,8 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         "CREATE SEQUENCE IF NOT EXISTS ${syncableEntityInfo.syncableEntity.simpleName}_${it}csn_seq")
                 }
 
-                codeBlock.add("$execSqlFn(%S)\n", """CREATE OR REPLACE FUNCTION 
-                    | inccsn_${syncableEntityInfo.tableId}_fn() RETURNS trigger AS $$
-                    | BEGIN  
-                    | UPDATE ${syncableEntityInfo.syncableEntity.simpleName} SET ${syncableEntityInfo.entityLocalCsnField.name} =
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.${syncableEntityInfo.entityLocalCsnField.name} 
-                    | ELSE NEXTVAL('${syncableEntityInfo.syncableEntity.simpleName}_lcsn_seq') END),
-                    | ${syncableEntityInfo.entityMasterCsnField.name} = 
-                    | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-                    | THEN NEXTVAL('${syncableEntityInfo.syncableEntity.simpleName}_mcsn_seq') 
-                    | ELSE NEW.${syncableEntityInfo.entityMasterCsnField.name} END)
-                    | WHERE ${syncableEntityInfo.entityPkField.name} = NEW.${syncableEntityInfo.entityPkField.name};
-                    | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
-                    | SELECT ${syncableEntityInfo.tableId}, NEW.${syncableEntityInfo.entityPkField.name}, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
-                    | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
-                    | RETURN null;
-                    | END $$
-                    | LANGUAGE plpgsql
-                """.trimMargin())
-                        .add("$execSqlFn(%S)\n", """CREATE TRIGGER inccsn_${syncableEntityInfo.tableId}_trig 
+                codeBlock.addSyncableEntityFunctionPostgres(execSqlFn, syncableEntityInfo)
+                    .add("$execSqlFn(%S)\n", """CREATE TRIGGER inccsn_${syncableEntityInfo.tableId}_trig 
                             |AFTER UPDATE OR INSERT ON ${syncableEntityInfo.syncableEntity.simpleName} 
                             |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                             |EXECUTE PROCEDURE inccsn_${syncableEntityInfo.tableId}_fn()

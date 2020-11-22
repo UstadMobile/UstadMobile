@@ -4478,6 +4478,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
       | INDEX index_UpdateNotification_pnDeviceId_pnTimestamp 
       |ON UpdateNotification (pnDeviceId, pnTimestamp)
       """.trimMargin())
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_14_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ClazzLog SET clazzLogLCSN =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogLCSN 
+      | ELSE NEXTVAL('ClazzLog_lcsn_seq') END),
+      | clazzLogMSQN = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ClazzLog_mcsn_seq') 
+      | ELSE NEW.clazzLogMSQN END)
+      | WHERE clazzLogUid = NEW.clazzLogUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 14, NEW.clazzLogUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ClazzLog_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ClazzLog_trk_epk_clientId_tmp ON ClazzLog_trk (epk, clientId)")
             database.execSQL("""
@@ -4491,6 +4510,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ClazzLog_trk_clientId_epk_csn  ON ClazzLog_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ClazzLog_trk_epk_clientId ON ClazzLog_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzLog_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_15_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ClazzLogAttendanceRecord SET clazzLogAttendanceRecordLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLogAttendanceRecordLocalChangeSeqNum 
+      | ELSE NEXTVAL('ClazzLogAttendanceRecord_lcsn_seq') END),
+      | clazzLogAttendanceRecordMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ClazzLogAttendanceRecord_mcsn_seq') 
+      | ELSE NEW.clazzLogAttendanceRecordMasterChangeSeqNum END)
+      | WHERE clazzLogAttendanceRecordUid = NEW.clazzLogAttendanceRecordUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 15, NEW.clazzLogAttendanceRecordUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ClazzLogAttendanceRecord_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId_tmp ON ClazzLogAttendanceRecord_trk (epk, clientId)")
             database.execSQL("""
@@ -4504,6 +4542,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ClazzLogAttendanceRecord_trk_clientId_epk_csn  ON ClazzLogAttendanceRecord_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId ON ClazzLogAttendanceRecord_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzLogAttendanceRecord_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_21_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE Schedule SET scheduleLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduleLocalChangeSeqNum 
+      | ELSE NEXTVAL('Schedule_lcsn_seq') END),
+      | scheduleMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('Schedule_mcsn_seq') 
+      | ELSE NEW.scheduleMasterChangeSeqNum END)
+      | WHERE scheduleUid = NEW.scheduleUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 21, NEW.scheduleUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_Schedule_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_Schedule_trk_epk_clientId_tmp ON Schedule_trk (epk, clientId)")
             database.execSQL("""
@@ -4517,6 +4574,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_Schedule_trk_clientId_epk_csn  ON Schedule_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_Schedule_trk_epk_clientId ON Schedule_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Schedule_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_17_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE DateRange SET dateRangeLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.dateRangeLocalChangeSeqNum 
+      | ELSE NEXTVAL('DateRange_lcsn_seq') END),
+      | dateRangeMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('DateRange_mcsn_seq') 
+      | ELSE NEW.dateRangeMasterChangeSeqNum END)
+      | WHERE dateRangeUid = NEW.dateRangeUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 17, NEW.dateRangeUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_DateRange_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_DateRange_trk_epk_clientId_tmp ON DateRange_trk (epk, clientId)")
             database.execSQL("""
@@ -4530,6 +4606,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_DateRange_trk_clientId_epk_csn  ON DateRange_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_DateRange_trk_epk_clientId ON DateRange_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_DateRange_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_28_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE HolidayCalendar SET umCalendarLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.umCalendarLocalChangeSeqNum 
+      | ELSE NEXTVAL('HolidayCalendar_lcsn_seq') END),
+      | umCalendarMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('HolidayCalendar_mcsn_seq') 
+      | ELSE NEW.umCalendarMasterChangeSeqNum END)
+      | WHERE umCalendarUid = NEW.umCalendarUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 28, NEW.umCalendarUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_HolidayCalendar_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_HolidayCalendar_trk_epk_clientId_tmp ON HolidayCalendar_trk (epk, clientId)")
             database.execSQL("""
@@ -4543,6 +4638,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_HolidayCalendar_trk_clientId_epk_csn  ON HolidayCalendar_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_HolidayCalendar_trk_epk_clientId ON HolidayCalendar_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_HolidayCalendar_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_99_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE Holiday SET holLocalCsn =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.holLocalCsn 
+      | ELSE NEXTVAL('Holiday_lcsn_seq') END),
+      | holMasterCsn = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('Holiday_mcsn_seq') 
+      | ELSE NEW.holMasterCsn END)
+      | WHERE holUid = NEW.holUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 99, NEW.holUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_Holiday_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_Holiday_trk_epk_clientId_tmp ON Holiday_trk (epk, clientId)")
             database.execSQL("""
@@ -4556,6 +4670,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_Holiday_trk_clientId_epk_csn  ON Holiday_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_Holiday_trk_epk_clientId ON Holiday_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Holiday_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_173_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ScheduledCheck SET scheduledCheckLocalCsn =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.scheduledCheckLocalCsn 
+      | ELSE NEXTVAL('ScheduledCheck_lcsn_seq') END),
+      | scheduledCheckMasterCsn = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ScheduledCheck_mcsn_seq') 
+      | ELSE NEW.scheduledCheckMasterCsn END)
+      | WHERE scheduledCheckUid = NEW.scheduledCheckUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 173, NEW.scheduledCheckUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ScheduledCheck_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ScheduledCheck_trk_epk_clientId_tmp ON ScheduledCheck_trk (epk, clientId)")
             database.execSQL("""
@@ -4569,6 +4702,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ScheduledCheck_trk_clientId_epk_csn  ON ScheduledCheck_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ScheduledCheck_trk_epk_clientId ON ScheduledCheck_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ScheduledCheck_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_53_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE AuditLog SET auditLogLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.auditLogLocalChangeSeqNum 
+      | ELSE NEXTVAL('AuditLog_lcsn_seq') END),
+      | auditLogMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('AuditLog_mcsn_seq') 
+      | ELSE NEW.auditLogMasterChangeSeqNum END)
+      | WHERE auditLogUid = NEW.auditLogUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 53, NEW.auditLogUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_AuditLog_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_AuditLog_trk_epk_clientId_tmp ON AuditLog_trk (epk, clientId)")
             database.execSQL("""
@@ -4582,6 +4734,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_AuditLog_trk_clientId_epk_csn  ON AuditLog_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_AuditLog_trk_epk_clientId ON AuditLog_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_AuditLog_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_56_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE CustomField SET customFieldLCSN =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldLCSN 
+      | ELSE NEXTVAL('CustomField_lcsn_seq') END),
+      | customFieldMCSN = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('CustomField_mcsn_seq') 
+      | ELSE NEW.customFieldMCSN END)
+      | WHERE customFieldUid = NEW.customFieldUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 56, NEW.customFieldUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_CustomField_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_CustomField_trk_epk_clientId_tmp ON CustomField_trk (epk, clientId)")
             database.execSQL("""
@@ -4595,6 +4766,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_CustomField_trk_clientId_epk_csn  ON CustomField_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_CustomField_trk_epk_clientId ON CustomField_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_CustomField_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_57_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE CustomFieldValue SET customFieldValueLCSN =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueLCSN 
+      | ELSE NEXTVAL('CustomFieldValue_lcsn_seq') END),
+      | customFieldValueMCSN = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('CustomFieldValue_mcsn_seq') 
+      | ELSE NEW.customFieldValueMCSN END)
+      | WHERE customFieldValueUid = NEW.customFieldValueUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 57, NEW.customFieldValueUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_CustomFieldValue_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_CustomFieldValue_trk_epk_clientId_tmp ON CustomFieldValue_trk (epk, clientId)")
             database.execSQL("""
@@ -4608,6 +4798,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_CustomFieldValue_trk_clientId_epk_csn  ON CustomFieldValue_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_CustomFieldValue_trk_epk_clientId ON CustomFieldValue_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_CustomFieldValue_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_55_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE CustomFieldValueOption SET customFieldValueOptionLCSN =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.customFieldValueOptionLCSN 
+      | ELSE NEXTVAL('CustomFieldValueOption_lcsn_seq') END),
+      | customFieldValueOptionMCSN = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('CustomFieldValueOption_mcsn_seq') 
+      | ELSE NEW.customFieldValueOptionMCSN END)
+      | WHERE customFieldValueOptionUid = NEW.customFieldValueOptionUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 55, NEW.customFieldValueOptionUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_CustomFieldValueOption_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_CustomFieldValueOption_trk_epk_clientId_tmp ON CustomFieldValueOption_trk (epk, clientId)")
             database.execSQL("""
@@ -4621,6 +4830,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_CustomFieldValueOption_trk_clientId_epk_csn  ON CustomFieldValueOption_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_CustomFieldValueOption_trk_epk_clientId ON CustomFieldValueOption_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_CustomFieldValueOption_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_9_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE Person SET personLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personLocalChangeSeqNum 
+      | ELSE NEXTVAL('Person_lcsn_seq') END),
+      | personMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('Person_mcsn_seq') 
+      | ELSE NEW.personMasterChangeSeqNum END)
+      | WHERE personUid = NEW.personUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 9, NEW.personUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_Person_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_Person_trk_epk_clientId_tmp ON Person_trk (epk, clientId)")
             database.execSQL("""
@@ -4634,6 +4862,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_Person_trk_clientId_epk_csn  ON Person_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_Person_trk_epk_clientId ON Person_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Person_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_6_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE Clazz SET clazzLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzLocalChangeSeqNum 
+      | ELSE NEXTVAL('Clazz_lcsn_seq') END),
+      | clazzMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('Clazz_mcsn_seq') 
+      | ELSE NEW.clazzMasterChangeSeqNum END)
+      | WHERE clazzUid = NEW.clazzUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 6, NEW.clazzUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_Clazz_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_Clazz_trk_epk_clientId_tmp ON Clazz_trk (epk, clientId)")
             database.execSQL("""
@@ -4647,6 +4894,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_Clazz_trk_clientId_epk_csn  ON Clazz_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_Clazz_trk_epk_clientId ON Clazz_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Clazz_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_65_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ClazzMember SET clazzMemberLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzMemberLocalChangeSeqNum 
+      | ELSE NEXTVAL('ClazzMember_lcsn_seq') END),
+      | clazzMemberMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ClazzMember_mcsn_seq') 
+      | ELSE NEW.clazzMemberMasterChangeSeqNum END)
+      | WHERE clazzMemberUid = NEW.clazzMemberUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 65, NEW.clazzMemberUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ClazzMember_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ClazzMember_trk_epk_clientId_tmp ON ClazzMember_trk (epk, clientId)")
             database.execSQL("""
@@ -4660,6 +4926,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ClazzMember_trk_clientId_epk_csn  ON ClazzMember_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ClazzMember_trk_epk_clientId ON ClazzMember_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzMember_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_178_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE PersonCustomFieldValue SET personCustomFieldValueLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personCustomFieldValueLocalChangeSeqNum 
+      | ELSE NEXTVAL('PersonCustomFieldValue_lcsn_seq') END),
+      | personCustomFieldValueMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('PersonCustomFieldValue_mcsn_seq') 
+      | ELSE NEW.personCustomFieldValueMasterChangeSeqNum END)
+      | WHERE personCustomFieldValueUid = NEW.personCustomFieldValueUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 178, NEW.personCustomFieldValueUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_PersonCustomFieldValue_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_PersonCustomFieldValue_trk_epk_clientId_tmp ON PersonCustomFieldValue_trk (epk, clientId)")
             database.execSQL("""
@@ -4673,6 +4958,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_PersonCustomFieldValue_trk_clientId_epk_csn  ON PersonCustomFieldValue_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_PersonCustomFieldValue_trk_epk_clientId ON PersonCustomFieldValue_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_PersonCustomFieldValue_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_42_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ContentEntry SET contentEntryLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentEntryLocalChangeSeqNum 
+      | ELSE NEXTVAL('ContentEntry_lcsn_seq') END),
+      | contentEntryMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ContentEntry_mcsn_seq') 
+      | ELSE NEW.contentEntryMasterChangeSeqNum END)
+      | WHERE contentEntryUid = NEW.contentEntryUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 42, NEW.contentEntryUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ContentEntry_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ContentEntry_trk_epk_clientId_tmp ON ContentEntry_trk (epk, clientId)")
             database.execSQL("""
@@ -4686,6 +4990,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ContentEntry_trk_clientId_epk_csn  ON ContentEntry_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ContentEntry_trk_epk_clientId ON ContentEntry_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentEntry_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_3_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ContentEntryContentCategoryJoin SET ceccjLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.ceccjLocalChangeSeqNum 
+      | ELSE NEXTVAL('ContentEntryContentCategoryJoin_lcsn_seq') END),
+      | ceccjMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ContentEntryContentCategoryJoin_mcsn_seq') 
+      | ELSE NEW.ceccjMasterChangeSeqNum END)
+      | WHERE ceccjUid = NEW.ceccjUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 3, NEW.ceccjUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ContentEntryContentCategoryJoin_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId_tmp ON ContentEntryContentCategoryJoin_trk (epk, clientId)")
             database.execSQL("""
@@ -4699,6 +5022,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ContentEntryContentCategoryJoin_trk_clientId_epk_csn  ON ContentEntryContentCategoryJoin_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId ON ContentEntryContentCategoryJoin_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentEntryContentCategoryJoin_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_7_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ContentEntryParentChildJoin SET cepcjLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.cepcjLocalChangeSeqNum 
+      | ELSE NEXTVAL('ContentEntryParentChildJoin_lcsn_seq') END),
+      | cepcjMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ContentEntryParentChildJoin_mcsn_seq') 
+      | ELSE NEW.cepcjMasterChangeSeqNum END)
+      | WHERE cepcjUid = NEW.cepcjUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 7, NEW.cepcjUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ContentEntryParentChildJoin_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ContentEntryParentChildJoin_trk_epk_clientId_tmp ON ContentEntryParentChildJoin_trk (epk, clientId)")
             database.execSQL("""
@@ -4712,6 +5054,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ContentEntryParentChildJoin_trk_clientId_epk_csn  ON ContentEntryParentChildJoin_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ContentEntryParentChildJoin_trk_epk_clientId ON ContentEntryParentChildJoin_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentEntryParentChildJoin_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_8_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ContentEntryRelatedEntryJoin SET cerejLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.cerejLocalChangeSeqNum 
+      | ELSE NEXTVAL('ContentEntryRelatedEntryJoin_lcsn_seq') END),
+      | cerejMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ContentEntryRelatedEntryJoin_mcsn_seq') 
+      | ELSE NEW.cerejMasterChangeSeqNum END)
+      | WHERE cerejUid = NEW.cerejUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 8, NEW.cerejUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ContentEntryRelatedEntryJoin_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId_tmp ON ContentEntryRelatedEntryJoin_trk (epk, clientId)")
             database.execSQL("""
@@ -4725,6 +5086,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ContentEntryRelatedEntryJoin_trk_clientId_epk_csn  ON ContentEntryRelatedEntryJoin_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId ON ContentEntryRelatedEntryJoin_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentEntryRelatedEntryJoin_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_2_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ContentCategorySchema SET contentCategorySchemaLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentCategorySchemaLocalChangeSeqNum 
+      | ELSE NEXTVAL('ContentCategorySchema_lcsn_seq') END),
+      | contentCategorySchemaMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ContentCategorySchema_mcsn_seq') 
+      | ELSE NEW.contentCategorySchemaMasterChangeSeqNum END)
+      | WHERE contentCategorySchemaUid = NEW.contentCategorySchemaUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 2, NEW.contentCategorySchemaUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ContentCategorySchema_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ContentCategorySchema_trk_epk_clientId_tmp ON ContentCategorySchema_trk (epk, clientId)")
             database.execSQL("""
@@ -4738,6 +5118,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ContentCategorySchema_trk_clientId_epk_csn  ON ContentCategorySchema_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ContentCategorySchema_trk_epk_clientId ON ContentCategorySchema_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentCategorySchema_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_1_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ContentCategory SET contentCategoryLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentCategoryLocalChangeSeqNum 
+      | ELSE NEXTVAL('ContentCategory_lcsn_seq') END),
+      | contentCategoryMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ContentCategory_mcsn_seq') 
+      | ELSE NEW.contentCategoryMasterChangeSeqNum END)
+      | WHERE contentCategoryUid = NEW.contentCategoryUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 1, NEW.contentCategoryUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ContentCategory_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ContentCategory_trk_epk_clientId_tmp ON ContentCategory_trk (epk, clientId)")
             database.execSQL("""
@@ -4751,6 +5150,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ContentCategory_trk_clientId_epk_csn  ON ContentCategory_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ContentCategory_trk_epk_clientId ON ContentCategory_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentCategory_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_13_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE Language SET langLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.langLocalChangeSeqNum 
+      | ELSE NEXTVAL('Language_lcsn_seq') END),
+      | langMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('Language_mcsn_seq') 
+      | ELSE NEW.langMasterChangeSeqNum END)
+      | WHERE langUid = NEW.langUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 13, NEW.langUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_Language_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_Language_trk_epk_clientId_tmp ON Language_trk (epk, clientId)")
             database.execSQL("""
@@ -4764,6 +5182,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_Language_trk_clientId_epk_csn  ON Language_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_Language_trk_epk_clientId ON Language_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Language_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_10_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE LanguageVariant SET langVariantLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.langVariantLocalChangeSeqNum 
+      | ELSE NEXTVAL('LanguageVariant_lcsn_seq') END),
+      | langVariantMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('LanguageVariant_mcsn_seq') 
+      | ELSE NEW.langVariantMasterChangeSeqNum END)
+      | WHERE langVariantUid = NEW.langVariantUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 10, NEW.langVariantUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_LanguageVariant_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_LanguageVariant_trk_epk_clientId_tmp ON LanguageVariant_trk (epk, clientId)")
             database.execSQL("""
@@ -4777,6 +5214,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_LanguageVariant_trk_clientId_epk_csn  ON LanguageVariant_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_LanguageVariant_trk_epk_clientId ON LanguageVariant_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_LanguageVariant_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_45_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE Role SET roleLocalCsn =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.roleLocalCsn 
+      | ELSE NEXTVAL('Role_lcsn_seq') END),
+      | roleMasterCsn = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('Role_mcsn_seq') 
+      | ELSE NEW.roleMasterCsn END)
+      | WHERE roleUid = NEW.roleUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 45, NEW.roleUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_Role_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_Role_trk_epk_clientId_tmp ON Role_trk (epk, clientId)")
             database.execSQL("""
@@ -4790,6 +5246,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_Role_trk_clientId_epk_csn  ON Role_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_Role_trk_epk_clientId ON Role_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Role_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_47_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE EntityRole SET erLocalCsn =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.erLocalCsn 
+      | ELSE NEXTVAL('EntityRole_lcsn_seq') END),
+      | erMasterCsn = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('EntityRole_mcsn_seq') 
+      | ELSE NEW.erMasterCsn END)
+      | WHERE erUid = NEW.erUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 47, NEW.erUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_EntityRole_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_EntityRole_trk_epk_clientId_tmp ON EntityRole_trk (epk, clientId)")
             database.execSQL("""
@@ -4803,6 +5278,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_EntityRole_trk_clientId_epk_csn  ON EntityRole_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_EntityRole_trk_epk_clientId ON EntityRole_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_EntityRole_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_43_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE PersonGroup SET groupLocalCsn =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLocalCsn 
+      | ELSE NEXTVAL('PersonGroup_lcsn_seq') END),
+      | groupMasterCsn = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('PersonGroup_mcsn_seq') 
+      | ELSE NEW.groupMasterCsn END)
+      | WHERE groupUid = NEW.groupUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 43, NEW.groupUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_PersonGroup_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_PersonGroup_trk_epk_clientId_tmp ON PersonGroup_trk (epk, clientId)")
             database.execSQL("""
@@ -4816,6 +5310,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_PersonGroup_trk_clientId_epk_csn  ON PersonGroup_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_PersonGroup_trk_epk_clientId ON PersonGroup_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_PersonGroup_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_44_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE PersonGroupMember SET groupMemberLocalCsn =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupMemberLocalCsn 
+      | ELSE NEXTVAL('PersonGroupMember_lcsn_seq') END),
+      | groupMemberMasterCsn = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('PersonGroupMember_mcsn_seq') 
+      | ELSE NEW.groupMemberMasterCsn END)
+      | WHERE groupMemberUid = NEW.groupMemberUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 44, NEW.groupMemberUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_PersonGroupMember_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_PersonGroupMember_trk_epk_clientId_tmp ON PersonGroupMember_trk (epk, clientId)")
             database.execSQL("""
@@ -4829,6 +5342,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_PersonGroupMember_trk_clientId_epk_csn  ON PersonGroupMember_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_PersonGroupMember_trk_epk_clientId ON PersonGroupMember_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_PersonGroupMember_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_50_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE PersonPicture SET personPictureLocalCsn =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.personPictureLocalCsn 
+      | ELSE NEXTVAL('PersonPicture_lcsn_seq') END),
+      | personPictureMasterCsn = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('PersonPicture_mcsn_seq') 
+      | ELSE NEW.personPictureMasterCsn END)
+      | WHERE personPictureUid = NEW.personPictureUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 50, NEW.personPictureUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_PersonPicture_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_PersonPicture_trk_epk_clientId_tmp ON PersonPicture_trk (epk, clientId)")
             database.execSQL("""
@@ -4842,6 +5374,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_PersonPicture_trk_clientId_epk_csn  ON PersonPicture_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_PersonPicture_trk_epk_clientId ON PersonPicture_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_PersonPicture_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_51_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE Container SET cntLocalCsn =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.cntLocalCsn 
+      | ELSE NEXTVAL('Container_lcsn_seq') END),
+      | cntMasterCsn = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('Container_mcsn_seq') 
+      | ELSE NEW.cntMasterCsn END)
+      | WHERE containerUid = NEW.containerUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 51, NEW.containerUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_Container_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_Container_trk_epk_clientId_tmp ON Container_trk (epk, clientId)")
             database.execSQL("""
@@ -4855,6 +5406,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_Container_trk_clientId_epk_csn  ON Container_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_Container_trk_epk_clientId ON Container_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Container_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_62_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE VerbEntity SET verbLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+      | ELSE NEXTVAL('VerbEntity_lcsn_seq') END),
+      | verbMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('VerbEntity_mcsn_seq') 
+      | ELSE NEW.verbMasterChangeSeqNum END)
+      | WHERE verbUid = NEW.verbUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 62, NEW.verbUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_VerbEntity_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_VerbEntity_trk_epk_clientId_tmp ON VerbEntity_trk (epk, clientId)")
             database.execSQL("""
@@ -4868,6 +5438,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_VerbEntity_trk_clientId_epk_csn  ON VerbEntity_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_VerbEntity_trk_epk_clientId ON VerbEntity_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_VerbEntity_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_64_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE XObjectEntity SET xObjectocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.xObjectocalChangeSeqNum 
+      | ELSE NEXTVAL('XObjectEntity_lcsn_seq') END),
+      | xObjectMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('XObjectEntity_mcsn_seq') 
+      | ELSE NEW.xObjectMasterChangeSeqNum END)
+      | WHERE xObjectUid = NEW.xObjectUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 64, NEW.xObjectUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_XObjectEntity_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_XObjectEntity_trk_epk_clientId_tmp ON XObjectEntity_trk (epk, clientId)")
             database.execSQL("""
@@ -4881,6 +5470,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_XObjectEntity_trk_clientId_epk_csn  ON XObjectEntity_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_XObjectEntity_trk_epk_clientId ON XObjectEntity_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_XObjectEntity_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_60_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE StatementEntity SET statementLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLocalChangeSeqNum 
+      | ELSE NEXTVAL('StatementEntity_lcsn_seq') END),
+      | statementMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('StatementEntity_mcsn_seq') 
+      | ELSE NEW.statementMasterChangeSeqNum END)
+      | WHERE statementUid = NEW.statementUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 60, NEW.statementUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_StatementEntity_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_StatementEntity_trk_epk_clientId_tmp ON StatementEntity_trk (epk, clientId)")
             database.execSQL("""
@@ -4894,6 +5502,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_StatementEntity_trk_clientId_epk_csn  ON StatementEntity_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_StatementEntity_trk_epk_clientId ON StatementEntity_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_StatementEntity_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_66_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ContextXObjectStatementJoin SET verbLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.verbLocalChangeSeqNum 
+      | ELSE NEXTVAL('ContextXObjectStatementJoin_lcsn_seq') END),
+      | verbMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ContextXObjectStatementJoin_mcsn_seq') 
+      | ELSE NEW.verbMasterChangeSeqNum END)
+      | WHERE contextXObjectStatementJoinUid = NEW.contextXObjectStatementJoinUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 66, NEW.contextXObjectStatementJoinUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ContextXObjectStatementJoin_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ContextXObjectStatementJoin_trk_epk_clientId_tmp ON ContextXObjectStatementJoin_trk (epk, clientId)")
             database.execSQL("""
@@ -4907,6 +5534,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ContextXObjectStatementJoin_trk_clientId_epk_csn  ON ContextXObjectStatementJoin_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ContextXObjectStatementJoin_trk_epk_clientId ON ContextXObjectStatementJoin_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContextXObjectStatementJoin_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_68_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE AgentEntity SET statementLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLocalChangeSeqNum 
+      | ELSE NEXTVAL('AgentEntity_lcsn_seq') END),
+      | statementMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('AgentEntity_mcsn_seq') 
+      | ELSE NEW.statementMasterChangeSeqNum END)
+      | WHERE agentUid = NEW.agentUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 68, NEW.agentUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_AgentEntity_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_AgentEntity_trk_epk_clientId_tmp ON AgentEntity_trk (epk, clientId)")
             database.execSQL("""
@@ -4920,6 +5566,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_AgentEntity_trk_clientId_epk_csn  ON AgentEntity_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_AgentEntity_trk_epk_clientId ON AgentEntity_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_AgentEntity_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_70_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE StateEntity SET stateLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.stateLocalChangeSeqNum 
+      | ELSE NEXTVAL('StateEntity_lcsn_seq') END),
+      | stateMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('StateEntity_mcsn_seq') 
+      | ELSE NEW.stateMasterChangeSeqNum END)
+      | WHERE stateUid = NEW.stateUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 70, NEW.stateUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_StateEntity_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_StateEntity_trk_epk_clientId_tmp ON StateEntity_trk (epk, clientId)")
             database.execSQL("""
@@ -4933,6 +5598,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_StateEntity_trk_clientId_epk_csn  ON StateEntity_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_StateEntity_trk_epk_clientId ON StateEntity_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_StateEntity_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_72_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE StateContentEntity SET stateContentLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.stateContentLocalChangeSeqNum 
+      | ELSE NEXTVAL('StateContentEntity_lcsn_seq') END),
+      | stateContentMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('StateContentEntity_mcsn_seq') 
+      | ELSE NEW.stateContentMasterChangeSeqNum END)
+      | WHERE stateContentUid = NEW.stateContentUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 72, NEW.stateContentUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_StateContentEntity_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_StateContentEntity_trk_epk_clientId_tmp ON StateContentEntity_trk (epk, clientId)")
             database.execSQL("""
@@ -4946,6 +5630,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_StateContentEntity_trk_clientId_epk_csn  ON StateContentEntity_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_StateContentEntity_trk_epk_clientId ON StateContentEntity_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_StateContentEntity_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_74_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE XLangMapEntry SET statementLangMapLocalCsn =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.statementLangMapLocalCsn 
+      | ELSE NEXTVAL('XLangMapEntry_lcsn_seq') END),
+      | statementLangMapMasterCsn = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('XLangMapEntry_mcsn_seq') 
+      | ELSE NEW.statementLangMapMasterCsn END)
+      | WHERE statementLangMapUid = NEW.statementLangMapUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 74, NEW.statementLangMapUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_XLangMapEntry_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_XLangMapEntry_trk_epk_clientId_tmp ON XLangMapEntry_trk (epk, clientId)")
             database.execSQL("""
@@ -4959,6 +5662,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_XLangMapEntry_trk_clientId_epk_csn  ON XLangMapEntry_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_XLangMapEntry_trk_epk_clientId ON XLangMapEntry_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_XLangMapEntry_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_164_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE School SET schoolLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.schoolLocalChangeSeqNum 
+      | ELSE NEXTVAL('School_lcsn_seq') END),
+      | schoolMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('School_mcsn_seq') 
+      | ELSE NEW.schoolMasterChangeSeqNum END)
+      | WHERE schoolUid = NEW.schoolUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 164, NEW.schoolUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_School_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_School_trk_epk_clientId_tmp ON School_trk (epk, clientId)")
             database.execSQL("""
@@ -4972,6 +5694,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_School_trk_clientId_epk_csn  ON School_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_School_trk_epk_clientId ON School_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_School_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_200_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE SchoolMember SET schoolMemberLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.schoolMemberLocalChangeSeqNum 
+      | ELSE NEXTVAL('SchoolMember_lcsn_seq') END),
+      | schoolMemberMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('SchoolMember_mcsn_seq') 
+      | ELSE NEW.schoolMemberMasterChangeSeqNum END)
+      | WHERE schoolMemberUid = NEW.schoolMemberUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 200, NEW.schoolMemberUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_SchoolMember_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_SchoolMember_trk_epk_clientId_tmp ON SchoolMember_trk (epk, clientId)")
             database.execSQL("""
@@ -4985,6 +5726,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_SchoolMember_trk_clientId_epk_csn  ON SchoolMember_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_SchoolMember_trk_epk_clientId ON SchoolMember_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_SchoolMember_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_201_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ClazzWork SET clazzWorkLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkLocalChangeSeqNum 
+      | ELSE NEXTVAL('ClazzWork_lcsn_seq') END),
+      | clazzWorkMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ClazzWork_mcsn_seq') 
+      | ELSE NEW.clazzWorkMasterChangeSeqNum END)
+      | WHERE clazzWorkUid = NEW.clazzWorkUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 201, NEW.clazzWorkUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ClazzWork_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ClazzWork_trk_epk_clientId_tmp ON ClazzWork_trk (epk, clientId)")
             database.execSQL("""
@@ -4998,6 +5758,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ClazzWork_trk_clientId_epk_csn  ON ClazzWork_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ClazzWork_trk_epk_clientId ON ClazzWork_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzWork_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_204_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ClazzWorkContentJoin SET clazzWorkContentJoinLCSN =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkContentJoinLCSN 
+      | ELSE NEXTVAL('ClazzWorkContentJoin_lcsn_seq') END),
+      | clazzWorkContentJoinMCSN = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ClazzWorkContentJoin_mcsn_seq') 
+      | ELSE NEW.clazzWorkContentJoinMCSN END)
+      | WHERE clazzWorkContentJoinUid = NEW.clazzWorkContentJoinUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 204, NEW.clazzWorkContentJoinUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkContentJoin_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ClazzWorkContentJoin_trk_epk_clientId_tmp ON ClazzWorkContentJoin_trk (epk, clientId)")
             database.execSQL("""
@@ -5011,6 +5790,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ClazzWorkContentJoin_trk_clientId_epk_csn  ON ClazzWorkContentJoin_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkContentJoin_trk_epk_clientId ON ClazzWorkContentJoin_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzWorkContentJoin_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_208_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE Comments SET commentsLCSN =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.commentsLCSN 
+      | ELSE NEXTVAL('Comments_lcsn_seq') END),
+      | commentsMCSN = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('Comments_mcsn_seq') 
+      | ELSE NEW.commentsMCSN END)
+      | WHERE commentsUid = NEW.commentsUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 208, NEW.commentsUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_Comments_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_Comments_trk_epk_clientId_tmp ON Comments_trk (epk, clientId)")
             database.execSQL("""
@@ -5024,6 +5822,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_Comments_trk_clientId_epk_csn  ON Comments_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_Comments_trk_epk_clientId ON Comments_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Comments_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_202_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ClazzWorkQuestion SET clazzWorkQuestionLCSN =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkQuestionLCSN 
+      | ELSE NEXTVAL('ClazzWorkQuestion_lcsn_seq') END),
+      | clazzWorkQuestionMCSN = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ClazzWorkQuestion_mcsn_seq') 
+      | ELSE NEW.clazzWorkQuestionMCSN END)
+      | WHERE clazzWorkQuestionUid = NEW.clazzWorkQuestionUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 202, NEW.clazzWorkQuestionUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestion_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ClazzWorkQuestion_trk_epk_clientId_tmp ON ClazzWorkQuestion_trk (epk, clientId)")
             database.execSQL("""
@@ -5037,6 +5854,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ClazzWorkQuestion_trk_clientId_epk_csn  ON ClazzWorkQuestion_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestion_trk_epk_clientId ON ClazzWorkQuestion_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzWorkQuestion_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_203_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ClazzWorkQuestionOption SET clazzWorkQuestionOptionLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkQuestionOptionLocalChangeSeqNum 
+      | ELSE NEXTVAL('ClazzWorkQuestionOption_lcsn_seq') END),
+      | clazzWorkQuestionOptionMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ClazzWorkQuestionOption_mcsn_seq') 
+      | ELSE NEW.clazzWorkQuestionOptionMasterChangeSeqNum END)
+      | WHERE clazzWorkQuestionOptionUid = NEW.clazzWorkQuestionOptionUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 203, NEW.clazzWorkQuestionOptionUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestionOption_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ClazzWorkQuestionOption_trk_epk_clientId_tmp ON ClazzWorkQuestionOption_trk (epk, clientId)")
             database.execSQL("""
@@ -5050,6 +5886,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ClazzWorkQuestionOption_trk_clientId_epk_csn  ON ClazzWorkQuestionOption_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestionOption_trk_epk_clientId ON ClazzWorkQuestionOption_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzWorkQuestionOption_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_206_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ClazzWorkSubmission SET clazzWorkSubmissionLCSN =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkSubmissionLCSN 
+      | ELSE NEXTVAL('ClazzWorkSubmission_lcsn_seq') END),
+      | clazzWorkSubmissionMCSN = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ClazzWorkSubmission_mcsn_seq') 
+      | ELSE NEW.clazzWorkSubmissionMCSN END)
+      | WHERE clazzWorkSubmissionUid = NEW.clazzWorkSubmissionUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 206, NEW.clazzWorkSubmissionUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkSubmission_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ClazzWorkSubmission_trk_epk_clientId_tmp ON ClazzWorkSubmission_trk (epk, clientId)")
             database.execSQL("""
@@ -5063,6 +5918,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ClazzWorkSubmission_trk_clientId_epk_csn  ON ClazzWorkSubmission_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkSubmission_trk_epk_clientId ON ClazzWorkSubmission_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzWorkSubmission_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_209_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ClazzWorkQuestionResponse SET clazzWorkQuestionResponseLCSN =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.clazzWorkQuestionResponseLCSN 
+      | ELSE NEXTVAL('ClazzWorkQuestionResponse_lcsn_seq') END),
+      | clazzWorkQuestionResponseMCSN = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ClazzWorkQuestionResponse_mcsn_seq') 
+      | ELSE NEW.clazzWorkQuestionResponseMCSN END)
+      | WHERE clazzWorkQuestionResponseUid = NEW.clazzWorkQuestionResponseUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 209, NEW.clazzWorkQuestionResponseUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ClazzWorkQuestionResponse_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId_tmp ON ClazzWorkQuestionResponse_trk (epk, clientId)")
             database.execSQL("""
@@ -5076,6 +5950,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ClazzWorkQuestionResponse_trk_clientId_epk_csn  ON ClazzWorkQuestionResponse_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId ON ClazzWorkQuestionResponse_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ClazzWorkQuestionResponse_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_210_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ContentEntryProgress SET contentEntryProgressLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.contentEntryProgressLocalChangeSeqNum 
+      | ELSE NEXTVAL('ContentEntryProgress_lcsn_seq') END),
+      | contentEntryProgressMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ContentEntryProgress_mcsn_seq') 
+      | ELSE NEW.contentEntryProgressMasterChangeSeqNum END)
+      | WHERE contentEntryProgressUid = NEW.contentEntryProgressUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 210, NEW.contentEntryProgressUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ContentEntryProgress_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ContentEntryProgress_trk_epk_clientId_tmp ON ContentEntryProgress_trk (epk, clientId)")
             database.execSQL("""
@@ -5089,6 +5982,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ContentEntryProgress_trk_clientId_epk_csn  ON ContentEntryProgress_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ContentEntryProgress_trk_epk_clientId ON ContentEntryProgress_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ContentEntryProgress_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_101_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE Report SET reportLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.reportLocalChangeSeqNum 
+      | ELSE NEXTVAL('Report_lcsn_seq') END),
+      | reportMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('Report_mcsn_seq') 
+      | ELSE NEW.reportMasterChangeSeqNum END)
+      | WHERE reportUid = NEW.reportUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 101, NEW.reportUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_Report_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_Report_trk_epk_clientId_tmp ON Report_trk (epk, clientId)")
             database.execSQL("""
@@ -5102,6 +6014,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_Report_trk_clientId_epk_csn  ON Report_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_Report_trk_epk_clientId ON Report_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_Report_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_102_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE ReportFilter SET reportFilterLocalChangeSeqNum =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.reportFilterLocalChangeSeqNum 
+      | ELSE NEXTVAL('ReportFilter_lcsn_seq') END),
+      | reportFilterMasterChangeSeqNum = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('ReportFilter_mcsn_seq') 
+      | ELSE NEW.reportFilterMasterChangeSeqNum END)
+      | WHERE reportFilterUid = NEW.reportFilterUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 102, NEW.reportFilterUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_ReportFilter_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_ReportFilter_trk_epk_clientId_tmp ON ReportFilter_trk (epk, clientId)")
             database.execSQL("""
@@ -5115,6 +6046,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_ReportFilter_trk_clientId_epk_csn  ON ReportFilter_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_ReportFilter_trk_epk_clientId ON ReportFilter_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_ReportFilter_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_301_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE LearnerGroup SET learnerGroupCSN =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupCSN 
+      | ELSE NEXTVAL('LearnerGroup_lcsn_seq') END),
+      | learnerGroupMCSN = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('LearnerGroup_mcsn_seq') 
+      | ELSE NEW.learnerGroupMCSN END)
+      | WHERE learnerGroupUid = NEW.learnerGroupUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 301, NEW.learnerGroupUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_LearnerGroup_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_LearnerGroup_trk_epk_clientId_tmp ON LearnerGroup_trk (epk, clientId)")
             database.execSQL("""
@@ -5128,6 +6078,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_LearnerGroup_trk_clientId_epk_csn  ON LearnerGroup_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_LearnerGroup_trk_epk_clientId ON LearnerGroup_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_LearnerGroup_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_300_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE LearnerGroupMember SET learnerGroupMemberCSN =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.learnerGroupMemberCSN 
+      | ELSE NEXTVAL('LearnerGroupMember_lcsn_seq') END),
+      | learnerGroupMemberMCSN = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('LearnerGroupMember_mcsn_seq') 
+      | ELSE NEW.learnerGroupMemberMCSN END)
+      | WHERE learnerGroupMemberUid = NEW.learnerGroupMemberUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 300, NEW.learnerGroupMemberUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_LearnerGroupMember_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_LearnerGroupMember_trk_epk_clientId_tmp ON LearnerGroupMember_trk (epk, clientId)")
             database.execSQL("""
@@ -5141,6 +6110,25 @@ class UmAppDatabase_SyncPushMigration : DoorMigration(42, 43) {
             database.execSQL("CREATE INDEX index_LearnerGroupMember_trk_clientId_epk_csn  ON LearnerGroupMember_trk (clientId, epk, csn)")
             database.execSQL("CREATE UNIQUE INDEX index_LearnerGroupMember_trk_epk_clientId ON LearnerGroupMember_trk (epk, clientId)")
             database.execSQL("DROP INDEX index_LearnerGroupMember_trk_epk_clientId_tmp")
+            database.execSQL("""
+      |CREATE OR REPLACE FUNCTION 
+      | inccsn_302_fn() RETURNS trigger AS ${'$'}${'$'}
+      | BEGIN  
+      | UPDATE GroupLearningSession SET groupLearningSessionCSN =
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.groupLearningSessionCSN 
+      | ELSE NEXTVAL('GroupLearningSession_lcsn_seq') END),
+      | groupLearningSessionMCSN = 
+      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+      | THEN NEXTVAL('GroupLearningSession_mcsn_seq') 
+      | ELSE NEW.groupLearningSessionMCSN END)
+      | WHERE groupLearningSessionUid = NEW.groupLearningSessionUid;
+      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+      | SELECT 302, NEW.groupLearningSessionUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+      | RETURN null;
+      | END ${'$'}${'$'}
+      | LANGUAGE plpgsql
+      """.trimMargin())
             database.execSQL("DROP INDEX IF EXISTS index_GroupLearningSession_trk_clientId_epk_rx_csn")
             database.execSQL("CREATE INDEX index_GroupLearningSession_trk_epk_clientId_tmp ON GroupLearningSession_trk (epk, clientId)")
             database.execSQL("""

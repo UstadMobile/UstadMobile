@@ -5,6 +5,8 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.ext.userAtServer
+import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
@@ -51,7 +53,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
     init {
         val accounts: UstadAccounts = systemImpl.getAppPref(ACCOUNTS_PREFKEY, appContext)?.let {
-            Json.parse(UstadAccounts.serializer(), it)
+            safeParse(di, UstadAccounts.serializer(), it)
         } ?: defaultAccount.let { defAccount ->
             UstadAccounts(defAccount.userAtServer, listOf(defAccount))
         }
@@ -101,7 +103,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
     suspend fun register(person: PersonWithAccount, endpointUrl: String, makeAccountActive: Boolean = true): UmAccount = withContext(Dispatchers.Default){
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
-            parameter("person", Json.stringify(PersonWithAccount.serializer(), person))
+            parameter("person",  safeStringify(di, PersonWithAccount.serializer(), person))
         }
 
         val (account: UmAccount?, status: Int) = httpStmt.execute { response ->
@@ -154,7 +156,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         val ustadAccounts = UstadAccounts(activeAccount.userAtServer,
             _storedAccounts, accountLastUsedTimeMap)
         systemImpl.setAppPref(ACCOUNTS_PREFKEY,
-                Json.stringify(UstadAccounts.serializer(), ustadAccounts), appContext)
+                safeStringify(di, UstadAccounts.serializer(), ustadAccounts), appContext)
     }
 
 

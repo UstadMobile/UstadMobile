@@ -118,6 +118,10 @@ private fun TypeSpec.Builder.addSyncPushMigrationFunction(dbTypeElement: TypeEle
                                 .filter { it.hasAnnotation(SyncableEntity::class.java) }
                                 .forEach { syncableEntity ->
 
+                            val syncableEntityInfo = SyncableEntityInfo(
+                                    syncableEntity.asClassName(), processingEnv)
+                            addSyncableEntityFunctionPostgres("database.execSQL",
+                                    syncableEntityInfo)
                             addRecreateTrkIndexes(syncableEntity.simpleName.toString())
                         }
 
@@ -149,8 +153,6 @@ private fun CodeBlock.Builder.addRecreateSqliteTriggerCode(typeElement: TypeElem
 class DbProcessorSyncPushMigration : AbstractDbProcessor() {
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
-        setupDb(roundEnv)
-
         //iterate over databases
         roundEnv.getElementsAnnotatedWith(Database::class.java).map { it as TypeElement }.forEach {dbTypeEl ->
             FileSpec.builder(dbTypeEl.packageName,

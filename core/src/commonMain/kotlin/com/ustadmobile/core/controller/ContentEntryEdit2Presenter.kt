@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.util.ext.convertToJsonObject
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryEdit2View.Companion.ARG_IMPORTED_METADATA
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -95,11 +96,11 @@ class ContentEntryEdit2Presenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         val metaDataStr = bundle[ARG_IMPORTED_METADATA]
         if (metaDataStr != null) {
-            view.entryMetaData = Json.parse(ImportedContentEntryMetaData.serializer(), metaDataStr)
+            view.entryMetaData = safeParse(di, ImportedContentEntryMetaData.serializer(), metaDataStr)
         }
         var editEntity: ContentEntryWithLanguage? = null
         editEntity = if (entityJsonStr != null) {
-            Json.parse(ContentEntryWithLanguage.serializer(), entityJsonStr)
+            safeParse(di, ContentEntryWithLanguage.serializer(), entityJsonStr)
         } else {
             ContentEntryWithLanguage()
         }

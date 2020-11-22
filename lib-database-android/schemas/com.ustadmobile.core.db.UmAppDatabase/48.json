@@ -1,8 +1,8 @@
 {
   "formatVersion": 1,
   "database": {
-    "version": 47,
-    "identityHash": "015546f085abc4fc002458076887a452",
+    "version": 48,
+    "identityHash": "12b43c64f2c1c6c5f013d417ebedc0df",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1591,6 +1591,15 @@
               "clazzMemberPersonUid"
             ],
             "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzMember_clazzMemberClazzUid_clazzMemberPersonUid` ON `${TABLE_NAME}` (`clazzMemberClazzUid`, `clazzMemberPersonUid`)"
+          },
+          {
+            "name": "index_ClazzMember_clazzMemberClazzUid_clazzMemberRole",
+            "unique": false,
+            "columnNames": [
+              "clazzMemberClazzUid",
+              "clazzMemberRole"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ClazzMember_clazzMemberClazzUid_clazzMemberRole` ON `${TABLE_NAME}` (`clazzMemberClazzUid`, `clazzMemberRole`)"
           },
           {
             "name": "index_ClazzMember_clazzMemberPersonUid",
@@ -4162,6 +4171,16 @@
           "autoGenerate": true
         },
         "indices": [
+          {
+            "name": "index_SchoolMember_schoolMemberSchoolUid_schoolMemberActive_schoolMemberRole",
+            "unique": false,
+            "columnNames": [
+              "schoolMemberSchoolUid",
+              "schoolMemberActive",
+              "schoolMemberRole"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SchoolMember_schoolMemberSchoolUid_schoolMemberActive_schoolMemberRole` ON `${TABLE_NAME}` (`schoolMemberSchoolUid`, `schoolMemberActive`, `schoolMemberRole`)"
+          },
           {
             "name": "index_SchoolMember_schoolMemberPersonUid",
             "unique": false,
@@ -9511,7 +9530,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '015546f085abc4fc002458076887a452')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '12b43c64f2c1c6c5f013d417ebedc0df')"
     ]
   }
 }

@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest.ext
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
 import com.ustadmobile.lib.db.entities.WorkSpace
@@ -27,7 +28,7 @@ fun UmAppDatabase.ktorInitDbWithRepo(repo: UmAppDatabase, passwordFilePath: Stri
     if (adminuser == null) {
         val adminPerson = Person("admin", "Admin", "User")
         adminPerson.admin = true
-        adminPerson.personUid = repo.personDao.insert(adminPerson)
+        adminPerson.personUid = runBlocking { repo.insertPersonAndGroup(adminPerson).personUid }
 
         //Remove lower case l, upper case I, and the number 1
         val adminPass = RandomStringUtils.random(10, "abcdefghijkmnpqrstuvxwyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")

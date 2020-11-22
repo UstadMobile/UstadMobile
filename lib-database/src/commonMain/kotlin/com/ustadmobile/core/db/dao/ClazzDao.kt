@@ -76,20 +76,25 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         '' AS teacherNames,
         0 AS lastRecorded
         FROM 
-        Clazz
+        PersonGroupMember
+        LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+        LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions &  :permission) > 0
+        LEFT JOIN Clazz ON 
+            CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = personUid) AS INTEGER) = 1
+            OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) 
+            OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
         LEFT JOIN ClazzMember ON ClazzMember.clazzMemberUid =
             COALESCE((SELECT ClazzMember.clazzMemberUid FROM ClazzMember
              WHERE
              ClazzMember.clazzMemberPersonUid = :personUid
              AND ClazzMember.clazzMemberClazzUid = Clazz.clazzUid LIMIT 1), 0)
         WHERE
-        CAST(Clazz.isClazzActive AS INTEGER) = 1
+        PersonGroupMember.groupMemberPersonUid = :personUid
+        AND CAST(Clazz.isClazzActive AS INTEGER) = 1
         AND Clazz.clazzName like :searchQuery
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
-        AND :personUid IN (
-        $ENTITY_PERSONS_WITH_PERMISSION
-        )
+        GROUP BY Clazz.clazzUid, ClazzMember.clazzMemberUid
         ORDER BY CASE :sortOrder
             WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
             ELSE 0

@@ -222,7 +222,6 @@ private fun TypeElement.daoHasSyncableWriteMethods(
 class DbProcessorSyncableReadOnlyWrapper: AbstractDbProcessor()  {
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
-        setupDb(roundEnv)
         roundEnv.getElementsAnnotatedWith(Database::class.java).map { it as TypeElement }.forEach {dbTypeEl ->
             //jvm version
             if(dbTypeEl.isDbSyncable(processingEnv)) {
