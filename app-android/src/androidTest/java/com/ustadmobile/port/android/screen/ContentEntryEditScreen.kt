@@ -81,8 +81,7 @@ object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
         if(!isZipped){
             entryTitleTextInput{
                 edit{
-                    clearText()
-                    typeText("Dummy Title")
+                    hasText(fileName.substringBefore("."))
                     clearText()
                     typeText("Dummy Title")
                     hasText("Dummy Title")
