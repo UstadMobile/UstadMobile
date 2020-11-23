@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -110,7 +111,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: ClazzLog? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(ClazzLog.serializer(), entityJsonStr)
+            editEntity = safeParse(di, ClazzLog.serializer(), entityJsonStr)
         }else {
             editEntity = ClazzLog()
         }

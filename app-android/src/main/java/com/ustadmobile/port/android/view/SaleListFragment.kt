@@ -11,6 +11,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SaleListView
 import com.ustadmobile.lib.db.entities.Sale
 import com.ustadmobile.lib.db.entities.SaleListDetail
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
 
@@ -46,8 +47,7 @@ class SaleListFragment(): UstadListViewFragment<Sale, SaleListDetail>(),
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout) {
-            //TODO
-            //navigateToEditEntity(null, R.id.sale_edit_dest, Sale::class.java)
+            navigateToEditEntity(null, R.id.sale_edit_dest, Sale::class.java)
         }else{
             super.onClick(view)
         }

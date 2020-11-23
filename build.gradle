@@ -17,7 +17,7 @@ buildscript {
     }
 
     dependencies {
-        classpath 'com.android.tools.build:gradle:4.1.0'
+        classpath 'com.android.tools.build:gradle:4.1.1'
         classpath 'com.google.gms:google-services:4.3.3'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$version_kotlin"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
@@ -70,7 +70,7 @@ subprojects {
 
 
 //Major.minor.database version
-version = "0.3.15"
+version = "0.3.16"
 group = "com.ustadmobile.app"
 
 ext {
@@ -109,7 +109,7 @@ ext {
     version_kotlinpoet = "1.5.0"
     version_reflections = "0.9.11"
     version_simple_jndi = "0.23.0"
-    version_sqlite_jdbc = "3.23.1"
+    version_sqlite_jdbc = "3.32.3.2"
     version_jsqlparser = "3.1"
     version_core_mockito = "3.3.3"
     version_kotlin_mockito = "2.2.0"
@@ -129,7 +129,7 @@ ext {
     version_logback = "1.0.13"
     version_kodein_di = "7.0.0"
 
-    version_android_buildtools = "29.0.0"
+    version_android_buildtools = "29.0.3"
     version_android_compile_sdk = 29
     version_android_target_sdk = 29
     version_android_min_sdk = 18

@@ -6,11 +6,33 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
-import com.ustadmobile.lib.db.entities.AgentEntity.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = AgentEntity.TABLE_ID,
+    notifyOnUpdate = [
+        """
+        SELECT DISTINCT DeviceSession.dsDeviceId as deviceId, ${AgentEntity.TABLE_ID} as tableId FROM 
+        ChangeLog
+        JOIN AgentEntity ON ChangeLog.chTableId = ${AgentEntity.TABLE_ID} AND ChangeLog.chEntityPk = AgentEntity.agentUid
+        JOIN Person ON Person.personUid = AgentEntity.agentPersonUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        """
+    ],
+
+    syncFindAllQuery = """
+        SELECT AgentEntity.* FROM 
+        AgentEntity
+        JOIN Person ON Person.personUid = AgentEntity.agentPersonUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+        """
+)
+
 @Serializable
 class AgentEntity {
 

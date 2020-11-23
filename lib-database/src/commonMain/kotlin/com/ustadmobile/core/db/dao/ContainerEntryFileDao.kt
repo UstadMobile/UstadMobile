@@ -7,10 +7,8 @@ import androidx.room.Transaction
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.ext.dbType
-import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 
-@UmDao
 @Dao
 abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
 

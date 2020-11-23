@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.*
 import com.ustadmobile.test.port.android.util.setDateField
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -25,7 +26,7 @@ class ClazzEndToEndTests : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -35,10 +36,9 @@ class ClazzEndToEndTests : TestCase() {
             "fills in form, then it should go to the new class")
     @Test
     fun givenEmptyClazzList_whenUserClicksAddAndFillsInForm_thenClassIsCreatedAndGoneInto() {
-
         var calendarUid = 0L
         init {
-            calendarUid = dbRule.db.holidayCalendarDao.insert(HolidayCalendar().apply {
+            calendarUid = dbRule.repo.holidayCalendarDao.insert(HolidayCalendar().apply {
                 this.umCalendarName = "Test Calendar"
             })
 
@@ -113,12 +113,10 @@ class ClazzEndToEndTests : TestCase() {
 
             }
 
-            val createdClazz = dbRule.db.clazzDao.findByClazzName("Test Class").first()
-
             MainScreen{
 
                 toolBarTitle{
-                    hasDescendant { withText(createdClazz.clazzName!!) }
+                    hasDescendant { withText("Test Class") }
                     isDisplayed()
                 }
 

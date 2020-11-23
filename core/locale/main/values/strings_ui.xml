@@ -27,6 +27,8 @@
     <string name='new_tab'>Displaying on new Tab</string>
     <string name='loading'>Loading</string>
     <string name='deleting'>Deleting</string>
+    <string name="processing">Processing</string>
+    <string name="uploading">Uploading</string>
     <string name='error_opening_file'>Error opening file: </string>
     <string name='logout'>Logout</string>
     <string name='about'>About</string>

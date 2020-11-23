@@ -7,8 +7,9 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SalePayment
+import com.ustadmobile.door.annotation.Repository
 
-@UmRepository
+@Repository
 @Dao
 abstract class SalePaymentDao : BaseDao<SalePayment>, OneToManyJoinDao<SalePayment> {
 

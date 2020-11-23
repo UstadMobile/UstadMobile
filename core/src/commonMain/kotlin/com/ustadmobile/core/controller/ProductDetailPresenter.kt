@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.ProductDetailView
+import com.ustadmobile.core.view.ProductEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
@@ -25,8 +26,8 @@ class ProductDetailPresenter(context: Any,
     }
 
     override fun handleClickEdit() {
-        //TODO: this
-        // systemImpl.go(ProductEditView.VIEW_NAME , arguments, context)
+        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        systemImpl.go(ProductEditView.VIEW_NAME , mapOf(ARG_ENTITY_UID to entityUid.toString()), context)
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ProductWithInventoryCount? {

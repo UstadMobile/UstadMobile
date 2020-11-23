@@ -53,7 +53,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_24dp"
-            android:text="@{person.inventoryCount}"
+            android:text="@{`` + person.inventoryCount}"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             app:layout_constraintBottom_toBottomOf="@+id/item_person_picture"
             app:layout_constraintEnd_toEndOf="parent"

@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzMember
@@ -13,7 +14,7 @@ import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson
 
 @UmDao(inheritPermissionFrom = ClazzDao::class, inheritPermissionForeignKey = "clazzMemberClazzUid",
         inheritPermissionJoinedPrimaryKey = "clazzUid")
-@UmRepository
+@Repository
 @Dao
 abstract class ClazzMemberDao : BaseDao<ClazzMember> {
 

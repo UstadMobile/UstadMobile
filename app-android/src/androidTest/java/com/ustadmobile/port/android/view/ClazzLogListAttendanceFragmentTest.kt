@@ -39,8 +39,7 @@ class ClazzLogListAttendanceFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    val dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true,
-            account = UmAccount(7L, "bond", "", "http://localhost"))
+    val dbRule = UmAppDatabaseAndroidClientRule(account = UmAccount(7L, "bond", "", "http://localhost"))
 
     @After
     fun tearDown() {
@@ -53,9 +52,9 @@ class ClazzLogListAttendanceFragmentTest : TestCase() {
 
         init{
 
-            val clazzAndMembers = runBlocking { dbRule.db.insertTestClazzAndMembers(5) }
+            val clazzAndMembers = runBlocking { dbRule.repo.insertTestClazzAndMembers(5) }
             ClazzLog(0L, clazzAndMembers.clazz.clazzUid, System.currentTimeMillis(), 0L).apply {
-                clazzLogUid = dbRule.db.clazzLogDao.insert(this)
+                clazzLogUid = dbRule.repo.clazzLogDao.insert(this)
             }
 
             launchFragmentInContainer(
@@ -100,7 +99,7 @@ class ClazzLogListAttendanceFragmentTest : TestCase() {
 
             val testClazz = Clazz("Test Clazz").apply {
                 clazzTimeZone = "Asia/Dubai"
-                clazzUid = dbRule.db.clazzDao.insert(this)
+                clazzUid = dbRule.repo.clazzDao.insert(this)
             }
 
             val oneDayInMs = (1000 * 60 * 60 * 24)
@@ -110,7 +109,7 @@ class ClazzLogListAttendanceFragmentTest : TestCase() {
 
             val numInClazz = 10
             runBlocking {
-                dbRule.db.insertClazzLogs(testClazz.clazzUid, 5) { index ->
+                dbRule.repo.insertClazzLogs(testClazz.clazzUid, 5) { index ->
                     ClazzLog().apply {
                         logDate = timeRange.first + (index * oneDayInMs) + (1000 * 60 * 60 * 8)
                         clazzLogNumAbsent = if (index.rem(2) == 0) 2 else 4

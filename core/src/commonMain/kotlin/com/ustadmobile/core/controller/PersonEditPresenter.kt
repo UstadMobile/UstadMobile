@@ -12,17 +12,20 @@ import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_PERSON_WE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import io.ktor.client.features.json.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -139,7 +142,7 @@ class PersonEditPresenter(context: Any,
 
         val canDelegate = repo.personDao.personHasPermissionAsync(loggedInPersonUid?: 0,
                 arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
-                Role.PERMISSION_PERSON_DELEGATE, excludesNameCheck = 1)
+                Role.PERMISSION_PERSON_DELEGATE, checkPermissionForSelf = 1)
 
         if(loggedInPerson != null && loggedInPerson?.admin == false){
             view.canDelegatePermissions = canDelegate
@@ -153,7 +156,7 @@ class PersonEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: Person? = null
         editEntity = if (entityJsonStr != null) {
-            Json.parse(PersonWithAccount.serializer(), entityJsonStr)
+            safeParse(di, PersonWithAccount.serializer(), entityJsonStr)
         } else {
             PersonWithAccount()
         }
@@ -221,6 +224,36 @@ class PersonEditPresenter(context: Any,
                 }
             }else{
                 //Create/Update person group
+
+                //Goldozi specific:
+                // 1. Check if Creating WE
+                // 2. If yes, check if logged In Person is an LE
+                // 3. If yes, check if LE's We group is created. Create it if it is not
+
+
+                if(arguments.containsKey(ARG_FILTER_PERSON_WE) &&
+                        arguments[ARG_FILTER_PERSON_WE]?.equals("true") ?: false){
+
+                    entity?.personGoldoziType = Person.Companion.GOLDOZI_TYPE_PRODUCER
+
+                    if(loggedInPerson?.personGoldoziType == Person.Companion.GOLDOZI_TYPE_LE){
+                        if(loggedInPerson?.personWeGroupUid == 0L){
+                            //Create a WE Group for this LE
+                            val leWeGroup = PersonGroup().apply {
+                                groupName = entity.fullName() + "'s WE group"
+                                personGroupFlag = PersonGroup.PERSONGROUP_FLAG_DEFAULT
+                                groupUid = repo.personGroupDao.insertAsync(this)
+                            }
+                            //Assign WE Group to the Logged in LE
+                            loggedInPerson?.personWeGroupUid = leWeGroup.groupUid
+                            val le = loggedInPerson
+                            if(le != null) {
+                                repo.personDao.updateAsync(le)
+                            }
+                        }
+                    }
+                }
+
                 if(entity.personUid == 0L) {
                     val personWithGroup = repo.insertPersonAndGroup(entity, loggedInPerson)
                     entity.personGroupUid = personWithGroup.personGroupUid
@@ -228,6 +261,18 @@ class PersonEditPresenter(context: Any,
                 }else {
                     repo.personDao.updateAsync(entity)
                 }
+
+                // 4. Assign this WE to that LE group
+                if(loggedInPerson?.personGoldoziType == Person.GOLDOZI_TYPE_LE) {
+                    if (loggedInPerson?.personWeGroupUid == 0L) {
+                        val weOneAssign = PersonGroupMember(entity.personUid, loggedInPerson?.personWeGroupUid?:0L)
+                        weOneAssign.groupMemberUid = repo.personGroupMemberDao.insert(weOneAssign)
+                    }
+                }
+
+
+
+
 
                 //Insert any roles and permissions
                 repo.entityRoleDao.insertListAsync(

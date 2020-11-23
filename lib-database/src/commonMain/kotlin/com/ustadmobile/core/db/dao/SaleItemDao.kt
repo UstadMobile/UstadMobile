@@ -9,9 +9,9 @@ import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.door.annotation.Repository
 
-
-@UmRepository
+@Repository
 @Dao
 abstract class SaleItemDao : BaseDao<SaleItem>, OneToManyJoinDao<SaleItem> {
 

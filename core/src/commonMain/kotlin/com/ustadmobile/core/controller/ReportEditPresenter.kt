@@ -8,6 +8,7 @@ import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -159,7 +160,7 @@ class ReportEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: ReportWithFilters
         if (entityJsonStr != null) {
-            editEntity = Json.parse(ReportWithFilters.serializer(), entityJsonStr)
+            editEntity = safeParse(di, ReportWithFilters.serializer(), entityJsonStr)
         } else {
             editEntity = ReportWithFilters()
         }

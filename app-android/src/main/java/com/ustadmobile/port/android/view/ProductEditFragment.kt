@@ -20,7 +20,9 @@ import com.ustadmobile.core.view.ProductEditView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Category
 import com.ustadmobile.lib.db.entities.Product
+import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 
 
 interface ProductEditFragmentEventHandler {
@@ -116,14 +118,16 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
         }
 
     override fun addNewCategory() {
-        //TODO
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(null, R.id.category_edit_dest, Category::class.java)
     }
 
     override fun onClickDelete(entry: Category) {
-        //TODO
+        mPresenter?.handleRemoveCategory(entry)
     }
 
     override fun onClickCategory(entry: Category) {
-        //TODO
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(entry, R.id.category_edit_dest, Category::class.java)
     }
 }

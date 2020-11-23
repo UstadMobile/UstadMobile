@@ -14,7 +14,6 @@
         android:name="com.ustadmobile.port.android.view.PersonListFragment"
         android:label="@string/people" />
 
-
     <fragment
         android:id="@+id/person_list_dest"
         android:name="com.ustadmobile.port.android.view.PersonListFragment"
@@ -44,6 +43,32 @@
     <fragment
         android:id="@+id/personlist_dest"
         android:name="com.ustadmobile.port.android.view.PersonListFragment" />
+
+    <fragment
+        android:id="@+id/product_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ProductEditFragment" />
+
+    <fragment
+        android:id="@+id/category_edit_dest"
+        android:name="com.ustadmobile.port.android.view.CategoryEditFragment" />
+
+    <fragment
+        android:id="@+id/inventoryitem_edit_dest"
+        android:name="com.ustadmobile.port.android.view.InventoryItemEditFragment" />
+
+    <fragment
+        android:id="@+id/product_detail_dest"
+        android:name="com.ustadmobile.port.android.view.ProductDetailFragment" />
+
+    <fragment
+        android:id="@+id/saleitem_edit_dest"
+        android:name="com.ustadmobile.port.android.view.SaleItemEditFragment" />
+
+
+    <fragment
+        android:id="@+id/sale_edit_dest"
+        android:name="com.ustadmobile.port.android.view.SaleEditFragment" />
+
 
     <fragment
         android:id="@+id/clazz_edit_dest"
@@ -121,36 +146,28 @@
 
     <fragment
         android:id="@+id/school_edit_dest"
-        android:name="com.ustadmobile.port.android.view.SchoolEditFragment"
-        android:label="SchoolEditFragment" />
+        android:name="com.ustadmobile.port.android.view.SchoolEditFragment" />
     <fragment
         android:id="@+id/school_detail_dest"
-        android:name="com.ustadmobile.port.android.view.SchoolDetailFragment"
-        android:label="SchoolDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.SchoolDetailFragment" />
     <fragment
         android:id="@+id/school_detail_overview_dest"
-        android:name="com.ustadmobile.port.android.view.SchoolDetailOverviewFragment"
-        android:label="SchoolDetailOverviewFragment" />
+        android:name="com.ustadmobile.port.android.view.SchoolDetailOverviewFragment" />
     <fragment
         android:id="@+id/schoolmember_list_dest"
-        android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment"
-        android:label="SchoolMemberListFragment" />
+        android:name="com.ustadmobile.port.android.view.SchoolMemberListFragment" />
     <fragment
         android:id="@+id/clazzwork_list_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkListFragment"
-        android:label="ClazzWorkListFragment" />
+        android:name="com.ustadmobile.port.android.view.ClazzWorkListFragment" />
     <fragment
         android:id="@+id/clazzwork_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkEditFragment"
-        android:label="ClazzWorkEditFragment" />
+        android:name="com.ustadmobile.port.android.view.ClazzWorkEditFragment" />
     <fragment
         android:id="@+id/clazzworkquestionandoptions_edit_dest"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkQuestionAndOptionsEditFragment"
-        android:label="ClazzWorkQuestionAndOptionsEditFragment" />
+        android:name="com.ustadmobile.port.android.view.ClazzWorkQuestionAndOptionsEditFragment" />
     <fragment
         android:id="@+id/clazzwork_detail_list"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailFragment"
-        android:label="ClazzWorkDetailFragment" />
+        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailFragment" />
 
     <fragment
         android:id="@+id/home_content_dest"
@@ -170,13 +187,13 @@
 
     <fragment
         android:id="@+id/home_sales_dest"
-        android:name="com.ustadmobile.port.android.view.ProductListFragment"
+        android:name="com.ustadmobile.port.android.view.SaleListFragment"
         android:label="@string/sales">
     </fragment>
 
     <fragment
         android:id="@+id/home_wes_dest"
-        android:name="com.ustadmobile.port.android.view.ProductListFragment"
+        android:name="com.ustadmobile.port.android.view.PersonWithSaleInfoListFragment"
         android:label="@string/wes">
     </fragment>
 
@@ -205,18 +222,17 @@
         android:label="" />
     <fragment
         android:id="@+id/clazzwork_detail_progress_list"
-        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment"
-        android:label="ClazzWorkDetailProgressListFragment" />
+        android:name="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment" />
 
     <fragment
         android:id="@+id/clazzworksubmission_marking_edit"
         android:name="com.ustadmobile.port.android.view.ClazzWorkSubmissionMarkingFragment"
-        android:label="ClazzWorkSubmissionMarkingFragment" />
+        />
 
     <fragment
         android:id="@+id/report_detail_dest"
         android:name="com.ustadmobile.port.android.view.ReportDetailFragment"
-        android:label="ReportDetailFragment" />
+        />
 
     <fragment
         android:id="@+id/content_xapi_dest"

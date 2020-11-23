@@ -46,8 +46,8 @@ class PersonWithSaleInfoListPresenter(context: Any, arguments: Map<String, Strin
 
     override fun handleClickCreateNewFab() {
 
-        //TODO: Add filter
-        systemImpl.go(PersonEditView.VIEW_NAME, mapOf(), context)
+        systemImpl.go(PersonEditView.VIEW_NAME, mapOf(UstadView.ARG_FILTER_PERSON_WE to "true"),
+                context)
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {

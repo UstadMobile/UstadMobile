@@ -3,9 +3,11 @@ package com.ustadmobile.sharedse.ext
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.sharedse.io.ConcatenatedInputStream
 import com.ustadmobile.sharedse.io.ConcatenatedPart
 import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
@@ -113,13 +115,15 @@ class ContainerEntryFileDaoExtTest {
     fun givenEpubContainer_whenReadWithConcatenatedInput_thenSHouldBeTheSame() {
         val context = Any()
         val appDb = UmAppDatabase.getInstance(context)
+        val appRepo = appDb.asRepository(context, "http://localhost/dummy", "",
+            defaultHttpClient())
         val epubContainer = Container()
-        epubContainer.containerUid = appDb.containerDao.insert(epubContainer)
+        epubContainer.containerUid = appRepo.containerDao.insert(epubContainer)
         val tmpEpubFile = File.createTempFile("ConcatenatingInputStreamTest", "testepub")
         val tmpDir = Files.createTempDirectory("ConcatenatingInputStreamTest").toFile()
         extractTestResourceToFile("/com/ustadmobile/core/contentformats/epub/test.epub",
                 tmpEpubFile)
-        val containerManager = ContainerManager(epubContainer, appDb, appDb, tmpDir.absolutePath)
+        val containerManager = ContainerManager(epubContainer, appDb, appRepo, tmpDir.absolutePath)
         runBlocking {
             addEntriesFromZipToContainer(tmpEpubFile.absolutePath, containerManager)
             val entryList = containerManager.allEntries.distinctBy { it.containerEntryFile!!.cefMd5 }
@@ -138,14 +142,17 @@ class ContainerEntryFileDaoExtTest {
     fun givenEpubContainer_whenRequestedInTwoPartialRequests_thenShouldbeTheSame() {
         val context = Any()
         val appDb = UmAppDatabase.getInstance(context)
+        val appRepo = appDb.asRepository(context, "http://localhost/dummy", "",
+                defaultHttpClient())
+
         val epubContainer = Container()
-        epubContainer.containerUid = appDb.containerDao.insert(epubContainer)
+        epubContainer.containerUid = appRepo.containerDao.insert(epubContainer)
         val tmpEpubFile = File.createTempFile("ConcatenatingInputStreamTest", "testepub")
         val tmpDir = Files.createTempDirectory("ConcatenatingInputStreamTest").toFile()
         extractTestResourceToFile("/com/ustadmobile/core/contentformats/epub/test.epub",
                 tmpEpubFile)
         val splitFromByte = tmpEpubFile.length() / 2
-        val containerManager = ContainerManager(epubContainer, appDb, appDb, tmpDir.absolutePath)
+        val containerManager = ContainerManager(epubContainer, appDb, appRepo, tmpDir.absolutePath)
         runBlocking {
             addEntriesFromZipToContainer(tmpEpubFile.absolutePath, containerManager)
             val entryList = containerManager.allEntries.distinctBy { it.containerEntryFile!!.cefMd5 }

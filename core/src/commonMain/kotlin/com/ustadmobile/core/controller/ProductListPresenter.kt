@@ -63,15 +63,16 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
             ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
             ListViewMode.BROWSER -> {
 
-                //TODO: this
-//                systemImpl.go(ProductEditView.VIEW_NAME,
-//                        mapOf(UstadView.ARG_ENTITY_UID to entry.productUid.toString()), context)
+                systemImpl.go(ProductDetailView.VIEW_NAME,
+                        mapOf(UstadView.ARG_ENTITY_UID to entry.productUid.toString()), context)
             }
         }
     }
 
     override fun onClickProduct(product: ProductWithInventoryCount) {
-        //TODO
+
+        systemImpl.go(ProductDetailView.VIEW_NAME,
+                mapOf(UstadView.ARG_ENTITY_UID to product.productUid.toString()), context)
 
     }
 }

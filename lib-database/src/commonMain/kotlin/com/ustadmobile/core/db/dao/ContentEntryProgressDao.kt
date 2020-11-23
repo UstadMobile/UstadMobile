@@ -5,13 +5,13 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.ustadmobile.core.db.dao.ContentEntryProgressDao.Companion.FIND_PROGRESS_BY_CONTENT_AND_PERSON_QUERY
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.DownloadJobItem
 
-@UmDao
-@UmRepository
+@Repository
 @Dao
 abstract class ContentEntryProgressDao : BaseDao<ContentEntryProgress> {
 

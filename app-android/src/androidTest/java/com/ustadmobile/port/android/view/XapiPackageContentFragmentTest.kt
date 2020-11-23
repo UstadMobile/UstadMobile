@@ -29,7 +29,7 @@ class XapiPackageContentFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -49,15 +49,14 @@ class XapiPackageContentFragmentTest : TestCase() {
 
     @Before
     fun setUp(){
-        dbRule.db.clearAllTables()
         contentEntry = ContentEntry().apply {
             leaf = true
-            contentEntryUid = dbRule.db.contentEntryDao.insert(this)
+            contentEntryUid = dbRule.repo.contentEntryDao.insert(this)
         }
 
         container = Container().apply {
             containerContentEntryUid = contentEntry?.contentEntryUid!!
-            containerUid = dbRule.db.containerDao.insert(this)
+            containerUid = dbRule.repo.containerDao.insert(this)
         }
         containerTmpDir = UmFileUtilSe.makeTempDir("xapicontent", "${System.currentTimeMillis()}")
         val testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)

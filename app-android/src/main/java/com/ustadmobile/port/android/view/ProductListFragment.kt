@@ -7,8 +7,10 @@ import com.ustadmobile.core.controller.ProductListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ProductListView
+import com.ustadmobile.lib.db.entities.PersonWithSaleInfo
 import com.ustadmobile.lib.db.entities.Product
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
 class ProductListFragment(): UstadListViewFragment<Product, ProductWithInventoryCount>(),
@@ -52,8 +54,7 @@ class ProductListFragment(): UstadListViewFragment<Product, ProductWithInventory
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout) {
-            //TODO
-            //navigateToEditEntity(null, R.id.product_edit_dest, Product::class.java)
+            navigateToEditEntity(null, R.id.product_edit_dest, Product::class.java)
         }else{
             super.onClick(view)
         }

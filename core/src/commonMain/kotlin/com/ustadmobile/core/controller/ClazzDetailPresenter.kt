@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -37,7 +38,7 @@ class ClazzDetailPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: Clazz? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(Clazz.serializer(), entityJsonStr)
+            editEntity = safeParse(di,  Clazz.serializer(), entityJsonStr)
         }else {
             editEntity = Clazz()
         }
@@ -80,7 +81,7 @@ class ClazzDetailPresenter(context: Any,
         //Map of the feature flag to the permission flag required for that tab to be visible
         val FEATURE_PERMISSION_MAP = mapOf(
                 Clazz.CLAZZ_FEATURE_ATTENDANCE to Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT,
-                Clazz.CLAZZ_FEATURE_CLAZZWORK to Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW)
+                Clazz.CLAZZ_FEATURE_CLAZZWORK to Role.PERMISSION_CLAZZWORK_SELECT)
 
         val VIEWNAME_MAP = mapOf<Long, String>(
                 Clazz.CLAZZ_FEATURE_ATTENDANCE to ClazzLogListAttendanceView.VIEW_NAME,

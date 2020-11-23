@@ -16,6 +16,8 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 
 
+// Suggestion: Add a property to the view called 'tabs' which is a List<String>, then move the logic
+// that determines visibility to the presenter.
 class ClazzWorkDetailPresenter(context: Any,
                           arguments: Map<String, String>, view: ClazzWorkDetailView,
                            di: DI, lifecycleOwner: DoorLifecycleOwner)
@@ -67,6 +69,9 @@ class ClazzWorkDetailPresenter(context: Any,
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
+        //TODO: why not use the normal permission check here? We have the UPDATE_CLASSWORK permission
+        // which is checked by class.
+
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val loggedInPerson: Person? = withTimeoutOrNull(2000){

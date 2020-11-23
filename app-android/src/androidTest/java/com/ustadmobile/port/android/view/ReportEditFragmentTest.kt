@@ -3,8 +3,6 @@ package com.ustadmobile.port.android.view
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso.onIdle
-import androidx.test.espresso.IdlingRegistry
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
@@ -31,7 +29,7 @@ class ReportEditFragmentTest: TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -49,10 +47,6 @@ class ReportEditFragmentTest: TestCase() {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    @Before
-    fun setup(){
-        dbRule.db.clearAllTables()
-    }
 
 
     @AdbScreenRecord("with no report present, fill all the fields and navigate to detail")
@@ -66,13 +60,13 @@ class ReportEditFragmentTest: TestCase() {
 
         val verb = VerbEntity().apply {
             urlId = "progressed"
-            verbUid = dbRule.db.verbDao.insert(this)
+            verbUid = dbRule.repo.verbDao.insert(this)
         }
 
         val xlangEntry = XLangMapEntry().apply {
             verbLangMapUid = verb.verbUid
             valueLangMap = "Progress"
-            statementLangMapUid = dbRule.db.xLangMapEntryDao.insert(this)
+            statementLangMapUid = dbRule.repo.xLangMapEntryDao.insert(this)
         }
 
         val verbDisplay = VerbDisplay().apply {
@@ -84,13 +78,13 @@ class ReportEditFragmentTest: TestCase() {
         val person = Person().apply {
             firstNames = "Ustad"
             lastName = "Mobile"
-            personUid = dbRule.db.personDao.insert(this)
+            personUid = dbRule.repo.personDao.insert(this)
         }
 
         val contentEntry = ContentEntry().apply {
             title = "Khan Academy"
             description = "content here"
-            contentEntryUid = dbRule.db.contentEntryDao.insert(this)
+            contentEntryUid = dbRule.repo.contentEntryDao.insert(this)
         }
 
         var currentEntity: ReportWithFilters? = null
@@ -121,7 +115,7 @@ class ReportEditFragmentTest: TestCase() {
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-                val reportList = dbRule.db.reportDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
+                val reportList = dbRule.repo.reportDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
                     it.isNotEmpty()
                 }
 
@@ -145,7 +139,7 @@ class ReportEditFragmentTest: TestCase() {
             yAxis = Report.AVG_DURATION
             xAxis = Report.WEEK
             subGroup = Report.GENDER
-            reportUid = dbRule.db.reportDao.insert(this)
+            reportUid = dbRule.repo.reportDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
@@ -174,7 +168,7 @@ class ReportEditFragmentTest: TestCase() {
         val person = Person().apply {
             firstNames = "Ustad"
             lastName = "Mobile"
-            personUid = dbRule.db.personDao.insert(this)
+            personUid = dbRule.repo.personDao.insert(this)
         }
 
         init{

@@ -41,6 +41,7 @@ fun Route.ContainerUpload() {
 
         post("finalizeEntries/") {
             val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
+            val repo: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_REPO)
             val sessionId = call.parameters["sessionId"] ?: ""
 
             val skipSessionFile = sessionId.isNullOrEmpty()
@@ -62,7 +63,7 @@ fun Route.ContainerUpload() {
 
                 var containerFromDb = db.containerDao.findByUid(container.containerUid)
                 if (containerFromDb == null) {
-                    db.containerDao.insertWithReplace(container)
+                    repo.containerDao.insertWithReplace(container)
                     containerFromDb = container
                 }
 

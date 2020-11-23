@@ -4,12 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentProductDetailBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.*
@@ -19,11 +21,10 @@ import com.ustadmobile.core.db.dao.ProductDao
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ProductDetailView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.Category
-import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
-import com.ustadmobile.lib.db.entities.PersonWithInventoryCount
-import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -116,11 +117,18 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
         //TODO
     }
     override fun handleClickRecordDelivery(product: ProductWithInventoryCount) {
-        //TOOD
+
+        navigateToEditEntity(null, R.id.inventoryitem_edit_dest, InventoryItem::class.java,
+        argBundle = bundleOf(
+                UstadView.ARG_PRODUCT_UID to arguments?.get(UstadView.ARG_ENTITY_UID).toString()))
+
     }
 
     override fun handleClickRecordSale(product: ProductWithInventoryCount) {
-        //TODO
+
+        navigateToEditEntity(null, R.id.saleitem_edit_dest, SaleItem::class.java,
+                argBundle = bundleOf(
+                        UstadView.ARG_PRODUCT_UID to arguments?.get(UstadView.ARG_ENTITY_UID).toString()))
     }
 
 

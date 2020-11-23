@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,11 +16,14 @@ import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.InventoryItemEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Category
 import com.ustadmobile.lib.db.entities.InventoryItem
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithInventory
 import com.ustadmobile.port.android.util.ext.*
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 
 
 interface InventoryItemEditFragmentEventHandler {
@@ -48,7 +52,8 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentInventoryItemEditBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentInventoryItemEditBinding.inflate(inflater, container,
+                false).also {
             rootView = it.root
         }
 
@@ -114,8 +119,13 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
             mBinding?.fieldsEnabled = value
         }
 
+
+
     override fun addWE() {
-        //TODO: Go to PersonEdit with We and LE arguments in
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(null, R.id.person_edit_dest, Person::class.java
+            ,argBundle = bundleOf(UstadView.ARG_FILTER_PERSON_WE to "true")
+        )
 
     }
 }

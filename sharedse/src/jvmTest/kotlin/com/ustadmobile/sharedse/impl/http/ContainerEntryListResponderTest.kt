@@ -12,6 +12,8 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.port.sharedse.impl.http.ContainerEntryListResponder
 import com.ustadmobile.port.sharedse.impl.http.ContainerEntryListResponder.Companion.PARAM_CONTAINER_UID
 import com.ustadmobile.sharedse.util.UstadTestRule
+import com.ustadmobile.sharedse.util.activeDbInstance
+import com.ustadmobile.sharedse.util.activeRepoInstance
 import com.ustadmobile.test.util.ext.insertContainerFromResources
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
@@ -49,11 +51,12 @@ class ContainerEntryListResponderTest {
             import(ustadTestRule.diModule)
         }
 
-        val accountManager: UstadAccountManager by di.instance()
-        val activeDb: UmAppDatabase by di.on(accountManager.activeAccount).instance(tag = TAG_DB)
+        val activeDb: UmAppDatabase by di.activeDbInstance()
+        val activeRepo: UmAppDatabase by di.activeRepoInstance()
         val containerPair = runBlocking {
-            activeDb.insertContainerFromResources(testFileRule.newFolder(), testFileRule.newFolder(),
-                *RES_FILENAMES.map { "$RES_FOLDER$it" }.toTypedArray())
+            insertContainerFromResources(activeDb, activeRepo, testFileRule.newFolder(),
+                    testFileRule.newFolder(),
+                    *RES_FILENAMES.map { "$RES_FOLDER$it" }.toTypedArray())
         }
 
         container = containerPair.first

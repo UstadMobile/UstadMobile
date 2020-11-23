@@ -6,12 +6,12 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
-import com.ustadmobile.lib.database.annotation.*
-import com.ustadmobile.lib.db.entities.XObjectEntity.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = XObjectEntity.TABLE_ID, notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${XObjectEntity.TABLE_ID} AS tableId 
+        FROM DeviceSession"""])
 @Serializable
 class XObjectEntity {
 

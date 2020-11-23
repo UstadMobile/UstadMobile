@@ -9,6 +9,7 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
+import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -72,20 +73,20 @@ class ContentEntry2DetailPresenterTest {
         }
 
         val db: UmAppDatabase by di.activeDbInstance()
-        val repo: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
 
         repoContentEntrySpyDao = spy(repo.contentEntryDao)
         whenever(repo.contentEntryDao).thenReturn(repoContentEntrySpyDao)
         createdEntry = ContentEntry().apply {
             title = "Dummy Entry"
             leaf = true
-            contentEntryUid = db.contentEntryDao.insert(this)
+            contentEntryUid = repo.contentEntryDao.insert(this)
         }
 
         entryContainer = Container().apply {
             containerContentEntryUid = createdEntry?.contentEntryUid ?: 0L
             cntLastModified = getSystemTimeInMillis()
-            containerUid = db.containerDao.insert(this)
+            containerUid = repo.containerDao.insert(this)
         }
 
         presenterArgs = mapOf(ARG_ENTITY_UID to createdEntry?.contentEntryUid.toString())

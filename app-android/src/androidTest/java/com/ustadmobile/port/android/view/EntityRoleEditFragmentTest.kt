@@ -4,11 +4,8 @@ import android.app.Application
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso.onIdle
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.swipeUp
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -17,31 +14,27 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.EntityRole
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.screen.EntityRoleEditScreen
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
-import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.letOnFragment
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Before
 import org.junit.Rule
+
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import org.junit.Test
 import java.lang.Thread.sleep
 
 
 @AdbScreenRecord("EntityRoleEdit screen Test")
-class EntityRoleEditFragmentTest {
+class EntityRoleEditFragmentTest : TestCase() {
 
     @JvmField
     @Rule
@@ -49,7 +42,7 @@ class EntityRoleEditFragmentTest {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -57,7 +50,6 @@ class EntityRoleEditFragmentTest {
 
     private val context = ApplicationProvider.getApplicationContext<Application>()
 
-    private lateinit var mockWebServer: MockWebServer
 
     private lateinit var serverUrl: String
 
@@ -66,15 +58,9 @@ class EntityRoleEditFragmentTest {
     @Before
     fun setUp(){
         impl.messageIdMap = MessageIDMap.ID_MAP
-        mockWebServer = MockWebServer()
-        mockWebServer.start()
-        serverUrl = mockWebServer.url("/").toString()
+
     }
 
-    @After
-    fun tearDown() {
-        mockWebServer.shutdown()
-    }
 
     @AdbScreenRecord("Given new entity role assignment. When submitted without Role " +
             " selct, should show error")
@@ -84,15 +70,15 @@ class EntityRoleEditFragmentTest {
 
         val newRole = Role().apply {
             roleName = "Role A"
-            roleUid= dbRule.db.roleDao.insert(this)
+            roleUid= dbRule.repo.roleDao.insert(this)
         }
         val schoolA = School().apply {
             schoolName = "School A"
             schoolActive = true
-            schoolUid = dbRule.db.schoolDao.insert(this)
+            schoolUid = dbRule.repo.schoolDao.insert(this)
         }
 
-        val person =  dbRule.db.insertPersonOnlyAndGroup(Person().apply {
+        val person =  dbRule.repo.insertPersonOnlyAndGroup(Person().apply {
             firstNames = "Person"
             lastName = "Two"
             admin = false
@@ -145,6 +131,7 @@ class EntityRoleEditFragmentTest {
     }
 
     private fun scrollToBottom(){
+        //TODO: convert to kaspresso
         onView(withId(R.id.nested_view)).perform(swipeUp())
         //make sure scroll animation is completed
         sleep(500)

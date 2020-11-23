@@ -1,5 +1,6 @@
 package com.ustadmobile.core.impl
 
+import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UnauthorizedException
@@ -66,6 +67,10 @@ class UstadAccountManagerTest {
                 mock<UmAppDatabase>(extraInterfaces = arrayOf(DoorDatabaseSyncRepository::class)) {
                     on { (this as DoorDatabaseSyncRepository).clientId }.thenReturn(42)
                 }
+            }
+
+            bind<Gson>() with singleton {
+                Gson()
             }
         }
     }

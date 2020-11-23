@@ -1,7 +1,8 @@
 package com.ustadmobile.port.sharedse.contentformats
 
-import com.ustadmobile.port.sharedse.contentformats.epub.EpubTypeFilePlugin
+import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -20,11 +21,14 @@ class EpubFileTypePluginTest {
         val tempEpubFile = tmpFolder.newFile()
         tempEpubFile.copyInputStreamToFile(inputStream)
 
-        val epubPlugin = EpubTypeFilePlugin()
-        val contentEntry = epubPlugin.getContentEntry(tempEpubFile)
-        Assert.assertEquals("Got ContentEntry with expected title",
-                "A Textbook of Sources for Teachers and Teacher-Training Classes",
-                contentEntry?.title)
+        val epubPlugin = EpubTypePluginCommonJvm()
+        runBlocking {
+            val contentEntry = epubPlugin.extractMetadata(tempEpubFile.path)
+            Assert.assertEquals("Got ContentEntry with expected title",
+                    "A Textbook of Sources for Teachers and Teacher-Training Classes",
+                    contentEntry?.title)
+        }
+
     }
 
 }

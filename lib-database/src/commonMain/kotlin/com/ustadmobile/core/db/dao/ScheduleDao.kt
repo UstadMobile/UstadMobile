@@ -2,19 +2,12 @@ package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.*
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.DateRange
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.Schedule
-import com.ustadmobile.lib.db.entities.ScheduledCheck
 
 
-@UmDao(inheritPermissionFrom = ClazzDao::class, 
-        inheritPermissionForeignKey = "scheduleClazzUid", 
-        inheritPermissionJoinedPrimaryKey = "clazzUid")
-@UmRepository
+@Repository
 @Dao
 abstract class ScheduleDao : BaseDao<Schedule>, OneToManyJoinDao<Schedule> {
 

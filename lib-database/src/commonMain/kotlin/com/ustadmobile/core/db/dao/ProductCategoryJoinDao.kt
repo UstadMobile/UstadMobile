@@ -6,10 +6,12 @@ import com.ustadmobile.core.db.dao.ProductDao.Companion.SELECT_ACCOUNT_IS_ADMIN
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ProductCategoryJoin
+import com.ustadmobile.door.annotation.Repository
+
 
 @UmDao(updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN,
         insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
-@UmRepository
+@Repository
 @Dao
 abstract class ProductCategoryJoinDao : BaseDao<ProductCategoryJoin>,
         OneToManyJoinDao<ProductCategoryJoin>{

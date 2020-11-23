@@ -38,14 +38,16 @@
             android:layout_height="wrap_content">
 
 
-            <include layout="@layout/item_createnew"
+            <include
                 android:id="@+id/fragment_inventory_item_edit_new_we"
-                android:layout_width="match_parent"
+                layout="@layout/item_createnew"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                app:onClickNew="@{() -> activityEventHandler.addWE()}"
-                app:createNewText="@{@string/add_category}"
+                app:createNewText="@{@string/add_we}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:onClickNew="@{() -> activityEventHandler.addWE()}" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_marginTop="@dimen/dimen_8dp"

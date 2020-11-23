@@ -4,11 +4,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.PersonWithSaleInfoListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.PersonWithSaleInfoListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.PersonWithSaleInfo
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
@@ -51,7 +53,9 @@ class PersonWithSaleInfoListFragment(): UstadListViewFragment<PersonWithSaleInfo
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout) {
-            navigateToEditEntity(null, R.id.person_detail_dest, PersonWithSaleInfo::class.java)
+            navigateToEditEntity(null, R.id.person_detail_dest, PersonWithSaleInfo::class.java
+                    ,argBundle = bundleOf(UstadView.ARG_FILTER_PERSON_WE to "true")
+            )
         }else{
             super.onClick(view)
         }

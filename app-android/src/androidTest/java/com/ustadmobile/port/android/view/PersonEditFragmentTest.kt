@@ -37,7 +37,7 @@ class PersonEditFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -61,7 +61,6 @@ class PersonEditFragmentTest : TestCase() {
 
     @Before
     fun setUp() {
-        dbRule.db.clearAllTables()
         impl.messageIdMap = MessageIDMap.ID_MAP
         mockWebServer = MockWebServer()
         mockWebServer.start()
@@ -112,12 +111,12 @@ class PersonEditFragmentTest : TestCase() {
         init {
             val newRole = Role().apply {
                 roleName = "Role A"
-                roleUid = dbRule.db.roleDao.insert(this)
+                roleUid = dbRule.repo.roleDao.insert(this)
             }
             val schoolA = School().apply {
                 schoolName = "School A"
                 schoolActive = true
-                schoolUid = dbRule.db.schoolDao.insert(this)
+                schoolUid = dbRule.repo.schoolDao.insert(this)
             }
             entityRoles = listOf(EntityRoleWithNameAndRole().apply {
                 entityRoleRole = newRole
@@ -168,12 +167,12 @@ class PersonEditFragmentTest : TestCase() {
 
             val newRole = Role().apply {
                 roleName = "Role A"
-                roleUid = dbRule.db.roleDao.insert(this)
+                roleUid = dbRule.repo.roleDao.insert(this)
             }
             val schoolA = School().apply {
                 schoolName = "School A"
                 schoolActive = true
-                schoolUid = dbRule.db.schoolDao.insert(this)
+                schoolUid = dbRule.repo.schoolDao.insert(this)
             }
             entityRoles = listOf(EntityRoleWithNameAndRole().apply {
                 entityRoleRole = newRole
@@ -189,7 +188,7 @@ class PersonEditFragmentTest : TestCase() {
                 lastName = "One"
                 active = true
                 admin = false
-                personUid = dbRule.db.insertPersonOnlyAndGroup(this).personUid
+                personUid = dbRule.repo.insertPersonOnlyAndGroup(this).personUid
             }
 
 

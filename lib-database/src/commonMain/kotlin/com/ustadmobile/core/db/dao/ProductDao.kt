@@ -9,10 +9,9 @@ import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Category
 import com.ustadmobile.lib.db.entities.Product
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
+import com.ustadmobile.door.annotation.Repository
 
-@UmDao(updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN,
-        insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
-@UmRepository
+@Repository
 @Dao
 abstract class ProductDao : BaseDao<Product> {
 

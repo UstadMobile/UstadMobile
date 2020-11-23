@@ -46,10 +46,12 @@ fun Route.ContentEntryLinkImporter() {
             val contentEntry = call.receive<ContentEntryWithLanguage>()
             val scraperType = call.request.queryParameters["scraperType"] ?: ""
 
+
             val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
+            val repo: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_REPO)
             val entryFromDb = db.contentEntryDao.findByUid(contentEntry.contentEntryUid)
             if (entryFromDb == null) {
-                db.contentEntryDao.insertWithReplace(contentEntry)
+                repo.contentEntryDao.insertWithReplace(contentEntry)
             }
 
             val scraperManager: ScraperManager by di().on(call).instance()

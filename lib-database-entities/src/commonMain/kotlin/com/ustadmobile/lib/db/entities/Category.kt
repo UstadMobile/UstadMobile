@@ -41,7 +41,7 @@ open class Category() {
     var categoryPictureUid: Long = 0
 
     //If the category active . False is effectively delete
-    var categoryActive: Boolean = false
+    var categoryActive: Boolean = true
 
     @MasterChangeSeqNum
     var categoryMCSN: Long = 0

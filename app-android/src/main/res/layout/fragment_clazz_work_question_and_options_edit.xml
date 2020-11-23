@@ -37,6 +37,9 @@
             name="presenter"
             type="com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter" />
 
+        <variable
+            name="errorText"
+            type="String" />
 
         <variable
             name="activityEventHandler"
@@ -83,6 +86,10 @@
                 app:layout_constraintStart_toStartOf="parent"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
+                android:focusable="false"
+                app:errorText="@{errorText}"
+                app:errorEnabled="@{errorText != null}"
+                app:errorTextColor="?colorError"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
@@ -92,6 +99,7 @@
                 <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
                     android:id="@+id/fragment_clazz_work_question_and_options_edit_type_ac"
                     android:layout_width="match_parent"
+                    android:focusable="false"
                     android:layout_height="wrap_content"
                     android:inputType="none"
                     app:layout_constraintEnd_toEndOf="parent"

@@ -10,8 +10,9 @@ import com.ustadmobile.lib.db.entities.InventoryTransaction
 import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
 import com.ustadmobile.lib.db.entities.PersonWithInventoryCount
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
+import com.ustadmobile.door.annotation.Repository
 
-@UmRepository
+@Repository
 @Dao
 abstract class InventoryTransactionDao : BaseDao<InventoryTransaction> {
 
