@@ -118,7 +118,7 @@ class ContentEntryEdit2PresenterTest {
 
     private fun createMockView(isUriNull: Boolean = false) {
         mockView = mock {
-            on { entryCompressed }.thenAnswer{ true }
+            on { compressionEnabled }.thenAnswer{ true }
             on { videoDimensions }.thenAnswer{ Pair(0,0) }
             on { selectedStorageIndex }.thenAnswer { 0 }
             on { storageOptions }.thenAnswer { runBlocking { systemImpl.getStorageDirsAsync(context) } }
