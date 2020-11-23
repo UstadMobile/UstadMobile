@@ -829,4 +829,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     -->
     <string name="moved_x_entries">Moved %1$s entries</string>
 
+    <string name="end_is_before_start_error">End is before start</string>
+
 </resources>
