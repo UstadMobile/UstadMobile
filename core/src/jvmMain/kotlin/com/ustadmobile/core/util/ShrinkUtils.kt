@@ -26,8 +26,9 @@ object ShrinkUtils {
 
             val osName = System.getProperty("os.name")
             // checks linux
-            if (osName.contains("nix") || osName.contains("nux") || osName.contains("aix")) {
-                File(it, commandName).path
+            val commonPath = File(it, commandName)
+            if(commonPath.exists()){
+                return commonPath.path
                 // checks windows
             } else if (osName.contains("win")) {
                 if (File(it, "$commandName.exe").exists()) {

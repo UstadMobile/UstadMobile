@@ -11,10 +11,10 @@ fun File.commandExists(): Boolean {
     val osName = System.getProperty("os.name")
 
     // checks linux
-    if(osName.contains("nix") || osName.contains("nux") || osName.contains("aix")){
-        return exists()
+    if(exists()){
+        return true
         // checks windows
-    }else if(osName.contains("win")){
+    }else if(osName.contains("Win")){
         return File(parent,"$name.exe").exists() || File(parent,"$name.bat").exists()
     }
     return false
