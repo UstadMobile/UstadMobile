@@ -15,7 +15,6 @@ class ViewNameToDestMap: DestinationProvider {
             ClazzDetailView.VIEW_NAME to UstadDestination(R.id.clazz_detail_dest),
             HolidayCalendarListView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_list_dest),
             HolidayCalendarEditView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_edit_dest),
-            TimeZoneEntityListView.VIEW_NAME to UstadDestination(R.id.timezoneentity_list_dest),
             SettingsView.VIEW_NAME to UstadDestination(R.id.settings_list_dest),
             RoleListView.VIEW_NAME to UstadDestination(R.id.role_list_dest),
             RoleEditView.VIEW_NAME to UstadDestination(R.id.role_edit_dest),
@@ -53,7 +52,8 @@ class ViewNameToDestMap: DestinationProvider {
             InviteViaLinkView.VIEW_NAME to UstadDestination(R.id.invite_via_link_dest),
             EntityRoleEditView.VIEW_NAME to UstadDestination(R.id.entityrole_edit_dest),
             JoinWithCodeView.VIEW_NAME to UstadDestination(R.id.join_with_code_dest),
-            LearnerGroupMemberListView.VIEW_NAME to UstadDestination(R.id.learner_group_member_list_dest)
+            LearnerGroupMemberListView.VIEW_NAME to UstadDestination(R.id.learner_group_member_list_dest),
+            TimeZoneListView.VIEW_NAME to UstadDestination(R.id.time_zone_list_dest)
     )
 
     override val navControllerViewId: Int
