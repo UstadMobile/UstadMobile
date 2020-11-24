@@ -40,6 +40,7 @@
         style="?android:attr/progressBarStyleHorizontal"
         android:layout_width="match_parent"
         android:layout_height="@dimen/dimen_2dp"
+        android:scaleY="2"
         android:progressDrawable="@drawable/progress_bar_drawable"
         android:layout_marginBottom="@dimen/dimen_2dp"
         />

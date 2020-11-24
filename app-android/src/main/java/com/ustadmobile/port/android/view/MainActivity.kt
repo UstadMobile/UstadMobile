@@ -71,6 +71,11 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private var searchView: SearchView? = null
 
+    //This is actually managed by the underlying fragments.
+    override var loading: Boolean
+        get() = false
+        set(value) {}
+
     //Observe the active account to show/hide the settings based on whether or not the user is admin
     private val mActiveUserObserver = Observer<UmAccount> {account ->
         GlobalScope.launch(Dispatchers.Main) {
