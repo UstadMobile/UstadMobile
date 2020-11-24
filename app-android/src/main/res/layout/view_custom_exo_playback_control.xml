@@ -44,6 +44,7 @@
 
         <ImageButton
             android:id="@+id/exo_subtitle_button"
+            android:visibility="gone"
             style="@style/ExoMediaButton.Subtitle"/>
 
     </LinearLayout>

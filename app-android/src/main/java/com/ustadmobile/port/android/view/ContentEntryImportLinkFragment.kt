@@ -74,7 +74,9 @@ class ContentEntryImportLinkFragment : UstadBaseFragment(), ContentEntryImportLi
         super.onDestroyView()
         mPresenter?.onDestroy()
         mPresenter = null
+        menuDoneItem = null
         mBinding = null
+
     }
 
 

@@ -26,6 +26,10 @@ import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.parseMap
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -82,6 +86,11 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
                 ?: throw IllegalArgumentException("container folder not given")
         val contentEntryUid = containerImportJob.cijContentEntryUid.takeIf { it != 0L }
                 ?: throw IllegalArgumentException("contentEntryUid not given")
+        val params = containerImportJob.cijConversionParams
+        var conversionParams: Map<String, String> = mapOf()
+        if(params != null){
+            conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+        }
 
         val importerJob = GlobalScope.async { progressUpdater() }
         var container: Container? = null
@@ -90,7 +99,7 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
                     filePath,
                     mimeType,
                     contentEntryUid,
-                    containerBaseDir, mapOf()) {
+                    containerBaseDir, conversionParams) {
                 importProgress.value = it.toLong()
             }
         } catch (e: Exception) {
@@ -112,7 +121,7 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
         }
     }
 
-    suspend fun startUpload(): Int {
+    suspend fun upload(): Int {
 
         var attemptNum = 0
         var uploadAttemptStatus = JobStatus.FAILED

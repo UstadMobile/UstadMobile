@@ -19,6 +19,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
@@ -127,6 +128,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
                                       arguments: Bundle?) {
         invalidateOptionsMenu()
         onAppBarExpand(true)
+        (mBinding.root.collapsing_toolbar.layoutParams as? AppBarLayout.LayoutParams)
+                ?.scrollFlags  = AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
 
         slideBottomNavigation(true)
     }

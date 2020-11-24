@@ -13,10 +13,13 @@ class ScrapeRun() {
 
     var scrapeType: String? = null
 
-    var status: Int = 0
+    var scrapeRunStatus: Int = 0
 
-    constructor(scrapeType: String, status: Int) : this() {
+    var conversionParams: String? = null
+
+    constructor(scrapeType: String, status: Int, conversionParams: String?) : this() {
         this.scrapeType = scrapeType
-        this.status = status
+        this.scrapeRunStatus = status
+        this.conversionParams = conversionParams
     }
 }

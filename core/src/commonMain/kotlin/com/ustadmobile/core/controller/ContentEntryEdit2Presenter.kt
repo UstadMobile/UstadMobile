@@ -8,6 +8,7 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMUUID
+import com.ustadmobile.core.util.ext.convertToJsonObject
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ContentEntryEdit2View
@@ -18,13 +19,16 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
+import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
 import org.kodein.di.DI
 import org.kodein.di.instanceOrNull
 import org.kodein.di.on
@@ -143,13 +147,17 @@ class ContentEntryEdit2Presenter(context: Any,
 
                 val metaData = view.entryMetaData
                 val uri = metaData?.uri
+                val videoDimensions = view.videoDimensions
+                val conversionParams = mapOf("compress" to view.compressionEnabled.toString(),
+                        "dimensions" to "${videoDimensions.first}x${videoDimensions.second}")
                 if (metaData != null && uri != null) {
 
                     if (uri.startsWith("file://")) {
 
                         metaData.contentEntry = entity
                         contentImportManager?.queueImportContentFromFile(uri, metaData,
-                                view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString())
+                                view.storageOptions?.get(view.selectedStorageIndex)?.dirURI.toString(),
+                                conversionParams)
 
                         view.finishWithResult(listOf(entity))
                         return@launch
@@ -157,17 +165,31 @@ class ContentEntryEdit2Presenter(context: Any,
 
                     } else {
 
-                        val client = defaultHttpClient().post<HttpStatement>() {
-                            url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl, "/import/downloadLink/"))
-                            parameter("parentUid", parentEntryUid)
-                            parameter("scraperType", view.entryMetaData?.scraperType)
-                            parameter("url", view.entryMetaData?.uri)
-                            header("content-type", "application/json")
-                            body = entity
-                        }.execute()
+                        var client: HttpResponse? = null
+                        try {
 
+                            client = defaultHttpClient().post<HttpStatement>() {
+                                url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
+                                        "/import/downloadLink/"))
+                                parameter("parentUid", parentEntryUid)
+                                parameter("scraperType", view.entryMetaData?.scraperType)
+                                parameter("url", view.entryMetaData?.uri)
+                                parameter("conversionParams",
+                                        Json.stringify(JsonObject.serializer(),
+                                                conversionParams.convertToJsonObject()))
+                                header("content-type", "application/json")
+                                body = entity
+                            }.execute()
+
+                        }catch (e: Exception){
+                            view.showSnackBar("${systemImpl.getString(MessageID.error, 
+                                    context)}: ${e.message ?: ""}", {})
+                            return@launch
+                        }
 
                         if (client.status.value != 200) {
+                            view.showSnackBar(systemImpl.getString(MessageID.error,
+                                    context), {})
                             return@launch
                         }
 
@@ -208,7 +230,12 @@ class ContentEntryEdit2Presenter(context: Any,
                 if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
                 view.fileImportErrorVisible = false
                 view.entity = entry
+                if(metadata.mimeType.startsWith("video/")){
+                    view.videoUri = filePath
+                }
             }
+            view.loading = false
+            view.fieldsEnabled = true
         }
     }
 

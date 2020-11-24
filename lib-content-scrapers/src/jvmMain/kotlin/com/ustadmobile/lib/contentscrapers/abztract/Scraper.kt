@@ -15,6 +15,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import com.ustadmobile.lib.db.entities.ScrapeQueueItemWithScrapeRun
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -45,7 +46,7 @@ abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentCon
 
     var contentEntry: ContentEntry? = null
     var parentContentEntry: ContentEntry? = null
-    var scrapeQueueItem: ScrapeQueueItem? = null
+    var scrapeQueueItem: ScrapeQueueItemWithScrapeRun? = null
 
     init {
         runBlocking {

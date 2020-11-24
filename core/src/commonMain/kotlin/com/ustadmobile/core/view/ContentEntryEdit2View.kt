@@ -22,6 +22,12 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var entryMetaData: ImportedContentEntryMetaData?
 
+    var compressionEnabled: Boolean
+
+    val videoDimensions: Pair<Int, Int>
+
+    var videoUri: String?
+
     companion object {
 
         const val VIEW_NAME = "ContentEntryEdit2EditView"

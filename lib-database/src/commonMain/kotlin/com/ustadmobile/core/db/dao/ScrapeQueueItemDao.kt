@@ -2,9 +2,9 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.Transaction
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import com.ustadmobile.lib.db.entities.ScrapeQueueItemWithScrapeRun
 
 @Dao
 abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
@@ -28,8 +28,10 @@ abstract class ScrapeQueueItemDao : BaseDao<ScrapeQueueItem> {
     @Query("UPDATE ScrapeQueueItem SET timeFinished = :timeFinished WHERE sqiUid = :uid")
     abstract fun setTimeFinished(uid: Int, timeFinished: Long)
 
-    @Query("SELECT * FROM ScrapeQueueItem where sqiUid = :sqiUid")
-    abstract fun findByUid(sqiUid: Int): ScrapeQueueItem?
+    @Query("""SELECT ScrapeQueueItem.*, ScrapeRun.* FROM ScrapeQueueItem 
+                    LEFT JOIN ScrapeRun ON  ScrapeQueueItem.runId = ScrapeRun.scrapeRunUid
+                    WHERE ScrapeQueueItem.sqiUid = :sqiUid""")
+    abstract fun findByUid(sqiUid: Int): ScrapeQueueItemWithScrapeRun?
 
     companion object {
 

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 49,
-    "identityHash": "8d03fa6e042eab4efcd3461691ed54cd",
+    "identityHash": "467352b8f2fb96a1bee2a923014a5229",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -2796,12 +2796,22 @@
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_ScrapeQueueItem_status_itemType",
+            "unique": false,
+            "columnNames": [
+              "status",
+              "itemType"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ScrapeQueueItem_status_itemType` ON `${TABLE_NAME}` (`status`, `itemType`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
         "tableName": "ScrapeRun",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scrapeRunUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `scrapeType` TEXT, `status` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`scrapeRunUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `scrapeType` TEXT, `scrapeRunStatus` INTEGER NOT NULL, `conversionParams` TEXT)",
         "fields": [
           {
             "fieldPath": "scrapeRunUid",
@@ -2816,10 +2826,16 @@
             "notNull": false
           },
           {
-            "fieldPath": "status",
-            "columnName": "status",
+            "fieldPath": "scrapeRunStatus",
+            "columnName": "scrapeRunStatus",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "conversionParams",
+            "columnName": "conversionParams",
+            "affinity": "TEXT",
+            "notNull": false
           }
         ],
         "primaryKey": {
@@ -4069,6 +4085,32 @@
             "schoolUid"
           ],
           "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "TimeZoneEntity",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` TEXT NOT NULL, `rawOffset` INTEGER NOT NULL, PRIMARY KEY(`id`))",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rawOffset",
+            "columnName": "rawOffset",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id"
+          ],
+          "autoGenerate": false
         },
         "indices": [],
         "foreignKeys": []
@@ -9504,7 +9546,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '8d03fa6e042eab4efcd3461691ed54cd')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '467352b8f2fb96a1bee2a923014a5229')"
     ]
   }
 }
