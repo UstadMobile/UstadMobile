@@ -91,6 +91,8 @@ class ClazzEdit2Presenter(context: Any,
 
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
         GlobalScope.launch(doorMainDispatcher()) {
+            view.loading = true
+            view.fieldsEnabled = false
             if(entity.clazzUid == 0L) {
                 repo.createNewClazzAndGroups(entity, systemImpl, context)
             }else {
@@ -109,6 +111,7 @@ class ClazzEdit2Presenter(context: Any,
                     accountManager.activeAccount.endpointUrl,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
 
+            view.loading = false
             onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
         }
     }

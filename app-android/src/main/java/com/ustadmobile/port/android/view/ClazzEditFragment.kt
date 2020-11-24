@@ -104,13 +104,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             mDataBinding?.fieldsEnabled = value
         }
 
-    override var loading: Boolean = false
-        set(value) {
-            field = value
-            //TODO: set this on activity
-        }
-
-
 
     override fun showNewScheduleDialog() {
         onSaveStateToBackStackStateHandle()

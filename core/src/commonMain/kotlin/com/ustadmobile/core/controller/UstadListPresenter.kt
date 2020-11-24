@@ -46,10 +46,8 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
         super.onCreate(savedState)
         mListMode = ListViewMode.valueOf(
                 arguments[UstadView.ARG_LISTMODE] ?: ListViewMode.BROWSER.toString())
-        view.loading = true
         GlobalScope.launch(doorMainDispatcher()) {
             onLoadFromDb()
-            view.loading = false
         }
     }
 
