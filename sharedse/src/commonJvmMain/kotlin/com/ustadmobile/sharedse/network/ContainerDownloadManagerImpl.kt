@@ -23,6 +23,8 @@ import com.ustadmobile.door.DoorObserver
 import org.kodein.di.*
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.sharedse.io.FileSe
+
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 
 /**
@@ -443,6 +445,41 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
                 checkQueue()
             }
         }
+    }
+
+    override suspend fun deleteDownloadJobItem(downloadJobItemUid: Int, onprogress: (progress: Int) -> Unit): Boolean {
+        appDb.downloadJobItemDao.findByUid(downloadJobItemUid)?: return false
+
+        appDb.downloadJobItemDao.forAllChildDownloadJobItemsRecursiveAsync(downloadJobItemUid) { childItems ->
+            childItems.forEach {
+                appDb.containerEntryDao.deleteByContentEntryUid(it.djiContentEntryUid)
+
+                handleDownloadJobItemUpdated(DownloadJobItem(it).also {
+                    it.djiStatus = JobStatus.DELETED
+                }, autoCommit = false)
+            }
+        }
+
+        commit()
+
+        var numFailures = 0
+        appDb.runInTransaction(Runnable {
+            var zombieEntryFilesList: List<ContainerEntryFile>
+            do {
+                zombieEntryFilesList = appDb.containerEntryFileDao.findZombieEntries()
+                zombieEntryFilesList.forEach {
+                    val filePath = it.cefPath
+                    if(filePath == null || !FileSe(filePath).delete()) {
+                        numFailures++
+                    }
+                }
+
+                appDb.containerEntryFileDao.deleteListOfEntryFiles(zombieEntryFilesList)
+            }while(zombieEntryFilesList.isNotEmpty())
+            onprogress.invoke(100)
+        })
+
+        return numFailures == 0
     }
 
     override suspend fun handleDownloadJobUpdated(downloadJob: DownloadJob) = withContext(singleThreadContext){

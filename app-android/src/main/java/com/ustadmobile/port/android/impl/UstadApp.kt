@@ -11,7 +11,6 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.ContentImportManager
-import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.contentformats.ContentImportManagerImplAndroid
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
@@ -61,7 +60,6 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
 
-import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**
@@ -123,6 +121,11 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<DownloadPreparationRequester>() with scoped(EndpointScope.Default).singleton {
             DownloadPreparationRequesterAndroidImpl(applicationContext, context)
         }
+
+        bind<DeletePreparationRequester>() with scoped(EndpointScope.Default).singleton {
+            DeletePreparationRequesterAndroidImpl(applicationContext, context)
+        }
+
 
         bind<ContainerDownloadRunner>() with factory { arg: DownloadJobItemRunnerDIArgs ->
             DownloadJobItemRunner(arg.downloadJobItem,

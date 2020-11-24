@@ -10,6 +10,7 @@
     <string name="register_incorrect_email">Wrong email address</string>
     <string name="group_activity">Group\nActivity</string>
     <string name="select_group_members">Select group members</string>
+    <string name="confirm_delete_message">Are you sure you want to delete this entry from your device?</string>
 
     <string name='wrong_user_pass_combo'>Wrong username/password: try again.</string>
     <string name='login_network_error'>Network error: please check you are online.</string>
