@@ -222,6 +222,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             if (uri != null) {
                 try {
                     loading = true
+                    fieldsEnabled = false
                     GlobalScope.launch {
                         val input = requireContext().contentResolver.openInputStream(uri)
                         val importFolder = File(requireContext().filesDir, "import")
@@ -241,6 +242,8 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    loading = false
+                    fieldsEnabled = true
                 }
             }
 

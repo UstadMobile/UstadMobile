@@ -235,6 +235,7 @@ class ContentEntryEdit2Presenter(context: Any,
                 }
             }
             view.loading = false
+            view.fieldsEnabled = true
         }
     }
 
