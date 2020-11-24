@@ -8,12 +8,14 @@ import com.ustadmobile.core.view.PersonGroupListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonGroup
+import com.ustadmobile.lib.db.entities.PersonGroupWithMemberCount
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
 class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, view: PersonGroupListView,
         di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<PersonGroupListView, PersonGroup>(context, arguments, view, di, lifecycleOwner) {
+    : UstadListPresenter<PersonGroupListView, PersonGroup>(context, arguments, view, di,
+        lifecycleOwner), PersonGroupListItemListener {
 
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
@@ -36,14 +38,7 @@ class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, vie
     }
 
     private fun updateListOnView() {
-        /* TODO: Update the list on the view from the appropriate DAO query, e.g.
-        view.list = when(sortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.daoName.findAllActiveClazzesSortByNameAsc(
-                    searchQuery, loggedInPersonUid)
-            SortOrder.ORDER_NAME_DSC -> repo.daoName.findAllActiveClazzesSortByNameDesc(
-                    searchQuery, loggedInPersonUid)q
-        }
-        */
+      view.list = repo.personGroupDao.getAllGroupsLive()
     }
 
     override fun handleClickEntry(entry: PersonGroup) {
@@ -66,5 +61,9 @@ class PersonGroupListPresenter(context: Any, arguments: Map<String, String>, vie
             currentSortOrder = sortOrder
             updateListOnView()
         }
+    }
+
+    override fun onClickGroup(group: PersonGroupWithMemberCount) {
+        //TODO :This
     }
 }

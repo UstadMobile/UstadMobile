@@ -7,9 +7,10 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.ItemPersongroupListItemBinding
+import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.PersonGroupListPresenter
+import com.ustadmobile.core.controller.ProductListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -18,6 +19,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonGroupListView
 import com.ustadmobile.lib.db.entities.PersonGroup
 import com.ustadmobile.lib.db.entities.PersonGroupWithMemberCount
+import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -32,39 +34,18 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
     override val listPresenter: UstadListPresenter<*, in PersonGroupWithMemberCount>?
         get() = mPresenter
 
-    class PersonGroupListViewHolder(val itemBinding: ItemPersongroupListItemBinding): RecyclerView.ViewHolder(itemBinding.root)
-
-    class PersonGroupListRecyclerAdapter(var presenter: PersonGroupListPresenter?)
-        : SelectablePagedListAdapter<PersonGroupWithMemberCount, PersonGroupListViewHolder>(DIFF_CALLBACK) {
-
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PersonGroupListViewHolder {
-            val itemBinding = ItemPersongroupListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            return PersonGroupListViewHolder(itemBinding)
-
-        }
-
-        override fun onBindViewHolder(holder: PersonGroupListViewHolder, position: Int) {
-            holder.itemBinding.personGroup = getItem(position)
-            holder.itemBinding.presenter = presenter
-        }
-
-        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
-            super.onDetachedFromRecyclerView(recyclerView)
-            presenter = null
-        }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        val accountManager: UstadAccountManager by instance()
-        dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         mPresenter = PersonGroupListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this,  di, viewLifecycleOwner)
-        mDataBinding?.presenter = mPresenter
+                this, di, viewLifecycleOwner)
+
         mDataRecyclerViewAdapter = PersonGroupListRecyclerAdapter(mPresenter)
-        mPresenter?.onCreate(savedInstanceState.toStringMap())
+        val createNewText = requireContext().getString(R.string.new_group)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view
     }
+
 
     override fun onClick(view: View?) {
 //        activity?.prepareGroupListEditCall {
@@ -97,7 +78,7 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
             : DiffUtil.ItemCallback<PersonGroupWithMemberCount>() {
             override fun areItemsTheSame(oldItem: PersonGroupWithMemberCount,
                                          newItem: PersonGroupWithMemberCount): Boolean {
-                TODO("e.g. insert primary keys here return oldItem.personGroup == newItem.personGroup")
+                return oldItem.groupUid == newItem.groupUid
             }
 
             override fun areContentsTheSame(oldItem: PersonGroupWithMemberCount,

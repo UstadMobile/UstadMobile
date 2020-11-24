@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.view.ProductDetailView
 import com.ustadmobile.core.view.ProductEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -25,6 +26,7 @@ class ProductDetailPresenter(context: Any,
         return true
     }
 
+
     override fun handleClickEdit() {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         systemImpl.go(ProductEditView.VIEW_NAME , mapOf(ARG_ENTITY_UID to entityUid.toString()), context)
@@ -32,6 +34,8 @@ class ProductDetailPresenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ProductWithInventoryCount? {
         val productUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+
+        val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val productWithCount = withTimeout(2000){
             db.productDao.findProductWithInventoryCountAsync(productUid)
@@ -41,10 +45,13 @@ class ProductDetailPresenter(context: Any,
         view.productCategories = repo.productDao.findAllCategoriesOfProductUid(productUid)
 
         //2. Stock list
-        view.stockList = repo.inventoryTransactionDao.getStockListByProduct(productUid)
+        view.stockList = repo.inventoryTransactionDao.getStockListByProduct(productUid, loggedInPersonUid)
 
         //3.TransactionList
         view.transactionList = repo.inventoryTransactionDao.getProductTransactionDetail(productUid)
+
+        //4. Pictures TODO
+        view.pictureList = repo.productDao.findAllProductPictures(productUid)
 
         return productWithCount
     }

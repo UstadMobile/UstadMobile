@@ -62,6 +62,11 @@ abstract class ProductDao : BaseDao<Product> {
     @Query(QUERY_FIND_ALL_CATEGORY_BY_PRODUCT)
     abstract fun findAllCategoriesOfProductUid(productUid: Long): DataSource.Factory<Int, Category>
 
+    @Query("""
+        SELECT * From Product WHERE productUid = :productUid
+    """)
+    abstract fun findAllProductPictures(productUid: Long): DataSource.Factory<Int, Product>
+
     @Query(QUERY_FIND_ALL_CATEGORY_BY_PRODUCT)
     abstract suspend  fun findAllCategoriesOfProductUidAsync(productUid: Long): List<Category>
 

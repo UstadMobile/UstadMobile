@@ -28,6 +28,10 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     private var filterByPermission: Long = 0
 
+    private var filterCustomer: Boolean = false
+    private var filterLE: Boolean = false
+    private var filterProducer: Boolean = false
+
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
@@ -39,6 +43,9 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         filterExcludeMemberOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
         filterAlreadySelectedList = arguments[ARG_EXCLUDE_PERSONUIDS_LIST]?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
                 ?: listOf()
+        filterCustomer = (arguments.containsKey(UstadView.ARG_FILTER_PERSON_CUSTOMER) && arguments[UstadView.ARG_FILTER_PERSON_CUSTOMER].equals("true"))?:false
+        filterLE = (arguments.containsKey(UstadView.ARG_FILTER_PERSON_LE) && arguments[UstadView.ARG_FILTER_PERSON_LE].equals("true"))?:false
+        filterProducer = (arguments.containsKey(UstadView.ARG_FILTER_PERSON_WE) && arguments[UstadView.ARG_FILTER_PERSON_WE].equals("true"))?:false
 
         filterByPermission = arguments[UstadView.ARG_FILTER_BY_PERMISSION]?.trim()?.toLong()
                 ?: Role.PERMISSION_PERSON_SELECT
@@ -54,10 +61,14 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
     }
 
     private fun updateListOnView() {
+        val filterLEInt: Int = if(filterLE){1}else{0}
+        val filterProducerInt: Int = if(filterProducer){1}else{0}
+        val filterCustomerInt: Int = if(filterCustomer){1}else{0}
         view.list = repo.personDao.findPersonsWithPermission(getSystemTimeInMillis(), filterExcludeMembersOfClazz,
                 filterExcludeMemberOfSchool, filterAlreadySelectedList,
                 accountManager.activeAccount.personUid, selectedSortOption?.flag ?: 0,
-                searchText.toQueryLikeParam())
+                searchText.toQueryLikeParam(), filterLEInt, filterProducerInt, filterCustomerInt)
+
     }
 
     override fun handleClickEntry(entry: Person) {

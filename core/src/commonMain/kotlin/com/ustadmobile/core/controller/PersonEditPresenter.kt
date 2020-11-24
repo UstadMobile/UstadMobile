@@ -19,6 +19,8 @@ import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_PERSON_CUSTOMER
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_PERSON_LE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_PERSON_WE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -229,7 +231,31 @@ class PersonEditPresenter(context: Any,
                 // 1. Check if Creating WE
                 // 2. If yes, check if logged In Person is an LE
                 // 3. If yes, check if LE's We group is created. Create it if it is not
+                val loggedInPersonUid = loggedInPerson?.personUid
+                if(loggedInPersonUid != null){
+                    entity?.personCreatedBy = loggedInPersonUid
+                }
 
+                if(arguments.containsKey(ARG_FILTER_PERSON_CUSTOMER) &&
+                        arguments[ARG_FILTER_PERSON_CUSTOMER]?.equals("true") ?: false){
+                    entity?.personGoldoziType = Person.Companion.GOLDOZI_TYPE_CUSTOMER
+                }
+
+                if(arguments.containsKey(ARG_FILTER_PERSON_LE) &&
+                        arguments[ARG_FILTER_PERSON_LE]?.equals("true") ?: false){
+                    entity?.personGoldoziType = Person.Companion.GOLDOZI_TYPE_LE
+
+                    if(entity?.personWeGroupUid == 0L){
+                        //Create a WE Group for this LE
+                        val leWeGroup = PersonGroup().apply {
+                            groupName = entity?.fullName() + "'s WE group"
+                            personGroupFlag = PersonGroup.PERSONGROUP_FLAG_DEFAULT
+                            groupUid = repo.personGroupDao.insertAsync(this)
+                        }
+                        //Assign WE Group to the Logged in LE
+                        entity?.personWeGroupUid = leWeGroup.groupUid
+                    }
+                }
 
                 if(arguments.containsKey(ARG_FILTER_PERSON_WE) &&
                         arguments[ARG_FILTER_PERSON_WE]?.equals("true") ?: false){
@@ -240,7 +266,7 @@ class PersonEditPresenter(context: Any,
                         if(loggedInPerson?.personWeGroupUid == 0L){
                             //Create a WE Group for this LE
                             val leWeGroup = PersonGroup().apply {
-                                groupName = entity.fullName() + "'s WE group"
+                                groupName = loggedInPerson?.fullName() + "'s WE group"
                                 personGroupFlag = PersonGroup.PERSONGROUP_FLAG_DEFAULT
                                 groupUid = repo.personGroupDao.insertAsync(this)
                             }
@@ -264,15 +290,16 @@ class PersonEditPresenter(context: Any,
 
                 // 4. Assign this WE to that LE group
                 if(loggedInPerson?.personGoldoziType == Person.GOLDOZI_TYPE_LE) {
-                    if (loggedInPerson?.personWeGroupUid == 0L) {
-                        val weOneAssign = PersonGroupMember(entity.personUid, loggedInPerson?.personWeGroupUid?:0L)
-                        weOneAssign.groupMemberUid = repo.personGroupMemberDao.insert(weOneAssign)
+
+                    if(arguments.containsKey(ARG_FILTER_PERSON_WE) &&
+                            arguments[ARG_FILTER_PERSON_WE]?.equals("true") ?: false) {
+                        if (loggedInPerson?.personWeGroupUid != 0L) {
+                            val weOneAssign = PersonGroupMember(entity.personUid, loggedInPerson?.personWeGroupUid
+                                    ?: 0L)
+                            weOneAssign.groupMemberUid = repo.personGroupMemberDao.insertAsync(weOneAssign)
+                        }
                     }
                 }
-
-
-
-
 
                 //Insert any roles and permissions
                 repo.entityRoleDao.insertListAsync(

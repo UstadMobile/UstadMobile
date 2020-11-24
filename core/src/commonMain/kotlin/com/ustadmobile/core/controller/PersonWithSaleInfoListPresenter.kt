@@ -59,6 +59,22 @@ class PersonWithSaleInfoListPresenter(context: Any, arguments: Map<String, Strin
     }
 
     override fun onClickPersonWithSaleInfo(personWithSaleInfo: PersonWithSaleInfo) {
-        //TODO: this
+        systemImpl.go(PersonDetailView.VIEW_NAME,
+                mapOf(UstadView.ARG_ENTITY_UID to personWithSaleInfo.personUid.toString()), context)
+    }
+
+    fun handleClickAddLE(){
+
+        systemImpl.go(PersonEditView.VIEW_NAME, mapOf(UstadView.ARG_FILTER_PERSON_LE to "true"), context)
+    }
+
+    fun handleClickAddProducer(){
+
+        systemImpl.go(PersonEditView.VIEW_NAME, mapOf(UstadView.ARG_FILTER_PERSON_WE to "true"), context)
+    }
+
+    fun handleClickAddCustomer(){
+
+        systemImpl.go(PersonEditView.VIEW_NAME, mapOf(UstadView.ARG_FILTER_PERSON_CUSTOMER to "true"), context)
     }
 }

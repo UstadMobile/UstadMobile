@@ -126,6 +126,57 @@
 
 
 
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/activity_settings2_groups_cl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:background="?android:selectableItemBackground"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:onClick="@{() -> presenter.goToGroupsList()}"
+                app:layout_constraintTop_toBottomOf="@+id/activity_settings2_roles_cl">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/activity_settings2_groups_imageview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:tint="?colorOnIconTint"
+                    app:layout_constraintBottom_toTopOf="@+id/activity_settings2_groups_title"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    app:srcCompat="@drawable/ic_people_black_24dp" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/activity_settings2_groups_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:text="@string/groups"
+                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_groups_imageview"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    android:id="@+id/activity_settings2_groups_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:text="@string/group_setting_desc"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_groups_imageview"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_settings2_groups_title" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.core.widget.NestedScrollView>
 </layout>

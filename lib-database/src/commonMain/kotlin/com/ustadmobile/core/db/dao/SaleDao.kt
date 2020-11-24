@@ -31,6 +31,9 @@ abstract class SaleDao : BaseDao<Sale> {
 
 
     @Query(QUERY_WE_LIST)
+    abstract fun findAllProducersAsPersonWithSaleInfo(leUid: Long): DataSource.Factory<Int, PersonWithSaleInfo>
+
+    @Query(QUERY_ALL_LIST)
     abstract fun findAllPersonWithSaleInfo(leUid: Long): DataSource.Factory<Int, PersonWithSaleInfo>
 
     companion object {
@@ -49,6 +52,30 @@ abstract class SaleDao : BaseDao<Sale> {
             LEFT JOIN Person ON Person.personUid = Sale.saleCustomerUid 
             LEFT JOIN Location ON Location.locationUid = Sale.saleLocationUid
             WHERE Sale.saleUid = :uid AND CAST(Sale.saleActive AS INTEGER) = 1 
+        """
+
+        const val QUERY_ALL_LIST = """
+            SELECT 
+                SUM((SaleItem.saleItemPricePerPiece)) - coalesce(SaleItem.saleItemDiscount, 0) AS totalSale, 
+                GROUP_CONCAT(DISTINCT Product.productName) AS topProducts, 
+                0 as personPictureUid ,
+                Person.* 
+            FROM Person 
+                LEFT JOIN Person AS LE ON LE.personUid = :leUid
+                LEFT JOIN InventoryItem ON 
+                    InventoryItem.InventoryItemWeUid = Person.personUid 
+                    AND InventoryItem.InventoryItemLeUid = LE.personUid AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+                LEFT JOIN InventoryTransaction ON 
+                    InventoryTransaction.InventoryTransactionInventoryItemUid = InventoryItem.InventoryItemUid 
+                    AND InventoryTransaction.inventoryTransactionFromLeUid = LE.personUid AND CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 1
+                LEFT JOIN SaleItem ON 
+                    SaleItem.saleItemUid = InventoryTransaction.inventoryTransactionSaleItemUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1
+                LEFT JOIN Sale ON 
+                    Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1 
+                LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid 
+                    AND CAST(Product.productActive AS INTEGER) = 1
+            AND CAST(Person.active AS INTEGER) = 1  
+            GROUP BY(Person.personUid)  
         """
 
         const val QUERY_WE_LIST = """

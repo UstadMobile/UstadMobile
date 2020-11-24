@@ -137,6 +137,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
                 app:layout_constraintTop_toBottomOf="@+id/hline1"
                 app:layout_constraintEnd_toEndOf="parent">
 
@@ -152,6 +154,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="17640"
+                android:text="0"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 />
@@ -331,22 +334,23 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginVertical="@dimen/dimen_8dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_balance_due_ll"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginBottom="@dimen/dimen_30dp"
+                android:hint="@string/order_notes"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                android:hint="@string/order_notes">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_edit_balance_due_ll">
 
-            <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/fragment_sale_edit_notes_tiet"
-                android:onClick="@{() -> activityEventHandler.selectCustomer()}"
-                android:text="@={sale.saleNotes}"
-                app:runOnClickWhenFocused="@{true}"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"/>
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/fragment_sale_edit_notes_tiet"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@={sale.saleNotes}"
+                    app:runOnClickWhenFocused="@{true}" />
 
 
-        </com.google.android.material.textfield.TextInputLayout>
+            </com.google.android.material.textfield.TextInputLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

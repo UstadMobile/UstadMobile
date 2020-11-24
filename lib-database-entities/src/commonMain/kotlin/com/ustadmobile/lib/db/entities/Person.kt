@@ -92,8 +92,11 @@ open class Person() {
     //Suggests if a person is a customer or producer(WE) or an LE
     var personGoldoziType: Int = GOLDOZI_TYPE_CUSTOMER
 
-    //This person's WE group
+    //This person's WE group if it is an LE
     var personWeGroupUid: Long = 0L
+
+    //This person was created by
+    var personCreatedBy: Long = 0L
 
     @MasterChangeSeqNum
     var personMasterChangeSeqNum: Long = 0

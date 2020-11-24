@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.SaleListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
@@ -11,6 +9,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SaleListView
 import com.ustadmobile.lib.db.entities.Sale
 import com.ustadmobile.lib.db.entities.SaleListDetail
+import com.ustadmobile.lib.db.entities.SaleWithCustomerAndLocation
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
@@ -35,6 +34,16 @@ class SaleListFragment(): UstadListViewFragment<Sale, SaleListDetail>(),
         return view
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = true
+    }
 
     override fun onResume() {
         super.onResume()
@@ -47,7 +56,7 @@ class SaleListFragment(): UstadListViewFragment<Sale, SaleListDetail>(),
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout) {
-            navigateToEditEntity(null, R.id.sale_edit_dest, Sale::class.java)
+            navigateToEditEntity(null, R.id.sale_edit_dest, SaleWithCustomerAndLocation::class.java)
         }else{
             super.onClick(view)
         }

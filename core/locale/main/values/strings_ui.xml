@@ -891,5 +891,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="edit_item">Edit item</string>
     <string name="in_stock">in stock</string>
     <string name="total_sales">total sales</string>
+    <string name="new_we">New WE</string>
+    <string name="new_le">New LE</string>
+    <string name="new_customer">New customer</string>
+    <string name="new_group">New group</string>
 
 </resources>

@@ -28,9 +28,7 @@
         android:background="?android:attr/selectableItemBackground"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, product)}"
-        app:onSelectableItemClicked="@{() -> itemListener.onClickEntry(product)}"
+        android:onClick="@{() -> itemListener.onClickProductPicture(product)}"
         >
 
         <androidx.appcompat.widget.AppCompatImageView

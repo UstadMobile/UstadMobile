@@ -205,11 +205,15 @@ abstract class PersonDao : BaseDao<Person> {
          AND (:excludeClazz = 0 OR :excludeClazz NOT IN
             (SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid 
             AND :timestamp BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft ))
-            AND (:excludeSchool = 0 OR :excludeSchool NOT IN
+        AND (:excludeSchool = 0 OR :excludeSchool NOT IN
             (SELECT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid 
-            AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
-            AND (Person.personUid NOT IN (:excludeSelected))
-            AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+        AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
+        AND (Person.personUid NOT IN (:excludeSelected))
+        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+        AND (:filterLE = 0 OR Person.personGoldoziType = ${Person.GOLDOZI_TYPE_LE})
+        AND (:filterProducer = 0 OR Person.personGoldoziType = ${Person.GOLDOZI_TYPE_PRODUCER})
+        AND (:filterCustomer = 0 OR Person.personGoldoziType = ${Person.GOLDOZI_TYPE_CUSTOMER})
+            
          GROUP BY Person.personUid
          ORDER BY CASE(:sortOrder)
                 WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
@@ -224,7 +228,10 @@ abstract class PersonDao : BaseDao<Person> {
     """)
     abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
                                                  excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int, PersonWithDisplayDetails>
+                                                 accountPersonUid: Long, sortOrder: Int,
+                                           searchText: String? = "%",
+                                           filterLE: Int = 0, filterProducer: Int = 0, filterCustomer: Int = 0)
+            : DataSource.Factory<Int, PersonWithDisplayDetails>
 
     @Query("""
         SELECT Person.* FROM Person 

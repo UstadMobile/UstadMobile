@@ -92,8 +92,6 @@ class InventoryItemEditPresenter(context: Any,
 
         GlobalScope.launch(doorMainDispatcher()) {
 
-
-            val itemToInsert = producerSelectionEditHelper.entitiesToInsert
             val itemsToUpdate = producerSelectionEditHelper.entitiesToUpdate
 
             for(producerInventory in itemsToUpdate){

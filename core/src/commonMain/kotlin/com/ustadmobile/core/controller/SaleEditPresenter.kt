@@ -152,6 +152,7 @@ class SaleEditPresenter(context: Any,
 
     override fun handleClickSave(entity: SaleWithCustomerAndLocation) {
         GlobalScope.launch(doorMainDispatcher()) {
+            entity?.salePersonUid = accountManager.activeAccount.personUid
             if(entity.saleUid == 0L) {
                 entity.saleUid = repo.saleDao.insertAsync(entity)
             }else {
@@ -193,8 +194,9 @@ class SaleEditPresenter(context: Any,
             repo.salePaymentDao.updateListAsync(paymentsToUpdate)
             repo.salePaymentDao.deactivateByUids(paymentsToDelete)
 
-            //TODO: this
-            //onFinish(SaleDetailView.VIEW_NAME, entity.saleUid, entity)
+
+            view.finishWithResult(listOf(entity))
+
         }
     }
 

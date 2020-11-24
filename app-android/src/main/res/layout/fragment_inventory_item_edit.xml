@@ -37,17 +37,15 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-
-            <include
+            <include layout="@layout/item_createnew"
                 android:id="@+id/fragment_inventory_item_edit_new_we"
-                layout="@layout/item_createnew"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:onClickNew="@{() -> activityEventHandler.addWE()}"
                 app:createNewText="@{@string/add_we}"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:onClickNew="@{() -> activityEventHandler.addWE()}" />
+                app:layout_constraintStart_toStartOf="parent" />
+
 
             <androidx.recyclerview.widget.RecyclerView
                 android:layout_marginTop="@dimen/dimen_8dp"

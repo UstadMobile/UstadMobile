@@ -9,6 +9,7 @@ interface ProductDetailView: UstadDetailView<ProductWithInventoryCount> {
     var stockList: DataSource.Factory<Int, PersonWithInventoryCount>?
     var transactionList: DataSource.Factory<Int, InventoryTransactionDetail>?
     //TODO: Maybe product picture in the future
+    var pictureList: DataSource.Factory<Int, Product>?
 
     companion object {
 

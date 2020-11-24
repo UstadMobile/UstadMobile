@@ -58,7 +58,9 @@ class ViewNameToDestMap: DestinationProvider {
             ProductDetailView.VIEW_NAME to UstadDestination(R.id.product_detail_dest),
             CategoryEditView.VIEW_NAME to UstadDestination(R.id.category_edit_dest),
             SaleItemEditView.VIEW_NAME to UstadDestination(R.id.saleitem_edit_dest),
-            InventoryItemEditView.VIEW_NAME to UstadDestination(R.id.inventoryitem_edit_dest)
+            InventoryItemEditView.VIEW_NAME to UstadDestination(R.id.inventoryitem_edit_dest),
+            SaleEditView.VIEW_NAME to UstadDestination(R.id.sale_edit_dest),
+            PersonGroupListView.VIEW_NAME to UstadDestination(R.id.persongroup_list_dest)
 
     )
 

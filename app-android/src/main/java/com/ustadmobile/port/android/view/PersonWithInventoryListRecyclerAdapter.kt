@@ -47,7 +47,11 @@ class PersonWithInventoryListRecyclerAdapter()
 
             override fun areContentsTheSame(oldItem: PersonWithInventory,
                                             newItem: PersonWithInventory): Boolean {
-                return oldItem == newItem
+                return oldItem.inventoryCount == newItem.inventoryCount &&
+                        oldItem.inventoryCountDelivered == newItem.inventoryCountDelivered &&
+                        oldItem.personUid == newItem.personUid &&
+                        oldItem.inventorySelected == newItem.inventorySelected
+
             }
         }
     }

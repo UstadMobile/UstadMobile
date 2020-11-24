@@ -38,7 +38,7 @@ interface ProductDetailFragmentEventHandler {
 
 class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), ProductDetailView,
         ProductDetailFragmentEventHandler, CategoryChipListener, InventoryTransactionDetailListener,
-        PersonWithInventoryCountListener{
+        PersonWithInventoryCountListener, ProductImageListener{
 
     private var mBinding: FragmentProductDetailBinding? = null
 
@@ -47,6 +47,16 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
     private var categoriesRecyclerView : RecyclerView? = null
     private var stockRecyclerView : RecyclerView? = null
     private var historyRecyclerView : RecyclerView? = null
+
+    //Pictures RV
+    private var picturesRecyclerAdapter: ProductImageRecyclerAdapter? = null
+    private var picturesLiveData: LiveData<PagedList<Product>>? = null
+    private var picturesObserver = Observer<PagedList<Product>?>{
+        t ->
+        run {
+            picturesRecyclerAdapter?.submitList(t)
+        }
+    }
 
     //Category RV
     private var categoriesRecyclerAdapter: CategoryChipRecyclerAdapter? = null
@@ -102,6 +112,13 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
             field = value
             historyLiveData?.observeIfFragmentViewIsReady(this, historyObserver)
         }
+    override var pictureList: DataSource.Factory<Int, Product>? = null
+        set(value) {
+            picturesLiveData?.removeObserver(picturesObserver)
+            picturesLiveData = value?.asRepositoryLiveData(ProductDao)
+            field = value
+            picturesLiveData?.observeIfFragmentViewIsReady(this, picturesObserver)
+        }
 
     private var repo: UmAppDatabase? = null
 
@@ -140,7 +157,7 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
         categoriesRecyclerAdapter = CategoryChipRecyclerAdapter(this)
         stockRecyclerAdapter = PersonWithInventoryCountRecyclerAdapter(this)
         historyRecyclerAdapter = InventoryTransactionDetailRecyclerAdapter(this)
-
+        picturesRecyclerAdapter = ProductImageRecyclerAdapter(this)
 
 
         mBinding = FragmentProductDetailBinding.inflate(inflater, container,
@@ -158,6 +175,10 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
             }
             it.fragmentProductDetailHistoryRv.apply{
                 adapter = historyRecyclerAdapter
+                layoutManager = LinearLayoutManager(requireContext())
+            }
+            it.fragmentProductShowcasePicturesRv.apply{
+                adapter = picturesRecyclerAdapter
                 layoutManager = LinearLayoutManager(requireContext())
             }
 
@@ -204,6 +225,9 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
             mBinding?.product = value
         }
 
+    override fun onClickProductPicture(product: Product) {
+        //TODO this
+    }
 
 
 }

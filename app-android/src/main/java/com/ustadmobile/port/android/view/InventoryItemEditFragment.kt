@@ -32,7 +32,7 @@ interface InventoryItemEditFragmentEventHandler {
 }
 
 class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryItemEditView,
-        InventoryItemEditFragmentEventHandler {
+        InventoryItemEditFragmentEventHandler, View.OnClickListener {
 
     private var mBinding: FragmentInventoryItemEditBinding? = null
 
@@ -55,6 +55,7 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
         mBinding = FragmentInventoryItemEditBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
+            it.activityEventHandler = this
         }
 
         producersRecyclerAdapter = PersonWithInventoryListRecyclerAdapter()
@@ -119,7 +120,14 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
             mBinding?.fieldsEnabled = value
         }
 
+    /**
+     * OnClick function that will handle when the user clicks to create a new item
+     */
+    override fun onClick(view: View?) {
+        if (view?.id == R.id.item_createnew_layout)
+            navigateToEditEntity(null, R.id.person_edit_dest, Person::class.java)
 
+    }
 
     override fun addWE() {
         onSaveStateToBackStackStateHandle()

@@ -44,8 +44,7 @@ class SaleListPresenter(context: Any, arguments: Map<String, String>, view: Sale
     }
 
     override fun handleClickCreateNewFab() {
-        //TODO: this
-        //systemImpl.go(SaleDetailView.VIEW_NAME, mapOf(), context)
+        systemImpl.go(SaleEditView.VIEW_NAME, mapOf(), context)
     }
 
     override fun handleClickSortOrder(sortOption: MessageIdOption) {
@@ -62,15 +61,13 @@ class SaleListPresenter(context: Any, arguments: Map<String, String>, view: Sale
             ListViewMode.BROWSER -> {
 
                 //TODO: this
-//                systemImpl.go(SaleDetailView.VIEW_NAME,
-//                        mapOf(UstadView.ARG_ENTITY_UID to entry.productUid.toString()), context)
+                systemImpl.go(SaleEditView.VIEW_NAME,
+                        mapOf(UstadView.ARG_ENTITY_UID to entry.saleUid.toString()), context)
             }
         }
     }
 
     override fun onClickSale(sale: SaleListDetail) {
-        //TODO this
-        // systemImpl.go(SaleDetailView.VIEW_NAME,
-        //  mapOf(UstadView.ARG_ENTITY_UID to entry.productUid.toString()), context)
+         systemImpl.go(SaleEditView.VIEW_NAME, mapOf(UstadView.ARG_ENTITY_UID to sale.saleUid.toString()), context)
     }
 }

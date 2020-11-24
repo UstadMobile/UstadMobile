@@ -5,6 +5,7 @@ package com.ustadmobile.port.android.view
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemProductImageBinding
 import com.ustadmobile.core.controller.ProductImageListener
@@ -15,7 +16,7 @@ import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 //TODO: Change to Product picture when that is ready
 class ProductImageRecyclerAdapter(var itemListener: ProductImageListener?)
-    : SelectablePagedListAdapter<Product,
+    : ListAdapter<Product,
         ProductImageRecyclerAdapter.ProductListViewHolder>(DIFF_CALLBACK) {
 
     class ProductListViewHolder(val itemBinding: ItemProductImageBinding)
@@ -32,7 +33,7 @@ class ProductImageRecyclerAdapter(var itemListener: ProductImageListener?)
     override fun onBindViewHolder(holder: ProductListViewHolder, position: Int) {
         val item = getItem(position)
         holder.itemBinding.product = item
-        holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
+        //holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

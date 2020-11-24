@@ -245,7 +245,6 @@
                     android:inputType="number"
                     android:text="@={`` + clazzWork.clazzWorkMaximumScore}"
                     app:layout_constraintStart_toStartOf="parent"
-                    tools:layout_editor_absoluteY="393dp"
                     tools:text="100" />
             </com.google.android.material.textfield.TextInputLayout>
 

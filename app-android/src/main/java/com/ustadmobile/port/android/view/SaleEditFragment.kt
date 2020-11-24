@@ -1,7 +1,9 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -10,20 +12,16 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSaleEditBinding
 import com.ustadmobile.core.controller.*
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ContentEntry2DetailView
-import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.SaleEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.ext.*
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import org.kodein.di.instance
 
 interface SaleEditFragmentEventHandler {
 
@@ -239,25 +237,22 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
 
     //TODO this
     override fun addDelivery() {
-        // go to SaleDeliveryEdit
         onSaveStateToBackStackStateHandle()
-        //navigateToEditEntity(null, R.id.saledelivery_edit_dest, SalePayment::class.java)
+        //navigateToEditEntity(null, R.id.saledelivery_edit_dest, SaleDelivery::class.java)
 
     }
 
     //TODO this
     override fun addPayment() {
-        //Go to SalePaymentEdit
         onSaveStateToBackStackStateHandle()
         //navigateToEditEntity(null, R.id.salepayment_edit_dest, SalePayment::class.java)
     }
 
-    // TODO this
     override fun selectCustomer() {
         // Go to person select
         onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(Person::class.java, R.id.home_personlist_dest,
-                args = bundleOf()
+                args = bundleOf(UstadView.ARG_FILTER_PERSON_CUSTOMER to "true")
         )
     }
 
@@ -270,17 +265,14 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
     }
 
     override fun onClickSaleItem(saleItem: SaleItemWithProduct) {
-        //TODO
-        val systemImpl: UstadMobileSystemImpl by instance()
-        val args = mapOf(UstadView.ARG_ENTITY_UID to saleItem.saleItemUid.toString())
-        //systemImpl.go(SaleItemEditView.VIEW_NAME, args,context)
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(saleItem, R.id.saleitem_edit_dest, SaleItem::class.java)
     }
 
     override fun onClickSaleDelivery(saleDelivery: SaleDelivery) {
         //TODO
-        val systemImpl: UstadMobileSystemImpl by instance()
-        val args = mapOf(UstadView.ARG_ENTITY_UID to saleDelivery.saleDeliveryUid.toString())
-        //systemImpl.go(SaleDeliveryEditView.VIEW_NAME, args,context)
+        onSaveStateToBackStackStateHandle()
+        //navigateToEditEntity(saleDelivery, R.id.saledelivery_edit_dest, SaleDelivery::class.java)
     }
 
     override fun onClickRemoveSaleDelivery(saleDelivery: SaleDelivery) {
@@ -289,9 +281,8 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
 
     override fun onClickSalePayment(salePayment: SalePayment) {
         //TODO
-        val systemImpl: UstadMobileSystemImpl by instance()
-        val args = mapOf(UstadView.ARG_ENTITY_UID to salePayment.salePaymentUid.toString())
-        //systemImpl.go(SaleItemPaymentView.VIEW_NAME, args,context)
+        onSaveStateToBackStackStateHandle()
+        //navigateToEditEntity(salePayment, R.id.salepayment_edit_dest, SalePayment::class.java)
     }
 
     override fun onClickRemoveSalePayment(salePayment: SalePayment) {

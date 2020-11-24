@@ -45,7 +45,6 @@ class PersonGroupMember() {
     @PrimaryKey(autoGenerate = true)
     var groupMemberUid: Long = 0
 
-
     var groupMemberActive: Boolean = true
 
     @ColumnInfo(index = true)
