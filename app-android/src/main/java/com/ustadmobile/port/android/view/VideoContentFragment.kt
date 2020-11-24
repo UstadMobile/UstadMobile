@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.content.res.Configuration
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -24,6 +25,7 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.MimeTypes
 import com.google.android.exoplayer2.util.Util
+import com.google.android.exoplayer2.video.VideoListener
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentVideoContentBinding
 import com.ustadmobile.core.container.ContainerManager
@@ -151,6 +153,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         player?.playWhenReady = playWhenReady
         player?.seekTo(currentWindow, playbackPosition)
     }
+
+
 
     fun setVideoParams(videoPath: String?, audioPath: ContainerEntryWithContainerEntryFile?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
         if (audioPath != null) {

@@ -142,6 +142,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun findByUid(entryUid: Long): ContentEntry?
 
 
+    @Query("SELECT * FROM ContentEntry WHERE title = :title")
+    @JsName("findByTitle")
+    abstract fun findByTitle(title: String): DoorLiveData<ContentEntry?>
+
+
     @Query("SELECT ContentEntry.* FROM ContentEntry " +
             "WHERE ContentEntry.sourceUrl = :sourceUrl")
     @JsName("findBySourceUrlWithContentEntryStatusAsync")
