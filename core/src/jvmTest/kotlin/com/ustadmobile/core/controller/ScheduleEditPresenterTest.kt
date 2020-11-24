@@ -91,7 +91,7 @@ class ScheduleEditPresenterTest {
         })
 
         val expectedErrMessage = di.direct.instance<UstadMobileSystemImpl>()
-                .getString(MessageID.start_after_end_error_message, Any())
+                .getString(MessageID.end_is_before_start_error, Any())
         verify(mockView).toTimeError = eq(expectedErrMessage)
     }
 

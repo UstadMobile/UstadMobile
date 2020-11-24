@@ -3,14 +3,16 @@ package com.ustadmobile.core.controller
 import com.nhaarman.mockitokotlin2.*
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.hours
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzLogDao
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.ext.asPerson
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -19,6 +21,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzLog
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertEquals
@@ -27,6 +30,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
+import org.kodein.di.instance
 
 class ClazzLogListAttendancePresenterTest {
 
@@ -85,6 +89,13 @@ class ClazzLogListAttendancePresenterTest {
     @Test
     fun givenExistingCompletedClazzLogs_whenOnCreateCalled_thenShouldSetGraphDataAndSetFabVisible() {
         val repo: UmAppDatabase by di.activeRepoInstance()
+        val accountManager: UstadAccountManager by di.instance()
+        accountManager.activeAccount = UmAccount(42L, "admin", "",
+                accountManager.activeAccount.endpointUrl, "Admin", "Admin")
+
+        runBlocking {
+            repo.insertPersonAndGroup(accountManager.activeAccount.asPerson(admin = true))
+        }
 
         val testClazz = Clazz("Test Clazz").apply {
             clazzTimeZone = "Asia/Dubai"
@@ -125,8 +136,30 @@ class ClazzLogListAttendancePresenterTest {
                     currentGraphData.percentageAttendedSeries.all { it.second == 0.8f || it.second == 0.6f })
         }
 
-        verify(mockView, timeout(5000).atLeastOnce()).recordAttendanceButtonVisible = true
+        verify(mockView, timeout(5000).atLeastOnce()).recordAttendanceOptions = argWhere {
+            ClazzLogListAttendancePresenter.RecordAttendanceOption.RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE in it
+                    && ClazzLogListAttendancePresenter.RecordAttendanceOption.RECORD_ATTENDANCE_NEW_SCHEDULE in it
+        }
     }
 
+
+    @Test
+    fun givenUserDoesNotHaveRecordAttendancePermission_whenOnCreateCalled_thenShouldSetRecordOptionsAsEmpty() {
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        val testClazz = Clazz("Test Clazz").apply {
+            clazzTimeZone = "Asia/Dubai"
+            clazzUid = repo.clazzDao.insert(this)
+        }
+
+        val presenter = ClazzLogListAttendancePresenter(context,
+                mapOf(UstadView.ARG_FILTER_BY_CLAZZUID to testClazz.clazzUid.toString()), mockView, di,
+                mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        verify(mockView, timeout(5000).atLeastOnce()).recordAttendanceOptions = argWhere {
+            it.isEmpty()
+        }
+    }
 
 }

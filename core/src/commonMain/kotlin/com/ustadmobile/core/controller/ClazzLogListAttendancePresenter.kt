@@ -14,6 +14,7 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.door.*
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzWithSchool
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -60,6 +61,14 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
+    enum class RecordAttendanceOption(val commandId: Int,val messageId: Int ) {
+        RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE(1, MessageID.use_most_recently_scheduled_day),
+        RECORD_ATTENDANCE_NEW_SCHEDULE(2, MessageID.add_a_new_occurrence)
+    }
+
+    fun RecordAttendanceOption.toMessageIdOption(context: Any) = MessageIdOption(messageId, context,
+            commandId)
+
     class ClazzLogListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
 
     override fun onCreate(savedState: Map<String, String>?) {
@@ -68,10 +77,28 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
         updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { ClazzLogListSortOption(it, context) }
         view.graphData = graphDisplayData
-        repo.clazzLogDao.clazzHasScheduleLive(clazzUidFilter, ClazzLog.STATUS_INACTIVE)
-                .observeWithLifecycleOwner(lifecycleOwner) { hasClazzLogs ->
-                    view.recordAttendanceButtonVisible = hasClazzLogs ?: false
-                }
+
+        GlobalScope.launch(doorMainDispatcher()) {
+            val hasAttendancePermission = repo.clazzDao.personHasPermissionWithClazz(
+                    accountManager.activeAccount.personUid, clazzUidFilter,
+                    Role.PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT)
+
+            if(!hasAttendancePermission) {
+                view.recordAttendanceOptions = listOf()
+                return@launch
+            }
+
+            repo.clazzLogDao.clazzHasScheduleLive(clazzUidFilter, ClazzLog.STATUS_INACTIVE)
+                    .observeWithLifecycleOwner(lifecycleOwner) { hasClazzLogs ->
+                        view.recordAttendanceOptions = if(hasClazzLogs == true) {
+                            listOf(RecordAttendanceOption.RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE,
+                                    RecordAttendanceOption.RECORD_ATTENDANCE_NEW_SCHEDULE)
+                        }else {
+                            listOf(RecordAttendanceOption.RECORD_ATTENDANCE_NEW_SCHEDULE)
+                        }
+                    }
+
+        }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -100,6 +127,19 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     override fun handleClickEntry(entry: ClazzLog) {
         systemImpl.go(ClazzLogEditAttendanceView.VIEW_NAME,
             mapOf(UstadView.ARG_ENTITY_UID to entry.clazzLogUid.toString()), context)
+    }
+
+    fun handleClickRecordAttendance(option: RecordAttendanceOption) {
+        if(option == RecordAttendanceOption.RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE) {
+            GlobalScope.launch(doorMainDispatcher()) {
+                val lastLog = db.clazzLogDao.findByClazzUidWithinTimeRangeAsync(
+                        clazzUidFilter, 0, Long.MAX_VALUE,
+                        ClazzLog.STATUS_INACTIVE, 1).firstOrNull()
+                if(lastLog != null){
+                    handleClickEntry(lastLog)
+                }
+            }
+        }
     }
 
     override fun handleClickCreateNewFab() {
