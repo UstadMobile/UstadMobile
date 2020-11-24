@@ -11,6 +11,10 @@ import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.parseMap
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.kodein.di.DI
@@ -88,7 +92,13 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
                 entry
             }
 
-            val container = contentImportManager.importFileToContainer(file.path, metadata.mimeType, fileEntry.contentEntryUid, containerFolder.path, mapOf()){
+            val params = scrapeQueueItem?.scrapeRun?.conversionParams
+            var conversionParams = mapOf<String, String>()
+            if(params != null){
+                conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+            }
+            val container = contentImportManager.importFileToContainer(file.path, metadata.mimeType,
+                    fileEntry.contentEntryUid, containerFolder.path, conversionParams){
 
             }
             if (!headRequestValues.etag.isNullOrEmpty() && container != null) {
