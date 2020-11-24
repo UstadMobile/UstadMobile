@@ -464,16 +464,19 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
 
         var numFailures = 0
         appDb.runInTransaction(Runnable {
-            val zombieEntryFilesList = appDb.containerEntryFileDao.findZombieEntries()
-            zombieEntryFilesList.forEach {
-                val filePath = it.cefPath
-                if(filePath == null || !FileSe(filePath).delete()) {
-                    numFailures++
+            var zombieEntryFilesList: List<ContainerEntryFile>
+            do {
+                zombieEntryFilesList = appDb.containerEntryFileDao.findZombieEntries()
+                zombieEntryFilesList.forEach {
+                    val filePath = it.cefPath
+                    if(filePath == null || !FileSe(filePath).delete()) {
+                        numFailures++
+                    }
                 }
-            }
-            onprogress.invoke(100)
 
-            appDb.containerEntryFileDao.deleteListOfEntryFiles(zombieEntryFilesList)
+                appDb.containerEntryFileDao.deleteListOfEntryFiles(zombieEntryFilesList)
+            }while(zombieEntryFilesList.isNotEmpty())
+            onprogress.invoke(100)
         })
 
         return numFailures == 0
