@@ -1,8 +1,8 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.SaleEditView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -14,13 +14,12 @@ import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 import com.ustadmobile.lib.db.entities.SaleDelivery
 import com.ustadmobile.lib.db.entities.SalePayment
-import kotlinx.serialization.builtins.list
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import org.kodein.di.DI
-
+import kotlinx.serialization.builtins.list
 
 class SaleEditPresenter(context: Any,
                         arguments: Map<String, String>, view: SaleEditView, di: DI,
@@ -108,20 +107,22 @@ class SaleEditPresenter(context: Any,
         }
         salePaymentEditHelper.liveList.sendValue(salePaymentList)
 
-        //TODO: Undo fix
-        val totalCountLive = withTimeout(2000){
-            db.saleItemDao.findTotalBySaleLive(entityUid)
-        }
-        view.totalAmountLive = totalCountLive
+        val totalCount = withTimeout(2000) {
+            db.saleItemDao.findTotalBySale(entityUid)
+        }?:0L
 
+        val paymentTotal = withTimeout(2000){
+            db.salePaymentDao.findTotalBySale(entityUid)
+        }?:0L
 
-//        view.runOnUiThread(Runnable {
-//            val totalCount =  db.saleItemDao.findTotalBySale(entityUid)
-//            view.totalAmount = totalCount
-//        })
+        view.runOnUiThread(Runnable {
+            view.orderTotal = totalCount
+            view.paymentTotal = paymentTotal
+        })
 
 
         return sale
+
 
     }
 
@@ -153,7 +154,10 @@ class SaleEditPresenter(context: Any,
     override fun handleClickSave(entity: SaleWithCustomerAndLocation) {
         GlobalScope.launch(doorMainDispatcher()) {
             entity?.salePersonUid = accountManager.activeAccount.personUid
+            entity?.saleLastUpdateDate = UMCalendarUtil.getDateInMilliPlusDays(0)
+
             if(entity.saleUid == 0L) {
+                entity?.saleCreationDate = UMCalendarUtil.getDateInMilliPlusDays(0)
                 entity.saleUid = repo.saleDao.insertAsync(entity)
             }else {
                 repo.saleDao.updateAsync(entity)

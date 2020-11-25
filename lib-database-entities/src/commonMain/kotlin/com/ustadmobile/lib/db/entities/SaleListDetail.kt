@@ -1,12 +1,18 @@
 package com.ustadmobile.lib.db.entities
 
 import kotlinx.serialization.Serializable
+import androidx.room.Embedded
+
 
 /**
  * Sale 's POJO for representing itself on the view (and recycler views)
  */
 @Serializable
 class SaleListDetail() : Sale() {
+
+
+    @Embedded
+    var customer: Person? = null
 
     //String categoryName;
 

@@ -17,9 +17,9 @@ interface SaleEditView: UstadEditView<SaleWithCustomerAndLocation> {
 
     var salePaymentList: DoorMutableLiveData<List<SalePayment>>?
 
-    var totalAmountLive: DoorLiveData<Long>?
+    var orderTotal: Long?
 
-    var totalAmount: Long?
+    var paymentTotal: Long?
 
     var balanceDue: Long?
 

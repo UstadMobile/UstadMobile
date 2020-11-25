@@ -42,9 +42,11 @@ abstract class SaleItemDao : BaseDao<SaleItem>, OneToManyJoinDao<SaleItem> {
     abstract fun findTotalBySaleLive(saleUid: Long):DoorLiveData<Long>
 
     @Query("""
-            SELECT SUM(saleItemPricePerPiece * saleItemQuantity) FROM SaleItem 
+            SELECT CASE WHEN SUM(saleItemPricePerPiece * saleItemQuantity) 
+                THEN SUM(saleItemPricePerPiece * saleItemQuantity) ELSE 0 END 
+             FROM SaleItem 
             WHERE saleItemSaleUid = :saleUid AND CAST(saleItemActive AS INTEGER) = 1 """)
-    abstract fun findTotalBySale(saleUid: Long): Long
+    abstract suspend fun findTotalBySale(saleUid: Long): Long
 
 
     @Query(QUERY_FIND_WITH_PRODUCT_BY_UID)

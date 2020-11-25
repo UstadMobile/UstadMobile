@@ -155,7 +155,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/dimen_8dp"
                     android:layout_weight="1"
-                    tools:saleItemTotal="@{saleItem}"
+                    app:saleItemTotal="@{saleItem}"
                     tools:text="8820"
                     android:textAppearance="@style/TextAppearance.AppCompat"
                     app:layout_constraintStart_toEndOf="@+id/item_sale_item_quantity"

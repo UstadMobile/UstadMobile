@@ -115,16 +115,18 @@
             app:srcCompat="@drawable/ic_people_black_24dp" />
 
         <TextView
-            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             android:id="@+id/item_school_list_item_members_tv"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginBottom="@dimen/dimen_8dp"
             android:layout_marginTop="@dimen/dimen_8dp"
             android:text="@{@string/x_in_stock(product.stock)}"
-            tools:text="15 in stock"
+            android:textAppearance="@style/UmTheme.TextAppearance.Caption"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@+id/item_school_list_item_members_iv"
-            app:layout_constraintTop_toBottomOf="@+id/barrierMemberDetails" />
+            app:layout_constraintTop_toBottomOf="@+id/barrierMemberDetails"
+            tools:text="15 in stock" />
 
 
         <androidx.appcompat.widget.AppCompatImageView

@@ -57,7 +57,7 @@ class CategoryEditFragment: UstadEditFragment<Category>(), CategoryEditView{
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.add_product, R.string.edit_product)
+        setEditFragmentTitle(R.string.add_category, R.string.edit_category)
     }
 
     override var entity: Category? = null

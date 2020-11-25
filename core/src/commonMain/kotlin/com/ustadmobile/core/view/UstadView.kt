@@ -142,6 +142,7 @@ interface UstadView {
         const val ARG_FILTER_PERSON_CUSTOMER = "argFilterPersonCustomer"
 
         const val ARG_SALE_UID = "argSaleUid"
+        const val ARG_CREATE_SALE = "argCreateSale"
 
         /**
          * Argument to pass to tell a fragment where on the back stack a result (e.g. entity selected

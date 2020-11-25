@@ -2,14 +2,20 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.core.os.bundleOf
+import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ProductListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ProductListView
+import com.ustadmobile.core.view.SaleItemEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.PersonWithSaleInfo
 import com.ustadmobile.lib.db.entities.Product
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
+import com.ustadmobile.lib.db.entities.SaleItemWithProduct
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
@@ -47,6 +53,15 @@ class ProductListFragment(): UstadListViewFragment<Product, ProductWithInventory
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
                 requireContext().getString(R.string.product)
+    }
+
+    override fun goToSaleItem(product: Product) {
+//        systemImpl.go(SaleItemEditView.VIEW_NAME, mapOf(
+//                UstadView.ARG_PRODUCT_UID to product.productUid.toString()
+//        ), context)
+        navigateToEditEntity(null, R.id.saleitem_edit_dest,
+                SaleItemWithProduct::class.java, argBundle = bundleOf(
+                        UstadView.ARG_PRODUCT_UID to product.productUid.toString()))
     }
 
     /**

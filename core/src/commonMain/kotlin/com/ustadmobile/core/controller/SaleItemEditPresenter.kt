@@ -12,6 +12,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemWithProduct
+import com.ustadmobile.lib.db.entities.Product
 
 import io.ktor.client.features.json.defaultSerializer
 import io.ktor.http.content.TextContent
@@ -20,6 +21,7 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PRODUCT_UID
 import org.kodein.di.DI
 
 
@@ -39,10 +41,19 @@ class SaleItemEditPresenter(context: Any,
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): SaleItemWithProduct? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        val productUid = arguments[ARG_PRODUCT_UID]?.toLong() ?:0L
+
+        val product = withTimeout(2000){
+            db.productDao.findByUidAsync(productUid)
+        }?:Product()
 
         val saleItemWithProduct = withTimeout(2000){
             db.saleItemDao.findWithProductByUidAsync(entityUid)
-        }?:SaleItemWithProduct()
+        }?:SaleItemWithProduct().apply{
+            saleItemProduct = product
+            saleItemProductUid = product.productUid
+        }
+
 
         return saleItemWithProduct
     }
@@ -70,13 +81,10 @@ class SaleItemEditPresenter(context: Any,
 
     override fun handleClickSave(entity: SaleItemWithProduct) {
 
-        GlobalScope.launch(doorMainDispatcher()) {
-            if(entity.saleItemUid == 0L) {
-                entity.saleItemUid = repo.saleItemDao.insertAsync(entity)
-            }else {
-                repo.saleItemDao.updateAsync(entity)
-            }
-
+        if(arguments.containsKey(UstadView.ARG_CREATE_SALE) && arguments[UstadView.ARG_CREATE_SALE].equals("true")){
+            //Create a new sale
+            view.finishWithResult(listOf(entity))
+        }else{
             view.finishWithResult(listOf(entity))
         }
     }

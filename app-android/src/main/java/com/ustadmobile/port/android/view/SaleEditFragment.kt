@@ -16,6 +16,7 @@ import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SaleEditView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CREATE_SALE
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
@@ -76,6 +77,8 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         mBinding = FragmentSaleEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.activityEventHandler = this
+            it.orderTotal = orderTotal
+            it.paymentTotal = paymentTotal
         }
 
         saleItemRecyclerAdpater = SaleItemRecyclerAdapter(this)
@@ -107,6 +110,8 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
                 SaleItemWithProduct::class.java) {
             val saleItem = it.firstOrNull() ?: return@observeResult
             mPresenter?.handleAddOrEditSaleItem(saleItem)
+            //Add numbers
+            orderTotal = orderTotal?.plus(saleItem.saleItemQuantity * saleItem.saleItemPricePerPiece.toLong())
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
@@ -119,6 +124,8 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
                 SalePayment::class.java) {
             val salePayment = it.firstOrNull() ?: return@observeResult
             mPresenter?.handleAddOrEditSalePayment(salePayment)
+            //Add numbers
+            paymentTotal = paymentTotal?.plus(salePayment.salePaymentPaidAmount)
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
@@ -143,11 +150,6 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
 
     }
 
-    private var totalAmountObserver = Observer<Long?> {
-        //TODO: fix this
-       //mBinding?.orderTotal = it
-
-    }
     override var saleItemList: DoorMutableLiveData<List<SaleItemWithProduct>>? = null
         set(value) {
             field?.removeObserver(saleItemObserver)
@@ -169,18 +171,19 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
             value?.observe(this, salePaymentObserver)
         }
 
-    override var totalAmountLive: DoorLiveData<Long>?= null
+
+    override var orderTotal: Long? = 0
         set(value) {
-            field?.removeObserver(totalAmountObserver)
-            field = value
-            value?.observe(viewLifecycleOwner, totalAmountObserver)
-        }
-    override var totalAmount: Long? = 0
-        set(value) {
-            //TODO: this
-            //mBinding?.orderTotal = value
+            mBinding?.orderTotal = value
             field = value
         }
+
+    override var paymentTotal: Long? = 0
+        set(value) {
+            mBinding?.paymentTotal = value
+            field = value
+        }
+
 
     override var balanceDue: Long? = 0
         set(value) {
@@ -227,12 +230,12 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         }
 
 
-    //TODO: this
     override fun addSaleItem() {
         //Go to product list followed by sale item edit
         onSaveStateToBackStackStateHandle()
-//        navigateToPickEntityFromList(Product::class.java, R.id.productlist_dest,
-//                args = bundleOf()       )
+        navigateToPickEntityFromList(SaleItemWithProduct::class.java, R.id.product_list_dest, args= bundleOf(
+                ARG_CREATE_SALE to "true"
+        ))
     }
 
     override fun addDelivery() {

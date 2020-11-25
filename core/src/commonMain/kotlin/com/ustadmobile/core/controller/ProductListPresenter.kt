@@ -59,9 +59,16 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
 
     override fun handleClickEntry(entry: Product) {
         when(mListMode) {
-            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
+            ListViewMode.PICKER -> {
+                if(arguments.containsKey(UstadView.ARG_CREATE_SALE) && arguments[UstadView.ARG_CREATE_SALE].equals("true")){
+                    systemImpl.go(SaleItemEditView.VIEW_NAME, mapOf(
+                            UstadView.ARG_PRODUCT_UID to entry.productUid.toString()
+                    ), context)
+                }else {
+                    view.finishWithResult(listOf(entry))
+                }
+            }
             ListViewMode.BROWSER -> {
-
                 systemImpl.go(ProductDetailView.VIEW_NAME,
                         mapOf(UstadView.ARG_ENTITY_UID to entry.productUid.toString()), context)
             }
@@ -69,10 +76,18 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
     }
 
     override fun onClickProduct(product: ProductWithInventoryCount) {
-        when(mListMode) {
-            ListViewMode.PICKER -> view.finishWithResult(listOf(product))
-            ListViewMode.BROWSER -> {
 
+
+        when(mListMode) {
+            ListViewMode.PICKER -> {
+                if(arguments.containsKey(UstadView.ARG_CREATE_SALE) && arguments[UstadView.ARG_CREATE_SALE].equals("true")){
+
+                    view.goToSaleItem(product)
+                }else {
+                    view.finishWithResult(listOf(product))
+                }
+            }
+            ListViewMode.BROWSER -> {
                 systemImpl.go(ProductDetailView.VIEW_NAME,
                         mapOf(UstadView.ARG_ENTITY_UID to product.productUid.toString()), context)
             }

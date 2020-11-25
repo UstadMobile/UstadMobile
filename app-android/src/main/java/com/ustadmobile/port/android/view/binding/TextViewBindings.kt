@@ -260,8 +260,7 @@ fun TextView.setMemberRoleName(clazzMember: ClazzMember?) {
 fun TextView.setSaleItemTotal(saleItem: SaleItem?) {
     val amount: Float = (saleItem?.saleItemQuantity?:0) * (saleItem?.saleItemPricePerPiece ?: 0F)
 
-    text = "" + amount.toString() +
-            saleItem?.saleItemCurrency
+    text = "" + amount.toString()
 }
 
 @BindingAdapter("productNameWithCount")
@@ -278,6 +277,17 @@ fun TextView.setInStockAppend(stock: Int?){
 @BindingAdapter(value = ["totalSale", "saleForTotalAfterDiscount"])
 fun TextView.setSaleItemAfterDiscountTotal(totalSale : Long, sale: Sale?) {
     text = "" + (totalSale - (sale?.saleDiscount ?: 0L)) + " " + context.getString(R.string.afs)
+}
+
+/**
+ * app:balanceDueSaleWithDiscount="@{sale}"
+app:balanceDueOrdertotal="@{orderTotal}"
+app:balanceDuePaymentTotal="@{paymentTotal}"
+ */
+
+@BindingAdapter(value = ["balanceDueOrdertotal", "balanceDueSaleWithDiscount", "balanceDuePaymentTotal"])
+fun TextView.setBalanceDueAfterPaymentAndSaleAndDiscount(totalSale : Long, sale: Sale?, totalPayment: Long) {
+    text = "" + (totalSale - (sale?.saleDiscount ?: 0L) - totalPayment) + " " + context.getString(R.string.afs)
 }
 
 @BindingAdapter("weTotalSaleValue")

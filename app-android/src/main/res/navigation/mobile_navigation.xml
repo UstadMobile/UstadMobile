@@ -206,17 +206,13 @@
         android:label="@string/products">
     </fragment>
 
-<!--    <fragment-->
-<!--        android:id="@+id/salepayment_edit_dest"-->
-<!--        android:name="com.ustadmobile.port.android.view.SalePaymentEditFragment"-->
-<!--        android:label="@string/payment">-->
-<!--    </fragment>-->
 
-<!--    <fragment-->
-<!--        android:id="@+id/saledelivery_edit_dest"-->
-<!--        android:name="com.ustadmobile.port.android.view.SaleDeliveryEditFragment"-->
-<!--        android:label="@string/delivery">-->
-<!--    </fragment>-->
+    <fragment
+        android:id="@+id/product_list_dest"
+        android:name="com.ustadmobile.port.android.view.ProductListFragment"
+        android:label="@string/products">
+    </fragment>
+
 
     <fragment
         android:id="@+id/home_sales_dest"

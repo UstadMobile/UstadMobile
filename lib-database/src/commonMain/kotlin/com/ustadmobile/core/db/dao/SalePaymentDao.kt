@@ -29,6 +29,11 @@ abstract class SalePaymentDao : BaseDao<SalePayment>, OneToManyJoinDao<SalePayme
     @Query(QUERY_ALL_ACTIVE_SALE_PAYMENT_LIST)
     abstract suspend fun findAllBySaleAsList(saleUid: Long): List<SalePayment>
 
+    @Query("""
+            SELECT CASE WHEN SUM(salePaymentPaidAmount) THEN SUM(salePaymentPaidAmount) ELSE 0 END FROM SalePayment 
+            WHERE salePaymentSaleUid = :saleUid AND CAST(salePaymentActive AS INTEGER) = 1 """)
+    abstract suspend fun findTotalBySale(saleUid: Long): Long
+
 
     @Query("""UPDATE SalePayment SET salePaymentSaleUid = 0
         WHERE salePaymentUid = :salePaymentUid

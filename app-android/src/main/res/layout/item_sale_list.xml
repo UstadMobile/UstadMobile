@@ -24,61 +24,60 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, sale)}"
-        app:onSelectableItemClicked="@{() -> itemListener.onClickSale(sale)}"
         android:background="@drawable/bg_listitem"
-        >
+        app:onSelectableItemClicked="@{() -> itemListener.onClickSale(sale)}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, sale)}"
+        app:selectableViewHelper="@{selectablePagedListAdapter}">
 
         <TextView
             android:id="@+id/item_sale_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
             android:text="@{sale.saleTitleGen}"
-            tools:text="20x Pink Hat"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="18sp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="20x Pink Hat" />
 
         <TextView
             android:id="@+id/item_sale_amount"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:layout_marginVertical="@dimen/dimen_16dp"
             android:text="@{`` + sale.saleAmount}"
-            tools:text="9,500 Afs"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="9,500 Afs" />
 
         <TextView
             android:id="@+id/item_sale_location"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginTop="8dp"
             android:layout_marginBottom="8dp"
-            android:text="@{sale.locationName}"
-            tools:text="Customer name"
+            android:text="@{sale.customer.fullName()}"
             app:layout_constraintBottom_toTopOf="@+id/item_sale_order_due_date"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/item_sale_title" />
+            app:layout_constraintTop_toBottomOf="@+id/item_sale_title"
+            tools:text="Customer name" />
 
         <TextView
             android:id="@+id/item_sale_order_date"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
             app:dateLong="@{sale.saleCreationDate}"
-            tools:text="21.01.2020"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/item_sale_amount" />
+            app:layout_constraintTop_toBottomOf="@+id/item_sale_amount"
+            tools:text="21.01.2020" />
 
         <TextView
             android:id="@+id/item_sale_order_due_date"

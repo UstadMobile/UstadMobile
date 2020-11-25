@@ -21,6 +21,10 @@
             />
 
         <variable
+            name="paymentTotal"
+            type="Long" />
+
+        <variable
             name="fieldsEnabled"
             type="boolean" />
 
@@ -154,7 +158,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 tools:text="17640"
-                android:text="0"
+                android:text="@{`` + orderTotal}"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 />
@@ -322,7 +326,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     tools:text="16000"
-                    android:text="0"
+                    app:balanceDueSaleWithDiscount="@{sale}"
+                    app:balanceDueOrdertotal="@{orderTotal}"
+                    app:balanceDuePaymentTotal="@{paymentTotal}"
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:layout_marginHorizontal="@dimen/dimen_16dp"
                     />
