@@ -143,9 +143,22 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
 
     override fun handleClickRecordSale(product: ProductWithInventoryCount) {
 
-        navigateToEditEntity(null, R.id.saleitem_edit_dest, SaleItem::class.java,
+        //TODO : Fix this
+//        navigateToEditEntity(null, R.id.saleitem_edit_dest,
+//                SaleItemWithProduct::class.java,
+//                argBundle = bundleOf(
+//                    UstadView.ARG_PRODUCT_UID to product.productUid.toString(),
+//                    UstadView.ARG_CREATE_SALE to "true")
+//        )
+
+
+        navigateToEditEntity(null, R.id.sale_edit_dest,
+                Sale::class.java,
                 argBundle = bundleOf(
-                        UstadView.ARG_PRODUCT_UID to arguments?.get(UstadView.ARG_ENTITY_UID).toString()))
+                        UstadView.ARG_PRODUCT_UID to product.productUid.toString(),
+                        UstadView.ARG_CREATE_SALE to "true")
+        )
+
     }
 
 

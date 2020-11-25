@@ -44,10 +44,15 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
+            android:max="100"
+            android:min="0"
             android:thumb="@drawable/seekbar_thumb"
+            android:progress="@={person.inventoryCount}"
             app:layout_constraintEnd_toStartOf="@+id/view_producer_with_inventory_selection_selected_edittext"
             app:layout_constraintStart_toEndOf="@+id/view_producer_with_inventory_selection_picture"
             app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_name" />
+
+        <!-- -->
 
         <EditText
             android:id="@+id/view_producer_with_inventory_selection_selected_edittext"
@@ -55,13 +60,16 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:ems="2"
+            android:importantForAutofill="no"
             android:inputType="number"
             android:singleLine="false"
-            tools:text="42"
-            android:text="@={`` + person.inventoryCount}"
+            android:text="@{`` + person.inventoryCount}"
+            android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_name"
-            android:importantForAutofill="no" />
+            tools:text="42" />
+
+        <!--app:seekCountET="@={person.inventoryCount}" -->
 
         <TextView
             android:id="@+id/view_producer_with_inventory_selection_stock_tv"
@@ -70,7 +78,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="8dp"
-            app:inStockAppend = "@{person.inventoryCount}"
+            app:inStockAppend="@{person.inventoryCount}"
             tools:text="42 in stock"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"

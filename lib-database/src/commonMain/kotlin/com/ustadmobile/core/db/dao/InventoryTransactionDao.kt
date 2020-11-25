@@ -23,8 +23,8 @@ abstract class InventoryTransactionDao : BaseDao<InventoryTransaction> {
     abstract fun getStockListByProduct(productUid: Long, leUid: Long) :
             DataSource.Factory<Int, PersonWithInventoryCount>
 
-    @Query(QUERY_GET_TRANSACTION_LIST_BY_PRODUCT)
-    abstract fun getProductTransactionDetail(productUid: Long) :
+    @Query(QUERY_GET_PRODUCT_TRANSACTION_HISTORY)
+    abstract fun getProductTransactionDetail(productUid: Long, leUid: Long) :
             DataSource.Factory<Int, InventoryTransactionDetail>
 
     companion object{
@@ -33,21 +33,36 @@ abstract class InventoryTransactionDao : BaseDao<InventoryTransaction> {
         const val QUERY_INVENTORY_LIST_SORTBY_NAME_ASC =
                 " ORDER BY Product.productName ASC "
 
-//        const val QUERY_GET_STOCK_LIST_BY_PRODUCT = """
-//            SELECT Person.*,
-//            0 as inventoryCount,
-//            0 as inventoryCountDeliveredTotal,
-//            0 as inventoryCountDelivered,
-//            0 as inventorySelected
-//            FROM Person
-//            LEFT JOIN Product ON Product.productUid = :productUid
-//            WHERE
-//            CAST(Person.active AS INTEGER) = 1
-//        """
 
         const val QUERY_GET_STOCK_LIST_BY_PRODUCT = """
             SELECT WE.*, 
-            0 as inventoryCount, 
+            (
+                SELECT 
+                    ( COUNT(*) - 
+                        (	select count(*) from inventorytransaction 
+                            where 
+                            inventorytransaction.inventoryTransactionInventoryItemUid in 
+                            (	select inventoryitemuid from inventoryitem where 
+                                inventoryitem.inventoryitemproductuid = Product.productUid
+                                AND InventoryItem.inventoryItemWeUid = WE.personUid
+                                AND InventoryItem.inventoryItemLeUid = :leUid
+                                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+                            ) 
+                            and inventorytransaction.inventoryTransactionSaleUid != 0 
+                            and cast(inventorytransaction.inventoryTransactionActive AS INTEGER) = 1 )
+                    ) 
+                FROM inventorytransaction
+					LEFT JOIN InventoryItem on InventoryItem.inventoryItemUid = InventoryTransaction.inventoryTransactionInventoryItemUid
+                    LEFT JOIN Product ON Product.productUid = inventoryItemProductUid
+                WHERE
+                    CAST(Product.productActive AS INTEGER) = 1 AND
+                    CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 AND
+                    Product.productUid = :productUid 
+                    AND InventoryItem.inventoryItemWeUid = WE.personUid
+                    AND InventoryItem.inventoryItemLeUid = :leUid
+                    and inventorytransaction.inventoryTransactionSaleUid == 0
+                    AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+            )  as inventoryCount, 
             0 as inventoryCountDeliveredTotal, 
             0 as inventoryCountDelivered, 
             0 as inventorySelected
@@ -64,17 +79,42 @@ abstract class InventoryTransactionDao : BaseDao<InventoryTransaction> {
             
         """
 
-        const val QUERY_GET_TRANSACTION_LIST_BY_PRODUCT = """
-           SELECT 
-            0 as stockCount, 
-            '' as weNames, 
-            0 as toLeUid, 
-            0 as transactionDate, 
-            '' as leName, 
-            0 as saleUid,
-            0 as fromLeUid 
+        const val QUERY_GET_PRODUCT_TRANSACTION_HISTORY = """
+            SELECT 
+                COUNT(*) as stockCount,  
+                GROUP_CONCAT(DISTINCT CASE WHEN WE.firstNames IS NOT NULL THEN WE.firstNames ELSE '' END||' '||CASE WHEN WE.lastName IS NOT NULL THEN WE.lastName ELSE '' END) AS weNames,
+                LE.firstNames||' '||LE.lastName as leName,
+                LE.personUid AS fromLeUid,
+                Sale.saleUid, TOLE.personUid as toLeUid,
+                CASE WHEN Sale.saleUid THEN Sale.saleCreationDate ELSE InventoryItem.InventoryItemDateAdded END as transactionDate
             FROM InventoryTransaction
-             LEFT JOIN Product ON Product.productUid = :productUid
+            LEFT JOIN InventoryItem ON InventoryTransaction.inventoryTransactionInventoryItemUid = InventoryItem.inventoryItemUid
+            LEFT JOIN Product ON InventoryItem.InventoryItemProductUid = Product.productUid 
+            LEFT JOIN Person as TOLE ON InventoryTransaction.InventoryTransactionToLeUid = TOLE.personUid 
+            LEFT JOIN Person as LE ON InventoryTransaction.inventoryTransactionFromLeUid = LE.personUid
+            LEFT JOIN Person as WE ON InventoryItem.InventoryItemWeUid = WE.personUid
+            LEFT JOIN Sale ON InventoryTransaction.inventoryTransactionSaleUid = Sale.saleUid
+            LEFT JOIN SaleItem ON InventoryTransaction.inventoryTransactionSaleItemUid = SaleItem.saleItemUid
+            LEFT JOIN Person as MLE ON MLE.personUid = :leUid 
+            WHERE
+                CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 1  
+                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 AND 
+                Product.productUid = :productUid 
+                AND ( CASE WHEN (CAST(MLE.admin as INTEGER) = 0) THEN LE.personUid = MLE.personUid ELSE 1 END )
+                AND CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 1
+                AND 
+                    (InventoryItem.inventoryItemWeUid IN (
+                        SELECT MEMBER.personUid FROM PersonGroupMember 
+                        LEFT JOIN PERSON AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
+                        LEFT JOIN PERSON AS LE ON LE.personUid = MLE.personUid
+                         WHERE groupMemberGroupUid = LE.personWeGroupUid 
+                        AND CAST(groupMemberActive  AS INTEGER) = 1
+                        ) 
+                    OR 
+                        CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END 
+                    )
+            GROUP BY saleUid, transactionDate
+            ORDER BY transactionDate DESC
         """
 
         const val SELECT_ACCOUNT_IS_ADMIN = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid)"

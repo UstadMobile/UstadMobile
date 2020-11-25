@@ -41,7 +41,8 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
 
     private fun updateListOnView() {
         //TODO: add sort listing
-        view.list = repo.productDao.findAllActiveProductWithInventoryCount()
+        view.list = repo.productDao.findAllActiveProductWithInventoryCount(
+                accountManager.activeAccount.personUid)
     }
 
     override fun handleClickCreateNewFab() {

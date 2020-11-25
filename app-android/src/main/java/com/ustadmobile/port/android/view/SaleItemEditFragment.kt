@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSaleItemEditBinding
@@ -11,9 +12,11 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SaleItemEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 import com.ustadmobile.port.android.util.ext.*
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 
 
 interface SaleItemEditFragmentEventHandler {
@@ -70,6 +73,11 @@ class SaleItemEditFragment: UstadEditFragment<SaleItemWithProduct>(), SaleItemEd
             field = value
             mBinding?.saleItem = value
         }
+
+    override fun goToNewSale(saleItem: SaleItemWithProduct) {
+        //TODO :Fix this
+        //navigateToEditEntity(saleItem, R.id.sale_edit_dest, SaleItemWithProduct::class.java)
+    }
 
     override var fieldsEnabled: Boolean = false
         get() = field

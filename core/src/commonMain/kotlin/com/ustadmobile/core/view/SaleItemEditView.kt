@@ -7,6 +7,8 @@ import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 
 interface SaleItemEditView: UstadEditView<SaleItemWithProduct> {
 
+    fun goToNewSale(saleItem: SaleItemWithProduct)
+
     companion object {
 
         const val VIEW_NAME = "SaleItemEditEditView"

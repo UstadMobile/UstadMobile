@@ -5,9 +5,13 @@ import android.text.InputFilter
 import android.text.Spanned
 import android.text.format.DateFormat
 import android.widget.EditText
+import android.widget.SeekBar
 import android.widget.TextView
+import androidx.core.widget.addTextChangedListener
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
+import androidx.databinding.InverseBindingListener
+import androidx.databinding.adapters.SeekBarBindingAdapter.OnProgressChanged
 import com.google.android.material.textfield.TextInputEditText
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ScheduleEditPresenter
@@ -126,6 +130,24 @@ fun TextInputEditText.setValueIfZero(value: Int){
 fun getRealValueInt(et: TextView): Int {
     return et.text.toString().toInt()?:0
 }
+
+
+@BindingAdapter("seekCountET")
+fun EditText.setInventoryCount(value: Int){
+    setText(value.toString())
+}
+
+@InverseBindingAdapter(attribute = "seekCountET")
+fun getInventoryCount(et: EditText): Int{
+    return et.text.toString().toInt()
+}
+
+@BindingAdapter("seekCountETAttrChanged")
+fun EditText.setCountListener(inverseBindingListener: InverseBindingListener) {
+    addTextChangedListener{inverseBindingListener.onChange() }
+}
+
+
 
 @BindingAdapter(value = ["minValue", "setMaxValue"])
 fun EditText.setMinMax(min: String, max: Int){

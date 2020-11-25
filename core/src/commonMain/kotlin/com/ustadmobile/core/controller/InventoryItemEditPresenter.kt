@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.InventoryItemEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -13,6 +14,7 @@ import com.ustadmobile.lib.db.entities.InventoryItem
 import com.ustadmobile.lib.db.entities.PersonWithInventory
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 import kotlinx.serialization.json.Json
@@ -43,8 +45,6 @@ class InventoryItemEditPresenter(context: Any,
         producerSelectionEditHelper.onDeactivateEntity(personWithInventory)
     }
 
-
-
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
@@ -57,7 +57,7 @@ class InventoryItemEditPresenter(context: Any,
         val productUid = arguments[ARG_PRODUCT_UID]?.toLong()?: 0L
 
        val producers = withTimeout(2000){
-            db.inventoryItemDao.findWeStock(productUid, loggedInPersonUid)
+            db.inventoryItemDao.findWe(loggedInPersonUid)
        }
         producerSelectionEditHelper.liveList.sendValue(producers)
 
@@ -75,6 +75,8 @@ class InventoryItemEditPresenter(context: Any,
             editEntity = InventoryItem()
         }
 
+        view.producers = producerSelectionEditHelper.liveList
+
         return editEntity
     }
 
@@ -90,7 +92,7 @@ class InventoryItemEditPresenter(context: Any,
         val loggedInPersonUid = accountManager.activeAccount.personUid
         val productUid = arguments[ARG_PRODUCT_UID]?.toLong()?: 0L
 
-        GlobalScope.launch(doorMainDispatcher()) {
+        GlobalScope.launch() {
 
             val itemsToUpdate = producerSelectionEditHelper.entitiesToUpdate
 
@@ -99,6 +101,7 @@ class InventoryItemEditPresenter(context: Any,
                     inventoryItemProductUid = productUid
                     inventoryItemLeUid = loggedInPersonUid
                     inventoryItemWeUid = producerInventory.personUid
+                    inventoryItemDateAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
                 }
 
                 repo.inventoryItemDao.insertInventoryItem(newInventory,
@@ -106,7 +109,9 @@ class InventoryItemEditPresenter(context: Any,
             }
 
 
-            view.finishWithResult(listOf(entity))
+            view.runOnUiThread(Runnable {
+                view.finishWithResult(listOf(entity))
+            })
         }
     }
 

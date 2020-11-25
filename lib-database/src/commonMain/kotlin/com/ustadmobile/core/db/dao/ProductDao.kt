@@ -34,7 +34,7 @@ abstract class ProductDao : BaseDao<Product> {
     abstract suspend fun findProductWithInventoryCountAsync(uid: Long): ProductWithInventoryCount?
 
     @Query(QUERY_PRODUCTS_WITH_INVENTORY)
-    abstract fun findAllActiveProductWithInventoryCount(): DataSource.Factory<Int, ProductWithInventoryCount>
+    abstract fun findAllActiveProductWithInventoryCount(leUid: Long): DataSource.Factory<Int, ProductWithInventoryCount>
 
     @Query("""SELECT * FROM Product 
         WHERE CAST(productActive AS INTEGER) = 1
@@ -92,7 +92,33 @@ abstract class ProductDao : BaseDao<Product> {
 
         const val QUERY_PRODUCTS_WITH_INVENTORY = """
             SELECT Product.*, 
-                (0) as stock
+                (
+                SELECT 
+                    ( COUNT(*) - 
+                        (	select count(*) from inventorytransaction 
+                            where 
+                            inventorytransaction.inventoryTransactionInventoryItemUid in 
+                            (	select inventoryitemuid from inventoryitem where 
+                                inventoryitem.inventoryitemproductuid = PR.productUid
+                                AND InventoryItem.inventoryItemLeUid = :leUid
+                                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+                            ) 
+                            and inventorytransaction.inventoryTransactionSaleUid != 0 
+                            and cast(inventorytransaction.inventoryTransactionActive AS INTEGER) = 1 )
+                    ) 
+                FROM inventorytransaction
+                    LEFT JOIN InventoryItem on InventoryItem.inventoryItemUid = InventoryTransaction.inventoryTransactionInventoryItemUid
+                    LEFT JOIN Product AS PR ON PR.productUid = inventoryItemProductUid
+                WHERE
+            
+                    InventoryItem.inventoryItemLeUid = :leUid
+                    AND PR.productUid = Product.productUid
+                    and inventorytransaction.inventoryTransactionSaleUid == 0
+                    AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+                    AND CAST(inventorytransaction.inventorytransactionactive as integer) = 1
+                
+                
+                ) as stock
             FROM Product 
             WHERE CAST(productActive AS INTEGER) = 1 
         """

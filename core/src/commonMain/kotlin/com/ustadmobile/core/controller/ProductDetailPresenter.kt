@@ -48,7 +48,7 @@ class ProductDetailPresenter(context: Any,
         view.stockList = repo.inventoryTransactionDao.getStockListByProduct(productUid, loggedInPersonUid)
 
         //3.TransactionList
-        view.transactionList = repo.inventoryTransactionDao.getProductTransactionDetail(productUid)
+        view.transactionList = repo.inventoryTransactionDao.getProductTransactionDetail(productUid, loggedInPersonUid)
 
         //4. Pictures TODO
         view.pictureList = repo.productDao.findAllProductPictures(productUid)

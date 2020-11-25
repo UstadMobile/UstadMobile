@@ -81,9 +81,10 @@ class SaleItemEditPresenter(context: Any,
 
     override fun handleClickSave(entity: SaleItemWithProduct) {
 
-        if(arguments.containsKey(UstadView.ARG_CREATE_SALE) && arguments[UstadView.ARG_CREATE_SALE].equals("true")){
+        if(arguments.containsKey(UstadView.ARG_CREATE_SALE) &&
+                arguments[UstadView.ARG_CREATE_SALE].equals("true")){
             //Create a new sale
-            view.finishWithResult(listOf(entity))
+            view.goToNewSale(entity)
         }else{
             view.finishWithResult(listOf(entity))
         }

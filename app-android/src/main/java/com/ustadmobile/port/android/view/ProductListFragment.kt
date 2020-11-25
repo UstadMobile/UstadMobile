@@ -56,9 +56,6 @@ class ProductListFragment(): UstadListViewFragment<Product, ProductWithInventory
     }
 
     override fun goToSaleItem(product: Product) {
-//        systemImpl.go(SaleItemEditView.VIEW_NAME, mapOf(
-//                UstadView.ARG_PRODUCT_UID to product.productUid.toString()
-//        ), context)
         navigateToEditEntity(null, R.id.saleitem_edit_dest,
                 SaleItemWithProduct::class.java, argBundle = bundleOf(
                         UstadView.ARG_PRODUCT_UID to product.productUid.toString()))

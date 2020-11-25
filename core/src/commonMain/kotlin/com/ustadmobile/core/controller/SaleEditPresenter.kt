@@ -79,10 +79,7 @@ class SaleEditPresenter(context: Any,
         view.saleItemList = saleItemEditHelper.liveList
         view.saleDeliveryList = saleDeliveryEditHelper.liveList
         view.salePaymentList = salePaymentEditHelper.liveList
-
-
     }
-
 
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): SaleWithCustomerAndLocation? {
