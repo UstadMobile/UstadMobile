@@ -895,5 +895,12 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="new_le">New LE</string>
     <string name="new_customer">New customer</string>
     <string name="new_group">New group</string>
+    <string name="new_location">New location</string>
+    <string name="edit_location">Edit location</string>
+    <string name="new_payment">New payment</string>
+    <string name="edit_payment">Edit payment</string>
+    <string name="amount">Amount</string>
+    <string name="payment_date">Payment date</string>
+    <string name="save_sale_before_delivery">Please save this sale before adding a delivery</string>
 
 </resources>

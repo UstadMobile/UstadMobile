@@ -8,10 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemPersonwithinventoryBinding
-import com.ustadmobile.core.controller.CategoryListListener
 import com.ustadmobile.lib.db.entities.PersonWithInventory
-import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
 class PersonWithInventoryListRecyclerAdapter()

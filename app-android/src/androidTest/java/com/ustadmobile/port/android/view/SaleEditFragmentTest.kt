@@ -1,10 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
-import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.navigation.fragment.findNavController
-import androidx.test.core.app.ApplicationProvider
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -12,18 +9,15 @@ import com.ustadmobile.port.android.screen.SaleEditScreen
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.toughra.ustadmobile.R
-import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.util.UMCalendarUtil
 
 import com.ustadmobile.test.port.android.util.*
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 
@@ -69,7 +63,7 @@ class SaleEditFragmentTest : TestCase(){
         }
 
         val provinceDubai = Location().apply{
-            title = "Dubai"
+            locationTitle = "Dubai"
             locationActive = true
             locationUid = dbRule.db.locationDao.insert(this)
         }

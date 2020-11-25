@@ -16,6 +16,12 @@ abstract class SalePaymentDao : BaseDao<SalePayment>, OneToManyJoinDao<SalePayme
     @Update
     abstract suspend fun updateAsync(entity: SalePayment): Int
 
+    @Query("""
+        SELECT * FROM SalePayment WHERE salePaymentUid = :uid 
+        AND CAST(salePaymentActive AS INTEGER) = 1
+    """)
+    abstract suspend fun findByUidAsync(uid: Long): SalePayment?
+
 
     @Query(QUERY_ALL_ACTIVE_SALE_PAYMENT_LIST)
     abstract fun findAllBySale(saleUid: Long): DataSource.Factory<Int,SalePayment>

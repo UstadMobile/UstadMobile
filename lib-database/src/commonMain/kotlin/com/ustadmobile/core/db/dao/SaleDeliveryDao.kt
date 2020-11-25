@@ -2,11 +2,11 @@ package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.*
-import com.ustadmobile.core.db.dao.SaleDeliveryDao.Companion.SELECT_ACCOUNT_IS_ADMIN
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SaleDelivery
+import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 import com.ustadmobile.door.annotation.Repository
 
 @Repository
@@ -16,12 +16,27 @@ abstract class SaleDeliveryDao : BaseDao<SaleDelivery>, OneToManyJoinDao<SaleDel
     @Update
     abstract suspend fun updateAsync(entity: SaleDelivery): Int
 
-
     @Query(QUERY_ALL_ACTIVE_SALE_DELIVERY_LIST)
     abstract fun findAllBySale(saleUid: Long): DataSource.Factory<Int,SaleDelivery>
 
     @Query(QUERY_ALL_ACTIVE_SALE_DELIVERY_LIST)
     abstract suspend fun findAllBySaleAsList(saleUid: Long): List<SaleDelivery>
+
+    @Query("""
+        SELECT * FROM SaleDelivery WHERE saleDeliveryUid = :uid 
+        AND CAST(saleDeliveryActive AS INTEGER) = 1
+    """)
+    abstract suspend fun findByUidAsync(uid: Long): SaleDelivery?
+
+    @Query("""
+        SELECT SaleItem.*, Product.*, 0 as deliveredCount FROM SaleItem 
+        LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid
+        WHERE SaleItem.saleItemSaleUid = :saleUid 
+        
+        
+    """)
+    abstract suspend fun findAllSaleItemsByDelivery(saleUid: Long):
+            List<SaleItemWithProduct>
 
 
     @Query("""

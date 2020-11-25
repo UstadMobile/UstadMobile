@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 148,
-    "identityHash": "deadbed0e3b6f4a3348f51afb3a776ac",
+    "identityHash": "3f66f41646e2c5146c97afc7529101fb",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -6466,7 +6466,7 @@
       },
       {
         "tableName": "Location",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`locationUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `title` TEXT, `description` TEXT, `lng` TEXT, `lat` TEXT, `parentLocationUid` INTEGER NOT NULL, `locationLocalChangeSeqNum` INTEGER NOT NULL, `locationMasterChangeSeqNum` INTEGER NOT NULL, `locationLastChangedBy` INTEGER NOT NULL, `timeZone` TEXT, `locationActive` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`locationUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `locationTitle` TEXT, `locationDescription` TEXT, `lng` TEXT, `lat` TEXT, `parentLocationUid` INTEGER NOT NULL, `locationLocalChangeSeqNum` INTEGER NOT NULL, `locationMasterChangeSeqNum` INTEGER NOT NULL, `locationLastChangedBy` INTEGER NOT NULL, `timeZone` TEXT, `locationActive` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "locationUid",
@@ -6475,14 +6475,14 @@
             "notNull": true
           },
           {
-            "fieldPath": "title",
-            "columnName": "title",
+            "fieldPath": "locationTitle",
+            "columnName": "locationTitle",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "description",
-            "columnName": "description",
+            "fieldPath": "locationDescription",
+            "columnName": "locationDescription",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -11336,7 +11336,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'deadbed0e3b6f4a3348f51afb3a776ac')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3f66f41646e2c5146c97afc7529101fb')"
     ]
   }
 }

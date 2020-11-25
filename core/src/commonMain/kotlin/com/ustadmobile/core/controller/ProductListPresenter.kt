@@ -45,7 +45,6 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
     }
 
     override fun handleClickCreateNewFab() {
-        //TODO: this
         systemImpl.go(ProductEditView.VIEW_NAME, mapOf(), context)
 
     }
@@ -70,9 +69,13 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
     }
 
     override fun onClickProduct(product: ProductWithInventoryCount) {
+        when(mListMode) {
+            ListViewMode.PICKER -> view.finishWithResult(listOf(product))
+            ListViewMode.BROWSER -> {
 
-        systemImpl.go(ProductDetailView.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to product.productUid.toString()), context)
-
+                systemImpl.go(ProductDetailView.VIEW_NAME,
+                        mapOf(UstadView.ARG_ENTITY_UID to product.productUid.toString()), context)
+            }
+        }
     }
 }

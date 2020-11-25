@@ -20,6 +20,11 @@
         android:label="@string/people" />
 
     <fragment
+        android:id="@+id/location_list_dest"
+        android:name="com.ustadmobile.port.android.view.LocationListFragment"
+        android:label="@string/location" />
+
+    <fragment
         android:id="@+id/verb_list_dest"
         android:name="com.ustadmobile.port.android.view.VerbEntityListFragment"
         android:label="@string/verb" />
@@ -57,6 +62,14 @@
         android:name="com.ustadmobile.port.android.view.InventoryItemEditFragment" />
 
     <fragment
+        android:id="@+id/salepayment_edit_dest"
+        android:name="com.ustadmobile.port.android.view.SalePaymentEditFragment" />
+
+    <fragment
+        android:id="@+id/saledelivery_edit_dest"
+        android:name="com.ustadmobile.port.android.view.SaleDeliveryEditFragment" />
+
+    <fragment
         android:id="@+id/product_detail_dest"
         android:name="com.ustadmobile.port.android.view.ProductDetailFragment" />
 
@@ -68,6 +81,10 @@
     <fragment
         android:id="@+id/sale_edit_dest"
         android:name="com.ustadmobile.port.android.view.SaleEditFragment" />
+
+    <fragment
+        android:id="@+id/location_edit_dest"
+        android:name="com.ustadmobile.port.android.view.LocationEditFragment" />
 
 
     <fragment

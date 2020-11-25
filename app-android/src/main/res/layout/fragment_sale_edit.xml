@@ -80,7 +80,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/fragment_sale_edit_province_tiet"
                     android:onClick="@{() -> activityEventHandler.selectLocation()}"
-                    android:text="@{sale.location.title}"
+                    android:text="@{sale.location.locationTitle}"
                     app:runOnClickWhenFocused="@{true}"
                     android:inputType="@{InputType.TYPE_NULL}"
                     android:layout_width="match_parent"
@@ -322,6 +322,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     tools:text="16000"
+                    android:text="0"
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:layout_marginHorizontal="@dimen/dimen_16dp"
                     />
@@ -336,7 +337,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
-                android:layout_marginBottom="@dimen/dimen_30dp"
+                android:layout_marginBottom="@dimen/dimen_60dp"
                 android:hint="@string/order_notes"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

@@ -30,7 +30,7 @@ open class SalePayment() {
     var salePaymentSaleUid: Long = 0
 
     //Says the payment was done. If it is false, then the amount is outstanding.
-    var salePaymentDone: Boolean = false
+    var salePaymentDone: Boolean = true
 
     //If false, it wont show up on the app and reports - effectively deleted.
     var salePaymentActive: Boolean = true

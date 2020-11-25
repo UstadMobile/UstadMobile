@@ -135,7 +135,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
             val province = it.firstOrNull() ?: return@observeResult
             entity?.saleLocationUid = province.locationUid
             entity?.location = province
-            mBinding?.fragmentSaleEditProvinceTiet?.setText(province.title)
+            mBinding?.fragmentSaleEditProvinceTiet?.setText(province.locationTitle)
             mBinding?.sale = entity
         }
 
@@ -235,17 +235,21 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
 //                args = bundleOf()       )
     }
 
-    //TODO this
     override fun addDelivery() {
-        onSaveStateToBackStackStateHandle()
-        //navigateToEditEntity(null, R.id.saledelivery_edit_dest, SaleDelivery::class.java)
+        if(entity?.saleUid != 0L) {
+            onSaveStateToBackStackStateHandle()
+            navigateToEditEntity(null, R.id.saledelivery_edit_dest, SaleDelivery::class.java,
+                    argBundle = bundleOf(
+                            UstadView.ARG_SALE_UID to entity?.saleUid.toString()))
+        }else{
+            showSnackBar(requireContext().getString(R.string.save_sale_before_delivery))
+        }
 
     }
 
-    //TODO this
     override fun addPayment() {
         onSaveStateToBackStackStateHandle()
-        //navigateToEditEntity(null, R.id.salepayment_edit_dest, SalePayment::class.java)
+        navigateToEditEntity(null, R.id.salepayment_edit_dest, SalePayment::class.java)
     }
 
     override fun selectCustomer() {
@@ -256,12 +260,11 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         )
     }
 
-    //TODO this
     override fun selectLocation() {
         //Go to location select
         onSaveStateToBackStackStateHandle()
-//        navigateToPickEntityFromList(Location::class.java, R.id.locationlist_dest,
-//                args = bundleOf()       )
+        navigateToPickEntityFromList(Location::class.java, R.id.location_list_dest,
+                args = bundleOf())
     }
 
     override fun onClickSaleItem(saleItem: SaleItemWithProduct) {
@@ -270,9 +273,10 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
     }
 
     override fun onClickSaleDelivery(saleDelivery: SaleDelivery) {
-        //TODO
         onSaveStateToBackStackStateHandle()
-        //navigateToEditEntity(saleDelivery, R.id.saledelivery_edit_dest, SaleDelivery::class.java)
+        navigateToEditEntity(saleDelivery, R.id.saledelivery_edit_dest,
+                SaleDelivery::class.java, argBundle = bundleOf(
+                    UstadView.ARG_SALE_UID to entity?.saleUid.toString()))
     }
 
     override fun onClickRemoveSaleDelivery(saleDelivery: SaleDelivery) {
@@ -280,9 +284,8 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
     }
 
     override fun onClickSalePayment(salePayment: SalePayment) {
-        //TODO
         onSaveStateToBackStackStateHandle()
-        //navigateToEditEntity(salePayment, R.id.salepayment_edit_dest, SalePayment::class.java)
+        navigateToEditEntity(salePayment, R.id.salepayment_edit_dest, SalePayment::class.java)
     }
 
     override fun onClickRemoveSalePayment(salePayment: SalePayment) {

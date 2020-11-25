@@ -17,9 +17,9 @@ open class Location() {
     @PrimaryKey(autoGenerate = true)
     var locationUid: Long = 0
 
-    var title: String? = null
+    var locationTitle: String? = null
 
-    var description: String? = null
+    var locationDescription: String? = null
 
     var lng: String? = null
 

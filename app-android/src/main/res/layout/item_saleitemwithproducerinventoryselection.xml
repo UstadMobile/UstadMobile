@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+        <variable
+            name="saleItem"
+            type="com.ustadmobile.lib.db.entities.SaleItemWithProduct" />
+
+        <variable
+            name="listener"
+            type="com.ustadmobile.core.controller.SaleItemListItemListener" />
+
+    </data>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:onClick="@{() -> listener.onClickSaleItem(saleItem)}"
+        android:background="?attr/selectableItemBackground"
+        >
+
+        <ImageView
+            android:id="@+id/item_sale_item_image"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginHorizontal="@dimen/dimen_16dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:layout_marginVertical="@dimen/dimen_8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_launcher_icon" />
+
+        <TextView
+            android:id="@+id/item_sale_item_name"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_8dp"
+            android:lines="1"
+            android:text="@{saleItem.saleItemProduct.productName}"
+            android:textAppearance="@style/TextAppearance.AppCompat.Medium"
+            app:layout_constraintBottom_toBottomOf="@+id/item_sale_item_image"
+            app:layout_constraintEnd_toStartOf="@+id/item_saleitemwithproducer_expand_iv"
+            app:layout_constraintStart_toEndOf="@+id/item_sale_item_image"
+            app:layout_constraintTop_toTopOf="@+id/item_sale_item_image"
+            tools:text="Pink Hat" />
+
+
+<ImageView
+    android:id="@+id/item_saleitemwithproducer_expand_iv"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:src="@drawable/ic_arrow_downward_24"
+    app:layout_constraintStart_toEndOf="@+id/item_sale_item_name"
+    app:layout_constraintTop_toTopOf="@+id/item_sale_item_image"
+    app:layout_constraintBottom_toBottomOf="@+id/item_sale_item_image"
+    app:layout_constraintEnd_toEndOf="parent"
+    android:layout_marginHorizontal="@dimen/dimen_16dp"
+    />
+
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>
