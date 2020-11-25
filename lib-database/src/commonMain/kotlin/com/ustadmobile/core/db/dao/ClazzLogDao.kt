@@ -1,10 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.door.annotation.Repository
@@ -89,5 +86,8 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         clazzLogLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1)
         WHERE clazzLogUid = :clazzLogUid""")
     abstract fun updateStatusByClazzLogUid(clazzLogUid: Long, newStatus: Int)
+
+    @Update
+    abstract suspend fun updateAsync(clazzLog: ClazzLog)
 
 }
