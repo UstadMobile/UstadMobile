@@ -920,4 +920,5 @@
     <string name="school_code">Рамзи муассисаи таълимӣ</string>
     <string name="entity_code">%1$s рамз</string>
     <string name="join_code_instructions">Дархости рамз аз омӯзгор ва ворид намудани он дар зер:</string>
+    <string name="record_for_student">Сабт барои хонанда</string>
 </resources>
