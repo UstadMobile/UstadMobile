@@ -171,6 +171,9 @@ class SaleEditPresenter(context: Any,
                 it.saleItemSaleUid = entity.saleUid
                 it.saleItemUid = repo.saleItemDao.insertAsync(it)
             }
+            saleItemstoUpdate.forEach {
+                it.saleItemSaleUid = entity.saleUid
+            }
             repo.saleItemDao.updateListAsync(saleItemstoUpdate)
             repo.saleItemDao.deactivateByUids(saleItemstoDelete)
 
@@ -194,6 +197,12 @@ class SaleEditPresenter(context: Any,
             paymentsToInsert.forEach {
                 it.salePaymentSaleUid = entity.saleUid
                 it.salePaymentUid = repo.salePaymentDao.insertAsync(it)
+            }
+            paymentsToUpdate.forEach {
+                it.salePaymentSaleUid = entity.saleUid
+                if(it.salePaymentUid == 0L) {
+                    it.salePaymentUid = repo.salePaymentDao.insertAsync(it)
+                }
             }
             repo.salePaymentDao.updateListAsync(paymentsToUpdate)
             repo.salePaymentDao.deactivateByUids(paymentsToDelete)

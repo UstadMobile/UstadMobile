@@ -69,15 +69,7 @@ class SalePaymentEditPresenter(context: Any,
 
     override fun handleClickSave(entity: SalePayment) {
 
-        GlobalScope.launch(doorMainDispatcher()) {
-            if(entity.salePaymentUid == 0L) {
-                entity.salePaymentUid = repo.salePaymentDao.insertAsync(entity)
-            }else {
-                repo.salePaymentDao.updateAsync(entity)
-            }
-
-            view.finishWithResult(listOf(entity))
-        }
+        view.finishWithResult(listOf(entity))
     }
 
 
