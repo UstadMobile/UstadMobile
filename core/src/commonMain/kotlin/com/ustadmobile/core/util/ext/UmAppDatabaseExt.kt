@@ -13,7 +13,6 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 fun UmAppDatabase.runPreload() {
     preload()
-    timeZoneEntityDao.insertSystemTimezones()
 }
 
 /**

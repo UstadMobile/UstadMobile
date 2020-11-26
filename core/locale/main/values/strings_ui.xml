@@ -831,4 +831,22 @@ Content is provided under license by external content providers. Ustad Mobile, u
     -->
     <string name="moved_x_entries">Moved %1$s entries</string>
 
+    <string name="end_is_before_start_error">End is before start</string>
+
+    <!--
+    Option when recording attendance. When the user clicks the 'record attendance' button they have
+    the option to either 1) record attendance for the the  most recent already known
+    occurrence of the class or 2) add an occurrence of the class (e.g. if they did not
+    setup a schedule or they want to add a one-off occurence of the class)
+    -->
+    <string name="record_attendance_for_most_recent_occurrence">Record attendance for most recent existing occurrence</string>
+
+    <!--
+    Option when recording attendance. When the user clicks the 'record attendance' button they have
+    the option to either 1) record attendance for the the  most recent already known
+    occurrence of the class or 2) add an occurrence of the class (e.g. if they did not
+    setup a schedule or they want to add a one-off occurence of the class)
+    -->
+    <string name="add_a_new_occurrence">Add a new occurrence</string>
+
 </resources>

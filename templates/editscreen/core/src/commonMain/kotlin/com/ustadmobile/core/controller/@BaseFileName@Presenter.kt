@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
@@ -20,16 +19,15 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import org.kodein.di.DI
+import com.ustadmobile.core.util.safeParse
 
 
 class @BaseFileName@Presenter(context: Any,
-                          arguments: Map<String, String>, view: @BaseFileName@View,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadEditPresenter<@BaseFileName@View, @EditEntity@>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+        arguments: Map<String, String>, view: @BaseFileName@View,
+        lifecycleOwner: DoorLifecycleOwner,
+        di: DI)
+    : UstadEditPresenter<@BaseFileName@View, @EditEntity@>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = TODO("PERSISTENCE_MODE.DB OR PERSISTENCE_MODE.JSON")
@@ -63,7 +61,7 @@ class @BaseFileName@Presenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: @EditEntity@? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(@EditEntity@.serializer(), entityJsonStr)
+            editEntity = safeParse(di, @EditEntity@.serializer(), entityJsonStr)
         }else {
             editEntity = @EditEntity@()
         }

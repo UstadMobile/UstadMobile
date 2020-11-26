@@ -17,6 +17,10 @@ open class UstadBaseWithContentOptionsActivity : UstadBaseActivity(),UstadViewWi
 
     internal var coordinatorLayout: CoordinatorLayout? = null
 
+    //does nothing
+    override var loading: Boolean
+        get() = false
+        set(value) {}
 
     internal lateinit  var importDialog: ProgressDialog
 

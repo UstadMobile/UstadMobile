@@ -165,10 +165,23 @@ class ClazzLogEditAttendancePresenterTest {
             }
         }
 
+
         Assert.assertTrue("After selecting a different clazz log day, attendance records are reloaded",
                 clazzLogAttendanceRecordLiveData.getValue()!!.all { it.attendanceStatus == 0 })
         Assert.assertEquals("After selecting a different clazz log day, same number of student records are loaded",
                 testClazzAndMembers.studentList.size, clazzLogAttendanceRecordLiveData.getValue()!!.size)
+
+        presenter.handleClickSave(initialViewOnEntity!!)
+        runBlocking {
+            db.waitUntil(5000, listOf("ClazzLogAttendanceRecord")) {
+                runBlocking {
+                    db.clazzLogAttendanceRecordDao.findByClazzLogUid(testClazzLog.clazzLogUid).all {
+                        it.attendanceStatus == STATUS_ATTENDED
+                    }
+                }
+            }
+        }
+
         runBlocking {
             val clazzLog1AttendanceRecords = db.clazzLogAttendanceRecordDao.findByClazzLogUid(testClazzLog.clazzLogUid)
             Assert.assertEquals("Previous clazz log was recorded", testClazzAndMembers.studentList.size,

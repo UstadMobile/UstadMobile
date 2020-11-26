@@ -48,11 +48,6 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
         entity = null
     }
 
-    override fun onResume() {
-        super.onResume()
-
-    }
-
     override var loading: Boolean = false
 
     override var entity: Schedule? = null
@@ -69,13 +64,6 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
             mBinding?.fieldsEnabled = value
         }
 
-    override var frequencyOptions: List<ScheduleEditPresenter.FrequencyMessageIdOption>? = null
-        get() = field
-        set(value) {
-            mBinding?.frequencyOptions = value
-            field  = value
-        }
-
     override var dayOptions: List<ScheduleEditPresenter.DayMessageIdOption>? = null
         get() = field
         set(value) {
@@ -83,4 +71,16 @@ class ScheduleEditFragment: UstadEditFragment<Schedule>(), ScheduleEditView {
             field = value
         }
 
+
+    override var fromTimeError: String?
+        get() = mBinding?.fromTimeError
+        set(value) {
+            mBinding?.fromTimeError = value
+        }
+
+    override var toTimeError: String?
+        get() = mBinding?.toTimeError
+        set(value) {
+            mBinding?.toTimeError = value
+        }
 }
