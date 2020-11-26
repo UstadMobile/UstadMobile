@@ -15,6 +15,8 @@ fun MaterialButtonToggleGroup.setMessageOptions(messageGroupOptions: Map<Int, In
     val viewIdToCheck = messageGroupOptions[messageGroupSelectedId]
     if(viewIdToCheck != null)
         check(viewIdToCheck)
+    else
+        clearChecked()
 
     setTag(R.id.tag_button_toggle_group_map, messageGroupOptions)
 }

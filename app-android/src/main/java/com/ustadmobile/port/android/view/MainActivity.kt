@@ -19,6 +19,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
@@ -71,6 +72,11 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private var searchView: SearchView? = null
 
+    //This is actually managed by the underlying fragments.
+    override var loading: Boolean
+        get() = false
+        set(value) {}
+
     //Observe the active account to show/hide the settings based on whether or not the user is admin
     private val mActiveUserObserver = Observer<UmAccount> {account ->
         GlobalScope.launch(Dispatchers.Main) {
@@ -122,6 +128,11 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
                                       arguments: Bundle?) {
         invalidateOptionsMenu()
         onAppBarExpand(true)
+
+        val ustadDestination = impl.destinationProvider.lookupDestinationById(destination.id)
+        val scrollFlags = ustadDestination?.actionBarScrollBehavior ?:
+            (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
+        (mBinding.root.collapsing_toolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
 
         slideBottomNavigation(true)
     }

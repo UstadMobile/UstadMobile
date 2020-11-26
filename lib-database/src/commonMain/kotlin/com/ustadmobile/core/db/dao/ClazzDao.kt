@@ -127,7 +127,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)
         WHERE clazzUid = :clazzUid
     """)
-    abstract fun updateClazzAttendanceAverage(clazzUid: Long)
+    abstract suspend fun updateClazzAttendanceAverageAsync(clazzUid: Long)
 
     /** Check if a permission is present on a specific entity e.g. updateState/modify etc */
     @Query("SELECT EXISTS(SELECT 1 FROM Clazz WHERE " +

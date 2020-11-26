@@ -93,6 +93,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
 
     fun handleLogin(username: String?, password:String?){
         view.inProgress = true
+        view.loading = true
         view.isEmptyUsername = username == null || username.isEmpty()
         view.isEmptyPassword = password == null || password.isEmpty()
 
@@ -102,6 +103,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                     val umAccount = accountManager.login(username.trim(),
                             password.trim() ,serverUrl)
                     view.inProgress = false
+                    view.loading = false
                     val goOptions = UstadMobileSystemCommon.UstadGoOptions("",
                             true)
                     val accountRepo: UmAppDatabase =  di.on(umAccount).direct.instance(tag = DoorTag.TAG_REPO)
@@ -112,11 +114,13 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                         MessageID.wrong_user_pass_combo else
                         MessageID.login_network_error , context)
                     view.inProgress = false
+                    view.loading = false
                     view.clearFields()
                 }
             }
         }else{
             view.inProgress = false
+            view.loading = false
         }
     }
 

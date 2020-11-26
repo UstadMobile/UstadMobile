@@ -23,13 +23,17 @@ import com.ustadmobile.port.android.view.UstadEditFragment
  * BackStack SavedStateHandle as specified by ARG_RESULT_DEST_ID and ARG_RESULT_DEST_KEY
  */
 fun Fragment.saveResultToBackStackSavedStateHandle(result: List<*>) {
+    saveResultToBackStackSavedStateHandle(defaultGson().toJson(result))
+}
+
+fun Fragment.saveResultToBackStackSavedStateHandle(result: String) {
     val saveToDestination = arguments?.getString(UstadView.ARG_RESULT_DEST_ID)
     val saveToKey = arguments?.getString(UstadBaseFragment.ARG_RESULT_DEST_KEY)
     val navController = findNavController()
     if(saveToDestination != null && saveToKey != null) {
         val saveToDestId = saveToDestination.toInt()
         val destStackEntry = navController.getBackStackEntry(saveToDestId)
-        destStackEntry.savedStateHandle.set(saveToKey, defaultGson().toJson(result))
+        destStackEntry.savedStateHandle.set(saveToKey, result)
         findNavController().popBackStack(saveToDestId, false)
     }else{
         navController.navigateUp()

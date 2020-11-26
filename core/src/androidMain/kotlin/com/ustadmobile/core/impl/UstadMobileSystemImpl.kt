@@ -300,6 +300,20 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         }
     }
 
+    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
+        val navController = navController ?: (context as Activity)
+                .findNavController(destinationProvider.navControllerViewId)
+
+        val popBackDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
+            navController.currentDestination?.id ?: 0
+        }else {
+            destinationProvider.lookupDestinationName(popUpToViewName)
+                    ?.destinationId ?: 0
+        }
+
+        navController.popBackStack(popBackDestId, popUpInclusive)
+    }
+
 
     /**
      * Get a string for use in the UI

@@ -37,7 +37,11 @@ class FabManagerLifecycleObserver(var extendedFab: ExtendedFloatingActionButton?
 
     var visible: Boolean = visible
         set(value) {
+            if(value == true && extendedFab?.isExtended == false)
+                extendedFab?.extend()
+
             field = value
+
             extendedFab?.takeIf { active }?.visibility = if(value) View.VISIBLE else View.GONE
         }
 
@@ -47,6 +51,8 @@ class FabManagerLifecycleObserver(var extendedFab: ExtendedFloatingActionButton?
             it.takeIf { text != null }?.text = text
             it.setOnClickListener(onClickListener)
             it.visibility = if(visible) View.VISIBLE else View.GONE
+            if(visible && extendedFab?.isExtended == false)
+                extendedFab?.extend()
         }
 
         active = true

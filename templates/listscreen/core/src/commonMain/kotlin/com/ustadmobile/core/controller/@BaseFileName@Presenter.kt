@@ -2,7 +2,6 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
@@ -12,12 +11,9 @@ import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.lib.db.entities.UmAccount
 
 class @BaseFileName@Presenter(context: Any, arguments: Map<String, String>, view: @BaseFileName@View,
-                          lifecycleOwner: DoorLifecycleOwner, systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?>,
+                                di: DI, lifecycleOwner: DoorLifecycleOwner,
                           private val @Entity_VariableName@ItemListener: Default@BaseFileName@ItemListener = Default@BaseFileName@ItemListener(view, ListViewMode.BROWSER, systemImpl, context))
-    : UstadListPresenter<@BaseFileName@View, @Entity@>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount), @BaseFileName@ItemListener by @Entity_VariableName@ItemListener {
+    : UstadListPresenter<@BaseFileName@View, @Entity@>(context, arguments, view, di, lifecycleOwner), @BaseFileName@ItemListener by @Entity_VariableName@ItemListener {
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
 
