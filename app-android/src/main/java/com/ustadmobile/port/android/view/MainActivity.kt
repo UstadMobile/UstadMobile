@@ -128,8 +128,11 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
                                       arguments: Bundle?) {
         invalidateOptionsMenu()
         onAppBarExpand(true)
-        (mBinding.root.collapsing_toolbar.layoutParams as? AppBarLayout.LayoutParams)
-                ?.scrollFlags  = AppBarLayout.LayoutParams.SCROLL_FLAG_NO_SCROLL
+
+        val ustadDestination = impl.destinationProvider.lookupDestinationById(destination.id)
+        val scrollFlags = ustadDestination?.actionBarScrollBehavior ?:
+            (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
+        (mBinding.root.collapsing_toolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
 
         slideBottomNavigation(true)
     }
