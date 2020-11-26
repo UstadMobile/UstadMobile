@@ -2,21 +2,24 @@ package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
-import com.ustadmobile.lib.contentscrapers.apache.ApacheIndexer
 import com.ustadmobile.lib.db.entities.ContainerETag
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
-import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.parseMap
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
 import java.net.URL
 import java.net.URLDecoder
@@ -29,12 +32,13 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
     private val logPrefix = "[URLScraper SQI ID #$sqiUid] "
 
+    private val contentImportManager: ContentImportManager by di.on(endpoint).instance()
 
     override fun scrapeUrl(sourceUrl: String) {
 
         val url = URL(sourceUrl)
 
-        val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
+        val recentContainer = db.containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
         val headRequestValues = isUrlContentUpdated(url, recentContainer)
 
         if(recentContainer != null){
@@ -54,7 +58,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
 
         runBlocking {
 
-            val metadata = extractContentEntryMetadataFromFile(file, db)
+            val metadata = contentImportManager.extractMetadata(file.path)
 
             if (metadata == null) {
                 Napier.i("$logPrefix with sourceUrl $sourceUrl had no metadata found, not supported", tag = SCRAPER_TAG)
@@ -82,15 +86,22 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
                         metadataContentEntry.thumbnailUrl.alternative(contentEntry?.thumbnailUrl ?: ""),
                         "",
                         "",
-                        metadataContentEntry.contentTypeFlag, contentEntryDao)
+                        metadataContentEntry.contentTypeFlag, repo.contentEntryDao)
                 Napier.d("$logPrefix new entry created/updated with entryUid ${entry.contentEntryUid} with title $name", tag = SCRAPER_TAG)
-                ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, entry, 0)
+                ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, entry, 0)
                 entry
             }
 
+            val params = scrapeQueueItem?.scrapeRun?.conversionParams
+            var conversionParams = mapOf<String, String>()
+            if(params != null){
+                conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+            }
+            val container = contentImportManager.importFileToContainer(file.path, metadata.mimeType,
+                    fileEntry.contentEntryUid, containerFolder.path, conversionParams){
 
-            val container = importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file, db, db, metadata.importMode, Any())
-            if (!headRequestValues.etag.isNullOrEmpty()) {
+            }
+            if (!headRequestValues.etag.isNullOrEmpty() && container != null) {
                 val etagContainer = ContainerETag(container.containerUid, headRequestValues.etag)
                 db.containerETagDao.insert(etagContainer)
             }

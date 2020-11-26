@@ -1,7 +1,7 @@
 package com.ustadmobile.sharedse.util
 
-import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
+import com.ustadmobile.core.util.LiveDataWorkQueue
 import com.ustadmobile.door.DoorLiveData
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking

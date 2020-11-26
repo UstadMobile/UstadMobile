@@ -4,7 +4,7 @@ import androidx.room.Database
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.MinSyncVersion
-import com.ustadmobile.door.entities.SqliteSyncablePrimaryKey
+import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.lib.db.entities.*
@@ -36,14 +36,21 @@ import kotlin.jvm.Volatile
     ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
     Report::class, ReportFilter::class,
-    DeviceSession::class, WorkSpace::class, ContainerUploadJob::class,
-    SqliteSyncablePrimaryKey::class, LearnerGroup::class, LearnerGroupMember::class,
-    GroupLearningSession::class
+    DeviceSession::class, WorkSpace::class, ContainerImportJob::class,
+    LearnerGroup::class, LearnerGroupMember::class,
+    GroupLearningSession::class,
+
+    //Door Helper entities
+    SqliteSyncablePk::class,
+    SqliteChangeSeqNums::class,
+    UpdateNotification::class,
+    TableSyncStatus::class,
+    ChangeLog::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 42)
+], version = 49)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -187,8 +194,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("reportFilterDao")
     abstract val reportFilterDao: ReportFilterDao
 
-    @JsName("containerUploadJobDao")
-    abstract val containerUploadJobDao: ContainerUploadJobDao
+    @JsName("containerImportJobDao")
+    abstract val containerImportJobDao: ContainerImportJobDao
 
     @JsName("statementDao")
     abstract val statementDao: StatementDao
@@ -2897,12 +2904,139 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_42_43 = UmAppDatabase_SyncPushMigration()
+
+        val MIGRATION_43_44 = object : DoorMigration(43, 44) {
+            override fun migrate(database: DoorSqlDatabase) {
+                try {
+                    //Sometimes the permission on this goes horribly wrong for no apparent reason
+                    database.execSQL("ALTER TABLE SqliteSyncablePrimaryKey RENAME to SqliteSyncablePk")
+                }catch(e: Exception) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SqliteSyncablePk (  sspTableId  INTEGER  PRIMARY KEY  NOT NULL , sspNextPrimaryKey  INTEGER  NOT NULL )")
+                }
+
+            }
+        }
+
+        val MIGRATION_44_45 = object : DoorMigration(44, 45) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("DROP TABLE ContainerUploadJob")
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerImportJob (`cijUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cijContainerUid` INTEGER NOT NULL, `cijFilePath` TEXT, `cijContainerBaseDir` TEXT, `cijContentEntryUid` INTEGER NOT NULL, `cijMimeType` TEXT, `cijSessionId` TEXT, `cijJobStatus` INTEGER NOT NULL, `cijBytesSoFar` INTEGER NOT NULL, `cijImportCompleted` INTEGER NOT NULL, `cijContentLength` INTEGER NOT NULL, `cijContainerEntryFileUids` TEXT, `cijConversionParams` TEXT)")
+                }else if (database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ContainerImportJob (  cijContainerUid  BIGINT , cijFilePath  TEXT , cijContainerBaseDir  TEXT , cijContentEntryUid  BIGINT , cijMimeType  TEXT , cijSessionId  TEXT , cijJobStatus  INTEGER , cijBytesSoFar  BIGINT , cijImportCompleted  BOOL , cijContentLength  BIGINT , cijContainerEntryFileUids  TEXT , cijConversionParams  TEXT , cijUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                }
+            }
+        }
+
+        val MIGRATION_45_46 = object : DoorMigration(45, 46) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("""
+                        Update ClazzWorkQuestionResponse
+                        SET clazzWorkQuestionResponseLCB = (SELECT nodeClientId from SyncNode)
+                        WHERE
+                        clazzWorkQuestionResponseLCB = 0
+                    """.trimIndent())
+
+                }
+            }
+        }
+
+        /**
+         * Add indexes to improve performance of queries that check permissions
+         */
+        val MIGRATION_46_47 = object : DoorMigration(46, 47) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("CREATE INDEX index_ClazzMember_clazzMemberPersonUid_clazzMemberClazzUid ON ClazzMember (clazzMemberPersonUid, clazzMemberClazzUid)")
+                database.execSQL("CREATE INDEX index_ClazzMember_clazzMemberClazzUid_clazzMemberPersonUid ON ClazzMember (clazzMemberClazzUid, clazzMemberPersonUid)")
+                database.execSQL("CREATE INDEX index_EntityRole_erGroupUid_erRoleUid_erTableId ON EntityRole (erGroupUid, erRoleUid, erTableId)")
+                database.execSQL("CREATE INDEX index_Role_rolePermissions ON Role(rolePermissions)")
+
+                //Add a PersonGroup for Admin
+                if(database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("""
+                        INSERT INTO PersonGroup(groupName, groupActive, personGroupFlag, groupMasterCsn, groupLocalCsn, groupLastChangedBy) 
+                        SELECT 'PGA' || person.personUid AS groupName, 
+                        true as groupActive,
+                        1 as personGroupFlag,
+                        0 as groupMasterCsn,
+                        0 as groupLocalCsn,
+                        (SELECT nodeClientId FROM SyncNode) as groupLastChangedBy
+                        FROM person
+                        where admin = true
+                        AND personGroupUid = 0""")
+                    database.execSQL("""
+                        UPDATE Person SET
+                        personGroupUid = (SELECT groupUid FROM PersonGroup WHERE groupName = ('PGA' || Person.personUid) LIMIT 1),
+                        personLastChangedBy = (SELECT nodeClientId FROM SyncNode) 
+                        WHERE
+                        admin = true AND personGroupUid = 0
+                    """)
+                    database.execSQL("""
+                        INSERT INTO PersonGroupMember(groupMemberPersonUid, groupMemberGroupUid, groupMemberMasterCsn, groupMemberLocalCsn, groupMemberLastChangedBy)
+                        SELECT Person.personUid AS groupMemberPersonUid,
+                        Person.personGroupUid AS groupMemberGroupUid,
+                        0 AS groupMemberMasterCsn,
+                        0 AS groupMemberLocalCsn,
+                        (SELECT nodeClientId FROM SyncNode) AS groupMemberLastChangedBy
+                        FROM Person
+                        WHERE admin = true
+                        AND (SELECT COUNT(*) FROM PersonGroupMember WHERE PersonGroupmember.groupMemberGroupUid = Person.personGroupUid) = 0
+                    """)
+                }
+
+            }
+        }
+
+        val MIGRATION_47_48 = object : DoorMigration(47, 48) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("CREATE INDEX " +
+                        "index_ClazzMember_clazzMemberClazzUid_clazzMemberRole " +
+                        "ON ClazzMember (clazzMemberClazzUid, clazzMemberRole)")
+                database.execSQL("CREATE INDEX " +
+                        "index_SchoolMember_schoolMemberSchoolUid_schoolMemberActive_schoolMemberRole " +
+                        "ON SchoolMember (schoolMemberSchoolUid, schoolMemberActive, schoolMemberRole)")
+            }
+        }
+
+        val MIGRATION_48_49 = object : DoorMigration(48, 49) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("""ALTER TABLE ScrapeRun ADD COLUMN conversionParams TEXT""".trimMargin())
+
+                database.execSQL("""
+          |CREATE 
+          | INDEX index_ScrapeQueueItem_status_itemType 
+          |ON ScrapeQueueItem (status, itemType)
+          """.trimMargin())
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("ALTER TABLE ScrapeRun RENAME to ScrapeRun_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ScrapeRun (  scrapeType  TEXT , scrapeRunStatus  INTEGER  NOT NULL , conversionParams  TEXT , scrapeRunUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("INSERT INTO ScrapeRun (scrapeRunUid, scrapeType, scrapeRunStatus, conversionParams) SELECT scrapeRunUid, scrapeType, status, conversionParams FROM ScrapeRun_OLD")
+                    database.execSQL("DROP TABLE ScrapeRun_OLD")
+
+                }else if (database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("""ALTER TABLE ScrapeRun RENAME COLUMN status to scrapeRunStatus
+                        """.trimMargin())
+                }
+
+            }
+        }
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
-                    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42)
+                    MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
+                    MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
+                    MIGRATION_47_48, MIGRATION_48_49)
 
 
 

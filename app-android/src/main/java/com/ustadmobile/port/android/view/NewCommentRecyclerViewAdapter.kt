@@ -22,7 +22,6 @@ class NewCommentRecyclerViewAdapter(
         set(value) {
             field = value
             viewHolder?.itemBinding?.commentHandler = newCommentHandler
-            viewHolder?.itemBinding?.commentText = ""
         }
 
     private var publicMode: Boolean = commentPublic

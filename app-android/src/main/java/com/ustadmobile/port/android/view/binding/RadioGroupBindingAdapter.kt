@@ -8,22 +8,18 @@ import androidx.databinding.InverseBindingListener
 import com.toughra.ustadmobile.R
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionOption
 
-@BindingAdapter("radioGroupOptions", "radioGroupOptionsResponse", "radioGroupStudentMode")
-fun RadioGroup.setRadioButtonOptions(options: List<ClazzWorkQuestionOption>, response: Long, studentMode: Boolean) {
+@BindingAdapter("radioGroupOptions", "radioGroupOptionsResponse")
+fun RadioGroup.setRadioButtonOptions(options: List<ClazzWorkQuestionOption>, response: Long) {
 
     removeAllViews()
     for (item in options) {
         val radioButton = RadioButton(context)
-        radioButton.setText(item.clazzWorkQuestionOptionText)
+        radioButton.text = item.clazzWorkQuestionOptionText
         radioButton.isSelected =
                 response == item.clazzWorkQuestionOptionUid
         radioButton.setTag(R.id.tag_clazzwork_quiz_option_uid, item.clazzWorkQuestionOptionUid)
         radioButton.isEnabled = response == 0L
         radioButton.isChecked = response == item.clazzWorkQuestionOptionUid
-
-        if(!studentMode){
-            radioButton.isEnabled = false
-        }
         addView(radioButton)
 
     }

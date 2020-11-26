@@ -121,6 +121,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_visual_type_textinputlayout">
 
                 <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                    android:id="@+id/yaxis_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:hint="@string/xapi_options_y_axes"

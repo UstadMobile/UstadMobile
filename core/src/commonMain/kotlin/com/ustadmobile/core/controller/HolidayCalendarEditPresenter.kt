@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.HolidayCalendarEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -15,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.Json.Default.parseJson
 import org.kodein.di.DI
 
 
@@ -67,7 +69,7 @@ class HolidayCalendarEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: HolidayCalendar? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(HolidayCalendar.serializer(), entityJsonStr)
+            editEntity = safeParse(di, HolidayCalendar.serializer(), entityJsonStr)
         }else {
             editEntity = HolidayCalendar()
         }

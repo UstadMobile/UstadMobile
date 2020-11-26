@@ -6,11 +6,13 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
+import com.ustadmobile.lib.db.entities.ClazzMember.Companion.ROLE_STUDENT
+import com.ustadmobile.lib.db.entities.ClazzMember.Companion.ROLE_TEACHER
 
-@UmRepository
+@Repository
 @Dao
 abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
@@ -74,20 +76,25 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         '' AS teacherNames,
         0 AS lastRecorded
         FROM 
-        Clazz
+        PersonGroupMember
+        LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+        LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions &  :permission) > 0
+        LEFT JOIN Clazz ON 
+            CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = personUid) AS INTEGER) = 1
+            OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) 
+            OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
         LEFT JOIN ClazzMember ON ClazzMember.clazzMemberUid =
             COALESCE((SELECT ClazzMember.clazzMemberUid FROM ClazzMember
              WHERE
              ClazzMember.clazzMemberPersonUid = :personUid
              AND ClazzMember.clazzMemberClazzUid = Clazz.clazzUid LIMIT 1), 0)
         WHERE
-        CAST(Clazz.isClazzActive AS INTEGER) = 1
+        PersonGroupMember.groupMemberPersonUid = :personUid
+        AND CAST(Clazz.isClazzActive AS INTEGER) = 1
         AND Clazz.clazzName like :searchQuery
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
-        AND :personUid IN (
-        $ENTITY_PERSONS_WITH_PERMISSION
-        )
+        GROUP BY Clazz.clazzUid, ClazzMember.clazzMemberUid
         ORDER BY CASE :sortOrder
             WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
             ELSE 0
@@ -129,8 +136,8 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                                                       permission: Long) : Boolean
 
     @Query("""SELECT Clazz.*, HolidayCalendar.*, School.*,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = 1) AS numStudents,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = 2) AS numTeachers
+        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = $ROLE_STUDENT) AS numStudents,
+        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = $ROLE_TEACHER) AS numTeachers
         FROM Clazz 
         LEFT JOIN HolidayCalendar ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
         LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid

@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ScheduleEditView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -47,7 +48,7 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
     override fun onLoadFromJson(bundle: Map<String, String>): Schedule? {
         val scheduleData = arguments[UstadEditView.ARG_ENTITY_JSON]
         return if(scheduleData != null) {
-            Json.parse(Schedule.serializer(), scheduleData)
+            safeParse(di, Schedule.serializer(), scheduleData)
         }else {
             Schedule().apply {
                 scheduleActive = true

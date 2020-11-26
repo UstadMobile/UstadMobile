@@ -4,9 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
 @Dao
+@Repository
 abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
 
     @Insert

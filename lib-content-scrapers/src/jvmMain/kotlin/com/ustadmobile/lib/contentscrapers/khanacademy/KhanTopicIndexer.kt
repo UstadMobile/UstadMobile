@@ -79,10 +79,10 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                                 tutorial.description, false,
                                 "", "",
                                 "", "",
-                                0, contentEntryDao)
+                                0, repo.contentEntryDao)
 
                         ContentScraperUtil.insertOrUpdateParentChildJoin(
-                                contentEntryParentChildJoinDao,
+                                repo.contentEntryParentChildJoinDao,
                                 parentContentEntry!!, tutorialEntry, tutorialCount)
 
                         tutorial.contentItems?.forEachIndexed { contentCount, contentItem ->
@@ -112,10 +112,10 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                                     true, "",
                                     contentItem.thumbnailUrl,
                                     "", "",
-                                    0, contentEntryDao)
+                                    0, repo.contentEntryDao)
 
                             ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(
-                                    contentEntryParentChildJoinDao, tutorialEntry,
+                                    repo.contentEntryParentChildJoinDao, tutorialEntry,
                                     entry, contentCount)
 
 
@@ -146,10 +146,10 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                             module.description, false,
                             "", module.imageUrl,
                             "", "",
-                            0, contentEntryDao)
+                            0, repo.contentEntryDao)
 
                     ContentScraperUtil.insertOrUpdateParentChildJoin(
-                            contentEntryParentChildJoinDao,
+                            repo.contentEntryParentChildJoinDao,
                             parentContentEntry!!, tutorialEntry, moduleCount)
 
 
@@ -179,10 +179,10 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                                 true, "",
                                 contentItem.thumbnailUrl,
                                 "", "",
-                                0, contentEntryDao)
+                                0, repo.contentEntryDao)
 
                         ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(
-                                contentEntryParentChildJoinDao, tutorialEntry,
+                                repo.contentEntryParentChildJoinDao, tutorialEntry,
                                 entry, itemCount)
 
                         createQueueItem(contentUrl.toString(), entry,
@@ -218,10 +218,10 @@ class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conte
                 false, "",
                 module.icon, "",
                 "",
-                0, contentEntryDao)
+                0, repo.contentEntryDao)
 
         ContentScraperUtil.insertOrUpdateParentChildJoin(
-                contentEntryParentChildJoinDao,
+                repo.contentEntryParentChildJoinDao,
                 parentContentEntry!!, subjectEntry, count)
 
         createQueueItem(subjectUrl.toString(), subjectEntry,

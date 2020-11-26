@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -33,8 +34,10 @@ import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.port.android.util.ext.getActivityContext
+import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.appbar_material_collapsing.*
 import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -47,12 +50,16 @@ import java.util.*
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
+        UstadActivityWithProgressBar,
         NavController.OnDestinationChangedListener {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     override val activityFloatingActionButton: ExtendedFloatingActionButton?
         get() = activity_listfragmelayout_behaviornt_fab
+
+    override val activityProgressBar: ProgressBar?
+        get() = main_progress_bar
 
     private lateinit var mBinding: ActivityMainBinding
 

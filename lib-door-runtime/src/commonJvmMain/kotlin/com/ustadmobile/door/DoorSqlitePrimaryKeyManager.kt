@@ -9,11 +9,11 @@ actual class DoorSqlitePrimaryKeyManager actual constructor(val repo: DoorDataba
 
     actual suspend fun getAndIncrementSqlitePk(tableId: Int, increment: Int): Long {
         val key = keyMap.getOrPut(tableId) {
-            AtomicLong(repo.selectNextSqliteSyncablePk(tableId))
+            AtomicLong(repo.syncHelperEntitiesDao.selectNextSqliteSyncablePk(tableId))
         }
 
         val newKey = key.getAndAdd(increment.toLong())
-        repo.incrementNextSqliteSyncablePk(tableId, increment)
+        repo.syncHelperEntitiesDao.incrementNextSqliteSyncablePk(tableId, increment)
         return newKey
     }
 

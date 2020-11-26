@@ -29,9 +29,12 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
                               val lifecycleHelperFactory: LifeCycleHelperFactory =
                                       {RepositoryLoadHelperLifecycleHelper(it)},
                               val uri: String = "",
+                              val listMaxItemsLimit: Int = -1,
                               val loadFn: suspend(endpoint: String) -> T) : RepositoryConnectivityListener {
 
     class NoConnectionException(message: String, cause: Throwable? = null): Exception(message, cause)
+
+    val completed = atomic(false)
 
     val requestLock = Mutex()
 
@@ -103,8 +106,6 @@ class RepositoryLoadHelper<T>(val repository: DoorDatabaseRepository,
             }
         }
     }
-
-    val completed = atomic(false)
 
     @Volatile
     var triedMainEndpoint = false

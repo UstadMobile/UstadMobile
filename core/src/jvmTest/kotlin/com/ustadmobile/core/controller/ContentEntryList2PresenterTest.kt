@@ -73,9 +73,9 @@ class ContentEntryList2PresenterTest {
     }
 
     private fun createEntries(nonLeafs: MutableList<Int> = mutableListOf()){
-        val db: UmAppDatabase by di.activeRepoInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         createdEntries = runBlocking {
-            db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+            repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6,parentEntryUid, nonLeafIndexes = nonLeafs)
         }
     }
@@ -89,7 +89,7 @@ class ContentEntryList2PresenterTest {
 
         val accountManager: UstadAccountManager by di.instance()
         verify(repoContentEntrySpyDao, timeout(defaultTimeout)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                eq(parentEntryUid), eq(0), eq(0), eq(accountManager.activeAccount.personUid))
+                eq(parentEntryUid), eq(0), eq(0), eq(accountManager.activeAccount.personUid), eq(false), eq(false))
 
         verify(mockView, timeout(defaultTimeout)).list = any()
     }
@@ -133,11 +133,11 @@ class ContentEntryList2PresenterTest {
     @Test
     fun givenPresenterCreatedInPickerMode_whenOnClickEntryCalledOnAFolder_thenShouldOpenIt(){
         createEntries(mutableListOf(0))
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val accountManager: UstadAccountManager by di.instance()
 
         runBlocking {
-            db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+            repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6, createdEntries?.get(0)?.contentEntryUid!!)
         }
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
@@ -149,7 +149,7 @@ class ContentEntryList2PresenterTest {
 
         argumentCaptor<Long>().apply{
             verify(repoContentEntrySpyDao, timeout(defaultTimeout).times(2)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid))
+                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid), eq(false), eq(false))
             assertEquals("Expected folder was opened", secondValue, createdEntries?.get(0)?.contentEntryUid)
         }
     }
@@ -158,10 +158,10 @@ class ContentEntryList2PresenterTest {
     @Test
     fun givenPresenterCreatedInPickerMode_whenOnClickEntryCalledOnAFolderForEntrySelection_thenShouldOpenItAndFinishWithResultWhenSelected(){
         createEntries(mutableListOf(0))
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
 
         val createdChildEntries = runBlocking {
-            db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+            repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6, createdEntries?.get(0)?.contentEntryUid!!)
         }
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
@@ -186,11 +186,11 @@ class ContentEntryList2PresenterTest {
     @Test
     fun givenPresenterCreatedInPickerMode_whenOnBackPressedWhileInAFolder_thenShouldGoBackToThePreviousParentEntry(){
         createEntries(mutableListOf(0))
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val accountManager: UstadAccountManager by di.instance()
 
         val createdChildEntries = runBlocking {
-            db.insertContentEntryWithParentChildJoinAndMostRecentContainer(
+            repo.insertContentEntryWithParentChildJoinAndMostRecentContainer(
                     6, createdEntries?.get(0)?.contentEntryUid!!)
         }
         val args = presenterArgs.plus(UstadView.ARG_LISTMODE to ListViewMode.PICKER.toString())
@@ -209,7 +209,7 @@ class ContentEntryList2PresenterTest {
 
         argumentCaptor<Long>().apply{
             verify(repoContentEntrySpyDao, timeout(defaultTimeout).times(3)).getChildrenByParentUidWithCategoryFilterOrderByNameAsc(
-                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid))
+                    capture(), eq(0), eq(0), eq(accountManager.activeAccount.personUid), eq(false), eq(false))
             assertEquals("Went back to the expected folder", thirdValue, parentEntryUid)
         }
     }

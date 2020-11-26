@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzWorkQuestionAndOptionsEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -54,7 +55,7 @@ class ClazzWorkQuestionAndOptionsEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: ClazzWorkQuestionAndOptions? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(ClazzWorkQuestionAndOptions.serializer(), entityJsonStr)
+            editEntity = safeParse(di, ClazzWorkQuestionAndOptions.serializer(), entityJsonStr)
         }else {
             editEntity = ClazzWorkQuestionAndOptions(ClazzWorkQuestion().apply {
                 clazzWorkQuestionActive = true }, listOf(), listOf() )
@@ -76,7 +77,6 @@ class ClazzWorkQuestionAndOptionsEditPresenter(context: Any,
         val clazzWorkQuestionOption = ClazzWorkQuestionOption().apply {
             clazzWorkQuestionOptionText= ""
             clazzWorkQuestionOptionActive = true
-//            clazzWorkQuestionOptionQuestionUid = entity?.clazzWorkQuestion?.clazzWorkQuestionUid?:0L
         }
         val currentList =
                 view.clazzWorkQuestionOptionList?.getValue()?.toMutableList()?:mutableListOf<ClazzWorkQuestionOption>()

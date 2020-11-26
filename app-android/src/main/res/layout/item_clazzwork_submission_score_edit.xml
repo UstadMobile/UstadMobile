@@ -7,9 +7,12 @@
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="android.view.View"/>
 
+        <variable name="noneType"
+            type="Integer" />
+
         <variable
             name="clazzWorkWithSubmission"
-            type="com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission" />
+            type="com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission" />
 
     </data>
 
@@ -28,7 +31,7 @@
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:text="@string/not_submitted_cap"
             android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
-            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid != 0L)?View.GONE:View.VISIBLE}"
+            android:visibility="@{(clazzWorkWithSubmission.clazzWork.clazzWorkSubmissionType == noneType || clazzWorkWithSubmission.submission.clazzWorkSubmissionUid != 0L)?View.GONE:View.VISIBLE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -43,9 +46,9 @@
             android:inputType="number"
             tools:text="77"
             app:minValue="@{`0`}"
-            app:setMaxValue="@{clazzWorkWithSubmission.clazzWorkMaximumScore}"
-            android:text="@={`` + clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionScore}"
-            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid != 0L)?View.VISIBLE:View.GONE}"
+            app:setMaxValue="@{clazzWorkWithSubmission.clazzWork.clazzWorkMaximumScore}"
+            android:text="@={`` + clazzWorkWithSubmission.submission.clazzWorkSubmissionScore}"
+            android:visibility="@{(clazzWorkWithSubmission.clazzWork.clazzWorkSubmissionType == noneType || clazzWorkWithSubmission.submission.clazzWorkSubmissionUid != 0L)?View.VISIBLE:View.GONE}"
             android:textSize="30sp"
             app:layout_constraintBottom_toBottomOf="@+id/item_clazzwork_submission_score_edit_total_score_tv"
             app:layout_constraintStart_toStartOf="parent"
@@ -58,9 +61,9 @@
             android:layout_marginVertical="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_16dp"
             android:contentDescription="@string/score"
-            android:text="@{`` + '/'+ clazzWorkWithSubmission.clazzWorkMaximumScore}"
+            android:text="@{`` + '/'+ clazzWorkWithSubmission.clazzWork.clazzWorkMaximumScore}"
             android:textSize="30sp"
-            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid != 0L)?View.VISIBLE:View.GONE}"
+            android:visibility="@{(clazzWorkWithSubmission.clazzWork.clazzWorkSubmissionType == noneType || clazzWorkWithSubmission.submission.clazzWorkSubmissionUid != 0L)?View.VISIBLE:View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/item_clazzwork_submission_score_edit_et"

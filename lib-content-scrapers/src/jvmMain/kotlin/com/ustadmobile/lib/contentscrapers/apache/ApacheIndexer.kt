@@ -3,18 +3,18 @@ package com.ustadmobile.lib.contentscrapers.apache
 import ScraperTypes
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.util.ext.requirePostfix
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.abztract.Indexer
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
-import com.ustadmobile.port.sharedse.contentformats.extSupported
-import org.apache.commons.io.FilenameUtils
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.jsoup.Jsoup
 import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.net.HttpURLConnection
 import java.net.URL
 
@@ -22,6 +22,8 @@ import java.net.URL
 class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntryUid, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     private val logPrefix = "[ApacheIndexer SQI ID #$sqiUid] "
+
+    private val contentImportManager: ContentImportManager by di.on(endpoint).instance()
 
     override fun indexUrl(sourceUrl: String) {
         
@@ -49,9 +51,9 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
                     ContentEntry.LICENSE_TYPE_OTHER, englishLang.langUid, null,
                     "", false, "",
                     "", "",
-                    "", ContentEntry.TYPE_COLLECTION, contentEntryDao)
+                    "", ContentEntry.TYPE_COLLECTION, repo.contentEntryDao)
             Napier.d("$logPrefix new entry created/updated with entryUid ${entry.contentEntryUid} with title $folderTitle", tag = SCRAPER_TAG)
-            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, entry, 0)
+            ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, entry, 0)
             entry
         }
 
@@ -78,7 +80,7 @@ class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, conte
 
                     Napier.i("$logPrefix found new file with title $title for parent folder $folderTitle", tag = SCRAPER_TAG)
                     val ext = href.substringAfterLast(".")
-                    val supported = extSupported.find { extension -> extension.toLowerCase() == ext.toLowerCase() }
+                    val supported = contentImportManager.getExtSupported().find { extension -> extension.toLowerCase() == ext.toLowerCase() }
 
                     if (supported != null) {
                         Napier.d("$logPrefix file $title with $ext found", tag = SCRAPER_TAG)

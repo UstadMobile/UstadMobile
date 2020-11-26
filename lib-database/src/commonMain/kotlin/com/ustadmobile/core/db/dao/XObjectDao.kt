@@ -2,12 +2,12 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.XObjectEntity
 import kotlin.js.JsName
 
 @Dao
-@UmRepository
+@Repository
 abstract class XObjectDao : BaseDao<XObjectEntity> {
 
     @JsName("findByObjectId")

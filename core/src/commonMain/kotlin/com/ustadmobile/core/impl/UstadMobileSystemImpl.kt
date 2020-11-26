@@ -67,11 +67,7 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
      * Get storage directories
      *
      * @param context Platform specific context
-     * @param callback Storage dir list callback
      */
-
-    override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>)
-
     override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir>
 
     /**

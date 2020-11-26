@@ -21,7 +21,7 @@ class JoinWithCodeFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -41,13 +41,13 @@ class JoinWithCodeFragmentTest : TestCase() {
             val clazz = Clazz().apply{
                 clazzCode="lulz42"
                 clazzName = "Class A"
-                clazzUid = dbRule.db.clazzDao.insert(this)
+                clazzUid = dbRule.repo.clazzDao.insert(this)
             }
 
             val person = Person().apply{
                 firstNames = "Test"
                 lastName = "One"
-                personUid = dbRule.db.personDao.insert(this)
+                personUid = dbRule.repo.personDao.insert(this)
             }
 
             dbRule.insertPersonForActiveUser(Person().apply {
