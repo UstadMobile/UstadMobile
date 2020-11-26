@@ -11,8 +11,6 @@ import com.toughra.ustadmobile.databinding.Item@ListItemName@ListBinding
 import com.ustadmobile.core.controller.@BaseFileName@Presenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.@BaseFileName@View
@@ -25,7 +23,6 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
-import com.ustadmobile.port.android.util.ext.*
 
 
 class @BaseFileName@Fragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>(),

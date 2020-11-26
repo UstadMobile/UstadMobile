@@ -38,8 +38,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         WHERE clazzLogClazzUid = :clazzUid
         AND clazzLog.clazzLogStatusFlag != :excludeStatus
         ORDER BY ClazzLog.logDate ASC""")
-    abstract fun findByClazzUidAsLiveData(clazzUid: Long, excludeStatus: Int): DoorLiveData<List<ClazzLog>>
-
+    abstract suspend fun findByClazzUidAsync(clazzUid: Long, excludeStatus: Int): List<ClazzLog>
 
 
     @Query("""SELECT ClazzLog.* FROM ClazzLog 

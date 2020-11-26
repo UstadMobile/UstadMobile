@@ -268,4 +268,9 @@
         android:name="com.ustadmobile.port.android.view.TimeZoneListFragment"
         android:label="@string/timezone"/>
 
+    <fragment
+        android:id="@+id/clazz_log_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ClazzLogEditFragment"
+        android:label="@string/add_a_new_occurrence"/>
+
 </navigation>

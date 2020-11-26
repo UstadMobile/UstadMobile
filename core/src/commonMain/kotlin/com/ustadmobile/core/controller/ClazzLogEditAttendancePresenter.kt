@@ -6,6 +6,8 @@ import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
+import com.ustadmobile.core.view.ClazzLogEditAttendanceView.Companion.ARG_NEW_CLAZZLOG
+import com.ustadmobile.core.view.ClazzLogEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -60,8 +62,19 @@ class ClazzLogEditAttendancePresenter(context: Any,
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzLog? {
+        val newClazzLog = arguments[ARG_NEW_CLAZZLOG]?.let { newClazzLogJson ->
+            //if the previous screen was to schedule a new occurrence, then add this to the list
+            // we will give to the view
+            safeParse(di, ClazzLog.serializer(), newClazzLogJson)
+        }
+
+
         val clazzLog = withTimeoutOrNull(2000) {
-             db.takeIf { currentClazzLogUid != 0L }?.clazzLogDao?.findByUidAsync(currentClazzLogUid)
+            if(currentClazzLogUid == 0L && newClazzLog != null) {
+                newClazzLog
+            }else {
+                db.takeIf { currentClazzLogUid != 0L }?.clazzLogDao?.findByUidAsync(currentClazzLogUid)
+            }
         } ?: ClazzLog()
 
         val clazzWithSchool = withTimeoutOrNull(2000) {
@@ -71,31 +84,49 @@ class ClazzLogEditAttendancePresenter(context: Any,
         view.clazzLogTimezone = clazzWithSchool.effectiveTimeZone()
 
         //Find all those who are members of the class at the corresponding class schedule.
-        val clazzMembersAtTime = db.clazzMemberDao.getAllClazzMembersAtTimeAsync(clazzLog.clazzLogClazzUid,
-            clazzLog.logDate, ClazzMember.ROLE_STUDENT)
+        val clazzMembersAtTime = db.clazzMemberDao.getAllClazzMembersAtTimeAsync(
+                clazzLog.clazzLogClazzUid, clazzLog.logDate, ClazzMember.ROLE_STUDENT)
 
 
-        val clazzAttendanceLogsInDb = db.clazzLogAttendanceRecordDao.findByClazzLogUid(currentClazzLogUid)
-                .map { dbAttendanceRec ->
+        var clazzAttendanceLogsInDb = db.clazzLogAttendanceRecordDao.findByClazzLogUid(currentClazzLogUid)
+        clazzAttendanceLogsInDb = clazzAttendanceLogsInDb.map { dbAttendanceRec ->
                     clazzAttendanceRecords.firstOrNull { jsonAttendanceRec ->
                     jsonAttendanceRec.clazzLogAttendanceRecordClazzLogUid == clazzLog.clazzLogUid &&
-                        dbAttendanceRec.clazzLogAttendanceRecordClazzMemberUid == jsonAttendanceRec.clazzLogAttendanceRecordClazzMemberUid
+                        dbAttendanceRec.clazzLogAttendanceRecordClazzMemberUid ==
+                            jsonAttendanceRec.clazzLogAttendanceRecordClazzMemberUid
                     } ?: dbAttendanceRec
                 }
 
-        val allMembers = clazzAttendanceLogsInDb + clazzMembersAtTime.filter { clazzMember ->
-            ! clazzAttendanceLogsInDb.any { it.clazzLogAttendanceRecordClazzMemberUid == clazzMember.clazzMemberUid }
-        }.map { ClazzLogAttendanceRecordWithPerson().apply {
-            person = it.person
-            clazzLogAttendanceRecordClazzLogUid = currentClazzLogUid
-            clazzLogAttendanceRecordClazzMemberUid = it.clazzMemberUid
-        } }.sortedBy { "${it.person?.firstNames} ${it.person?.lastName}" }
+        /* Figure out what to display for class members. In order of preference:
+          1) The attendance record as stored in memory/json clazzAttendanceRecords
+          2) The attendance record from the database
+          3) A new blank attendance record
+         */
+        val allMembers = clazzMembersAtTime.map { clazzMember ->
+            clazzAttendanceRecords.firstOrNull {
+                it.clazzLogAttendanceRecordClazzMemberUid == clazzMember.clazzMemberUid &&
+                        it.clazzLogAttendanceRecordClazzLogUid == currentClazzLogUid
+            } ?: clazzAttendanceLogsInDb.firstOrNull {
+                it.clazzLogAttendanceRecordClazzMemberUid == clazzMember.clazzMemberUid &&
+                        it.clazzLogAttendanceRecordClazzLogUid == currentClazzLogUid
+            } ?:ClazzLogAttendanceRecordWithPerson().apply {
+                person = clazzMember.person
+                clazzLogAttendanceRecordClazzLogUid = currentClazzLogUid
+                clazzLogAttendanceRecordClazzMemberUid = clazzMember.clazzMemberUid
+            }
+        }.sortedBy { "${it.person?.firstNames} ${it.person?.lastName}" }
 
         attendanceRecordOneToManyJoinHelper.liveList.sendValue(allMembers)
 
         if(view.clazzLogsList == null) {
-            view.clazzLogsList = repo.clazzLogDao.findByClazzUidAsLiveData(clazzLog.clazzLogClazzUid,
-                ClazzLog.STATUS_HOLIDAY)
+            val clazzLogs = repo.clazzLogDao.findByClazzUidAsync(clazzLog.clazzLogClazzUid,
+                    ClazzLog.STATUS_HOLIDAY).toMutableList()
+            if(newClazzLog != null) {
+                clazzLogs.add(newClazzLog)
+                clazzLogs.sortBy { it.logDate }
+            }
+
+            view.clazzLogsList = clazzLogs.toList()
         }
 
         return clazzLog
@@ -168,10 +199,6 @@ class ClazzLogEditAttendancePresenter(context: Any,
     }
 
     private suspend fun commitToDatabase() {
-        val insertUpdatePartition = clazzAttendanceRecords.partition { it.clazzLogAttendanceRecordUid == 0L }
-        repo.clazzLogAttendanceRecordDao.insertListAsync(insertUpdatePartition.first)
-        repo.clazzLogAttendanceRecordDao.updateListAsync(insertUpdatePartition.second)
-
         this.clazzLogs.forEach { entity ->
             val entityClazzAttendanceRecords = clazzAttendanceRecords.filter {
                 it.clazzLogAttendanceRecordClazzLogUid == entity.clazzLogUid
@@ -184,21 +211,31 @@ class ClazzLogEditAttendancePresenter(context: Any,
             if(entity.clazzLogUid != 0L) {
                 repo.clazzLogDao.updateAsync(entity)
             }else {
-                repo.clazzLogDao.insertAsync(entity)
+                entity.clazzLogUid = repo.clazzLogDao.insertAsync(entity)
+                entityClazzAttendanceRecords.forEach {
+                    it.clazzLogAttendanceRecordClazzLogUid = entity.clazzLogUid
+                }
             }
-
-            //now update the average attendance for the class
-            repo.clazzDao.updateClazzAttendanceAverageAsync(entity.clazzLogClazzUid)
-
         }
 
+        val insertUpdatePartition = clazzAttendanceRecords.partition { it.clazzLogAttendanceRecordUid == 0L }
+        repo.clazzLogAttendanceRecordDao.insertListAsync(insertUpdatePartition.first)
+        repo.clazzLogAttendanceRecordDao.updateListAsync(insertUpdatePartition.second)
+
+        //now update the average attendance for the class
+        repo.clazzDao.updateClazzAttendanceAverageAsync(clazzLogs.firstOrNull()?.clazzLogClazzUid ?: 0)
     }
 
     override fun handleClickSave(entity: ClazzLog) {
         GlobalScope.launch(doorMainDispatcher()) {
             updateAttendanceRecordsFromView()
             commitToDatabase()
-            view.finishWithResult(listOf(entity))
+            if(arguments[ARG_NEW_CLAZZLOG] != null) {
+                systemImpl.popBack(ClazzLogEditView.VIEW_NAME, true, context)
+            }else {
+                view.finishWithResult(listOf(entity))
+            }
+
         }
     }
 

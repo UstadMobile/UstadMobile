@@ -10,8 +10,12 @@ import com.ustadmobile.core.util.ext.attendancePercentage
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.latePercentage
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.door.*
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzWithSchool
 import com.ustadmobile.lib.db.entities.Role
@@ -62,7 +66,7 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
     }
 
     enum class RecordAttendanceOption(val commandId: Int,val messageId: Int ) {
-        RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE(1, MessageID.use_most_recently_scheduled_day),
+        RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE(1, MessageID.record_attendance_for_most_recent_occurrence),
         RECORD_ATTENDANCE_NEW_SCHEDULE(2, MessageID.add_a_new_occurrence)
     }
 
@@ -139,6 +143,16 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
                     handleClickEntry(lastLog)
                 }
             }
+        }else {
+            val newClazzLog = ClazzLog().also {
+                it.clazzLogClazzUid = clazzUidFilter
+                it.logDate = systemTimeInMillis()
+            }
+
+            systemImpl.go(ClazzLogEditView.VIEW_NAME,
+                    mapOf(ARG_ENTITY_JSON to safeStringify(di, ClazzLog.serializer(), newClazzLog),
+                        ARG_NEXT to ClazzLogEditAttendanceView.VIEW_NAME),
+                    context)
         }
     }
 

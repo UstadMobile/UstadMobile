@@ -68,6 +68,10 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         lastDestination = LastGoToDest(viewName, args)
     }
 
+    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
+
+    }
+
     /**
      * Get a string for use in the UI
      */

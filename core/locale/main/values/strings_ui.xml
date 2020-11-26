@@ -834,17 +834,17 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <!--
     Option when recording attendance. When the user clicks the 'record attendance' button they have
-    the option to either 1) record attendance for the day class was most recently scheduled (if they
-    have setup a schedule for the class) or 2) add an occurence of the class (e.g. if they did not
+    the option to either 1) record attendance for the the  most recent already known
+    occurrence of the class or 2) add an occurrence of the class (e.g. if they did not
     setup a schedule or they want to add a one-off occurence of the class)
     -->
-    <string name="use_most_recently_scheduled_day">Use most recently scheduled day</string>
+    <string name="record_attendance_for_most_recent_occurrence">Record attendance for most recent existing occurrence</string>
 
     <!--
     Option when recording attendance. When the user clicks the 'record attendance' button they have
-    the option to either 1) record attendance for the day class was most recently scheduled (if they
-    have setup a schedule for the class) or 2) add an occurrence of the class (e.g. if they did not
-    setup a schedule or they want to add a one-off occurrence of the class)
+    the option to either 1) record attendance for the the  most recent already known
+    occurrence of the class or 2) add an occurrence of the class (e.g. if they did not
+    setup a schedule or they want to add a one-off occurence of the class)
     -->
     <string name="add_a_new_occurrence">Add a new occurrence</string>
 

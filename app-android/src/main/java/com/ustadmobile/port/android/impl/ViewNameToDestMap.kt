@@ -53,7 +53,8 @@ class ViewNameToDestMap: DestinationProvider {
             EntityRoleEditView.VIEW_NAME to UstadDestination(R.id.entityrole_edit_dest),
             JoinWithCodeView.VIEW_NAME to UstadDestination(R.id.join_with_code_dest),
             LearnerGroupMemberListView.VIEW_NAME to UstadDestination(R.id.learner_group_member_list_dest),
-            TimeZoneListView.VIEW_NAME to UstadDestination(R.id.time_zone_list_dest)
+            TimeZoneListView.VIEW_NAME to UstadDestination(R.id.time_zone_list_dest),
+            ClazzLogEditView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_dest)
     )
 
     override val navControllerViewId: Int
