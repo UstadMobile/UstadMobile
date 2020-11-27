@@ -20,9 +20,9 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
 
     override fun indexUrl(sourceUrl: String) {
 
-        val khanEntry = getKhanEntry(englishLang, contentEntryDao)
+        val khanEntry = getKhanEntry(englishLang, repo.contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, khanEntry, 12)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, khanEntry, 12)
 
         val lang = sourceUrl.substringBefore(".khan").substringAfter("://")
 
@@ -31,7 +31,7 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
 
         val parentEntry = createKangLangEntry(if (lang == "www") "en" else lang, khanLang.title, khanLang.url, db)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, khanEntry, parentEntry, 0)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, khanEntry, parentEntry, 0)
 
         val document: Document
         try {
@@ -60,9 +60,9 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
                     parentEntry.primaryLanguageUid, parentEntry.languageVariantUid,
                     description, false, "", "",
                     "", "",
-                    0, contentEntryDao)
+                    0, repo.contentEntryDao)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentEntry, headerEntry, count)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentEntry, headerEntry, count)
 
             val contentList = element.select("div.library-content-list li.subjects-row-first td a.subject-link")
 
@@ -86,9 +86,9 @@ class KhanLiteIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
                         parentEntry.languageVariantUid, "", true,
                         "", "",
                         "", "",
-                        ContentEntry.TYPE_VIDEO, contentEntryDao)
+                        ContentEntry.TYPE_VIDEO, repo.contentEntryDao)
 
-                ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, headerEntry, entry, contentCount)
+                ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, headerEntry, entry, contentCount)
 
                 createQueueItem(contentUrl.toString(), entry, KHAN_LITE_VIDEO_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, headerEntry.contentEntryUid)
 

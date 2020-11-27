@@ -51,6 +51,9 @@ kotlin {
 
     sourceSets {
         commonMain {
+            //Add the SyncHelperEntitiesDao
+            kotlin.srcDir("../lib-door-runtime/src/commonMain/resources/daos")
+
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
@@ -62,13 +65,14 @@ kotlin {
                 implementation project(':lib-door-runtime')
                 implementation project(":lib-database-annotations")
                 compileOnly project(":lib-room-annotations")
+                implementation "com.github.aakira:napier:$version_napier"
 
             }
         }
 
         jvmMain {
             //Uncomment lines below to allow debugging on generated source code
-//            kotlin.srcDirs += ["$buildDir/generated/source/doordb-jvm"]
+            kotlin.srcDirs += ["$buildDir/generated/source/doordb-jvm"]
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
@@ -82,6 +86,7 @@ kotlin {
 
                 implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
                 implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
             }
         }
         jsMain {
@@ -92,7 +97,7 @@ kotlin {
                 implementation "com.soywiz.korlibs.klock:klock-js:$version_klock"
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
-
+                implementation "com.github.aakira:napier-js:$version_napier"
             }
         }
 
@@ -111,10 +116,11 @@ kapt {
     arguments {
         arg("doordb_android_out", "$buildDir/generated/source/door-android")
         //Uncomment lines below to allow debugging on generated source code.
-//        arg("doordb_ktor_out", "$buildDir/generated/source/doordb-jvm")
-//        arg("doordb_jvm_out", "$buildDir/generated/source/doordb-jvm")
+        arg("doordb_ktor_out", "$buildDir/generated/source/doordb-jvm")
+        arg("doordb_jvm_out", "$buildDir/generated/source/doordb-jvm")
         arg("doordb_js_out", "$buildDir/generated/source/door-js")
         arg("doordb_source_path", project.file("src/commonMain/kotlin"))
+        arg("doordb_migrations_out", project.file("$buildDir/generated/door-migrations"))
     }
 }
 
@@ -138,6 +144,7 @@ dependencies {
     kapt "io.ktor:ktor-client-okhttp:$version_ktor"
     kapt "org.nanohttpd:nanohttpd:$version_nanohttpd"
     kapt "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+    kapt "com.github.aakira:napier-jvm:$version_napier"
 }
 
 compileKotlinJvm.dependsOn(":lib-database-annotation-processor:jar")

@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ReportGraphHelper
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
 import com.ustadmobile.core.view.UstadEditView
@@ -58,7 +59,7 @@ class ReportDetailPresenter(context: Any,
         val entityJsonStr = bundle[UstadEditView.ARG_ENTITY_JSON]
         val editEntity: ReportWithFilters?
         editEntity = if (entityJsonStr != null) {
-            Json.parse(ReportWithFilters.serializer(), entityJsonStr)
+            safeParse(di, ReportWithFilters.serializer(), entityJsonStr)
         } else {
             ReportWithFilters()
         }

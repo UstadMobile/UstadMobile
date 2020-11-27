@@ -86,12 +86,12 @@ class TestHarContainer {
         targetEntry.author = "borrachera"
         targetEntry.primaryLanguageUid = 53
         targetEntry.leaf = true
-        targetEntry.contentEntryUid = db.contentEntryDao.insert(targetEntry)
+        targetEntry.contentEntryUid = repo.contentEntryDao.insert(targetEntry)
 
         container = Container()
         container?.mimeType = "application/har+zip"
         container?.containerContentEntryUid = targetEntry.contentEntryUid
-        container?.containerUid = db.containerDao.insert(container!!)
+        container?.containerUid = repo.containerDao.insert(container!!)
 
         val containerManager = ContainerManager(container!!, db, repo,
                 tmpDir.absolutePath)

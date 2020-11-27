@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -71,7 +72,7 @@ class ClazzEdit2Presenter(context: Any,
         val clazzJsonStr = bundle[ARG_ENTITY_JSON]
         var clazz: ClazzWithHolidayCalendarAndSchool? = null
         if(clazzJsonStr != null) {
-            clazz = Json.parse(ClazzWithHolidayCalendarAndSchool.serializer(), clazzJsonStr)
+            clazz = safeParse(di, ClazzWithHolidayCalendarAndSchool.serializer(), clazzJsonStr)
         }else {
             clazz = ClazzWithHolidayCalendarAndSchool()
         }
@@ -90,6 +91,8 @@ class ClazzEdit2Presenter(context: Any,
 
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
         GlobalScope.launch(doorMainDispatcher()) {
+            view.loading = true
+            view.fieldsEnabled = false
             if(entity.clazzUid == 0L) {
                 repo.createNewClazzAndGroups(entity, systemImpl, context)
             }else {
@@ -108,6 +111,7 @@ class ClazzEdit2Presenter(context: Any,
                     accountManager.activeAccount.endpointUrl,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
 
+            view.loading = false
             onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
         }
     }

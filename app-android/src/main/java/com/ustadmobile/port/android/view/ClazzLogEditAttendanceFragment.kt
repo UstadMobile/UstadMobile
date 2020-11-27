@@ -177,18 +177,14 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
         t -> clazzLogAttendanceRecordRecyclerAdapter?.submitList(t)
     }
 
-    override var clazzLogsList: DoorLiveData<List<ClazzLog>>? = null
+    override var clazzLogsList: List<ClazzLog>? = null
         get() = field
         set(value) {
-            field?.removeObserver(clazzLogListObserver)
             field = value
-            value?.observe(viewLifecycleOwner, clazzLogListObserver)
+            if(value != null)
+                clazzLogEditHeaderRecyclerAdapter?.submitList(listOf(value))
+
         }
-
-    var clazzLogListObserver = Observer<List<ClazzLog>> {
-        this.clazzLogEditHeaderRecyclerAdapter?.submitList(listOf(it))
-    }
-
 
     override val mEditPresenter: UstadEditPresenter<*, ClazzLog>?
         get() = mPresenter
@@ -260,7 +256,7 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
     companion object {
         val DIFFUTIL_CLAZZATTENDANCERECORD = object: DiffUtil.ItemCallback<ClazzLogAttendanceRecordWithPerson>() {
             override fun areItemsTheSame(oldItem: ClazzLogAttendanceRecordWithPerson, newItem: ClazzLogAttendanceRecordWithPerson): Boolean {
-                return oldItem.clazzLogAttendanceRecordUid == newItem.clazzLogAttendanceRecordUid
+                return oldItem === newItem
             }
 
             override fun areContentsTheSame(oldItem: ClazzLogAttendanceRecordWithPerson, newItem: ClazzLogAttendanceRecordWithPerson): Boolean {

@@ -5,6 +5,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.impl.http.ConcatenatedContainerEntryFileResponder
@@ -53,8 +54,10 @@ class ConcatenatedContainerEntryFileResponderTest {
 
         accountManager = di.direct.instance()
         db = di.on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
+        val repo: UmAppDatabase = di.on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
+
         container = runBlocking {
-            db.insertContainerFromResources(tmpfileRule.newFolder(), tmpfileRule.newFolder(),
+            insertContainerFromResources(db, repo, tmpfileRule.newFolder(), tmpfileRule.newFolder(),
                     *testResourcesList.toTypedArray())
         }
     }

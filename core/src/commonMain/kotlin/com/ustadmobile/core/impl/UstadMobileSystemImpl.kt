@@ -57,6 +57,8 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
     override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int,
                     ustadGoOptions: UstadGoOptions)
 
+    fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any)
+
     /**
      * Get a string for use in the UI
      */
@@ -67,11 +69,7 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
      * Get storage directories
      *
      * @param context Platform specific context
-     * @param callback Storage dir list callback
      */
-
-    override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>)
-
     override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir>
 
     /**

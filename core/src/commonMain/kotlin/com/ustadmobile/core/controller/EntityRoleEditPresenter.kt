@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.EntityRoleEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
@@ -26,7 +27,7 @@ class EntityRoleEditPresenter(context: Any,
         val personGroupUid = bundle[UstadView.ARG_FILTER_BY_PERSONGROUPUID]?.toLong()?:0L
         var entityRole: EntityRoleWithNameAndRole? = null
         if(entityRoleJsonStr != null) {
-            entityRole = Json.parse(EntityRoleWithNameAndRole.serializer(), entityRoleJsonStr)
+            entityRole = safeParse(di, EntityRoleWithNameAndRole.serializer(), entityRoleJsonStr)
         }else {
             entityRole = EntityRoleWithNameAndRole()
         }

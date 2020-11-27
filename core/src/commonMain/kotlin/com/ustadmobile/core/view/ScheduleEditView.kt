@@ -5,9 +5,11 @@ import com.ustadmobile.lib.db.entities.Schedule
 
 interface ScheduleEditView: UstadEditView<Schedule> {
 
-    var frequencyOptions: List<ScheduleEditPresenter.FrequencyMessageIdOption>?
-
     var dayOptions: List<ScheduleEditPresenter.DayMessageIdOption>?
+
+    var fromTimeError: String?
+
+    var toTimeError: String?
 
     companion object {
         const val ARG_SCHEDULE = "schedule"

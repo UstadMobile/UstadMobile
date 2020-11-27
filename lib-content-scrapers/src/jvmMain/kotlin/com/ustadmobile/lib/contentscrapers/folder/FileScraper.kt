@@ -1,20 +1,24 @@
 package com.ustadmobile.lib.contentscrapers.folder
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper
-import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.apache.commons.lang3.exception.ExceptionUtils
 import org.kodein.di.DI
+import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
 
 @ExperimentalStdlibApi
 class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
+
+    private val contentImportManager: ContentImportManager by di.on(endpoint).instance()
 
     override fun scrapeUrl(sourceUrl: String) {
 
@@ -28,7 +32,7 @@ class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Lon
 
             try {
 
-                val metadata = extractContentEntryMetadataFromFile(file, db)
+                val metadata = contentImportManager.extractMetadata(file.path)
 
                 if (metadata == null) {
                     hideContentEntry()
@@ -52,12 +56,18 @@ class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Lon
                         metadataContentEntry.description, true, "",
                         metadataContentEntry.thumbnailUrl, "",
                         "",
-                        metadataContentEntry.contentTypeFlag, contentEntryDao)
+                        metadataContentEntry.contentTypeFlag, repo.contentEntryDao)
 
-                ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
+                ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
+                val params = scrapeQueueItem?.scrapeRun?.conversionParams
+                var conversionParams = mapOf<String, String>()
+                if(params != null){
+                    conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+                }
+                contentImportManager.importFileToContainer(file.path, metadata.mimeType,
+                        fileEntry.contentEntryUid, containerFolder.path, conversionParams){
 
-                importContainerFromFile(fileEntry.contentEntryUid, metadata.mimeType, containerFolder.absolutePath, file, db, db, metadata.importMode, Any())
-
+                }
                 close()
                 UMLogUtil.logInfo("finished scrape for $sourceUrl")
 

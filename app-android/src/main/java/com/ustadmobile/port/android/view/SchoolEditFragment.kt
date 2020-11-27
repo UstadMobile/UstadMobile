@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
+import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -24,7 +25,6 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
-import com.ustadmobile.lib.db.entities.TimeZoneEntity
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
@@ -123,12 +123,12 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
             mBinding?.school = entity
         }
 
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                TimeZoneEntity::class.java) {
-            val timeZone = it.firstOrNull() ?: return@observeResult
-            entity?.schoolTimeZone = timeZone.id
-            mBinding?.school= entity
-        }
+
+        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>(TimeZoneListFragment.RESULT_TIMEZONE_KEY)
+                ?.observe(viewLifecycleOwner) {
+                    entity?.schoolTimeZone = it
+                    mBinding?.school = entity
+                }
     }
 
     override fun onDestroyView() {
@@ -199,7 +199,8 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
 
     override fun handleClickTimeZone() {
         onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(TimeZoneEntity::class.java, R.id.timezoneentity_list_dest)
+        navigateToPickEntityFromList(String::class.java, R.id.time_zone_list_dest,
+                destinationResultKey = TimeZoneListFragment.RESULT_TIMEZONE_KEY)
     }
 
     override fun showHolidayCalendarPicker() {

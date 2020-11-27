@@ -5,6 +5,8 @@ import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
 import com.soywiz.klock.parse
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.checkJndiSetup
 import kotlinx.coroutines.runBlocking
@@ -17,6 +19,8 @@ class TestClazzLogCreator {
 
     private lateinit var db: UmAppDatabase
 
+    private lateinit var repo: UmAppDatabase
+
     val dateFormat = DateFormat("EEE, dd MMM yyyy HH:mm:ss z")
 
     @Before
@@ -24,6 +28,9 @@ class TestClazzLogCreator {
         checkJndiSetup()
         db = UmAppDatabase.Companion.getInstance(Any())
         db.clearAllTables()
+
+        repo = db.asRepository(Any(), "http://localhost/dummy", "",
+                defaultHttpClient(), null)
     }
 
     private fun createClazzAndSchedule(clazzName: String, holidayCalendarUid: Long = 0,
@@ -32,11 +39,11 @@ class TestClazzLogCreator {
         val testClazz = Clazz(clazzName).apply {
             clazzHolidayUMCalendarUid = holidayCalendarUid
             clazzTimeZone = timezone
-            clazzUid = db.clazzDao.insert(this)
+            clazzUid = repo.clazzDao.insert(this)
         }
         val testClazzSchedule = Schedule().apply(scheduleBlock).apply {
             scheduleClazzUid = testClazz.clazzUid
-            scheduleUid = db.scheduleDao.insert(this)
+            scheduleUid = repo.scheduleDao.insert(this)
         }
 
         return Pair(testClazz, testClazzSchedule)
@@ -57,7 +64,7 @@ class TestClazzLogCreator {
         val toTime = fromTime + (1.days.millisecondsLong)
 
         runBlocking {
-            db.createClazzLogs(fromTime, toTime)
+            repo.createClazzLogs(fromTime, toTime)
 
             val createdLogs = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime)
@@ -74,14 +81,14 @@ class TestClazzLogCreator {
     @Test
     fun givenClazzWithScheduleInRangeAndOverlappingHoliday_whenCreateClazzLogsCalled_thenShouldBeCreatedAsCancelledWithNote() {
         val holidayCalendar = HolidayCalendar("Test Holiday Calendar", 0).apply {
-            umCalendarUid = db.holidayCalendarDao.insert(this)
+            umCalendarUid = repo.holidayCalendarDao.insert(this)
         }
 
         val longWeekendHoliday = Holiday().apply {
             holStartTime = dateFormat.parse("Fri, 15 May 2020 00:00:00 UTC").utc.unixMillisLong
             holEndTime = dateFormat.parse("Sun, 17 May 2020 23:59:59 UTC").utc.unixMillisLong
             this.holHolidayCalendarUid = holidayCalendar.umCalendarUid
-            holUid = db.holidayDao.insert(this)
+            holUid = repo.holidayDao.insert(this)
         }
 
         val (testClazz, testClazzSchedule) = createClazzAndSchedule("Test Clazz",
@@ -95,8 +102,8 @@ class TestClazzLogCreator {
         val fromTime = dateFormat.parse("Thu, 14 May 2020 20:00:00 UTC").utc.unixMillisLong
         val toTime = fromTime + (1.days.millisecondsLong)
         runBlocking {
-            db.createClazzLogs(fromTime, toTime)
-            val createdLogs = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
+            repo.createClazzLogs(fromTime, toTime)
+            val createdLogs = repo.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime)
 
             Assert.assertEquals("Created one ClazzLog", 1, createdLogs.size)
@@ -119,12 +126,12 @@ class TestClazzLogCreator {
         val fromTime = dateFormat.parse("Thu, 14 May 2020 20:00:00 UTC").utc.unixMillisLong
         val toTime = fromTime + (1.days.millisecondsLong)
         runBlocking {
-            db.createClazzLogs(fromTime, toTime)
+            repo.createClazzLogs(fromTime, toTime)
             val numLogsCreatedBefore = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime).size
 
             //Call it again
-            db.createClazzLogs(fromTime, toTime)
+            repo.createClazzLogs(fromTime, toTime)
             val allLogsCreated = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime)
 
@@ -154,7 +161,7 @@ class TestClazzLogCreator {
         val fromTime = dateFormat.parse("Thu, 14 May 2020 20:00:00 UTC").utc.unixMillisLong
         val toTime = fromTime + (1.days.millisecondsLong)
         runBlocking {
-            db.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
+            repo.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
 
             val createdLogs = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime)
@@ -179,7 +186,7 @@ class TestClazzLogCreator {
         val fromTime = dateFormat.parse("Thu, 14 May 2020 18:00:00 UTC").utc.unixMillisLong
         val toTime = fromTime + (1.days.millisecondsLong)
         runBlocking {
-            db.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
+            repo.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
 
             val clazzLogsCreated = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime)
@@ -203,15 +210,15 @@ class TestClazzLogCreator {
         val fromTime = dateFormat.parse("Thu, 14 May 2020 20:00:00 UTC").utc.unixMillisLong
         val toTime = fromTime + (1.days.millisecondsLong)
         runBlocking {
-            db.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
+            repo.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
 
             testClazzSchedule.apply {
                 sceduleStartTime = 12 * 60 * 60 * 1000 //12pm
                 scheduleEndTime = 13 * 60 * 60 * 1000
             }
-            db.scheduleDao.update(testClazzSchedule)
+            repo.scheduleDao.update(testClazzSchedule)
 
-            db.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
+            repo.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
 
             val clazzLogsCreated = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime).partition { it.clazzLogStatusFlag != ClazzLog.STATUS_RESCHEDULED }

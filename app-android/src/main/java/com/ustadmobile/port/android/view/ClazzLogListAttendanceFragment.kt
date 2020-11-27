@@ -24,6 +24,7 @@ import com.toughra.ustadmobile.databinding.ItemClazzLogAttendanceListBinding
 import com.ustadmobile.core.controller.ClazzLogListAttendancePresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.view.ClazzLogListAttendanceView
 import com.ustadmobile.door.DoorMutableLiveData
@@ -31,11 +32,14 @@ import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.text.DecimalFormat
 import java.util.*
 
 class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog>(),
-        ClazzLogListAttendanceView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+        ClazzLogListAttendanceView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener,
+        BottomSheetOptionSelectedListener{
 
     private var mPresenter: ClazzLogListAttendancePresenter? = null
 
@@ -59,10 +63,10 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
         }
 
 
-    override var recordAttendanceButtonVisible: Boolean
-        get() = fabManager?.visible ?: false
+    override var recordAttendanceOptions: List<ClazzLogListAttendancePresenter.RecordAttendanceOption>? = null
         set(value) {
-            fabManager?.visible = value
+            fabManager?.visible = !value.isNullOrEmpty()
+            field = value
         }
 
     private var graphRecyclerViewAdapter: ClazzLogListGraphRecyclerAdapter? = null
@@ -236,10 +240,22 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
         return view
     }
 
+    fun ClazzLogListAttendancePresenter.RecordAttendanceOption.toBottomSheetOption(): BottomSheetOption {
+        val systemImpl : UstadMobileSystemImpl = direct.instance()
+        return BottomSheetOption(RECORD_ATTENDANCE_OPTIONS_ICON[this] ?: 0,
+            systemImpl.getString(this.messageId, requireContext()), this.commandId)
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fabManager?.text = requireContext().getString(R.string.record_attendance)
         fabManager?.icon = R.drawable.baseline_assignment_turned_in_24
+        fabManager?.onClickListener = {
+            val bottomSheet = OptionsBottomSheetFragment(recordAttendanceOptions?.map {
+                it.toBottomSheetOption()
+            } ?: listOf(), this)
+            bottomSheet.show(childFragmentManager, bottomSheet.tag)
+        }
     }
 
     /**
@@ -248,6 +264,14 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
     override fun onClick(view: View?) {
         //if(view?.id == R.id.item_createnew_layout)
             //navigateToEditEntity(null, R.id.clazzlog_edit_dest, ClazzLog::class.java)
+    }
+
+    override fun onBottomSheetOptionSelected(optionSelected: BottomSheetOption) {
+        mPresenter?.handleClickRecordAttendance(
+            ClazzLogListAttendancePresenter.RecordAttendanceOption.values().first {
+                it.commandId == optionSelected.optionCode
+            }
+        )
     }
 
     override fun onDestroyView() {
@@ -260,6 +284,14 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
         get() = dbRepo?.clazzLogDao
 
     companion object {
+
+        val RECORD_ATTENDANCE_OPTIONS_ICON = mapOf(
+                ClazzLogListAttendancePresenter.RecordAttendanceOption.RECORD_ATTENDANCE_MOST_RECENT_SCHEDULE
+                        to R.drawable.ic_calendar_today_24px_,
+                ClazzLogListAttendancePresenter.RecordAttendanceOption.RECORD_ATTENDANCE_NEW_SCHEDULE
+                        to R.drawable.ic_add_black_24dp
+        )
+
         val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzLog> = object
             : DiffUtil.ItemCallback<ClazzLog>() {
             override fun areItemsTheSame(oldItem: ClazzLog,

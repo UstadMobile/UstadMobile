@@ -300,6 +300,20 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         }
     }
 
+    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
+        val navController = navController ?: (context as Activity)
+                .findNavController(destinationProvider.navControllerViewId)
+
+        val popBackDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
+            navController.currentDestination?.id ?: 0
+        }else {
+            destinationProvider.lookupDestinationName(popUpToViewName)
+                    ?.destinationId ?: 0
+        }
+
+        navController.popBackStack(popBackDestId, popUpInclusive)
+    }
+
 
     /**
      * Get a string for use in the UI
@@ -320,40 +334,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun getSystemLocale(context: Any): String {
         return Locale.getDefault().toString()
-    }
-
-
-    /**
-     * Get storage directories
-     *
-     * @param context Platform specific context
-     * @param callback Storage dir list callback
-     */
-
-    @Deprecated("Use getStorageDirsAsync instead")
-    actual override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>) {
-        Thread {
-            val dirList = ArrayList<UMStorageDir>()
-            val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
-            val contentDirName = getContentDirName(context)
-
-            var umDir = File(storageOptions[deviceStorageIndex], contentDirName!!)
-            if (!umDir.exists()) umDir.mkdirs()
-            dirList.add(UMStorageDir(umDir.absolutePath,
-                    getString(MessageID.phone_memory, context), true,
-                    isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
-
-            if (storageOptions.size > 1) {
-                val sdCardStorage = storageOptions[sdCardStorageIndex]
-                umDir = File(sdCardStorage, contentDirName)
-                if (!umDir.exists()) umDir.mkdirs()
-                dirList.add(UMStorageDir(umDir.absolutePath,
-                        getString(MessageID.memory_card, context), removableMedia = true,
-                        isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
-            }
-
-            callback.onDone(dirList)
-        }.start()
     }
 
 

@@ -4,6 +4,7 @@ import com.github.aakira.napier.Napier
 import com.soywiz.klock.DateFormat
 import com.soywiz.klock.parse
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
@@ -12,16 +13,16 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.port.sharedse.contentformats.extractContentEntryMetadataFromFile
-import com.ustadmobile.port.sharedse.contentformats.importContainerFromFile
-import com.ustadmobile.port.sharedse.contentformats.mimeTypeSupported
-import io.ktor.client.call.receive
-import io.ktor.client.request.get
-import io.ktor.client.request.parameter
-import io.ktor.client.statement.HttpStatement
+import io.ktor.client.call.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -38,6 +39,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
 
     private val logPrefix = "[GoogleDriveScraper SQI ID #$sqiUid] "
 
+    private val contentImportManager: ContentImportManager by di.on(endpoint).instance()
 
     override fun scrapeUrl(sourceUrl: String) {
 
@@ -60,10 +62,10 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
 
                 val file = fileResponse.receive<GoogleFile>()
 
-                mimeTypeSupported.find { fileMimeType -> fileMimeType == file.mimeType }
+                contentImportManager.getMimeTypeSupported().find { fileMimeType -> fileMimeType == file.mimeType }
                         ?: return@execute
 
-                val recentContainer = containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
+                val recentContainer = db.containerDao.getMostRecentContainerForContentEntry(contentEntryUid)
                 val googleModifiedTime = file.modifiedTime
                 val parsedModifiedTime: Long = if (googleModifiedTime != null) googleDriveFormat.parse(googleModifiedTime).local.unixMillisLong else 1
                 val isUpdated = parsedModifiedTime > recentContainer?.cntLastModified ?: 0
@@ -88,7 +90,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     }
                     stream.close()
 
-                    val metadata = extractContentEntryMetadataFromFile(contentFile, db)
+                    val metadata = contentImportManager.extractMetadata(contentFile.path)
 
                     if (metadata == null) {
                         Napier.i("$logPrefix with sourceUrl $sourceUrl had no metadata found, not supported", tag = SCRAPER_TAG)
@@ -123,17 +125,20 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                                 metadataContentEntry.thumbnailUrl.alternative(contentEntry?.thumbnailUrl
                                         ?: file.thumbnailLink ?: ""),
                                 "", "",
-                                metadataContentEntry.contentTypeFlag, contentEntryDao)
+                                metadataContentEntry.contentTypeFlag, repo.contentEntryDao)
                         Napier.d("$logPrefix new entry created/updated with entryUid ${fileEntry.contentEntryUid} with title ${file.name}", tag = SCRAPER_TAG)
-                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
+                        ContentScraperUtil.insertOrUpdateChildWithMultipleParentsJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, fileEntry, 0)
                     }
+                    metadata.contentEntry.contentEntryUid = fileEntry.contentEntryUid
 
-
-
-                    importContainerFromFile(fileEntry.contentEntryUid,
-                            metadata.mimeType, containerFolder.absolutePath,
-                            contentFile, db, db, metadata.importMode, Any())
-
+                    val params = scrapeQueueItem?.scrapeRun?.conversionParams
+                    var conversionParams = mapOf<String, String>()
+                    if(params != null){
+                        conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+                    }
+                    contentImportManager.importFileToContainer(contentFile.path, metadata.mimeType,
+                            fileEntry.contentEntryUid, containerFolder.path, conversionParams){
+                    }
                     Napier.d("$logPrefix finished Scraping", tag = SCRAPER_TAG)
                     showContentEntry()
                     setScrapeDone(true, 0)

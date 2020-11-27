@@ -1,19 +1,16 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Role
 
 
-@UmRepository
+@Repository
 @Dao
 abstract class ClazzLogDao : BaseDao<ClazzLog> {
 
@@ -41,8 +38,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         WHERE clazzLogClazzUid = :clazzUid
         AND clazzLog.clazzLogStatusFlag != :excludeStatus
         ORDER BY ClazzLog.logDate ASC""")
-    abstract fun findByClazzUidAsLiveData(clazzUid: Long, excludeStatus: Int): DoorLiveData<List<ClazzLog>>
-
+    abstract suspend fun findByClazzUidAsync(clazzUid: Long, excludeStatus: Int): List<ClazzLog>
 
 
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
@@ -89,5 +85,8 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         clazzLogLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1)
         WHERE clazzLogUid = :clazzLogUid""")
     abstract fun updateStatusByClazzLogUid(clazzLogUid: Long, newStatus: Int)
+
+    @Update
+    abstract suspend fun updateAsync(clazzLog: ClazzLog)
 
 }

@@ -1,10 +1,9 @@
 # lib-database-android
 
-This module is separated out to avoid using the annotation processor
-on the main app-android module, as the room annotation processor does
-not support incremental annotation processing.
 
-It contains entities (generated from the lib-entities module by
-the lib-database-entity-processor module) and the database and DAO
-classes (generated from lib-database by
-lib-database-annotation-processor-core).
+This contains the DAOs and Databases that are generated from lib-database, so that they can be
+processed using Room's annotation processor.
+
+Note: incremental annotation processing only works with JDK 8 if using the JDK bundled with Android
+studio, see
+[RoomProcessor.kt source](https://android.googlesource.com/platform/frameworks/support/+/refs/heads/androidx-master-dev/room/compiler/src/main/kotlin/androidx/room/RoomProcessor.kt)

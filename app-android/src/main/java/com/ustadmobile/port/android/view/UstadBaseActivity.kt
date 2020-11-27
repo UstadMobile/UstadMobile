@@ -32,7 +32,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadViewWithNotifications
-import com.ustadmobile.core.view.UstadViewWithProgress
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
 import com.ustadmobile.sharedse.network.NetworkManagerBle
@@ -50,19 +49,11 @@ import java.util.*
  * Created by mike on 10/15/15.
  */
 abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications,
-        UstadView, ShakeDetector.Listener, UstadViewWithProgress, BleNetworkManagerProvider, DIAware {
+        UstadView, ShakeDetector.Listener, BleNetworkManagerProvider, DIAware {
 
     override val di by di()
 
     private var baseController: UstadBaseController<*>? = null
-
-
-    override var loading: Boolean = false
-        get() = false
-        set(value) {
-            //TODO: set this on the main activity
-            field = value
-        }
 
     /**
      * Get the toolbar that's used for the support action bar
@@ -224,11 +215,11 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     }
 
-    override fun showBaseProgressBar(showProgress: Boolean) {
-        runOnUiThread {
-            baseProgressBar.visibility = if (showProgress) View.VISIBLE else View.INVISIBLE
-        }
-    }
+//    override fun showBaseProgressBar(showProgress: Boolean) {
+//        runOnUiThread {
+//            baseProgressBar.visibility = if (showProgress) View.VISIBLE else View.INVISIBLE
+//        }
+//    }
 
 
     /**
@@ -253,9 +244,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     override fun onPause() {
         super.onPause()
-        if (shakeDetector != null) {
-            shakeDetector?.stop()
-        }
+        shakeDetector?.stop()
     }
 
     /**
@@ -277,16 +266,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         umToolbar = findViewById<View>(toolbarID) as Toolbar
         setSupportActionBar(umToolbar)
         supportActionBar?.setHomeButtonEnabled(true)
-    }
-
-    protected fun setProgressBar() {
-        baseProgressBar = findViewById(R.id.progressBar)
-        baseProgressBar.isIndeterminate = true
-        baseProgressBar.scaleY = 3f
-    }
-
-    protected fun setProgressBarDeterminate(isDeterminate: Boolean) {
-        baseProgressBar.isIndeterminate = !isDeterminate
     }
 
     protected fun setBaseController(baseController: UstadBaseController<*>) {

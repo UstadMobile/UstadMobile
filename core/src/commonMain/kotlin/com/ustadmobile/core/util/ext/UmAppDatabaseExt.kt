@@ -9,10 +9,10 @@ import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
+import kotlinx.coroutines.withTimeoutOrNull
 
 fun UmAppDatabase.runPreload() {
     preload()
-    timeZoneEntityDao.insertSystemTimezones()
 }
 
 /**
@@ -162,8 +162,8 @@ suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, schoo
 /**
  * Inserts the person, sets its group and groupmember. Does not check if its an update
  */
-suspend fun UmAppDatabase.insertPersonAndGroup(entity: PersonWithAccount,
-                loggedInPerson: Person? = null): PersonWithAccount{
+suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T,
+                loggedInPerson: Person? = null): T{
 
     val groupPerson = PersonGroup().apply {
         groupName = "Person individual group"
@@ -181,7 +181,6 @@ suspend fun UmAppDatabase.insertPersonAndGroup(entity: PersonWithAccount,
             PersonGroupMember(entity.personUid, entity.personGroupUid))
 
     return entity
-
 }
 
 /**
@@ -279,4 +278,41 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
     }else{
         return matches[0]
     }
+}
+
+
+suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzWorkWithSubmission,
+                                                 clazzMemberUid: Long, responsePersonUid : Long)
+        : List<ClazzWorkQuestionAndOptionWithResponse>{
+
+    val questionsAndOptionsWithResponses :List<ClazzWorkQuestionAndOptionWithResponseRow> = withTimeoutOrNull(2000){
+        clazzWorkQuestionDao.findAllQuestionsAndOptionsWithResponse(clazzWorkWithSubmission.clazzWorkUid?:0L,
+                clazzMemberUid)
+    } ?: listOf()
+
+    val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
+            questionsAndOptionsWithResponses.groupBy { it.clazzWorkQuestion }.entries
+                    .map {
+                        val questionUid = it.key?.clazzWorkQuestionUid ?: 0L
+
+                        ClazzWorkQuestionAndOptionWithResponse(
+                                clazzWorkWithSubmission ,
+                                it.key ?: ClazzWorkQuestion(),
+                                it.value.map {
+                                    it.clazzWorkQuestionOption ?: ClazzWorkQuestionOption()
+                                },
+                                it.value.map {
+                                    it.clazzWorkQuestionOptionResponse
+                                }.first()?: ClazzWorkQuestionResponse().apply {
+                                    clazzWorkQuestionResponseQuestionUid = questionUid?:0L
+                                    clazzWorkQuestionResponsePersonUid = responsePersonUid
+                                    clazzWorkQuestionResponseClazzMemberUid = clazzMemberUid
+                                            ?: 0L
+                                    clazzWorkQuestionResponseClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
+                                            ?: 0L
+                                })
+                    }
+
+
+    return questionsAndOptionsWithResponseList
 }

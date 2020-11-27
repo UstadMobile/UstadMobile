@@ -104,7 +104,7 @@ open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, sqiUid:
                 parentContentEntry?.languageVariantUid ?: 0,
                 youtubeData.description ?: "", false, "",
                 youtubeData.thumbnail ?: "",
-                "", "", 0, contentEntryDao)
+                "", "", 0, repo.contentEntryDao)
 
 
         youtubeData.entries?.forEachIndexed { counter, entry ->
@@ -116,12 +116,12 @@ open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, sqiUid:
             val youtubeUrl = "https://www.youtube.com/watch?v=${entry.url!!}"
 
             val youtubeEntry = ContentScraperUtil.insertTempYoutubeContentEntry(
-                    contentEntryDao, youtubeUrl,
+                    repo.contentEntryDao, youtubeUrl,
                     parentContentEntry?.primaryLanguageUid ?: 0, entry.title!!,
                     parentContentEntry?.publisher ?: "", parentContentEntry?.licenseType ?: 0,
                     parentContentEntry?.languageVariantUid ?: 0)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry!!, youtubeEntry, counter)
+            ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry!!, youtubeEntry, counter)
 
             createQueueItem(youtubeUrl, youtubeEntry, ScraperTypes.YOUTUBE_VIDEO_SCRAPER, ScrapeQueueItem.ITEM_TYPE_SCRAPE, parentContentEntryUid)
         }

@@ -43,7 +43,12 @@ class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?)
 
             override fun areContentsTheSame(oldItem: ClazzWithListDisplayDetails,
                                             newItem: ClazzWithListDisplayDetails): Boolean {
-                return oldItem == newItem
+                return oldItem.clazzName == newItem.clazzName &&
+                        oldItem.numStudents == newItem.numStudents &&
+                        oldItem.numTeachers == newItem.numTeachers &&
+                        oldItem.clazzDesc == newItem.clazzDesc &&
+                        oldItem.clazzActiveMember?.clazzMemberRole == newItem.clazzActiveMember?.clazzMemberRole &&
+                        oldItem.attendanceAverage == newItem.attendanceAverage
             }
         }
     }

@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzWorkDetailView
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -67,22 +68,7 @@ class ClazzWorkEditPresenter(context: Any,
     { clazzWorkQuestion.clazzWorkQuestionUid = it }
 
     fun handleAddOrEditClazzQuestionAndOptions(entityClass: ClazzWorkQuestionAndOptions) {
-
-        //We could save this
-        GlobalScope.launch {
-            entityClass
-            entityClass.clazzWorkQuestion.clazzWorkQuestionClazzWorkUid = entity?.clazzWorkUid ?: 0L
-            entityClass.clazzWorkQuestion.clazzWorkQuestionUid = 0L
-            val questionUid = repo.clazzWorkQuestionDao.insertAsync(entityClass.clazzWorkQuestion)
-            entityClass.clazzWorkQuestion.clazzWorkQuestionUid = questionUid
-            entityClass.options.forEach {
-                it.clazzWorkQuestionOptionActive = true
-                it.clazzWorkQuestionOptionQuestionUid = questionUid
-            }
-        }
-
         questionAndOptionsEditHelper.onEditResult(entityClass)
-
     }
 
     fun handleRemoveQuestionAndOptions(entityClass: ClazzWorkQuestionAndOptions) {
@@ -143,7 +129,7 @@ class ClazzWorkEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: ClazzWork? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(ClazzWork.serializer(), entityJsonStr)
+            editEntity = safeParse(di, ClazzWork.serializer(), entityJsonStr)
         }else {
             editEntity = ClazzWork()
         }
@@ -158,9 +144,6 @@ class ClazzWorkEditPresenter(context: Any,
 
         view.clazzWorkQuizQuestionsAndOptions = questionAndOptionsEditHelper.liveList
         view.submissionTypeOptions = SubmissionOptions.values().map{SubmissionOptionsMessageIdOption(it, context)}
-
-        contentJoinEditHelper.liveList.sendValue(listOf())
-        questionAndOptionsEditHelper.liveList.sendValue(listOf())
 
         questionAndOptionsEditHelper.onLoadFromJsonSavedState(bundle)
 

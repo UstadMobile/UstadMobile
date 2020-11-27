@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <import type="android.view.View"/>
@@ -18,13 +19,16 @@
             type="boolean" />
 
         <variable
-            name="frequencyOptions"
-            type="java.util.List&lt;com.ustadmobile.core.util.MessageIdOption&gt;"/>
-
-        <variable
             name="dayOptions"
             type="java.util.List&lt;com.ustadmobile.core.util.MessageIdOption&gt;"/>
 
+        <variable
+            name="fromTimeError"
+            type="String"/>
+
+        <variable
+            name="toTimeError"
+            type="String" />
 
     </data>
 
@@ -43,29 +47,9 @@
             android:layout_height="wrap_content">
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_add_schedule_dialog_schedule_textinputlayout"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:layout_marginTop="@dimen/dimen_16dp"
-                android:hint="@string/frequency"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
-                    android:inputType="none"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    app:selectedMessageIdOption="@={schedule.scheduleFrequency}"
-                    app:messageIdOptions="@{frequencyOptions}" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-            <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/fragment_add_schedule_dialog_day_textinputlayout"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_add_schedule_dialog_schedule_textinputlayout"
+                app:layout_constraintTop_toTopOf="parent"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -93,7 +77,9 @@
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                >
+                app:errorTextColor="?colorError"
+                app:error="@{fromTimeError}"
+                app:errorEnabled="true">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
@@ -118,6 +104,9 @@
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
                 android:hint="@string/to"
+                app:errorTextColor="?colorError"
+                app:error="@{toTimeError}"
+                app:errorEnabled="true"
                 >
 
                 <com.google.android.material.textfield.TextInputEditText

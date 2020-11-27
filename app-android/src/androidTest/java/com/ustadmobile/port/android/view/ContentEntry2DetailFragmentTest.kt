@@ -5,15 +5,14 @@ import android.content.Context
 import android.content.Intent
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItemAtPosition
 import androidx.test.espresso.matcher.ViewMatchers.*
 import androidx.test.rule.GrantPermissionRule
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -23,10 +22,10 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.dbVersionHeader
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.port.android.screen.ContentEntryDetailScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.*
 import com.ustadmobile.util.test.ext.insertContentEntryWithTranslations
@@ -37,33 +36,23 @@ import io.ktor.client.request.post
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.Matchers.not
 import org.junit.Assert.assertEquals
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
 
-class ContentEntry2DetailFragmentTest {
+class ContentEntry2DetailFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true,
-        controlServerUrl = "http://${BuildConfig.TEST_HOST}:${BuildConfig.TEST_PORT}")
+    var dbRule = UmAppDatabaseAndroidClientRule(controlServerUrl = "http://${BuildConfig.TEST_HOST}:${BuildConfig.TEST_PORT}")
 
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
-
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
 
     @JvmField
     @Rule
@@ -75,71 +64,112 @@ class ContentEntry2DetailFragmentTest {
 
     private lateinit var di: DI
 
+    @Before
+    fun setup() {
+        di = (ApplicationProvider.getApplicationContext<Context>() as DIAware).di
+    }
+
     @AdbScreenRecord("Given content entry exists should show user selected content entry")
     @Test
     fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntryWithProgressComplete() {
 
-        di = (ApplicationProvider.getApplicationContext<Context>() as DIAware).di
         val entryTitle = "Dummy Title"
-        val testEntry = ContentEntryWithLanguage().apply {
-            title = entryTitle
-            description = "Dummy description"
-            leaf = true
-            contentEntryUid = dbRule.db.contentEntryDao.insert(this)
-        }
+        init {
 
-        val accountManager: UstadAccountManager by di.instance()
-        val activeAccount = accountManager.activeAccount
-
-        ContentEntryProgress().apply {
-            contentEntryProgressContentEntryUid = testEntry.contentEntryUid
-            contentEntryProgressProgress = 100
-            contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED
-            contentEntryProgressActive = true
-            contentEntryProgressPersonUid = activeAccount.personUid
-            contentEntryProgressUid = dbRule.db.contentEntryProgressDao.insert(this)
-        }
-
-
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
-            ContentEntry2DetailFragment().also { fragment ->
-                fragment.installNavController(systemImplNavRule.navController)
+            val testEntry = ContentEntryWithLanguage().apply {
+                title = entryTitle
+                description = "Dummy description"
+                leaf = true
+                contentEntryUid = dbRule.repo.contentEntryDao.insert(this)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        onView(withText(entryTitle)).check(matches(isDisplayed()))
+            val accountManager: UstadAccountManager by di.instance()
+            val activeAccount = accountManager.activeAccount
 
-        onView(withId(R.id.entry_detail_progress_bar)).check(matches(isDisplayed()))
-        onView(withId(R.id.content_progress_fail_correct)).check(matches(isDisplayed()))
+            ContentEntryProgress().apply {
+                contentEntryProgressContentEntryUid = testEntry.contentEntryUid
+                contentEntryProgressProgress = 100
+                contentEntryProgressStatusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED
+                contentEntryProgressActive = true
+                contentEntryProgressPersonUid = activeAccount.personUid
+                contentEntryProgressUid = dbRule.repo.contentEntryProgressDao.insert(this)
+            }
+
+
+            launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
+                ContentEntry2DetailFragment().also { fragment ->
+                    fragment.installNavController(systemImplNavRule.navController)
+                }
+            }
+
+        }.run {
+
+
+            ContentEntryDetailScreen {
+
+                entryTitleTextView {
+                    isDisplayed()
+                    hasText(entryTitle)
+                }
+
+                progress {
+                    isDisplayed()
+                }
+                progressCheck {
+                    isDisplayed()
+                }
+
+            }
+
+
+        }
+
+
     }
 
     @AdbScreenRecord("Given content entry exists should show user selected content entry with no progress")
     @Test
     fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntryWithProgressHidden() {
-
-        di = (ApplicationProvider.getApplicationContext<Context>() as DIAware).di
         val entryTitle = "Dummy Title"
-        val testEntry = ContentEntryWithLanguage().apply {
-            title = entryTitle
-            description = "Dummy description"
-            leaf = true
-            contentEntryUid = dbRule.db.contentEntryDao.insert(this)
+        init {
+
+            val testEntry = ContentEntryWithLanguage().apply {
+                title = entryTitle
+                description = "Dummy description"
+                leaf = true
+                contentEntryUid = dbRule.repo.contentEntryDao.insert(this)
+            }
+
+            launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
+                ContentEntry2DetailFragment().also { fragment ->
+                    fragment.installNavController(systemImplNavRule.navController)
+                }
+            }
+
+        }.run {
+
+            ContentEntryDetailScreen {
+
+                entryTitleTextView {
+                    isDisplayed()
+                    hasText(entryTitle)
+                }
+
+                progress {
+                    isNotDisplayed()
+                }
+                progressCheck {
+                    isNotDisplayed()
+                }
+
+            }
+
+
         }
 
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
-            ContentEntry2DetailFragment().also { fragment ->
-                fragment.installNavController(systemImplNavRule.navController)
-            }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        onView(withText(entryTitle)).check(matches(isDisplayed()))
-
-        onView(withId(R.id.entry_detail_progress_bar)).check(matches(not(isDisplayed())))
-        onView(withId(R.id.content_progress_fail_correct)).check(matches(not(isDisplayed())))
     }
 
 
@@ -148,23 +178,40 @@ class ContentEntry2DetailFragmentTest {
     fun givenContentEntryWithTranslationExists_whenLaunched_thenShouldShowTranslations() {
         val parentUid = 10000L
         val totalTranslations = 5
-        val testEntry = runBlocking {
-            dbRule.db.insertContentEntryWithTranslations(totalTranslations, parentUid)
+        var testEntry: ContentEntry? = null
+        init {
+            testEntry = runBlocking {
+                dbRule.repo.insertContentEntryWithTranslations(totalTranslations, parentUid)
+            }
+
+            launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry!!.contentEntryUid)) {
+                ContentEntry2DetailFragment().also { fragment ->
+                    fragment.installNavController(systemImplNavRule.navController)
+                }
+            }
+        }.run {
+
+            ContentEntryDetailScreen {
+
+                entryTitleTextView {
+                    isDisplayed()
+                    hasText(testEntry!!.title!!)
+                }
+
+                translationsList {
+                    isVisible()
+                    isDisplayed()
+                    hasChildCount(totalTranslations)
+                }
+
+
+            }
+
+
         }
 
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
-            ContentEntry2DetailFragment().also { fragment ->
-                fragment.installNavController(systemImplNavRule.navController)
-            }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        onView(withText(testEntry.title)).check(matches(isDisplayed()))
-
-        onView(withId(R.id.availableTranslationView)).check(matches(isDisplayed()))
-
-        onView(withId(R.id.availableTranslationView)).check(matches(hasChildCount(totalTranslations)))
     }
 
 
@@ -174,7 +221,7 @@ class ContentEntry2DetailFragmentTest {
         val parentUid = 10001L
         val totalTranslations = 6
         val testEntry = runBlocking {
-            dbRule.db.insertContentEntryWithTranslations(totalTranslations, parentUid)
+            dbRule.repo.insertContentEntryWithTranslations(totalTranslations, parentUid)
         }
 
         launchFragmentInContainer(themeResId = R.style.UmTheme_App,
@@ -182,15 +229,19 @@ class ContentEntry2DetailFragmentTest {
             ContentEntry2DetailFragment().also { fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
 
-        onView(withId(R.id.availableTranslationView)).check(matches(isDisplayed()))
+        ContentEntryDetailScreen {
 
-        onView(withId(R.id.availableTranslationView)).check(matches(hasChildCount(totalTranslations)))
+            translationsList {
+                isDisplayed()
+                hasChildCount(totalTranslations)
+                emptyChildAt(1) {
+                    click()
+                }
+            }
 
-        onView(withId(R.id.availableTranslationView))
-                .perform(actionOnItemAtPosition<RecyclerView.ViewHolder>(1, click()))
+        }
 
         assertEquals("After clicking on item, it navigates to translated detail view",
                 R.id.content_entry_details_dest, systemImplNavRule.navController.currentDestination?.id)
@@ -230,8 +281,6 @@ class ContentEntry2DetailFragmentTest {
 
 
         val activityScenario = launchActivity<MainActivity>(intent = launchIntent)
-                .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         //TODO: Replace this with IdlingResources
         Thread.sleep(1000)

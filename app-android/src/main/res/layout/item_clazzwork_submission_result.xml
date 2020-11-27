@@ -38,10 +38,6 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:text="42/100" />
 
-        <!--
-            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid != 0L)?View.VISIBLE:View.GONE}"
-
--->
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

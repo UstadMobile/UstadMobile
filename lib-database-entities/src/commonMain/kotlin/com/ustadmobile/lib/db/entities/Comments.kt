@@ -9,7 +9,26 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = 208)
+@SyncableEntity(tableId = Comments.TABLE_ID,
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${Comments.TABLE_ID} AS tableId FROM 
+        ChangeLog
+        JOIN Comments ON ChangeLog.chTableId = ${Comments.TABLE_ID} AND ChangeLog.chEntityPk = Comments.commentsUid
+        JOIN ClazzWork ON Comments.commentsEntityType = ${ClazzWork.CLAZZ_WORK_TABLE_ID} AND Comments.commentsEntityUid = ClazzWork.clazzWorkUid
+        JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
+        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZWORK_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+    """],
+    syncFindAllQuery = """
+        SELECT Comments.* FROM
+        Comments
+        JOIN ClazzWork ON Comments.commentsEntityType = ${ClazzWork.CLAZZ_WORK_TABLE_ID} AND Comments.commentsEntityUid = ClazzWork.clazzWorkUid
+        JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
+        JOIN Person ON Person.personUid IN (${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT1}  ${Role.PERMISSION_CLAZZWORK_SELECT } ${Clazz.ENTITY_PERSONS_WITH_PERMISSION_PT2})
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId  
+    """
+)
 @Serializable
 open class Comments() {
 
@@ -59,6 +78,9 @@ open class Comments() {
     }
 
     companion object {
+
+        const val TABLE_ID = 208
+
         const val COMMENTS_STATUS_APPROVED = 0
         const val COMMENTS_STATUS_PENDING = 1
         const val COMMENTS_STATUS_REJECTED = 2

@@ -1,0 +1,16 @@
+package com.ustadmobile.port.android.screen
+
+import com.agoda.kakao.text.KTextView
+import com.kaspersky.kaspresso.screens.KScreen
+import com.toughra.ustadmobile.R
+import com.ustadmobile.port.android.view.ClazzWorkDetailOverviewFragment
+
+object ClazzDetailOverviewScreen : KScreen<ClazzDetailOverviewScreen>() {
+
+    override val layoutId: Int?
+        get() = R.layout.fragment_clazz_detail_overview
+    override val viewClass: Class<*>?
+        get() = ClazzWorkDetailOverviewFragment::class.java
+
+    val clazzDescTextView = KTextView { withId(R.id.fragment_clazz_detail_overview_description_text)}
+}
