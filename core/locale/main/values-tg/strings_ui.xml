@@ -920,4 +920,18 @@
     <string name="school_code">Рамзи муассисаи таълимӣ</string>
     <string name="entity_code">%1$s рамз</string>
     <string name="join_code_instructions">Дархости рамз аз омӯзгор ва ворид намудани он дар зер:</string>
+    <string name="record_for_student">Сабт барои хонанда</string>
+    <string name="add_a_new_occurrence">Воридоти навро илова кунед</string>
+    <string name="record_attendance_for_most_recent_occurrence">Сабти давомнокӣ барои охирин иштироки мавҷуда</string>
+    <string name="end_is_before_start_error">Анҷом пеш аз оғоз аст</string>
+    <string name="moved_x_entries">Вурудоти %1$s интиқол дода шудааст</string>
+    <string name="open_folder">Ҷувздонро кушо</string>
+    <string name="show_hidden_items">Қисматҳои пинҳоншударо нишон деҳ</string>
+    <string name="compress">Пахш намо</string>
+    <string name="unhide">Дубора кушо</string>
+    <string name="hide">Пинҳон намо</string>
+    <string name="move">Интиқол деҳ</string>
+    <string name="uploading">Таҳти боргирӣ</string>
+    <string name="processing">Таҳти коркард</string>
+    <string name="confirm_delete_message">Шумо ҳақиқатан мехоҳед ин вурудро аз дастгоҳи худ нест кунед\?</string>
 </resources>
