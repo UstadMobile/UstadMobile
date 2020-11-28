@@ -1232,6 +1232,9 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
 
         const val SUFFIX_JDBC_KT = "JdbcKt"
 
+        //As it should be including the underscore - the above will be deprecated
+        const val SUFFIX_JDBC_KT2 = "_JdbcKt"
+
         const val ARG_MIGRATION_TEMPLATE_SQLITE_UPDATE_TRIGGER = "doordb_template_fixupdatetrigger_sqlite"
 
     }

@@ -17,9 +17,15 @@ import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.GetAttachmentData
 import com.ustadmobile.door.annotation.SetAttachmentData
-import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.SUFFIX_JDBC_KT
+import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_JVM_DIRS
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.SUFFIX_JDBC_KT2
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorRepository.Companion.SUFFIX_REPOSITORY2
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.CLASSNAME_SYNC_HELPERENTITIES_DAO
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_ABSTRACT
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_IMPL
 import java.io.File
 import java.util.*
+import javax.annotation.processing.ProcessingEnvironment
 
 internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: Boolean = false,
         extraConstructorParams: List<ParameterSpec> = listOf()): TypeSpec.Builder {
@@ -78,6 +84,337 @@ internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: B
     return repoClassSpec
 }
 
+/**
+ * Where this TypeElement represents a Database class, this is the property name which should be
+ * used for the property name for the SyncDao repo class. It will always be _DatabaseName_SyncDao
+ */
+private val TypeElement.syncDaoPropName: String
+    get() = "_${this.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"
+
+/**
+ * Where this TypeElement represents a Database class, this is the ClassName which should be used
+ * for the abstract SyncDao. It will always be in the form of DatabaseName_SyncDao
+ */
+private val TypeElement.abstractSyncDaoClassName: ClassName
+    get() = asClassNameWithSuffix(SUFFIX_SYNCDAO_ABSTRACT)
+
+/**
+ * Generate the table id map of entity names (strings) to the table id as per the syncableentity
+ * annotation
+ */
+private fun TypeSpec.Builder.addTableIdMapProperty(dbTypeElement: TypeElement, processingEnv: ProcessingEnvironment) : TypeSpec.Builder {
+    addProperty(PropertySpec.builder("TABLE_ID_MAP",
+            Map::class.asClassName().parameterizedBy(String::class.asClassName(), INT))
+            .initializer(CodeBlock.builder()
+                    .add("mapOf(")
+                    .apply {
+                        dbTypeElement.allSyncableDbEntities(processingEnv).forEachIndexed { index, syncableEl ->
+                            if(index > 0)
+                                add(",")
+
+                            val syncableEntityInfo = SyncableEntityInfo(syncableEl.asClassName(),
+                                    processingEnv)
+                            add("%S to %L\n", syncableEntityInfo.syncableEntity.simpleName,
+                                    syncableEntityInfo.tableId)
+                        }
+                    }
+                    .add(")\n")
+                    .build())
+            .build())
+
+    return this
+}
+
+/**
+ * Add a TypeSpec to the given FileSpec Builder that is an implementation of the repository for a
+ * database as per the dbTypeElement parameter.
+ */
+fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
+                                   processingEnv: ProcessingEnvironment,
+                                   syncDaoMode: Int = DbProcessorRepository.REPO_SYNCABLE_DAO_CONSTRUCT,
+                                   overrideClearAllTables: Boolean = true,
+                                   overrideSyncDao: Boolean = false,
+                                   overrideOpenHelper: Boolean = false,
+                                   addDbVersionProp: Boolean = false,
+                                   overrideKtorHelpers: Boolean = false): FileSpec.Builder {
+    addType(TypeSpec.classBuilder(dbTypeElement.asClassNameWithSuffix(SUFFIX_REPOSITORY2))
+            .superclass(dbTypeElement.asClassName())
+            .apply {
+                if(dbTypeElement.isDbSyncable(processingEnv)) {
+                    addSuperinterface(DoorDatabaseSyncRepository::class)
+                }else {
+                    addSuperinterface(DoorDatabaseRepository::class)
+                }
+            }
+            .primaryConstructor(FunSpec.constructorBuilder()
+                .addParameter(ParameterSpec.builder("_db", dbTypeElement.asClassName() ).build())
+                .addParameter(ParameterSpec.builder("db", dbTypeElement.asClassName()).build())
+                .addParameter(ParameterSpec.builder("_endpoint",
+                        String::class.asClassName()).build())
+                .addParameter("_accessToken", String::class)
+                .addParameter(ParameterSpec.builder("_httpClient",
+                        HttpClient::class.asClassName()).build())
+                .addParameter(ParameterSpec.builder("_attachmentsDir",
+                        String::class).build())
+                .addParameter("_updateNotificationManager",
+                        ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
+                .addParameter("_useClientSyncManager", Boolean::class)
+                .build())
+            .addProperty(PropertySpec.builder("_db", dbTypeElement.asClassName())
+                    .initializer("_db").build())
+            .addProperty(PropertySpec.builder("db",
+                    dbTypeElement.asClassName()).initializer("db")
+                    .addModifiers(KModifier.OVERRIDE)
+                    .build())
+            .addProperty(PropertySpec.builder("_endpoint",
+                    String::class.asClassName()).initializer("_endpoint").build())
+            .addProperty(PropertySpec.builder("_accessToken", String::class)
+                    .initializer("_accessToken").build())
+            .addProperty(PropertySpec.builder("_httpClient",
+                    HttpClient::class.asClassName()).initializer("_httpClient").build())
+            .addProperty(PropertySpec.builder("endpoint", String::class)
+                    .getter(FunSpec.getterBuilder().addCode("return _endpoint\n").build())
+                    .addModifiers(KModifier.OVERRIDE)
+                    .build())
+            .addProperty(PropertySpec.builder("auth", String::class)
+                .getter(FunSpec.getterBuilder().addCode("return _accessToken\n").build())
+                .addModifiers(KModifier.OVERRIDE)
+                .build())
+            .addProperty(PropertySpec.builder("dbPath", String::class)
+                    .getter(FunSpec.getterBuilder().addCode("return ${DbProcessorRepository.DB_NAME_VAR}\n").build())
+                    .addModifiers(KModifier.OVERRIDE)
+                    .build())
+            .addProperty(PropertySpec.builder("httpClient", HttpClient::class)
+                    .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
+                    .addModifiers(KModifier.OVERRIDE)
+                    .build())
+            .addProperty(PropertySpec.builder("_attachmentsDir", String::class)
+                    .initializer("_attachmentsDir")
+                    .build())
+            .addProperty(PropertySpec.builder("_updateNotificationManager",
+                    ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
+                    .initializer("_updateNotificationManager")
+                    .build())
+            .addProperty(PropertySpec.builder("_repositoryHelper", RepositoryHelper::class)
+                    .initializer("%T(%M(%S))", RepositoryHelper::class,
+                            MemberName("kotlinx.coroutines", "newSingleThreadContext"),
+                            "Repo-${dbTypeElement.simpleName}")
+                    .build())
+            .addProperty(PropertySpec.builder("_clientSyncManager",
+                    ClientSyncManager::class.asClassName().copy(nullable = true))
+                    .initializer(CodeBlock.builder().beginControlFlow("if(_useClientSyncManager)")
+                            .add("%T(this, _db.%M(), _repositoryHelper.connectivityStatus, httpClient)\n",
+                                    ClientSyncManager::class, MemberName("com.ustadmobile.door.ext", "dbSchemaVersion"))
+                            .nextControlFlow("else")
+                            .add("null\n")
+                            .endControlFlow()
+                            .build())
+                    .build())
+            .addProperty(PropertySpec.builder("tableIdMap",
+                    Map::class.asClassName().parameterizedBy(String::class.asClassName(), INT))
+                    .getter(FunSpec.getterBuilder().addCode("return TABLE_ID_MAP\n").build())
+                    .addModifiers(KModifier.OVERRIDE)
+                    .build())
+            .addFunction(FunSpec.builder("clearAllTables")
+                    .addModifiers(KModifier.OVERRIDE)
+                    .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to clearAllTables!")
+                    .build())
+            .applyIf(dbTypeElement.isDbSyncable(processingEnv)) {
+                addFunction(FunSpec.builder("invalidateAllTables")
+                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                        .addCode("_clientSyncManager?.invalidateAllTables()\n")
+                        .build())
+            }
+
+            .addRepositoryHelperDelegateCalls("_repositoryHelper",
+                    "_clientSyncManager")
+            .applyIf(overrideClearAllTables) {
+                addFunction(FunSpec.builder("createAllTables")
+                        .addModifiers(KModifier.OVERRIDE)
+                        .addCode("throw %T(%S)\n",
+                                IllegalAccessException::class,
+                                "Cannot use a repository to createAllTables!")
+                        .build())
+            }
+            .applyIf(overrideSyncDao) {
+                addFunction(FunSpec.builder("_syncDao")
+                        .addModifiers(KModifier.OVERRIDE)
+                        .addCode("return _db._syncDao()\n")
+                        .returns(dbTypeElement.abstractSyncDaoClassName)
+                        .build())
+            }
+            .applyIf(overrideSyncDao && dbTypeElement.isDbSyncable(processingEnv)){
+                addFunction(FunSpec.builder("_syncHelperEntitiesDao")
+                        .addModifiers(KModifier.OVERRIDE)
+                        .returns(ClassName("com.ustadmobile.door.daos",
+                                "SyncHelperEntitiesDao"))
+                        .addCode("return _db._syncHelperEntitiesDao()\n")
+                        .build())
+            }
+            .applyIf(overrideOpenHelper) {
+                addRoomCreateInvalidationTrackerFunction()
+                addRoomDatabaseCreateOpenHelperFunction()
+            }
+            .applyIf(addDbVersionProp) {
+                addDbVersionProperty(dbTypeElement)
+            }
+            .applyIf(dbTypeElement.isDbSyncable(processingEnv) &&
+                    syncDaoMode == DbProcessorRepository.REPO_SYNCABLE_DAO_CONSTRUCT) {
+                addProperty(PropertySpec.builder("_syncDao",
+                                dbTypeElement.abstractSyncDaoClassName)
+                        .delegate(CodeBlock.builder().beginControlFlow("lazy")
+                                .add("%T(_db)\n", dbTypeElement.asClassNameWithSuffix(SUFFIX_SYNCDAO_IMPL))
+                                .endControlFlow().build())
+                        .build())
+                addProperty(PropertySpec.builder("_syncHelperEntitiesDao",
+                            CLASSNAME_SYNC_HELPERENTITIES_DAO)
+                        .delegate(CodeBlock.builder().beginControlFlow("lazy")
+                                .add("%T(db)\n", CLASSNAME_SYNC_HELPERENTITIES_DAO.withSuffix(SUFFIX_JDBC_KT2))
+                                .endControlFlow()
+                                .build())
+                        .build())
+            }.applyIf(dbTypeElement.isDbSyncable(processingEnv) &&
+                    syncDaoMode == DbProcessorRepository.REPO_SYNCABLE_DAO_FROMDB) {
+                addProperty(PropertySpec.builder("_syncDao",
+                        dbTypeElement.abstractSyncDaoClassName)
+                        .getter(FunSpec.getterBuilder()
+                                .addCode("return _db._syncDao()\n")
+                                .build())
+                        .build())
+                addProperty(PropertySpec.builder("_syncHelperEntitiesDao",
+                        CLASSNAME_SYNC_HELPERENTITIES_DAO)
+                        .getter(FunSpec.getterBuilder()
+                                .addCode("return _db._syncHelperEntitiesDao()\n")
+                                .build())
+                        .build())
+            }.applyIf(dbTypeElement.isDbSyncable(processingEnv)) {
+                addProperty(PropertySpec.builder("syncHelperEntitiesDao",
+                        ISyncHelperEntitiesDao::class)
+                    .addModifiers(KModifier.OVERRIDE)
+                    .getter(FunSpec.getterBuilder()
+                            .addCode("return _syncHelperEntitiesDao")
+                            .build())
+                    .build())
+                addProperty(PropertySpec.builder("_clientId", INT)
+                        .delegate("lazy { _syncDao._findSyncNodeClientId() }").build())
+                addProperty(PropertySpec.builder("_clientIdFn",
+                        LambdaTypeName.get(parameters = *arrayOf(DoorDatabase::class.asClassName()),
+                                returnType = Int::class.asClassName()))
+                        .initializer("{ _db -> _clientId  }")
+                        .build())
+                addProperty(PropertySpec.builder("clientId", INT)
+                        .getter(FunSpec.getterBuilder().addCode("return _clientId").build())
+                        .addModifiers(KModifier.OVERRIDE)
+                        .build())
+                addProperty(PropertySpec.builder("master", BOOLEAN)
+                        .addModifiers(KModifier.OVERRIDE)
+                        .getter(FunSpec.getterBuilder().addCode("return _db.master").build())
+                        .build())
+                addProperty(PropertySpec.builder(dbTypeElement.syncDaoPropName,
+                            dbTypeElement.asClassNameWithSuffix("$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_REPOSITORY2"))
+                        .delegate(CodeBlock.builder().beginControlFlow("lazy")
+                                .add("%T(_db, this, _syncDao, _httpClient, _clientIdFn, _endpoint," +
+                                        " ${DbProcessorRepository.DB_NAME_VAR}, _attachmentsDir," +
+                                        " _updateNotificationManager) ",
+                                        dbTypeElement
+                                                .asClassNameWithSuffix("$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_REPOSITORY2"))
+                                .endControlFlow().build())
+                        .build())
+                addFunction(FunSpec.builder("sync")
+                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                        .addParameter("tablesToSync", List::class.parameterizedBy(Int::class)
+                        .copy(nullable = true))
+                        .returns(List::class.parameterizedBy(SyncResult::class))
+                        .addCode("return ${dbTypeElement.syncDaoPropName}.sync(tablesToSync)\n")
+                        .build())
+                addFunction(FunSpec.builder("dispatchUpdateNotifications")
+                        .addParameter("tableId", INT)
+                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                        .addCode("${dbTypeElement.syncDaoPropName}.dispatchUpdateNotifications(tableId)\n")
+                        .build())
+                addProperty(PropertySpec.builder("_sqlitePkManager",
+                            DoorSqlitePrimaryKeyManager::class)
+                        .initializer("%T(this)", DoorSqlitePrimaryKeyManager::class)
+                        .build())
+                addFunction(FunSpec.builder("getAndIncrementSqlitePk")
+                        .addParameter("tableId", INT)
+                        .addParameter("increment", INT)
+                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                        .addCode("return _sqlitePkManager.getAndIncrementSqlitePk(tableId, increment)\n")
+                        .returns(LONG)
+                        .build())
+            }
+            .apply {
+                dbTypeElement.allDbClassDaoGetters(processingEnv).forEach { daoGetter ->
+                    addRepoDbDaoAccessor(daoGetter, overrideKtorHelpers, processingEnv)
+                }
+            }
+            .addType(TypeSpec.companionObjectBuilder()
+                    .addTableIdMapProperty(dbTypeElement, processingEnv)
+                    .addProperty(PropertySpec.builder(DbProcessorRepository.DB_NAME_VAR, String::class)
+                            .addModifiers(KModifier.CONST)
+                            .initializer("%S", dbTypeElement.simpleName)
+                            .mutable(false).build())
+                    .build())
+            .build())
+
+    return this
+}
+
+/**
+ * Add an accessor function for the given dao accessor (and any related ktor helper daos if
+ * specified).
+ */
+private fun TypeSpec.Builder.addRepoDbDaoAccessor(daoGetter: ExecutableElement,
+                                          overrideKtorHelpers: Boolean,
+                                          processingEnv: ProcessingEnvironment) : TypeSpec.Builder{
+    val daoTypeEl = daoGetter.returnType.asTypeElement(processingEnv)
+            ?: throw IllegalArgumentException("Dao getter has no return type")
+    if(!daoTypeEl.hasAnnotation(Repository::class.java)) {
+        addAccessorOverride(daoGetter, CodeBlock.of("throw %T(%S)\n",
+                IllegalStateException::class,
+                "${daoTypeEl.simpleName} is not annotated with @Repository"))
+        return this
+    }
+
+    val daoTypeSpec = daoTypeEl.asImplementableTypeSpec(processingEnv)
+    val daoHasSyncableEntities = daoTypeSpec.isDaoWithSyncableEntitiesInSelectResults(processingEnv)
+
+    val syncDaoParam = if(daoHasSyncableEntities) {
+        ", _syncDao"
+    }else {
+        ""
+    }
+
+    addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",
+                daoTypeEl.asClassNameWithSuffix(SUFFIX_REPOSITORY2))
+            .delegate(CodeBlock.builder().beginControlFlow("lazy")
+                    .add("%T(_db, this, _db.%L, _httpClient, _clientIdFn, _endpoint, ${DbProcessorRepository.DB_NAME_VAR}, " +
+                            "_attachmentsDir $syncDaoParam) ",
+                            daoTypeEl.asClassNameWithSuffix(SUFFIX_REPOSITORY2),
+                            daoGetter.makeAccessorCodeBlock())
+                    .endControlFlow()
+                    .build())
+            .build())
+
+    addAccessorOverride(daoGetter, CodeBlock.of("return  _${daoTypeEl.simpleName}"))
+
+    if(overrideKtorHelpers) {
+        listOf("Master", "Local").forEach {suffix ->
+            val ktorHelperClassName = daoTypeEl.asClassNameWithSuffix(
+                    "${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}$suffix")
+            addFunction(FunSpec.builder("_${ktorHelperClassName.simpleName}")
+                    .returns(ktorHelperClassName)
+                    .addModifiers(KModifier.OVERRIDE)
+                    .addCode("throw %T(%S)", IllegalAccessException::class,
+                            "Cannot access KTOR HTTP Helper from Repository")
+                    .build())
+        }
+    }
+
+    return this
+}
+
 
 
 class DbProcessorRepository: AbstractDbProcessor() {
@@ -85,16 +422,21 @@ class DbProcessorRepository: AbstractDbProcessor() {
     override fun process(annotations: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
         val dbs = roundEnv.getElementsAnnotatedWith(Database::class.java)
 
+
         for(dbTypeEl in dbs) {
-            writeFileSpecToOutputDirs(generateDbRepositoryClass(dbTypeEl as TypeElement,
-                    syncDaoMode = REPO_SYNCABLE_DAO_CONSTRUCT, addDbVersionProp = true),
-                    AnnotationProcessorWrapper.OPTION_JVM_DIRS)
-            writeFileSpecToOutputDirs(generateDbRepositoryClass(dbTypeEl as TypeElement,
-                    syncDaoMode = REPO_SYNCABLE_DAO_FROMDB, overrideClearAllTables = false,
-                    overrideSyncDao = true, overrideOpenHelper = true,
-                    addBoundaryCallbackGetters = true,
-                    overrideKtorHelpers = true),
-                    AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
+            FileSpec.builder(dbTypeEl.packageName, "${dbTypeEl.simpleName}$SUFFIX_REPOSITORY2")
+                    .addDbRepoType(dbTypeEl as TypeElement, processingEnv,
+                        syncDaoMode = REPO_SYNCABLE_DAO_CONSTRUCT, addDbVersionProp = true)
+                    .build()
+                    .writeToDirsFromArg(OPTION_JVM_DIRS)
+            FileSpec.builder(dbTypeEl.packageName, "${dbTypeEl.simpleName}$SUFFIX_REPOSITORY2")
+                    .addDbRepoType(dbTypeEl as TypeElement,
+                            processingEnv,
+                        syncDaoMode = REPO_SYNCABLE_DAO_FROMDB, overrideClearAllTables = false,
+                        overrideSyncDao = true, overrideOpenHelper = true,
+                        overrideKtorHelpers = true)
+                    .build()
+                    .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
@@ -113,331 +455,6 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
         return true
     }
-
-
-    fun generateDbRepositoryClass(dbTypeElement: TypeElement,
-                                  syncDaoMode: Int = REPO_SYNCABLE_DAO_CONSTRUCT,
-                                  overrideClearAllTables: Boolean = true,
-                                  overrideSyncDao: Boolean = false,
-                                  overrideOpenHelper: Boolean = false,
-                                  addDbVersionProp: Boolean = false,
-                                  addBoundaryCallbackGetters: Boolean = false,
-                                  overrideKtorHelpers: Boolean = false): FileSpec {
-        val dbRepoFileSpec = FileSpec.builder(pkgNameOfElement(dbTypeElement, processingEnv),
-                "${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
-        val isDbTypeSyncable = isSyncableDb(dbTypeElement, processingEnv)
-
-        val repoInterface = if(isDbTypeSyncable) {
-            DoorDatabaseRepository::class.asClassName()
-        } else {
-            DoorDatabaseSyncRepository::class.asClassName()
-        }
-
-        val dbRepoType = TypeSpec.classBuilder("${dbTypeElement.simpleName}_$SUFFIX_REPOSITORY")
-                .superclass(dbTypeElement.asClassName())
-                .addSuperinterface(repoInterface)
-                .primaryConstructor(FunSpec.constructorBuilder()
-                        .addParameter(ParameterSpec.builder("_db", dbTypeElement.asClassName() ).build())
-                        .addParameter(ParameterSpec.builder("db", dbTypeElement.asClassName()).build())
-                        .addParameter(ParameterSpec.builder("_endpoint", String::class.asClassName()).build())
-                        .addParameter("_accessToken", String::class)
-                        .addParameter(ParameterSpec.builder("_httpClient", HttpClient::class.asClassName()).build())
-                        .addParameter(ParameterSpec.builder("_attachmentsDir", String::class).build())
-                        .addParameter("_updateNotificationManager",
-                            ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
-                        .addParameter("_useClientSyncManager", Boolean::class)
-                        .build())
-                .addProperties(listOf(
-                        PropertySpec.builder("_db",
-                            dbTypeElement.asClassName()).initializer("_db").build(),
-                        PropertySpec.builder("db",
-                                dbTypeElement.asClassName()).initializer("db")
-                                .addModifiers(KModifier.OVERRIDE)
-                                .build(),
-                        PropertySpec.builder("_endpoint",
-                                String::class.asClassName()).initializer("_endpoint").build(),
-                        PropertySpec.builder("_accessToken", String::class)
-                                .initializer("_accessToken").build(),
-                        PropertySpec.builder("_httpClient",
-                            HttpClient::class.asClassName()).initializer("_httpClient").build(),
-                        PropertySpec.builder("endpoint", String::class)
-                                .getter(FunSpec.getterBuilder().addCode("return _endpoint\n").build())
-                                .addModifiers(KModifier.OVERRIDE)
-                                .build(),
-                        PropertySpec.builder("auth", String::class)
-                                .getter(FunSpec.getterBuilder().addCode("return _accessToken\n").build())
-                                .addModifiers(KModifier.OVERRIDE)
-                                .build(),
-                        PropertySpec.builder("dbPath", String::class)
-                                .getter(FunSpec.getterBuilder().addCode("return $DB_NAME_VAR\n").build())
-                                .addModifiers(KModifier.OVERRIDE)
-                                .build(),
-                        PropertySpec.builder("httpClient", HttpClient::class)
-                                .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
-                                .addModifiers(KModifier.OVERRIDE)
-                                .build(),
-                        PropertySpec.builder("_attachmentsDir", String::class)
-                                .initializer("_attachmentsDir")
-                                .build(),
-                        PropertySpec.builder("_updateNotificationManager",
-                                ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
-                                .initializer("_updateNotificationManager")
-                                .build(),
-                        PropertySpec.builder("_repositoryHelper", RepositoryHelper::class)
-                                .initializer("%T(%M(%S))", RepositoryHelper::class,
-                                        MemberName("kotlinx.coroutines", "newSingleThreadContext"),
-                                        "Repo-${dbTypeElement.simpleName}")
-                                .build(),
-                        PropertySpec.builder("_clientSyncManager",
-                                ClientSyncManager::class.asClassName().copy(nullable = true))
-                                .initializer(CodeBlock.builder().beginControlFlow("if(_useClientSyncManager)")
-                                        .add("%T(this, _db.%M(), _repositoryHelper.connectivityStatus, httpClient)\n",
-                                            ClientSyncManager::class, MemberName("com.ustadmobile.door.ext", "dbSchemaVersion"))
-                                        .nextControlFlow("else")
-                                        .add("null\n")
-                                        .endControlFlow()
-                                        .build())
-                                .build(),
-                        PropertySpec.builder("tableIdMap",
-                                Map::class.asClassName().parameterizedBy(String::class.asClassName(), INT))
-                                .getter(FunSpec.getterBuilder().addCode("return TABLE_ID_MAP\n").build())
-                                .addModifiers(KModifier.OVERRIDE)
-                                .build()
-                ))
-                .addFunction(FunSpec.builder("clearAllTables")
-                        .addModifiers(KModifier.OVERRIDE)
-                        .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to clearAllTables!")
-                        .build())
-                .applyIf(isDbTypeSyncable) {
-                    addFunction(FunSpec.builder("invalidateAllTables")
-                            .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                            .addCode("_clientSyncManager?.invalidateAllTables()\n")
-                            .build())
-                }
-                .addType(TypeSpec.companionObjectBuilder()
-                        .addProperty(PropertySpec.builder(DB_NAME_VAR, String::class)
-                                .addModifiers(KModifier.CONST)
-                                .initializer("%S", dbTypeElement.simpleName)
-                                .mutable(false).build())
-                        .addProperty(PropertySpec.builder("TABLE_ID_MAP",
-                            Map::class.asClassName().parameterizedBy(String::class.asClassName(), INT))
-                                .initializer(CodeBlock.builder()
-                                        .add("mapOf(")
-                                        .apply {
-                                    syncableEntityTypesOnDb(dbTypeElement, processingEnv).forEachIndexed {index, syncableEl ->
-                                        if(index > 0)
-                                            add(",")
-
-                                        val syncableEntityInfo = SyncableEntityInfo(syncableEl.asClassName(),
-                                                processingEnv)
-                                        add("%S to %L\n", syncableEntityInfo.syncableEntity.simpleName,
-                                                syncableEntityInfo.tableId)
-                                    }
-                                }
-                                        .add(")\n")
-                                    .build())
-                                .build())
-                        .build())
-
-
-        dbRepoType.addRepositoryHelperDelegateCalls("_repositoryHelper",
-                "_clientSyncManager")
-
-        if(overrideClearAllTables) {
-            dbRepoType.addFunction(FunSpec.builder("createAllTables")
-                    .addModifiers(KModifier.OVERRIDE)
-                    .addCode("throw %T(%S)\n", IllegalAccessException::class, "Cannot use a repository to createAllTables!")
-                    .build())
-        }
-
-        if(overrideSyncDao) {
-            val dbTypeClassName = dbTypeElement.asClassName()
-            dbRepoType.addFunction(FunSpec.builder("_syncDao")
-                    .addModifiers(KModifier.OVERRIDE)
-                    .addCode("return _db._syncDao()\n")
-                    .returns(ClassName(dbTypeClassName.packageName,
-                            "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}"))
-                    .build())
-
-            if(isDbTypeSyncable) {
-                dbRepoType.addFunction(FunSpec.builder("_syncHelperEntitiesDao")
-                        .addModifiers(KModifier.OVERRIDE)
-                        .returns(ClassName("com.ustadmobile.door.daos",
-                                "SyncHelperEntitiesDao"))
-                        .addCode("return _db._syncHelperEntitiesDao()\n")
-                        .build())
-            }
-        }
-
-        if(overrideOpenHelper) {
-            dbRepoType.addRoomDatabaseCreateOpenHelperFunction()
-                    .addRoomCreateInvalidationTrackerFunction()
-        }
-
-        if(addDbVersionProp) {
-            dbRepoType.addProperty(PropertySpec.builder("dbVersion", INT)
-                    .addModifiers(KModifier.OVERRIDE)
-                    .getter(FunSpec.getterBuilder()
-                            .addCode("return _db.dbVersion")
-                            .build())
-                    .build())
-        }
-
-
-        if(isDbTypeSyncable) {
-            val syncableDaoClassName = ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
-                    "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}")
-            val syncDaoProperty = PropertySpec.builder("_syncDao", syncableDaoClassName)
-            val syncHelperEntitiesClassName =
-                    ClassName("com.ustadmobile.door.daos", "SyncHelperEntitiesDao")
-            val syncHelperEntitesDaoProperty = PropertySpec.builder("_syncHelperEntitiesDao",
-                syncHelperEntitiesClassName)
-
-            //TODO: Add SyncEntitiesDao here
-            if(syncDaoMode == REPO_SYNCABLE_DAO_CONSTRUCT) {
-                syncDaoProperty.delegate(
-                        CodeBlock.builder().beginControlFlow("lazy")
-                                .add("%T(_db) ", ClassName(pkgNameOfElement(dbTypeElement, processingEnv),
-                                        "${dbTypeElement.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
-                                .endControlFlow().build())
-                syncHelperEntitesDaoProperty.delegate(
-                        CodeBlock.builder().beginControlFlow("lazy")
-                                .add("%T(_db)", ClassName(syncHelperEntitiesClassName.packageName,
-                                    "${syncHelperEntitiesClassName.simpleName}_$SUFFIX_JDBC_KT"))
-                                .endControlFlow()
-                                .build())
-
-            }else if(syncDaoMode == REPO_SYNCABLE_DAO_FROMDB) {
-                syncDaoProperty.delegate("lazy {_db._syncDao() }")
-                syncHelperEntitesDaoProperty.delegate("lazy {_db._syncHelperEntitiesDao() } ")
-            }
-
-            dbRepoType.addProperty(syncDaoProperty.build())
-                    .addProperty(syncHelperEntitesDaoProperty.build())
-
-            dbRepoType.addProperty(PropertySpec.builder("syncHelperEntitiesDao",
-                    ISyncHelperEntitiesDao::class)
-                    .addModifiers(KModifier.OVERRIDE)
-                    .getter(FunSpec.getterBuilder()
-                            .addCode("return _syncHelperEntitiesDao")
-                            .build())
-                    .build())
-
-            dbRepoType.addProperty(PropertySpec.builder("_clientId", INT)
-                    .delegate("lazy { _syncDao._findSyncNodeClientId() }").build())
-            dbRepoType.addProperty(PropertySpec.builder("_clientIdFn",
-                LambdaTypeName.get(parameters = *arrayOf(DoorDatabase::class.asClassName()),
-                        returnType = Int::class.asClassName()))
-                    .initializer("{ _db -> _clientId  }")
-                    .build())
-            dbRepoType.addProperty(PropertySpec.builder("clientId", INT)
-                    .getter(FunSpec.getterBuilder().addCode("return _clientId").build())
-                    .addModifiers(KModifier.OVERRIDE)
-                    .build())
-
-            dbRepoType.addProperty(PropertySpec.builder("master", BOOLEAN)
-                    .addModifiers(KModifier.OVERRIDE)
-                    .getter(FunSpec.getterBuilder().addCode("return _db.master").build())
-                    .build())
-
-
-            val repoImplClassName = ClassName(dbTypeElement.asClassName().packageName,
-                    "${syncableDaoClassName.simpleName}_$SUFFIX_REPOSITORY")
-            dbRepoType.addProperty(PropertySpec
-                    .builder("_${syncableDaoClassName.simpleName}", repoImplClassName)
-                    .delegate(CodeBlock.builder().beginControlFlow("lazy")
-                            .add("%T(_db, this, _syncDao, _httpClient, _clientIdFn, _endpoint, $DB_NAME_VAR, _attachmentsDir, _updateNotificationManager) ", repoImplClassName)
-                            .endControlFlow().build())
-                    .build())
-            dbRepoType.addSuperinterface(DoorDatabaseSyncRepository::class)
-            dbRepoType.addFunction(FunSpec.builder("sync")
-                    .addModifiers(KModifier.OVERRIDE,KModifier.SUSPEND)
-                    .addParameter("tablesToSync", List::class.parameterizedBy(Int::class)
-                            .copy(nullable = true))
-                    .returns(List::class.parameterizedBy(SyncResult::class))
-                    .addCode("return _${syncableDaoClassName.simpleName}.sync(tablesToSync)\n")
-                    .build())
-
-            dbRepoType.addFunction(FunSpec.builder("dispatchUpdateNotifications")
-                        .addParameter("tableId", INT)
-                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                        .addCode("_${syncableDaoClassName.simpleName}.dispatchUpdateNotifications(tableId)\n")
-                        .build())
-
-            dbRepoType.addProperty(PropertySpec.builder("_sqlitePkManager", DoorSqlitePrimaryKeyManager::class)
-                    .initializer("%T(this)", DoorSqlitePrimaryKeyManager::class)
-                    .build())
-
-            dbRepoType.addFunction(FunSpec.builder("getAndIncrementSqlitePk")
-                    .addParameter("tableId", INT)
-                    .addParameter("increment", INT)
-                    .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                    .addCode("return _sqlitePkManager.getAndIncrementSqlitePk(tableId, increment)\n")
-                    .returns(LONG)
-                    .build())
-
-        }
-
-        methodsToImplement(dbTypeElement, dbTypeElement.asType() as DeclaredType, processingEnv)
-            .filter{it.kind == ElementKind.METHOD }.map {it as ExecutableElement }.forEach {
-
-            val daoTypeEl = processingEnv.typeUtils.asElement(it.returnType) as TypeElement?
-            if(daoTypeEl == null) {
-                return@forEach
-            }
-
-            //If the DAO in question is not annotated with Repository, we will not generate a
-            //repository class. Trying to use the database repo to access the object will throw
-            //an exception
-            if(!daoTypeEl.isDaoWithRepository) {
-                dbRepoType.addAccessorOverride(it, CodeBlock.of("throw %T(%S)\n",
-                    IllegalStateException::class,
-                    "${daoTypeEl.simpleName} is not annotated with @Repository"))
-                return@forEach
-            }
-
-            val daoClassName = daoTypeEl.asClassName()
-            val repoImplClassName = ClassName(pkgNameOfElement(daoTypeEl, processingEnv),
-                    "${daoTypeEl.simpleName}_$SUFFIX_REPOSITORY")
-            val daoHasSyncableEntities = syncableEntitiesOnDao(daoTypeEl.asClassName(), processingEnv)
-                    .isNotEmpty()
-            val syncDaoParam = if(daoHasSyncableEntities) {
-                ", _syncDao"
-            }else {
-                ""
-            }
-
-            dbRepoType.addProperty(PropertySpec.builder("_${daoTypeEl.simpleName}",  repoImplClassName)
-                    .delegate(CodeBlock.builder().beginControlFlow("lazy")
-                            .add("%T(_db, this, _db.%L, _httpClient, _clientIdFn, _endpoint, $DB_NAME_VAR, " +
-                                    "_attachmentsDir $syncDaoParam) ",
-                                repoImplClassName, it.makeAccessorCodeBlock())
-                            .endControlFlow()
-                            .build())
-                    .build())
-            dbRepoType.addAccessorOverride(it, CodeBlock.of("return  _${daoTypeEl.simpleName}"))
-
-            if(daoTypeEl.isDaoWithRepository && overrideKtorHelpers) {
-                listOf("Master", "Local").forEach {suffix ->
-                    val ktorHelperClassName = ClassName(daoClassName.packageName,
-                            "${daoClassName.simpleName}${DbProcessorKtorServer.SUFFIX_KTOR_HELPER}$suffix")
-                    dbRepoType.addFunction(FunSpec.builder("_${ktorHelperClassName.simpleName}")
-                            .returns(ktorHelperClassName)
-                            .addModifiers(KModifier.OVERRIDE)
-                            .addCode("throw %T(%S)", IllegalAccessException::class,
-                                    "Cannot access KTOR HTTP Helper from Repository")
-                            .build())
-                }
-            }
-
-
-
-        }
-
-        dbRepoFileSpec.addType(dbRepoType.build())
-        return dbRepoFileSpec.build()
-    }
-
 
 
 
@@ -772,6 +789,9 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
     companion object {
         const val SUFFIX_REPOSITORY = "Repo"
+
+        //including the underscore as it should
+        const val SUFFIX_REPOSITORY2 = "_Repo"
 
         /**
          * When creating a repository, the Syncable DAO is constructed (JDBC). This is because

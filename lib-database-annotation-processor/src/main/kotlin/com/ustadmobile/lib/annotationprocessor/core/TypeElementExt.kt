@@ -9,6 +9,7 @@ import javax.lang.model.type.ExecutableType
 import androidx.room.*
 import com.ustadmobile.door.SyncableDoorDatabase
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER
 import java.util.*
 import javax.lang.model.type.TypeMirror
@@ -166,6 +167,13 @@ fun TypeElement.allDbEntities(processingEnv: ProcessingEnvironment): List<TypeEl
 
     return entityTypeElements.toList()
 }
+
+/**
+ * Where this TypeElement represents a database class, get a list of all the entities
+ * that are syncable (e.g. annotated with @SyncableEntity).
+ */
+fun TypeElement.allSyncableDbEntities(processingEnv: ProcessingEnvironment) =
+        allDbEntities(processingEnv).filter { it.hasAnnotation(SyncableEntity::class.java) }
 
 
 fun TypeElement.asClassNameWithSuffix(suffix: String) =

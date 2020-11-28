@@ -797,6 +797,9 @@ class DbProcessorSync: AbstractDbProcessor() {
          * notification that has been received
          */
         const val ENDPOINT_POSTFIX_DELETE_UPDATE = "_deleteUpdateNotification"
+
+        val CLASSNAME_SYNC_HELPERENTITIES_DAO = ClassName("com.ustadmobile.door.daos",
+            "SyncHelperEntitiesDao")
     }
 
 }

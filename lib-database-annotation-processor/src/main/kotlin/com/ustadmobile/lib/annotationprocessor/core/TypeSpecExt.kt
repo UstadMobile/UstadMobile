@@ -238,6 +238,13 @@ fun TypeSpec.daoSyncableEntitiesInSelectResults(processingEnv: ProcessingEnviron
 }
 
 /**
+ * Returns whether or not this DAO has Syncable Entities in select results. If there are syncable
+ * entities in the return type, then a SyncHelper is required.
+ */
+fun TypeSpec.isDaoWithSyncableEntitiesInSelectResults(processingEnv: ProcessingEnvironment): Boolean =
+        daoSyncableEntitiesInSelectResults(processingEnv).isNotEmpty()
+
+/**
  * Provide a list of all functions that require implementation (e.g. DAO functions etc)
  */
 fun TypeSpec.functionsToImplement() = funSpecs.filter { KModifier.ABSTRACT in it.modifiers }
