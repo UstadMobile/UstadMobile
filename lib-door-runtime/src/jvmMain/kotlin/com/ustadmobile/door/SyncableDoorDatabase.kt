@@ -19,16 +19,16 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
         File("attachments").absolutePath //TODO: look this up from JNDI
     }
 
-    val db = if(this is DoorDatabaseSyncableReadOnlyWrapper) {
+    val dbUnwrapped = if(this is DoorDatabaseSyncableReadOnlyWrapper) {
         this.unwrap(dbClass)
     }else {
         this
     }
 
     val repo = repoImplClass
-            .getConstructor(dbClass.java, String::class.java,String::class.java, HttpClient::class.java,
+            .getConstructor(dbClass.java, dbClass.java, String::class.java,String::class.java, HttpClient::class.java,
                     String::class.java, ServerUpdateNotificationManager::class.java, Boolean::class.javaPrimitiveType)
-            .newInstance(db, endpoint, accessToken, httpClient, attachmentsDirToUse,
+            .newInstance(dbUnwrapped, this, endpoint, accessToken, httpClient, attachmentsDirToUse,
                     updateNotificationManager, useClientSyncManager)
     return repo
 }

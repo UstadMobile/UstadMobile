@@ -138,6 +138,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 .addSuperinterface(repoInterface)
                 .primaryConstructor(FunSpec.constructorBuilder()
                         .addParameter(ParameterSpec.builder("_db", dbTypeElement.asClassName() ).build())
+                        .addParameter(ParameterSpec.builder("db", dbTypeElement.asClassName()).build())
                         .addParameter(ParameterSpec.builder("_endpoint", String::class.asClassName()).build())
                         .addParameter("_accessToken", String::class)
                         .addParameter(ParameterSpec.builder("_httpClient", HttpClient::class.asClassName()).build())
@@ -149,6 +150,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
                 .addProperties(listOf(
                         PropertySpec.builder("_db",
                             dbTypeElement.asClassName()).initializer("_db").build(),
+                        PropertySpec.builder("db",
+                                dbTypeElement.asClassName()).initializer("db")
+                                .addModifiers(KModifier.OVERRIDE)
+                                .build(),
                         PropertySpec.builder("_endpoint",
                                 String::class.asClassName()).initializer("_endpoint").build(),
                         PropertySpec.builder("_accessToken", String::class)
