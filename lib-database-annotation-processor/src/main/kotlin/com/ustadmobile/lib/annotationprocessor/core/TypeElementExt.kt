@@ -11,7 +11,6 @@ import com.ustadmobile.door.SyncableDoorDatabase
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER
-import java.util.*
 import javax.lang.model.type.TypeMirror
 
 val ALL_QUERY_ANNOTATIONS = listOf(Query::class.java, Update::class.java, Delete::class.java,
@@ -205,12 +204,16 @@ fun TypeElement.allDaoQueryMethods() = allMethodsWithAnnotation(ALL_QUERY_ANNOTA
  * TypeSpecs are often used as the basis for generation logic because we can generate it (eg. for
  * SyncDaos etc). This extension function converts a TypeElement from the annotation processor
  * environment into an equivalent TypeSpec.
+ *
+ * @param convertToImplementationStub if true, this will generate FunSpecs as they need to be for
+ * implementation by removing the abstract modifier and adding an override modifier
  */
-fun TypeElement.asImplementableTypeSpec(processingEnv: ProcessingEnvironment): TypeSpec {
+fun TypeElement.asTypeSpecStub(processingEnv: ProcessingEnvironment,
+        convertToImplementationStub: Boolean = false): TypeSpec {
     val declaredType = this.asType() as DeclaredType
     val thisTypeEl = this
     return TypeSpec.classBuilder(asClassName())
-            .applyIf(Modifier.ABSTRACT in modifiers) {
+            .applyIf(!convertToImplementationStub && Modifier.ABSTRACT in modifiers) {
                 addModifiers(KModifier.ABSTRACT)
             }
             .apply {
@@ -220,7 +223,11 @@ fun TypeElement.asImplementableTypeSpec(processingEnv: ProcessingEnvironment): T
 
                     addFunction(executableEl.asFunSpecConvertedToKotlinTypes(declaredType,
                         processingEnv, forceNullableReturn = returnTypeName.isNullableAsSelectReturnResult,
-                        forceNullableParameterTypeArgs = returnTypeName.isNullableParameterTypeAsSelectReturnResult)
+                        forceNullableParameterTypeArgs = returnTypeName.isNullableParameterTypeAsSelectReturnResult,
+                        ignoreAbstract = convertToImplementationStub)
+                            .applyIf(convertToImplementationStub) {
+                                addModifiers(KModifier.OVERRIDE)
+                            }
                             .build())
                 }
             }
@@ -247,7 +254,7 @@ val TypeElement.isDaoThatRequiresKtorHelper: Boolean
 
 
 fun TypeElement.daoSyncableEntitiesInSelectResults(processingEnv: ProcessingEnvironment) : List<ClassName> {
-    return asImplementableTypeSpec(processingEnv).daoSyncableEntitiesInSelectResults(processingEnv)
+    return asTypeSpecStub(processingEnv).daoSyncableEntitiesInSelectResults(processingEnv)
 }
 
 fun TypeElement.isDaoThatRequiresSyncHelper(processingEnv: ProcessingEnvironment): Boolean {

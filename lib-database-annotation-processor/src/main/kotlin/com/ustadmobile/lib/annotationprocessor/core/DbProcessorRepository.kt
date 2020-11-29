@@ -23,6 +23,7 @@ import com.ustadmobile.lib.annotationprocessor.core.DbProcessorRepository.Compan
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.CLASSNAME_SYNC_HELPERENTITIES_DAO
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_ABSTRACT
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_IMPL
+import kotlinx.coroutines.GlobalScope
 import java.io.File
 import java.util.*
 import javax.annotation.processing.ProcessingEnvironment
@@ -377,7 +378,7 @@ private fun TypeSpec.Builder.addRepoDbDaoAccessor(daoGetter: ExecutableElement,
         return this
     }
 
-    val daoTypeSpec = daoTypeEl.asImplementableTypeSpec(processingEnv)
+    val daoTypeSpec = daoTypeEl.asTypeSpecStub(processingEnv)
     val daoHasSyncableEntities = daoTypeSpec.isDaoWithSyncableEntitiesInSelectResults(processingEnv)
 
     val syncDaoParam = if(daoHasSyncableEntities) {
@@ -415,7 +416,448 @@ private fun TypeSpec.Builder.addRepoDbDaoAccessor(daoGetter: ExecutableElement,
     return this
 }
 
+/**
+ * Add a TypeSpec repository implementation for the given DAO as given by daoTypeSpec
+ *
+ * @param daoTypeSpec The TypeSpec containing the FunSpecs for this DAO
+ * @param daoClassName Classname for the abstract DAO class
+ * @param processingEnv processing environment
+ * @param pagingBoundaryCallbackEnabled true/false : whether or not an Android paging boundary
+ * callback will be generated
+ * @param isAlwaysSqlite true if the function being generated will always run on SQLite (eg
+ * on Android), false otherwise (e.g. JDBC server)
+ *
+ */
+fun FileSpec.Builder.addDaoRepoType(daoTypeSpec: TypeSpec,
+                                    daoClassName: ClassName,
+                                    processingEnv: ProcessingEnvironment,
+                                    pagingBoundaryCallbackEnabled: Boolean = false,
+                                    isAlwaysSqlite: Boolean = false,
+                                    extraConstructorParams: List<ParameterSpec> = listOf()): FileSpec.Builder {
+    val idGetterLambdaType = LambdaTypeName.get(
+            parameters = *arrayOf(DoorDatabase::class.asClassName()), returnType = Int::class.asClassName())
 
+    addType(TypeSpec.classBuilder("${daoTypeSpec.name}$SUFFIX_REPOSITORY2")
+            .addProperty(PropertySpec.builder("_db", DoorDatabase::class)
+                    .initializer("_db").build())
+            .addProperty(PropertySpec.builder("_repo", DoorDatabaseRepository::class)
+                    .initializer("_repo").build())
+            .addProperty(PropertySpec.builder("_dao",
+                    daoClassName).initializer("_dao").build())
+            .addProperty(PropertySpec.builder("_httpClient",
+                    HttpClient::class).initializer("_httpClient").build())
+            .addProperty(PropertySpec.builder("_clientId", Int::class)
+                    .getter(FunSpec.getterBuilder().addCode("return _clientIdFn(_db)\n")
+                            .build())
+                    .build())
+            .addProperty(PropertySpec.builder("_clientIdFn",
+                    idGetterLambdaType).initializer("_clientIdFn").build())
+            .addProperty(PropertySpec.builder("_endpoint", String::class)
+                    .initializer("_endpoint").build())
+            .addProperty(PropertySpec.builder("_dbPath", String::class)
+                    .initializer("_dbPath").build())
+            .addProperty(PropertySpec.builder("_attachmentsDir", String::class)
+                    .initializer("_attachmentsDir").build())
+            .applyIf(daoTypeSpec.isDaoWithSyncableEntitiesInSelectResults(processingEnv)) {
+                addProperty(PropertySpec.builder("_syncHelper",
+                        daoClassName.withSuffix("_SyncHelper"))
+                        .initializer("_syncHelper")
+                        .build())
+            }
+            .superclass(daoClassName)
+            .addAnnotation(AnnotationSpec.builder(Suppress::class)
+                    .addMember("%S, %S, %S", "REDUNDANT_PROJECTION", "LocalVariableName",
+                        "ClassName")
+                    .build())
+            .primaryConstructor(FunSpec.constructorBuilder()
+                    .addParameter("_db", DoorDatabase::class)
+                    .addParameter("_repo", DoorDatabaseRepository::class)
+                    .addParameter("_dao", daoClassName)
+                    .addParameter("_httpClient", HttpClient::class)
+                    .addParameter("_clientIdFn", idGetterLambdaType)
+                    .addParameter("_endpoint", String::class)
+                    .addParameter("_dbPath", String::class)
+                    .addParameter("_attachmentsDir", String::class)
+                    .apply {
+                        takeIf { extraConstructorParams.isNotEmpty() }?.addParameters(extraConstructorParams)
+                    }
+                    .applyIf(daoTypeSpec.isDaoWithSyncableEntitiesInSelectResults(processingEnv)) {
+                        addParameter("_syncHelper", daoClassName.withSuffix("_SyncHelper"))
+                    }
+                    .build())
+            //TODO: Ideally check and see if any of the return function types are DataSource.Factory
+            .applyIf(pagingBoundaryCallbackEnabled &&
+                    daoTypeSpec.isDaoWithSyncableEntitiesInSelectResults(processingEnv)) {
+                addProperty(PropertySpec.builder(
+                        DbProcessorRepository.DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME,
+                        DbProcessorRepository.BOUNDARY_CALLBACK_MAP_CLASSNAME)
+                        .initializer("%T()", WeakHashMap::class)
+                        .build())
+                addSuperinterface(ClassName("com.ustadmobile.door",
+                    "DoorBoundaryCallbackProvider"))
+                addFunction(FunSpec.builder("getBoundaryCallback")
+                        .addAnnotation(AnnotationSpec.builder(Suppress::class)
+                                .addMember("%S", "UNCHECKED_CAST")
+                                .build())
+                        .addTypeVariable(TypeVariableName("T"))
+                        .addParameter("dataSource",
+                                DataSource.Factory::class.asClassName().parameterizedBy(INT,
+                                        TypeVariableName("T")))
+                        .addModifiers(KModifier.OVERRIDE)
+                        .returns(DbProcessorRepository.BOUNDARY_CALLBACK_CLASSNAME
+                                .parameterizedBy(TypeVariableName("T")).copy(nullable = true))
+                        .addCode("return ${DbProcessorRepository.DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME}[dataSource] as %T\n",
+                                DbProcessorRepository.BOUNDARY_CALLBACK_CLASSNAME
+                                .parameterizedBy(TypeVariableName("T")).copy(nullable = true))
+                        .build())
+
+            }
+            .apply {
+                daoTypeSpec.funSpecs.forEach {
+                    addDaoRepoFun(it, daoClassName.simpleName, processingEnv,
+                            pagingBoundaryCallbackEnabled, isAlwaysSqlite)
+                }
+            }
+            .build())
+
+    return this
+}
+
+/**
+ * Add a repo implementation of the given DAO FunSpec
+ * @param daoFunSpec the function spec for which an implementation is being generated
+ * @param daoName the name of the DAO class (simple name e.g. SomeDao)
+ * @param processingEnv processing environment
+ * @param pagingBoundaryCallbackEnabled true if an Android pagingboundarycallback is being
+ * generated, false otherwise
+ * @param isAlwaysSqlite true if the function will always run on SQLite, false otherwise
+ */
+fun TypeSpec.Builder.addDaoRepoFun(daoFunSpec: FunSpec,
+                                   daoName: String,
+                                   processingEnv: ProcessingEnvironment,
+                                   pagingBoundaryCallbackEnabled: Boolean,
+                                   isAlwaysSqlite: Boolean = false) : TypeSpec.Builder {
+
+    var repoMethodType = daoFunSpec.getAnnotationSpec(Repository::class.java)
+            ?.memberToString(memberName = "methodType")?.toInt() ?: Repository.METHOD_AUTO
+
+    if(repoMethodType == Repository.METHOD_AUTO) {
+        repoMethodType = when {
+            daoFunSpec.isQueryWithSyncableResults(processingEnv) -> Repository.METHOD_SYNCABLE_GET
+            else -> Repository.METHOD_DELEGATE_TO_DAO
+        }
+    }
+
+    var generateBoundaryCallback = false
+    val returnTypeVal = daoFunSpec.returnType
+
+    if(pagingBoundaryCallbackEnabled
+            && repoMethodType == Repository.METHOD_SYNCABLE_GET
+            && returnTypeVal is ParameterizedTypeName
+            && returnTypeVal.rawType == DataSource.Factory::class.asClassName()) {
+        generateBoundaryCallback = true
+        repoMethodType = Repository.METHOD_DELEGATE_TO_DAO
+    }
+
+    addFunction(daoFunSpec.toBuilder()
+            .addCode(CodeBlock.builder().apply {
+                when(repoMethodType) {
+                    Repository.METHOD_SYNCABLE_GET -> {
+                        addRepositoryGetSyncableEntitiesCode(daoFunSpec,
+                                daoName, processingEnv,
+                                addReturnDaoResult = !generateBoundaryCallback)
+                    }
+                    Repository.METHOD_DELEGATE_TO_DAO -> {
+                        addRepoDelegateToDaoCode(daoFunSpec, isAlwaysSqlite, processingEnv)
+                    }
+                }
+            }.build())
+            .build())
+
+    return this
+}
+
+/**
+ * Add code which fetches any new syncable entities from the server and returns the results from the
+ * DAO.
+ *
+ * @param daoFunSpec the DAO function spec for which this code is being generated
+ * @param daoName the simple name of the DAO class
+ * @param processingEnv processing environment
+ * @param syncHelperDaoVarName the variable name of the sync helper dao
+ * @param addReturnDaoResult true to add a return statement to the end of the code
+ * @param generateGlobalScopeLaunchBlockForLiveDataTypes true to put the http fetch for functions
+ * that return a LiveData object in a GlobalScope.launch so they run asynchronously. True by default
+ * @param autoRetryEmptyMirrorResult will be removed
+ * @param receiveCountVarName if not null, a variable that will hold a count of how many entities
+ * are received
+ */
+fun CodeBlock.Builder.addRepositoryGetSyncableEntitiesCode(daoFunSpec: FunSpec, daoName: String,
+                                                           processingEnv: ProcessingEnvironment,
+                                                           syncHelperDaoVarName: String = "_syncHelper",
+                                                           addReturnDaoResult: Boolean  = true,
+                                                           generateGlobalScopeLaunchBlockForLiveDataTypes: Boolean = true,
+                                                           autoRetryEmptyMirrorResult: Boolean = false,
+                                                           receiveCountVarName: String? = null) : CodeBlock.Builder {
+
+    val isLiveDataOrDataSourceFactory = daoFunSpec.returnType?.isDataSourceFactoryOrLiveData() == true
+    val isLiveData = daoFunSpec.returnType?.isLiveData() == true
+
+    if(isLiveDataOrDataSourceFactory && addReturnDaoResult) {
+        add("val _daoResult = ").addDelegateFunctionCall("_dao", daoFunSpec).add("\n")
+    }
+
+    if(isLiveDataOrDataSourceFactory && generateGlobalScopeLaunchBlockForLiveDataTypes) {
+        beginControlFlow("%T.%M", GlobalScope::class,
+                MemberName("kotlinx.coroutines", "launch"))
+        beginControlFlow("try")
+    }
+
+    //Create the loadhelper that would actually run the request
+    val liveDataLoadHelperArg = if(isLiveData) "autoRetryOnEmptyLiveData=_daoResult," else ""
+    beginControlFlow("val _loadHelper = %T(_repo,·" +
+            "autoRetryEmptyMirrorResult·=·$autoRetryEmptyMirrorResult,·$liveDataLoadHelperArg·" +
+            "uri·=·%S)", RepositoryLoadHelper::class, "$daoName/${daoFunSpec.name}")
+    add("_endpointToTry -> \n")
+
+    add("val _httpResult = ")
+    addKtorRequestForFunction(daoFunSpec, dbPathVarName = "_dbPath", daoName = daoName,
+        httpEndpointVarName = "_endpointToTry")
+    addReplaceSyncableEntitiesIntoDbCode("_httpResult",
+            daoFunSpec.returnType!!.unwrapLiveDataOrDataSourceFactory(), processingEnv,
+                daoName = daoName)
+    if(receiveCountVarName != null) {
+        add("$receiveCountVarName += _httpResult.size\n")
+    }
+
+    //TODO: Generate the replace syncable entity code block - generateReplaceSyncableEntityCodeBlock
+
+    //end the LoadHelper block
+    add("_httpResult\n")
+    endControlFlow()
+
+    if(isLiveDataOrDataSourceFactory && generateGlobalScopeLaunchBlockForLiveDataTypes) {
+        add("_loadHelper.doRequest()\n")
+        nextControlFlow("catch(_e: %T)", Exception::class)
+        add("%M(%S)\n", MemberName("kotlin.io", "println"), "Caught doRequest exception:")
+        endControlFlow()
+        endControlFlow()
+    }
+
+    if(addReturnDaoResult) {
+        if(!isLiveDataOrDataSourceFactory) {
+            //use the repoloadhelper to actually run the request and get the result
+            add("var _daoResult: %T\n", daoFunSpec.returnType?.unwrapLiveDataOrDataSourceFactory())
+                    .beginControlFlow("do"
+                    ).applyIf(KModifier.SUSPEND !in daoFunSpec.modifiers) {
+                        beginControlFlow("%M",
+                                MemberName("kotlinx.coroutines", "runBlocking"))
+                    }
+                    .beginControlFlow("try")
+                    .add("_loadHelper.doRequest()\n")
+                    .nextControlFlow("catch(_e: %T)", Exception::class)
+                    .add("%M(%S)", MemberName("kotlin.io", "println"), "Caught doRequest exception: \\\$_e")
+                    .endControlFlow()
+                    .applyIf(KModifier.SUSPEND !in daoFunSpec.modifiers) {
+                        endControlFlow()
+                    }
+                    .add("_daoResult = ").addDelegateFunctionCall("_dao", daoFunSpec).add("\n")
+                    .endControlFlow()
+                    .add("while(_loadHelper.shouldTryAnotherMirror())\n")
+                    .add("return _daoResult\n")
+        }else {
+            add("return _daoResult\n")
+        }
+    }
+
+    return this
+}
+
+
+/**
+ * Add code that will handle receiving new syncable entities from the server. The syncable entities
+ * should only be those that are new to the client. The entities will be inserted using a replace
+ * function on the SyncHelper, and then an http request will be made to the server to acknowledge
+ * receipt of the entities.
+ */
+fun CodeBlock.Builder.addReplaceSyncableEntitiesIntoDbCode(resultVarName: String, resultType: TypeName,
+                                                           processingEnv: ProcessingEnvironment,
+                                                           daoName: String,
+                                                           syncHelperDaoVarName: String = "_syncHelper") : CodeBlock.Builder{
+    val componentType = resultType.unwrapQueryResultComponentType()
+    if(componentType !is ClassName)
+        return this
+
+
+    //Block at the end which will run all inserts of newly received entities
+    val transactionCodeBlock = CodeBlock.builder()
+
+    val sendTrkEntitiesCodeBlock = CodeBlock.builder()
+
+    componentType.findAllSyncableEntities(processingEnv).forEach {
+        val sEntityInfo = SyncableEntityInfo(it.value, processingEnv)
+
+        val replaceEntityFnName ="_replace${sEntityInfo.syncableEntity.simpleName}"
+
+        val accessorVarName = "_se${sEntityInfo.syncableEntity.simpleName}"
+        add("val $accessorVarName = $resultVarName")
+
+        if(resultType.isListOrArray()) {
+            it.key.forEach {embedVarName ->
+                beginControlFlow(".mapNotNull ")
+                add("it.$embedVarName", it.value.copy(nullable = true))
+                endControlFlow()
+            }
+
+            if(it.key.isEmpty() && it.value != sEntityInfo.syncableEntity) {
+                add(".map { it as %T }", sEntityInfo.syncableEntity)
+            }
+
+            add("\n")
+            transactionCodeBlock.add("${syncHelperDaoVarName}.$replaceEntityFnName($accessorVarName)\n")
+            //TODO: check about putting this in a transaction
+        }else {
+            if(it.key.isNotEmpty())
+                add("?.")
+
+            add(it.key.joinToString (prefix = "", separator = "?.", postfix = ""))
+            add("\n")
+            transactionCodeBlock.
+                beginControlFlow("if($accessorVarName != null)")
+                    .add("${syncHelperDaoVarName}.$replaceEntityFnName(listOf($accessorVarName))\n")
+                    .endControlFlow()
+        }
+
+        sendTrkEntitiesCodeBlock.beginIfNotNullOrEmptyControlFlow(accessorVarName,
+                resultType.isListOrArray())
+                .add("val _ackList = ")
+                .apply {
+                    if(!resultType.isListOrArray())
+                        add("listOf($accessorVarName)")
+                    else
+                        add(accessorVarName)
+                }
+                .beginControlFlow(".map")
+                .add("·%T(epk·=·it.${sEntityInfo.entityPkField.name},·" +
+                        "csn·=·it.${sEntityInfo.entityMasterCsnField.name}", EntityAck::class)
+                .applyIf(sEntityInfo.entityMasterCsnField.type == LONG) {
+                    add(".toInt()")
+                }
+                .add(")\n")
+                .endControlFlow()
+                .add("\n")
+                .add("_httpClient.%M(_ackList, _endpoint, \"${'$'}_dbPath/$daoName/_ack${it.value.simpleName}Received\", _db)\n",
+                    MemberName("com.ustadmobile.door.ext", "postEntityAck"))
+                .endControlFlow()
+    }
+
+    beginControlFlow("_db.runInTransaction(%T", Runnable::class)
+    add(transactionCodeBlock.build())
+    endControlFlow()
+    add(")\n")
+    add(sendTrkEntitiesCodeBlock.build())
+
+    return this
+}
+
+/**
+ * Add a CodeBlock for a repo delegate to DAO function. This will
+ *
+ * 1) Set the primary key on any entities that don't have a primary key set if running
+ * on SQLite when running an insert
+ * 2) Update the change sequence numbers when running an update
+ * 3) Pass the work to the DAO and return the result
+ *
+ * TODO: Update last changed by field, return primary key values from pk manager if applicable
+ */
+fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqlite: Boolean,
+                                   processingEnv: ProcessingEnvironment) : CodeBlock.Builder{
+
+    var syncableEntityInfo: SyncableEntityInfo? = null
+    if(daoFunSpec.hasAnyAnnotation(Update::class.java, Delete::class.java, Insert::class.java)) {
+        val entityParam = daoFunSpec.parameters.first()
+        val entityComponentType = entityParam.type.unwrapListOrArrayComponentType()
+        if(entityComponentType.hasSyncableEntities(processingEnv)) {
+            syncableEntityInfo = SyncableEntityInfo(entityComponentType as ClassName, processingEnv)
+            if(daoFunSpec.hasAnyAnnotation(Update::class.java)) {
+                add("val _isSyncablePrimary = _db.%M\n",
+                        MemberName("com.ustadmobile.door.ext", "syncableAndPrimary"))
+            }
+
+            if(entityParam.type.isListOrArray()) {
+                beginControlFlow("${entityParam.name}.forEach")
+            }
+
+            if(daoFunSpec.hasAnnotation(Update::class.java)) {
+                beginControlFlow("if(_isSyncablePrimary)")
+                add("${entityParam.name}.${syncableEntityInfo.entityMasterCsnField.name} = 0\n")
+                nextControlFlow("else")
+                add("${entityParam.name}.${syncableEntityInfo.entityLocalCsnField.name} = 0\n")
+                endControlFlow()
+            }
+
+            if(entityParam.type.isListOrArray()) {
+                endControlFlow()
+            }
+
+            //Use the SQLite Primary key manager if this is an SQLite insert
+            if(daoFunSpec.hasAnnotation(Insert::class.java)) {
+                if(!isAlwaysSqlite)
+                    beginControlFlow("if(_db.jdbcDbType == %T.SQLITE)", DoorDbType::class)
+
+                if(entityParam.type.isListOrArray()) {
+                    add("var _nextPk = ")
+                    if(!daoFunSpec.isSuspended) {
+                        beginRunBlockingControlFlow()
+                    }
+                    add("(_repo as %T).getAndIncrementSqlitePk(" +
+                            "${syncableEntityInfo.tableId}, ${entityParam.name}.size)\n",
+                            DoorDatabaseSyncRepository::class)
+                    if(!daoFunSpec.isSuspended) {
+                        endControlFlow()
+                    }
+
+                    beginControlFlow("${entityParam.name}.forEach")
+                    add("it.takeIf { it.${syncableEntityInfo.entityPkField.name} == 0L}?." +
+                            "${syncableEntityInfo.entityPkField.name} = _nextPk++\n")
+                    endControlFlow()
+                }else {
+                    add("${entityParam.name}.takeIf { it.${syncableEntityInfo.entityPkField.name} == 0L }" +
+                            "?.${syncableEntityInfo.entityPkField.name} = ")
+
+                    if(!daoFunSpec.isSuspended)
+                        beginRunBlockingControlFlow()
+
+                    add("(_repo as %T).getAndIncrementSqlitePk(" +
+                            "${syncableEntityInfo.tableId}, 1)\n", DoorDatabaseSyncRepository::class)
+
+                    if(!daoFunSpec.isSuspended)
+                        endControlFlow()
+
+                }
+
+                if(!isAlwaysSqlite)
+                    endControlFlow()
+
+            }
+        }
+    }
+
+    if(daoFunSpec.returnType != UNIT)
+        add("val _result = ")
+
+    add("_dao.${daoFunSpec.name}(")
+            .add(daoFunSpec.parameters.joinToString { it.name })
+            .add(")\n")
+
+
+    //TODO: check and see if we need to go back to get the primary keys
+
+    if(daoFunSpec.returnType != null && daoFunSpec.returnType != UNIT)
+        add("return _result\n")
+
+    return this
+}
 
 class DbProcessorRepository: AbstractDbProcessor() {
 
@@ -444,12 +886,19 @@ class DbProcessorRepository: AbstractDbProcessor() {
         for(daoElement in daos) {
             val daoTypeEl = daoElement as TypeElement
             if(daoTypeEl.isDaoWithRepository) {
-                writeFileSpecToOutputDirs(generateDaoRepositoryClass(daoTypeEl),
-                        AnnotationProcessorWrapper.OPTION_JVM_DIRS)
-                val androidRepoFileSpec = generateDaoRepositoryClass(daoTypeEl,
-                        pagingBoundaryCallbackEnabled = true, isAlwaysSqlite = true)
-                writeFileSpecToOutputDirs(androidRepoFileSpec,
-                        AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
+                FileSpec.builder(daoElement.packageName,
+                        "${daoTypeEl.simpleName}$SUFFIX_REPOSITORY2")
+                        .addDaoRepoType(daoTypeEl.asTypeSpecStub(processingEnv,
+                                convertToImplementationStub = true),
+                            daoTypeEl.asClassName(), processingEnv)
+                        .build()
+                        .writeToDirsFromArg(OPTION_JVM_DIRS)
+//                writeFileSpecToOutputDirs(generateDaoRepositoryClass(daoTypeEl),
+//                        AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+//                val androidRepoFileSpec = generateDaoRepositoryClass(daoTypeEl,
+//                        pagingBoundaryCallbackEnabled = true, isAlwaysSqlite = true)
+//                writeFileSpecToOutputDirs(androidRepoFileSpec,
+//                        AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
             }
         }
 

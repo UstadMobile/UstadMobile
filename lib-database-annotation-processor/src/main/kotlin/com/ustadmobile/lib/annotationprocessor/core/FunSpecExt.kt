@@ -4,9 +4,7 @@ import androidx.room.Query
 import androidx.room.Delete
 import androidx.room.Update
 import androidx.room.Insert
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.asClassName
+import com.squareup.kotlinpoet.*
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
 
@@ -26,6 +24,10 @@ fun <A : Annotation> FunSpec.hasAnyAnnotation(vararg annotationsClasses: Class<o
     return annotations.any { annotationSpec ->
         annotationClassNames.any { it == annotationSpec.className }
     }
+}
+
+fun <A: Annotation> FunSpec.getAnnotationSpec(annotationClass: Class<A>): AnnotationSpec? {
+    return annotations.firstOrNull { it.className.canonicalName == annotationClass.canonicalName }
 }
 
 /**
@@ -70,3 +72,9 @@ fun FunSpec.daoFunSyncableEntityTypes(processingEnv: ProcessingEnvironment,
         return listOf()
     }
 }
+
+//Shorthand to check if this function is suspended
+val FunSpec.isSuspended: Boolean
+    get() = KModifier.SUSPEND in modifiers
+
+

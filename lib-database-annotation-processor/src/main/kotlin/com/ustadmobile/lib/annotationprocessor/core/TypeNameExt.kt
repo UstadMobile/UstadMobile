@@ -39,6 +39,9 @@ internal fun TypeName.isDataSourceFactory(paramTypeFilter: (List<TypeName>) -> B
         && this.rawType == DataSource.Factory::class.asClassName() && paramTypeFilter(this.typeArguments)
 
 
+internal fun TypeName.isDataSourceFactoryOrLiveData() = this is ParameterizedTypeName
+        && (this.rawType == DataSource.Factory::class.asClassName() || this.rawType == DoorLiveData::class.asClassName())
+
 fun TypeName.isListOrArray() = (this is ClassName && this.canonicalName =="kotlin.Array")
         || (this is ParameterizedTypeName && this.rawType == List::class.asClassName())
 

@@ -16,9 +16,9 @@ fun List<CodeBlock>.findBooleanMemberValue(memberName: String): Boolean? = this
  * Get the string value of an AnnotationSpec member (e.g. the query for @Query("SELECT ...")). This
  * is useful where a FunSpec type has been used and we want to get the query
  */
-fun AnnotationSpec.valueMemberToString(): String {
+fun AnnotationSpec.memberToString(memberName: String = "value"): String {
     var strValue = members
-        .first { it.toString().trim().startsWith("value") || it.toString().trim().startsWith("\"") }.toString()
+        .first { it.toString().trim().startsWith(memberName) || it.toString().trim().startsWith("\"") }.toString()
 
     if(strValue.endsWith("trimMargin()")) {
         strValue = strValue.removeSuffix(".trimMargin()")
@@ -29,7 +29,7 @@ fun AnnotationSpec.valueMemberToString(): String {
 
     strValue = StringEscapeUtils.unescapeJava(strValue)
 
-    return strValue
+    return strValue.trimMemberString(memberName)
 }
 
 /**
@@ -37,7 +37,10 @@ fun AnnotationSpec.valueMemberToString(): String {
  * query SQL as a String
  */
 fun List<AnnotationSpec>.daoQuerySql() : String {
-    val queryValueMember = first { it.className == Query::class.asClassName() }.valueMemberToString()
-    return queryValueMember.trim().removePrefix("value").trim().removePrefix("=")
-            .trim().removeAllPrefixedInstancesOf("\"").removeAllSuffixedInstancesOf("\"")
+    val queryValueMember = first { it.className == Query::class.asClassName() }.memberToString()
+    return queryValueMember
 }
+
+private fun String.trimMemberString(memberName: String): String =
+        trim().removePrefix(memberName).trim().removePrefix("=")
+            .trim().removeAllPrefixedInstancesOf("\"").removeAllSuffixedInstancesOf("\"")

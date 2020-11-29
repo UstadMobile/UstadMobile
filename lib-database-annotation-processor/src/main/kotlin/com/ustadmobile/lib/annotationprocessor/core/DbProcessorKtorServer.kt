@@ -928,7 +928,7 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
         daos.filter { it is TypeElement && it.isDaoWithRepository }.map { it as TypeElement }.forEach {daoTypeEl ->
             val daoBaseName = daoTypeEl.simpleName.toString()
-            val daoTypeSpec = daoTypeEl.asImplementableTypeSpec(processingEnv)
+            val daoTypeSpec = daoTypeEl.asTypeSpecStub(processingEnv)
 
             FileSpec.builder(daoTypeEl.packageName, "${daoTypeEl.simpleName}$SUFFIX_KTOR_ROUTE")
                     .addDaoKtorRouteFun(daoTypeSpec, daoTypeEl.asClassName(),
