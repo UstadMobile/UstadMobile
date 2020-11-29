@@ -8,15 +8,17 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemPersonwithinventoryBinding
-import com.ustadmobile.lib.db.entities.PersonWithInventory
+import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
 
 
 class PersonWithInventoryListRecyclerAdapter()
-    : ListAdapter<PersonWithInventory,
+    : ListAdapter<PersonWithInventoryItemAndStock,
         PersonWithInventoryListRecyclerAdapter.InventoryTransactionDetailHolder>(DIFF_CALLBACK) {
 
     class InventoryTransactionDetailHolder(val itemBinding: ItemPersonwithinventoryBinding)
-        : RecyclerView.ViewHolder(itemBinding.root)
+        : RecyclerView.ViewHolder(itemBinding.root){
+
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InventoryTransactionDetailHolder {
         val itemBinding = ItemPersonwithinventoryBinding.inflate(
@@ -27,6 +29,7 @@ class PersonWithInventoryListRecyclerAdapter()
     override fun onBindViewHolder(holder: InventoryTransactionDetailHolder, position: Int) {
         val item = getItem(position)
         holder.itemBinding.person = item
+
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -34,20 +37,17 @@ class PersonWithInventoryListRecyclerAdapter()
     }
 
     companion object {
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<PersonWithInventory> = object
-            : DiffUtil.ItemCallback<PersonWithInventory>() {
-            override fun areItemsTheSame(oldItem: PersonWithInventory,
-                                         newItem: PersonWithInventory): Boolean {
-                return oldItem.personUid == newItem.personUid
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<PersonWithInventoryItemAndStock> = object
+            : DiffUtil.ItemCallback<PersonWithInventoryItemAndStock>() {
+            override fun areItemsTheSame(oldItemWithInventoryItem: PersonWithInventoryItemAndStock,
+                                         newItemWithInventoryItem: PersonWithInventoryItemAndStock): Boolean {
+                return oldItemWithInventoryItem.personUid == newItemWithInventoryItem.personUid
 
             }
 
-            override fun areContentsTheSame(oldItem: PersonWithInventory,
-                                            newItem: PersonWithInventory): Boolean {
-                return oldItem.inventoryCount == newItem.inventoryCount &&
-                        oldItem.inventoryCountDelivered == newItem.inventoryCountDelivered &&
-                        oldItem.personUid == newItem.personUid &&
-                        oldItem.inventorySelected == newItem.inventorySelected
+            override fun areContentsTheSame(oldItemWithInventoryItem: PersonWithInventoryItemAndStock,
+                                            newItemWithInventoryItem: PersonWithInventoryItemAndStock): Boolean {
+                return oldItemWithInventoryItem === newItemWithInventoryItem
 
             }
         }

@@ -11,7 +11,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.InventoryItem
-import com.ustadmobile.lib.db.entities.PersonWithInventory
+import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -32,16 +32,16 @@ class InventoryItemEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
 
-    val producerSelectionEditHelper = DefaultOneToManyJoinEditHelper<PersonWithInventory>(
-            PersonWithInventory::personUid,
-            "PersonWithInventory", PersonWithInventory.serializer().list,
-            PersonWithInventory.serializer().list, this) { personUid = it }
+    val producerSelectionEditHelper = DefaultOneToManyJoinEditHelper<PersonWithInventoryItemAndStock>(
+            PersonWithInventoryItemAndStock::personUid,
+            "PersonWithInventoryItemAndStock", PersonWithInventoryItemAndStock.serializer().list,
+            PersonWithInventoryItemAndStock.serializer().list, this) { personUid = it }
 
-    fun handleAddOrEditPersonWithInventory(personWithInventory: PersonWithInventory) {
+    fun handleAddOrEditPersonWithInventory(personWithInventory: PersonWithInventoryItemAndStock) {
         producerSelectionEditHelper.onEditResult(personWithInventory)
     }
 
-    fun handleRemoveSchedule(personWithInventory: PersonWithInventory) {
+    fun handleRemoveSchedule(personWithInventory: PersonWithInventoryItemAndStock) {
         producerSelectionEditHelper.onDeactivateEntity(personWithInventory)
     }
 
@@ -57,7 +57,7 @@ class InventoryItemEditPresenter(context: Any,
         val productUid = arguments[ARG_PRODUCT_UID]?.toLong()?: 0L
 
        val producers = withTimeout(2000){
-            db.inventoryItemDao.findWe(loggedInPersonUid)
+            db.inventoryItemDao.getAllWeWithNewInventoryItem(loggedInPersonUid)
        }
         producerSelectionEditHelper.liveList.sendValue(producers)
 
@@ -102,10 +102,9 @@ class InventoryItemEditPresenter(context: Any,
                     inventoryItemLeUid = loggedInPersonUid
                     inventoryItemWeUid = producerInventory.personUid
                     inventoryItemDateAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
+                    inventoryItemQuantity = producerInventory.selectedStock?.toLong()?:0L
+                    inventoryItemUid = repo.inventoryItemDao.insertAsync(this)
                 }
-
-                repo.inventoryItemDao.insertInventoryItem(newInventory,
-                        producerInventory.inventoryCount?:0, loggedInPersonUid)
             }
 
 

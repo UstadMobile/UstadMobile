@@ -9,56 +9,40 @@ import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.InventoryItem
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
 import com.ustadmobile.lib.db.entities.PersonWithInventory
-import com.ustadmobile.lib.db.entities.InventoryTransaction
+import com.ustadmobile.lib.db.entities.PersonWithInventoryCount
+import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
+import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
 import com.ustadmobile.door.annotation.Repository
 
 @Repository
 @Dao
 abstract class InventoryItemDao : BaseDao<InventoryItem> {
 
+    @Query(QUERY_GET_WE_NEW_INVENTORY)
+    abstract suspend fun getAllWeWithNewInventoryItem(leUid: Long)
+            : List<PersonWithInventoryItemAndStock>
 
-    @Query(QUERY_BY_PERSON)
-    abstract suspend fun findWe(leUid: Long)
-            : List<PersonWithInventory>
+    @Query(QUERY_GET_STOCK_LIST_BY_PRODUCT)
+    abstract fun getStockListByProduct(productUid: Long, leUid: Long) :
+            DataSource.Factory<Int, PersonWithInventoryCount>
 
-
-    @Insert
-    abstract suspend fun insertTransaction(inventoryTransaction: InventoryTransaction)
-
-    suspend fun insertInventoryItem(item: InventoryItem, count: Int, leUid:Long){
-
-        val inventoryItemUid = insertAsync(item)
-        var x =0
-        while(x < count){
-
-            val inventoryTransaction = InventoryTransaction()
-            inventoryTransaction.inventoryTransactionInventoryItemUid = inventoryItemUid
-            inventoryTransaction.inventoryTransactionFromLeUid = leUid
-            insertTransaction(inventoryTransaction)
-
-            x++;
-        }
-    }
+    @Query(QUERY_GET_PRODUCT_TRANSACTION_HISTORY)
+    abstract fun getProductTransactionDetail(productUid: Long, leUid: Long) :
+            DataSource.Factory<Int, InventoryTransactionDetail>
 
 
     companion object{
 
-
-        const val QUERY_INVENTORY_LIST_SORTBY_NAME_ASC =
-                " ORDER BY Product.productName ASC "
-
-
-        const val SELECT_ACCOUNT_IS_ADMIN = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid)"
-
-        const val QUERY_BY_PERSON = """
+        //TODO: Count existing stock
+        const val QUERY_GET_WE_NEW_INVENTORY = """
         SELECT 
             Person.*,
-            0 as inventoryCount, 
-            0 as inventorySelected,
-            0 as inventoryCountDeliveredTotal, 
-            0 as inventoryCountDelivered
+            InventoryItem.*, 
+            (0)  as stock , 
+            0 as selectedStock
         FROM Person
         LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
+        LEFT JOIN InventoryItem ON InventoryItem.inventoryItemUid = 0
         WHERE
             CAST(Person.admin AS INTEGER) = 0 AND
             CAST(Person.active AS INTEGER) = 1 AND
@@ -69,36 +53,53 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
                 AND CAST(groupMemberActive  AS INTEGER) = 1 ) 
                 OR 
                 CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END )
+        """
+
+        const val QUERY_GET_STOCK_LIST_BY_PRODUCT = """
+            SELECT WE.*, 
+            (
+                SELECT SUM(inventoryItemQuantity) FROM InventoryItem WHERE      
+                InventoryItem.inventoryItemProductUid = Product.productUid
+                AND InventoryItem.inventoryItemWeUid = WE.personUid
+                AND InventoryItem.inventoryItemLeUid = :leUid
+                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+            )  as inventoryCount, 
+            0 as inventoryCountDeliveredTotal, 
+            0 as inventoryCountDelivered, 
+            0 as inventorySelected
+            FROM PersonGroupMember
+            LEFT JOIN Person AS WE ON WE.personUid = PersonGroupMember.groupMemberPersonUid
+             LEFT JOIN Person AS LE ON LE.personUid = :leUid
+            LEFT JOIN Product ON Product.productUid = :productUid
+            
+            WHERE 
+            CAST(LE.active AS INTEGER) = 1 
+            AND PersonGroupMember.groupMemberGroupUid = LE.personWeGroupUid 
+            AND CAST(WE.active AS INTEGER) = 1  
+            GROUP BY(WE.personUid)  
             
         """
 
-        /*
+        const val QUERY_GET_PRODUCT_TRANSACTION_HISTORY = """
+            SELECT 
+                SUM(inventoryItemQuantity) as stockCount,
+                GROUP_CONCAT(DISTINCT CASE WHEN WE.firstNames IS NOT NULL 
+                            THEN WE.firstNames ELSE '' END||' '|| CASE WHEN WE.lastName IS NOT NULL 
+                                THEN WE.lastName ELSE '' END) AS weNames,
+                LE.firstNames||' '||LE.lastName as leName,
+                LE.personUid AS fromLeUid,
+                inventoryItemSaleUid as saleUid, 
+                inventoryItemDateAdded as transactionDate
+            FROM InventoryItem
+                LEFT JOIN Person AS LE ON LE.personUid = inventoryItemLeUid
+                LEFT JOIN Person AS WE ON WE.personUid = inventoryItemWeUid
+            WHERE 
+                inventoryItemProductUid = :productUid 
+                AND inventoryItemLeUid = :leUid
+                AND CAST(inventoryItemActive AS INTEGER) = 1 
+            GROUP BY inventoryItemDateAdded
+        """
 
-                SELECT
-                    ( COUNT(*) -
-                        (	select count(*) from inventorytransaction
-                            where
-                            inventorytransaction.inventoryTransactionInventoryItemUid in
-                            (	select inventoryitemuid from inventoryitem where
-                                inventoryitem.inventoryitemproductuid = Product.productUid
-                                AND InventoryItem.inventoryItemWeUid = Person.personUid
-                                AND InventoryItem.inventoryItemLeUid = :leUid
-                                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
-                            )
-                            and inventorytransaction.inventoryTransactionSaleUid != 0
-                            and cast(inventorytransaction.inventoryTransactionActive AS INTEGER) = 1 )
-                    )
-                FROM InventoryItem
-                    LEFT JOIN Product ON Product.productUid = InventoryItemProductUid
-                WHERE
-                    CAST(Product.productActive AS INTEGER) = 1 AND
-                    CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1 AND
-                    Product.productUid = :productUid
-                    AND InventoryItem.inventoryItemWeUid = Person.personUid
-                    AND InventoryItem.inventoryItemLeUid = :leUid
-                    AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
-
-         */
 
     }
 

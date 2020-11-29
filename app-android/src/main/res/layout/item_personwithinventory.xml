@@ -6,7 +6,7 @@
     <data>
         <variable
             name="person"
-            type="com.ustadmobile.lib.db.entities.PersonWithInventory" />
+            type="com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock" />
 
 
     </data>
@@ -47,7 +47,7 @@
             android:max="100"
             android:min="0"
             android:thumb="@drawable/seekbar_thumb"
-            android:progress="@={person.inventoryCount}"
+            android:progress="@={person.selectedStock}"
             app:layout_constraintEnd_toStartOf="@+id/view_producer_with_inventory_selection_selected_edittext"
             app:layout_constraintStart_toEndOf="@+id/view_producer_with_inventory_selection_picture"
             app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_name" />
@@ -63,12 +63,13 @@
             android:importantForAutofill="no"
             android:inputType="number"
             android:singleLine="false"
-            android:text="@{`` + person.inventoryCount}"
+            android:text="@={`` + person.selectedStock}"
             android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_name"
             tools:text="42" />
 
+        <!--android:text="@={`` + person.inventoryItem.inventoryItemQuantity}"-->
         <!--app:seekCountET="@={person.inventoryCount}" -->
 
         <TextView
@@ -78,7 +79,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="8dp"
-            app:inStockAppend="@{person.inventoryCount}"
+            app:inStockAppend="@{person.stock}"
             tools:text="42 in stock"
             android:textSize="12sp"
             app:layout_constraintBottom_toBottomOf="parent"

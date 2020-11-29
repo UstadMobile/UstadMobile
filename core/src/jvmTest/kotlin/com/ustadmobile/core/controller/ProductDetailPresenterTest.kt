@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.ProductDetailView
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.InventoryItemDao
 import com.ustadmobile.core.db.dao.InventoryTransactionDao
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ProductDao
@@ -42,7 +43,7 @@ class ProductDetailPresenterTest {
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
     private lateinit var repoProductDaoSpy: ProductDao
-    private lateinit var repoInventoryTransactionDaoSpy: InventoryTransactionDao
+    private lateinit var repoInventoryItemDaoSpy: InventoryItemDao
 
     private lateinit var di: DI
 
@@ -63,8 +64,8 @@ class ProductDetailPresenterTest {
         repoProductDaoSpy = spy(repo.productDao)
         whenever(repo.productDao).thenReturn(repoProductDaoSpy)
 
-        repoInventoryTransactionDaoSpy = spy(repo.inventoryTransactionDao)
-        whenever(repo.inventoryTransactionDao).thenReturn(repoInventoryTransactionDaoSpy)
+        repoInventoryItemDaoSpy = spy(repo.inventoryItemDao)
+        whenever(repo.inventoryItemDao).thenReturn(repoInventoryItemDaoSpy)
     }
 
     @Test
@@ -88,8 +89,8 @@ class ProductDetailPresenterTest {
                 testEntity.productUid, entityValSet.productUid)
 
         verify(repoProductDaoSpy, timeout(5000)).findAllCategoriesOfProductUid(entityValSet.productUid)
-        verify(repoInventoryTransactionDaoSpy, timeout(5000)).getStockListByProduct(entityValSet.productUid)
-        verify(repoInventoryTransactionDaoSpy, timeout(5000)).getProductTransactionDetail(entityValSet.productUid)
+        verify(repoInventoryItemDaoSpy, timeout(5000)).getStockListByProduct(entityValSet.productUid)
+        verify(repoInventoryItemDaoSpy, timeout(5000)).getProductTransactionDetail(entityValSet.productUid)
     }
 
 

@@ -21,7 +21,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Category
 import com.ustadmobile.lib.db.entities.InventoryItem
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonWithInventory
+import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 
@@ -43,7 +43,7 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
 
     private var producersRecyclerAdapter: PersonWithInventoryListRecyclerAdapter? = null
     private var producersListRecyclerView: RecyclerView? = null
-    private val producersObserver = Observer<List<PersonWithInventory>?>{
+    private val producersObserver = Observer<List<PersonWithInventoryItemAndStock>?>{
         t ->
         run {
             producersRecyclerAdapter?.submitList(t)
@@ -74,7 +74,7 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
         val navController = findNavController()
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                PersonWithInventory::class.java) {
+                PersonWithInventoryItemAndStock::class.java) {
             val producer = it.firstOrNull() ?: return@observeResult
             mPresenter?.handleAddOrEditPersonWithInventory(producer)
         }
@@ -106,7 +106,7 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
             mBinding?.inventoryItem = value
         }
 
-    override var producers: DoorMutableLiveData<List<PersonWithInventory>>? = null
+    override var producers: DoorMutableLiveData<List<PersonWithInventoryItemAndStock>>? = null
         set(value) {
             field?.removeObserver(producersObserver)
             field = value

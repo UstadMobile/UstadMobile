@@ -16,7 +16,7 @@ import com.toughra.ustadmobile.databinding.FragmentProductDetailBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.InventoryTransactionDao
+import com.ustadmobile.core.db.dao.InventoryItemDao
 import com.ustadmobile.core.db.dao.ProductDao
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
@@ -100,7 +100,7 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
     override var stockList: DataSource.Factory<Int, PersonWithInventoryCount>? = null
         set(value) {
             stockLiveData?.removeObserver(stockObserver)
-            stockLiveData = value?.asRepositoryLiveData(InventoryTransactionDao)
+            stockLiveData = value?.asRepositoryLiveData(InventoryItemDao)
             field = value
             stockLiveData?.observeIfFragmentViewIsReady(this, stockObserver)
         }
@@ -108,7 +108,7 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
     override var transactionList: DataSource.Factory<Int, InventoryTransactionDetail>? = null
         set(value) {
             historyLiveData?.removeObserver(historyObserver)
-            historyLiveData = value?.asRepositoryLiveData(InventoryTransactionDao)
+            historyLiveData = value?.asRepositoryLiveData(InventoryItemDao)
             field = value
             historyLiveData?.observeIfFragmentViewIsReady(this, historyObserver)
         }

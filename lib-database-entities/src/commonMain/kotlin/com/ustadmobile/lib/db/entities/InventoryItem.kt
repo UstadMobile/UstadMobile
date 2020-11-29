@@ -28,9 +28,15 @@ open class InventoryItem() {
 
     var inventoryItemDateAdded: Long = 0
 
-    var inventoryItemDayAdded : Long = 0
-
     var inventoryItemActive: Boolean = true
+
+    var inventoryItemSaleUid : Long = 0
+
+    var inventoryItemSaleDeliveryUid: Long = 0
+
+    var inventoryItemSaleItemUid: Long = 0
+
+    var inventoryItemQuantity: Long = 0
 
     @MasterChangeSeqNum
     var inventoryItemMCSN: Long = 0

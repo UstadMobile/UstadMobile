@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 148,
-    "identityHash": "3f66f41646e2c5146c97afc7529101fb",
+    "identityHash": "aa51717e2159fdeb0f09ca261ec025af",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5760,7 +5760,7 @@
       },
       {
         "tableName": "InventoryItem",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`inventoryItemUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `inventoryItemProductUid` INTEGER NOT NULL, `inventoryItemLeUid` INTEGER NOT NULL, `inventoryItemWeUid` INTEGER NOT NULL, `inventoryItemDateAdded` INTEGER NOT NULL, `inventoryItemDayAdded` INTEGER NOT NULL, `inventoryItemActive` INTEGER NOT NULL, `inventoryItemMCSN` INTEGER NOT NULL, `inventoryItemLCSN` INTEGER NOT NULL, `inventoryItemLCB` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`inventoryItemUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `inventoryItemProductUid` INTEGER NOT NULL, `inventoryItemLeUid` INTEGER NOT NULL, `inventoryItemWeUid` INTEGER NOT NULL, `inventoryItemDateAdded` INTEGER NOT NULL, `inventoryItemActive` INTEGER NOT NULL, `inventoryItemSaleUid` INTEGER NOT NULL, `inventoryItemSaleDeliveryUid` INTEGER NOT NULL, `inventoryItemSaleItemUid` INTEGER NOT NULL, `inventoryItemQuantity` INTEGER NOT NULL, `inventoryItemMCSN` INTEGER NOT NULL, `inventoryItemLCSN` INTEGER NOT NULL, `inventoryItemLCB` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "inventoryItemUid",
@@ -5793,14 +5793,32 @@
             "notNull": true
           },
           {
-            "fieldPath": "inventoryItemDayAdded",
-            "columnName": "inventoryItemDayAdded",
+            "fieldPath": "inventoryItemActive",
+            "columnName": "inventoryItemActive",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "inventoryItemActive",
-            "columnName": "inventoryItemActive",
+            "fieldPath": "inventoryItemSaleUid",
+            "columnName": "inventoryItemSaleUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inventoryItemSaleDeliveryUid",
+            "columnName": "inventoryItemSaleDeliveryUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inventoryItemSaleItemUid",
+            "columnName": "inventoryItemSaleItemUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "inventoryItemQuantity",
+            "columnName": "inventoryItemQuantity",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -11336,7 +11354,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '3f66f41646e2c5146c97afc7529101fb')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'aa51717e2159fdeb0f09ca261ec025af')"
     ]
   }
 }

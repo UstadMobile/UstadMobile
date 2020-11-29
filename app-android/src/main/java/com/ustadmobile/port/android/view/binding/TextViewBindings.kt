@@ -279,11 +279,10 @@ fun TextView.setSaleItemAfterDiscountTotal(totalSale : Long, sale: Sale?) {
     text = "" + (totalSale - (sale?.saleDiscount ?: 0L)) + " " + context.getString(R.string.afs)
 }
 
-/**
- * app:balanceDueSaleWithDiscount="@{sale}"
-app:balanceDueOrdertotal="@{orderTotal}"
-app:balanceDuePaymentTotal="@{paymentTotal}"
- */
+@BindingAdapter("selectedStock")
+fun TextView.setSelectedStock(person: PersonWithInventoryItemAndStock?){
+    text = person?.inventoryItem?.inventoryItemQuantity.toString()
+}
 
 @BindingAdapter(value = ["balanceDueOrdertotal", "balanceDueSaleWithDiscount", "balanceDuePaymentTotal"])
 fun TextView.setBalanceDueAfterPaymentAndSaleAndDiscount(totalSale : Long, sale: Sale?, totalPayment: Long) {
