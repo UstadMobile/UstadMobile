@@ -630,8 +630,6 @@ fun CodeBlock.Builder.addRepositoryGetSyncableEntitiesCode(daoFunSpec: FunSpec, 
         add("$receiveCountVarName += _httpResult.size\n")
     }
 
-    //TODO: Generate the replace syncable entity code block - generateReplaceSyncableEntityCodeBlock
-
     //end the LoadHelper block
     add("_httpResult\n")
     endControlFlow()
@@ -715,7 +713,6 @@ fun CodeBlock.Builder.addReplaceSyncableEntitiesIntoDbCode(resultVarName: String
 
             add("\n")
             transactionCodeBlock.add("${syncHelperDaoVarName}.$replaceEntityFnName($accessorVarName)\n")
-            //TODO: check about putting this in a transaction
         }else {
             if(it.key.isNotEmpty())
                 add("?.")
@@ -851,10 +848,30 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
             .add(")\n")
 
 
-    //TODO: check and see if we need to go back to get the primary keys
+    if(daoFunSpec.hasReturnType && daoFunSpec.hasAnnotation(Insert::class.java)
+            && syncableEntityInfo != null) {
+        add("return ")
+        if(!isAlwaysSqlite)
+            beginControlFlow("if(_db.jdbcDbType == %T.SQLITE)", DoorDbType::class)
 
-    if(daoFunSpec.returnType != null && daoFunSpec.returnType != UNIT)
+        if(daoFunSpec.parameters.first().type.isListOrArray()) {
+            add("${daoFunSpec.parameters[0].name}.map·{·it.${syncableEntityInfo.entityPkField.name}·}")
+            if(daoFunSpec.returnType?.isArrayType() == true)
+                add(".%M()", MemberName("kotlin.collections", "toTypedArray"))
+
+            add("\n")
+        }else {
+            add("${daoFunSpec.parameters[0].name}.${syncableEntityInfo.entityPkField.name}·\n")
+        }
+
+        if(!isAlwaysSqlite) {
+            nextControlFlow("else")
+            add("return _result\n")
+            endControlFlow()
+        }
+    }else if(daoFunSpec.hasReturnType) {
         add("return _result\n")
+    }
 
     return this
 }

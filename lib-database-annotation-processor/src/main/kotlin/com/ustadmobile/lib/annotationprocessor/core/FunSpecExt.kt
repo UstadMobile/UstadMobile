@@ -78,3 +78,8 @@ val FunSpec.isSuspended: Boolean
     get() = KModifier.SUSPEND in modifiers
 
 
+/**
+ * Shorthand to check if this function has an actual return type
+ */
+val FunSpec.hasReturnType: Boolean
+    get() = returnType != null && returnType != UNIT
