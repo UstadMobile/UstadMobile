@@ -7,9 +7,6 @@ import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
 
 interface InventoryItemEditView: UstadEditView<InventoryItem> {
 
-    //The list of producers / women embroiderers to be set on the view
-    //var womenEmbroiderers : List<PersonWithInventory>
-
     var producers: DoorMutableLiveData<List<PersonWithInventoryItemAndStock>>?
 
     companion object {

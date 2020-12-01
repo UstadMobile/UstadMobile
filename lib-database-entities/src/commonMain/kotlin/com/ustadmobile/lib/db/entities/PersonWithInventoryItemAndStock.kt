@@ -3,9 +3,6 @@ package com.ustadmobile.lib.db.entities
 import kotlinx.serialization.Serializable
 import androidx.room.Embedded
 
-/**
- * Person 's POJO for representing a WE with inventory count
- */
 @Serializable
 class PersonWithInventoryItemAndStock() : Person() {
 
@@ -17,6 +14,5 @@ class PersonWithInventoryItemAndStock() : Person() {
     var stock: Int = 0
 
     var selectedStock: Int = 0
-
 
 }

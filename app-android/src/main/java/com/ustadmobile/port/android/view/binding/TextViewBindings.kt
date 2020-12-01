@@ -268,6 +268,10 @@ fun TextView.setProductNameWithDeliveryCount(saleItemWithProduct: SaleItemWithPr
     text = "" + saleItemWithProduct?.saleItemProduct?.productName + " (" +
             saleItemWithProduct?.deliveredCount + " " + context.getString(R.string.in_stock) + " )"
 }
+@BindingAdapter("productNameWithItemCount")
+fun TextView.setProductNameWithItemCount(productDeet: ProductDeliveryWithProductAndTransactions?){
+    text = "" + productDeet?.productName + " (" +  productDeet?.items + " " + context.getString(R.string.items) + " )"
+}
 
 @BindingAdapter("inStockAppend")
 fun TextView.setInStockAppend(stock: Int?){

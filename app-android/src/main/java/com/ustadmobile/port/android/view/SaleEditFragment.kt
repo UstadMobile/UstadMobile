@@ -241,7 +241,12 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
     override fun addDelivery() {
         if(entity?.saleUid != 0L) {
             onSaveStateToBackStackStateHandle()
-            navigateToEditEntity(null, R.id.saledelivery_edit_dest, SaleDelivery::class.java,
+            val saleDeliveryWithItems = SaleDeliveryAndItems().apply{
+                delivery = null
+                saleItems = saleItemList?.value?: listOf()
+            }
+
+            navigateToEditEntity(saleDeliveryWithItems, R.id.saledelivery_edit_dest, SaleDeliveryAndItems::class.java,
                     argBundle = bundleOf(
                             UstadView.ARG_SALE_UID to entity?.saleUid.toString()))
         }else{

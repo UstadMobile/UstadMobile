@@ -26,10 +26,16 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
     abstract fun getStockListByProduct(productUid: Long, leUid: Long) :
             DataSource.Factory<Int, PersonWithInventoryCount>
 
+
+    @Query(QUERY_GET_STOCK_LIST_BY_PRODUCT_AND_DELIVERY)
+    abstract suspend fun getStockAndDeliveryListByProduct(productUid: Long, leUid: Long,
+                                                  saleDeliveryUid: Long) :
+            List<PersonWithInventoryItemAndStock>
+
+
     @Query(QUERY_GET_PRODUCT_TRANSACTION_HISTORY)
     abstract fun getProductTransactionDetail(productUid: Long, leUid: Long) :
             DataSource.Factory<Int, InventoryTransactionDetail>
-
 
     companion object{
 
@@ -53,6 +59,43 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
                 AND CAST(groupMemberActive  AS INTEGER) = 1 ) 
                 OR 
                 CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END )
+        """
+
+        const val QUERY_GET_STOCK_LIST_BY_PRODUCT_AND_DELIVERY = """
+            SELECT 
+                Person.*,
+                InventoryItem.*, 
+                (
+                SELECT SUM(inventoryItemQuantity) FROM InventoryItem WHERE      
+                InventoryItem.inventoryItemProductUid = Product.productUid
+                AND InventoryItem.inventoryItemWeUid = Person.personUid
+                AND InventoryItem.inventoryItemLeUid = :leUid
+                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+                )  as stock , 
+                (
+                SELECT SUM(inventoryItemQuantity) FROM InventoryItem WHERE      
+                InventoryItem.inventoryItemProductUid = Product.productUid
+                AND InventoryItem.inventoryItemWeUid = Person.personUid
+                AND InventoryItem.inventoryItemLeUid = :leUid
+                AND InventoryItem.inventoryItemSaleDeliveryUid = SaleDelivery.saleDeliveryUid
+                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+                ) as selectedStock
+            FROM Person
+            LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
+            LEFT JOIN InventoryItem ON InventoryItem.inventoryItemUid = 0
+            LEFT JOIN Product ON Product.productUid = :productUid
+            LEFT JOIN SaleDelivery ON SaleDelivery.saleDeliveryUid = :saleDeliveryUid
+            WHERE
+                CAST(Person.admin AS INTEGER) = 0 AND
+                CAST(Person.active AS INTEGER) = 1 AND
+                (Person.personUid IN (
+                    SELECT MEMBER.personUid FROM PersonGroupMember 
+                    LEFT JOIN PERSON AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
+                     WHERE groupMemberGroupUid = MLE.personWeGroupUid 
+                    AND CAST(groupMemberActive  AS INTEGER) = 1 ) 
+                    OR 
+                    CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END )
+            
         """
 
         const val QUERY_GET_STOCK_LIST_BY_PRODUCT = """
@@ -99,6 +142,7 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
                 AND CAST(inventoryItemActive AS INTEGER) = 1 
             GROUP BY inventoryItemDateAdded
         """
+
 
 
     }

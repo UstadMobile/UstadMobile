@@ -8,7 +8,7 @@
 
         <variable
             name="saleDelivery"
-            type="com.ustadmobile.lib.db.entities.SaleDelivery" />
+            type="com.ustadmobile.lib.db.entities.SaleDeliveryAndItems" />
 
         <variable
             name="loading"
@@ -39,15 +39,16 @@
 
 
             <androidx.recyclerview.widget.RecyclerView
-                android:layout_marginTop="@dimen/dimen_8dp"
-                android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:id="@+id/fragment_sale_delivery_edit_items_rv"
-                tools:itemCount="2"
-                tools:listitem="@layout/item_saleitemwithproducerinventoryselection"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                tools:itemCount="2"
+                android:layout_marginBottom="@dimen/dimen_64dp"
+                tools:listitem="@layout/item_saleitemwithproducerinventoryselection" />
 
 
         </androidx.constraintlayout.widget.ConstraintLayout>

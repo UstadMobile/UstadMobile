@@ -95,18 +95,18 @@ class InventoryItemEditPresenter(context: Any,
         GlobalScope.launch() {
 
             val itemsToUpdate = producerSelectionEditHelper.entitiesToUpdate
+            val commonDate = UMCalendarUtil.getDateInMilliPlusDays(0)
 
             for(producerInventory in itemsToUpdate){
                 val newInventory = InventoryItem().apply{
                     inventoryItemProductUid = productUid
                     inventoryItemLeUid = loggedInPersonUid
                     inventoryItemWeUid = producerInventory.personUid
-                    inventoryItemDateAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
+                    inventoryItemDateAdded = commonDate
                     inventoryItemQuantity = producerInventory.selectedStock?.toLong()?:0L
                     inventoryItemUid = repo.inventoryItemDao.insertAsync(this)
                 }
             }
-
 
             view.runOnUiThread(Runnable {
                 view.finishWithResult(listOf(entity))

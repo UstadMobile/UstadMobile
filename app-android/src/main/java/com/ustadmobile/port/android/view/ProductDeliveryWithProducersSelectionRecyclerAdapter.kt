@@ -7,12 +7,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemSaleitemwithproducerinventoryselectionBinding
-import com.ustadmobile.lib.db.entities.SaleItemWithProduct
+import com.ustadmobile.lib.db.entities.ProductDeliveryWithProductAndTransactions
 
 
-class SaleItemWithProducerInventorySelectionRecyclerAdapter()
-    : ListAdapter<SaleItemWithProduct,
-        SaleItemWithProducerInventorySelectionRecyclerAdapter.InventoryTransactionDetailHolder>(DIFF_CALLBACK) {
+class ProductDeliveryWithProducersSelectionRecyclerAdapter()
+    : ListAdapter<ProductDeliveryWithProductAndTransactions,
+        ProductDeliveryWithProducersSelectionRecyclerAdapter.InventoryTransactionDetailHolder>(DIFF_CALLBACK) {
 
     class InventoryTransactionDetailHolder(val itemBinding: ItemSaleitemwithproducerinventoryselectionBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
@@ -25,7 +25,7 @@ class SaleItemWithProducerInventorySelectionRecyclerAdapter()
 
     override fun onBindViewHolder(holder: InventoryTransactionDetailHolder, position: Int) {
         val item = getItem(position)
-        holder.itemBinding.saleItem = item
+        holder.itemBinding.productDeets = item
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -33,17 +33,17 @@ class SaleItemWithProducerInventorySelectionRecyclerAdapter()
     }
 
     companion object {
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleItemWithProduct> = object
-            : DiffUtil.ItemCallback<SaleItemWithProduct>() {
-            override fun areItemsTheSame(oldItem: SaleItemWithProduct,
-                                         newItem: SaleItemWithProduct): Boolean {
-                return oldItem.saleItemUid == newItem.saleItemUid
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<ProductDeliveryWithProductAndTransactions> = object
+            : DiffUtil.ItemCallback<ProductDeliveryWithProductAndTransactions>() {
+            override fun areItemsTheSame(oldItem: ProductDeliveryWithProductAndTransactions,
+                                         newItem: ProductDeliveryWithProductAndTransactions): Boolean {
+                return oldItem.productUid == newItem.productUid
 
             }
 
-            override fun areContentsTheSame(oldItem: SaleItemWithProduct,
-                                            newItem: SaleItemWithProduct): Boolean {
-                return oldItem == newItem
+            override fun areContentsTheSame(oldItem: ProductDeliveryWithProductAndTransactions,
+                                            newItem: ProductDeliveryWithProductAndTransactions): Boolean {
+                return oldItem === newItem
 
             }
         }

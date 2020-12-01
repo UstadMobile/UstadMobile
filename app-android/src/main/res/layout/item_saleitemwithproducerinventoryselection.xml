@@ -5,19 +5,14 @@
 
     <data>
         <variable
-            name="saleItem"
-            type="com.ustadmobile.lib.db.entities.SaleItemWithProduct" />
-
-        <variable
-            name="listener"
-            type="com.ustadmobile.core.controller.SaleItemListItemListener" />
+            name="productDeets"
+            type="com.ustadmobile.lib.db.entities.ProductDeliveryWithProductAndTransactions" />
 
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> listener.onClickSaleItem(saleItem)}"
         android:background="?attr/selectableItemBackground"
         >
 
@@ -38,27 +33,14 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_8dp"
             android:lines="1"
-            android:text="@{saleItem.saleItemProduct.productName}"
+            android:text="@{productDeets.productName}"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             app:layout_constraintBottom_toBottomOf="@+id/item_sale_item_image"
-            app:layout_constraintEnd_toStartOf="@+id/item_saleitemwithproducer_expand_iv"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/item_sale_item_image"
             app:layout_constraintTop_toTopOf="@+id/item_sale_item_image"
-            tools:text="Pink Hat" />
-
-
-<ImageView
-    android:id="@+id/item_saleitemwithproducer_expand_iv"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:src="@drawable/ic_arrow_downward_24"
-    app:layout_constraintStart_toEndOf="@+id/item_sale_item_name"
-    app:layout_constraintTop_toTopOf="@+id/item_sale_item_image"
-    app:layout_constraintBottom_toBottomOf="@+id/item_sale_item_image"
-    app:layout_constraintEnd_toEndOf="parent"
-    android:layout_marginHorizontal="@dimen/dimen_16dp"
-    />
-
+            app:productNameWithItemCount="@{productDeets}"
+            tools:text="Pink Hat (10 items)" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>
