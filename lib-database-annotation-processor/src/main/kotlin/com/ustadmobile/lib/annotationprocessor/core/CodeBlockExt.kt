@@ -458,5 +458,6 @@ internal fun CodeBlock.Builder.addKtorRequestForFunction(
  * Shorthand to begin a runBlocking control flow
  */
 fun CodeBlock.Builder.beginRunBlockingControlFlow() =
-        beginControlFlow("%M ",
-                MemberName("kotlinx.coroutines", "runBlocking"))
+        add("%M·{\n", MemberName("kotlinx.coroutines", "runBlocking"))
+                .indent()
+
