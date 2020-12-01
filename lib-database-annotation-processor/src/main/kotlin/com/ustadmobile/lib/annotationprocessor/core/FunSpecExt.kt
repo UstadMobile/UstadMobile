@@ -44,6 +44,27 @@ fun FunSpec.isQueryWithSyncableResults(processingEnv: ProcessingEnvironment) =
         returnType?.hasSyncableEntities(processingEnv) == true
 
 /**
+ * Shorthand to check if this FunSpec is annotated with @Query and is a query that will
+ * modify the database (e.g. it runs UPDATE, DELETE, or INSERT)
+ */
+val FunSpec.isAQueryThatModifiesTables: Boolean
+    get() = hasAnnotation(Query::class.java) && daoQuerySql().isSQLAModifyingQuery()
+
+/**
+ * Where this FunSpec represents a DAO annotated by with @Query, this function will determine
+ * what entities (if any) it modifies.
+ */
+fun FunSpec.getDaoFunEntityModifiedByQuery(allKnownEntityTypesMap: Map<String, TypeElement>): ClassName? {
+    val modifiedEntityName = findEntityModifiedByQuery(daoQuerySql(), allKnownEntityTypesMap.keys.toList())
+    if(modifiedEntityName != null) {
+        return allKnownEntityTypesMap[modifiedEntityName]?.asClassName()
+    }else {
+        return null
+    }
+}
+
+
+/**
  * Gets a list of the syncable entities that are used in the given FunSpec where this is a DAO
  * function.
  * For functions annotated with Query, this will return any syncable entities that are in the
@@ -83,3 +104,12 @@ val FunSpec.isSuspended: Boolean
  */
 val FunSpec.hasReturnType: Boolean
     get() = returnType != null && returnType != UNIT
+
+/**
+ * Shorthand to get the type of entity component type for an update, insert, or delete function. This
+ * will unwrap list or arrays to give the actual component (singular) type name
+ */
+val FunSpec.entityParamComponentType: TypeName
+    get() = parameters.first().type.unwrapListOrArrayComponentType()
+
+

@@ -431,6 +431,7 @@ private fun TypeSpec.Builder.addRepoDbDaoAccessor(daoGetter: ExecutableElement,
 fun FileSpec.Builder.addDaoRepoType(daoTypeSpec: TypeSpec,
                                     daoClassName: ClassName,
                                     processingEnv: ProcessingEnvironment,
+                                    allKnownEntityTypesMap: Map<String, TypeElement>,
                                     pagingBoundaryCallbackEnabled: Boolean = false,
                                     isAlwaysSqlite: Boolean = false,
                                     extraConstructorParams: List<ParameterSpec> = listOf()): FileSpec.Builder {
@@ -515,7 +516,7 @@ fun FileSpec.Builder.addDaoRepoType(daoTypeSpec: TypeSpec,
             .apply {
                 daoTypeSpec.funSpecs.forEach {
                     addDaoRepoFun(it, daoClassName.simpleName, processingEnv,
-                            pagingBoundaryCallbackEnabled, isAlwaysSqlite)
+                            allKnownEntityTypesMap, pagingBoundaryCallbackEnabled, isAlwaysSqlite)
                 }
             }
             .build())
@@ -535,6 +536,7 @@ fun FileSpec.Builder.addDaoRepoType(daoTypeSpec: TypeSpec,
 fun TypeSpec.Builder.addDaoRepoFun(daoFunSpec: FunSpec,
                                    daoName: String,
                                    processingEnv: ProcessingEnvironment,
+                                   allKnownEntityTypesMap: Map<String, TypeElement>,
                                    pagingBoundaryCallbackEnabled: Boolean,
                                    isAlwaysSqlite: Boolean = false) : TypeSpec.Builder {
 
@@ -568,8 +570,13 @@ fun TypeSpec.Builder.addDaoRepoFun(daoFunSpec: FunSpec,
                                 addReturnDaoResult = !generateBoundaryCallback)
                     }
                     Repository.METHOD_DELEGATE_TO_DAO -> {
-                        addRepoDelegateToDaoCode(daoFunSpec, isAlwaysSqlite, processingEnv)
+                        addRepoDelegateToDaoCode(daoFunSpec, isAlwaysSqlite, processingEnv,
+                                allKnownEntityTypesMap)
                     }
+                    Repository.METHOD_DELEGATE_TO_WEB -> {
+                        addDelegateToWebCode(daoFunSpec, daoName)
+                    }
+
                 }
             }.build())
             .build())
@@ -622,7 +629,7 @@ fun CodeBlock.Builder.addRepositoryGetSyncableEntitiesCode(daoFunSpec: FunSpec, 
 
     add("val _httpResult = ")
     addKtorRequestForFunction(daoFunSpec, dbPathVarName = "_dbPath", daoName = daoName,
-        httpEndpointVarName = "_endpointToTry")
+        httpEndpointVarName = "_endpointToTry", addClientIdHeaderVar = "_clientId")
     addReplaceSyncableEntitiesIntoDbCode("_httpResult",
             daoFunSpec.returnType!!.unwrapLiveDataOrDataSourceFactory(), processingEnv,
                 daoName = daoName)
@@ -768,7 +775,8 @@ fun CodeBlock.Builder.addReplaceSyncableEntitiesIntoDbCode(resultVarName: String
  * TODO: Update last changed by field, return primary key values from pk manager if applicable
  */
 fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqlite: Boolean,
-                                   processingEnv: ProcessingEnvironment) : CodeBlock.Builder{
+                                   processingEnv: ProcessingEnvironment,
+                                   allKnownEntityTypesMap: Map<String, TypeElement>) : CodeBlock.Builder{
 
     var syncableEntityInfo: SyncableEntityInfo? = null
     if(daoFunSpec.hasAnyAnnotation(Update::class.java, Delete::class.java, Insert::class.java)) {
@@ -781,21 +789,26 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
                         MemberName("com.ustadmobile.door.ext", "syncableAndPrimary"))
             }
 
-            if(entityParam.type.isListOrArray()) {
-                beginControlFlow("${entityParam.name}.forEach")
-            }
-
             if(daoFunSpec.hasAnnotation(Update::class.java)) {
+                var entityVarName = entityParam.name
+                if(entityParam.type.isListOrArray()) {
+                    beginControlFlow("${entityParam.name}.forEach")
+                    entityVarName = "it"
+                }
+
+                add("$entityVarName.${syncableEntityInfo.entityLastChangedByField.name} = _clientId\n")
                 beginControlFlow("if(_isSyncablePrimary)")
-                add("${entityParam.name}.${syncableEntityInfo.entityMasterCsnField.name} = 0\n")
+                add("$entityVarName.${syncableEntityInfo.entityMasterCsnField.name} = 0\n")
                 nextControlFlow("else")
-                add("${entityParam.name}.${syncableEntityInfo.entityLocalCsnField.name} = 0\n")
+                add("$entityVarName.${syncableEntityInfo.entityLocalCsnField.name} = 0\n")
                 endControlFlow()
+
+                if(entityParam.type.isListOrArray()) {
+                    endControlFlow()
+                }
             }
 
-            if(entityParam.type.isListOrArray()) {
-                endControlFlow()
-            }
+
 
             //Use the SQLite Primary key manager if this is an SQLite insert
             if(daoFunSpec.hasAnnotation(Insert::class.java)) {
@@ -815,10 +828,12 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
                     }
 
                     beginControlFlow("${entityParam.name}.forEach")
+                    add("it.${syncableEntityInfo.entityLastChangedByField.name} = _clientId\n")
                     add("it.takeIf { it.${syncableEntityInfo.entityPkField.name} == 0L}?." +
                             "${syncableEntityInfo.entityPkField.name} = _nextPk++\n")
                     endControlFlow()
                 }else {
+                    add("${entityParam.name}.${syncableEntityInfo.entityLastChangedByField.name} = _clientId\n")
                     add("${entityParam.name}.takeIf { it.${syncableEntityInfo.entityPkField.name} == 0L }" +
                             "?.${syncableEntityInfo.entityPkField.name} = ")
 
@@ -830,7 +845,6 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
 
                     if(!daoFunSpec.isSuspended)
                         endControlFlow()
-
                 }
 
                 if(!isAlwaysSqlite)
@@ -840,13 +854,31 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
         }
     }
 
-    if(daoFunSpec.returnType != UNIT)
+
+
+    if(daoFunSpec.hasReturnType)
         add("val _result = ")
 
     add("_dao.${daoFunSpec.name}(")
             .add(daoFunSpec.parameters.joinToString { it.name })
             .add(")\n")
 
+    //Check if a table is modified by this query
+    val tableChanged = if(daoFunSpec.hasAnyAnnotation(Update::class.java, Insert::class.java,
+            Delete::class.java)) {
+        (daoFunSpec.entityParamComponentType as ClassName).simpleName
+    }else if(daoFunSpec.isAQueryThatModifiesTables){
+        daoFunSpec.getDaoFunEntityModifiedByQuery(allKnownEntityTypesMap)
+    }else {
+        null
+    }
+
+    if(tableChanged != null) {
+        add("_repo")
+        if(daoFunSpec.isAQueryThatModifiesTables && daoFunSpec.hasReturnType)
+            add(".takeIf { result > 0 }?")
+        add(".handleTableChanged(%S)\n", tableChanged)
+    }
 
     if(daoFunSpec.hasReturnType && daoFunSpec.hasAnnotation(Insert::class.java)
             && syncableEntityInfo != null) {
@@ -876,6 +908,23 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
     return this
 }
 
+fun CodeBlock.Builder.addDelegateToWebCode(daoFunSpec: FunSpec, daoName: String) : CodeBlock.Builder {
+    if(daoFunSpec.hasReturnType) {
+        add("return ")
+    }
+
+    if(!daoFunSpec.isSuspended) {
+        beginRunBlockingControlFlow()
+    }
+
+    addKtorRequestForFunction(daoFunSpec, dbPathVarName = "_dbPath", daoName = daoName)
+
+    if(!daoFunSpec.isSuspended) {
+        endControlFlow()
+    }
+
+    return this
+}
 class DbProcessorRepository: AbstractDbProcessor() {
 
     override fun process(annotations: MutableSet<out TypeElement>, roundEnv: RoundEnvironment): Boolean {
@@ -907,7 +956,8 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         "${daoTypeEl.simpleName}$SUFFIX_REPOSITORY2")
                         .addDaoRepoType(daoTypeEl.asTypeSpecStub(processingEnv,
                                 convertToImplementationStub = true),
-                            daoTypeEl.asClassName(), processingEnv)
+                            daoTypeEl.asClassName(), processingEnv,
+                            allKnownEntityTypesMap = allKnownEntityTypesMap)
                         .build()
                         .writeToDirsFromArg(OPTION_JVM_DIRS)
 //                writeFileSpecToOutputDirs(generateDaoRepositoryClass(daoTypeEl),

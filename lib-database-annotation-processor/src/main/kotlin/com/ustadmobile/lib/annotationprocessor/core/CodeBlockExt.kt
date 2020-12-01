@@ -352,7 +352,8 @@ internal fun CodeBlock.Builder.addKtorRequestForFunction(
                                                    useKotlinxListSerialization: Boolean = false,
                                                    kotlinxSerializationJsonVarName: String = "",
                                                    useMultipartPartsVarName: String? = null,
-                                                   addDbVersionParamName: String? = "_db"): CodeBlock.Builder {
+                                                   addDbVersionParamName: String? = "_db",
+                                                   addClientIdHeaderVar: String? = null): CodeBlock.Builder {
 
     //Begin creation of the HttpStatement call that will set the URL, parameters, etc.
     val nonQueryParams =  funSpec.parameters.filter { !it.type.isHttpQueryQueryParam() }
@@ -380,13 +381,15 @@ internal fun CodeBlock.Builder.addKtorRequestForFunction(
     add("%M($httpEndpointVarName)\n", MemberName("io.ktor.http", "takeFrom"))
     add("encodedPath = \"\${encodedPath}\${$dbPathVarName}/%L/%L\"\n", daoName, funSpec.name)
     endControlFlow()
-    //add(requestBuilderCodeBlock)
-
-
 
     if(addDbVersionParamName != null) {
         add("%M($addDbVersionParamName)\n",
                 MemberName("com.ustadmobile.door.ext", "dbVersionHeader"))
+    }
+
+    if(addClientIdHeaderVar != null) {
+        add("%M(%S, $addClientIdHeaderVar)\n", MemberName("io.ktor.client.request", "header"),
+                "x-nid")
     }
 
     funSpec.parameters.filter { it.type.isHttpQueryQueryParam() }.forEach {
