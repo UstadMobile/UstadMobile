@@ -88,4 +88,7 @@ abstract class SyncHelperEntitiesDao : ISyncHelperEntitiesDao {
     @Query("UPDATE SqliteSyncablePk SET sspNextPrimaryKey = sspNextPrimaryKey + :increment WHERE sspTableId = :tableId")
     override abstract suspend fun incrementNextSqliteSyncablePk(tableId: Int, increment: Int)
 
+    @Query("SELECT nodeClientId FROM SyncNode LIMIT 1")
+    override abstract fun findSyncNodeClientId(): Int
+
 }

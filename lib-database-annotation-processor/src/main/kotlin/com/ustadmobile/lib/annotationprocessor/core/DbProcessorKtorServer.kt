@@ -340,7 +340,11 @@ fun CodeBlock.Builder.addKtorRouteSelectCodeBlock(daoMethod: FunSpec, processing
 
     if(syncableEntitiesList.isNotEmpty()) {
         addGetClientIdHeader("__clientId", serverType)
-        queryVarsList  += ParameterSpec.builder("clientId", INT).build()
+
+        //it is possible that clientId is already a parameter of the function (eg synchelper etc).
+        // We should not add it twice.
+        if(!daoMethod.parameters.any { it.name == "clientId" })
+            queryVarsList  += ParameterSpec.builder("clientId", INT).build()
     }
 
     if(serverType != SERVER_TYPE_NANOHTTPD)
@@ -588,6 +592,10 @@ fun FunSpec.toKtorHelperFunSpec(overrides: Boolean = false,
                                 isAbstract: Boolean = true) : FunSpec {
     val resultType = this.returnType?.unwrapLiveDataOrDataSourceFactory()
     return this.toBuilder()
+            .apply {
+                //Override must be set explicitly, so remove it if it is present
+                modifiers.remove(KModifier.OVERRIDE)
+            }
             .applyIf(annotationSpecs != null) {
                 annotations.clear()
                 annotationSpecs?.also  { annotations.addAll(it) }
@@ -601,8 +609,9 @@ fun FunSpec.toKtorHelperFunSpec(overrides: Boolean = false,
             .applyIf(this.returnType?.isDataSourceFactory() ==true) {
                 addParameter(PARAM_NAME_OFFSET, INT)
                 addParameter(PARAM_NAME_LIMIT, INT)
+            }.applyIf(!parameters.any { it.name == "clientId" }) {
+                addParameter("clientId", INT)
             }
-            .addParameter("clientId", INT)
             .apply {
                 if(resultType != null)
                     returns(resultType.copy(nullable = resultType.isNullableAsSelectReturnResult))

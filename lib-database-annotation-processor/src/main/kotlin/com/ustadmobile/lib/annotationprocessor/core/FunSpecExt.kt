@@ -113,3 +113,13 @@ val FunSpec.entityParamComponentType: TypeName
     get() = parameters.first().type.unwrapListOrArrayComponentType()
 
 
+/**
+ * Shorthand to make the function non-abstract
+ */
+fun FunSpec.Builder.removeAbstractModifier(): FunSpec.Builder {
+    if(KModifier.ABSTRACT in modifiers)
+        modifiers.remove(KModifier.ABSTRACT)
+
+    return this
+}
+

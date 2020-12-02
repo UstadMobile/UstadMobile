@@ -63,4 +63,9 @@ interface ISyncHelperEntitiesDao {
 
     suspend fun incrementNextSqliteSyncablePk(tableId: Int, increment: Int)
 
+    /**
+     * Get the clientId for this instance of the database
+     */
+    fun findSyncNodeClientId(): Int
+
 }

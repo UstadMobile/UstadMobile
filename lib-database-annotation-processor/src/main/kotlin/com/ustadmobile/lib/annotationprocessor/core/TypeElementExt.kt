@@ -205,15 +205,12 @@ fun TypeElement.allDaoQueryMethods() = allMethodsWithAnnotation(ALL_QUERY_ANNOTA
  * SyncDaos etc). This extension function converts a TypeElement from the annotation processor
  * environment into an equivalent TypeSpec.
  *
- * @param convertToImplementationStub if true, this will generate FunSpecs as they need to be for
- * implementation by removing the abstract modifier and adding an override modifier
  */
-fun TypeElement.asTypeSpecStub(processingEnv: ProcessingEnvironment,
-        convertToImplementationStub: Boolean = false): TypeSpec {
+fun TypeElement.asTypeSpecStub(processingEnv: ProcessingEnvironment): TypeSpec {
     val declaredType = this.asType() as DeclaredType
     val thisTypeEl = this
     return TypeSpec.classBuilder(asClassName())
-            .applyIf(!convertToImplementationStub && Modifier.ABSTRACT in modifiers) {
+            .applyIf(Modifier.ABSTRACT in modifiers) {
                 addModifiers(KModifier.ABSTRACT)
             }
             .apply {
@@ -223,11 +220,7 @@ fun TypeElement.asTypeSpecStub(processingEnv: ProcessingEnvironment,
 
                     addFunction(executableEl.asFunSpecConvertedToKotlinTypes(declaredType,
                         processingEnv, forceNullableReturn = returnTypeName.isNullableAsSelectReturnResult,
-                        forceNullableParameterTypeArgs = returnTypeName.isNullableParameterTypeAsSelectReturnResult,
-                        ignoreAbstract = convertToImplementationStub)
-                            .applyIf(convertToImplementationStub) {
-                                addModifiers(KModifier.OVERRIDE)
-                            }
+                        forceNullableParameterTypeArgs = returnTypeName.isNullableParameterTypeAsSelectReturnResult)
                             .build())
                 }
             }
@@ -260,3 +253,11 @@ fun TypeElement.daoSyncableEntitiesInSelectResults(processingEnv: ProcessingEnvi
 fun TypeElement.isDaoThatRequiresSyncHelper(processingEnv: ProcessingEnvironment): Boolean {
     return daoSyncableEntitiesInSelectResults(processingEnv).isNotEmpty()
 }
+
+fun TypeElement.dbEnclosedDaos(processingEnv: ProcessingEnvironment) : List<TypeElement> {
+    return enclosedElements
+            .filter { it.kind == ElementKind.METHOD && Modifier.ABSTRACT in it.modifiers}
+            .mapNotNull { (it as ExecutableElement).returnType.asTypeElement(processingEnv) }
+            .filter { it.hasAnnotation(Dao::class.java) }
+}
+

@@ -300,7 +300,7 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                             .build())
                     .build())
                 addProperty(PropertySpec.builder("_clientId", INT)
-                        .delegate("lazy { _syncDao._findSyncNodeClientId() }").build())
+                        .delegate("lazy { _syncHelperEntitiesDao.findSyncNodeClientId() }").build())
                 addProperty(PropertySpec.builder("_clientIdFn",
                         LambdaTypeName.get(parameters = *arrayOf(DoorDatabase::class.asClassName()),
                                 returnType = Int::class.asClassName()))
@@ -319,7 +319,7 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                         .delegate(CodeBlock.builder().beginControlFlow("lazy")
                                 .add("%T(_db, this, _syncDao, _httpClient, _clientIdFn, _endpoint," +
                                         " ${DbProcessorRepository.DB_NAME_VAR}, _attachmentsDir," +
-                                        " _updateNotificationManager) ",
+                                        " _syncDao) ",
                                         dbTypeElement
                                                 .asClassNameWithSuffix("$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_REPOSITORY2"))
                                 .endControlFlow().build())
@@ -334,7 +334,8 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                 addFunction(FunSpec.builder("dispatchUpdateNotifications")
                         .addParameter("tableId", INT)
                         .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                        .addCode("${dbTypeElement.syncDaoPropName}.dispatchUpdateNotifications(tableId)\n")
+                        //TODO: Implement this
+                        //.addCode("${dbTypeElement.syncDaoPropName}.dispatchUpdateNotifications(tableId)\n")
                         .build())
                 addProperty(PropertySpec.builder("_sqlitePkManager",
                             DoorSqlitePrimaryKeyManager::class)
@@ -437,7 +438,8 @@ fun FileSpec.Builder.addDaoRepoType(daoTypeSpec: TypeSpec,
                                     allKnownEntityTypesMap: Map<String, TypeElement>,
                                     pagingBoundaryCallbackEnabled: Boolean = false,
                                     isAlwaysSqlite: Boolean = false,
-                                    extraConstructorParams: List<ParameterSpec> = listOf()): FileSpec.Builder {
+                                    extraConstructorParams: List<ParameterSpec> = listOf(),
+                                    syncHelperClassName: ClassName = daoClassName.withSuffix("_SyncHelper")): FileSpec.Builder {
     val idGetterLambdaType = LambdaTypeName.get(
             parameters = *arrayOf(DoorDatabase::class.asClassName()), returnType = Int::class.asClassName())
 
@@ -464,7 +466,7 @@ fun FileSpec.Builder.addDaoRepoType(daoTypeSpec: TypeSpec,
                     .initializer("_attachmentsDir").build())
             .applyIf(daoTypeSpec.isDaoWithSyncableEntitiesInSelectResults(processingEnv)) {
                 addProperty(PropertySpec.builder("_syncHelper",
-                        daoClassName.withSuffix("_SyncHelper"))
+                        syncHelperClassName)
                         .initializer("_syncHelper")
                         .build())
             }
@@ -486,7 +488,7 @@ fun FileSpec.Builder.addDaoRepoType(daoTypeSpec: TypeSpec,
                         takeIf { extraConstructorParams.isNotEmpty() }?.addParameters(extraConstructorParams)
                     }
                     .applyIf(daoTypeSpec.isDaoWithSyncableEntitiesInSelectResults(processingEnv)) {
-                        addParameter("_syncHelper", daoClassName.withSuffix("_SyncHelper"))
+                        addParameter("_syncHelper", syncHelperClassName)
                     }
                     .build())
             //TODO: Ideally check and see if any of the return function types are DataSource.Factory
@@ -565,6 +567,8 @@ fun TypeSpec.Builder.addDaoRepoFun(daoFunSpec: FunSpec,
     }
 
     addFunction(daoFunSpec.toBuilder()
+            .removeAbstractModifier()
+            .addModifiers(KModifier.OVERRIDE)
             .addCode(CodeBlock.builder().apply {
                 when(repoMethodType) {
                     Repository.METHOD_SYNCABLE_GET -> {
@@ -988,8 +992,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
             if(daoTypeEl.isDaoWithRepository) {
                 FileSpec.builder(daoElement.packageName,
                         "${daoTypeEl.simpleName}$SUFFIX_REPOSITORY2")
-                        .addDaoRepoType(daoTypeEl.asTypeSpecStub(processingEnv,
-                                convertToImplementationStub = true),
+                        .addDaoRepoType(daoTypeEl.asTypeSpecStub(processingEnv),
                             daoTypeEl.asClassName(), processingEnv,
                             allKnownEntityTypesMap = allKnownEntityTypesMap)
                         .build()
@@ -997,8 +1000,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
                 FileSpec.builder(daoElement.packageName,
                         "${daoTypeEl.simpleName}$SUFFIX_REPOSITORY2")
-                        .addDaoRepoType(daoTypeEl.asTypeSpecStub(processingEnv,
-                                convertToImplementationStub = true),
+                        .addDaoRepoType(daoTypeEl.asTypeSpecStub(processingEnv),
                                 daoTypeEl.asClassName(), processingEnv,
                                 allKnownEntityTypesMap = allKnownEntityTypesMap,
                                 pagingBoundaryCallbackEnabled = true,
