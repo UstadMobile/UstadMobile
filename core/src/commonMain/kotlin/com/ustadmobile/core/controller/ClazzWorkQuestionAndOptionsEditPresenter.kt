@@ -79,7 +79,8 @@ class ClazzWorkQuestionAndOptionsEditPresenter(context: Any,
             clazzWorkQuestionOptionActive = true
         }
         val currentList =
-                view.clazzWorkQuestionOptionList?.getValue()?.toMutableList()?:mutableListOf<ClazzWorkQuestionOption>()
+                view.clazzWorkQuestionOptionList?.getValue()?.toMutableList()?:mutableListOf<
+                        ClazzWorkQuestionOption>()
         val newList = currentList + mutableListOf(clazzWorkQuestionOption)
         view.clazzWorkQuestionOptionList?.setVal(newList)
     }
@@ -93,7 +94,8 @@ class ClazzWorkQuestionAndOptionsEditPresenter(context: Any,
             currentList.removeAll { it === deleteMe }
             view.clazzWorkQuestionOptionList?.sendValue(currentList)
         }else{
-            val currentDeleteList = view.clazzWorkQuestionOptionDeactivateList?.getValue()?.toMutableList()
+            val currentDeleteList =
+                    view.clazzWorkQuestionOptionDeactivateList?.getValue()?.toMutableList()
                     ?: mutableListOf()
             val newList =  currentDeleteList + listOf(deleteMe)
             view.clazzWorkQuestionOptionDeactivateList?.sendValue(newList)

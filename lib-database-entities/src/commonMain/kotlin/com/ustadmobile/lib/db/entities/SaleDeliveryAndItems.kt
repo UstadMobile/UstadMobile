@@ -4,10 +4,8 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class SaleDeliveryAndItems() {
-
-    @Embedded
-    var delivery: SaleDelivery? = null
-    var saleItems: List<SaleItemWithProduct> = listOf()
-
-}
+data class SaleDeliveryAndItems(
+        var delivery: SaleDelivery = SaleDelivery(),
+        var saleItems: List<SaleItemWithProduct> = listOf(),
+        var deliveryDetails: List<ProductDeliveryWithProductAndTransactions> = mutableListOf()
+)

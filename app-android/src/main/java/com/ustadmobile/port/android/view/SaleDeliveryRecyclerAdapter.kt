@@ -10,10 +10,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemSaledeliveryBinding
 import com.ustadmobile.core.controller.SaleDeliveryItemListener
 import com.ustadmobile.lib.db.entities.SaleDelivery
+import com.ustadmobile.lib.db.entities.SaleDeliveryAndItems
 
 
 class SaleDeliveryRecyclerAdapter(var itemListener: SaleDeliveryItemListener?)
-    : ListAdapter<SaleDelivery,
+    : ListAdapter<SaleDeliveryAndItems,
         SaleDeliveryRecyclerAdapter.InventoryTransactionDetailHolder>(DIFF_CALLBACK) {
 
     class InventoryTransactionDetailHolder(val itemBinding: ItemSaledeliveryBinding)
@@ -29,7 +30,6 @@ class SaleDeliveryRecyclerAdapter(var itemListener: SaleDeliveryItemListener?)
     override fun onBindViewHolder(holder: InventoryTransactionDetailHolder, position: Int) {
         val item = getItem(position)
         holder.itemBinding.saleDelivery = item
-        //holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -38,16 +38,16 @@ class SaleDeliveryRecyclerAdapter(var itemListener: SaleDeliveryItemListener?)
     }
 
     companion object {
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleDelivery> = object
-            : DiffUtil.ItemCallback<SaleDelivery>() {
-            override fun areItemsTheSame(oldItem: SaleDelivery,
-                                         newItem: SaleDelivery): Boolean {
-                return oldItem.saleDeliveryUid == newItem.saleDeliveryUid
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<SaleDeliveryAndItems> = object
+            : DiffUtil.ItemCallback<SaleDeliveryAndItems>() {
+            override fun areItemsTheSame(oldItem: SaleDeliveryAndItems,
+                                         newItem: SaleDeliveryAndItems): Boolean {
+                return oldItem.delivery?.saleDeliveryUid == newItem.delivery?.saleDeliveryUid
 
             }
 
-            override fun areContentsTheSame(oldItem: SaleDelivery,
-                                            newItem: SaleDelivery): Boolean {
+            override fun areContentsTheSame(oldItem: SaleDeliveryAndItems,
+                                            newItem: SaleDeliveryAndItems): Boolean {
                 return oldItem == newItem
             }
         }

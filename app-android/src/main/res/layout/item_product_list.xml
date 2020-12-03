@@ -81,17 +81,19 @@
             app:srcCompat="@drawable/ic_location_pin_24dp" />
 
         <TextView
-            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:id="@+id/item_school_list_item_location_name"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_8dp"
-            android:layout_marginTop="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_4dp"
             android:text="@{product.productDesc}"
+            android:layout_marginEnd="@dimen/dimen_16dp"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(product.productDesc)}"
-            tools:text="These are pink hats"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/item_school_list_item_location_iv"
-            app:layout_constraintTop_toBottomOf="@+id/barrierLoc" />
+            app:layout_constraintTop_toBottomOf="@+id/barrierLoc"
+            tools:text="These are pink hats" />
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/barrierMemberDetails"
@@ -120,7 +122,6 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/dimen_8dp"
             android:layout_marginBottom="@dimen/dimen_8dp"
-            android:layout_marginTop="@dimen/dimen_8dp"
             android:text="@{@string/x_in_stock(product.stock)}"
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
             app:layout_constraintBottom_toBottomOf="parent"

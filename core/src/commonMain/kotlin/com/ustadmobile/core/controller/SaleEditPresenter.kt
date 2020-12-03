@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.SaleEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
@@ -13,7 +14,9 @@ import com.ustadmobile.lib.db.entities.SaleWithCustomerAndLocation
 import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 import com.ustadmobile.lib.db.entities.SaleDelivery
+import com.ustadmobile.lib.db.entities.SaleDeliveryAndItems
 import com.ustadmobile.lib.db.entities.SalePayment
+import com.ustadmobile.lib.db.entities.SalePaymentWithSaleItems
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -31,7 +34,8 @@ class SaleEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
     //Sale Item edit helper
-    val saleItemEditHelper = DefaultOneToManyJoinEditHelper<SaleItemWithProduct>(SaleItemWithProduct::saleItemUid,
+    val saleItemEditHelper = DefaultOneToManyJoinEditHelper<SaleItemWithProduct>(di,
+            SaleItemWithProduct::saleItemUid,
             "SaleItem", SaleItemWithProduct.serializer().list,
             SaleItemWithProduct.serializer().list, this) { saleItemUid = it }
 
@@ -43,30 +47,34 @@ class SaleEditPresenter(context: Any,
         saleItemEditHelper.onDeactivateEntity(saleItem)
     }
 
-    //Sale Delivery edit helper
-    val saleDeliveryEditHelper = DefaultOneToManyJoinEditHelper<SaleDelivery>(SaleDelivery::saleDeliveryUid,
-            "SaleDelivery", SaleDelivery.serializer().list,
-            SaleDelivery.serializer().list, this) { saleDeliveryUid = it }
 
-    fun handleAddOrEditSaleDelivery(saleDelivery: SaleDelivery) {
+
+    //Sale Delivery edit helper
+    val saleDeliveryEditHelper = DefaultOneToManyJoinEditHelper<SaleDeliveryAndItems>(di,
+            {it.delivery?.saleDeliveryUid?:0L},
+            "SaleDeliveryAndItems", SaleDeliveryAndItems.serializer().list,
+            SaleDeliveryAndItems.serializer().list, this) { delivery?.saleDeliveryUid = it }
+
+    fun handleAddOrEditSaleDelivery(saleDelivery: SaleDeliveryAndItems) {
         saleDeliveryEditHelper.onEditResult(saleDelivery)
     }
 
-    fun handleRemoveSaleDelivery(saleDelivery: SaleDelivery) {
+    fun handleRemoveSaleDelivery(saleDelivery: SaleDeliveryAndItems) {
         saleDeliveryEditHelper.onDeactivateEntity(saleDelivery)
     }
 
 
     //Sale Payment edit helper
-    val salePaymentEditHelper = DefaultOneToManyJoinEditHelper<SalePayment>(SalePayment::salePaymentUid,
-            "SalePayment", SalePayment.serializer().list,
-            SalePayment.serializer().list, this) { salePaymentUid = it }
+    val salePaymentEditHelper = DefaultOneToManyJoinEditHelper<SalePaymentWithSaleItems>(
+            di, { it.payment?.salePaymentUid?:0L },
+            "SalePaymentWithSaleItems", SalePaymentWithSaleItems.serializer().list,
+            SalePaymentWithSaleItems.serializer().list, this) { payment?.salePaymentUid = it }
 
-    fun handleAddOrEditSalePayment(salePayment: SalePayment) {
+    fun handleAddOrEditSalePayment(salePayment: SalePaymentWithSaleItems) {
         salePaymentEditHelper.onEditResult(salePayment)
     }
 
-    fun handleRemoveSalePayment(salePayment: SalePayment) {
+    fun handleRemoveSalePayment(salePayment: SalePaymentWithSaleItems) {
         salePaymentEditHelper.onDeactivateEntity(salePayment)
     }
 
@@ -97,12 +105,25 @@ class SaleEditPresenter(context: Any,
         val saleDeliveryList = withTimeout(2000){
             db.saleDeliveryDao.findAllBySaleAsList(entityUid)
         }
-        saleDeliveryEditHelper.liveList.sendValue(saleDeliveryList)
+
+        var saleDeliverywithItems = mutableListOf<SaleDeliveryAndItems>()
+        for(eachDelivery in saleDeliveryList){
+            saleDeliverywithItems.add(SaleDeliveryAndItems().apply{
+                delivery = eachDelivery
+            })
+        }
+        saleDeliveryEditHelper.liveList.sendValue(saleDeliverywithItems)
 
         val salePaymentList = withTimeout(2000){
             db.salePaymentDao.findAllBySaleAsList(entityUid)
         }
-        salePaymentEditHelper.liveList.sendValue(salePaymentList)
+        var salePaymentWithItems = mutableListOf<SalePaymentWithSaleItems>()
+        for(eachPayment in salePaymentList){
+            salePaymentWithItems.add(SalePaymentWithSaleItems().apply{
+                payment = eachPayment
+            })
+        }
+        salePaymentEditHelper.liveList.sendValue(salePaymentWithItems)
 
         val totalCount = withTimeout(2000) {
             db.saleItemDao.findTotalBySale(entityUid)
@@ -117,9 +138,7 @@ class SaleEditPresenter(context: Any,
             view.paymentTotal = paymentTotal
         })
 
-
         return sale
-
 
     }
 
@@ -129,7 +148,7 @@ class SaleEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: SaleWithCustomerAndLocation? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(SaleWithCustomerAndLocation.serializer(), entityJsonStr)
+            editEntity = safeParse(di, SaleWithCustomerAndLocation.serializer(), entityJsonStr)
         }else {
             editEntity = SaleWithCustomerAndLocation()
         }
@@ -175,34 +194,36 @@ class SaleEditPresenter(context: Any,
             repo.saleItemDao.deactivateByUids(saleItemstoDelete)
 
 
-            val deliveriesToInsert = saleDeliveryEditHelper.entitiesToInsert
-            val deliveriesToUpdate = saleDeliveryEditHelper.entitiesToUpdate
-            val deliveriesToDelete = saleDeliveryEditHelper.primaryKeysToDeactivate
+            //TODO: Deliveries
+//            val deliveriesToInsert = saleDeliveryEditHelper.entitiesToInsert
+//            val deliveriesToUpdate = saleDeliveryEditHelper.entitiesToUpdate
+//            val deliveriesToDelete = saleDeliveryEditHelper.primaryKeysToDeactivate
+//
+//            deliveriesToInsert.forEach {
+//                it.saleDeliverySaleUid = entity.saleUid
+//                it.saleDeliveryUid = repo.saleDeliveryDao.insertAsync(it)
+//            }
+//            repo.saleDeliveryDao.updateListAsync(deliveriesToUpdate)
+//            repo.saleDeliveryDao.deactivateByUids(deliveriesToDelete)
 
-            deliveriesToInsert.forEach {
-                it.saleDeliverySaleUid = entity.saleUid
-                it.saleDeliveryUid = repo.saleDeliveryDao.insertAsync(it)
-            }
-            repo.saleDeliveryDao.updateListAsync(deliveriesToUpdate)
-            repo.saleDeliveryDao.deactivateByUids(deliveriesToDelete)
 
-
-            val paymentsToInsert = salePaymentEditHelper.entitiesToInsert
-            val paymentsToUpdate = salePaymentEditHelper.entitiesToUpdate
-            val paymentsToDelete = salePaymentEditHelper.primaryKeysToDeactivate
-
-            paymentsToInsert.forEach {
-                it.salePaymentSaleUid = entity.saleUid
-                it.salePaymentUid = repo.salePaymentDao.insertAsync(it)
-            }
-            paymentsToUpdate.forEach {
-                it.salePaymentSaleUid = entity.saleUid
-                if(it.salePaymentUid == 0L) {
-                    it.salePaymentUid = repo.salePaymentDao.insertAsync(it)
-                }
-            }
-            repo.salePaymentDao.updateListAsync(paymentsToUpdate)
-            repo.salePaymentDao.deactivateByUids(paymentsToDelete)
+            //TODO: Payments
+//            val paymentsToInsert = salePaymentEditHelper.entitiesToInsert
+//            val paymentsToUpdate = salePaymentEditHelper.entitiesToUpdate
+//            val paymentsToDelete = salePaymentEditHelper.primaryKeysToDeactivate
+//
+//            paymentsToInsert.forEach {
+//                it.salePaymentSaleUid = entity.saleUid
+//                it.salePaymentUid = repo.salePaymentDao.insertAsync(it)
+//            }
+//            paymentsToUpdate.forEach {
+//                it.salePaymentSaleUid = entity.saleUid
+//                if(it.salePaymentUid == 0L) {
+//                    it.salePaymentUid = repo.salePaymentDao.insertAsync(it)
+//                }
+//            }
+//            repo.salePaymentDao.updateListAsync(paymentsToUpdate)
+//            repo.salePaymentDao.deactivateByUids(paymentsToDelete)
 
 
             view.finishWithResult(listOf(entity))

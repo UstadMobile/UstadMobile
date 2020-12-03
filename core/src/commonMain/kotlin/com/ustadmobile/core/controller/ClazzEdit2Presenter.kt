@@ -34,7 +34,7 @@ class ClazzEdit2Presenter(context: Any,
          di, lifecycleOwner) {
 
     private val scheduleOneToManyJoinEditHelper
-            = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid,
+            = DefaultOneToManyJoinEditHelper<Schedule>(di, Schedule::scheduleUid,
             ARG_SAVEDSTATE_SCHEDULES, Schedule.serializer().list,
             Schedule.serializer().list, this) {scheduleUid = it}
 

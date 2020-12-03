@@ -902,5 +902,7 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="amount">Amount</string>
     <string name="payment_date">Payment date</string>
     <string name="save_sale_before_delivery">Please save this sale before adding a delivery</string>
+    <string name="selected_more_than_required">Please do not select more than the required amount</string>
+    <string name="selected_payment_higher">Please select payment lower than total sale</string>
 
 </resources>

@@ -17,6 +17,7 @@ import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
+import kotlinx.android.synthetic.main.fragment_sale_edit.*
 
 
 interface SaleItemEditFragmentEventHandler {
@@ -71,6 +72,9 @@ class SaleItemEditFragment: UstadEditFragment<SaleItemWithProduct>(), SaleItemEd
         get() = field
         set(value) {
             field = value
+            if(value?.saleItemPricePerPiece == 0F){
+                value?.saleItemPricePerPiece = value?.saleItemProduct?.productBasePrice?:0F
+            }
             mBinding?.saleItem = value
         }
 

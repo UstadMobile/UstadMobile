@@ -8,6 +8,10 @@
             name="person"
             type="com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock" />
 
+        <variable
+            name="saleDeliveryMode"
+            type="Boolean" />
+
 
     </data>
 
@@ -45,14 +49,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="24dp"
             android:max="100"
+            app:setSeekBarMax="@{person}"
+            app:deliveryMode="@{saleDeliveryMode}"
             android:min="0"
             android:thumb="@drawable/seekbar_thumb"
             android:progress="@={person.selectedStock}"
             app:layout_constraintEnd_toStartOf="@+id/view_producer_with_inventory_selection_selected_edittext"
             app:layout_constraintStart_toEndOf="@+id/view_producer_with_inventory_selection_picture"
             app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_name" />
-
-        <!-- -->
 
         <EditText
             android:id="@+id/view_producer_with_inventory_selection_selected_edittext"
@@ -69,6 +73,7 @@
             app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_name"
             tools:text="42" />
 
+        <!-- android:text="@={`` + person.selectedStock}" -->
         <!--android:text="@={`` + person.inventoryItem.inventoryItemQuantity}"-->
         <!--app:seekCountET="@={person.inventoryCount}" -->
 

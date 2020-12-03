@@ -1,9 +1,11 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.SaleDeliveryEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -15,8 +17,6 @@ import com.ustadmobile.lib.db.entities.SaleDeliveryAndItems
 import com.ustadmobile.lib.db.entities.ProductDeliveryWithProductAndTransactions
 import kotlinx.serialization.builtins.list
 import com.ustadmobile.door.DoorMutableLiveData
-
-
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -34,42 +34,6 @@ class SaleDeliveryEditPresenter(context: Any,
         get() = PersistenceMode.JSON
 
 
-    val productWithDeliveriesEditHelper = DefaultOneToManyJoinEditHelper<ProductDeliveryWithProductAndTransactions>(
-            ProductDeliveryWithProductAndTransactions::productUid,
-            "ProductDeliveryWithProductAndTransactions", ProductDeliveryWithProductAndTransactions.serializer().list,
-            ProductDeliveryWithProductAndTransactions.serializer().list, this) { productUid = it }
-
-    fun handleAddOrEditSaleItemWithProduct(saleItemWithProduct: ProductDeliveryWithProductAndTransactions) {
-        productWithDeliveriesEditHelper.onEditResult(saleItemWithProduct)
-    }
-
-    fun handleRemoveSchedule(saleItemWithProduct: ProductDeliveryWithProductAndTransactions) {
-        productWithDeliveriesEditHelper.onDeactivateEntity(saleItemWithProduct)
-    }
-
-    override fun onCreate(savedState: Map<String, String>?) {
-        super.onCreate(savedState)
-
-        //view.productWithDeliveries = productWithDeliveriesEditHelper.liveList
-    }
-
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): SaleDeliveryAndItems? {
-        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        val saleUid = arguments[UstadView.ARG_SALE_UID]?.toLong() ?: 0L
-
-
-         val saleDelivery = withTimeoutOrNull(2000) {
-             db.saleDeliveryDao.findByUidAsync(entityUid)
-         } ?: SaleDelivery()
-
-        val saleDeliveryAndItems = SaleDeliveryAndItems().apply{
-            delivery = saleDelivery
-        }
-
-         return saleDeliveryAndItems
-
-    }
-
     override fun onLoadFromJson(bundle: Map<String, String>): SaleDeliveryAndItems? {
         super.onLoadFromJson(bundle)
 
@@ -78,9 +42,9 @@ class SaleDeliveryEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: SaleDeliveryAndItems? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(SaleDeliveryAndItems.serializer(), entityJsonStr)
+            editEntity = safeParse(di, SaleDeliveryAndItems.serializer(), entityJsonStr)
         }else {
-            editEntity = SaleDeliveryAndItems()
+            editEntity = SaleDeliveryAndItems(delivery = SaleDelivery())
         }
 
         //1. Get all saleItems from JSON
@@ -100,8 +64,6 @@ class SaleDeliveryEditPresenter(context: Any,
             val allProductsWithProducers = mutableListOf<ProductDeliveryWithProductAndTransactions>()
             //Build product and we selection list ie ProductDeliveryWithProductAndTransactions
             for ((productUid, quantity) in quantityMap) {
-                print("hehe")
-
                 //4. Get transactions
                 val producersTransactions = withTimeout(2000) {
                     db.inventoryItemDao.getStockAndDeliveryListByProduct(productUid,
@@ -114,8 +76,7 @@ class SaleDeliveryEditPresenter(context: Any,
 
                 //5. Create product with transactions
                 val productWithWE = ProductDeliveryWithProductAndTransactions().apply {
-                    saleDelivery = editEntity.delivery
-                    items = quantity
+                    numItemsExpected = quantity
                     transactions = producersTransactions
                     productName = product?.productName
                 }
@@ -124,7 +85,6 @@ class SaleDeliveryEditPresenter(context: Any,
             }
 
             view.runOnUiThread(Runnable {
-//                view.productWithDeliveries = DoorMutableLiveData(allProductsWithProducers)
                 view.productWithDeliveriesList = allProductsWithProducers
 
             })
@@ -142,20 +102,27 @@ class SaleDeliveryEditPresenter(context: Any,
 
     override fun handleClickSave(entity: SaleDeliveryAndItems) {
         val saleUid = arguments[UstadView.ARG_SALE_UID]?.toLong() ?: 0L
-        GlobalScope.launch(doorMainDispatcher()) {
-//            if(entity.saleDeliveryUid == 0L) {
-//                entity.saleDeliveryDate = UMCalendarUtil.getDateInMilliPlusDays(0)
-//                entity.saleDeliveryPersonUid = accountManager.activeAccount.personUid
-//                entity.saleDeliverySaleUid = saleUid
-//                entity.saleDeliveryUid = repo.saleDeliveryDao.insertAsync(entity)
-//            }else {
-//                repo.saleDeliveryDao.updateAsync(entity)
-//            }
-//
-//            //TODO: Persist inventory selection
+        val deliveryDetailsOnView = view.productWithDeliveriesList
 
+        //1. Do validation
+        var validated: Boolean = true
+        for(product in deliveryDetailsOnView){
+            val totalSelectedStock = product.transactions?.sumBy{it.selectedStock}
+            if(totalSelectedStock?:0 > product.numItemsExpected){
+                //Alert
+                view.runOnUiThread(Runnable {
+                    view.showSnackBar(systemImpl.getString(
+                            MessageID.selected_more_than_required, context))
+                    validated = false
+                })
+            }
+        }
+
+        if(validated) {
+            entity.deliveryDetails = deliveryDetailsOnView
             view.finishWithResult(listOf(entity))
         }
+
     }
 
 

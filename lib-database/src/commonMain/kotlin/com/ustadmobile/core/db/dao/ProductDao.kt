@@ -93,33 +93,14 @@ abstract class ProductDao : BaseDao<Product> {
         const val QUERY_PRODUCTS_WITH_INVENTORY = """
             SELECT Product.*, 
                 (
-                SELECT 
-                    ( COUNT(*) - 
-                        (	select count(*) from inventorytransaction 
-                            where 
-                            inventorytransaction.inventoryTransactionInventoryItemUid in 
-                            (	select inventoryitemuid from inventoryitem where 
-                                inventoryitem.inventoryitemproductuid = PR.productUid
-                                AND InventoryItem.inventoryItemLeUid = :leUid
-                                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
-                            ) 
-                            and inventorytransaction.inventoryTransactionSaleUid != 0 
-                            and cast(inventorytransaction.inventoryTransactionActive AS INTEGER) = 1 )
-                    ) 
-                FROM inventorytransaction
-                    LEFT JOIN InventoryItem on InventoryItem.inventoryItemUid = InventoryTransaction.inventoryTransactionInventoryItemUid
-                    LEFT JOIN Product AS PR ON PR.productUid = inventoryItemProductUid
-                WHERE
-            
-                    InventoryItem.inventoryItemLeUid = :leUid
-                    AND PR.productUid = Product.productUid
-                    and inventorytransaction.inventoryTransactionSaleUid == 0
-                    AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
-                    AND CAST(inventorytransaction.inventorytransactionactive as integer) = 1
-                
-                
+                SELECT CASE WHEN SUM(InventoryItem.inventoryItemQuantity) THEN SUM(InventoryItem.inventoryItemQuantity) ELSE 0 END
+                FROM InventoryItem WHERE
+                InventoryItem.inventoryItemProductUid = Product.productUid
+                AND (CAST(LE.admin AS INTEGER) = 1 OR InventoryItem.inventoryItemLeUid = LE.personUid)
+                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
                 ) as stock
             FROM Product 
+            LEFT JOIN PERSON AS LE ON LE.personUid = :leUid
             WHERE CAST(productActive AS INTEGER) = 1 
         """
 

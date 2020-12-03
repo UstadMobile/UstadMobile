@@ -9,7 +9,7 @@
 
         <variable
             name="salePayment"
-            type="com.ustadmobile.lib.db.entities.SalePayment" />
+            type="com.ustadmobile.lib.db.entities.SalePaymentWithSaleItems" />
 
         <variable
             name="loading"
@@ -57,7 +57,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="@{InputType.TYPE_CLASS_NUMBER}"
-                    android:text="@={`` + salePayment.salePaymentPaidAmount}"
+                    android:text="@={`` + salePayment.payment.salePaymentPaidAmount}"
                     app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -75,7 +75,7 @@
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/fragment_sale_item_edit_delivery_date_tiet"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={salePayment.salePaymentPaidDate}"
+                    app:dateLong="@={salePayment.payment.salePaymentPaidDate}"
                     app:runOnClickWhenFocused="@{true}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>

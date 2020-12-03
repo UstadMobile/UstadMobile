@@ -9,11 +9,11 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemSalepaymentBinding
 import com.ustadmobile.core.controller.SalePaymentItemListener
-import com.ustadmobile.lib.db.entities.SalePayment
+import com.ustadmobile.lib.db.entities.SalePaymentWithSaleItems
 
 
 class SalePaymentRecyclerAdapter(var itemListener: SalePaymentItemListener?)
-    : ListAdapter<SalePayment,
+    : ListAdapter<SalePaymentWithSaleItems,
         SalePaymentRecyclerAdapter.InventoryTransactionDetailHolder>(DIFF_CALLBACK) {
 
     class InventoryTransactionDetailHolder(val itemBinding: ItemSalepaymentBinding)
@@ -38,16 +38,16 @@ class SalePaymentRecyclerAdapter(var itemListener: SalePaymentItemListener?)
     }
 
     companion object {
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<SalePayment> = object
-            : DiffUtil.ItemCallback<SalePayment>() {
-            override fun areItemsTheSame(oldItem: SalePayment,
-                                         newItem: SalePayment): Boolean {
-                return oldItem.salePaymentUid == newItem.salePaymentUid
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<SalePaymentWithSaleItems> = object
+            : DiffUtil.ItemCallback<SalePaymentWithSaleItems>() {
+            override fun areItemsTheSame(oldItem: SalePaymentWithSaleItems,
+                                         newItem: SalePaymentWithSaleItems): Boolean {
+                return oldItem.payment.salePaymentUid == newItem.payment.salePaymentUid
 
             }
 
-            override fun areContentsTheSame(oldItem: SalePayment,
-                                            newItem: SalePayment): Boolean {
+            override fun areContentsTheSame(oldItem: SalePaymentWithSaleItems,
+                                            newItem: SalePaymentWithSaleItems): Boolean {
                 return oldItem == newItem
             }
         }

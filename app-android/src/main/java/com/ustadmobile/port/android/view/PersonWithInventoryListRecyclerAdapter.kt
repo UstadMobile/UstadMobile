@@ -4,6 +4,7 @@ package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import android.widget.SeekBar
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -11,14 +12,28 @@ import com.toughra.ustadmobile.databinding.ItemPersonwithinventoryBinding
 import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
 
 
-class PersonWithInventoryListRecyclerAdapter()
+class PersonWithInventoryListRecyclerAdapter(var deliveryMode: Boolean = false)
     : ListAdapter<PersonWithInventoryItemAndStock,
         PersonWithInventoryListRecyclerAdapter.InventoryTransactionDetailHolder>(DIFF_CALLBACK) {
 
     class InventoryTransactionDetailHolder(val itemBinding: ItemPersonwithinventoryBinding)
-        : RecyclerView.ViewHolder(itemBinding.root){
+        : RecyclerView.ViewHolder(itemBinding.root), SeekBar.OnSeekBarChangeListener{
+
+        private val editText = itemBinding.viewProducerWithInventorySelectionSelectedEdittext
+
+        override fun onProgressChanged(p0: SeekBar?, p1: Int, p2: Boolean) {
+            editText.setText(p1.toString())
+        }
+
+        override fun onStartTrackingTouch(p0: SeekBar?) { }
+
+        override fun onStopTrackingTouch(p0: SeekBar?) { }
 
     }
+
+
+    var saleDeliveryMode: Boolean? = deliveryMode
+
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InventoryTransactionDetailHolder {
         val itemBinding = ItemPersonwithinventoryBinding.inflate(
@@ -29,6 +44,9 @@ class PersonWithInventoryListRecyclerAdapter()
     override fun onBindViewHolder(holder: InventoryTransactionDetailHolder, position: Int) {
         val item = getItem(position)
         holder.itemBinding.person = item
+        holder.itemBinding.saleDeliveryMode = saleDeliveryMode
+        holder.itemBinding.viewProducerWithInventorySelectionSeekbar.setOnSeekBarChangeListener(holder)
+
 
     }
 

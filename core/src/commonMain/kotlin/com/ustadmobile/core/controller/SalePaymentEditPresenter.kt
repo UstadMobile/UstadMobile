@@ -1,9 +1,12 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.LocationEditView
 import com.ustadmobile.core.view.SalePaymentEditView
 import com.ustadmobile.core.view.UstadView
@@ -11,6 +14,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.SalePayment
+import com.ustadmobile.lib.db.entities.SalePaymentWithSaleItems
 
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.features.json.defaultSerializer
@@ -26,36 +30,30 @@ import org.kodein.di.DI
 class SalePaymentEditPresenter(context: Any,
                                arguments: Map<String, String>, view: SalePaymentEditView, di: DI,
                                lifecycleOwner: DoorLifecycleOwner)
-    : UstadEditPresenter<SalePaymentEditView, SalePayment>(context, arguments, view, di, lifecycleOwner) {
+    : UstadEditPresenter<SalePaymentEditView, SalePaymentWithSaleItems>(context, arguments, view,
+        di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
-        get() = PersistenceMode.DB
+        get() = PersistenceMode.JSON
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): SalePayment? {
-        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-
-        val salePayment = withTimeoutOrNull(2000){
-            db.salePaymentDao.findByUidAsync(entityUid)
-        } ?: SalePayment()
-        return salePayment
-
-    }
-
-    override fun onLoadFromJson(bundle: Map<String, String>): SalePayment? {
+    override fun onLoadFromJson(bundle: Map<String, String>): SalePaymentWithSaleItems? {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: SalePayment? = null
+        var editEntity: SalePaymentWithSaleItems? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(SalePayment.serializer(), entityJsonStr)
+            editEntity = safeParse(di, SalePaymentWithSaleItems.serializer(), entityJsonStr)
         }else {
-            editEntity = SalePayment()
+            editEntity = SalePaymentWithSaleItems(payment = SalePayment())
         }
+        //1. Get all saleItems from JSON
+        val saleItems = editEntity.saleItems
+
 
         return editEntity
     }
@@ -67,9 +65,19 @@ class SalePaymentEditPresenter(context: Any,
                 entityVal)
     }
 
-    override fun handleClickSave(entity: SalePayment) {
+    override fun handleClickSave(entity: SalePaymentWithSaleItems) {
 
-        view.finishWithResult(listOf(entity))
+        //Total amount possible given
+
+        var totalSaleAmount = 0F
+        for(eachItem in entity?.saleItems){
+            totalSaleAmount += eachItem.saleItemQuantity * eachItem.saleItemPricePerPiece
+        }
+        if(entity.payment.salePaymentPaidAmount >  (totalSaleAmount - entity.saleDiscount)){
+            view.showSnackBar(systemImpl.getString(MessageID.selected_payment_higher, context))
+        }else {
+            view.finishWithResult(listOf(entity))
+        }
     }
 
 

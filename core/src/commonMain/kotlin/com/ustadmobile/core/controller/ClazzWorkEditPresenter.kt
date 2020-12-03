@@ -44,7 +44,7 @@ class ClazzWorkEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
 
-    private val contentJoinEditHelper = DefaultOneToManyJoinEditHelper(
+    private val contentJoinEditHelper = DefaultOneToManyJoinEditHelper(di,
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::contentEntryUid,
             "state_ContentEntryWithMetrics_list",
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer().list,
@@ -60,8 +60,8 @@ class ClazzWorkEditPresenter(context: Any,
     }
 
     private val questionAndOptionsEditHelper =
-            DefaultOneToManyJoinEditHelper<ClazzWorkQuestionAndOptions>(
-            {it.clazzWorkQuestion.clazzWorkQuestionUid},
+            DefaultOneToManyJoinEditHelper<ClazzWorkQuestionAndOptions>(di,
+                    {it.clazzWorkQuestion.clazzWorkQuestionUid},
             "state_ClazzWorkQuestionAndOption_list",
                     ClazzWorkQuestionAndOptions.serializer().list,
             ClazzWorkQuestionAndOptions.serializer().list, this)

@@ -12,6 +12,7 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SalePaymentEditView
 import com.ustadmobile.lib.db.entities.SalePayment
+import com.ustadmobile.lib.db.entities.SalePaymentWithSaleItems
 import com.ustadmobile.port.android.util.ext.*
 
 
@@ -19,14 +20,14 @@ interface SalePaymentEditFragmentEventHandler {
 
 }
 
-class SalePaymentEditFragment: UstadEditFragment<SalePayment>(), SalePaymentEditView,
+class SalePaymentEditFragment: UstadEditFragment<SalePaymentWithSaleItems>(), SalePaymentEditView,
         SalePaymentEditFragmentEventHandler {
 
     private var mBinding: FragmentSalePaymentEditBinding? = null
 
     private var mPresenter: SalePaymentEditPresenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, SalePayment>?
+    override val mEditPresenter: UstadEditPresenter<*, SalePaymentWithSaleItems>?
         get() = mPresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -59,7 +60,7 @@ class SalePaymentEditFragment: UstadEditFragment<SalePayment>(), SalePaymentEdit
         setEditFragmentTitle(R.string.new_payment, R.string.edit_payment)
     }
 
-    override var entity: SalePayment? = null
+    override var entity: SalePaymentWithSaleItems? = null
         get() = field
         set(value) {
             field = value

@@ -12,3 +12,7 @@ import org.kodein.di.DI
 expect inline fun <reified T> safeParse(di: DI, strategy: DeserializationStrategy<T>, str: String) : T
 
 expect inline fun <reified T> safeStringify(di: DI, strategy: SerializationStrategy<T>, entity: T) : String
+
+//expect inline fun <reified T> safeStringifyList(di: DI, strategy: SerializationStrategy<T>, entity: List<T>): String
+
+expect inline fun <reified  T: Any> safeParseList(di: DI, string: String, strategy: DeserializationStrategy<T>) : List<T>

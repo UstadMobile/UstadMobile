@@ -58,7 +58,7 @@ class PersonEditPresenter(context: Any,
     private var regViaLink: Boolean = false
 
     private val clazzMemberJoinEditHelper =
-            DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
+            DefaultOneToManyJoinEditHelper(di, ClazzMemberWithClazz::clazzMemberUid,
             "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
             ClazzMemberWithClazz.serializer().list, this) { clazzMemberUid = it }
 
@@ -71,7 +71,7 @@ class PersonEditPresenter(context: Any,
     }
 
     private val rolesAndPermissionEditHelper = DefaultOneToManyJoinEditHelper<EntityRoleWithNameAndRole>(
-            EntityRoleWithNameAndRole::erUid,
+            di, EntityRoleWithNameAndRole::erUid,
             "state_EntityRoleWithNameAndRole_list", EntityRoleWithNameAndRole.serializer().list,
             EntityRoleWithNameAndRole.serializer().list, this) { erUid = it }
 

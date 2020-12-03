@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ProductEditView
 import com.ustadmobile.core.view.SaleItemEditView
 import com.ustadmobile.core.view.UstadView
@@ -64,7 +65,7 @@ class SaleItemEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: SaleItemWithProduct? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(SaleItemWithProduct.serializer(), entityJsonStr)
+            editEntity = safeParse(di, SaleItemWithProduct.serializer(), entityJsonStr)
         }else {
             editEntity = SaleItemWithProduct()
         }

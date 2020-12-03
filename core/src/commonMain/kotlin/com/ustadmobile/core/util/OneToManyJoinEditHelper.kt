@@ -6,6 +6,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
 
 /**
  * This class is designed to help manager a one to many join in edit mode. E.g. Clazz has a 1:n
@@ -23,7 +24,7 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
                                          val newPk: K,
                                          editPresenter: UstadEditPresenter<*, *>?,
                                     val pkSetter: T.(K) -> Unit,
-    open protected val fakePkGenerator: () -> K): UstadEditPresenter.JsonLoadListener  {
+    open protected val fakePkGenerator: () -> K, var di: DI): UstadEditPresenter.JsonLoadListener  {
 
     val liveList: DoorMutableLiveData<List<T>> = DoorMutableLiveData(listOf())
 
@@ -78,13 +79,15 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
     override fun onSaveState(outState: MutableMap<String, String>) {
         val listVal = liveList.getValue() ?: return
         val serializer = serializationStrategy ?: return
-        outState[serializationKey] = Json.stringify(serializationStrategy, listVal)
+        outState[serializationKey] = safeStringify(di, serializationStrategy, listVal)
     }
 
     override fun onLoadFromJsonSavedState(savedState: Map<String, String>?) {
         val listJsonStr = savedState?.get(serializationKey) ?: return
         val deserializer = deserializationStrategy ?: return
-        val listVal = Json.parse(deserializer, listJsonStr)
+        //TODO : Check if it is a list or not
+        val listVal = safeParse(di, deserializer, listJsonStr)
+        val listVal2 = safeParseList(di, listJsonStr, deserializer)
         liveList.setVal(listVal)
     }
 

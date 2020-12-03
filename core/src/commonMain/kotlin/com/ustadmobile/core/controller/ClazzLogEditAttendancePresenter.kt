@@ -31,7 +31,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    private val attendanceRecordOneToManyJoinHelper = DefaultOneToManyJoinEditHelper(ClazzLogAttendanceRecord::clazzLogAttendanceRecordUid,
+    private val attendanceRecordOneToManyJoinHelper = DefaultOneToManyJoinEditHelper(di, ClazzLogAttendanceRecord::clazzLogAttendanceRecordUid,
             "state_ClazzLogAttendanceRecord_list", ClazzLogAttendanceRecordWithPerson.serializer().list,
             ClazzLogAttendanceRecordWithPerson.serializer().list, this) { clazzLogAttendanceRecordUid = it }
 

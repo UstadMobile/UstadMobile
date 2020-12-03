@@ -3,8 +3,7 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
-import android.view.View
-import android.widget.Button
+import android.widget.SeekBar
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
@@ -270,7 +269,7 @@ fun TextView.setProductNameWithDeliveryCount(saleItemWithProduct: SaleItemWithPr
 }
 @BindingAdapter("productNameWithItemCount")
 fun TextView.setProductNameWithItemCount(productDeet: ProductDeliveryWithProductAndTransactions?){
-    text = "" + productDeet?.productName + " (" +  productDeet?.items + " " + context.getString(R.string.items) + " )"
+    text = "" + productDeet?.productName + " (" +  productDeet?.numItemsExpected + " " + context.getString(R.string.items) + " )"
 }
 
 @BindingAdapter("inStockAppend")
@@ -297,6 +296,15 @@ fun TextView.setBalanceDueAfterPaymentAndSaleAndDiscount(totalSale : Long, sale:
 fun TextView.setWeTotalSale(personWithSaleInfo: PersonWithSaleInfo?){
     text = personWithSaleInfo?.totalSale.toString() + " " + context.getString(R.string.afs) +
             " " +  context.getString(R.string.total_sales)
+}
+
+@BindingAdapter(value = ["setSeekBarMax", "deliveryMode"])
+fun SeekBar.setMaxForWE(personWithInventory: PersonWithInventoryItemAndStock, saleDeliveryMode: Boolean){
+    if(saleDeliveryMode){
+        max = personWithInventory.stock
+    }else{
+        max = 100
+    }
 }
 
 @BindingAdapter("rolesAndPermissionsText")

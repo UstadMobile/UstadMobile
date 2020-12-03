@@ -6,11 +6,8 @@ import androidx.room.Embedded
 @Serializable
 class ProductDeliveryWithProductAndTransactions() : Product() {
 
-    @Embedded
-    var saleDelivery: SaleDelivery? = null
-
     //Total items expected
-    var items : Int = 0
+    var numItemsExpected : Int = 0
 
     //The inventory item transactions for this person
     var transactions: List<PersonWithInventoryItemAndStock>? = listOf()

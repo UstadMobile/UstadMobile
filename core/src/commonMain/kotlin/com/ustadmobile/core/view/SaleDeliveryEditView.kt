@@ -8,7 +8,6 @@ import com.ustadmobile.lib.db.entities.ProductDeliveryWithProductAndTransactions
 
 interface SaleDeliveryEditView: UstadEditView<SaleDeliveryAndItems> {
 
-    var productWithDeliveries: DoorMutableLiveData<List<ProductDeliveryWithProductAndTransactions>>?
     var productWithDeliveriesList: List<ProductDeliveryWithProductAndTransactions>
 
     companion object {

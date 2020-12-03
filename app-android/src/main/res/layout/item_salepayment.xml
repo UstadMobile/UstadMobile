@@ -6,7 +6,7 @@
     <data>
         <variable
             name="salePayment"
-            type="com.ustadmobile.lib.db.entities.SalePayment" />
+            type="com.ustadmobile.lib.db.entities.SalePaymentWithSaleItems" />
 
         <variable
             name="listener"
@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginVertical="@dimen/dimen_16dp"
-            app:dateLong="@{salePayment.salePaymentPaidDate}"
+            app:dateLong="@{salePayment.payment.salePaymentPaidDate}"
             app:layout_constraintEnd_toStartOf="@+id/item_salepayment_amount"
             app:layout_constraintStart_toEndOf="@id/item_saledelivery_image"
             app:layout_constraintTop_toTopOf="parent"
@@ -52,7 +52,7 @@
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginVertical="@dimen/dimen_16dp"
             tools:text="15,500"
-            android:text="@{`` + salePayment.salePaymentPaidAmount}"
+            android:text="@{`` + salePayment.payment.salePaymentPaidAmount}"
             app:layout_constraintEnd_toStartOf="@+id/item_saledelivery_delete_iv"
             app:layout_constraintTop_toTopOf="parent"
             />

@@ -34,13 +34,6 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
 
     private var deliveryListMergerRecyclerView: RecyclerView? = null
 
-    private var saleItemsRecyclerAdapter: ProductDeliveryWithProducersSelectionRecyclerAdapter? = null
-    private val saleItemObserver = Observer<List<ProductDeliveryWithProductAndTransactions>?>{
-        t ->
-        run {
-            saleItemsRecyclerAdapter?.submitList(t)
-        }
-    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -50,13 +43,11 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
             rootView = it.root
         }
 
-        deliveryListMergerRecyclerView = rootView.findViewById(R.id.fragment_sale_delivery_edit_items_rv)
-        saleItemsRecyclerAdapter = ProductDeliveryWithProducersSelectionRecyclerAdapter()
+        deliveryListMergerRecyclerView = rootView.findViewById(
+                R.id.fragment_sale_delivery_edit_items_rv)
 
-
-
-        mPresenter = SaleDeliveryEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+        mPresenter = SaleDeliveryEditPresenter(requireContext(), arguments.toStringMap(),
+                this, di, viewLifecycleOwner)
 
         return rootView
     }
@@ -66,15 +57,7 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
         val navController = findNavController()
 
 
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                ProductDeliveryWithProductAndTransactions::class.java) {
-            val producer = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddOrEditSaleItemWithProduct(producer)
-        }
-
-
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
-
 
     }
 
@@ -96,15 +79,7 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
             field = value
             mBinding?.saleDelivery = value
         }
-    override var productWithDeliveries
-            : DoorMutableLiveData<List<ProductDeliveryWithProductAndTransactions>>? = null
-        set(value) {
 
-
-            field?.removeObserver(saleItemObserver)
-            field = value
-            value?.observe(this, saleItemObserver)
-        }
 
     override var productWithDeliveriesList
             : List<ProductDeliveryWithProductAndTransactions> = mutableListOf()
@@ -116,11 +91,13 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
             val mergeAdapter = MergeAdapter()
             for(product in value){
 
-                val productTitleRecyclerAdapter = ProductDeliveryWithProducersSelectionRecyclerAdapter()
+                val productTitleRecyclerAdapter =
+                        ProductDeliveryWithProducersSelectionRecyclerAdapter()
                 productTitleRecyclerAdapter?.submitList(listOf(product))
                 mergeAdapter.addAdapter(productTitleRecyclerAdapter)
 
-                val deliverySelectionRecyclerAdapter = PersonWithInventoryListRecyclerAdapter()
+                val deliverySelectionRecyclerAdapter = PersonWithInventoryListRecyclerAdapter(
+                        true)
                 deliverySelectionRecyclerAdapter?.submitList(product.transactions)
                 mergeAdapter?.addAdapter(deliverySelectionRecyclerAdapter)
 
@@ -131,7 +108,6 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
         }
 
     override var fieldsEnabled: Boolean = false
-        get() = field
         set(value) {
             field = value
             mBinding?.fieldsEnabled = value

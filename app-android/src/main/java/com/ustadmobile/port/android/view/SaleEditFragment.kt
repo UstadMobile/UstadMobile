@@ -52,7 +52,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
 
     private var saleDeliveryRecyclerAdapter: SaleDeliveryRecyclerAdapter? = null
     private var saleDeliveryRecyclerView : RecyclerView? = null
-    private val saleDeliveryObserver = Observer<List<SaleDelivery>?> {
+    private val saleDeliveryObserver = Observer<List<SaleDeliveryAndItems>?> {
         t ->
         run {
             saleDeliveryRecyclerAdapter?.submitList(t)
@@ -61,7 +61,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
 
     private var salePaymentRecyclerAdpater : SalePaymentRecyclerAdapter? = null
     private var salePaymentRecyclerView : RecyclerView? = null
-    private val salePaymentObserver = Observer<List<SalePayment>?> {
+    private val salePaymentObserver = Observer<List<SalePaymentWithSaleItems>?> {
         t ->
         run {
             salePaymentRecyclerAdpater?.submitList(t)
@@ -111,21 +111,22 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
             val saleItem = it.firstOrNull() ?: return@observeResult
             mPresenter?.handleAddOrEditSaleItem(saleItem)
             //Add numbers
-            orderTotal = orderTotal?.plus(saleItem.saleItemQuantity * saleItem.saleItemPricePerPiece.toLong())
+            orderTotal = orderTotal?.plus(saleItem.saleItemQuantity *
+                    saleItem.saleItemPricePerPiece.toLong())
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                SaleDelivery::class.java) {
-            val saleDelivery = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddOrEditSaleDelivery(saleDelivery)
+                SaleDeliveryAndItems::class.java) {
+            val saleDeliveryAndItems = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddOrEditSaleDelivery(saleDeliveryAndItems)
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                SalePayment::class.java) {
+                SalePaymentWithSaleItems::class.java) {
             val salePayment = it.firstOrNull() ?: return@observeResult
             mPresenter?.handleAddOrEditSalePayment(salePayment)
             //Add numbers
-            paymentTotal = paymentTotal?.plus(salePayment.salePaymentPaidAmount)
+            paymentTotal = paymentTotal?.plus(salePayment.payment.salePaymentPaidAmount)
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
@@ -157,14 +158,14 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
             value?.observe(this, saleItemObserver)
         }
 
-    override var saleDeliveryList: DoorMutableLiveData<List<SaleDelivery>>? = null
+    override var saleDeliveryList: DoorMutableLiveData<List<SaleDeliveryAndItems>>? = null
         set(value) {
             field?.removeObserver(saleDeliveryObserver)
             field = value
             value?.observe(this, saleDeliveryObserver)
         }
 
-    override var salePaymentList: DoorMutableLiveData<List<SalePayment>>? = null
+    override var salePaymentList: DoorMutableLiveData<List<SalePaymentWithSaleItems>>? = null
         set(value) {
             field?.removeObserver(salePaymentObserver)
             field = value
@@ -183,7 +184,6 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
             mBinding?.paymentTotal = value
             field = value
         }
-
 
     override var balanceDue: Long? = 0
         set(value) {
@@ -239,25 +239,24 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
     }
 
     override fun addDelivery() {
-        if(entity?.saleUid != 0L) {
-            onSaveStateToBackStackStateHandle()
-            val saleDeliveryWithItems = SaleDeliveryAndItems().apply{
-                delivery = null
-                saleItems = saleItemList?.value?: listOf()
-            }
-
-            navigateToEditEntity(saleDeliveryWithItems, R.id.saledelivery_edit_dest, SaleDeliveryAndItems::class.java,
-                    argBundle = bundleOf(
-                            UstadView.ARG_SALE_UID to entity?.saleUid.toString()))
-        }else{
-            showSnackBar(requireContext().getString(R.string.save_sale_before_delivery))
+        onSaveStateToBackStackStateHandle()
+        val saleDeliveryWithItems = SaleDeliveryAndItems().apply{
+            saleItems = saleItemList?.value?: listOf()
         }
-
+        navigateToEditEntity(saleDeliveryWithItems, R.id.saledelivery_edit_dest,
+                SaleDeliveryAndItems::class.java,
+                argBundle = bundleOf(
+                        UstadView.ARG_SALE_UID to entity?.saleUid.toString()))
     }
 
     override fun addPayment() {
         onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(null, R.id.salepayment_edit_dest, SalePayment::class.java)
+        var salePaymentWithDiscount = SalePaymentWithSaleItems().apply {
+            saleItems = saleItemList?.value ?: listOf()
+            saleDiscount = entity?.saleDiscount ?: 0L
+        }
+        navigateToEditEntity(salePaymentWithDiscount, R.id.salepayment_edit_dest,
+            SalePaymentWithSaleItems::class.java)
     }
 
     override fun selectCustomer() {
@@ -280,23 +279,27 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         navigateToEditEntity(saleItem, R.id.saleitem_edit_dest, SaleItem::class.java)
     }
 
-    override fun onClickSaleDelivery(saleDelivery: SaleDelivery) {
+    override fun onClickSaleDelivery(saleDelivery: SaleDeliveryAndItems) {
         onSaveStateToBackStackStateHandle()
         navigateToEditEntity(saleDelivery, R.id.saledelivery_edit_dest,
-                SaleDelivery::class.java, argBundle = bundleOf(
+                SaleDeliveryAndItems::class.java, argBundle = bundleOf(
                     UstadView.ARG_SALE_UID to entity?.saleUid.toString()))
     }
 
-    override fun onClickRemoveSaleDelivery(saleDelivery: SaleDelivery) {
+    override fun onClickRemoveSaleDelivery(saleDelivery: SaleDeliveryAndItems) {
         mPresenter?.handleRemoveSaleDelivery(saleDelivery)
     }
 
-    override fun onClickSalePayment(salePayment: SalePayment) {
+    override fun onClickSalePayment(salePayment: SalePaymentWithSaleItems) {
+        var salePaymentWithDiscount = salePayment
+        salePaymentWithDiscount.saleItems = saleItemList?.value?: listOf()
+        salePaymentWithDiscount.saleDiscount = entity?.saleDiscount?:0L
         onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(salePayment, R.id.salepayment_edit_dest, SalePayment::class.java)
+        navigateToEditEntity(salePaymentWithDiscount, R.id.salepayment_edit_dest,
+                SalePaymentWithSaleItems::class.java)
     }
 
-    override fun onClickRemoveSalePayment(salePayment: SalePayment) {
+    override fun onClickRemoveSalePayment(salePayment: SalePaymentWithSaleItems) {
         mPresenter?.handleRemoveSalePayment(salePayment)
     }
 }
