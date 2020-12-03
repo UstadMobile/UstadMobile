@@ -80,7 +80,8 @@ class ReportEditPresenter(context: Any,
 
     val personOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper(ReportFilterWithDisplayDetails::reportFilterUid,
             "state_Person_list", ReportFilterWithDisplayDetails.serializer().list,
-            ReportFilterWithDisplayDetails.serializer().list, this) { reportFilterUid = it }
+            ReportFilterWithDisplayDetails.serializer().list, this,
+            ReportFilterWithDisplayDetails::class) { reportFilterUid = it }
 
     fun handleAddOrEditPerson(person: ReportFilterWithDisplayDetails) {
         personOneToManyJoinEditHelper.onEditResult(person)
@@ -92,7 +93,8 @@ class ReportEditPresenter(context: Any,
 
     val verbDisplaynOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper(ReportFilterWithDisplayDetails::reportFilterUid,
             "state_VerbDisplay_list", ReportFilterWithDisplayDetails.serializer().list,
-            ReportFilterWithDisplayDetails.serializer().list, this) { reportFilterUid = it }
+            ReportFilterWithDisplayDetails.serializer().list, this,
+            ReportFilterWithDisplayDetails::class) { reportFilterUid = it }
 
     fun handleAddOrEditVerbDisplay(verbDisplay: ReportFilterWithDisplayDetails) {
         verbDisplaynOneToManyJoinEditHelper.onEditResult(verbDisplay)
@@ -105,7 +107,7 @@ class ReportEditPresenter(context: Any,
 
     val contentOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper(ReportFilterWithDisplayDetails::reportFilterUid,
             "state_Content_list", ReportFilterWithDisplayDetails.serializer().list,
-            ReportFilterWithDisplayDetails.serializer().list, this) { reportFilterUid = it }
+            ReportFilterWithDisplayDetails.serializer().list, this, ReportFilterWithDisplayDetails::class) { reportFilterUid = it }
 
     fun handleAddOrEditContent(content: ReportFilterWithDisplayDetails) {
         contentOneToManyJoinEditHelper.onEditResult(content)
