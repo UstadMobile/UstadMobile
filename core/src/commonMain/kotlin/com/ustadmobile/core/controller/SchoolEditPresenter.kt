@@ -44,9 +44,9 @@ class SchoolEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    private val clazzOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<Clazz>(di,
+    private val clazzOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<Clazz>(
             Clazz::clazzUid,"state_Clazz_list", Clazz.serializer().list,
-            Clazz.serializer().list, this) { clazzUid = it }
+            Clazz.serializer().list, this, Clazz::class) { clazzUid = it }
 
     fun handleAddOrEditClazz(clazz: Clazz) {
         clazzOneToManyJoinEditHelper.onEditResult(clazz)

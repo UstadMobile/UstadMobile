@@ -20,6 +20,11 @@ class AboutActivity : UstadBaseActivity(), AboutView, DIAware {
 
     override val di by di()
 
+    //There isn't really any loading done here
+    override var loading: Boolean
+        get() = false
+        set(value) {}
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_about)

@@ -63,12 +63,6 @@ fun TextView.setTimeZoneText(timeZone: TimeZone) {
     text = "${mkGmtOffsetString(timeZone.rawOffset)} ${timeZone.id}"
 }
 
-@SuppressLint("SetTextI18n")
-@BindingAdapter("timeZoneText")
-fun TextView.setTimeZoneTextEntity(timeZoneEntity: TimeZoneEntity) {
-    text = "${mkGmtOffsetString(timeZoneEntity.rawOffset)} ${timeZoneEntity.id}"
-}
-
 
 @SuppressLint("SetTextI18n")
 @BindingAdapter("entityRoleText")

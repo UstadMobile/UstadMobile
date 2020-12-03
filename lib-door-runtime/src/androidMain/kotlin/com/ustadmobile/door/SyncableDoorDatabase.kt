@@ -14,13 +14,13 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
                                                                     attachmentsDir: String?,
                                                                     updateNotificationManager: ServerUpdateNotificationManager?,
                                                                     useClientSyncManager: Boolean): T {
-    val db = if(this is DoorDatabaseSyncableReadOnlyWrapper) {
+    val dbUnwrapped = if(this is DoorDatabaseSyncableReadOnlyWrapper) {
         this.unwrap(T::class)
     }else {
         this
     }
 
-    val dbName = (db as RoomDatabase).openHelper.databaseName
+    val dbName = (dbUnwrapped as RoomDatabase).openHelper.databaseName
     val attachmentsDirToUse = if(attachmentsDir == null) {
         File(ContextCompat.getExternalFilesDirs(context as Context, null)[0],
                 "$dbName/attachments").absolutePath
@@ -31,9 +31,9 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
     val dbClass = T::class
     val repoImplClass = Class.forName("${dbClass.qualifiedName}_Repo") as Class<T>
     val repo = repoImplClass
-            .getConstructor(dbClass.java, String::class.java,String::class.java, HttpClient::class.java,
+            .getConstructor(dbClass.java, dbClass.java, String::class.java,String::class.java, HttpClient::class.java,
                     String::class.java, ServerUpdateNotificationManager::class.java, Boolean::class.javaPrimitiveType)
-            .newInstance(db, endpoint, accessToken, httpClient, attachmentsDirToUse,
+            .newInstance(dbUnwrapped, this, endpoint, accessToken, httpClient, attachmentsDirToUse,
                     updateNotificationManager, useClientSyncManager)
     return repo
 }

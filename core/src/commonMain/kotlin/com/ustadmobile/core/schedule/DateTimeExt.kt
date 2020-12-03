@@ -7,3 +7,8 @@ import com.soywiz.klock.TimezoneOffset
 fun DateTime.toOffsetByTimezone(timezoneId: String): DateTimeTz {
     return toOffset(TimezoneOffset(getTimezoneOffset(timezoneId, this.unixMillisLong).toDouble()))
 }
+
+/**
+ * Move the given DateTime back to what would be midnight for the given timezone.
+ */
+fun DateTime.toLocalMidnight(timeZoneId: String) = toOffsetByTimezone(timeZoneId).localMidnight.utc

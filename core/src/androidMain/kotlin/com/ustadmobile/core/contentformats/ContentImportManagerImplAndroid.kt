@@ -14,8 +14,9 @@ class ContentImportManagerImplAndroid(contentPlugins: List<ContentTypePlugin>, c
 
     override suspend fun queueImportContentFromFile(filePath: String,
                                                     metadata: ImportedContentEntryMetaData,
-                                                    containerBaseDir: String): ContainerImportJob {
-        val importJob =  super.queueImportContentFromFile(filePath, metadata, containerBaseDir)
+                                                    containerBaseDir: String,
+                                                    conversionParams: Map<String, String>): ContainerImportJob {
+        val importJob =  super.queueImportContentFromFile(filePath, metadata, containerBaseDir, conversionParams)
 
         val androidContext = context as Context
         val importIntent = Intent(androidContext, DownloadNotificationService::class.java)

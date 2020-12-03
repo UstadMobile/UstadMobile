@@ -41,7 +41,7 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        view.frequencyOptions = FrequencyOption.values().map { FrequencyMessageIdOption(it, context) }
+        //view.frequencyOptions = FrequencyOption.values().map { FrequencyMessageIdOption(it, context) }
         view.dayOptions = DayOptions.values().map { DayMessageIdOption(it, context) }
     }
 
@@ -52,11 +52,30 @@ class ScheduleEditPresenter(context: Any, args: Map<String, String>, view: Sched
         }else {
             Schedule().apply {
                 scheduleActive = true
+                scheduleFrequency = Schedule.SCHEDULE_FREQUENCY_WEEKLY
             }
         }
     }
 
     override fun handleClickSave(entity: Schedule) {
+        //Remove any previous error messages
+        view.fromTimeError = null
+        view.toTimeError = null
+
+        if(entity.sceduleStartTime == 0L) {
+            view.fromTimeError = systemImpl.getString(MessageID.field_required_prompt,
+                context)
+            return
+        }else if(entity.scheduleEndTime == 0L) {
+            view.toTimeError = systemImpl.getString(MessageID.field_required_prompt,
+                context)
+            return
+        }else if(entity.scheduleEndTime <= entity.sceduleStartTime) {
+            view.toTimeError = systemImpl.getString(MessageID.end_is_before_start_error,
+                context)
+            return
+        }
+
         view.finishWithResult(listOf(entity))
     }
 }

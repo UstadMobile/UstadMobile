@@ -44,12 +44,12 @@ class ClazzWorkEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
 
-    private val contentJoinEditHelper = DefaultOneToManyJoinEditHelper(di,
+    private val contentJoinEditHelper = DefaultOneToManyJoinEditHelper(
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::contentEntryUid,
             "state_ContentEntryWithMetrics_list",
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer().list,
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer().list,
-            this) { contentEntryUid = it }
+            this, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class) { contentEntryUid = it }
 
     fun handleAddOrEditContent(entityClass: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         contentJoinEditHelper.onEditResult(entityClass)
@@ -60,11 +60,12 @@ class ClazzWorkEditPresenter(context: Any,
     }
 
     private val questionAndOptionsEditHelper =
-            DefaultOneToManyJoinEditHelper<ClazzWorkQuestionAndOptions>(di,
+            DefaultOneToManyJoinEditHelper<ClazzWorkQuestionAndOptions>(
                     {it.clazzWorkQuestion.clazzWorkQuestionUid},
             "state_ClazzWorkQuestionAndOption_list",
                     ClazzWorkQuestionAndOptions.serializer().list,
-            ClazzWorkQuestionAndOptions.serializer().list, this)
+            ClazzWorkQuestionAndOptions.serializer().list, this,
+                    ClazzWorkQuestionAndOptions::class)
     { clazzWorkQuestion.clazzWorkQuestionUid = it }
 
     fun handleAddOrEditClazzQuestionAndOptions(entityClass: ClazzWorkQuestionAndOptions) {

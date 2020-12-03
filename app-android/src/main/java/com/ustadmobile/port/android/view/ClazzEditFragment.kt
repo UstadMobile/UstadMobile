@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
+import androidx.lifecycle.observe
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -25,6 +26,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.TimeZoneListFragment.Companion.RESULT_TIMEZONE_KEY
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
@@ -104,13 +106,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             mDataBinding?.fieldsEnabled = value
         }
 
-    override var loading: Boolean = false
-        set(value) {
-            field = value
-            //TODO: set this on activity
-        }
-
-
 
     override fun showNewScheduleDialog() {
         onSaveStateToBackStackStateHandle()
@@ -143,7 +138,8 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
     override fun handleClickTimeZone() {
         onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(TimeZoneEntity::class.java, R.id.timezoneentity_list_dest)
+        navigateToPickEntityFromList(String::class.java, R.id.time_zone_list_dest,
+                destinationResultKey = RESULT_TIMEZONE_KEY)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -196,12 +192,11 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             mDataBinding?.clazz = entity
         }
 
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-            TimeZoneEntity::class.java) {
-            val timeZone = it.firstOrNull() ?: return@observeResult
-            entity?.clazzTimeZone = timeZone.id
-            mDataBinding?.clazz = entity
-        }
+        navController.currentBackStackEntry?.savedStateHandle?.getLiveData<String>(RESULT_TIMEZONE_KEY)
+                ?.observe(viewLifecycleOwner) {
+                    entity?.clazzTimeZone = it
+                    mDataBinding?.clazz = entity
+                }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 LongWrapper::class.java, CLAZZ_FEATURES_KEY) {

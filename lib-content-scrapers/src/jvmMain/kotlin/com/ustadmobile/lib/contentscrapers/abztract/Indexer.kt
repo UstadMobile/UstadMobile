@@ -8,6 +8,7 @@ import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
+import com.ustadmobile.lib.db.entities.ScrapeQueueItemWithScrapeRun
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -18,12 +19,12 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val sqi
 
     val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
 
-    val repo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
+    val repo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
 
     var parentContentEntry: ContentEntry? = null
     var contentEntry: ContentEntry? = null
-    var scrapeQueueItem: ScrapeQueueItem? = null
-    val englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(db.languageDao, "English")
+    var scrapeQueueItem: ScrapeQueueItemWithScrapeRun? = null
+    val englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(repo.languageDao, "English")
 
     init {
         runBlocking {

@@ -197,7 +197,7 @@ class ImportJobRunnerTest {
         val runner = ImportJobRunner(containerImportJob, retryDelay, endpoint, di)
         runBlocking {
             runner.importContainer()
-            runner.startUpload()
+            runner.upload()
         }
         val containerUid = runBlocking {
             appDb.containerImportJobDao.findByUid(containerImportJob.cijUid)!!.cijContainerUid
@@ -257,7 +257,7 @@ class ImportJobRunnerTest {
         val runner = ImportJobRunner(containerImportJob, retryDelay, endpoint, di)
         runBlocking {
             runner.importContainer()
-            runner.startUpload()
+            runner.upload()
         }
         val containerUid = runBlocking {
             appDb.containerImportJobDao.findByUid(containerImportJob.cijUid)!!.cijContainerUid

@@ -30,9 +30,9 @@ class HolidayCalendarEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
 
-    val holidayOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<Holiday>(di, Holiday::holUid,
+    val holidayOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<Holiday>(Holiday::holUid,
             "state_Holiday_list", Holiday.serializer().list,
-            Holiday.serializer().list, this) { holUid = it }
+            Holiday.serializer().list, this, Holiday::class) { holUid = it }
 
     fun handleAddOrEditHoliday(holiday: Holiday) {
         holidayOneToManyJoinEditHelper.onEditResult(holiday)

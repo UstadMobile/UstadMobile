@@ -7,6 +7,7 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
+import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.ContentEntryOpener
@@ -163,7 +164,11 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     fun handleOnClickDeleteButton() {
-
+        GlobalScope.launch(doorMainDispatcher()){
+            val downloadJobItem = db.downloadJobItemDao.findByContentEntryUidAsync(contentEntryUid) ?: return@launch
+            val deleteRequester: DeletePreparationRequester by on(accountManager.activeAccount).instance()
+            deleteRequester.requestDelete(downloadJobItem.djiUid)
+        }
     }
 
     fun handleOnClickGroupActivityButton() {

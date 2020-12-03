@@ -8,9 +8,19 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.WebChromeClient
+import android.webkit.WebView
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.fragment.findNavController
+import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.source.ProgressiveMediaSource
+import com.google.android.exoplayer2.ui.PlayerView
+import com.google.android.exoplayer2.upstream.DataSource
+import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
+import com.google.android.exoplayer2.util.Util
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryEdit2Binding
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
@@ -36,6 +46,9 @@ interface ContentEntryEdit2FragmentEventHandler {
     fun onClickContentImportSourceSelection()
 
     fun handleClickLanguage()
+
+    fun handleToggleCompress(checked: Boolean)
+
 }
 
 class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = null) : UstadEditFragment<ContentEntryWithLanguage>(), ContentEntryEdit2View, ContentEntryEdit2FragmentEventHandler {
@@ -47,6 +60,17 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     override val mEditPresenter: UstadEditPresenter<*, ContentEntryWithLanguage>?
         get() = mPresenter
 
+    private var playerView: PlayerView? = null
+
+    private var player: SimpleExoPlayer? = null
+
+    private var playWhenReady: Boolean = false
+
+    private var currentWindow = 0
+
+    private var playbackPosition: Long = 0
+
+    private var webView: WebView?  = null
 
     override var entity: ContentEntryWithLanguage? = null
         get() = field
@@ -62,6 +86,13 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 View.VISIBLE else View.GONE
             mBinding?.importedMetadata = value
             field = value
+        }
+
+    override var compressionEnabled: Boolean = true
+        get() = mBinding?.compressionEnabled ?: true
+        set(value) {
+            field = value
+            mBinding?.compressionEnabled = value
         }
 
     override var licenceOptions: List<ContentEntryEdit2Presenter.LicenceMessageIdOptions>? = null
@@ -84,6 +115,53 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             entry_title.error = getString(R.string.field_required_prompt)
             mBinding?.titleErrorEnabled = value
             field = value
+        }
+
+    override var videoUri: String? = null
+        get() = field
+        set(value) {
+
+            field = value
+            if(value == null) return
+            if (value.startsWith("http")) {
+                mBinding?.showVideoPreview = false
+                mBinding?.showWebPreview = true
+                prepareVideoFromWeb(value)
+            }else{
+                mBinding?.showVideoPreview = true
+                mBinding?.showWebPreview = false
+                prepareVideoFromFile(value)
+            }
+        }
+
+    private fun prepareVideoFromFile(filePath: String) {
+        val uri = Uri.parse(filePath)
+        val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(requireContext(), "UstadMobile")
+        val mediaSource = ProgressiveMediaSource.Factory(dataSourceFactory)
+                .createMediaSource(uri)
+        player?.prepare(mediaSource)
+    }
+
+    private fun prepareVideoFromWeb(filePath: String){
+        webView?.loadData("""
+            <!DOCTYPE html>
+            <html lang="en">
+            <body>
+            
+             <video id="video" style="width: 100%;height: 175px" controls>
+                <source src="$filePath"
+             </video> 
+            
+            </body>
+            </html>
+        """.trimIndent(), "text/html", "UTF-8")
+    }
+
+    override val videoDimensions: Pair<Int, Int>
+        get() {
+            val width = mBinding?.entryEditVideoPreview?.videoSurfaceView?.width ?: 0
+            val height = mBinding?.entryEditVideoPreview?.videoSurfaceView?.height ?: 0
+            return Pair(width, height)
         }
 
     override var fileImportErrorVisible: Boolean = false
@@ -124,11 +202,15 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
     }
 
+    override fun handleToggleCompress(checked: Boolean) {
+        compressionEnabled = checked
+    }
+
     /**
      * removes the temp folder from being deleted in the backstack
      */
     private fun unregisterFileFromTemp() {
-        if(entryMetaData?.uri?.startsWith("file://") == true) {
+        if (entryMetaData?.uri?.startsWith("file://") == true) {
             findNavController().unregisterDestinationTempFile(requireContext(), File(entryMetaData?.uri?.removePrefix("file://")).parentFile)
         }
     }
@@ -139,6 +221,8 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 registry ?: requireActivity().activityResultRegistry) { uri: Uri? ->
             if (uri != null) {
                 try {
+                    loading = true
+                    fieldsEnabled = false
                     GlobalScope.launch {
                         val input = requireContext().contentResolver.openInputStream(uri)
                         val importFolder = File(requireContext().filesDir, "import")
@@ -158,6 +242,8 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
+                    loading = false
+                    fieldsEnabled = true
                 }
             }
 
@@ -180,6 +266,26 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
             rootView = it.root
             it.fileImportInfoVisibility = View.GONE
             it.activityEventHandler = this
+            it.compressionEnabled = true
+            it.showVideoPreview = false
+            it.showWebPreview = false
+            webView = it.entryEditWebPreview
+            webView?.webChromeClient = WebChromeClient()
+            playerView = it.entryEditVideoPreview
+            webView?.settings?.apply {
+                javaScriptEnabled = true
+                domStorageEnabled = true
+                allowFileAccess = true
+                allowFileAccessFromFileURLs = true
+                allowUniversalAccessFromFileURLs = true
+                mediaPlaybackRequiresUserGesture = true
+            }
+        }
+
+        if (savedInstanceState != null) {
+            playbackPosition = savedInstanceState.get(PLAYBACK) as Long
+            playWhenReady = savedInstanceState.get(PLAY_WHEN_READY) as Boolean
+            currentWindow = savedInstanceState.get(CURRENT_WINDOW) as Int
         }
 
         return rootView
@@ -203,6 +309,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 ImportedContentEntryMetaData::class.java) {
             val metadata = it.firstOrNull() ?: return@observeResult
+            loading = true
             // back from navigate import
             entryMetaData = metadata
             val entry = entryMetaData?.contentEntry
@@ -211,18 +318,69 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 if (entryUid != null) entry.contentEntryUid = entryUid.toString().toLong()
                 fileImportErrorVisible = false
                 entity = entry
+                videoUri = metadata.uri
             }
+            loading = false
         }
+        viewLifecycleOwner.lifecycle.addObserver(viewLifecycleObserver)
 
     }
 
+    private fun initializePlayer() {
+        player = SimpleExoPlayer.Builder(requireContext()).build()
+        playerView?.player = player
+        player?.playWhenReady = playWhenReady
+        player?.seekTo(currentWindow, playbackPosition)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if(item.itemId == R.id.menu_done){
-            if(entity?.let { mPresenter?.isImportValid(it) } == true){
+        if (item.itemId == R.id.menu_done) {
+            if (entity?.let { mPresenter?.isImportValid(it) } == true) {
                 unregisterFileFromTemp()
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private val viewLifecycleObserver = object : DefaultLifecycleObserver {
+
+        override fun onStart(owner: LifecycleOwner) {
+            super.onStart(owner)
+            if (Util.SDK_INT > 23) {
+                initializePlayer()
+            }
+        }
+
+        override fun onResume(owner: LifecycleOwner) {
+            super.onResume(owner)
+            if (Util.SDK_INT <= 23 || player == null) {
+                initializePlayer()
+            }
+        }
+
+        override fun onPause(owner: LifecycleOwner) {
+            super.onPause(owner)
+            if (Util.SDK_INT <= 23) {
+                releasePlayer()
+            }
+        }
+
+        override fun onStop(owner: LifecycleOwner) {
+            super.onStop(owner)
+            if (Util.SDK_INT > 23) {
+                releasePlayer()
+            }
+
+        }
+
+    }
+
+    private fun releasePlayer() {
+        playbackPosition = player?.currentPosition ?: 0L
+        currentWindow = player?.currentWindowIndex ?: 0
+        playWhenReady = player?.playWhenReady ?: false
+        player?.release()
+        player = null
     }
 
     override fun onDestroyView() {
@@ -231,6 +389,19 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
         mPresenter = null
         entity = null
         entryMetaData = null
+        playerView = null
+        webView = null
+        player = null
+    }
+
+    companion object {
+
+        const val PLAYBACK = "playback"
+
+        const val PLAY_WHEN_READY = "playWhenReady"
+
+        const val CURRENT_WINDOW = "currentWindow"
+
     }
 
 }

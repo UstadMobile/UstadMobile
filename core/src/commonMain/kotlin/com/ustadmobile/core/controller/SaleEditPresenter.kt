@@ -34,10 +34,10 @@ class SaleEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
     //Sale Item edit helper
-    val saleItemEditHelper = DefaultOneToManyJoinEditHelper<SaleItemWithProduct>(di,
+    val saleItemEditHelper = DefaultOneToManyJoinEditHelper<SaleItemWithProduct>(
             SaleItemWithProduct::saleItemUid,
             "SaleItem", SaleItemWithProduct.serializer().list,
-            SaleItemWithProduct.serializer().list, this) { saleItemUid = it }
+            SaleItemWithProduct.serializer().list, this, SaleItemWithProduct::class) { saleItemUid = it }
 
     fun handleAddOrEditSaleItem(saleItem: SaleItemWithProduct) {
         saleItemEditHelper.onEditResult(saleItem)
@@ -50,10 +50,10 @@ class SaleEditPresenter(context: Any,
 
 
     //Sale Delivery edit helper
-    val saleDeliveryEditHelper = DefaultOneToManyJoinEditHelper<SaleDeliveryAndItems>(di,
+    val saleDeliveryEditHelper = DefaultOneToManyJoinEditHelper<SaleDeliveryAndItems>(
             {it.delivery?.saleDeliveryUid?:0L},
             "SaleDeliveryAndItems", SaleDeliveryAndItems.serializer().list,
-            SaleDeliveryAndItems.serializer().list, this) { delivery?.saleDeliveryUid = it }
+            SaleDeliveryAndItems.serializer().list, this, SaleDeliveryAndItems::class) { delivery?.saleDeliveryUid = it }
 
     fun handleAddOrEditSaleDelivery(saleDelivery: SaleDeliveryAndItems) {
         saleDeliveryEditHelper.onEditResult(saleDelivery)
@@ -66,9 +66,9 @@ class SaleEditPresenter(context: Any,
 
     //Sale Payment edit helper
     val salePaymentEditHelper = DefaultOneToManyJoinEditHelper<SalePaymentWithSaleItems>(
-            di, { it.payment?.salePaymentUid?:0L },
+            { it.payment?.salePaymentUid?:0L },
             "SalePaymentWithSaleItems", SalePaymentWithSaleItems.serializer().list,
-            SalePaymentWithSaleItems.serializer().list, this) { payment?.salePaymentUid = it }
+            SalePaymentWithSaleItems.serializer().list, this, SalePaymentWithSaleItems::class) { payment?.salePaymentUid = it }
 
     fun handleAddOrEditSalePayment(salePayment: SalePaymentWithSaleItems) {
         salePaymentEditHelper.onEditResult(salePayment)

@@ -32,10 +32,10 @@ class InventoryItemEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
 
-    val producerSelectionEditHelper = DefaultOneToManyJoinEditHelper<PersonWithInventoryItemAndStock>(di,
+    val producerSelectionEditHelper = DefaultOneToManyJoinEditHelper<PersonWithInventoryItemAndStock>(
             PersonWithInventoryItemAndStock::personUid,
             "PersonWithInventoryItemAndStock", PersonWithInventoryItemAndStock.serializer().list,
-            PersonWithInventoryItemAndStock.serializer().list, this) { personUid = it }
+            PersonWithInventoryItemAndStock.serializer().list, this, PersonWithInventoryItemAndStock::class) { personUid = it }
 
     fun handleAddOrEditPersonWithInventory(personWithInventory: PersonWithInventoryItemAndStock) {
         producerSelectionEditHelper.onEditResult(personWithInventory)

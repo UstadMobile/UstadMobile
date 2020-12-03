@@ -31,7 +31,6 @@ import kotlin.jvm.Volatile
     StateEntity::class, StateContentEntity::class, XLangMapEntry::class,
     SyncNode::class, LocallyAvailableContainer::class, ContainerETag::class,
     SyncResult::class, School::class,
-    TimeZoneEntity::class,
     SchoolMember::class, ClazzWork::class, ClazzWorkContentJoin::class, Comments::class,
     ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
@@ -54,7 +53,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 148)
+], version = 150)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -249,9 +248,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val xLangMapEntryDao: XLangMapEntryDao
 
     abstract val locallyAvailableContainerDao: LocallyAvailableContainerDao
-
-    @JsName("timeZoneEntityDao")
-    abstract val timeZoneEntityDao: TimeZoneEntityDao
 
     @JsName("schoolMemberDao")
     abstract val schoolMemberDao: SchoolMemberDao
@@ -3035,13 +3031,45 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_48_49 = object : DoorMigration(48, 49) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("""ALTER TABLE ScrapeRun ADD COLUMN conversionParams TEXT""".trimMargin())
+
+                database.execSQL("""
+          |CREATE 
+          | INDEX index_ScrapeQueueItem_status_itemType 
+          |ON ScrapeQueueItem (status, itemType)
+          """.trimMargin())
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("ALTER TABLE ScrapeRun RENAME to ScrapeRun_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ScrapeRun (  scrapeType  TEXT , scrapeRunStatus  INTEGER  NOT NULL , conversionParams  TEXT , scrapeRunUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("INSERT INTO ScrapeRun (scrapeRunUid, scrapeType, scrapeRunStatus, conversionParams) SELECT scrapeRunUid, scrapeType, status, conversionParams FROM ScrapeRun_OLD")
+                    database.execSQL("DROP TABLE ScrapeRun_OLD")
+
+                }else if (database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("""ALTER TABLE ScrapeRun RENAME COLUMN status to scrapeRunStatus
+                        """.trimMargin())
+                }
+
+            }
+        }
+
+        val MIGRATION_49_50 = object : DoorMigration(49, 50) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("DROP TABLE TimeZoneEntity")
+            }
+        }
+
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
                     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
-                    MIGRATION_47_48)
+                    MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50)
 
 
 

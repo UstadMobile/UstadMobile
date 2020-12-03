@@ -10,6 +10,7 @@
     <string name="register_incorrect_email">Wrong email address</string>
     <string name="group_activity">Group\nActivity</string>
     <string name="select_group_members">Select group members</string>
+    <string name="confirm_delete_message">Are you sure you want to delete this entry from your device?</string>
 
     <string name='wrong_user_pass_combo'>Wrong username/password: try again.</string>
     <string name='login_network_error'>Network error: please check you are online.</string>
@@ -108,6 +109,7 @@
     <string name="move">Move</string>
     <string name="hide">Hide</string>
     <string name="unhide">Unhide</string>
+    <string name="compress">Compress</string>
 
     <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
 
@@ -904,5 +906,22 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="save_sale_before_delivery">Please save this sale before adding a delivery</string>
     <string name="selected_more_than_required">Please do not select more than the required amount</string>
     <string name="selected_payment_higher">Please select payment lower than total sale</string>
+    <string name="end_is_before_start_error">End is before start</string>
+
+    <!--
+    Option when recording attendance. When the user clicks the 'record attendance' button they have
+    the option to either 1) record attendance for the the  most recent already known
+    occurrence of the class or 2) add an occurrence of the class (e.g. if they did not
+    setup a schedule or they want to add a one-off occurence of the class)
+    -->
+    <string name="record_attendance_for_most_recent_occurrence">Record attendance for most recent existing occurrence</string>
+
+    <!--
+    Option when recording attendance. When the user clicks the 'record attendance' button they have
+    the option to either 1) record attendance for the the  most recent already known
+    occurrence of the class or 2) add an occurrence of the class (e.g. if they did not
+    setup a schedule or they want to add a one-off occurence of the class)
+    -->
+    <string name="add_a_new_occurrence">Add a new occurrence</string>
 
 </resources>

@@ -57,6 +57,8 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
     override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int,
                     ustadGoOptions: UstadGoOptions)
 
+    fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any)
+
     /**
      * Get a string for use in the UI
      */

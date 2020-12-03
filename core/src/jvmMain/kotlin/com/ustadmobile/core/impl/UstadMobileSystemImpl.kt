@@ -68,11 +68,17 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         lastDestination = LastGoToDest(viewName, args)
     }
 
+    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
+
+    }
+
     /**
      * Get a string for use in the UI
      */
     actual override fun getString(messageCode: Int, context: Any): String{
-        return ""
+        //This is really only used in tests, so we just want to be sure that it is returning
+        //something that is distinct
+        return "$messageCode"
     }
 
 

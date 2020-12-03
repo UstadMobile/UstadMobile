@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -18,6 +19,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
@@ -33,8 +35,10 @@ import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.port.android.util.ext.getActivityContext
+import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.appbar_material_collapsing.*
 import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -47,12 +51,16 @@ import java.util.*
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
+        UstadActivityWithProgressBar,
         NavController.OnDestinationChangedListener {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     override val activityFloatingActionButton: ExtendedFloatingActionButton?
         get() = activity_listfragmelayout_behaviornt_fab
+
+    override val activityProgressBar: ProgressBar?
+        get() = main_progress_bar
 
     private lateinit var mBinding: ActivityMainBinding
 
@@ -63,6 +71,11 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     private var mIsAdmin: Boolean? = null
 
     private var searchView: SearchView? = null
+
+    //This is actually managed by the underlying fragments.
+    override var loading: Boolean
+        get() = false
+        set(value) {}
 
     //Observe the active account to show/hide the settings based on whether or not the user is admin
     private val mActiveUserObserver = Observer<UmAccount> {account ->
@@ -115,6 +128,11 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
                                       arguments: Bundle?) {
         invalidateOptionsMenu()
         onAppBarExpand(true)
+
+        val ustadDestination = impl.destinationProvider.lookupDestinationById(destination.id)
+        val scrollFlags = ustadDestination?.actionBarScrollBehavior ?:
+            (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
+        (mBinding.root.collapsing_toolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
 
         slideBottomNavigation(true)
     }

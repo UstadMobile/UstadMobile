@@ -138,9 +138,10 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
         }
     }
 
-    fun start(startingUrl: String, scraperType: String, parentUid: Long, contentEntryUid: Long, overrideEntry: Boolean = false) {
+    fun start(startingUrl: String, scraperType: String, parentUid: Long, contentEntryUid: Long,
+              overrideEntry: Boolean = false, conversionParams: String?) {
         val runId = db.scrapeRunDao.insert(ScrapeRun(scraperType,
-                ScrapeQueueItemDao.STATUS_PENDING)).toInt()
+                ScrapeQueueItemDao.STATUS_PENDING,conversionParams)).toInt()
 
         val isIndexer = ScraperTypes.indexerTypeMap.keys.find { it == scraperType }
         val isScraper = ScraperTypes.scraperTypeMap.keys.find { it == scraperType }

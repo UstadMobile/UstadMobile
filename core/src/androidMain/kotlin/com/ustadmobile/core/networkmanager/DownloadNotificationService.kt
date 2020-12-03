@@ -199,18 +199,20 @@ class DownloadNotificationService : Service(), DIAware {
         }
     }
 
-    inner class DeleteNotificationHolder(val downloadJobUid: Int) :
-            NotificationHolder2(impl.getString(MessageID.deleting, applicationContext),
-                    impl.getString(MessageID.deleting, applicationContext)) {
+    inner class DeleteNotificationHolder(val downloadJobItemUid: Int, val endpoint: Endpoint)
+        : NotificationHolder2(impl.getString(MessageID.deleting, applicationContext),
+            impl.getString(MessageID.deleting, applicationContext)) {
+
         init {
             builder.setContentTitle(contentTitle)
                     .setContentText(contentText)
 
             GlobalScope.launch {
-//                val downloadJobTitleInDb = umAppDatabase.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid) ?: ""
-//                builder.setContentTitle(downloadJobTitleInDb)
-//                contentTitle = downloadJobTitleInDb
-//                doNotify()
+                val db: UmAppDatabase = on(endpoint).direct.instance(tag = TAG_DB)
+                val downloadJobTitleInDb = db.downloadJobItemDao.getEntryTitleByDownloadJobItemUidAsync(downloadJobItemUid) ?: ""
+                builder.setContentTitle(downloadJobTitleInDb)
+                contentTitle = downloadJobTitleInDb
+                doNotify()
 
             }
         }
@@ -357,6 +359,7 @@ class DownloadNotificationService : Service(), DIAware {
 
         val downloadJobUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBUID) ?: -1
         val importJobUid = intentExtras?.getLong(EXTRA_IMPORTJOB_UID) ?: -1
+        val downloadJobItemUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBITEMUID) ?: -1
         val endpointUrl = intentExtras?.getString(EXTRA_ENDPOINT)
         val endpoint: Endpoint? = if(endpointUrl != null) Endpoint(endpointUrl) else null
 
@@ -422,7 +425,8 @@ class DownloadNotificationService : Service(), DIAware {
             }
 
             ACTION_DELETE_DOWNLOAD -> {
-                var deleteNotificationHolder = DeleteNotificationHolder(downloadJobUid)
+                val endpointVal = endpoint ?: throw IllegalArgumentException("ACTION_DELETE_DOWNLOAD requires EXTRA_ENDPOINT")
+                var deleteNotificationHolder = DeleteNotificationHolder(downloadJobItemUid, endpointVal)
                 activeDeleteJobNotifications.add(deleteNotificationHolder)
 
                 if (!foregroundActive && foregroundNotificationHolder == null) {
@@ -432,14 +436,14 @@ class DownloadNotificationService : Service(), DIAware {
                 }
 
                 GlobalScope.async {
-//                    val containerDownloadManager = networkManagerDeferred.await().containerDownloadManager
-//                    deleteDownloadJob(umAppDatabase, downloadJobUid, containerDownloadManager) {
-//                        deleteNotificationHolder.builder.setProgress(MAX_PROGRESS_VALUE, it, false)
-//                        deleteNotificationHolder.doNotify()
-//                    }
-//                    activeDeleteJobNotifications.remove(deleteNotificationHolder)
-//                    mNotificationManager.cancel(deleteNotificationHolder.notificationId)
-//                    checkIfCompleteAfterDelay()
+                    val containerDownloadManager: ContainerDownloadManager by on(endpointVal).instance()
+                    containerDownloadManager.deleteDownloadJobItem(downloadJobItemUid){
+                        deleteNotificationHolder.builder.setProgress(MAX_PROGRESS_VALUE, it, false)
+                        deleteNotificationHolder.doNotify()
+                    }
+                    activeDeleteJobNotifications.remove(deleteNotificationHolder)
+                    mNotificationManager.cancel(deleteNotificationHolder.notificationId)
+                    checkIfCompleteAfterDelay()
                 }
 
             }

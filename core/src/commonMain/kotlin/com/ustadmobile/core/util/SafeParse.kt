@@ -3,6 +3,7 @@ package com.ustadmobile.core.util
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import org.kodein.di.DI
+import kotlin.reflect.KClass
 
 /**
  * This function is temporarily required because of Kotlinx serialization's flakiness. It can throw
@@ -13,6 +14,5 @@ expect inline fun <reified T> safeParse(di: DI, strategy: DeserializationStrateg
 
 expect inline fun <reified T> safeStringify(di: DI, strategy: SerializationStrategy<T>, entity: T) : String
 
-//expect inline fun <reified T> safeStringifyList(di: DI, strategy: SerializationStrategy<T>, entity: List<T>): String
-
-expect inline fun <reified  T: Any> safeParseList(di: DI, string: String, strategy: DeserializationStrategy<T>) : List<T>
+expect fun <T: Any> safeParseList(di : DI, strategy: DeserializationStrategy<List<T>>,
+                                            klass: KClass<T>, str: String): List<T>

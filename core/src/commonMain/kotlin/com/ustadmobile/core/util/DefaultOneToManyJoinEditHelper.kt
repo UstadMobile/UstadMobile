@@ -5,16 +5,17 @@ import com.ustadmobile.core.db.dao.OneToManyJoinDao
 import kotlinx.atomicfu.atomic
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
-import org.kodein.di.DI
+import kotlin.reflect.KClass
 
-class DefaultOneToManyJoinEditHelper<T>(di: DI, pkGetter: (T) -> Long,
-                                        serializationKey: String,
-                                        serializationStrategy: SerializationStrategy<List<T>>,
-                                        deserializationStrategy: DeserializationStrategy<List<T>>,
-                                        editPresenter: UstadEditPresenter<*, *>?,
-                                        pkSetter: T.(Long) -> Unit)
+class DefaultOneToManyJoinEditHelper<T: Any>(pkGetter: (T) -> Long,
+                                             serializationKey: String,
+                                             serializationStrategy: SerializationStrategy<List<T>>,
+                                             deserializationStrategy: DeserializationStrategy<List<T>>,
+                                             editPresenter: UstadEditPresenter<*, *>,
+                                             entityClass: KClass<T>,
+                                             pkSetter: T.(Long) -> Unit)
     : OneToManyJoinEditHelper<T, Long>(pkGetter, serializationKey, serializationStrategy,
-        deserializationStrategy, 0L, editPresenter, pkSetter, {-1L}, di){
+        deserializationStrategy, 0L, editPresenter, entityClass, pkSetter, {-1L}){
 
     private val atomicLong = atomic(0L)
 
