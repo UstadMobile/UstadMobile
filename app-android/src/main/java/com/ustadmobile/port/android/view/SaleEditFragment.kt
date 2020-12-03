@@ -242,6 +242,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         onSaveStateToBackStackStateHandle()
         val saleDeliveryWithItems = SaleDeliveryAndItems().apply{
             saleItems = saleItemList?.value?: listOf()
+            payments = salePaymentList?.value?: listOf()
         }
         navigateToEditEntity(saleDeliveryWithItems, R.id.saledelivery_edit_dest,
                 SaleDeliveryAndItems::class.java,
@@ -254,6 +255,8 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         var salePaymentWithDiscount = SalePaymentWithSaleItems().apply {
             saleItems = saleItemList?.value ?: listOf()
             saleDiscount = entity?.saleDiscount ?: 0L
+            deliveries =  saleDeliveryList?.value?: listOf()
+
         }
         navigateToEditEntity(salePaymentWithDiscount, R.id.salepayment_edit_dest,
             SalePaymentWithSaleItems::class.java)
@@ -281,6 +284,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
 
     override fun onClickSaleDelivery(saleDelivery: SaleDeliveryAndItems) {
         onSaveStateToBackStackStateHandle()
+        saleDelivery.saleItems = saleItemList?.value?: listOf()
         navigateToEditEntity(saleDelivery, R.id.saledelivery_edit_dest,
                 SaleDeliveryAndItems::class.java, argBundle = bundleOf(
                     UstadView.ARG_SALE_UID to entity?.saleUid.toString()))

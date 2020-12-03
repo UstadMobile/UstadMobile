@@ -32,10 +32,16 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
                                                   saleDeliveryUid: Long) :
             List<PersonWithInventoryItemAndStock>
 
-
     @Query(QUERY_GET_PRODUCT_TRANSACTION_HISTORY)
     abstract fun getProductTransactionDetail(productUid: Long, leUid: Long) :
             DataSource.Factory<Int, InventoryTransactionDetail>
+
+    @Query(QUERY_UPDATE_DELIVERY_ON_INVENTORY)
+    abstract suspend fun updateSaleDeliveryOnInventoryItems(productUid: Long, leUid: Long,
+                                                            weUid: Long,
+                                                            saleDeliveryUid: Long,
+                                                            saleUid: Long,
+                                                            count: Long): Int
 
     companion object{
 
@@ -143,6 +149,26 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
             GROUP BY inventoryItemDateAdded
         """
 
+
+        /**
+         * productUid: Long, leUid: Long,
+        saleDeliveryUid: Long,
+        saleUid: Long
+         */
+        const val QUERY_UPDATE_DELIVERY_ON_INVENTORY = """
+
+            UPDATE InventoryItem SET 
+                inventoryItemSaleDeliveryUid = :saleDeliveryUid, 
+                inventoryItemSaleUid = :saleUid
+            WHERE inventoryItemUid IN 
+			(SELECT II.inventoryItemUid FROM InventoryItem AS II
+				WHERE II.inventoryItemLeUid = :leUid
+                AND II.inventoryItemProductUid = :productUid
+                AND II.inventoryItemWeUid = :weUid 
+            ORDER BY II.inventoryItemDateAdded ASC LIMIT :count)
+
+
+        """
 
 
     }

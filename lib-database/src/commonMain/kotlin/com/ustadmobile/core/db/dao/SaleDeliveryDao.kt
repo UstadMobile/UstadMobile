@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.SaleDelivery
 import com.ustadmobile.lib.db.entities.SaleDeliveryAndItems
 import com.ustadmobile.lib.db.entities.SaleItemWithProduct
+import com.ustadmobile.lib.db.entities.Product
 import com.ustadmobile.door.annotation.Repository
 
 @Repository
@@ -22,6 +23,14 @@ abstract class SaleDeliveryDao : BaseDao<SaleDelivery>, OneToManyJoinDao<SaleDel
 
     @Query(QUERY_ALL_ACTIVE_SALE_DELIVERY_LIST)
     abstract suspend fun findAllBySaleAsList(saleUid: Long): List<SaleDelivery>
+
+    @Query("""
+        SELECT Product.* FROM InventoryItem
+        LEFt JOIN Product ON Product.productUid = InventoryItem.inventoryItemProductUid
+         WHERE InventoryItem.inventoryItemSaleDeliveryUid = :saleDeliveryUid
+         AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+    """)
+    abstract suspend fun findAllProductsInThisDelivery(saleDeliveryUid: Long): List<Product>
 
     @Query("""
         SELECT * FROM SaleDelivery WHERE saleDeliveryUid = :uid 

@@ -17,6 +17,8 @@ import com.ustadmobile.lib.db.entities.SaleDelivery
 import com.ustadmobile.lib.db.entities.SaleDeliveryAndItems
 import com.ustadmobile.lib.db.entities.SalePayment
 import com.ustadmobile.lib.db.entities.SalePaymentWithSaleItems
+import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
+import com.ustadmobile.lib.db.entities.InventoryItem
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -110,6 +112,8 @@ class SaleEditPresenter(context: Any,
         for(eachDelivery in saleDeliveryList){
             saleDeliverywithItems.add(SaleDeliveryAndItems().apply{
                 delivery = eachDelivery
+
+
             })
         }
         saleDeliveryEditHelper.liveList.sendValue(saleDeliverywithItems)
@@ -153,9 +157,8 @@ class SaleEditPresenter(context: Any,
             editEntity = SaleWithCustomerAndLocation()
         }
 
-        view.salePaymentList = salePaymentEditHelper.liveList
-        view.saleDeliveryList = saleDeliveryEditHelper.liveList
-        view.salePaymentList = salePaymentEditHelper.liveList
+//        view.salePaymentList = salePaymentEditHelper.liveList
+//        view.saleDeliveryList = saleDeliveryEditHelper.liveList
 
         return editEntity
     }
@@ -169,6 +172,7 @@ class SaleEditPresenter(context: Any,
 
     override fun handleClickSave(entity: SaleWithCustomerAndLocation) {
         GlobalScope.launch(doorMainDispatcher()) {
+            val loggedInPersonUid = accountManager.activeAccount.personUid
             entity?.salePersonUid = accountManager.activeAccount.personUid
             entity?.saleLastUpdateDate = UMCalendarUtil.getDateInMilliPlusDays(0)
 
@@ -194,36 +198,75 @@ class SaleEditPresenter(context: Any,
             repo.saleItemDao.deactivateByUids(saleItemstoDelete)
 
 
-            //TODO: Deliveries
-//            val deliveriesToInsert = saleDeliveryEditHelper.entitiesToInsert
-//            val deliveriesToUpdate = saleDeliveryEditHelper.entitiesToUpdate
-//            val deliveriesToDelete = saleDeliveryEditHelper.primaryKeysToDeactivate
-//
-//            deliveriesToInsert.forEach {
-//                it.saleDeliverySaleUid = entity.saleUid
-//                it.saleDeliveryUid = repo.saleDeliveryDao.insertAsync(it)
-//            }
-//            repo.saleDeliveryDao.updateListAsync(deliveriesToUpdate)
-//            repo.saleDeliveryDao.deactivateByUids(deliveriesToDelete)
+            val deliveriesToInsert = saleDeliveryEditHelper.entitiesToInsert
+            val deliveriesToUpdate = saleDeliveryEditHelper.entitiesToUpdate
+            val deliveriesToDelete = saleDeliveryEditHelper.primaryKeysToDeactivate
+
+            deliveriesToUpdate.forEach {
+                it.delivery.saleDeliverySaleUid = entity.saleUid
+                if(it.delivery.saleDeliveryUid == 0L) {
+                    it.delivery.saleDeliveryUid = repo.saleDeliveryDao.insertAsync(it.delivery)
+                }
+
+                val saleDeliveryUid = it.delivery.saleDeliveryUid
+                //1. get the amount and product
+                var productCountSelected = 0
+                for(producerSelection in it.deliveryDetails){
+                    for(everyTransaction in producerSelection?.transactions?: emptyList<PersonWithInventoryItemAndStock>()){
+                        productCountSelected += everyTransaction.selectedStock
+                    }
+                }
+
+                for(producerSelection in it.deliveryDetails) {
+                    //2. Udpdate productCountSelected InventoryItems with the deliveryUid and saleUid
+                    val productUid = producerSelection.productUid
+                    for(everyTransaction in producerSelection?.transactions?: emptyList<PersonWithInventoryItemAndStock>()) {
+                        val deliveryInventoryTransaction = InventoryItem().apply{
+                            inventoryItemProductUid = productUid
+                            inventoryItemLeUid = loggedInPersonUid
+                            inventoryItemWeUid = everyTransaction.personUid
+                            inventoryItemDateAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
+                            inventoryItemSaleUid = entity.saleUid
+                            inventoryItemSaleDeliveryUid = saleDeliveryUid
+                            inventoryItemQuantity = everyTransaction.selectedStock * -1L
+                            inventoryItemUid = repo.inventoryItemDao.insertAsync(this)
+                        }
+                    }
+                }
+            }
+
+            var deliveriesToUpdateDeliveriesOnly = mutableListOf<SaleDelivery>()
+            for(everyDelivery in deliveriesToUpdate){
+                deliveriesToUpdateDeliveriesOnly.add(everyDelivery.delivery)
+            }
+            repo.saleDeliveryDao.updateListAsync(deliveriesToUpdateDeliveriesOnly)
+            repo.saleDeliveryDao.deactivateByUids(deliveriesToDelete)
 
 
-            //TODO: Payments
-//            val paymentsToInsert = salePaymentEditHelper.entitiesToInsert
-//            val paymentsToUpdate = salePaymentEditHelper.entitiesToUpdate
-//            val paymentsToDelete = salePaymentEditHelper.primaryKeysToDeactivate
-//
-//            paymentsToInsert.forEach {
-//                it.salePaymentSaleUid = entity.saleUid
-//                it.salePaymentUid = repo.salePaymentDao.insertAsync(it)
-//            }
-//            paymentsToUpdate.forEach {
-//                it.salePaymentSaleUid = entity.saleUid
-//                if(it.salePaymentUid == 0L) {
-//                    it.salePaymentUid = repo.salePaymentDao.insertAsync(it)
-//                }
-//            }
-//            repo.salePaymentDao.updateListAsync(paymentsToUpdate)
-//            repo.salePaymentDao.deactivateByUids(paymentsToDelete)
+            val paymentsToInsert = salePaymentEditHelper.entitiesToInsert
+            val paymentsToUpdate = salePaymentEditHelper.entitiesToUpdate
+            val paymentsToDelete = salePaymentEditHelper.primaryKeysToDeactivate
+
+            val paymentsToUpdatePaymentsOnly = mutableListOf<SalePayment>()
+            for(everyPayment in paymentsToUpdate){
+                paymentsToUpdatePaymentsOnly.add(everyPayment.payment)
+            }
+            val paymentsToInsertPaymentsOnly = mutableListOf<SalePayment>()
+            for(everyPayment in paymentsToInsert){
+                paymentsToUpdatePaymentsOnly.add(everyPayment.payment)
+            }
+            paymentsToInsertPaymentsOnly.forEach {
+                it.salePaymentSaleUid = entity.saleUid
+                it.salePaymentUid = repo.salePaymentDao.insertAsync(it)
+            }
+            paymentsToUpdatePaymentsOnly.forEach {
+                it.salePaymentSaleUid = entity.saleUid
+                if(it.salePaymentUid == 0L) {
+                    it.salePaymentUid = repo.salePaymentDao.insertAsync(it)
+                }
+            }
+            repo.salePaymentDao.updateListAsync(paymentsToUpdatePaymentsOnly)
+            repo.salePaymentDao.deactivateByUids(paymentsToDelete)
 
 
             view.finishWithResult(listOf(entity))

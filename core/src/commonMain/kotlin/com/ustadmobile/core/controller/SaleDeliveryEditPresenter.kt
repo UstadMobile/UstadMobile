@@ -65,7 +65,7 @@ class SaleDeliveryEditPresenter(context: Any,
             //Build product and we selection list ie ProductDeliveryWithProductAndTransactions
             for ((productUid, quantity) in quantityMap) {
                 //4. Get transactions
-                val producersTransactions = withTimeout(2000) {
+                var producersTransactions = withTimeout(2000) {
                     db.inventoryItemDao.getStockAndDeliveryListByProduct(productUid,
                             loggedInPersonUid, editEntity?.delivery?.saleDeliveryUid ?: 0L)
                 }
@@ -79,6 +79,7 @@ class SaleDeliveryEditPresenter(context: Any,
                     numItemsExpected = quantity
                     transactions = producersTransactions
                     productName = product?.productName
+                    this.productUid = product?.productUid?:0L
                 }
                 allProductsWithProducers.add(productWithWE)
 
@@ -120,6 +121,7 @@ class SaleDeliveryEditPresenter(context: Any,
 
         if(validated) {
             entity.deliveryDetails = deliveryDetailsOnView
+            entity.delivery.saleDeliveryDate = UMCalendarUtil.getDateInMilliPlusDays(0)
             view.finishWithResult(listOf(entity))
         }
 

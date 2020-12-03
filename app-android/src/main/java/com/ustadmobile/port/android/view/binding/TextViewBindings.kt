@@ -3,10 +3,14 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
+import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
+import androidx.core.widget.addTextChangedListener
 import androidx.databinding.BindingAdapter
+import androidx.databinding.InverseBindingAdapter
+import androidx.databinding.InverseBindingListener
 import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -305,6 +309,27 @@ fun SeekBar.setMaxForWE(personWithInventory: PersonWithInventoryItemAndStock, sa
     }else{
         max = 100
     }
+}
+
+@BindingAdapter("seekBarProgress")
+fun SeekBar.setSeekBarProgress(progressValue: Int){
+    var newProgress = progressValue
+    if(newProgress < 0){
+        newProgress = -1 * progressValue
+    }
+    progress = newProgress
+}
+
+
+@InverseBindingAdapter(attribute = "seekBarProgress")
+fun getSeekBarProgress(seekBar: SeekBar): Int{
+    return seekBar.progress.toInt()
+}
+
+@BindingAdapter("seekBarProgressAttrChanged")
+fun SeekBar.setProgressListener(inverseBindingListener: InverseBindingListener) {
+    inverseBindingListener.onChange()
+
 }
 
 @BindingAdapter("rolesAndPermissionsText")

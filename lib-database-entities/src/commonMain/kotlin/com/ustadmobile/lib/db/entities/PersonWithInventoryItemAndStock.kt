@@ -10,7 +10,7 @@ class PersonWithInventoryItemAndStock() : Person() {
     @Embedded
     var inventoryItem: InventoryItem? = InventoryItem()
 
-    //Total inventory/stock count
+    //Total inventory/stock count that This person has
     var stock: Int = 0
 
     var selectedStock: Int = 0
