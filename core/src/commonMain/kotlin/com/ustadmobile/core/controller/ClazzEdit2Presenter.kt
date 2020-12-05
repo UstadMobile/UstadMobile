@@ -35,7 +35,7 @@ class ClazzEdit2Presenter(context: Any,
     private val scheduleOneToManyJoinEditHelper
             = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid,
             ARG_SAVEDSTATE_SCHEDULES, Schedule.serializer().list,
-            Schedule.serializer().list, this) {scheduleUid = it}
+            Schedule.serializer().list, this, Schedule::class) {scheduleUid = it}
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

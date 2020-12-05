@@ -57,7 +57,7 @@ class PersonEditPresenter(context: Any,
     private val clazzMemberJoinEditHelper =
             DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
             "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
-            ClazzMemberWithClazz.serializer().list, this) { clazzMemberUid = it }
+            ClazzMemberWithClazz.serializer().list, this, ClazzMemberWithClazz::class) { clazzMemberUid = it }
 
     fun handleAddOrEditClazzMemberWithClazz(clazzMemberWithClazz: ClazzMemberWithClazz) {
         clazzMemberJoinEditHelper.onEditResult(clazzMemberWithClazz)
@@ -70,7 +70,7 @@ class PersonEditPresenter(context: Any,
     private val rolesAndPermissionEditHelper = DefaultOneToManyJoinEditHelper<EntityRoleWithNameAndRole>(
             EntityRoleWithNameAndRole::erUid,
             "state_EntityRoleWithNameAndRole_list", EntityRoleWithNameAndRole.serializer().list,
-            EntityRoleWithNameAndRole.serializer().list, this) { erUid = it }
+            EntityRoleWithNameAndRole.serializer().list, this, EntityRoleWithNameAndRole::class) { erUid = it }
 
     fun handleAddOrEditRoleAndPermission(entityRoleWithNameAndRole: EntityRoleWithNameAndRole) {
         rolesAndPermissionEditHelper.onEditResult(entityRoleWithNameAndRole)
