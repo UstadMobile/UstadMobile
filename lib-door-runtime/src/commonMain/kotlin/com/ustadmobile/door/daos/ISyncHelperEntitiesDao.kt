@@ -1,5 +1,7 @@
 package com.ustadmobile.door.daos
 
+import androidx.room.Insert
+import com.ustadmobile.door.SyncResult
 import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
 
@@ -68,4 +70,8 @@ interface ISyncHelperEntitiesDao {
      */
     fun findSyncNodeClientId(): Int
 
+    /**
+     * Insert a SyncResult entity (logging success or failure of a sync run)
+     */
+    suspend fun insertSyncResult(syncResult: SyncResult)
 }

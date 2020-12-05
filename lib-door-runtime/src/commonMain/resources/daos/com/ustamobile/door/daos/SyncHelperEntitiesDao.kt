@@ -1,8 +1,10 @@
 package com.ustadmobile.door.daos
 
 import androidx.room.Dao
+import androidx.room.Insert
 import androidx.room.Query
 import com.ustadmobile.door.ClientSyncManager
+import com.ustadmobile.door.SyncResult
 import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
 
@@ -17,6 +19,9 @@ import com.ustadmobile.door.entities.UpdateNotification
  */
 @Dao
 abstract class SyncHelperEntitiesDao : ISyncHelperEntitiesDao {
+
+    @Insert
+    override abstract suspend fun insertSyncResult(syncResult: SyncResult)
 
     /**
      * This will be implemented by generated code to run the query. It will find a list of all

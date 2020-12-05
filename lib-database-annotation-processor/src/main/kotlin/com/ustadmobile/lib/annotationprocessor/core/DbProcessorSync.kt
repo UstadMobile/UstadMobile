@@ -36,6 +36,7 @@ import com.ustadmobile.lib.annotationprocessor.core.DbProcessorRepository.Compan
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_ENTITY_TRK
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_ABSTRACT
 import java.lang.IllegalArgumentException
+import com.ustadmobile.door.EntityAck
 
 /**
  * Generate a Tracker Entity for a Syncable Entity
@@ -43,6 +44,9 @@ import java.lang.IllegalArgumentException
 internal fun generateTrackerEntity(entityClass: TypeElement, processingEnv: ProcessingEnvironment) : TypeSpec {
     val pkFieldTypeName = getEntityPrimaryKey(entityClass)!!.asType().asTypeName()
     return TypeSpec.classBuilder("${entityClass.simpleName}_trk")
+            .addAnnotation(AnnotationSpec.builder(Suppress::class)
+                    .addMember("%S", "ClassName")
+                    .build())
             .addProperties(listOf(
                     PropertySpec.builder(DbProcessorSync.TRACKER_PK_FIELDNAME, LONG)
                             .addAnnotation(AnnotationSpec.builder(PrimaryKey::class).addMember("autoGenerate = true").build())
@@ -97,8 +101,62 @@ internal fun generateTrackerEntity(entityClass: TypeElement, processingEnv: Proc
                     .build())
             .addModifiers(KModifier.DATA)
             .build()
-
 }
+
+fun FileSpec.Builder.addSyncableEntityToTrackFunction(entityClass: TypeElement, processingEnv: ProcessingEnvironment)
+: FileSpec.Builder{
+
+    val syncEntityInfo = SyncableEntityInfo(entityClass.asClassName(), processingEnv)
+    addFunction(FunSpec.builder("toSyncableTrk")
+            .receiver(List::class.asClassName().parameterizedBy(entityClass.asClassName()))
+            .addParameter(ParameterSpec.builder("primary", BOOLEAN)
+                    .defaultValue("false")
+                    .build())
+            .addParameter(ParameterSpec.builder("clientId", INT)
+                    .defaultValue("0")
+                    .build())
+            .returns(List::class.asClassName().parameterizedBy(syncEntityInfo.tracker))
+            .addCode(CodeBlock.builder()
+                    .add("return·map·{\n") //Avoid this being put on the next line
+                    .indent()
+                    .add("%T(epk = it.${syncEntityInfo.entityPkField.name}," +
+                            "clientId = clientId,", syncEntityInfo.tracker)
+                    .beginControlFlow("csn = if(primary)")
+                    .add("it.${syncEntityInfo.entityMasterCsnField.name}\n")
+                    .nextControlFlow("else")
+                    .add("it.${syncEntityInfo.entityLocalCsnField.name}\n")
+                    .endControlFlow()
+                    .add(")\n")
+                    .endControlFlow()
+                    .build())
+            .build())
+
+    return this
+}
+
+fun FileSpec.Builder.addSyncableEntitytoEntityAckFunction(entityClass: TypeElement,
+                                                          processingEnv: ProcessingEnvironment) : FileSpec.Builder {
+    val syncEntityInfo = SyncableEntityInfo(entityClass.asClassName(), processingEnv)
+    addFunction(FunSpec.builder("toEntityAck")
+            .receiver(List::class.asClassName().parameterizedBy(entityClass.asClassName()))
+            .addParameter("primary", BOOLEAN)
+            .returns(List::class.parameterizedBy(EntityAck::class))
+            .addCode(CodeBlock.builder()
+                    .add("return·map{\n").indent()
+                    .add("%T(epk·=·it.${syncEntityInfo.entityPkField.name},\n",
+                        EntityAck::class)
+                    .beginControlFlow("csn = if(primary)")
+                        .add("it.${syncEntityInfo.entityMasterCsnField.name}\n")
+                    .nextControlFlow("else")
+                        .add("it.${syncEntityInfo.entityLocalCsnField.name}\n")
+                    .endControlFlow()
+                    .add(")\n")
+                    .endControlFlow()
+                    .build())
+            .build())
+    return this
+}
+
 
 /**
  * Where this TypeElement represents a Database, generate a TypeSpec for the SyncDao
@@ -112,7 +170,7 @@ fun TypeElement.toSyncDaoTypeSpec(processingEnv: ProcessingEnvironment) : TypeSp
             .addSuperinterface(ClassName(dbTypeEl.packageName, "I${dbTypeEl.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"))
             .apply {
                 dbTypeEl.allDbEntities(processingEnv).filter { it.hasAnnotation(SyncableEntity::class.java) }.forEach {entityType ->
-                    addSyncDaoFunsForEntity(entityType, isOverride = true)
+                    addSyncDaoFunsForEntity(entityType, isOverride = true, processingEnv = processingEnv)
                 }
 
                 dbTypeEl.dbEnclosedDaos(processingEnv).filter { it.isDaoThatRequiresSyncHelper(processingEnv) }.forEach {
@@ -131,7 +189,7 @@ fun TypeElement.toSyncDaoInterfaceTypeSpec(processingEnv: ProcessingEnvironment)
     return TypeSpec.interfaceBuilder("I$simpleName$SUFFIX_SYNCDAO_ABSTRACT")
             .apply {
                 dbTypeEl.allDbEntities(processingEnv).filter { it.hasAnnotation(SyncableEntity::class.java) }.forEach { entityType ->
-                    addSyncDaoFunsForEntity(entityType, isOverride = false)
+                    addSyncDaoFunsForEntity(entityType, isOverride = false, processingEnv = processingEnv)
                 }
             }
             .build()
@@ -142,31 +200,61 @@ fun TypeElement.toSyncDaoInterfaceTypeSpec(processingEnv: ProcessingEnvironment)
  * that find the remote changes, local changes, insert/replace the entity itself, and
  * insert/replace the trk entity, etc.
  */
-fun TypeSpec.Builder.addSyncDaoFunsForEntity(entityType: TypeElement, isOverride: Boolean) : TypeSpec.Builder{
+fun TypeSpec.Builder.addSyncDaoFunsForEntity(entityType: TypeElement, isOverride: Boolean,
+        processingEnv: ProcessingEnvironment) : TypeSpec.Builder{
     val syncFindAllSql = entityType.getAnnotation(SyncableEntity::class.java)?.syncFindAllQuery
-    val getAllSql = if(syncFindAllSql?.isNotEmpty() == true) {
+    val syncableEntityInfo = SyncableEntityInfo(entityType.asClassName(), processingEnv)
+    val findAllRemoteSql = if(syncFindAllSql?.isNotEmpty() == true) {
         syncFindAllSql
     }else {
         "SELECT * FROM ${entityType.simpleName}"
     }
 
+    val findLocalUnsentSql = "SELECT * FROM " +
+            "(SELECT * FROM ${entityType.simpleName} ) AS ${entityType.simpleName} " +
+            "WHERE " +
+            "${syncableEntityInfo.entityLastChangedByField.name} = (SELECT nodeClientId FROM SyncNode) AND " +
+            "(${entityType.simpleName}.${syncableEntityInfo.entityLocalCsnField.name} > " +
+            "COALESCE((SELECT ${syncableEntityInfo.trackerCsnField.name} FROM ${syncableEntityInfo.tracker.simpleName} " +
+            "WHERE ${syncableEntityInfo.trackerPkField.name} = ${entityType.simpleName}.${syncableEntityInfo.entityPkField.name} " +
+            "AND ${syncableEntityInfo.trackerDestField.name} = :destClientId), 0)" +
+            ") LIMIT :limit"
+
     addFunction(FunSpec.builder("_findMasterUnsent${entityType.simpleName}")
             .addModifiers(KModifier.ABSTRACT, KModifier.SUSPEND)
             .applyIf(isOverride) {
                 addModifiers(KModifier.OVERRIDE)
-            }.applyIf(getAllSql.contains(":clientId")) {
+            }.applyIf(findAllRemoteSql.contains(":clientId")) {
                 addParameter("clientId", INT)
             }
             .returns(List::class.asClassName().parameterizedBy(entityType.asClassName()))
             .addAnnotation(AnnotationSpec.builder(Query::class)
-                    .addMember("%S", getAllSql).build())
+                    .addMember("%S", findAllRemoteSql).build())
             .addAnnotation(AnnotationSpec.builder(Repository::class)
                     .addMember("methodType = ${Repository.METHOD_DELEGATE_TO_WEB}")
                     .build())
             .build())
 
+
+    addFunction(FunSpec.builder("_findLocalUnsent${entityType.simpleName}")
+            .addAnnotation(AnnotationSpec.builder(Query::class)
+                    .addMember("%S", findLocalUnsentSql)
+                    .build())
+            .addAnnotation(AnnotationSpec.builder(Repository::class)
+                    .addMember("methodType = ${Repository.METHOD_DELEGATE_TO_DAO}")
+                    .build())
+            .addModifiers(KModifier.ABSTRACT, KModifier.SUSPEND)
+            .applyIf(isOverride) {
+                addModifiers(KModifier.OVERRIDE)
+            }
+            .addParameter("destClientId", INT)
+            .addParameter("limit", INT)
+            .returns(List::class.asClassName().parameterizedBy(entityType.asClassName()))
+            .build())
+
+
     addFunction(FunSpec.builder("_replace${entityType.simpleName}")
-            .addModifiers(KModifier.ABSTRACT)
+            .addModifiers(KModifier.ABSTRACT, KModifier.SUSPEND)
             .applyIf(isOverride) {
                 addModifiers(KModifier.OVERRIDE)
             }
@@ -178,7 +266,7 @@ fun TypeSpec.Builder.addSyncDaoFunsForEntity(entityType: TypeElement, isOverride
             .build())
 
     addFunction(FunSpec.builder("_replace${entityType.simpleName}_trk")
-            .addModifiers(KModifier.ABSTRACT)
+            .addModifiers(KModifier.ABSTRACT, KModifier.SUSPEND)
             .applyIf(isOverride) {
                 addModifiers(KModifier.OVERRIDE)
             }
@@ -189,6 +277,64 @@ fun TypeSpec.Builder.addSyncDaoFunsForEntity(entityType: TypeElement, isOverride
             .build())
 
 
+
+    return this
+}
+
+
+/**
+ * Generate a sync function that will take the list of tables to sync and call the sync function
+ * for the required tables
+ */
+fun TypeSpec.Builder.addRepoSyncFunction(dbTypeEl: TypeElement,
+                                         processingEnv: ProcessingEnvironment) : TypeSpec.Builder{
+    addFunction(FunSpec.builder("sync")
+            .addModifiers(KModifier.SUSPEND, KModifier.OVERRIDE)
+            .returns(List::class.parameterizedBy(SyncResult::class))
+            .addParameter("tablesToSync", List::class.parameterizedBy(Int::class)
+                    .copy(nullable = true))
+            .addCode(CodeBlock.builder()
+                    .add("val _allResults = mutableListOf<%T>()\n", SyncResult::class)
+                    .apply {
+                        val syncRepoVarName = "_${dbTypeEl.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"
+                        dbTypeEl.allDbEntities(processingEnv)
+                                .filter { it.hasAnnotation(SyncableEntity::class.java) }
+                                .forEach { entityType ->
+
+                                    val tableId = entityType.getAnnotation(SyncableEntity::class.java).tableId
+                                    beginControlFlow("%M(tablesToSync, $tableId, _allResults)",
+                                            MemberName("com.ustadmobile.door.ext", "runEntitySyncIfRequired"))
+                                    add("%M(", MemberName("com.ustadmobile.door.ext",
+                                            "syncEntity"))
+                                    .applyIf(entityType.syncableEntityFindAllHasClientIdParam) {
+                                        beginControlFlow("receiveRemoteEntitiesFn = ")
+                                        add("_syncDao._findMasterUnsent${entityType.simpleName}(clientId)\n")
+                                        endControlFlow()
+                                        add(",")
+                                    }
+                                    .applyIf(!entityType.syncableEntityFindAllHasClientIdParam) {
+                                        add("receiveRemoteEntitiesFn = " +
+                                                "$syncRepoVarName::_findMasterUnsent${entityType.simpleName},\n ")
+                                    }
+                                    add("storeEntitiesFn = _syncDao::_replace${entityType.simpleName},\n")
+                                    beginControlFlow("findLocalUnsentEntitiesFn =")
+                                    add("_syncDao._findLocalUnsent${entityType.simpleName}(0, 100)\n")
+                                    endControlFlow()
+                                    add(",")
+                                    beginControlFlow("entityToAckFn = ")
+                                        add("_entities, primary -> \n")
+                                        add("_entities.%M(primary)\n",
+                                            MemberName(entityType.packageName, "toEntityAck"))
+                                    endControlFlow()
+                                    add(")\n")
+                                    endControlFlow()
+                                }
+                    }
+                    .add("%M(_allResults)\n",
+                            MemberName("com.ustadmobile.door.ext", "recordSyncRunResult"))
+                    .add("return _allResults\n")
+                    .build())
+            .build())
 
     return this
 }
@@ -270,7 +416,10 @@ class DbProcessorSync: AbstractDbProcessor() {
                         .getTypeElement("${it.asClassName().packageName}.${it.simpleName}$TRACKER_SUFFIX") == null}
                 .forEach {
                     val trackerFileSpec = FileSpec.builder(it.asClassName().packageName, "${it.simpleName}$TRACKER_SUFFIX")
-                            .addType(generateTrackerEntity(it, processingEnv)).build()
+                            .addType(generateTrackerEntity(it, processingEnv))
+                            .addSyncableEntityToTrackFunction(it, processingEnv)
+                            .addSyncableEntitytoEntityAckFunction(it, processingEnv)
+                            .build()
 
                     writeFileSpecToOutputDirs(trackerFileSpec, AnnotationProcessorWrapper.OPTION_JVM_DIRS)
                     writeFileSpecToOutputDirs(trackerFileSpec, AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT,
@@ -381,7 +530,7 @@ class DbProcessorSync: AbstractDbProcessor() {
             syncHelperInterface.addFunction(
                     FunSpec.builder("_replace${it.simpleName}")
                             .addParameter("entityList", List::class.asClassName().parameterizedBy(it))
-                            .addModifiers(KModifier.ABSTRACT)
+                            .addModifiers(KModifier.ABSTRACT, KModifier.SUSPEND)
                             .build())
 
             val entitySyncTrackerClassName = ClassName(it.packageName,
@@ -390,7 +539,7 @@ class DbProcessorSync: AbstractDbProcessor() {
                     FunSpec.builder("_replace${entitySyncTrackerClassName.simpleName}")
                             .addParameter("entityTrackerList",
                                     List::class.asClassName().parameterizedBy(entitySyncTrackerClassName))
-                            .addModifiers(KModifier.ABSTRACT)
+                            .addModifiers(KModifier.ABSTRACT, KModifier.SUSPEND)
                             .build())
 
         }

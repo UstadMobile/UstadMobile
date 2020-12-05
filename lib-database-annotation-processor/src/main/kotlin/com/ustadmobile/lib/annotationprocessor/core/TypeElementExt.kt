@@ -68,7 +68,7 @@ fun TypeElement.allOverridableMethods(processingEnv: ProcessingEnvironment,
     }.distinctBy {
         val signatureParamTypes = (processingEnv.typeUtils.asMemberOf(enclosing, it) as ExecutableType)
                 .parameterTypes.filter { ! isContinuationParam(it.asTypeName()) }
-        MethodToImplement(it.simpleName.toString(), signatureParamTypes)
+        MethodToImplement(it.simpleName.toString(), signatureParamTypes.map { it.asTypeName() })
     }.map {
         it as ExecutableElement
     }
@@ -260,4 +260,11 @@ fun TypeElement.dbEnclosedDaos(processingEnv: ProcessingEnvironment) : List<Type
             .mapNotNull { (it as ExecutableElement).returnType.asTypeElement(processingEnv) }
             .filter { it.hasAnnotation(Dao::class.java) }
 }
+
+/**
+ * The SyncableEntity find all for a specific client may (or may not) have a clientId as a
+ * parameter in the query itself.
+ */
+val TypeElement.syncableEntityFindAllHasClientIdParam: Boolean
+    get() = getAnnotation(SyncableEntity::class.java).syncFindAllQuery.contains(":clientId")
 

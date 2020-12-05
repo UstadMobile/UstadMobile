@@ -8,3 +8,8 @@ import com.ustadmobile.door.DoorDatabase
 expect fun DoorDatabase.dbType(): Int
 
 expect fun DoorDatabase.dbSchemaVersion(): Int
+
+/**
+ * Run a transaction within a suspend coroutine context.
+ */
+expect suspend inline fun <T: DoorDatabase, R> T.doorWithTransaction(crossinline block: suspend(T) -> R): R

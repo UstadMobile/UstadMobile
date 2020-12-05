@@ -4,11 +4,13 @@
 package com.ustadmobile.door.ext
 
 import com.github.aakira.napier.Napier
-import com.ustadmobile.door.DoorDatabaseSyncRepository
-import com.ustadmobile.door.ServerUpdateNotificationManager
+import com.ustadmobile.door.*
 import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.entities.UpdateNotificationSummary
 import com.ustadmobile.door.util.systemTimeInMillis
+import io.ktor.client.features.json.*
+import io.ktor.client.request.*
+import io.ktor.http.*
 
 /**
  * This is used by the generated SyncDao Repository when it is implementing
@@ -41,4 +43,65 @@ fun DoorDatabaseSyncRepository.sendUpdates(tableId: Int, updateNotificationManag
 
 
     return devicesToNotify
+}
+
+/**
+ * Runs a block that syncs the given entity if it is in the list of tablesToSync
+ * or tablesToSync is null (which means sync all entities)
+ */
+suspend inline fun DoorDatabaseSyncRepository.runEntitySyncIfRequired(tablesToSync: List<Int>?, tableId : Int,
+                                           allResults: MutableList<SyncResult>,
+                                           crossinline block: suspend DoorDatabaseSyncRepository.() -> SyncResult) {
+    if(tablesToSync == null || tableId in tablesToSync) {
+        allResults += block()
+    }
+}
+
+/**
+ * Records the
+ */
+suspend fun DoorDatabaseSyncRepository.recordSyncRunResult(allResults: List<SyncResult>) {
+    val syncStatus = if(allResults.all { it.status == SyncResult.STATUS_SUCCESS}) {
+        SyncResult.STATUS_SUCCESS
+    }else {
+        SyncResult.STATUS_FAILED
+    }
+
+    syncHelperEntitiesDao.insertSyncResult(SyncResult(status = syncStatus,
+            timestamp = systemTimeInMillis()))
+}
+
+suspend inline fun <reified T:Any> DoorDatabaseSyncRepository.syncEntity(
+    receiveRemoteEntitiesFn: suspend () -> List<T>,
+    storeEntitiesFn: suspend (List<T>) -> Unit,
+    findLocalUnsentEntitiesFn: suspend () -> List<T>,
+    entityToAckFn: (entities: List<T>, primary: Boolean) -> List<EntityAck>): SyncResult {
+
+    val newEntities = receiveRemoteEntitiesFn()
+    storeEntitiesFn(newEntities)
+
+    val entityAcks = entityToAckFn(newEntities, true)
+    httpClient.postEntityAck(entityAcks, endpoint, dbPath, db)
+
+    val dbName = this::class.simpleName
+    val entityName =  T::class.simpleName
+
+    val localUnsentEntities = findLocalUnsentEntitiesFn()
+
+    httpClient.post<Unit> {
+        url {
+            takeFrom(endpoint)
+            encodedPath = "$encodedPath$dbPath/${dbName}_SyncDao/_replace${entityName}"
+        }
+
+        dbVersionHeader(db)
+        body = defaultSerializer().write(localUnsentEntities,
+                ContentType.Application.Json.withUtf8Charset())
+    }
+
+    val result = SyncResult(received = newEntities.size, sent = localUnsentEntities.size)
+
+    syncHelperEntitiesDao.insertSyncResult(result)
+
+    return result
 }

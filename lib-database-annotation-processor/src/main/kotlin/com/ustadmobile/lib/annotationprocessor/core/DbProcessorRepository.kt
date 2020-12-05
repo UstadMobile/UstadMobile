@@ -6,17 +6,11 @@ import com.squareup.kotlinpoet.*
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.*
 import com.ustadmobile.door.daos.*
-import com.ustadmobile.door.annotation.LastChangedBy
 import io.ktor.client.HttpClient
 import javax.annotation.processing.RoundEnvironment
-import javax.lang.model.element.ElementKind
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
-import javax.lang.model.type.DeclaredType
-import javax.lang.model.type.ExecutableType
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.door.annotation.GetAttachmentData
-import com.ustadmobile.door.annotation.SetAttachmentData
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_ANDROID_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_JVM_DIRS
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.SUFFIX_JDBC_KT2
@@ -27,7 +21,6 @@ import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.CL
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_ABSTRACT
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_IMPL
 import kotlinx.coroutines.GlobalScope
-import java.io.File
 import java.util.*
 import javax.annotation.processing.ProcessingEnvironment
 
@@ -324,13 +317,14 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                                                 .asClassNameWithSuffix("$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_REPOSITORY2"))
                                 .endControlFlow().build())
                         .build())
-                addFunction(FunSpec.builder("sync")
-                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                        .addParameter("tablesToSync", List::class.parameterizedBy(Int::class)
-                        .copy(nullable = true))
-                        .returns(List::class.parameterizedBy(SyncResult::class))
-                        .addCode("return ${dbTypeElement.syncDaoPropName}.sync(tablesToSync)\n")
-                        .build())
+//                addFunction(FunSpec.builder("sync")
+//                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+//                        .addParameter("tablesToSync", List::class.parameterizedBy(Int::class)
+//                        .copy(nullable = true))
+//                        .returns(List::class.parameterizedBy(SyncResult::class))
+//                        .addCode("return ${dbTypeElement.syncDaoPropName}.sync(tablesToSync)\n")
+//                        .build())
+                addRepoSyncFunction(dbTypeElement, processingEnv)
                 addFunction(FunSpec.builder("dispatchUpdateNotifications")
                         .addParameter("tableId", INT)
                         .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
@@ -644,7 +638,7 @@ fun CodeBlock.Builder.addRepositoryGetSyncableEntitiesCode(daoFunSpec: FunSpec, 
         httpEndpointVarName = "_endpointToTry", addClientIdHeaderVar = "_clientId")
     addReplaceSyncableEntitiesIntoDbCode("_httpResult",
             daoFunSpec.returnType!!.unwrapLiveDataOrDataSourceFactory(), processingEnv,
-                daoName = daoName)
+                daoName = daoName, isInSuspendContext = true)
     if(receiveCountVarName != null) {
         add("$receiveCountVarName += _httpResult.size\n")
     }
@@ -700,6 +694,7 @@ fun CodeBlock.Builder.addRepositoryGetSyncableEntitiesCode(daoFunSpec: FunSpec, 
 fun CodeBlock.Builder.addReplaceSyncableEntitiesIntoDbCode(resultVarName: String, resultType: TypeName,
                                                            processingEnv: ProcessingEnvironment,
                                                            daoName: String,
+                                                           isInSuspendContext: Boolean,
                                                            syncHelperDaoVarName: String = "_syncHelper") : CodeBlock.Builder{
     val componentType = resultType.unwrapQueryResultComponentType()
     if(componentType !is ClassName)
@@ -767,10 +762,13 @@ fun CodeBlock.Builder.addReplaceSyncableEntitiesIntoDbCode(resultVarName: String
                 .endControlFlow()
     }
 
-    beginControlFlow("_db.runInTransaction(%T", Runnable::class)
+    takeIf { !isInSuspendContext }?.beginRunBlockingControlFlow()
+    beginControlFlow("_db.%M",
+            MemberName("com.ustadmobile.door.ext", "doorWithTransaction"))
     add(transactionCodeBlock.build())
     endControlFlow()
-    add(")\n")
+    takeIf { !isInSuspendContext }?.endControlFlow()
+
     add(sendTrkEntitiesCodeBlock.build())
 
     return this
