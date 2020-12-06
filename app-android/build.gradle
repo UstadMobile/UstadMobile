@@ -412,6 +412,12 @@ dependencies {
     //Range seekbar by Crystal
     implementation "com.crystal:crystalrangeseekbar:$version_crystalrangeseekbar"
 
+    //Signature pad
+    implementation "com.github.gcacace:signature-pad:$version_signaturepad"
+
+    //SSVG
+    implementation 'com.caverock:androidsvg-aar:1.4'
+
     //Android play core for update support within the application
     implementation "com.google.android.play:core:$version_play_core"
     implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"

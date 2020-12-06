@@ -1,24 +1,31 @@
 package com.ustadmobile.port.android.view
 
+import android.graphics.Picture
+import android.graphics.drawable.PictureDrawable
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.github.gcacace.signaturepad.views.SignaturePad
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSaleDeliveryEditBinding
 import com.ustadmobile.core.controller.SaleDeliveryEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SaleDeliveryEditView
-import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.ext.*
-import androidx.lifecycle.Observer
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.MergeAdapter
+import com.ustadmobile.lib.db.entities.ProductDeliveryWithProductAndTransactions
+import com.ustadmobile.lib.db.entities.SaleDeliveryAndItems
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.caverock.androidsvg.SVG
+import com.caverock.androidsvg.SVGParseException
 
-interface SaleDeliveryEditFragmentEventHandler {
+interface SaleDeliveryEditFragmentEventHandler: SignaturePad.OnSignedListener {
+
+    fun clearAll()
 
 }
 
@@ -41,7 +48,11 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
         mBinding = FragmentSaleDeliveryEditBinding.inflate(inflater, container,
                 false).also {
             rootView = it.root
+            it.activityEventHandler = this
+            it.fragmentSaleDeliveryEditSignature.setOnSignedListener(this)
+
         }
+        mBinding?.fragmentSaleDeliveryEditSignature?.setOnSignedListener(this)
 
         deliveryListMergerRecyclerView = rootView.findViewById(
                 R.id.fragment_sale_delivery_edit_items_rv)
@@ -78,8 +89,46 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
         set(value) {
             field = value
             mBinding?.saleDelivery = value
+
+            try {
+
+                if(value?.delivery?.saleDeliverySignature != null && value.delivery?.saleDeliverySignature.isNotBlank()) {
+                    val svg = SVG.getFromString(value?.delivery?.saleDeliverySignature ?: "")
+
+                    val signPic = svg.renderToPicture()
+
+                    val picW = signPic.getWidth()
+                    val picH = signPic.getHeight()
+                    var adjustedPic = signPic
+                    if (picH > picW) {
+                        adjustedPic = rotatePicture(0f, signPic)
+                    }
+                    val pd = PictureDrawable(adjustedPic)
+
+                    mBinding?.fragmentSaleDeliveryEditSignature?.background = pd
+                }
+
+            } catch (spe: SVGParseException) {
+                spe.printStackTrace()
+            }
+
+
         }
 
+    fun rotatePicture(degrees: Float, picture: Picture): Picture {
+        val width = picture.width
+        val height = picture.height
+
+        val rotatedPicture = Picture()
+        val canvas = rotatedPicture.beginRecording(width, height)
+        canvas.save()
+        canvas.rotate(degrees, width.toFloat(), height.toFloat())
+        picture.draw(canvas)
+        canvas.restore()
+        rotatedPicture.endRecording()
+
+        return rotatedPicture
+    }
 
     override var productWithDeliveriesList
             : List<ProductDeliveryWithProductAndTransactions> = mutableListOf()
@@ -112,4 +161,28 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
             field = value
             mBinding?.fieldsEnabled = value
         }
+
+    override fun clearAll() {
+        mBinding?.fragmentSaleDeliveryEditSignature?.clear()
+        print("hie")
+    }
+
+
+    override fun onStartSigning() {
+        //Event triggered when the pad is touched
+        print("hsss")
+    }
+
+    override fun onSigned() {
+        //Event triggered when the pad is signed
+        print("hi")
+        val signSvg = mBinding?.fragmentSaleDeliveryEditSignature?.getSignatureSvg()
+        entity?.delivery?.saleDeliverySignature = signSvg?:""
+
+
+    }
+
+    override fun onClear() {
+    }
+
 }

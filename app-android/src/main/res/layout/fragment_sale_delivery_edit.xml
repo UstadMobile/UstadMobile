@@ -35,7 +35,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/fragment_sale_delivery_edit_edit_clx"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="match_parent">
 
 
             <androidx.recyclerview.widget.RecyclerView
@@ -43,7 +43,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                android:layout_marginVertical="@dimen/dimen_16dp"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:itemCount="2"
@@ -51,7 +51,75 @@
                 tools:listitem="@layout/item_saleitemwithproducerinventoryselection" />
 
 
+            <TextView
+                android:id="@+id/fragment_sale_delivery_edit_signature_title"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginVertical="@dimen/dimen_16dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                style="@style/TextAppearance.AppCompat.Subhead"
+                android:text="@string/signature"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_delivery_edit_items_rv" />
+
+            <com.github.gcacace.signaturepad.views.SignaturePad
+
+                xmlns:bind="http://schemas.android.com/apk/res-auto"
+                android:id="@+id/fragment_sale_delivery_edit_signature"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:layout_constraintDimensionRatio="4:1"
+                android:layout_marginStart="8dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:penMaxWidth="5dp"
+                app:penMinWidth="1dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:layout_marginEnd="8dp"
+                android:layout_marginBottom="68dp"
+                android:background="@android:drawable/dialog_holo_light_frame"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_delivery_edit_signature_title"
+                app:penColor="@android:color/black"
+                bind:onSigned="@{activityEventHandler.onSigned}"
+                bind:onClear="@{activityEventHandler.onClear}"
+                />
+
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:id="@+id/fragment_sale_delivery_edit_submit_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:layout_marginBottom="16dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:icon="@drawable/ic_done_white_24dp"
+                android:layout_marginStart="@dimen/dimen_56dp"
+                android:visibility="gone"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/fragment_sale_delivery_edit_signature"
+                android:text="@string/submit" />
+
+            <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+                android:id="@+id/activity_record_signature_fab_clear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:layout_marginBottom="16dp"
+                android:text="@string/clear"
+                app:icon="@drawable/ic_clear_white_24dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:onClick="@{() -> activityEventHandler.clearAll()}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/fragment_sale_delivery_edit_submit_button" />
+
+
         </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+
+
 
     </androidx.core.widget.NestedScrollView>
 
