@@ -82,12 +82,16 @@ suspend fun DoorDatabaseSyncRepository.recordSyncRunResult(allResults: List<Sync
  * @param findLocalUnsentEntitiesFn a function that will find entities that have been changed locally
  * that need to be sent to the remote server
  * @param entityToAckFn a function that wil turn a List of the given entity into a list of EntityAck
+ * @param entityToTrkFn a function that will convert a list of the entity itself into the tracker entity (_trk)
+ * @param storeTrkFn a function that will insert / replace the trk entity locally
  */
-suspend inline fun <reified T:Any> DoorDatabaseSyncRepository.syncEntity(tableId: Int,
+suspend inline fun <reified T:Any, reified K: Any> DoorDatabaseSyncRepository.syncEntity(tableId: Int,
     receiveRemoteEntitiesFn: suspend () -> List<T>,
     storeEntitiesFn: suspend (List<T>) -> Unit,
     findLocalUnsentEntitiesFn: suspend () -> List<T>,
-    entityToAckFn: (entities: List<T>, primary: Boolean) -> List<EntityAck>): SyncResult {
+    entityToAckFn: (entities: List<T>, primary: Boolean) -> List<EntityAck>,
+    entityToTrkFn: (entities: List<T>, primary: Boolean) -> List<K>,
+    storeTrkFn: suspend (List<K>) -> Unit): SyncResult {
 
     val dbName = this::class.simpleName?.removeSuffix("_Repo")
     val daoName = dbName + "SyncDao"
@@ -108,15 +112,19 @@ suspend inline fun <reified T:Any> DoorDatabaseSyncRepository.syncEntity(tableId
 
     val localUnsentEntities = findLocalUnsentEntitiesFn()
 
-    httpClient.takeIf { localUnsentEntities.isNotEmpty() }?.post<Unit> {
-        url {
-            takeFrom(endpoint)
-            encodedPath = "$encodedPath$dbPath/$daoName/_replace${entityName}"
+    if(localUnsentEntities.isNotEmpty()) {
+        httpClient.post<Unit> {
+            url {
+                takeFrom(endpoint)
+                encodedPath = "$encodedPath$dbPath/$daoName/_replace${entityName}"
+            }
+
+            dbVersionHeader(db)
+            body = defaultSerializer().write(localUnsentEntities,
+                    ContentType.Application.Json.withUtf8Charset())
         }
 
-        dbVersionHeader(db)
-        body = defaultSerializer().write(localUnsentEntities,
-                ContentType.Application.Json.withUtf8Charset())
+        storeTrkFn(entityToTrkFn(localUnsentEntities, false))
     }
 
     val result = SyncResult(tableId = tableId, received = newEntities.size,

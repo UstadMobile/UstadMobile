@@ -309,8 +309,8 @@ fun TypeSpec.Builder.addRepoSyncEntityFunction(entityType: TypeElement, syncRepo
             .addCode(CodeBlock.builder()
                     .apply {
                         val tableId = entityType.getAnnotation(SyncableEntity::class.java).tableId
-                        add("return %M($tableId,", MemberName("com.ustadmobile.door.ext",
-                                "syncEntity"))
+                        add("return %M<%T, %T>($tableId,", MemberName("com.ustadmobile.door.ext",
+                                "syncEntity"), entityType, entityType.asClassNameWithSuffix("_trk"))
                                 .applyIf(entityType.syncableEntityFindAllHasClientIdParam) {
                                     beginControlFlow("receiveRemoteEntitiesFn = ")
                                     add("$syncRepoVarName._findMasterUnsent${entityType.simpleName}(clientId)\n")
@@ -331,6 +331,14 @@ fun TypeSpec.Builder.addRepoSyncEntityFunction(entityType: TypeElement, syncRepo
                         add("_entities.%M(primary)\n",
                                 MemberName(entityType.packageName, "toEntityAck"))
                         endControlFlow()
+                        add(",")
+                        beginControlFlow("entityToTrkFn = ")
+                        add("_entities, _primary ->")
+                        add("_entities.%M(primary = _primary)\n",
+                                MemberName(entityType.packageName, "toSyncableTrk"))
+                        endControlFlow()
+                        add(",")
+                        add("storeTrkFn = _syncDao::_replace${entityType.simpleName}_trk")
                         add(")\n")
                     }
                     .build()
