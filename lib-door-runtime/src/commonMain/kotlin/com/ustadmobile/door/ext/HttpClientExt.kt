@@ -1,10 +1,8 @@
 package com.ustadmobile.door.ext
 
-import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.door.EntityAck
+import com.ustadmobile.door.*
 import io.ktor.client.*
 import io.ktor.client.call.*
-import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
@@ -46,15 +44,25 @@ suspend inline fun <reified T> HttpClient.postOrNull(block: HttpRequestBuilder.(
 }
 
 /**
- * Supports returning null when the server returns a 204 response
+ * Send a list of entity acknowledgements to the server
+ *
+ * @param endpoint the server endpoint URL to send the acknowledgement to
+ * @param path the path from the endpoint base url to post to
+ * @param repo the repo for which entity acknowledgements are being sent
  */
-suspend fun HttpClient.postEntityAck(ackList: List<EntityAck>, endpoint: String, path: String, db: DoorDatabase) {
+suspend fun HttpClient.postEntityAck(ackList: List<EntityAck>, endpoint: String, path: String,
+                                     repo: DoorDatabaseRepository) {
     post<Unit> {
         url {
             takeFrom(endpoint)
             encodedPath = "$encodedPath$path"
         }
-        dbVersionHeader(db)
+        dbVersionHeader(repo as DoorDatabase)
+
+        if(repo is DoorDatabaseSyncRepository) {
+            header("x-nid", repo.clientId)
+        }
+
         body = defaultSerializer().write(ackList, ContentType.Application.Json.withUtf8Charset())
     }
 }

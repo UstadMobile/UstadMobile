@@ -317,20 +317,8 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                                                 .asClassNameWithSuffix("$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_REPOSITORY2"))
                                 .endControlFlow().build())
                         .build())
-//                addFunction(FunSpec.builder("sync")
-//                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-//                        .addParameter("tablesToSync", List::class.parameterizedBy(Int::class)
-//                        .copy(nullable = true))
-//                        .returns(List::class.parameterizedBy(SyncResult::class))
-//                        .addCode("return ${dbTypeElement.syncDaoPropName}.sync(tablesToSync)\n")
-//                        .build())
                 addRepoSyncFunction(dbTypeElement, processingEnv)
-                addFunction(FunSpec.builder("dispatchUpdateNotifications")
-                        .addParameter("tableId", INT)
-                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                        //TODO: Implement this
-                        //.addCode("${dbTypeElement.syncDaoPropName}.dispatchUpdateNotifications(tableId)\n")
-                        .build())
+                addRepoDispatchUpdatesFunction(dbTypeElement, processingEnv)
                 addProperty(PropertySpec.builder("_sqlitePkManager",
                             DoorSqlitePrimaryKeyManager::class)
                         .initializer("%T(this)", DoorSqlitePrimaryKeyManager::class)
@@ -757,7 +745,7 @@ fun CodeBlock.Builder.addReplaceSyncableEntitiesIntoDbCode(resultVarName: String
                 .add(")\n")
                 .endControlFlow()
                 .add("\n")
-                .add("_httpClient.%M(_ackList, _endpoint, \"${'$'}_dbPath/$daoName/_ack${it.value.simpleName}Received\", _db)\n",
+                .add("_httpClient.%M(_ackList, _endpoint, \"${'$'}_dbPath/$daoName/_ack${it.value.simpleName}Received\", _repo)\n",
                     MemberName("com.ustadmobile.door.ext", "postEntityAck"))
                 .endControlFlow()
     }
@@ -879,7 +867,7 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
             Delete::class.java)) {
         (daoFunSpec.entityParamComponentType as ClassName).simpleName
     }else if(daoFunSpec.isAQueryThatModifiesTables){
-        daoFunSpec.getDaoFunEntityModifiedByQuery(allKnownEntityTypesMap)
+        daoFunSpec.getDaoFunEntityModifiedByQuery(allKnownEntityTypesMap)?.simpleName
     }else {
         null
     }
@@ -953,7 +941,8 @@ fun CodeBlock.Builder.addDelegateToWebCode(daoFunSpec: FunSpec, daoName: String)
         beginRunBlockingControlFlow()
     }
 
-    addKtorRequestForFunction(daoFunSpec, dbPathVarName = "_dbPath", daoName = daoName)
+    addKtorRequestForFunction(daoFunSpec, dbPathVarName = "_dbPath", daoName = daoName,
+        addClientIdHeaderVar = "_clientId")
 
     if(!daoFunSpec.isSuspended) {
         endControlFlow()

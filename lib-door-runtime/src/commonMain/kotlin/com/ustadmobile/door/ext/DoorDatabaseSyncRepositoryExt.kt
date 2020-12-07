@@ -18,8 +18,7 @@ import io.ktor.http.*
  * in order to generate UpdateNotification entities.
  */
 fun DoorDatabaseSyncRepository.sendUpdates(tableId: Int, updateNotificationManager: ServerUpdateNotificationManager?,
-                                           findDevicesFn: () -> List<UpdateNotificationSummary>,
-                                            replaceUpdateNotificationFn: (List<UpdateNotification>) -> Unit)
+                                           findDevicesFn: () -> List<UpdateNotificationSummary>)
         : List<UpdateNotificationSummary> {
 
     val devicesToNotify = findDevicesFn()
@@ -36,7 +35,7 @@ fun DoorDatabaseSyncRepository.sendUpdates(tableId: Int, updateNotificationManag
         UpdateNotification(pnDeviceId = it.deviceId, pnTableId = it.tableId, pnTimestamp = timeNow)
     }
 
-    replaceUpdateNotificationFn(updateNotifications)
+    syncHelperEntitiesDao.replaceUpdateNotifications(updateNotifications)
     updateNotificationManager?.onNewUpdateNotifications(updateNotifications)
     Napier.v("[SyncRepo@${this.doorIdentityHashCode}] replaced update notifications " +
             "and informed updatenotificationmanager: $updateNotificationManager", tag = DoorTag.LOG_TAG)
@@ -58,7 +57,8 @@ suspend inline fun DoorDatabaseSyncRepository.runEntitySyncIfRequired(tablesToSy
 }
 
 /**
- * Records the
+ * Records the overall result of the syncrun based on all results from all tables that sync was
+ * attempted for.
  */
 suspend fun DoorDatabaseSyncRepository.recordSyncRunResult(allResults: List<SyncResult>) {
     val syncStatus = if(allResults.all { it.status == SyncResult.STATUS_SUCCESS}) {
@@ -71,27 +71,47 @@ suspend fun DoorDatabaseSyncRepository.recordSyncRunResult(allResults: List<Sync
             timestamp = systemTimeInMillis()))
 }
 
-suspend inline fun <reified T:Any> DoorDatabaseSyncRepository.syncEntity(
+/**
+ * This is the main entity sync function that is called by generated code. It will use function
+ * parameters to get a list of new entities from the remote endpoint, send acknowledgements for
+ * entities received, and then send entities that have been changed locally to the remote server.
+ *
+ * @param tableId the SyncableEntity tableId that the sync is running for
+ * @param receiveRemoteEntitiesFn a function that will retrieve new entities from the server (this
+ * will be a function on the generated SyncDao)
+ * @param findLocalUnsentEntitiesFn a function that will find entities that have been changed locally
+ * that need to be sent to the remote server
+ * @param entityToAckFn a function that wil turn a List of the given entity into a list of EntityAck
+ */
+suspend inline fun <reified T:Any> DoorDatabaseSyncRepository.syncEntity(tableId: Int,
     receiveRemoteEntitiesFn: suspend () -> List<T>,
     storeEntitiesFn: suspend (List<T>) -> Unit,
     findLocalUnsentEntitiesFn: suspend () -> List<T>,
     entityToAckFn: (entities: List<T>, primary: Boolean) -> List<EntityAck>): SyncResult {
 
-    val newEntities = receiveRemoteEntitiesFn()
-    storeEntitiesFn(newEntities)
-
-    val entityAcks = entityToAckFn(newEntities, true)
-    httpClient.postEntityAck(entityAcks, endpoint, dbPath, db)
-
-    val dbName = this::class.simpleName
+    val dbName = this::class.simpleName?.removeSuffix("_Repo")
+    val daoName = dbName + "SyncDao"
     val entityName =  T::class.simpleName
+
+    Napier.d("SyncRepo: start sync of ${T::class.simpleName} ")
+    val newEntities = receiveRemoteEntitiesFn()
+
+    if(newEntities.isNotEmpty()) {
+        storeEntitiesFn(newEntities)
+
+        val entityAcks = entityToAckFn(newEntities, true)
+
+        Napier.d("DAONAME=$daoName / ${this::class.simpleName}")
+        httpClient.postEntityAck(entityAcks, endpoint,
+                "$dbPath/${daoName}/_ack${T::class.simpleName}Received", this)
+    }
 
     val localUnsentEntities = findLocalUnsentEntitiesFn()
 
-    httpClient.post<Unit> {
+    httpClient.takeIf { localUnsentEntities.isNotEmpty() }?.post<Unit> {
         url {
             takeFrom(endpoint)
-            encodedPath = "$encodedPath$dbPath/${dbName}_SyncDao/_replace${entityName}"
+            encodedPath = "$encodedPath$dbPath/$daoName/_replace${entityName}"
         }
 
         dbVersionHeader(db)
@@ -99,8 +119,10 @@ suspend inline fun <reified T:Any> DoorDatabaseSyncRepository.syncEntity(
                 ContentType.Application.Json.withUtf8Charset())
     }
 
-    val result = SyncResult(received = newEntities.size, sent = localUnsentEntities.size)
+    val result = SyncResult(tableId = tableId, received = newEntities.size,
+            sent = localUnsentEntities.size, status = SyncResult.STATUS_SUCCESS)
 
+    Napier.d("SyncRepo: ${T::class.simpleName} DONE - Received ${result.received} / Sent ${result.sent}")
     syncHelperEntitiesDao.insertSyncResult(result)
 
     return result

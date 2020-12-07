@@ -2,9 +2,11 @@ package com.ustadmobile.door.daos
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.ustadmobile.door.ClientSyncManager
 import com.ustadmobile.door.SyncResult
+import com.ustadmobile.door.annotation.PgOnConflict
 import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
 
@@ -96,4 +98,7 @@ abstract class SyncHelperEntitiesDao : ISyncHelperEntitiesDao {
     @Query("SELECT nodeClientId FROM SyncNode LIMIT 1")
     override abstract fun findSyncNodeClientId(): Int
 
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @PgOnConflict("ON CONFLICT (pnDeviceId, pnTableId) DO UPDATE SET pnTimestamp = excluded.pnTimestamp")
+    abstract override fun replaceUpdateNotifications(entities: List<UpdateNotification>)
 }
