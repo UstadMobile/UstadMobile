@@ -105,9 +105,17 @@ fun FileSpec.Builder.addSyncableEntityToTrackFunction(entityClass: TypeElement, 
                     .add("%T(epk = it.${syncEntityInfo.entityPkField.name}," +
                             "clientId = clientId,", syncEntityInfo.tracker)
                     .beginControlFlow("csn = if(primary)")
-                    .add("it.${syncEntityInfo.entityMasterCsnField.name}\n")
+                    .add("it.${syncEntityInfo.entityMasterCsnField.name}")
+                    .applyIf(syncEntityInfo.entityMasterCsnField.type == LONG) {
+                        add(".toInt()")
+                    }
+                    .add("\n")
                     .nextControlFlow("else")
-                    .add("it.${syncEntityInfo.entityLocalCsnField.name}\n")
+                    .add("it.${syncEntityInfo.entityLocalCsnField.name}")
+                    .applyIf(syncEntityInfo.entityMasterCsnField.type == LONG) {
+                        add(".toInt()")
+                    }
+                    .add("\n")
                     .endControlFlow()
                     .add(")\n")
                     .endControlFlow()
@@ -129,9 +137,17 @@ fun FileSpec.Builder.addSyncableEntitytoEntityAckFunction(entityClass: TypeEleme
                     .add("%T(epk·=·it.${syncEntityInfo.entityPkField.name},\n",
                         EntityAck::class)
                     .beginControlFlow("csn = if(primary)")
-                        .add("it.${syncEntityInfo.entityMasterCsnField.name}\n")
+                        .add("it.${syncEntityInfo.entityMasterCsnField.name}")
+                        .applyIf(syncEntityInfo.entityMasterCsnField.type == LONG) {
+                            add(".toInt()")
+                        }
+                        .add("\n")
                     .nextControlFlow("else")
-                        .add("it.${syncEntityInfo.entityLocalCsnField.name}\n")
+                        .add("it.${syncEntityInfo.entityLocalCsnField.name}")
+                        .applyIf(syncEntityInfo.entityMasterCsnField.type == LONG) {
+                            add(".toInt()")
+                        }
+                        .add("\n")
                     .endControlFlow()
                     .add(")\n")
                     .endControlFlow()
@@ -150,6 +166,7 @@ fun TypeElement.toSyncDaoTypeSpec(processingEnv: ProcessingEnvironment) : TypeSp
     val dbTypeEl = this
     return TypeSpec.classBuilder("$simpleName$SUFFIX_SYNCDAO_ABSTRACT")
             .addModifiers(KModifier.ABSTRACT)
+            .addAnnotation(Dao::class.java)
             .addSuperinterface(ClassName(dbTypeEl.packageName, "I${dbTypeEl.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"))
             .apply {
                 dbTypeEl.allDbEntities(processingEnv).filter { it.hasAnnotation(SyncableEntity::class.java) }.forEach {entityType ->
@@ -462,7 +479,8 @@ class DbProcessorSync: AbstractDbProcessor() {
                     .addType(dbTypeEl.toSyncDaoInterfaceTypeSpec(processingEnv))
                     .addType(syncDaoType)
                     .build()
-                    .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+                    .writeToDirsFromArg(listOf(AnnotationProcessorWrapper.OPTION_JVM_DIRS,
+                            AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT))
 
             FileSpec.builder(dbTypeEl.packageName, "$dbTypeEl$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_JDBC_KT2")
                     .addJdbcDaoImplType(syncDaoType, syncDaoClassName)
@@ -479,6 +497,16 @@ class DbProcessorSync: AbstractDbProcessor() {
                             false, syncHelperClassName = syncDaoClassName)
                     .build()
                     .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_JVM_DIRS)
+
+            FileSpec.builder(dbTypeEl.packageName, "${dbTypeEl.simpleName}$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_REPOSITORY2")
+                    .addDaoRepoType(dbTypeEl.toSyncDaoTypeSpec(processingEnv),
+                            syncDaoClassName,
+                            processingEnv, allKnownEntityTypesMap,
+                            pagingBoundaryCallbackEnabled = true,
+                            isAlwaysSqlite = true,
+                            syncHelperClassName = syncDaoClassName)
+                    .build()
+                    .writeToDirsFromArg(AnnotationProcessorWrapper.OPTION_ANDROID_OUTPUT)
 
             FileSpec.builder(dbTypeEl.packageName,
                     "${dbTypeEl.simpleName}$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_KTOR_ROUTE")
