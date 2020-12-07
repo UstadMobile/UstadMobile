@@ -294,6 +294,51 @@ fun TypeSpec.Builder.addSyncDaoFunsForEntity(entityType: TypeElement, isOverride
     return this
 }
 
+/**
+ * Add a function that runs the sync of the given entity in the repo. Each entity sync needs to go
+ * in it's own function, otherwise the main 'sync' function can become too large for the compiler to
+ * handle.
+ *
+ * @param entityType TypeElement representing the SyncableEntity
+ * @param syncRepoVarName The variable name of the repo for the SyncDao
+ */
+fun TypeSpec.Builder.addRepoSyncEntityFunction(entityType: TypeElement, syncRepoVarName: String) : TypeSpec.Builder{
+    addFunction(FunSpec.builder("_sync${entityType.simpleName}")
+            .addModifiers(KModifier.PRIVATE, KModifier.SUSPEND)
+            .returns(SyncResult::class)
+            .addCode(CodeBlock.builder()
+                    .apply {
+                        val tableId = entityType.getAnnotation(SyncableEntity::class.java).tableId
+                        add("return %M($tableId,", MemberName("com.ustadmobile.door.ext",
+                                "syncEntity"))
+                                .applyIf(entityType.syncableEntityFindAllHasClientIdParam) {
+                                    beginControlFlow("receiveRemoteEntitiesFn = ")
+                                    add("$syncRepoVarName._findMasterUnsent${entityType.simpleName}(clientId)\n")
+                                    endControlFlow()
+                                    add(",")
+                                }
+                                .applyIf(!entityType.syncableEntityFindAllHasClientIdParam) {
+                                    add("receiveRemoteEntitiesFn = " +
+                                            "$syncRepoVarName::_findMasterUnsent${entityType.simpleName},\n ")
+                                }
+                        add("storeEntitiesFn = _syncDao::_replace${entityType.simpleName},\n")
+                        beginControlFlow("findLocalUnsentEntitiesFn =")
+                        add("_syncDao._findLocalUnsent${entityType.simpleName}(0, 100)\n")
+                        endControlFlow()
+                        add(",")
+                        beginControlFlow("entityToAckFn = ")
+                        add("_entities, primary -> \n")
+                        add("_entities.%M(primary)\n",
+                                MemberName(entityType.packageName, "toEntityAck"))
+                        endControlFlow()
+                        add(")\n")
+                    }
+                    .build()
+            )
+            .build())
+
+    return this
+}
 
 /**
  * Generate a sync function that will take the list of tables to sync and call the sync function
@@ -309,37 +354,12 @@ fun TypeSpec.Builder.addRepoSyncFunction(dbTypeEl: TypeElement,
             .addCode(CodeBlock.builder()
                     .add("val _allResults = mutableListOf<%T>()\n", SyncResult::class)
                     .apply {
-                        val syncRepoVarName = "_${dbTypeEl.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"
                         dbTypeEl.allDbEntities(processingEnv)
                                 .filter { it.hasAnnotation(SyncableEntity::class.java) }
                                 .forEach { entityType ->
-
                                     val tableId = entityType.getAnnotation(SyncableEntity::class.java).tableId
-                                    beginControlFlow("%M(tablesToSync, $tableId, _allResults)",
-                                            MemberName("com.ustadmobile.door.ext", "runEntitySyncIfRequired"))
-                                    add("%M($tableId,", MemberName("com.ustadmobile.door.ext",
-                                            "syncEntity"))
-                                    .applyIf(entityType.syncableEntityFindAllHasClientIdParam) {
-                                        beginControlFlow("receiveRemoteEntitiesFn = ")
-                                        add("$syncRepoVarName._findMasterUnsent${entityType.simpleName}(clientId)\n")
-                                        endControlFlow()
-                                        add(",")
-                                    }
-                                    .applyIf(!entityType.syncableEntityFindAllHasClientIdParam) {
-                                        add("receiveRemoteEntitiesFn = " +
-                                                "$syncRepoVarName::_findMasterUnsent${entityType.simpleName},\n ")
-                                    }
-                                    add("storeEntitiesFn = _syncDao::_replace${entityType.simpleName},\n")
-                                    beginControlFlow("findLocalUnsentEntitiesFn =")
-                                    add("_syncDao._findLocalUnsent${entityType.simpleName}(0, 100)\n")
-                                    endControlFlow()
-                                    add(",")
-                                    beginControlFlow("entityToAckFn = ")
-                                        add("_entities, primary -> \n")
-                                        add("_entities.%M(primary)\n",
-                                            MemberName(entityType.packageName, "toEntityAck"))
-                                    endControlFlow()
-                                    add(")\n")
+                                    beginControlFlow("if(tablesToSync == null || $tableId in tablesToSync)")
+                                    add("_allResults += _sync${entityType.simpleName}()\n")
                                     endControlFlow()
                                 }
                     }

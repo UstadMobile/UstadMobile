@@ -11,6 +11,7 @@ import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_ANDROID_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_JVM_DIRS
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.SUFFIX_JDBC_KT2
@@ -143,6 +144,10 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                     addSuperinterface(DoorDatabaseRepository::class)
                 }
             }
+            .addAnnotation(AnnotationSpec.builder(Suppress::class)
+                    .addMember("%S, %S, %S, %S", "LocalVariableName", "PropertyName", "FunctionName",
+                            "ClassName")
+                    .build())
             .primaryConstructor(FunSpec.constructorBuilder()
                 .addParameter(ParameterSpec.builder("_db", dbTypeElement.asClassName() ).build())
                 .addParameter(ParameterSpec.builder("db", dbTypeElement.asClassName()).build())
@@ -319,6 +324,14 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                         .build())
                 addRepoSyncFunction(dbTypeElement, processingEnv)
                 addRepoDispatchUpdatesFunction(dbTypeElement, processingEnv)
+                val syncRepoVarName = "_${dbTypeElement.simpleName}$SUFFIX_SYNCDAO_ABSTRACT"
+
+                dbTypeElement.allDbEntities(processingEnv)
+                        .filter { it.hasAnnotation(SyncableEntity::class.java) }
+                        .forEach { entityType ->
+                            addRepoSyncEntityFunction(entityType, syncRepoVarName)
+                        }
+
                 addProperty(PropertySpec.builder("_sqlitePkManager",
                             DoorSqlitePrimaryKeyManager::class)
                         .initializer("%T(this)", DoorSqlitePrimaryKeyManager::class)
@@ -963,8 +976,7 @@ class DbProcessorRepository: AbstractDbProcessor() {
                     .build()
                     .writeToDirsFromArg(OPTION_JVM_DIRS)
             FileSpec.builder(dbTypeEl.packageName, "${dbTypeEl.simpleName}$SUFFIX_REPOSITORY2")
-                    .addDbRepoType(dbTypeEl as TypeElement,
-                            processingEnv,
+                    .addDbRepoType(dbTypeEl, processingEnv,
                         syncDaoMode = REPO_SYNCABLE_DAO_FROMDB, overrideClearAllTables = false,
                         overrideSyncDao = true, overrideOpenHelper = true,
                         overrideKtorHelpers = true)
