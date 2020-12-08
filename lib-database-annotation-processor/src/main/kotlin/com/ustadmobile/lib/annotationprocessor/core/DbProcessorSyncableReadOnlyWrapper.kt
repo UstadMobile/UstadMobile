@@ -109,6 +109,9 @@ fun FileSpec.Builder.addDbWrapperTypeSpec(dbTypeEl: TypeElement,
     val dbClassName = dbTypeEl.asClassName()
     addType(
             TypeSpec.classBuilder("${dbTypeEl.simpleName}${DoorDatabaseSyncableReadOnlyWrapper.SUFFIX}")
+                    .addAnnotation(AnnotationSpec.builder(Suppress::class)
+                            .addMember("%S, %S", "REDUNDANT_PROJECTION", "ClassName")
+                            .build())
                     .superclass(dbClassName)
                     .addSuperinterface(DoorDatabaseSyncableReadOnlyWrapper::class.asClassName())
                     .primaryConstructor(FunSpec.constructorBuilder()

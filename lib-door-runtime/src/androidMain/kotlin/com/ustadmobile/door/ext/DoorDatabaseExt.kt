@@ -1,10 +1,12 @@
 package com.ustadmobile.door.ext
 
+import androidx.room.RoomDatabase
 import com.ustadmobile.door.DoorDatabase
 import com.ustadmobile.door.DoorDatabaseVersion
 import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.asRepository
 import java.lang.RuntimeException
+import androidx.room.*
 
 private val dbVersions = mutableMapOf<Class<*>, Int>()
 
@@ -24,4 +26,10 @@ actual fun DoorDatabase.dbSchemaVersion(): Int {
     }
 
     return thisVersion
+}
+
+actual suspend inline fun <T: DoorDatabase, R> T.doorWithTransaction(crossinline block: suspend(T) -> R): R {
+    return withTransaction {
+        block(this)
+    }
 }

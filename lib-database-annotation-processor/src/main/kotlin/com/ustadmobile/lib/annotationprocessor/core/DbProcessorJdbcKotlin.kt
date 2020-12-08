@@ -516,7 +516,7 @@ fun sqlArrayComponentTypeOf(typeName: TypeName): String {
 }
 
 //Limitation: this does not currently support interface inheritence
-data class MethodToImplement(val methodName: String, val paramTypes: List<TypeMirror>)
+data class MethodToImplement(val methodName: String, val paramTypes: List<TypeName>)
 
 fun methodsToImplement(typeElement: TypeElement, enclosing: DeclaredType,
                        processingEnv: ProcessingEnvironment,
@@ -534,7 +534,7 @@ fun methodsToImplement(typeElement: TypeElement, enclosing: DeclaredType,
     }.distinctBy {
         val signatureParamTypes = (processingEnv.typeUtils.asMemberOf(enclosing, it) as ExecutableType)
                 .parameterTypes.filter { ! isContinuationParam(it.asTypeName()) }
-        MethodToImplement(it.simpleName.toString(), signatureParamTypes)
+        MethodToImplement(it.simpleName.toString(), signatureParamTypes.map { it.asTypeName() })
     }
 }
 
@@ -1231,6 +1231,9 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
     companion object {
 
         const val SUFFIX_JDBC_KT = "JdbcKt"
+
+        //As it should be including the underscore - the above will be deprecated
+        const val SUFFIX_JDBC_KT2 = "_JdbcKt"
 
         const val ARG_MIGRATION_TEMPLATE_SQLITE_UPDATE_TRIGGER = "doordb_template_fixupdatetrigger_sqlite"
 

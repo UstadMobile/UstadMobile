@@ -88,12 +88,15 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
                 Napier.d("$logPrefix finish repo sync for $tableId " +
                         "received ${syncResults.firstOrNull()?.received} / " +
                         "sent ${syncResults.firstOrNull()?.sent}", tag = LOG_TAG)
-                repo.takeIf { syncResults.any { it.tableId == tableId && it.status == SyncResult.STATUS_SUCCESS} }
+                val tableSyncedOk = syncResults.any { it.tableId == tableId && it.status == SyncResult.STATUS_SUCCESS}
+                Napier.d("tableSyncedOk = $tableSyncedOk")
+                repo.takeIf { tableSyncedOk }
                         ?.syncHelperEntitiesDao?.updateTableSyncStatusLastSynced(tableId, startTime)
                 pendingJobs -= tableId
                 checkQueue()
             }catch(e: Exception) {
-                Napier.e("$logPrefix Exception syncing tableid #$id", e, tag = LOG_TAG)
+                Napier.e("$logPrefix Exception syncing tableid $tableId processor #$id", e,
+                        tag = LOG_TAG)
             }
         }
     }

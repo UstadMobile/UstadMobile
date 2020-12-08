@@ -23,7 +23,7 @@ abstract class ExampleSyncableDao {
     abstract fun insertList(syncableEntityLIst: List<ExampleSyncableEntity>)
 
     @Insert
-    abstract suspend fun insertAndReturnList(entities: List<ExampleSyncableEntity>)
+    abstract suspend fun insertAndReturnList(entities: List<ExampleSyncableEntity>) : List<Long>
 
     @Insert
     abstract suspend fun insertAsync(syncableEntity: ExampleSyncableEntity): Long

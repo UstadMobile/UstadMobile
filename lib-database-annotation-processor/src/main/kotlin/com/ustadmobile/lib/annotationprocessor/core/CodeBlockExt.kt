@@ -2,6 +2,10 @@ package com.ustadmobile.lib.annotationprocessor.core
 
 import android.arch.persistence.room.ColumnInfo
 import com.squareup.kotlinpoet.*
+import io.ktor.client.request.forms.*
+import io.ktor.client.statement.*
+import io.ktor.content.*
+import io.ktor.http.*
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
 
@@ -325,3 +329,135 @@ internal fun CodeBlock.Builder.addReplaceSqliteChangeSeqNums(execSqlFn: String,
 
     return this
 }
+
+
+/**
+ * Generates a CodeBlock that will make KTOR HTTP Client Request for a DAO method. It will set
+ * the correct URL (e.g. endpoint/DatabaseName/DaoName/methodName and parameters (including the request body
+ * if required). It will decide between using get or post based on the parameters.
+ *
+ * @param funSpec the FunSpec that represents the function for which we expect an endpoint on
+ * the server
+ * @param httpClientVarName variable name to access a KTOR httpClient
+ * @param httpEndpointVarName variable name for the base API endpoint
+ * @param dbPathVarName The path from the endpoint to the specific database
+ * @param daoName The name of the DAO to which funSpec belongs
+ */
+internal fun CodeBlock.Builder.addKtorRequestForFunction(
+                                                   funSpec: FunSpec,
+                                                   httpClientVarName: String = "_httpClient",
+                                                   httpEndpointVarName: String = "_endpoint",
+                                                   dbPathVarName: String,
+                                                   daoName: String,
+                                                   useKotlinxListSerialization: Boolean = false,
+                                                   kotlinxSerializationJsonVarName: String = "",
+                                                   useMultipartPartsVarName: String? = null,
+                                                   addDbVersionParamName: String? = "_db",
+                                                   addClientIdHeaderVar: String? = null): CodeBlock.Builder {
+
+    //Begin creation of the HttpStatement call that will set the URL, parameters, etc.
+    val nonQueryParams =  funSpec.parameters.filter { !it.type.isHttpQueryQueryParam() }
+
+    //The type of the response we expect from the server.
+    val httpResultType = funSpec.returnType?.unwrapLiveDataOrDataSourceFactory() ?: UNIT
+
+    val httpMemberFn = if(nonQueryParams.isEmpty()) {
+        if(httpResultType.isNullable == true) {
+            CLIENT_GET_NULLABLE_MEMBER_NAME
+        }else {
+            CLIENT_GET_MEMBER_NAME
+        }
+    }else {
+        if(httpResultType.isNullable == true) {
+            CLIENT_POST_NULLABLE_MEMBER_NAME
+        }else {
+            CLIENT_POST_MEMBER_NAME
+        }
+    }
+
+    beginControlFlow("$httpClientVarName.%M<%T>",
+            httpMemberFn, httpResultType)
+    beginControlFlow("url")
+    add("%M($httpEndpointVarName)\n", MemberName("io.ktor.http", "takeFrom"))
+    add("encodedPath = \"\${encodedPath}\${$dbPathVarName}/%L/%L\"\n", daoName, funSpec.name)
+    endControlFlow()
+
+    if(addDbVersionParamName != null) {
+        add("%M($addDbVersionParamName)\n",
+                MemberName("com.ustadmobile.door.ext", "dbVersionHeader"))
+    }
+
+    if(addClientIdHeaderVar != null) {
+        add("%M(%S, $addClientIdHeaderVar)\n", MemberName("io.ktor.client.request", "header"),
+                "x-nid")
+    }
+
+    funSpec.parameters.filter { it.type.isHttpQueryQueryParam() }.forEach {
+        val paramType = it.type
+        val isList = paramType is ParameterizedTypeName && paramType.rawType == List::class.asClassName()
+
+        val paramsCodeblock = CodeBlock.builder()
+        var paramVarName = it.name
+        if(isList) {
+            paramsCodeblock.add("${it.name}.forEach { ")
+            paramVarName = "it"
+            if(paramType != String::class.asClassName()) {
+                paramVarName += ".toString()"
+            }
+        }
+
+        paramsCodeblock.add("%M(%S, $paramVarName)\n",
+                MemberName("io.ktor.client.request", "parameter"),
+                it.name)
+        if(isList) {
+            paramsCodeblock.add("} ")
+        }
+        paramsCodeblock.add("\n")
+        addWithNullCheckIfNeeded(it.name, it.type, paramsCodeblock.build())
+    }
+
+    val requestBodyParam = funSpec.parameters.firstOrNull { !it.type.isHttpQueryQueryParam() }
+
+    if(requestBodyParam != null) {
+        val requestBodyParamType = requestBodyParam.type
+
+        val writeBodyCodeBlock = if(useMultipartPartsVarName != null) {
+            CodeBlock.of("body = %T($useMultipartPartsVarName)\n",
+                    MultiPartFormDataContent::class)
+        }else if(useKotlinxListSerialization && requestBodyParamType is ParameterizedTypeName
+                && requestBodyParamType.rawType == List::class.asClassName()) {
+            val entityComponentType = resolveEntityFromResultType(requestBodyParamType).javaToKotlinType()
+            val serializerFnCodeBlock = if(entityComponentType in QUERY_SINGULAR_TYPES) {
+                CodeBlock.of("%M()", MemberName("kotlinx.serialization", "serializer"))
+            }else {
+                CodeBlock.of("serializer()")
+            }
+            CodeBlock.of("body = %T(_json.stringify(%T.%L.%M, ${requestBodyParam.name}), %T.Application.Json.%M())\n",
+                    TextContent::class, entityComponentType,
+                    serializerFnCodeBlock,
+                    MemberName("kotlinx.serialization.builtins", "list"),
+                    ContentType::class,
+                    MemberName("com.ustadmobile.door.ext", "withUtf8Charset"))
+        }else {
+            CodeBlock.of("body = %M().write(${requestBodyParam.name}, %T.Application.Json.%M())\n",
+                    MemberName("io.ktor.client.features.json", "defaultSerializer"),
+                    ContentType::class, MemberName("com.ustadmobile.door.ext", "withUtf8Charset"))
+        }
+
+        addWithNullCheckIfNeeded(requestBodyParam.name, requestBodyParam.type,
+                writeBodyCodeBlock)
+    }
+
+    endControlFlow()
+
+    return this
+}
+
+
+/**
+ * Shorthand to begin a runBlocking control flow
+ */
+fun CodeBlock.Builder.beginRunBlockingControlFlow() =
+        add("%M·{\n", MemberName("kotlinx.coroutines", "runBlocking"))
+                .indent()
+

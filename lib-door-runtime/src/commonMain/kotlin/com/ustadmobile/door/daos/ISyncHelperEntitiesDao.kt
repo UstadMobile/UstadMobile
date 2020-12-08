@@ -1,5 +1,7 @@
 package com.ustadmobile.door.daos
 
+import androidx.room.Insert
+import com.ustadmobile.door.SyncResult
 import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
 
@@ -62,5 +64,21 @@ interface ISyncHelperEntitiesDao {
     suspend fun selectNextSqliteSyncablePk(tableId: Int): Long
 
     suspend fun incrementNextSqliteSyncablePk(tableId: Int, increment: Int)
+
+    /**
+     * Get the clientId for this instance of the database
+     */
+    fun findSyncNodeClientId(): Int
+
+    /**
+     * Insert a SyncResult entity (logging success or failure of a sync run)
+     */
+    suspend fun insertSyncResult(syncResult: SyncResult)
+
+    /**
+     * Replace/update UpdateNotification objects. If there is an existing update notification pending
+     * for the same device id and table id, then the existing one will be replaced/updated
+     */
+    fun replaceUpdateNotifications(entities: List<UpdateNotification>)
 
 }

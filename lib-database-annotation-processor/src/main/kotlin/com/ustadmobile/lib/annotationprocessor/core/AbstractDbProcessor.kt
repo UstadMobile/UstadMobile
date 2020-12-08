@@ -9,7 +9,6 @@ import javax.annotation.processing.AbstractProcessor
 import javax.annotation.processing.Messager
 import javax.annotation.processing.ProcessingEnvironment
 import javax.tools.Diagnostic
-import org.sqlite.SQLiteDataSource
 import java.io.File
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.*
@@ -23,7 +22,6 @@ import io.ktor.content.TextContent
 import io.ktor.http.ContentType
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.*
-import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import kotlinx.coroutines.Runnable
 import java.io.IOException
@@ -293,6 +291,10 @@ internal val CLIENT_GET_MEMBER_NAME = MemberName("io.ktor.client.request", "get"
 
 internal val CLIENT_POST_MEMBER_NAME = MemberName("io.ktor.client.request", "post")
 
+internal val CLIENT_GET_NULLABLE_MEMBER_NAME = MemberName("com.ustadmobile.door.ext", "getOrNull")
+
+internal val CLIENT_POST_NULLABLE_MEMBER_NAME = MemberName("com.ustadmobile.door.ext", "postOrNull")
+
 internal val CLIENT_RECEIVE_MEMBER_NAME = MemberName("io.ktor.client.call", "receive")
 
 internal val CLIENT_PARAMETER_MEMBER_NAME = MemberName("io.ktor.client.request", "parameter")
@@ -322,6 +324,8 @@ internal val CLIENT_HTTPSTMT_RECEIVE_MEMBER_NAME = MemberName("io.ktor.client.ca
  * name that will be used to access the Json object to serialize or deserialize.
  * @param isPrimary if true, we will use the primary change sequence number when inserting tracker
  * entities. If false, we will use the local change sequence number.
+ *
+ * REPLACE WITH CodeBlockExt.addKtorRequestForFunction
  */
 internal fun generateKtorRequestCodeBlockForMethod(httpEndpointVarName: String = "_endpoint",
                                                    dbPathVarName: String,
@@ -1248,70 +1252,70 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                             .endControlFlow()
                             .build()
                 },
-                beforeInsertCode = {accessorVarName, className, isList ->
-                    if(findEntitiesWithAnnotation(className, EntityWithAttachment::class.java,
-                                    processingEnv).isNotEmpty()) {
-                        val attDirVarName = "_attDir_${className.simpleName}"
-                        val attEntityCodeBlock= CodeBlock.builder()
-                                .add("val $attDirVarName = %T(_attachmentsDir, %S)\n",
-                                        File::class, className.simpleName)
-                                .beginControlFlow("if(!$attDirVarName.exists())")
-                                .add("$attDirVarName.mkdirs()\n")
-                                .endControlFlow()
-
-                        val entityVarName = if(isList) {
-                            attEntityCodeBlock.beginControlFlow("$accessorVarName.forEach ")
-                            "it"
-                        }else {
-                            accessorVarName
-                        }
-
-                        val entityPkEl = processingEnv.elementUtils.getTypeElement(className.canonicalName)
-                                .enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null}
-
-                        attEntityCodeBlock
-                                .beginControlFlow("try")
-                                .beginControlFlow("_httpClient.%M<%T>",
-                                    CLIENT_GET_MEMBER_NAME, HttpStatement::class)
-                                .add("%M(_db)\n",
-                                        MemberName("com.ustadmobile.door.ext", "dbVersionHeader"))
-                                .beginControlFlow("url")
-                                .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
-                                .add("encodedPath = \"\${encodedPath}\${_dbPath}/%L/%L\"\n", daoName,
-                                        "_get${className.simpleName}AttachmentData")
-                                .endControlFlow()
-                                .add("%M(%S, $entityVarName.%L)\n", CLIENT_PARAMETER_MEMBER_NAME,
-                                        "_pk", entityPkEl.simpleName)
-                                .nextControlFlow(".execute")
-                                .add("response ->\n")
-                                //TODO: throw an exception whne the status code != 200
-                                .beginControlFlow("if(response.status == %T.OK)",
-                                        HttpStatusCode::class)
-                                .add("val _attFileDest = File($attDirVarName, $entityVarName.${entityPkEl.simpleName}.toString())\n")
-                                .add("response.content.%M(_attFileDest.%M())\n",
-                                        MemberName("io.ktor.utils.io", "copyAndClose"),
-                                        MemberName("io.ktor.util.cio", "writeChannel"))
-                                .endControlFlow()
-                                .endControlFlow()
-
-                        attEntityCodeBlock.nextControlFlow("catch(e: %T)", Exception::class)
-                                .add("throw %T(" +
-                                        "\"Could·not·download·attachment·for·${className.simpleName}·PK·\${$entityVarName.${entityPkEl.simpleName}}\",e)\n",
-                                        IOException::class)
-                                .nextControlFlow("finally")
-                                .endControlFlow()
-
-                        if(isList) {
-                            attEntityCodeBlock.endControlFlow()
-                        }
-
-
-
-                        attEntityCodeBlock.build()
-                    }else {
-                        CodeBlock.of("")
-                    }
-                },
+//                beforeInsertCode = {accessorVarName, className, isList ->
+//                    if(findEntitiesWithAnnotation(className, EntityWithAttachment::class.java,
+//                                    processingEnv).isNotEmpty()) {
+//                        val attDirVarName = "_attDir_${className.simpleName}"
+//                        val attEntityCodeBlock= CodeBlock.builder()
+//                                .add("val $attDirVarName = %T(_attachmentsDir, %S)\n",
+//                                        File::class, className.simpleName)
+//                                .beginControlFlow("if(!$attDirVarName.exists())")
+//                                .add("$attDirVarName.mkdirs()\n")
+//                                .endControlFlow()
+//
+//                        val entityVarName = if(isList) {
+//                            attEntityCodeBlock.beginControlFlow("$accessorVarName.forEach ")
+//                            "it"
+//                        }else {
+//                            accessorVarName
+//                        }
+//
+//                        val entityPkEl = processingEnv.elementUtils.getTypeElement(className.canonicalName)
+//                                .enclosedElements.first { it.getAnnotation(PrimaryKey::class.java) != null}
+//
+//                        attEntityCodeBlock
+//                                .beginControlFlow("try")
+//                                .beginControlFlow("_httpClient.%M<%T>",
+//                                    CLIENT_GET_MEMBER_NAME, HttpStatement::class)
+//                                .add("%M(_db)\n",
+//                                        MemberName("com.ustadmobile.door.ext", "dbVersionHeader"))
+//                                .beginControlFlow("url")
+//                                .add("%M(_endpoint)\n", MemberName("io.ktor.http", "takeFrom"))
+//                                .add("encodedPath = \"\${encodedPath}\${_dbPath}/%L/%L\"\n", daoName,
+//                                        "_get${className.simpleName}AttachmentData")
+//                                .endControlFlow()
+//                                .add("%M(%S, $entityVarName.%L)\n", CLIENT_PARAMETER_MEMBER_NAME,
+//                                        "_pk", entityPkEl.simpleName)
+//                                .nextControlFlow(".execute")
+//                                .add("response ->\n")
+//                                //TODO: throw an exception whne the status code != 200
+//                                .beginControlFlow("if(response.status == %T.OK)",
+//                                        HttpStatusCode::class)
+//                                .add("val _attFileDest = File($attDirVarName, $entityVarName.${entityPkEl.simpleName}.toString())\n")
+//                                .add("response.content.%M(_attFileDest.%M())\n",
+//                                        MemberName("io.ktor.utils.io", "copyAndClose"),
+//                                        MemberName("io.ktor.util.cio", "writeChannel"))
+//                                .endControlFlow()
+//                                .endControlFlow()
+//
+//                        attEntityCodeBlock.nextControlFlow("catch(e: %T)", Exception::class)
+//                                .add("throw %T(" +
+//                                        "\"Could·not·download·attachment·for·${className.simpleName}·PK·\${$entityVarName.${entityPkEl.simpleName}}\",e)\n",
+//                                        IOException::class)
+//                                .nextControlFlow("finally")
+//                                .endControlFlow()
+//
+//                        if(isList) {
+//                            attEntityCodeBlock.endControlFlow()
+//                        }
+//
+//
+//
+//                        attEntityCodeBlock.build()
+//                    }else {
+//                        CodeBlock.of("")
+//                    }
+//                },
                 resultType = resultType, processingEnv = processingEnv,
                 syncHelperDaoVarName = syncHelperDaoVarName))
 
@@ -1371,7 +1375,7 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
                         .addModifiers(KModifier.OVERRIDE)
                         .addCode(generateQueryCodeBlock(funSpec.returnType ?: UNIT,
                                 funSpec.parameters.map { it.name to it.type}.toMap(),
-                                queryAnnotation.valueMemberToString(), null, null))
+                                queryAnnotation.memberToString(), null, null))
                 if(funSpec.returnType != UNIT) {
                     overridingFun.addCode("return _result\n")
                 }
