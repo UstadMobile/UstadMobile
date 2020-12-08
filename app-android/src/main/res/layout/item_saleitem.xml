@@ -43,7 +43,7 @@
                 android:layout_weight="1"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:srcCompat="@drawable/ic_launcher_icon" />
+                app:srcCompat="@drawable/ic_baseline_insert_photo_24" />
 
             <LinearLayout
                 android:layout_width="wrap_content"

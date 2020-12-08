@@ -164,13 +164,11 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
 
     override fun clearAll() {
         mBinding?.fragmentSaleDeliveryEditSignature?.clear()
-        print("hie")
     }
 
 
     override fun onStartSigning() {
         //Event triggered when the pad is touched
-        print("hsss")
     }
 
     override fun onSigned() {
@@ -178,8 +176,6 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
         print("hi")
         val signSvg = mBinding?.fragmentSaleDeliveryEditSignature?.getSignatureSvg()
         entity?.delivery?.saleDeliverySignature = signSvg?:""
-
-
     }
 
     override fun onClear() {

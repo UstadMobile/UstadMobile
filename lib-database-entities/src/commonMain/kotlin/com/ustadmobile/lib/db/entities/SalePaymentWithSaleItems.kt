@@ -7,6 +7,4 @@ import kotlinx.serialization.Serializable
 data class SalePaymentWithSaleItems(
         var payment: SalePayment = SalePayment(),
         var saleDiscount: Long = 0L,
-        var saleItems: List<SaleItemWithProduct> = listOf(),
-        var deliveries: List<SaleDeliveryAndItems> = mutableListOf()
-)
+        var saleItems: List<SaleItemWithProduct> = listOf())

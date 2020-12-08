@@ -20,7 +20,6 @@ import com.ustadmobile.lib.db.entities.SalePaymentWithSaleItems
 import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
 import com.ustadmobile.lib.db.entities.InventoryItem
 import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import org.kodein.di.DI
@@ -36,10 +35,11 @@ class SaleEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
     //Sale Item edit helper
-    val saleItemEditHelper = DefaultOneToManyJoinEditHelper<SaleItemWithProduct>(
+    private val saleItemEditHelper = DefaultOneToManyJoinEditHelper<SaleItemWithProduct>(
             SaleItemWithProduct::saleItemUid,
             "SaleItem", SaleItemWithProduct.serializer().list,
-            SaleItemWithProduct.serializer().list, this, SaleItemWithProduct::class) { saleItemUid = it }
+            SaleItemWithProduct.serializer().list, this, SaleItemWithProduct::class) {
+                saleItemUid = it }
 
     fun handleAddOrEditSaleItem(saleItem: SaleItemWithProduct) {
         saleItemEditHelper.onEditResult(saleItem)
@@ -49,13 +49,12 @@ class SaleEditPresenter(context: Any,
         saleItemEditHelper.onDeactivateEntity(saleItem)
     }
 
-
-
     //Sale Delivery edit helper
-    val saleDeliveryEditHelper = DefaultOneToManyJoinEditHelper<SaleDeliveryAndItems>(
-            {it.delivery?.saleDeliveryUid?:0L},
+    private val saleDeliveryEditHelper = DefaultOneToManyJoinEditHelper<SaleDeliveryAndItems>(
+            {it.delivery?.saleDeliveryUid},
             "SaleDeliveryAndItems", SaleDeliveryAndItems.serializer().list,
-            SaleDeliveryAndItems.serializer().list, this, SaleDeliveryAndItems::class) { delivery?.saleDeliveryUid = it }
+            SaleDeliveryAndItems.serializer().list, this, SaleDeliveryAndItems::class) {
+                delivery?.saleDeliveryUid = it }
 
     fun handleAddOrEditSaleDelivery(saleDelivery: SaleDeliveryAndItems) {
         saleDeliveryEditHelper.onEditResult(saleDelivery)
@@ -67,10 +66,11 @@ class SaleEditPresenter(context: Any,
 
 
     //Sale Payment edit helper
-    val salePaymentEditHelper = DefaultOneToManyJoinEditHelper<SalePaymentWithSaleItems>(
+    private val salePaymentEditHelper = DefaultOneToManyJoinEditHelper<SalePaymentWithSaleItems>(
             { it.payment?.salePaymentUid?:0L },
             "SalePaymentWithSaleItems", SalePaymentWithSaleItems.serializer().list,
-            SalePaymentWithSaleItems.serializer().list, this, SalePaymentWithSaleItems::class) { payment?.salePaymentUid = it }
+            SalePaymentWithSaleItems.serializer().list, this,
+                SalePaymentWithSaleItems::class) { payment?.salePaymentUid = it }
 
     fun handleAddOrEditSalePayment(salePayment: SalePaymentWithSaleItems) {
         salePaymentEditHelper.onEditResult(salePayment)
@@ -83,8 +83,6 @@ class SaleEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
-        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         view.saleItemList = saleItemEditHelper.liveList
         view.saleDeliveryList = saleDeliveryEditHelper.liveList
@@ -108,15 +106,13 @@ class SaleEditPresenter(context: Any,
             db.saleDeliveryDao.findAllBySaleAsList(entityUid)
         }
 
-        var saleDeliverywithItems = mutableListOf<SaleDeliveryAndItems>()
+        val saleDeliveryWithItems = mutableListOf<SaleDeliveryAndItems>()
         for(eachDelivery in saleDeliveryList){
-            saleDeliverywithItems.add(SaleDeliveryAndItems().apply{
+            saleDeliveryWithItems.add(SaleDeliveryAndItems().apply{
                 delivery = eachDelivery
-
-
             })
         }
-        saleDeliveryEditHelper.liveList.sendValue(saleDeliverywithItems)
+        saleDeliveryEditHelper.liveList.sendValue(saleDeliveryWithItems)
 
         val salePaymentList = withTimeout(2000){
             db.salePaymentDao.findAllBySaleAsList(entityUid)
@@ -157,8 +153,12 @@ class SaleEditPresenter(context: Any,
             editEntity = SaleWithCustomerAndLocation()
         }
 
-//        view.salePaymentList = salePaymentEditHelper.liveList
-//        view.saleDeliveryList = saleDeliveryEditHelper.liveList
+        view.saleDeliveryList = saleDeliveryEditHelper.liveList
+        view.salePaymentList = salePaymentEditHelper.liveList
+
+        saleDeliveryEditHelper.onLoadFromJsonSavedState(bundle)
+        salePaymentEditHelper.onLoadFromJsonSavedState(bundle)
+
 
         return editEntity
     }
@@ -212,16 +212,18 @@ class SaleEditPresenter(context: Any,
                 //1. get the amount and product
                 var productCountSelected = 0
                 for(producerSelection in it.deliveryDetails){
-                    for(everyTransaction in producerSelection?.transactions?: emptyList<PersonWithInventoryItemAndStock>()){
+                    for(everyTransaction in producerSelection?.transactions?:
+                                emptyList<PersonWithInventoryItemAndStock>()){
                         productCountSelected += everyTransaction.selectedStock
                     }
                 }
 
                 for(producerSelection in it.deliveryDetails) {
-                    //2. Udpdate productCountSelected InventoryItems with the deliveryUid and saleUid
+                    //2. Update productCountSelected InventoryItems with the deliveryUid and saleUid
                     val productUid = producerSelection.productUid
-                    for(everyTransaction in producerSelection?.transactions?: emptyList<PersonWithInventoryItemAndStock>()) {
-                        val deliveryInventoryTransaction = InventoryItem().apply{
+                    for(everyTransaction in producerSelection?.transactions?:
+                                emptyList<PersonWithInventoryItemAndStock>()) {
+                        InventoryItem().apply{
                             inventoryItemProductUid = productUid
                             inventoryItemLeUid = loggedInPersonUid
                             inventoryItemWeUid = everyTransaction.personUid
@@ -272,11 +274,6 @@ class SaleEditPresenter(context: Any,
             view.finishWithResult(listOf(entity))
 
         }
-    }
-
-    companion object {
-
-
     }
 
 }

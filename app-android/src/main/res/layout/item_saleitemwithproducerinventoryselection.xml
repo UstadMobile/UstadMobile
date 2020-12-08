@@ -25,7 +25,7 @@
             android:layout_marginVertical="@dimen/dimen_8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_launcher_icon" />
+            app:srcCompat="@drawable/ic_baseline_insert_photo_24" />
 
         <TextView
             android:id="@+id/item_sale_item_name"

@@ -17,7 +17,6 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SaleEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CREATE_SALE
-import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -96,16 +95,27 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         salePaymentRecyclerView?.adapter = salePaymentRecyclerAdpater
         salePaymentRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
-        mPresenter = SaleEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+        val navController = findNavController()
+        val stateWithArguments : HashMap<String, String> = hashMapOf()
+        stateWithArguments.putAll(navController.currentBackStackEntrySavedStateMap()?: mapOf())
+        stateWithArguments.putAll(arguments.toStringMap())
+
+        mPresenter = SaleEditPresenter(requireContext(), stateWithArguments,
+                this, di, viewLifecycleOwner)
 
         return rootView
     }
+
+    override val viewContext: Any
+        get() = requireContext()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
         val navController = findNavController()
+
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 SaleItemWithProduct::class.java) {
             val saleItem = it.firstOrNull() ?: return@observeResult
@@ -147,7 +157,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
             mBinding?.sale = entity
         }
 
-        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+
 
     }
 
@@ -216,14 +226,12 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
     }
 
     override var entity: SaleWithCustomerAndLocation? = null
-        get() = field
         set(value) {
             field = value
             mBinding?.sale = value
         }
 
     override var fieldsEnabled: Boolean = false
-        get() = field
         set(value) {
             field = value
             mBinding?.fieldsEnabled = value
@@ -233,16 +241,15 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
     override fun addSaleItem() {
         //Go to product list followed by sale item edit
         onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(SaleItemWithProduct::class.java, R.id.product_list_dest, args= bundleOf(
-                ARG_CREATE_SALE to "true"
-        ))
+        navigateToPickEntityFromList(SaleItemWithProduct::class.java, R.id.product_list_dest,
+                args= bundleOf(ARG_CREATE_SALE to "true")
+        )
     }
 
     override fun addDelivery() {
         onSaveStateToBackStackStateHandle()
         val saleDeliveryWithItems = SaleDeliveryAndItems().apply{
             saleItems = saleItemList?.value?: listOf()
-            payments = salePaymentList?.value?: listOf()
         }
         navigateToEditEntity(saleDeliveryWithItems, R.id.saledelivery_edit_dest,
                 SaleDeliveryAndItems::class.java,
@@ -252,11 +259,9 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
 
     override fun addPayment() {
         onSaveStateToBackStackStateHandle()
-        var salePaymentWithDiscount = SalePaymentWithSaleItems().apply {
+        val salePaymentWithDiscount = SalePaymentWithSaleItems().apply {
             saleItems = saleItemList?.value ?: listOf()
             saleDiscount = entity?.saleDiscount ?: 0L
-            deliveries =  saleDeliveryList?.value?: listOf()
-
         }
         navigateToEditEntity(salePaymentWithDiscount, R.id.salepayment_edit_dest,
             SalePaymentWithSaleItems::class.java)
@@ -295,11 +300,10 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
     }
 
     override fun onClickSalePayment(salePayment: SalePaymentWithSaleItems) {
-        var salePaymentWithDiscount = salePayment
-        salePaymentWithDiscount.saleItems = saleItemList?.value?: listOf()
-        salePaymentWithDiscount.saleDiscount = entity?.saleDiscount?:0L
+        salePayment.saleItems = saleItemList?.value?: listOf()
+        salePayment.saleDiscount = entity?.saleDiscount?:0L
         onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(salePaymentWithDiscount, R.id.salepayment_edit_dest,
+        navigateToEditEntity(salePayment, R.id.salepayment_edit_dest,
                 SalePaymentWithSaleItems::class.java)
     }
 
