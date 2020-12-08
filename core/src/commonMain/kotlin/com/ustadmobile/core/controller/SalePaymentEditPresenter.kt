@@ -50,7 +50,7 @@ class SalePaymentEditPresenter(context: Any,
         if(entityJsonStr != null) {
             editEntity = safeParse(di, SalePaymentWithSaleItems.serializer(), entityJsonStr)
         }else {
-            editEntity = SalePaymentWithSaleItems(payment = SalePayment())
+            editEntity = SalePaymentWithSaleItems()
         }
         //1. Get all saleItems from JSON
         val saleItems = editEntity.saleItems
@@ -74,10 +74,10 @@ class SalePaymentEditPresenter(context: Any,
         for(eachItem in entity?.saleItems){
             totalSaleAmount += eachItem.saleItemQuantity * eachItem.saleItemPricePerPiece
         }
-        if(entity.payment.salePaymentPaidAmount >  (totalSaleAmount - entity.saleDiscount)){
+        if(entity.salePaymentPaidAmount >  (totalSaleAmount - entity.saleDiscount)){
             view.showSnackBar(systemImpl.getString(MessageID.selected_payment_higher, context))
         }else {
-            entity.payment.salePaymentPaidDate = UMCalendarUtil.getDateInMilliPlusDays(0)
+            entity.salePaymentPaidDate = UMCalendarUtil.getDateInMilliPlusDays(0)
             view.finishWithResult(listOf(entity))
         }
     }

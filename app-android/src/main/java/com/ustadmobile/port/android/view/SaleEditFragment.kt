@@ -40,6 +40,10 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
 
     private var mPresenter: SaleEditPresenter? = null
 
+    override val mEditPresenter: UstadEditPresenter<*, SaleWithCustomerAndLocation>?
+        get() = mPresenter
+
+    //Sale Item stuff
     private var saleItemRecyclerAdpater: SaleItemRecyclerAdapter? = null
     private var saleItemRecyclerView : RecyclerView? = null
     private val saleItemObserver = Observer<List<SaleItemWithProduct>?> {
@@ -49,6 +53,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         }
     }
 
+    //Delivery
     private var saleDeliveryRecyclerAdapter: SaleDeliveryRecyclerAdapter? = null
     private var saleDeliveryRecyclerView : RecyclerView? = null
     private val saleDeliveryObserver = Observer<List<SaleDeliveryAndItems>?> {
@@ -58,6 +63,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         }
     }
 
+    //Payment
     private var salePaymentRecyclerAdpater : SalePaymentRecyclerAdapter? = null
     private var salePaymentRecyclerView : RecyclerView? = null
     private val salePaymentObserver = Observer<List<SalePaymentWithSaleItems>?> {
@@ -67,99 +73,8 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         }
     }
 
-    override val mEditPresenter: UstadEditPresenter<*, SaleWithCustomerAndLocation>?
-        get() = mPresenter
-
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle?): View? {
-        val rootView: View
-        mBinding = FragmentSaleEditBinding.inflate(inflater, container, false).also {
-            rootView = it.root
-            it.activityEventHandler = this
-            it.orderTotal = orderTotal
-            it.paymentTotal = paymentTotal
-        }
-
-        saleItemRecyclerAdpater = SaleItemRecyclerAdapter(this)
-        saleItemRecyclerView = rootView.findViewById(R.id.fragment_sale_edit_saleitem_rv)
-        saleItemRecyclerView?.adapter = saleItemRecyclerAdpater
-        saleItemRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
-        saleDeliveryRecyclerAdapter = SaleDeliveryRecyclerAdapter(this)
-        saleDeliveryRecyclerView = rootView.findViewById(R.id.fragment_sale_edit_delivery_rv)
-        saleDeliveryRecyclerView?.adapter = saleDeliveryRecyclerAdapter
-        saleDeliveryRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
-        salePaymentRecyclerAdpater = SalePaymentRecyclerAdapter(this)
-        salePaymentRecyclerView = rootView.findViewById(R.id.fragment_sale_edit_payment_rv)
-        salePaymentRecyclerView?.adapter = salePaymentRecyclerAdpater
-        salePaymentRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
-
-        val navController = findNavController()
-        val stateWithArguments : HashMap<String, String> = hashMapOf()
-        stateWithArguments.putAll(navController.currentBackStackEntrySavedStateMap()?: mapOf())
-        stateWithArguments.putAll(arguments.toStringMap())
-
-        mPresenter = SaleEditPresenter(requireContext(), stateWithArguments,
-                this, di, viewLifecycleOwner)
-
-        return rootView
-    }
-
     override val viewContext: Any
         get() = requireContext()
-
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        val navController = findNavController()
-
-        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                SaleItemWithProduct::class.java) {
-            val saleItem = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddOrEditSaleItem(saleItem)
-            //Add numbers
-            orderTotal = orderTotal?.plus(saleItem.saleItemQuantity *
-                    saleItem.saleItemPricePerPiece.toLong())
-        }
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                SaleDeliveryAndItems::class.java) {
-            val saleDeliveryAndItems = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddOrEditSaleDelivery(saleDeliveryAndItems)
-        }
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                SalePaymentWithSaleItems::class.java) {
-            val salePayment = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleAddOrEditSalePayment(salePayment)
-            //Add numbers
-            paymentTotal = paymentTotal?.plus(salePayment.payment.salePaymentPaidAmount)
-        }
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                Person::class.java) {
-            val customer = it.firstOrNull() ?: return@observeResult
-            entity?.saleCustomerUid = customer.personUid
-            entity?.person = customer
-            mBinding?.fragmentSaleEditCustomerTiet?.setText(customer.fullName())
-            mBinding?.sale = entity
-        }
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                Location::class.java) {
-            val province = it.firstOrNull() ?: return@observeResult
-            entity?.saleLocationUid = province.locationUid
-            entity?.location = province
-            mBinding?.fragmentSaleEditProvinceTiet?.setText(province.locationTitle)
-            mBinding?.sale = entity
-        }
-
-
-
-    }
 
     override var saleItemList: DoorMutableLiveData<List<SaleItemWithProduct>>? = null
         set(value) {
@@ -182,7 +97,6 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
             value?.observe(this, salePaymentObserver)
         }
 
-
     override var orderTotal: Long? = 0
         set(value) {
             mBinding?.orderTotal = value
@@ -201,34 +115,10 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
             field = value
         }
 
-    override fun onDestroyView() {
-        super.onDestroyView()
-        mBinding = null
-        mPresenter = null
-        entity = null
-        saleItemRecyclerView?.adapter = null
-        saleItemRecyclerView = null
-        saleItemRecyclerAdpater = null
-
-        saleDeliveryRecyclerView?.adapter = null
-        saleDeliveryRecyclerView = null
-        saleDeliveryRecyclerAdapter = null
-
-        salePaymentRecyclerView?.adapter = null
-        salePaymentRecyclerView = null
-        salePaymentRecyclerAdpater = null
-
-    }
-
-    override fun onResume() {
-        super.onResume()
-        setEditFragmentTitle(R.string.add_sale, R.string.edit_sale)
-    }
-
     override var entity: SaleWithCustomerAndLocation? = null
         set(value) {
-            field = value
             mBinding?.sale = value
+            field = value
         }
 
     override var fieldsEnabled: Boolean = false
@@ -236,7 +126,6 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
             field = value
             mBinding?.fieldsEnabled = value
         }
-
 
     override fun addSaleItem() {
         //Go to product list followed by sale item edit
@@ -264,7 +153,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
             saleDiscount = entity?.saleDiscount ?: 0L
         }
         navigateToEditEntity(salePaymentWithDiscount, R.id.salepayment_edit_dest,
-            SalePaymentWithSaleItems::class.java)
+                SalePaymentWithSaleItems::class.java)
     }
 
     override fun selectCustomer() {
@@ -292,7 +181,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         saleDelivery.saleItems = saleItemList?.value?: listOf()
         navigateToEditEntity(saleDelivery, R.id.saledelivery_edit_dest,
                 SaleDeliveryAndItems::class.java, argBundle = bundleOf(
-                    UstadView.ARG_SALE_UID to entity?.saleUid.toString()))
+                UstadView.ARG_SALE_UID to entity?.saleUid.toString()))
     }
 
     override fun onClickRemoveSaleDelivery(saleDelivery: SaleDeliveryAndItems) {
@@ -309,5 +198,115 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
 
     override fun onClickRemoveSalePayment(salePayment: SalePaymentWithSaleItems) {
         mPresenter?.handleRemoveSalePayment(salePayment)
+    }
+
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
+        val rootView: View
+        mBinding = FragmentSaleEditBinding.inflate(inflater, container, false).also {
+            rootView = it.root
+            it.activityEventHandler = this
+            it.orderTotal = orderTotal
+            it.paymentTotal = paymentTotal
+        }
+
+        //Sale Items
+        saleItemRecyclerAdpater = SaleItemRecyclerAdapter(this)
+        saleItemRecyclerView = rootView.findViewById(R.id.fragment_sale_edit_saleitem_rv)
+        saleItemRecyclerView?.adapter = saleItemRecyclerAdpater
+        saleItemRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+
+        //Sale Deliveries
+        saleDeliveryRecyclerAdapter = SaleDeliveryRecyclerAdapter(this)
+        saleDeliveryRecyclerView = rootView.findViewById(R.id.fragment_sale_edit_delivery_rv)
+        saleDeliveryRecyclerView?.adapter = saleDeliveryRecyclerAdapter
+        saleDeliveryRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+
+        //Sale Payments:
+        salePaymentRecyclerAdpater = SalePaymentRecyclerAdapter(this)
+        salePaymentRecyclerView = rootView.findViewById(R.id.fragment_sale_edit_payment_rv)
+        salePaymentRecyclerView?.adapter = salePaymentRecyclerAdpater
+        salePaymentRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
+
+        mPresenter = SaleEditPresenter(requireContext(), arguments.toStringMap(),
+                this@SaleEditFragment, di, viewLifecycleOwner)
+
+        return rootView
+    }
+
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setEditFragmentTitle(R.string.add_sale, R.string.edit_sale)
+
+        val navController = findNavController()
+
+        mPresenter?.onCreate(backStackSavedState)
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                SaleItemWithProduct::class.java) {
+            val saleItem = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddOrEditSaleItem(saleItem)
+            //Add numbers
+            orderTotal = orderTotal?.plus(saleItem.saleItemQuantity *
+                    saleItem.saleItemPricePerPiece.toLong())
+        }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                SaleDeliveryAndItems::class.java) {
+            val saleDeliveryAndItems = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddOrEditSaleDelivery(saleDeliveryAndItems)
+        }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                SalePaymentWithSaleItems::class.java) {
+            val salePayment = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddOrEditSalePayment(salePayment)
+            //Add numbers
+            paymentTotal = paymentTotal?.plus(salePayment.salePaymentPaidAmount)
+        }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                Person::class.java) {
+            val customer = it.firstOrNull() ?: return@observeResult
+            entity?.saleCustomerUid = customer.personUid
+            entity?.person = customer
+            mBinding?.fragmentSaleEditCustomerTiet?.setText(customer.fullName())
+            mBinding?.sale = entity
+        }
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                Location::class.java) {
+            val province = it.firstOrNull() ?: return@observeResult
+            entity?.saleLocationUid = province.locationUid
+            entity?.location = province
+            mBinding?.fragmentSaleEditProvinceTiet?.setText(province.locationTitle)
+            mBinding?.sale = entity
+        }
+
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mBinding = null
+        mPresenter = null
+        entity = null
+        saleItemRecyclerView?.adapter = null
+        saleItemRecyclerView = null
+        saleItemRecyclerAdpater = null
+        saleItemList = null
+
+        saleDeliveryRecyclerView?.adapter = null
+        saleDeliveryRecyclerView = null
+        saleDeliveryRecyclerAdapter = null
+        saleDeliveryList = null
+
+        salePaymentRecyclerView?.adapter = null
+        salePaymentRecyclerView = null
+        salePaymentRecyclerAdpater = null
+        salePaymentList = null
+
     }
 }

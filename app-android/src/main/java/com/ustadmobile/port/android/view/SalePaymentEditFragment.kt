@@ -45,7 +45,7 @@ class SalePaymentEditFragment: UstadEditFragment<SalePaymentWithSaleItems>(), Sa
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val navController = findNavController()
-        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+        mPresenter?.onCreate(backStackSavedState)
     }
 
     override fun onDestroyView() {

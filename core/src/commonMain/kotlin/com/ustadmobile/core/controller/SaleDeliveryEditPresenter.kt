@@ -44,7 +44,7 @@ class SaleDeliveryEditPresenter(context: Any,
         if(entityJsonStr != null) {
             editEntity = safeParse(di, SaleDeliveryAndItems.serializer(), entityJsonStr)
         }else {
-            editEntity = SaleDeliveryAndItems(delivery = SaleDelivery())
+            editEntity = SaleDeliveryAndItems()
         }
 
         //1. Get all saleItems from JSON
@@ -67,7 +67,7 @@ class SaleDeliveryEditPresenter(context: Any,
                 //4. Get transactions
                 var producersTransactions = withTimeout(2000) {
                     db.inventoryItemDao.getStockAndDeliveryListByProduct(productUid,
-                            loggedInPersonUid, editEntity?.delivery?.saleDeliveryUid ?: 0L)
+                            loggedInPersonUid, editEntity?.saleDeliveryUid ?: 0L)
                 }
 
                 val product = withTimeout(2000){
@@ -121,7 +121,7 @@ class SaleDeliveryEditPresenter(context: Any,
 
         if(validated) {
             entity.deliveryDetails = deliveryDetailsOnView
-            entity.delivery.saleDeliveryDate = UMCalendarUtil.getDateInMilliPlusDays(0)
+            entity.saleDeliveryDate = UMCalendarUtil.getDateInMilliPlusDays(0)
             view.finishWithResult(listOf(entity))
         }
 

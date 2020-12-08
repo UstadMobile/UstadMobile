@@ -38,7 +38,7 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginVertical="@dimen/dimen_16dp"
-            app:dateLong="@{saleDelivery.delivery.saleDeliveryDate}"
+            app:dateLong="@{saleDelivery.saleDeliveryDate}"
             app:layout_constraintEnd_toStartOf="@+id/item_saledelivery_delete_iv"
             app:layout_constraintStart_toEndOf="@id/item_saledelivery_image"
             app:layout_constraintTop_toTopOf="parent"

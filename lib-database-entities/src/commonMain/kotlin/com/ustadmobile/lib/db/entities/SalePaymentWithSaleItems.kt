@@ -4,7 +4,18 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class SalePaymentWithSaleItems(
-        var payment: SalePayment = SalePayment(),
-        var saleDiscount: Long = 0L,
-        var saleItems: List<SaleItemWithProduct> = listOf())
+class SalePaymentWithSaleItems() : SalePayment() {
+    var saleDiscount: Long = 0L
+    var saleItems: List<SaleItemWithProduct> = listOf()
+
+    fun createWithPayment(salePayment: SalePayment){
+
+        salePaymentUid = salePayment.salePaymentUid
+        salePaymentPaidDate = salePayment.salePaymentPaidDate
+        salePaymentPaidAmount = salePayment.salePaymentPaidAmount
+        salePaymentCurrency = salePayment.salePaymentCurrency
+        salePaymentSaleUid = salePayment.salePaymentSaleUid
+        salePaymentActive = salePayment.salePaymentActive
+
+    }
+}

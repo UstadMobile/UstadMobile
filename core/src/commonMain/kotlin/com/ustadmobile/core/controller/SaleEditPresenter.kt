@@ -51,10 +51,10 @@ class SaleEditPresenter(context: Any,
 
     //Sale Delivery edit helper
     private val saleDeliveryEditHelper = DefaultOneToManyJoinEditHelper<SaleDeliveryAndItems>(
-            {it.delivery?.saleDeliveryUid},
+            SaleDeliveryAndItems::saleDeliveryUid,
             "SaleDeliveryAndItems", SaleDeliveryAndItems.serializer().list,
             SaleDeliveryAndItems.serializer().list, this, SaleDeliveryAndItems::class) {
-                delivery?.saleDeliveryUid = it }
+                saleDeliveryUid = it }
 
     fun handleAddOrEditSaleDelivery(saleDelivery: SaleDeliveryAndItems) {
         saleDeliveryEditHelper.onEditResult(saleDelivery)
@@ -67,10 +67,10 @@ class SaleEditPresenter(context: Any,
 
     //Sale Payment edit helper
     private val salePaymentEditHelper = DefaultOneToManyJoinEditHelper<SalePaymentWithSaleItems>(
-            { it.payment?.salePaymentUid?:0L },
+            SalePaymentWithSaleItems::salePaymentUid ,
             "SalePaymentWithSaleItems", SalePaymentWithSaleItems.serializer().list,
             SalePaymentWithSaleItems.serializer().list, this,
-                SalePaymentWithSaleItems::class) { payment?.salePaymentUid = it }
+                SalePaymentWithSaleItems::class) { salePaymentUid = it }
 
     fun handleAddOrEditSalePayment(salePayment: SalePaymentWithSaleItems) {
         salePaymentEditHelper.onEditResult(salePayment)
@@ -108,9 +108,11 @@ class SaleEditPresenter(context: Any,
 
         val saleDeliveryWithItems = mutableListOf<SaleDeliveryAndItems>()
         for(eachDelivery in saleDeliveryList){
-            saleDeliveryWithItems.add(SaleDeliveryAndItems().apply{
-                delivery = eachDelivery
-            })
+
+            var saleDeliveryAndItems = SaleDeliveryAndItems()
+            saleDeliveryAndItems.createWithDelivery(eachDelivery)
+
+            saleDeliveryWithItems.add(saleDeliveryAndItems)
         }
         saleDeliveryEditHelper.liveList.sendValue(saleDeliveryWithItems)
 
@@ -119,9 +121,11 @@ class SaleEditPresenter(context: Any,
         }
         var salePaymentWithItems = mutableListOf<SalePaymentWithSaleItems>()
         for(eachPayment in salePaymentList){
-            salePaymentWithItems.add(SalePaymentWithSaleItems().apply{
-                payment = eachPayment
-            })
+
+            var salePaymentAndItems = SalePaymentWithSaleItems()
+            salePaymentAndItems.createWithPayment(eachPayment)
+
+            salePaymentWithItems.add(salePaymentAndItems)
         }
         salePaymentEditHelper.liveList.sendValue(salePaymentWithItems)
 
@@ -152,9 +156,6 @@ class SaleEditPresenter(context: Any,
         }else {
             editEntity = SaleWithCustomerAndLocation()
         }
-
-        view.saleDeliveryList = saleDeliveryEditHelper.liveList
-        view.salePaymentList = salePaymentEditHelper.liveList
 
         saleDeliveryEditHelper.onLoadFromJsonSavedState(bundle)
         salePaymentEditHelper.onLoadFromJsonSavedState(bundle)
@@ -203,12 +204,12 @@ class SaleEditPresenter(context: Any,
             val deliveriesToDelete = saleDeliveryEditHelper.primaryKeysToDeactivate
 
             deliveriesToUpdate.forEach {
-                it.delivery.saleDeliverySaleUid = entity.saleUid
-                if(it.delivery.saleDeliveryUid == 0L) {
-                    it.delivery.saleDeliveryUid = repo.saleDeliveryDao.insertAsync(it.delivery)
+                it.saleDeliverySaleUid = entity.saleUid
+                if(it.saleDeliveryUid == 0L) {
+                    it.saleDeliveryUid = repo.saleDeliveryDao.insertAsync(it)
                 }
 
-                val saleDeliveryUid = it.delivery.saleDeliveryUid
+                val saleDeliveryUid = it.saleDeliveryUid
                 //1. get the amount and product
                 var productCountSelected = 0
                 for(producerSelection in it.deliveryDetails){
@@ -239,7 +240,7 @@ class SaleEditPresenter(context: Any,
 
             var deliveriesToUpdateDeliveriesOnly = mutableListOf<SaleDelivery>()
             for(everyDelivery in deliveriesToUpdate){
-                deliveriesToUpdateDeliveriesOnly.add(everyDelivery.delivery)
+                deliveriesToUpdateDeliveriesOnly.add(everyDelivery)
             }
             repo.saleDeliveryDao.updateListAsync(deliveriesToUpdateDeliveriesOnly)
             repo.saleDeliveryDao.deactivateByUids(deliveriesToDelete)
@@ -251,11 +252,11 @@ class SaleEditPresenter(context: Any,
 
             val paymentsToUpdatePaymentsOnly = mutableListOf<SalePayment>()
             for(everyPayment in paymentsToUpdate){
-                paymentsToUpdatePaymentsOnly.add(everyPayment.payment)
+                paymentsToUpdatePaymentsOnly.add(everyPayment)
             }
             val paymentsToInsertPaymentsOnly = mutableListOf<SalePayment>()
             for(everyPayment in paymentsToInsert){
-                paymentsToUpdatePaymentsOnly.add(everyPayment.payment)
+                paymentsToUpdatePaymentsOnly.add(everyPayment)
             }
             paymentsToInsertPaymentsOnly.forEach {
                 it.salePaymentSaleUid = entity.saleUid

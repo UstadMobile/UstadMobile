@@ -29,7 +29,6 @@ class SalePaymentRecyclerAdapter(var itemListener: SalePaymentItemListener?)
     override fun onBindViewHolder(holder: InventoryTransactionDetailHolder, position: Int) {
         val item = getItem(position)
         holder.itemBinding.salePayment = item
-        //holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -42,7 +41,7 @@ class SalePaymentRecyclerAdapter(var itemListener: SalePaymentItemListener?)
             : DiffUtil.ItemCallback<SalePaymentWithSaleItems>() {
             override fun areItemsTheSame(oldItem: SalePaymentWithSaleItems,
                                          newItem: SalePaymentWithSaleItems): Boolean {
-                return oldItem.payment.salePaymentUid == newItem.payment.salePaymentUid
+                return oldItem.salePaymentUid == newItem.salePaymentUid
 
             }
 

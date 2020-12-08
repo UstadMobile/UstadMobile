@@ -42,7 +42,7 @@ class SaleDeliveryRecyclerAdapter(var itemListener: SaleDeliveryItemListener?)
             : DiffUtil.ItemCallback<SaleDeliveryAndItems>() {
             override fun areItemsTheSame(oldItem: SaleDeliveryAndItems,
                                          newItem: SaleDeliveryAndItems): Boolean {
-                return oldItem.delivery?.saleDeliveryUid == newItem.delivery?.saleDeliveryUid
+                return oldItem?.saleDeliveryUid == newItem?.saleDeliveryUid
 
             }
 

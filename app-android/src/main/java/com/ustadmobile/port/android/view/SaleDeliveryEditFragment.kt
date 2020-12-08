@@ -68,7 +68,7 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
         val navController = findNavController()
 
 
-        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+        mPresenter?.onCreate(backStackSavedState)
 
     }
 
@@ -92,8 +92,8 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
 
             try {
 
-                if(value?.delivery?.saleDeliverySignature != null && value.delivery?.saleDeliverySignature.isNotBlank()) {
-                    val svg = SVG.getFromString(value?.delivery?.saleDeliverySignature ?: "")
+                if(value?.saleDeliverySignature != null && value?.saleDeliverySignature.isNotBlank()) {
+                    val svg = SVG.getFromString(value?.saleDeliverySignature ?: "")
 
                     val signPic = svg.renderToPicture()
 
@@ -175,7 +175,7 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
         //Event triggered when the pad is signed
         print("hi")
         val signSvg = mBinding?.fragmentSaleDeliveryEditSignature?.getSignatureSvg()
-        entity?.delivery?.saleDeliverySignature = signSvg?:""
+        entity?.saleDeliverySignature = signSvg?:""
     }
 
     override fun onClear() {
