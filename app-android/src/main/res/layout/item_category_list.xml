@@ -60,7 +60,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            android:onClick="@{() -> itemListener.onClickDelete(category)" />
+            android:onClick="@{() -> itemListener.onClickDelete(category)}" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

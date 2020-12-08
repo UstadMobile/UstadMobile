@@ -38,7 +38,7 @@ class ProductDetailPresenter(context: Any,
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val productWithCount = withTimeout(2000){
-            db.productDao.findProductWithInventoryCountAsync(productUid)
+            db.productDao.findProductWithInventoryCountAsync(productUid, loggedInPersonUid)
         }?: ProductWithInventoryCount()
 
         //1. Get categories

@@ -4,7 +4,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.os.bundleOf
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -143,13 +145,6 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
 
     override fun handleClickRecordSale(product: ProductWithInventoryCount) {
 
-        //TODO : Fix this
-//        navigateToEditEntity(null, R.id.saleitem_edit_dest,
-//                SaleItemWithProduct::class.java,
-//                argBundle = bundleOf(
-//                    UstadView.ARG_PRODUCT_UID to product.productUid.toString(),
-//                    UstadView.ARG_CREATE_SALE to "true")
-//        )
 
 
         navigateToEditEntity(null, R.id.sale_edit_dest,
@@ -209,6 +204,7 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
 
 
 
+
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
@@ -231,11 +227,21 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
 
     }
 
+    override fun onResume() {
+        super.onResume()
+
+
+    }
+
     override var entity: ProductWithInventoryCount? = null
         get() = field
         set(value) {
             field = value
             mBinding?.product = value
+            if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
+                (activity as? AppCompatActivity)?.supportActionBar?.title =
+                        value?.productName
+
         }
 
     override fun onClickProductPicture(product: Product) {

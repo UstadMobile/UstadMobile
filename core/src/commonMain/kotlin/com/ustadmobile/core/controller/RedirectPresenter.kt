@@ -36,7 +36,7 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
             } else if (cameFromGetStarted) {
                 if (canSelectServer) GetStartedView.VIEW_NAME else Login2View.VIEW_NAME
             } else {
-                ContentEntryListTabsView.VIEW_NAME
+                ProductListView.VIEW_NAME
             }
 
             view.showNextScreen(destination, args)

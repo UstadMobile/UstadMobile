@@ -27,7 +27,7 @@
             android:layout_height="@dimen/dimen_48dp"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
             android:layout_marginVertical="@dimen/dimen_16dp"
-            android:src="@drawable/ic_launcher_icon"
+            android:src="@drawable/ic_baseline_insert_photo_24"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

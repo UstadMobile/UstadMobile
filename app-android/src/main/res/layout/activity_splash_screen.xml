@@ -20,7 +20,7 @@
        app:layout_constraintLeft_toLeftOf="parent"
        app:layout_constraintRight_toRightOf="parent"
        app:layout_constraintTop_toTopOf="parent"
-       app:srcCompat="@drawable/ic_ustad_logo"
+       app:srcCompat="@drawable/ic_goldozi_logo"
        tools:ignore="ContentDescription" />
 
 
@@ -34,6 +34,7 @@
        app:layout_constraintLeft_toLeftOf="parent"
        app:layout_constraintRight_toRightOf="parent"
        app:layout_constraintTop_toBottomOf="@+id/organisation_icon"
+       android:visibility="gone"
        app:srcCompat="@drawable/expo2020_logo"
        tools:ignore="ContentDescription" />
 
@@ -43,6 +44,7 @@
        android:layout_width="wrap_content"
        android:layout_height="wrap_content"
        android:orientation="vertical"
+       android:visibility="gone"
        app:layout_constraintBottom_toBottomOf="parent"
        app:layout_constraintHorizontal_bias="0.5"
        app:layout_constraintLeft_toLeftOf="parent"
