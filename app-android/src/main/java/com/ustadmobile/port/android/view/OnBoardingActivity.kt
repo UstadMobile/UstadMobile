@@ -42,6 +42,11 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
     override val viewContext: Any
         get() = this
 
+    //Do nothing - there isn't really any loading of this
+    override var loading: Boolean
+        get() = false
+        set(value) {}
+
     /**
      * Model for the the onboarding screen
      */

@@ -10,6 +10,8 @@ interface SchoolDetailOverviewView: UstadDetailView<SchoolWithHolidayCalendar> {
 
     var schoolClazzes : DataSource.Factory<Int, Clazz>?
 
+    var schoolCodeVisible: Boolean
+
     companion object {
 
         const val VIEW_NAME = "SchoolWithHolidayCalendarDetailView"

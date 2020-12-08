@@ -8,7 +8,8 @@ import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionTextEntryBindi
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission
 
-class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false, marking: Boolean = false)
+class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false,
+                                                   marking: Boolean = false)
     : ListAdapter<ClazzWorkWithSubmission,
         SubmissionTextEntryWithResultRecyclerAdapter.SubmissionTextEntryWithResultViewHolder>(
         ClazzWorkDetailOverviewFragment.DU_CLAZZWORKWITHSUBMISSION) {
@@ -21,7 +22,15 @@ class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false, mar
             field = value
         }
 
-    var markingMode: Boolean = marking
+    var shortTextEditable: Boolean = marking
+        set(value){
+            if(field == value)
+                return
+            field = value
+            viewHolder?.itemBinding?.editable = value
+            viewHolder?.itemBinding?.freeText = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
+
+        }
 
     class SubmissionTextEntryWithResultViewHolder(
             var itemBinding: ItemClazzworkSubmissionTextEntryBinding)
@@ -29,13 +38,14 @@ class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false, mar
 
     private var viewHolder: SubmissionTextEntryWithResultViewHolder? = null
 
+
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
             : SubmissionTextEntryWithResultViewHolder {
         return SubmissionTextEntryWithResultViewHolder(
                 ItemClazzworkSubmissionTextEntryBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
                     it.freeText = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT
-                    it.markingMode = markingMode
+                    it.editable = shortTextEditable
                 })
     }
 
@@ -50,6 +60,7 @@ class SubmissionTextEntryWithResultRecyclerAdapter(visible: Boolean = false, mar
 
     override fun onBindViewHolder(holder: SubmissionTextEntryWithResultViewHolder, position: Int) {
         holder.itemBinding.clazzWorkWithSubmission = getItem(position)
-        holder.itemView.tag = getItem(position).clazzWorkUid?:0L
+        holder.itemView.tag = getItem(position).clazzWorkUid ?: 0L
+        holder.itemBinding.editable = shortTextEditable
     }
 }

@@ -108,7 +108,7 @@ class VideoContentPresenterTest {
 
         presenter.updateProgress(0, 100, true)
 
-        verify(mockEndpoint).storeStatements(any(), eq(""), eq(container!!.containerContentEntryUid))
+        verify(mockEndpoint, timeout(5000)).storeStatements(any(), eq(""), eq(container!!.containerContentEntryUid))
 
     }
 

@@ -7,11 +7,11 @@ import androidx.room.RawQuery
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.Report
 
 @Dao
-@UmRepository
+@Repository
 abstract class ReportDao : BaseDao<Report> {
 
     @RawQuery
@@ -24,10 +24,10 @@ abstract class ReportDao : BaseDao<Report> {
     abstract fun findAllActiveReportByUserDesc(loggedInPersonUid: Long): DataSource.Factory<Int, Report>
 
     @Query("SELECT * FROM Report WHERE reportUid = :entityUid")
-    abstract fun findByUid(entityUid: Long): Report?
+    abstract suspend fun findByUid(entityUid: Long): Report?
 
     @Update
-    abstract fun updateAsync(entity: Report)
+    abstract suspend fun updateAsync(entity: Report)
 
     @Query("SELECT * From Report WHERE  reportUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Report?>
@@ -35,7 +35,9 @@ abstract class ReportDao : BaseDao<Report> {
     @Query("Select * From Report")
     abstract fun findAllLive(): DoorLiveData<List<Report>>
 
-    @Query("UPDATE Report SET reportInactive = :inactive WHERE reportUid = :uid")
+    @Query("""UPDATE Report SET reportInactive = :inactive,
+                reportLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                WHERE reportUid = :uid""")
     abstract fun updateReportInactive(inactive: Boolean, uid: Long)
 
 

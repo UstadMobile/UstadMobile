@@ -8,6 +8,13 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener.Companion.SHAREDPREF_TMPFILE_REG
 import java.io.File
 
+/**
+ * We are using the NavController saved state handle instead of the SavedState bundle. The SavedState
+ * bundle does not help us when a fragment is destroyed for reasons other than the Android system
+ * reclaiming memory (e.g. when the user wants goes to another screen).
+ *
+ * This is simply a convenience extension function.
+ */
 fun NavController.currentBackStackEntrySavedStateMap() = this.currentBackStackEntry?.savedStateHandle?.toStringMap()
 
 /**
@@ -27,6 +34,16 @@ fun NavController.registerDestinationTempFile(context: Context, file: File,
     }
 }
 
+
+/**
+ * Removes the given file from the tmpFile registration
+ */
+fun NavController.unregisterDestinationTempFile(context: Context, file: File){
+    context.getSharedPreferences(SHAREDPREF_TMPFILE_REG, Context.MODE_PRIVATE).edit {
+        remove(file.absolutePath)
+    }
+}
+
 /**
  * Create a temp file that will be deleted once the given destination has been popped from the back
  * stack. This will save an entry to a sharedpreference key in a dedicated SharedPreferences.
@@ -42,4 +59,19 @@ fun NavController.createTempFileForDestination(context: Context, name: String,
     val newTmpFile = File(context.cacheDir, name)
     registerDestinationTempFile(context, newTmpFile, destination)
     return newTmpFile
+}
+
+/**
+ * Create a temporary directory for the given destination. This is the smae as createTempFileForDestination,
+ * only it creates a directory instead of a file.
+ *
+ * Because DeleteTempNavigationListener will use deleteRecursively, anything in the directory will
+ * be deleted once the destination is no longer in the stack
+ */
+fun NavController.createTempDirForDestination(context: Context, name: String,
+                                              destination: NavDestination? = this.currentDestination): File {
+    val newTmpDir = File(context.cacheDir, name)
+    newTmpDir.mkdirs()
+    registerDestinationTempFile(context, newTmpDir, destination)
+    return newTmpDir
 }

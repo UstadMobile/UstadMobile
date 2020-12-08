@@ -28,15 +28,26 @@ class DefaultClazzListItemListener(var view: ClazzList2View?,
     override fun onClickClazz(clazz: Clazz) {
         if(listViewMode == ListViewMode.BROWSER) {
             val db = on(accountManager.activeAccount).direct.instance<UmAppDatabase>(tag = TAG_DB)
+
+            //Check if person is part of Pending
             GlobalScope.launch(doorMainDispatcher()) {
-                val canOpen = db.clazzDao.personHasPermission(accountManager.activeAccount.personUid,
-                    Role.PERMISSION_CLAZZ_OPEN)
-                if(canOpen) {
+                val personGroupMember = db.personGroupMemberDao.checkPersonBelongsToGroup(
+                        clazz.clazzPendingStudentsPersonGroupUid, accountManager.activeAccount.personUid)
+                if(personGroupMember.isNotEmpty()){
+                    val canOpen = db.clazzDao.personHasPermissionWithClazz(
+                            accountManager.activeAccount.personUid, clazz.clazzUid,
+                            Role.PERMISSION_CLAZZ_OPEN)
+                    if(canOpen) {
+                        systemImpl.go(ClazzDetailView.VIEW_NAME,
+                                mapOf(UstadView.ARG_ENTITY_UID to clazz.clazzUid.toString()), context)
+                    }else {
+                        view?.showSnackBar(systemImpl.getString(MessageID.please_wait_for_approval, context))
+                    }
+                }else{
                     systemImpl.go(ClazzDetailView.VIEW_NAME,
                             mapOf(UstadView.ARG_ENTITY_UID to clazz.clazzUid.toString()), context)
-                }else {
-                    view?.showSnackBar(systemImpl.getString(MessageID.please_wait_for_approval, context))
                 }
+
             }
         }else {
             view?.finishWithResult(listOf(clazz))

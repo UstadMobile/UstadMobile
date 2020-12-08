@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
@@ -20,20 +18,22 @@ import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
+import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
+import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
 class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWithClazzWorkProgress,
-        ClazzMemberWithClazzWorkProgress>(), ClazzWorkDetailProgressListView{
+        ClazzMemberWithClazzWorkProgress>(), ClazzWorkDetailProgressListView {
 
     private var mPresenter: ClazzWorkDetailProgressListPresenter? = null
 
     override var autoMergeRecyclerViewAdapter: Boolean = false
 
-    private var metricsRecyclerAdapter : ClazzWorkMetricsRecyclerAdapter? = null
+    private var metricsRecyclerAdapter: ClazzWorkMetricsRecyclerAdapter? = null
 
     private var metricsLiveData: LiveData<PagedList<ClazzWorkWithMetrics>>? = null
 
-    private val metricsObserver = Observer<PagedList<ClazzWorkWithMetrics>?> {
-        t -> metricsRecyclerAdapter?.submitList(t)
+    private val metricsObserver = Observer<PagedList<ClazzWorkWithMetrics>?> { t ->
+        metricsRecyclerAdapter?.submitList(t)
     }
 
     override val listPresenter: UstadListPresenter<*, in ClazzMemberWithClazzWorkProgress>?
@@ -48,12 +48,23 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWit
 
         metricsRecyclerAdapter = ClazzWorkMetricsRecyclerAdapter(null, false)
         mDataRecyclerViewAdapter = ClazzWorkProgressListRecyclerAdapter(mPresenter)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
 
-        mMergeRecyclerViewAdapter = MergeAdapter(metricsRecyclerAdapter,
-                mDataRecyclerViewAdapter)
+        mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
+                metricsRecyclerAdapter, mDataRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
 
         return view
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     override fun onResume() {
@@ -67,6 +78,7 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWit
         super.onDestroyView()
         mPresenter = null
         dbRepo = null
+        metricsRecyclerAdapter = null
     }
 
     override val displayTypeRepo: Any?
@@ -78,7 +90,7 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWit
             metricsLiveData?.removeObserver(metricsObserver)
             metricsLiveData = value?.asRepositoryLiveData(ClazzWorkDao)
             field = value
-            metricsLiveData?.observe(viewLifecycleOwner, metricsObserver)
+            metricsLiveData?.observeIfFragmentViewIsReady(this, metricsObserver)
         }
 
     companion object {

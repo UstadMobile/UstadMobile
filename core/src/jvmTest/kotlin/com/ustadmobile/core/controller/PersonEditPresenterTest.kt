@@ -4,17 +4,23 @@ import com.nhaarman.mockitokotlin2.*
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.EntityRoleDao
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.lib.db.entities.UmAccount
 import junit.framework.Assert.assertEquals
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -56,6 +62,7 @@ class PersonEditPresenterTest  {
 
     private lateinit var impl: UstadMobileSystemImpl
 
+    private lateinit var repoEntityRoleDao: EntityRoleDao
 
     @Before
     fun setUp() {
@@ -84,6 +91,9 @@ class PersonEditPresenterTest  {
         repo = di.directActiveRepoInstance()
         mockDao = spy(repo.personDao)
         whenever(repo.personDao).thenReturn(mockDao)
+
+        repoEntityRoleDao = spy(repo.entityRoleDao)
+        whenever(repo.entityRoleDao).thenReturn(repoEntityRoleDao)
     }
 
     @After
@@ -109,6 +119,40 @@ class PersonEditPresenterTest  {
                 dateOfBirth = selectedDateOfBirth
             }
         }
+    }
+
+
+    private fun createPersonAndInsert(matchPassword: Boolean = true, leftOutPassword: Boolean = false): PersonWithAccount {
+        val password = "password"
+        val confirmPassword = if(matchPassword) password else "password1"
+        var personWithAccount =  PersonWithAccount().apply {
+            fatherName = "Doe"
+            firstNames = "Jane"
+            lastName = "Doe"
+            if(!leftOutPassword){
+                newPassword = password
+                confirmedPassword = confirmPassword
+            }
+        }
+
+        GlobalScope.launch {
+            personWithAccount = repo.insertPersonAndGroup(personWithAccount)
+        }
+        return personWithAccount
+    }
+
+    @Test
+    fun givenPersonEditExistingWithRoles_whenLoaded_thenRolesCalled(){
+
+        val person = createPersonAndInsert(leftOutPassword = true)
+
+        val args = mapOf(UstadView.ARG_ENTITY_UID to person.personUid.toString())
+        val presenter = PersonEditPresenter(context, args,mockView, di,mockLifecycleOwner)
+
+        presenter.onCreate(null)
+        
+        verify(mockView, timeout(5000).atLeastOnce()).rolesAndPermissionsList = any()
+
     }
 
     @Test
@@ -228,5 +272,7 @@ class PersonEditPresenterTest  {
             }
         }
     }
+
+
 
 }

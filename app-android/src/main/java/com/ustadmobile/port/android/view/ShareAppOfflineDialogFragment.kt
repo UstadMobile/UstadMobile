@@ -61,7 +61,7 @@ class ShareAppOfflineDialogFragment : UstadDialogFragment(){
         GlobalScope.launch(Dispatchers.IO) {
             val ctx = rootView.context
             val apkFile = File(ctx.applicationInfo.sourceDir)
-            val baseName = "Ustad-${BuildConfig.VERSION_NAME}.apk"
+            val baseName = "Ustad.apk"
 
             val outDir = File(ctx.filesDir, "external")
             if (!outDir.isDirectory)

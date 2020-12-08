@@ -6,6 +6,7 @@ import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzWorkDetailView
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -48,7 +49,7 @@ class ClazzWorkEditPresenter(context: Any,
             "state_ContentEntryWithMetrics_list",
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer().list,
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer().list,
-            this) { contentEntryUid = it }
+            this, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class) { contentEntryUid = it }
 
     fun handleAddOrEditContent(entityClass: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         contentJoinEditHelper.onEditResult(entityClass)
@@ -63,26 +64,12 @@ class ClazzWorkEditPresenter(context: Any,
             {it.clazzWorkQuestion.clazzWorkQuestionUid},
             "state_ClazzWorkQuestionAndOption_list",
                     ClazzWorkQuestionAndOptions.serializer().list,
-            ClazzWorkQuestionAndOptions.serializer().list, this)
+            ClazzWorkQuestionAndOptions.serializer().list, this,
+                    ClazzWorkQuestionAndOptions::class)
     { clazzWorkQuestion.clazzWorkQuestionUid = it }
 
     fun handleAddOrEditClazzQuestionAndOptions(entityClass: ClazzWorkQuestionAndOptions) {
-
-        //We could save this
-        GlobalScope.launch {
-            entityClass
-            entityClass.clazzWorkQuestion.clazzWorkQuestionClazzWorkUid = entity?.clazzWorkUid ?: 0L
-            entityClass.clazzWorkQuestion.clazzWorkQuestionUid = 0L
-            val questionUid = repo.clazzWorkQuestionDao.insertAsync(entityClass.clazzWorkQuestion)
-            entityClass.clazzWorkQuestion.clazzWorkQuestionUid = questionUid
-            entityClass.options.forEach {
-                it.clazzWorkQuestionOptionActive = true
-                it.clazzWorkQuestionOptionQuestionUid = questionUid
-            }
-        }
-
         questionAndOptionsEditHelper.onEditResult(entityClass)
-
     }
 
     fun handleRemoveQuestionAndOptions(entityClass: ClazzWorkQuestionAndOptions) {
@@ -113,7 +100,7 @@ class ClazzWorkEditPresenter(context: Any,
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
         val contentList = withTimeoutOrNull(2000) {
-            db.clazzWorkContentJoinDao.findAllContentByClazzWorkUid(
+            db.clazzWorkContentJoinDao.findAllContentByClazzWorkUidAsync(
                     clazzWork.clazzWorkUid, loggedInPersonUid
             )
          }?: listOf()
@@ -143,7 +130,7 @@ class ClazzWorkEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: ClazzWork? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(ClazzWork.serializer(), entityJsonStr)
+            editEntity = safeParse(di, ClazzWork.serializer(), entityJsonStr)
         }else {
             editEntity = ClazzWork()
         }
@@ -158,9 +145,6 @@ class ClazzWorkEditPresenter(context: Any,
 
         view.clazzWorkQuizQuestionsAndOptions = questionAndOptionsEditHelper.liveList
         view.submissionTypeOptions = SubmissionOptions.values().map{SubmissionOptionsMessageIdOption(it, context)}
-
-        contentJoinEditHelper.liveList.sendValue(listOf())
-        questionAndOptionsEditHelper.liveList.sendValue(listOf())
 
         questionAndOptionsEditHelper.onLoadFromJsonSavedState(bundle)
 
@@ -184,20 +168,15 @@ class ClazzWorkEditPresenter(context: Any,
             }
 
             val contentToInsert = contentJoinEditHelper.entitiesToInsert
-            val contentToUpdate = contentJoinEditHelper.entitiesToUpdate
             val contentToDelete = contentJoinEditHelper.primaryKeysToDeactivate
 
-            contentToInsert.forEach {
-                val newLink = ClazzWorkContentJoin().apply {
+            repo.clazzWorkContentJoinDao.insertListAsync(contentToInsert.map {
+                ClazzWorkContentJoin().apply {
                     clazzWorkContentJoinContentUid = it.contentEntryUid
                     clazzWorkContentJoinClazzWorkUid = entity?.clazzWorkUid?:0L
                     clazzWorkContentJoinDateAdded = systemTimeInMillis()
                 }
-                newLink.clazzWorkContentJoinUid = repo.clazzWorkContentJoinDao.insert(newLink)
-            }
-            contentToUpdate.forEach {
-
-            }
+            })
 
             repo.clazzWorkContentJoinDao.deactivateByUids(contentToDelete)
 
@@ -231,11 +210,11 @@ class ClazzWorkEditPresenter(context: Any,
             val allQuestions: List<ClazzWorkQuestionAndOptions> = (eti + etu)
             val allOptions = allQuestions.flatMap { it.options }
             val splitList = allOptions.partition { it.clazzWorkQuestionOptionUid == 0L }
-            repo.clazzWorkQuestionOptionDao.insertList(splitList.first)
-            repo.clazzWorkQuestionOptionDao.updateList(splitList.second)
+            repo.clazzWorkQuestionOptionDao.insertListAsync(splitList.first)
+            repo.clazzWorkQuestionOptionDao.updateListAsync(splitList.second)
 
             val deactivateOptions = allQuestions.flatMap { it.optionsToDeactivate }
-            db.clazzWorkQuestionOptionDao.deactivateByUids(deactivateOptions)
+            repo.clazzWorkQuestionOptionDao.deactivateByUids(deactivateOptions)
 
             repo.clazzWorkQuestionDao.deactivateByUids(questionAndOptionsEditHelper.primaryKeysToDeactivate)
 

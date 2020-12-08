@@ -1,10 +1,12 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.content.DialogInterface
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.*
 import androidx.paging.DataSource
 import androidx.paging.PagedList
@@ -14,8 +16,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.aakira.napier.Napier
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntry2DetailBinding
 import com.toughra.ustadmobile.databinding.ItemEntryTranslationBinding
+import com.toughra.ustadmobile.generated.callback.OnClickListener
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntry2DetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
@@ -39,6 +44,10 @@ import org.kodein.di.on
 interface ContentEntryDetailFragmentEventHandler {
 
     fun handleOnClickOpenDownloadButton()
+
+    fun handleOnClickGroupActivityButton()
+
+    fun handleOnClickDeleteButton()
 }
 
 class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecentContainer>(), ContentEntry2DetailView, ContentEntryDetailFragmentEventHandler{
@@ -100,6 +109,19 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
 
     override fun handleOnClickOpenDownloadButton() {
         mPresenter?.handleOnClickOpenDownloadButton()
+    }
+
+    override fun handleOnClickGroupActivityButton() {
+        mPresenter?.handleOnClickGroupActivityButton()
+    }
+
+    override fun handleOnClickDeleteButton() {
+        MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.confirm)
+                .setPositiveButton(R.string.delete) { _, _ -> mPresenter?.handleOnClickDeleteButton() }
+                .setNegativeButton(R.string.cancel) { dialog, _ ->  dialog.cancel() }
+                .setMessage(R.string.confirm_delete_message)
+                .show()
     }
 
     override var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null

@@ -20,26 +20,26 @@
     <string name="unable_to_update_username_error">Тафтиши номи корбарӣ ғайриимкон аст. Лутфан боварӣ ҳосил кунед, ки шумо онлайн ҳастед.</string>
     <string name="register_empty_fields">Лутфан ҳама сатрҳои лозимаро пур кунед</string>
     <string name="register_incorrect_email">Суроғаи почтаи электронии нодуруст</string>
-    <string name="wrong_user_pass_combo">Номи истифодабаранда/пароли хато: бори дигар кӯшиш кунед.</string>
-    <string name="login_network_error">Хатогии пайвастшавӣ башабака: лутфан пайваст будани худро санҷед.</string>
+    <string name="wrong_user_pass_combo">Номи корбар/пароли хато: бори дигар кӯшиш кунед.</string>
+    <string name="login_network_error">Хатогии пайвастшавӣ: лутфан пайваст будани худро санҷед.</string>
     <string name="download">Боргирӣ</string>
     <string name="downloaded" value="81">Боргир шудааст</string>
-    <string name="recycled">Аз нав коркард шуда</string>
+    <string name="recycled">Аз нав коркардшуда</string>
     <string name="libraries">Китобхона</string>
-    <string name="pause_download">Таваққуф кардани боргирӣ</string>
+    <string name="pause_download">Таваққуфи боргирӣ</string>
     <string name="ok">ОК</string>
-    <string name="confirm">Тасдиқ кардан</string>
-    <string name="cancel">Бекор кардан</string>
+    <string name="confirm">Тасдиқ намоед</string>
+    <string name="cancel">Бекор намоед</string>
     <string name="canceled">Бекор шуд</string>
-    <string name="delete">Нест кардан</string>
+    <string name="delete">Нест кунед</string>
     <string name="deleted">Нест шуд</string>
-    <string name="new_tab">Намоиш додан дар варақаи нав</string>
+    <string name="new_tab">Намоиш дар варақаи нав</string>
     <string name="loading">Боргузорӣ</string>
-    <string name="deleting">Нест кардан</string>
+    <string name="deleting">Дар ҳоли несткунӣ</string>
     <string name="logout">Хориҷ шудан</string>
-    <string name="error_opening_file">Хатои дар ҳоли кушодани файл:</string>
+    <string name="error_opening_file">Хатоӣ дар ҳоли кушодани файл:</string>
     <string name="about">Дар бораи</string>
-    <string name="download_all">Ҳамаро боргирӣ кардан</string>
+    <string name="download_all">Ҳамаро боргирӣ кунед</string>
     <string name="next">Баъдӣ</string>
     <string name="previous">Пештар</string>
     <string name="back">Бозгашт</string>
@@ -52,13 +52,13 @@
     <string name="login_no_network_auth_fail">Муайянсозии шахсият офлайн имконпазир аст.</string>
     <string name="memory_card">Корти хотира</string>
     <string name="device">Дастгоҳ</string>
-    <string name="register">Сабти ном кардан</string>
+    <string name="register">Сабти ном</string>
     <string name="phone_number">Рақами телефон</string>
     <string name="name">Ном</string>
     <string name="male">Мард</string>
     <string name="female">Зан</string>
     <string name="other">Дигар</string>
-    <string name="unset">Бекор кардан</string>
+    <string name="unset">Бекор кунед</string>
     <string name="settings">Танзимот</string>
     <string name="language">Забон</string>
     <string name="advanced">Такмилёфта</string>
@@ -74,52 +74,52 @@
     <string name="reports">Гузоришҳо</string>
     <string name="contents">Мундариҷа</string>
     <string name="students">Хонандагон</string>
-    <string name="forgot_password">Фаромуш кардани парол</string>
-    <string name="account">Хисоб</string>
+    <string name="forgot_password">Паролро фаромӯш кардам</string>
+    <string name="account">Саҳифа</string>
     <string name="share_application">Мубодила кардани барнома</string>
-    <string name="share">Мубодила кардан</string>
-    <string name="send">Фиристодан</string>
-    <string name="open">Кушодан</string>
+    <string name="share">Мубодила намоед</string>
+    <string name="send">Фиристонед</string>
+    <string name="open">Кушоед</string>
     <string name="passed">Гузашт</string>
-    <string name="downloading">Дар ҳоли боргирӣ кардан</string>
-    <string name="waiting">Интизорӣ</string>
+    <string name="downloading">Дар ҳоли боргирӣ</string>
+    <string name="waiting">Дар ҳоли интизорӣ</string>
     <string name="queued">Дар навбат қарор дорад</string>
-    <string name="success">Комёб шудан</string>
+    <string name="success">Комёб шуд</string>
     <string name="completed">Анҷом ёфт</string>
-    <string name="no_subtitle">Бе Зерунвон</string>
-    <string name="no_video_file_found">Ягон файли видеои ёфт нашуд</string>
+    <string name="no_subtitle">Бе зерунвон</string>
+    <string name="no_video_file_found">Ягон файли видеоӣ ёфт нашуд</string>
     <string name="cancel_invite">Бекор кардани даъват</string>
     <string name="share_offline_zip_checkbox_label">Файли фишурдашударо фиристед</string>
-    <string name="preparing">Тайёрӣ дидан</string>
+    <string name="preparing">Дар ҳоли омодабош</string>
     <string name="field_required_prompt">Ин бахш ҳатмист</string>
     <string name="field_password_min">Ҳадди ақал 5 аломат</string>
     <string name="field_password_error_min">Парол бояд на камтар аз 5 аломат бошад</string>
     <string name="filed_password_no_match">Парол мувофиқат намекунад, бори дигар кӯшиш кунед</string>
-    <string name="update">Навсозӣ кардан</string>
+    <string name="update">Навсозӣ кунед</string>
     <string name="profile">Профил</string>
-    <string name="dialog_download_from_playstore_message">Дастрас намудан ва мубодила кардани мундариҷа дар офлайн</string>
-    <string name="dialog_download_from_playstore_ok">Боргирӣ кунед (бе маблағ)</string>
+    <string name="dialog_download_from_playstore_message">Дастрас намудан ва мубодила кардани мундариҷа дар шакли офлайн</string>
+    <string name="dialog_download_from_playstore_ok">Боргирӣ кунед (бепул)</string>
     <string name="accept">Қабул кунед</string>
-    <string name="also_available_in">Инчунин дар ... дастрас аст</string>
-    <string name="onboarding_get_started_label">Оғоз кардан</string>
+    <string name="also_available_in">Инчунин дастрас аст дар</string>
+    <string name="onboarding_get_started_label">Оғоз намоед</string>
     <string name="onboarding_no_internet_headline">Интернет нест\? Душворие ҳам нест.</string>
     <string name="onboarding_offline_sharing">Дар офлайн мубодила кунед</string>
     <string name="onboarding_offline_sharing_subheading">Маводҳоро бо суръати баланд бо ягон корбари дигари наздик мубодила кунед.</string>
-    <string name="download_continue_stacked_label">Идома додан ба боргирӣ</string>
-    <string name="download_continue_btn_label">Идома додан</string>
+    <string name="download_continue_stacked_label">Ба боргирӣ идома диҳед</string>
+    <string name="download_continue_btn_label">Идома диҳед</string>
     <string name="download_wifi_only">Танҳо WiFi</string>
     <string name="download_calculating">Ҳисоб карда истодааст …</string>
     <string name="download_state_download">
-        <b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ%2$ и анбори дастгоҳи шуморо истифода хоҳанд кард.</string>
+        <b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$sи захирахагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="content_font_24">24pt</string>
     <string name="schools">Муассисаҳои таълимӣ</string>
     <string name="download_state_downloading">
-        <b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$-и захираҳои дастгоҳи шуморо истифода хоҳанд кард.</string>
-    <string name="download_downloading_placeholder">Боргирии%1$s аз %2$s</string>
+        <b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s -и захираи дастгоҳи шуморо истифода хоҳанд кард.</string>
+    <string name="download_downloading_placeholder">Боргирии %1$s аз %2$s</string>
     <string name="download_summary_title">Боргирии фаъол %1$s</string>
     <string name="download_cancel_all">Ҳамаро бекор кардан</string>
     <string name="download_cancel_label">Бекор кардани боргирӣ</string>
-    <string name="download_pause_download">Таваққуф кардан</string>
+    <string name="download_pause_download">Таваққуф намоед</string>
     <string name="assignments">Супоришҳо</string>
     <string name="download_storage_permission_title">Иҷозатҳои файл лозиманд</string>
     <string name="download_locally_availability">Дар наздикӣ дастрас аст</string>
@@ -145,19 +145,19 @@
     <string name="content_font_10">10pt</string>
     <string name="store_title">Устод Мобайл - захираҳои таълимии кушодаи офлайн</string>
     <string name="content_font_14">14pt</string>
-    <string name="store_description_full">Устод Мобайл як барномаи кушодаасос аст, ки ба корбарон имкон медиҳад то дастрасӣ ба захираҳои гуногуни таълимии кушодро дар реҷаи онлайн ё офлайн дастрас кунад. Ҳам барнома ва ҳам мундариҷа метавонанд аз дастгоҳҳо ба таври офлайн мубодила шаванд.
-\n 
-\n Устод Мобайл дорои мундариҷаи ошкоро ва иҷозатномашуда мебошад, ки баъзе мундариҷаи пешрафтаи дастрасӣ ба таълим дар Интернетро инъикос мекунад :
-\n 
-\n  Китобҳои ҳикояи Африқо
-\n  ЭТаккато
-\n  Китобхонаи глобалии рақамӣ
-\n  Академияи Хан (аз ҷумла дастрасии фаврӣ ба ҳам видео ва ҳам машқҳо)
-\n  PHET
-\n  Китобҳои Pratham
-\n  Овози Амрико
-\n 
-\n  Мундариҷа аз ҷониби провайдерҳои мундариҷаи беруна тибқи иҷозатнома пешниҳод карда мешавад. Устод Мобайл, агар ба таври возеҳ дарҷ нагардида бошад, аз ҷониби ягон провайдери мундариҷа тасдиқ карда намешавад.</string>
+    <string name="store_description_full">Устод Мобайл як барномаи кушодаасос аст, ки ба корбарон имкон медиҳад то дастрасӣ ба захираҳои гуногуни таълимии кушодро дар реҷаи онлайн ё офлайн дастрас кунад. Ҳам барнома ва ҳам мундариҷа метавонанд аз дастгоҳҳо ба таври офлайн мубодила шаванд. 
+\n  
+\n Устод Мобайл дорои мундариҷаи ошкоро ва иҷозатнома мебошад, ки баъзе мундариҷаи пешрафтаи дастрасӣ ба таълим дар Интернетро инъикос мекунад : 
+\n  
+\n  Китобҳои ҳикояи Африқо 
+\n  ЭТаккато 
+\n  Китобхонаи глобалии рақамӣ 
+\n  Академияи Хан (аз ҷумла дастрасии фаврӣ ба ҳам видео ва ҳам машқҳо) 
+\n  PHET 
+\n  Китобҳои Pratham 
+\n  Овози Амрико 
+\n  
+\n Мундариҷа аз ҷониби провайдерҳои мундариҷаи беруна тибқи иҷозатнома пешниҳод карда мешавад. Устод Мобайл, агар ба таври возеҳ дарҷ нагардида бошад, аз ҷониби ягон провайдери мундариҷа тасдиқ карда намешавад.</string>
     <string name="content_font_18">18pt</string>
     <string name="content_source_camera">Аз камера</string>
     <string name="content_choose_file">Файлро интихоб кунед</string>
@@ -167,24 +167,24 @@
     <string name="content_media_video">Видео</string>
     <string name="content_media_title">Навъи медиа</string>
     <string name="content_blank_page_title">Саҳифаи холӣ</string>
-    <string name="content_blank_doc_click_label">Зер кардан</string>
+    <string name="content_blank_doc_click_label">Зер намоед</string>
     <string name="content_blank_doc_start_label">Оғози таҳрир.</string>
     <string name="content_option_page">Саҳифаи нав</string>
     <string name="content_untitled_document">Ҳуҷҷати бесарлавҳа</string>
-    <string name="content_add_page">Илова кардани саҳифа</string>
+    <string name="content_add_page">Саҳифаро илова намоед</string>
     <string name="content_update_page_title">Саҳифаро навсозӣ кунед</string>
-    <string name="content_action_page_remove">Тоза кардани саҳифа</string>
+    <string name="content_action_page_remove">Саҳифаро нест кунед</string>
     <string name="content_editor_page_view_hint">Унвон</string>
     <string name="content_entry_not_found">Илова кардани мундариҷа ёфт нашуд</string>
     <string name="content_editor_directionality">Роҳнамо</string>
-    <string name="content_editor_menu_undo">Ботил сохтан</string>
-    <string name="content_editor_menu_redo">Дубора анҷом додан</string>
+    <string name="content_editor_menu_undo">Баргардед</string>
+    <string name="content_editor_menu_redo">Дубора анҷом диҳед</string>
     <string name="content_editor_menu_text_formatting">Форматкунии матн</string>
     <string name="content_editor_menu_pages">Саҳифаҳо</string>
     <string name="content_editor_menu_indent">Фосила</string>
     <string name="content_editor_menu_outdent">Берун аз ҳошия</string>
     <string name="content_editor_menu_unorderd_list">Рӯйхати номатлуб</string>
-    <string name="content_editor_menu_strikesthrough">Оғози ногаҳони</string>
+    <string name="content_editor_menu_strikesthrough">Оғози ногаҳонӣ</string>
     <string name="content_editor_menu_underline">Нишон диҳед</string>
     <string name="content_editor_menu_italic">Хам</string>
     <string name="content_editor_menu_bold">Пурранг</string>
@@ -194,17 +194,17 @@
     <string name="content_editor_menu_superscript">Абарнигошт</string>
     <string name="content_editor_menu_subscript">Зернигошт</string>
     <string name="content_editor_preview">Пешнамоиш</string>
-    <string name="content_editor_link_text">Пайванд кардани матн</string>
-    <string name="content_editor_link_url">Пайванд кардани URL</string>
-    <string name="content_editor_link_insert">Дарҷ кардани пайванд</string>
-    <string name="content_editor_link_remove">Тоза кардани пайванд</string>
-    <string name="permission_camera_message">Ин барнома иҷозати аксбардори ва наворбардориро талаб мекунад</string>
+    <string name="content_editor_link_text">Матнро пайванд кунед</string>
+    <string name="content_editor_link_url">URL-ро пайванд кунед</string>
+    <string name="content_editor_link_insert">Пайвандро ворид намоед</string>
+    <string name="content_editor_link_remove">Пайвандро тоза намоед</string>
+    <string name="permission_camera_message">Ин барнома иҷозати аксбардорӣ ва наворбардориро талаб мекунад</string>
     <string name="content_editor_create_new">Илова кардани нав</string>
-    <string name="content_editor_create_new_import">Воридоти файл</string>
-    <string name="content_editor_create_new_import_link">Воридоти пайванд</string>
+    <string name="content_editor_create_new_import">Файлро ворид намоед</string>
+    <string name="content_editor_create_new_import_link">Пайвандро ворид намоед</string>
     <string name="content_editor_create_new_category">Ҷузвдони нав</string>
     <string name="content_editor_edit_category">Таҳрир кардан</string>
-    <string name="content_editor_create_new_title">Илова кардани мундариҷа</string>
+    <string name="content_editor_create_new_title">Илова намудани мундариҷа</string>
     <string name="content_entry_label_desc">Шарҳу тавсиф</string>
     <string name="content_entry_label_save">Захира кардан</string>
     <string name="content_entry_label_update">Ҳуҷҷатро навсозӣ кунед</string>
@@ -227,7 +227,7 @@
     <string name="content_entry_importing">Дар ҳоли воридшавӣ, лутфан мунтазир бошед</string>
     <string name="content_entry_export">Содир кардан</string>
     <string name="content_entry_export_inprogress">Дар ҳоли содир кардан</string>
-    <string name="content_entry_export_message">Шумо дар ҳоли %1$s -ро ба захираи дастгоҳатон содир карданед. Мехоҳед идома диҳед\?</string>
+    <string name="content_entry_export_message">Шумо дар ҳоли %1$s -ро ба захираи дастгоҳатон содир қарор доред. Мехоҳед идома диҳед\?</string>
     <string name="invalid_register_code">Рамзи бақайдгирии нодуруст</string>
     <string name="bar_chart" value="100">Сутуни диаграмма</string>
     <string name="line_graph" value="101">Графаи хатҳо</string>
@@ -241,7 +241,7 @@
     <string name="xapi_content_entry" value="304">Вуруди мундариҷа</string>
     <string name="xapi_location" value="305">Ҷойгиршавӣ</string>
     <string name="xapi_gender" value="306">Гендер</string>
-    <string name="xapi_clear">Пок кардан</string>
+    <string name="xapi_clear">Пок намоед</string>
     <string name="xapi_today">Имрӯз</string>
     <string name="from">Аз</string>
     <string name="tocao">Ба</string>
@@ -252,14 +252,14 @@
     <string name="xapi_options_axes">Асбобҳо</string>
     <string name="xapi_options_y_axes">Y-меҳвар</string>
     <string name="xapi_options_x_axes">X-меҳвар</string>
-    <string name="xapi_options_subgroup">Зергуруҳ аз</string>
+    <string name="xapi_options_subgroup">Зергурӯҳ аз</string>
     <string name="xapi_options_who">Кӣ</string>
     <string name="xapi_options_did">Кард</string>
     <string name="xapi_options_what">Чӣ</string>
     <string name="xapi_options_when">Кай</string>
     <string name="xapi_options_where">Дар куҷо</string>
     <string name="activity_preview_xapi">Пешнамоиш</string>
-    <string name="activity_import_link">Ворид кардани пайванд</string>
+    <string name="activity_import_link">Пайвандро ворид намоед</string>
     <string name="xapi_hours">Соатҳо</string>
     <string name="xapi_minutes">Дақиқаҳо</string>
     <string name="xapi_seconds">Сонияҳо</string>
@@ -269,14 +269,14 @@
     <string name="xapi_when_header">Кай</string>
     <string name="import_link_video">Унвон</string>
     <string name="import_title_not_entered">Сарлавҳа ворид карда нашудааст</string>
-    <string name="no_account">Шумо ҳисоб надоред\?</string>
+    <string name="no_account">Шумо саҳифа надоред\?</string>
     <string name="import_link_invalid_url">URL-и беэътибор</string>
     <string name="import_link_content_not_supported">Мундариҷа дастгирӣ намешавад</string>
     <string name="import_link_error">Хатогии воридот</string>
     <string name="error_not_found_status">404 !</string>
     <string name="offline_sharing_enable_bluetooth_prompt">Мубодилаи офлайнӣ Bluetooth-ро талаб мекунад</string>
-    <string name="offline_sharing_enable_wifi_promot">Мубодилаи офлайнӣ талаб менамояд, ки WiFi фаъол бошад</string>
-    <string name="enable">Фаъол кардан</string>
+    <string name="offline_sharing_enable_wifi_promot">Мубодилаи офлайнӣ WiFi-ро талаб менамояд</string>
+    <string name="enable">Фаъол намоед</string>
     <string name="more_information">Маълумоти бештар</string>
     <string name="less_information">Маълумоти камтар</string>
     <string name="repo_loading_status_loading_mirror">Боркунӣ аз ҳамроҳ</string>
@@ -286,7 +286,7 @@
     <string name="node_title_list">Рӯйхати гиреҳ</string>
     <string name="feed">Навсозӣ</string>
     <string name="people">Корбарон</string>
-    <string name="record_attendance">Қайд кардани иштирок</string>
+    <string name="record_attendance">Бақайдгирии иштирок</string>
     <string name="students_literal">Хонандагон</string>
     <string name="last_recorded">Сабти охир</string>
     <string name="today">Имрӯз</string>
@@ -305,19 +305,19 @@
     <string name="partial_unselected">Қисман интихобашон бекор шуд</string>
     <string name="call_parent">Ба падару модар занг занед</string>
     <string name="enroll_in_class">Номнавис шудан ба дарс</string>
-    <string name="attendance_report">Ҳисоботи иштирок</string>
+    <string name="attendance_report">Ҳисобот аз иштирок</string>
     <string name="record_dropout">Қайд кардани тарки дарс</string>
     <string name="father">Падар (ё сарпараст)</string>
     <string name="birthday">Зодрӯз</string>
     <string name="field_fullname">Ному насаб</string>
-    <string name="first_names">Номҳо</string>
+    <string name="first_names">Ном</string>
     <string name="basic_details">Тафсилоти асосӣ</string>
     <string name="add_person_to_class">Шахсеро ба синф илова кунед</string>
     <string name="fathers_name">Номи падар</string>
     <string name="fathers_number">Шумораи падарон</string>
     <string name="mothers_name">Номи модар</string>
     <string name="new_person">Шахси нав</string>
-    <string name="edit_person">Таҳрири шахс</string>
+    <string name="edit_person">Таҳрири маълумоти шахсӣ</string>
     <string name="edit">Таҳрир</string>
     <string name="clazz">Синф</string>
     <string name="student_image">Сурати хонанда</string>
@@ -327,20 +327,20 @@
     <string name="child_given_consent">Хонанда барои иштирок розигӣ додааст</string>
     <string name="start_selection">Оғоз намудани интихоб</string>
     <string name="recognition_title_desc_sn">Эътироф: Лутфан ба ҳар як акси ҳамсинфони худ ламс кунед ва номи онҳоро аз барҷастҳо интихоб кунед.</string>
-    <string name="question">Савол</string>
+    <string name="question">савол</string>
     <string name="questions">Саволҳо</string>
     <string name="sel_question_description">Ин саволест, ки ба хонанда шарҳ дода мешавад.</string>
     <string name="assign_to_all_classes">Ба ҳамаи синфҳо вазифа супоред</string>
     <string name="allow_multiple_nominations">Ба номзадҳои сершумор иҷозат диҳед</string>
     <string name="sel_new_question_title">Савол</string>
     <string name="sel_recognition_student_recognizes">Хонанда ҳамсинфони худро эътироф мекунад</string>
-    <string name="add_person">Шахсеро илова кунед</string>
+    <string name="add_person">Шахсро илова намоед</string>
     <string name="update_picture">Аксатонро нав созед</string>
-    <string name="add_class">Илова кардани синф</string>
+    <string name="add_class">Синфро илова намоед</string>
     <string name="class_name">Номи синф</string>
     <string name="class_description">Тавсифи синф</string>
     <string name="to">ба</string>
-    <string name="holiday_calendar">Тақвими идҳо</string>
+    <string name="holiday_calendar">Тақвими ҷашнҳо</string>
     <string name="features_enabled">Амалиётҳо фаъол карда шудаанд</string>
     <string name="class_setup">Танзими синф</string>
     <string name="add_session">Илова кардани ҷаласа</string>
@@ -433,8 +433,8 @@
     <string name="file_selected">Мавод интихоб гардид:</string>
     <string name="all">Ҳама</string>
     <string name="retention_officer">Корманди нигоҳдорӣ</string>
-    <string name="holiday_calendars">Тақвими идҳо</string>
-    <string name="holiday_calendars_desc">Илова, тоза кардан ва тағйир додани тақвими идҳо</string>
+    <string name="holiday_calendars">Тақвими ҷашнҳо</string>
+    <string name="holiday_calendars_desc">Илова, тоза кардан ва тағйир додани тақвими ҷашнҳо</string>
     <string name="sel_question_set">Маҷмуъи саволҳои SEL</string>
     <string name="sel_question_set_desc">Идора кардани саволҳои SEL</string>
     <string name="users">Корбарон</string>
@@ -480,7 +480,7 @@
     <string name="groups">Гурӯҳҳо</string>
     <string name="roles">Нақшҳо</string>
     <string name="role">Нақш</string>
-    <string name="roles_setting_desc">Иҷозатномаҳои ба нақшҳо додашударо идора кардан</string>
+    <string name="roles_setting_desc">Иҷозатномаҳои ба нақшҳо додашударо идора намоед</string>
     <string name="rols_assignment">Тақсимоти вазифаҳо</string>
     <string name="locations">Макон</string>
     <string name="locations_setting_desc">Идоракунии маконҳо</string>
@@ -493,13 +493,13 @@
     <string name="add_calendar_range">Як қатор тақвим илова кунед</string>
     <string name="new_role">Нақши нав</string>
     <string name="permissions">Иҷозаҳо</string>
-    <string name="permission">Иҷозат</string>
+    <string name="permission">иҷозат</string>
     <string name="add_role">Илова кардани нақш</string>
     <string name="role_name">Номи нақш</string>
-    <string name="permission_sel_question_update">Саволҳои SEL ро навсозӣ кунед</string>
-    <string name="permission_sel_select">Натиҷаҳои SEL ро назорат кунед</string>
+    <string name="permission_sel_question_update">Саволҳои SEL ро навсозӣ намоед</string>
+    <string name="permission_sel_select">Натиҷаҳои SEL-ро назорат кунед</string>
     <string name="permission_sel_insert">SEL ро ба қайд гиред</string>
-    <string name="permission_sel_update">Натиҷаҳои SEL ро навсозӣ кунед</string>
+    <string name="permission_sel_update">Натиҷаҳои SEL-ро навсозӣ кунед</string>
     <string name="enroll_group_member">Як нафарро дохил кунед</string>
     <string name="changed">Тағйир дода шуд</string>
     <string name="sel_caps">SEL</string>
@@ -528,7 +528,7 @@
     <string name="person">Шахс</string>
     <string name="permission_person_select">Назорати корбарон</string>
     <string name="permission_person_insert">Корбаронро ворид намоед</string>
-    <string name="permission_person_update">Навсозии корбарон</string>
+    <string name="permission_person_update">Навсозии маълумоти корбарон</string>
     <string name="permission_person_picture_select">Намоиши тасвирҳои профил</string>
     <string name="permission_person_picture_insert">Илова намудани тасвири профил</string>
     <string name="permission_person_picture_update">Навсозии тасвири профил</string>
@@ -540,7 +540,7 @@
     <string name="permission_attendance_update">Навсозии давомот</string>
     <string name="permission_activity_select">Назорати фаъолияти синф</string>
     <string name="permission_activity_update">Машғулияти синфиро навсозӣ кунед</string>
-    <string name="permission_sel_question_select">Саволҳои SEL ро аз назар гузаронед</string>
+    <string name="permission_sel_question_select">Саволҳои SEL-ро аз назар гузаронед</string>
     <string name="entity">Субъект</string>
     <string name="field_name_english">Номи бахш (англисӣ)</string>
     <string name="field_name_arabic">Номи бахш (арабӣ)</string>
@@ -552,7 +552,7 @@
     <string name="default_value">Арзиши пешфарз</string>
     <string name="errors">Хатогиҳо</string>
     <string name="shake_feedback">Барои фикру мулоҳиза даст афшонед</string>
-    <string name="feedback_hint">Лутфан фикру мулоҳизаҳои худро ворид кунед</string>
+    <string name="feedback_hint">Лутфан фикру мулоҳизаҳои худро ворид намоед</string>
     <string name="send_feedback">Фикру мулоҳизаро ирсол намоед</string>
     <string name="start_date">Санаи оғоз</string>
     <string name="end_date">Санаи анҷом</string>
@@ -580,20 +580,20 @@
     <string name="s_person_group">Алоқамандаии касе ба гурӯҳ</string>
     <string name="enter_name">Лутфан ному насабро ворид кунед</string>
     <string name="created_user">Корбари таъсис дода шуда</string>
-    <string name="add">Илова кардан</string>
+    <string name="add">Илова намоед</string>
     <string name="refresh">Навсозӣ</string>
     <string name="add_school">Илова кардани муассисаи таълимӣ</string>
     <string name="new_assignment">Илова кардани супоришҳо</string>
     <string name="grading">Баҳогузорӣ</string>
     <string name="password">Парол</string>
-    <string name="confirm_password">Тасдиқ кардани парол</string>
+    <string name="confirm_password">Тасдиқи парол</string>
     <string name="notifications">Огоҳиномаҳо</string>
     <string name="in_progress">Дар ҳоли пешрафт</string>
     <string name="failed">Комёб нашуд</string>
-    <string name="select_subtitle_video">Интихоб кардани Забони Зерунвон</string>
+    <string name="select_subtitle_video">Интихоб кардани забони зерунвон</string>
     <string name="error_this_device_doesnt_support_bluetooth_sharing">Бубахшед, ин дастгоҳ фиристодани файлҳоро тавассути Bluetooth дастгирӣ намекунад.</string>
-    <string name="share_offline_dialog_message">Шумо метавонед ин барномаро дар оффлайн мубодила кунед. Дар дастгоҳе, ки шумо онро мубодила кардан мехоҳед:
-\n1. Танзимотҳо &gt; Танзимоти Bluetooth -ро кушоед.
+    <string name="share_offline_dialog_message">Шумо метавонед ин барномаро дар оффлайн мубодила кунед. Дар дастгоҳе, ки шумо онро мубодила кардан мехоҳед: 
+\n1. Танзимот &gt; Танзимоти Bluetooth -ро кушоед. 
 \n2. Боварӣ ҳосил кунед, ки дастгоҳ намоён аст.</string>
     <string name="dialog_download_from_playstore_cancel">Дар сомона истед</string>
     <string name="onboarding_no_internet_subheadline">Видеоҳо, мақолаҳо ва машқҳои интерактивии таълимиро барои истифодаи баъдӣ боргирӣ кунед.</string>
@@ -611,7 +611,7 @@
     <string name="started_date">%1$s%оғоз шуд</string>
     <string name="started">Оғоз шуд</string>
     <string name="mixed">Омехта</string>
-    <string name="store_description_short">Ба шабака дастрасӣ ва мубодила кардани мундариҷаи таълимӣ</string>
+    <string name="store_description_short">Дастрасӣ ва мубодила мундариҷаи таълимӣ тариқи оффлайн</string>
     <string name="due_date">Санаи анҷом</string>
     <string name="title">Сарлавҳа</string>
     <string name="content">Мазмун</string>
@@ -622,7 +622,7 @@
     <string name="use_device_language">Забони дастгоҳ</string>
     <string name="location_permission_details">Ин барнома Bluetooth ва WiFi-ро барои ёфтани корбарони дигар дар наздикӣ истифода мебарад. Он гоҳ барнома метавонад бо корбарони наздик бо суръати баланд боркаш кардани мундариҷаро бидуни дархости дастрасӣ ба Интернет имконият диҳад. Азбаски ин амалро барои муайян кардани макони шумо истифода бурдан мумкин аст, шумо бояд барои муайян кардани ҷойгиршавӣ иҷозат диҳед. Ин барнома натиҷаҳои ин амал ва макони шуморо бо ягон роҳ сабт намекунад. Ин барнома аз рамзи кушодаасос сохта шудааст, ки онро дар github.com/UstadMobile/UstadMobile санҷидан мумкин аст</string>
     <string name="download_state_downloaded">
-        <b>Бор гардид </b> ҳамагӣ %1$ s мавод, онҳо ҳамагӣ %2$-и захирагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
+        <b>Бор гардид </b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s-и захирагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="download_storage_option_device">Истифодаи %1$s - аз %2$s озод</string>
     <string name="download_storage_permission_message">Ин барнома барои зеркашӣ ва нигоҳ доштани мундариҷа дар корти SD иҷозати файлро талаб мекунад</string>
     <string name="insufficient_space">Ҷойи кофии нигоҳдории мундариҷа мавҷуд нест</string>
@@ -640,7 +640,7 @@
     <string name="content_editor_menu_align_left">Чап</string>
     <string name="content_editor_link_error">Матни истинод ё url холӣ буда наметавонад, бори дигар кӯшиш кунед</string>
     <string name="permission_camera_title">Иҷозат барои истифодаи камера ва файл лозим аст</string>
-    <string name="content_editor_create_new_content">Эҷод кардани маводи нав</string>
+    <string name="content_editor_create_new_content">Маводи навро эҷод намоед</string>
     <string name="content_editor_action_done">Иҷро шуд</string>
     <string name="content_entry_label_title">Унвон</string>
     <string name="content_entry_label_select_file">Файлро интихоб кунед</string>
@@ -654,8 +654,8 @@
     <string name="content_editor_save_error">Ҳангоми захирасозӣ ба хатогӣ рӯ ба рӯ шуд, бори дигар кӯшиш кунед</string>
     <string name="enter_register_code">Рамзи бақайдгириро ворид кунед</string>
     <string name="add_to_dashboard">Ба панели фаъолиятҳо илова кунед</string>
-    <string name="xapi_score">Ҳисоб (%)</string>
-    <string name="enter_url">URL-ро ворид кардан</string>
+    <string name="xapi_score">Хол (%)</string>
+    <string name="enter_url">URL-ро ворид намоед</string>
     <string name="import_link_big_size">Андозаи файл хеле калон аст</string>
     <string name="error_not_found_tag">Бубахшед, саҳифае, ки шумо ҷустуҷӯ мекунед, ёфта намешавад.</string>
     <string name="repo_loading_status_loading_cloud">Бор кардан аз клауд</string>
@@ -699,7 +699,7 @@
     <string name="at_risk_report_desc">Гузориши хонандагони зери хатар: ҳамаи хонандагони дар зери хатар қарордоштаро нишон медиҳад (бо сабаби иштироки паст дар дарсҳо)</string>
     <string name="question_set">Савол гузошта шудааст</string>
     <string name="sel_question_type_multiple_choise">Интихоби чандгона</string>
-    <string name="date_left">Сана мондааст</string>
+    <string name="date_left">Сана қайд нашудаст</string>
     <string name="count_absent_days">Миқдори рӯзҳое, ки иштирок накардаст</string>
     <string name="class_id">Шиносномаи синф</string>
     <string name="consent_not_selected">Ризоият дода нашудаст. Лутфан санҷед, ки оё розигӣ дода шудааст.</string>
@@ -708,7 +708,7 @@
     <string name="dropout_reason_other_ngo">Дигар ташкилотҳои ғайридавлатӣ</string>
     <string name="dropout_reason_parents_refuse_permission">Волидайн иҷозат намедиҳанд</string>
     <string name="group_setting_desc">Илова, нест ё тағйир додани гурӯҳҳо</string>
-    <string name="role_assignment_setting_desc">Тақсимоти вазифаҳо ба истифодабаранда ё гурӯҳ</string>
+    <string name="role_assignment_setting_desc">Тақсимоти вазифаҳо ба корбар ва ё гурӯҳ</string>
     <string name="add_holiday_calendar">Ворид намудани тақвими идҳо</string>
     <string name="add_holiday">Идро илова кунед</string>
     <string name="members">аъзоён</string>
@@ -718,10 +718,10 @@
     <string name="sub_locations">зермаконҳо</string>
     <string name="changed_by">ивазкунӣ аз ҷониби</string>
     <string name="audit_log_desc">Дафтари аудит қайди тамоми фаъолиятҳои марбут ба идоракунии синф, омӯзгорон ва хонандагон мебошад.</string>
-    <string name="permission_clazz_insert">Илова кардани синфҳо</string>
+    <string name="permission_clazz_insert">Илова намудани синфҳо</string>
     <string name="permission_clazz_add_student">Илова намудани хонандагон ба синфҳо</string>
     <string name="permission_activity_insert">Ба машғулият синфӣ оғоз кунед</string>
-    <string name="permission_sel_question_insert">Саволҳои SEL ро илова кунед</string>
+    <string name="permission_sel_question_insert">Саволҳои SEL-ро илова намоед</string>
     <string name="x_filter">%1$s филтр</string>
     <string name="return_only">Бозгардед ва ба итмом расонед</string>
     <string name="return_and_mark_next">Бозгардед ва баъдиро қайд кунед</string>
@@ -731,7 +731,7 @@
     <string name="class_comments">Шарҳи синф</string>
     <string name="add_private_comment">Шарҳи махфиро илова намоед</string>
     <string name="add_class_comment">Шарҳи синфро илова намоед</string>
-    <string name="submit_your_answer">Ҷавоби худро пешниҳод кунед</string>
+    <string name="submit_your_answer">Ҷавоби худро пешниҳод намоед</string>
     <string name="maximum_score">Баҳои ниҳоӣ</string>
     <string name="private_comments">Шарҳи махфӣ</string>
     <string name="public_comments">Шарҳи оммавӣ</string>
@@ -764,12 +764,12 @@
     <string name="permission_clazz_assignment_view">Супоришҳои синфиро аз назар гузаронед</string>
     <string name="add_new">Иловаи нав</string>
     <string name="overview">Шарҳ</string>
-    <string name="permission_clazz_asignment_edit">Вазифаҳои синфҳоро таҳия ва таҳрир кунед</string>
+    <string name="permission_clazz_asignment_edit">Вазифаҳои синфҳоро таҳия ва таҳрир намоед</string>
     <string name="edit_entity">%1$s таҳрир намоед</string>
-    <string name="select_new_photo_from_gallery">Тасвири навро аз галерея интихоб намоед</string>
-    <string name="take_new_photo_from_camera">Тасвири навро аз камера гиред</string>
-    <string name="remove_photo">Тоза кардани сурат</string>
-    <string name="change_photo">Ивази сурат</string>
+    <string name="select_new_photo_from_gallery">Акси навро аз галерея интихоб намоед</string>
+    <string name="take_new_photo_from_camera">Акси навро аз камера гиред</string>
+    <string name="remove_photo">Тоза кардани акс</string>
+    <string name="change_photo">Ивази акс</string>
     <string name="items_selected">%1$d интихоб шуд</string>
     <string name="remove_from">Аз %1$s тоза намоед</string>
     <string name="add_to">Ба %1$s илова намоед</string>
@@ -782,8 +782,8 @@
     <string name="select_item">%1$s интихоб намоед</string>
     <string name="school">Муассисаи таълимӣ</string>
     <string name="timezone">Вақти маҳаллӣ</string>
-    <string name="holidays">Идҳо</string>
-    <string name="holiday">Ид</string>
+    <string name="holidays">Ҷашнҳо</string>
+    <string name="holiday">Ҷашн</string>
     <string name="address">Суроға</string>
     <string name="licence_type_all_rights">Ҳама ҳуқуқҳо ҳифз шудаанд</string>
     <string name="licence_type_public_domain">Домени ҷамъиятӣ</string>
@@ -817,7 +817,7 @@
     <string name="description">Шарҳ</string>
     <string name="created_partnership">Дар ҳамкорӣ бо шарики мазкур таҳия шудааст:</string>
     <string name="copied_to_clipboard">Ба ҳофизаи мувақаттӣ нусхабардорӣ шудааст</string>
-    <string name="ask_your_teacher_for_code">Аз омӯзгор рамзи синфро дархост кунед ва пас онро ворид кунед:</string>
+    <string name="ask_your_teacher_for_code">Аз омӯзгор рамзро дархост намоед ва пас онро ворид кунед:</string>
     <string name="reject">Рад</string>
     <string name="please_wait_for_approval">Лутфан, тасдиқи дархостатон аз ҷониби омӯзгор ё маъмур мунтазир шавед.</string>
     <string name="join_existing">Ба %1$s мавҷуда ҳамроҳ шавед</string>
@@ -830,7 +830,7 @@
     <string name="logged_in_as">Ҳамчун %1$s дар %2$s ворид гардид</string>
     <string name="add_another">%1$s-и навро илова намоед</string>
     <string name="my">%1$s-и ман</string>
-    <string name="create_account">Таъсиси ҳисоб</string>
+    <string name="create_account">Таъсиси саҳифа</string>
     <string name="connect_as_guest">Ҳамчун меҳмон пайваст шавед</string>
     <string name="create_workspace_organisation">Дар Ustad Mobile барои хонандагон ва омӯзгорони муассисаи худ як фазои кории нав эҷод кунед</string>
     <string name="create_organisation">Таъсиси фазои нави корӣ</string>
@@ -848,12 +848,90 @@
     <string name="submitted_cap">Пешниҳодшуда</string>
     <string name="marked_cap">Қайдкардашуда</string>
     <string name="add_a_new">%1$s-и навро илова кунед</string>
-    <string name="descending">Поён рафтан</string>
-    <string name="ascending">Боло рафтан</string>
+    <string name="descending">Ба поён</string>
+    <string name="ascending">Ба боло</string>
     <string name="license_type_cc_0">CC0</string>
     <string name="invalid_link">Пайванди нодуруст</string>
     <string name="link">Пайванд</string>
     <string name="lets_get_started_label">Биёед оғоз намоем</string>
-    <string name="accounts">Ҳисобҳо</string>
+    <string name="accounts">Саҳифаҳо</string>
     <string name="register_now">Сабти ном кунед</string>
+    <string name="add_content_filter">Филтри мундариҷаро илова намоед</string>
+    <string name="supported_link">Намудҳои пайвандҳои дастгиршаванда: Google Drive (ҷузвдон ё файл) ва пайвандҳои оддии HTTP</string>
+    <string name="add_a_holiday">Ҷашнро илова намоед</string>
+    <string name="add_a_new_holiday_calendar">Тақвими нави ҷашнҳоро илова намоед</string>
+    <string name="add_a_new_person">Шахси навро илова намоед</string>
+    <string name="edit_school">Таҳрири маълумоти муассисаи таълимӣ</string>
+    <string name="add_content">Маводи нав</string>
+    <string name="roles_and_permissions">Нақшҳо ва иҷозаҳо</string>
+    <string name="scope_description">Ҳаҷмро интихоб намоед(масалан, синф, мактаб ё шахси мушаххас), ки бар он иҷозаҳо татбиқ карда мешаванд.</string>
+    <string name="role_description">Нақш (масалан, омӯзгор, хонанда ва ғ.) маҷмӯи иҷозаҳоро (масалан, дастрасӣ ба маълумоти шахсӣ, сабти иштирок ва ғ.), ки ба ҳаҷми дар боло интихобшуда дахл доранд, фароҳам меорад.</string>
+    <string name="role_not_selected_error">Нақш бояд интихоб шавад</string>
+    <string name="permission_role_select">Ҳамаи нақшҳоро аз назар гузаронед ва интихоб намоед</string>
+    <string name="permission_school_insert">Муассисаи таълимии навро ворид намоед</string>
+    <string name="permission_school_update">Аз нав ва ё таҳрири маълумоти муассисаи таълимӣ</string>
+    <string name="group_activity">Гурӯҳ
+\nФаъолият</string>
+    <string name="select_group_members">Аъзоёни гурӯҳро интихоб намоед</string>
+    <string name="add_a_new_language">Забони навро илова намоед</string>
+    <string name="add_a_student">Хонандаро илова намоед</string>
+    <string name="underRegistrationAgeError">Бақайдгирии мустақили кӯдакони то 13-сола манъ аст. Лутфан аз омӯзгори худ хоҳиш кунед, ки шуморо сабти ном кунад.</string>
+    <string name="create_a_new_report">Гузориши навро омода намоед</string>
+    <string name="edit_report">Таҳрири гузориш</string>
+    <string name="add_a_new_verb">Феъли навро илова намоед</string>
+    <string name="add_person_filter">Филтри шахсро илова намоед</string>
+    <string name="add_verb_filter">Филтри феълро илова намоед</string>
+    <string name="add_a_schedule">Нақшаро илова намоед</string>
+    <string name="edit_schedule">Нақшаро таҳрир намоед</string>
+    <string name="add_a_new_class">Синфи навро илова намоед</string>
+    <string name="edit_clazz">Маълумоти синфро таҳрир намоед</string>
+    <string name="add_a_class">Синфро илова намоед</string>
+    <string name="join_existing_class">Ба синфи мавҷуда шомил шавед</string>
+    <string name="add_question">Саволро илова намоед</string>
+    <string name="edit_holiday">Таҳрири ҷашн</string>
+    <string name="edit_holiday_calendar">Таҳрири тақвими ҷашнҳо</string>
+    <string name="date_enroll">Санаи номнавис</string>
+    <string name="add_a_teacher">Омӯзгорро ворид намоед</string>
+    <string name="participant">Иштирокчиён</string>
+    <string name="primary_user">Корбари асосӣ</string>
+    <string name="add_a_new_role">Нақши навро илова намоед</string>
+    <string name="edit_role">Таҳрири нақш</string>
+    <string name="add_a_new_school">Муассисаи таълимии навро ворид намоед</string>
+    <string name="join_existing_school">Ба муассисаи таълимии мавҷуда шомил шавед</string>
+    <string name="add_new_content">Маводи навро ворид намоед</string>
+    <string name="status">Мақом</string>
+    <string name="add_a_new_clazzwork">Кори синфии навро ворид намоед</string>
+    <string name="edit_clazzwork">Таҳрири кори синфӣ</string>
+    <string name="add_role_permission">"нақшҳо  иҷозаҳоро ворид намоед"</string>
+    <string name="scope">Ҳаҷм</string>
+    <string name="assign_role">Таъини нақш</string>
+    <string name="invite_link_desc">Ҳар касе, ки ин пайвандро дорад, метавонад ба% 1 $ s ҳамроҳ шавад ва барои пайвастан тавассути он муроҷиат кунад. Пас шумо метавонед дархости онҳоро барои ҳамроҳ шудан тасдиқ ё рад кунед.</string>
+    <string name="copy_link">Нусхабардории пайванд</string>
+    <string name="copy_code">Нусхабардории рамз</string>
+    <string name="share_link">Мубодилаи пайванд</string>
+    <string name="invite_with_link">Даъват тавассути пайванд</string>
+    <string name="permission_person_delegate">Нақшҳо ва иҷозаҳоро ба дигарон супоред</string>
+    <string name="this_field_is_mandatory">Ин бахш ҳатмӣ аст</string>
+    <string name="permission_role_insert">Нақши навро ворид намоед</string>
+    <string name="permission_school_select">Аз назар гузаронидан ва интихоби муассисаи таълимӣ</string>
+    <string name="add_student_to_school">Ворид намудани хонанда ба муассисаи таълимӣ</string>
+    <string name="add_staff_to_school">Ворид намудани корманд ба муассисаи таълимӣ</string>
+    <string name="permission_password_reset">Барқарор ва ё аз нав кардани пароли шахсӣ</string>
+    <string name="school_code">Рамзи муассисаи таълимӣ</string>
+    <string name="entity_code">%1$s рамз</string>
+    <string name="join_code_instructions">Дархости рамз аз омӯзгор ва ворид намудани он дар зер:</string>
+    <string name="record_for_student">Сабт барои хонанда</string>
+    <string name="add_a_new_occurrence">Воридоти навро илова кунед</string>
+    <string name="record_attendance_for_most_recent_occurrence">Сабти давомнокӣ барои охирин иштироки мавҷуда</string>
+    <string name="end_is_before_start_error">Анҷом пеш аз оғоз аст</string>
+    <string name="moved_x_entries">Вурудоти %1$s интиқол дода шудааст</string>
+    <string name="open_folder">Ҷувздонро кушо</string>
+    <string name="show_hidden_items">Қисматҳои пинҳоншударо нишон деҳ</string>
+    <string name="compress">Пахш намо</string>
+    <string name="unhide">Дубора кушо</string>
+    <string name="hide">Пинҳон намо</string>
+    <string name="move">Интиқол деҳ</string>
+    <string name="uploading">Таҳти боргирӣ</string>
+    <string name="processing">Таҳти коркард</string>
+    <string name="confirm_delete_message">Шумо ҳақиқатан мехоҳед ин вурудро аз дастгоҳи худ нест кунед\?</string>
 </resources>

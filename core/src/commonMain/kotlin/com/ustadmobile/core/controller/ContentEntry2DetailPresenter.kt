@@ -7,29 +7,28 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.NoAppFoundException
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
+import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.ContentEntryEdit2View
+import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
-import com.ustadmobile.lib.db.entities.DownloadJobItem
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 import org.kodein.di.on
-import kotlin.jvm.Volatile
 
 
 class ContentEntry2DetailPresenter(context: Any,
@@ -93,11 +92,11 @@ class ContentEntry2DetailPresenter(context: Any,
         val result = db.contentEntryRelatedEntryJoinDao.findAllTranslationsWithContentEntryUid(entityUid)
         view.availableTranslationsList = result
 
-        view.contentEntryProgress = db.contentEntryProgressDao.getProgressByContentAndPerson(entityUid, accountManager.activeAccount.personUid)
+        view.contentEntryProgress = db.contentEntryProgressDao.getProgressByContentAndPersonAsync(entityUid, accountManager.activeAccount.personUid)
 
-        if(db == repo) {
+        if (db == repo) {
             val containerUid = entity.container?.containerUid ?: 0L
-            availabilityRequest = AvailabilityMonitorRequest(listOf(containerUid)) {availableEntries ->
+            availabilityRequest = AvailabilityMonitorRequest(listOf(containerUid)) { availableEntries ->
                 GlobalScope.launch(doorMainDispatcher()) {
                     view.locallyAvailable = availableEntries[containerUid] ?: false
                 }
@@ -161,7 +160,38 @@ class ContentEntry2DetailPresenter(context: Any,
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
         return db.contentEntryDao.personHasPermissionWithContentEntry(accountManager.activeAccount.personUid,
-            arguments[ARG_ENTITY_UID]?.toLong() ?: 0, Role.PERMISSION_CONTENT_UPDATE)
+                arguments[ARG_ENTITY_UID]?.toLong() ?: 0, Role.PERMISSION_CONTENT_UPDATE)
+    }
+
+    fun handleOnClickDeleteButton() {
+        GlobalScope.launch(doorMainDispatcher()){
+            val downloadJobItem = db.downloadJobItemDao.findByContentEntryUidAsync(contentEntryUid) ?: return@launch
+            val deleteRequester: DeletePreparationRequester by on(accountManager.activeAccount).instance()
+            deleteRequester.requestDelete(downloadJobItem.djiUid)
+        }
+    }
+
+    fun handleOnClickGroupActivityButton() {
+        GlobalScope.launch(doorMainDispatcher()) {
+            val learnerGroup = LearnerGroup().apply {
+                learnerGroupUid = repo.learnerGroupDao.insertAsync(this)
+            }
+            GroupLearningSession().apply {
+                groupLearningSessionContentUid = contentEntryUid
+                groupLearningSessionLearnerGroupUid = learnerGroup.learnerGroupUid
+                groupLearningSessionLearnerGroupUid = repo.groupLearningSessionDao.insertAsync(this)
+            }
+            LearnerGroupMember().apply {
+                learnerGroupMemberRole = LearnerGroupMember.PRIMARY_ROLE
+                learnerGroupMemberLgUid = learnerGroup.learnerGroupUid
+                learnerGroupMemberPersonUid = accountManager.activeAccount.personUid
+                learnerGroupMemberUid = repo.learnerGroupMemberDao.insertAsync(this)
+            }
+            systemImpl.go(LearnerGroupMemberListView.VIEW_NAME,
+                    mapOf(ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
+                            ARG_LEARNER_GROUP_UID to learnerGroup.learnerGroupUid.toString()),
+                    context)
+        }
     }
 
 }

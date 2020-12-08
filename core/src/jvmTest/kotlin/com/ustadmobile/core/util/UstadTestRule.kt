@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util
 
+import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
@@ -74,6 +75,10 @@ class UstadTestRule: TestWatcher() {
             bind<NetworkManagerBle>() with singleton { mock<NetworkManagerBle> { } }
 
             bind<ContainerMounter>() with singleton { EmbeddedHTTPD(0, di).also { it.start() } }
+
+            bind<Gson>() with singleton {
+                Gson()
+            }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }

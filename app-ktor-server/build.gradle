@@ -59,6 +59,8 @@ kotlin {
                   implementation "org.kodein.di:kodein-di:$version_kodein_di"
                   implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
+                  implementation "com.github.aakira:napier-jvm:$version_napier"
+
                   implementation project(":core")
                   implementation project(":sharedse")
                   implementation project(":lib-database")
@@ -67,6 +69,7 @@ kotlin {
                   implementation project(":lib-room-annotations")
                   implementation project(":lib-database-entities")
                   implementation project(":lib-util")
+                  implementation project(":lib-content-scrapers")
 
                   implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
@@ -113,7 +116,7 @@ configurations {
     standaloneRuntime.extendsFrom runtime
 }
 
-mainClassName = 'io.ktor.server.netty.EngineMain'
+mainClassName = 'com.ustadmobile.lib.rest.ServerAppMain'
 
 // This task will generate your fat JAR and put it in the ./build/libs/ directory
 shadowJar {
@@ -229,7 +232,7 @@ task devModeWar(type: War) {
 task appRun(type: JavaExec) {
     classpath = files("$buildDir/libs/app-ktor-server-all.jar")
     main = 'io.ktor.server.netty.EngineMain'
-    args '-port=8087'
+    args '-port=8087', '-config=server.conf'
 }
 
 task appRunDebug(type: JavaExec) {

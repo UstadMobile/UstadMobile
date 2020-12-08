@@ -1,24 +1,14 @@
 package com.ustadmobile.core.view
 
-interface ContentEntryImportLinkView : UstadView, UstadViewWithProgress {
+import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 
-    fun showUrlStatus(isValid: Boolean, message: String)
+interface ContentEntryImportLinkView : UstadView {
 
-    fun displayUrl(url: String)
+    fun showHideProgress(show: Boolean)
 
-    fun returnResult()
+    var validLink: Boolean
 
-    fun showHideVideoTitle(showTitle: Boolean)
-
-    fun showNoTitleEntered(errorText: String)
-
-    fun checkDoneButton()
-
-    fun enableDisableEditText(enable: Boolean)
-
-    fun showHideErrorMessage(show: Boolean)
-
-    fun updateSourceUrl(sourceUrl: String)
+    fun finishWithResult(result: ImportedContentEntryMetaData)
 
     companion object {
 

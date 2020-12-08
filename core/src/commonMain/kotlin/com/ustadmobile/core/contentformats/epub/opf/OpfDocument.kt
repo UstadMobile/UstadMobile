@@ -31,7 +31,6 @@
 package com.ustadmobile.core.contentformats.epub.opf
 
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import org.kmp.io.KMPPullParser
 import org.kmp.io.KMPSerializerParser
 import org.kmp.io.KMPXmlParser
@@ -59,6 +58,17 @@ class OpfDocument {
      * @return
      */
     var navItem: OpfItem? = null
+
+    /**
+     * Epub 2 documents use an NCX for the table of contents that is specified on the spine
+     *
+     * &lt;item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml"/&gt;
+     * ...
+     * e.g. &lt;spine toc="ncx"
+     *
+     */
+    var ncxItem: OpfItem? = null
+
 
     var title: String? = null
 
@@ -180,10 +190,10 @@ class OpfDocument {
                         /*
                          * As per the EPUB spec only one item should have this property
                          */
-                        if (properties?.contains("nav")!!) {
+                        if (properties?.contains("nav") == true) {
                             navItem = item2
                         }
-                        if (properties.contains("cover-image")) {
+                        if (properties?.contains("cover-image") == true) {
                             addCoverImage(item2)
                         }
 
@@ -205,6 +215,10 @@ class OpfDocument {
                             spine.add(manifestItems[idref]!!)
                         } else {
                             UMLog.l(UMLog.WARN, 209, idref)
+                        }
+                    }else if(tagName == "spine") {
+                        ncxItem = xpp.getAttributeValue(null, "toc")?.let {
+                            manifestItems[it]
                         }
                     }
                 }

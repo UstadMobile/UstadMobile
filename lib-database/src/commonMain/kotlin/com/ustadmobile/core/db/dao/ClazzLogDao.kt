@@ -1,24 +1,18 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.QueryLiveTables
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.Role
 
 
-@UmRepository
+@Repository
 @Dao
 abstract class ClazzLogDao : BaseDao<ClazzLog> {
-
-    @Insert
-    abstract override fun insert(entity: ClazzLog): Long
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replace(entity: ClazzLog): Long
@@ -44,8 +38,7 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         WHERE clazzLogClazzUid = :clazzUid
         AND clazzLog.clazzLogStatusFlag != :excludeStatus
         ORDER BY ClazzLog.logDate ASC""")
-    abstract fun findByClazzUidAsLiveData(clazzUid: Long, excludeStatus: Int): DoorLiveData<List<ClazzLog>>
-
+    abstract suspend fun findByClazzUidAsync(clazzUid: Long, excludeStatus: Int): List<ClazzLog>
 
 
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
@@ -56,9 +49,19 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         ORDER BY ClazzLog.logDate DESC
         LIMIT :limit
     """)
-    abstract fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long, excludeStatusFilter: Int, limit: Int): List<ClazzLog>
+    abstract suspend fun findByClazzUidWithinTimeRangeAsync(clazzUid: Long, fromTime: Long, toTime: Long, excludeStatusFilter: Int, limit: Int): List<ClazzLog>
 
-    fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long) = findByClazzUidWithinTimeRange(clazzUid, fromTime, toTime, 0, Int.MAX_VALUE)
+
+    @Query("""SELECT ClazzLog.* FROM ClazzLog 
+        WHERE 
+        ClazzLog.clazzLogClazzUid = :clazzUid 
+        AND ClazzLog.logDate BETWEEN :fromTime AND :toTime
+        AND (:excludeStatusFilter = 0 OR ((ClazzLog.clazzLogStatusFlag & :excludeStatusFilter) = 0))
+        ORDER BY ClazzLog.logDate DESC
+        LIMIT :limit
+    """)
+    abstract fun findByClazzUidWithinTimeRange(clazzUid: Long, fromTime: Long, toTime: Long, excludeStatusFilter: Int = 0, limit: Int = Int.MAX_VALUE): List<ClazzLog>
+
 
     @Query("""SELECT ClazzLog.* FROM ClazzLog 
         WHERE 
@@ -82,5 +85,8 @@ abstract class ClazzLogDao : BaseDao<ClazzLog> {
         clazzLogLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1)
         WHERE clazzLogUid = :clazzLogUid""")
     abstract fun updateStatusByClazzLogUid(clazzLogUid: Long, newStatus: Int)
+
+    @Update
+    abstract suspend fun updateAsync(clazzLog: ClazzLog)
 
 }

@@ -3,7 +3,6 @@ package com.ustadmobile.core.view
 import androidx.paging.DataSource
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.SortOrderOption
 
 enum class ListViewMode(val mode: String) {
     BROWSER("browser"),
@@ -21,7 +20,10 @@ enum class ListViewAddMode {
  */
 enum class SelectionOption(val messageId: Int, val commandId: Int) {
     EDIT(MessageID.edit, 1),
-    DELETE(MessageID.delete, 2)
+    DELETE(MessageID.delete, 2),
+    MOVE(MessageID.move,3),
+    HIDE(MessageID.hide, 4),
+    UNHIDE(MessageID.unhide, 5)
 }
 
 /**

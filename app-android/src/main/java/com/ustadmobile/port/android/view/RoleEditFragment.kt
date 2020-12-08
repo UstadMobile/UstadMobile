@@ -63,10 +63,9 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
         : ListAdapter<BitmaskFlag, BitmaskViewHolder>(DIFFUTIL_BITMASKFLAG) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): BitmaskViewHolder {
-            val viewHolder =  BitmaskViewHolder(ItemBitmaskBinding.inflate(
+            return BitmaskViewHolder(ItemBitmaskBinding.inflate(
                     LayoutInflater.from(parent.context),
                     parent, false))
-            return viewHolder
         }
 
         override fun onBindViewHolder(holder: BitmaskViewHolder, position: Int) {
@@ -90,14 +89,12 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
         mRecyclerView?.adapter = mRecyclerViewAdapter
         mRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
-
-
         return rootView
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.role)
+        setEditFragmentTitle(R.string.add_a_new_role, R.string.edit_role)
 
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
@@ -112,14 +109,12 @@ class RoleEditFragment : UstadEditFragment<Role>(), RoleEditView {
     }
 
     override var fieldsEnabled: Boolean = false
-        get() = field
         set(value) {
             field = value
             mBinding?.fieldsEnabled = value
         }
 
     override var loading: Boolean = false
-        get() = field
         set(value) {
             field = value
             mBinding?.loading = value

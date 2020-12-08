@@ -2,33 +2,22 @@ package com.ustadmobile.sharedse.xapi
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
+import com.ustadmobile.core.contentformats.xapi.Statement
+import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContextXObjectStatementJoinDao
 import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.core.util.UMTinCanUtil
-import com.ustadmobile.lib.db.entities.AgentEntity
-import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
-import com.ustadmobile.lib.db.entities.VerbEntity
-import com.ustadmobile.core.contentformats.xapi.Statement
-import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.parse8601Duration
-import com.ustadmobile.door.asRepository
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
-import com.ustadmobile.sharedse.network.NetworkManagerBle
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommon
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
+import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import org.junit.Assert
@@ -39,7 +28,6 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
-import javax.naming.InitialContext
 
 class TestStatementEndpoint {
 
@@ -47,6 +35,7 @@ class TestStatementEndpoint {
     val fullstatement = "/com/ustadmobile/port/sharedse/xapi/fullstatement"
     val simpleStatement = "/com/ustadmobile/port/sharedse/xapi/simpleStatement"
     val subStatement = "/com/ustadmobile/port/sharedse/xapi/substatement"
+    val statementWithLearnerGroup =  "/com/ustadmobile/port/sharedse/xapi/statementWithLearnerGroup"
 
     val statementWithProgress = "/com/ustadmobile/port/sharedse/xapi/statementWithProgress.json"
 
@@ -66,18 +55,7 @@ class TestStatementEndpoint {
         val endpointScope = EndpointScope()
         val endpointUrl = Endpoint("http://localhost:8087/")
         di = DI {
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope).singleton {
-                val dbName = sanitizeDbNameFromUrl(context.url)
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
-                spy(UmAppDatabase.getInstance(Any(), dbName).also {
-                    it.clearAllTables()
-                    it.preload()
-                })
-            }
-
-            bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
-            }
+            bindDbAndRepoWithEndpoint(endpointScope, clientMode = true)
 
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
@@ -92,7 +70,7 @@ class TestStatementEndpoint {
         }
 
         gson = di.direct.instance()
-        repo = di.on(endpointUrl).direct.instance(tag = UmAppDatabase.TAG_DB)
+        repo = di.on(endpointUrl).direct.instance(tag = UmAppDatabase.TAG_REPO)
         endpoint = di.on(endpointUrl).direct.instance()
     }
 
@@ -301,6 +279,49 @@ class TestStatementEndpoint {
         Assert.assertEquals("joined to substatement object", subobject?.xObjectUid, entity?.subStatementObjectUid)
         Assert.assertEquals("with substatment, object should be null", 0L, entity?.xObjectUid)
 
+
+
+
+    }
+
+    @ExperimentalStdlibApi
+    @Test
+    fun givenValidStatementWithLearnerGroup_whenParsed_thenDbAndStatementShouldMatch(){
+
+        val entry = ContentEntry().apply {
+            entryId = "http://demo.com/"
+            contentEntryUid = repo.contentEntryDao.insert(this)
+        }
+
+        val entryProgress = ContentEntryProgress().apply {
+            contentEntryProgressProgress = 10
+            contentEntryProgressContentEntryUid = entry.contentEntryUid
+            contentEntryProgressPersonUid = 0
+            contentEntryProgressStatusFlag = 0
+            contentEntryProgressActive = true
+            contentEntryProgressUid = repo.contentEntryProgressDao.insert(this)
+        }
+
+        val learnerGroup = LearnerGroup().apply{
+            learnerGroupUid = 1
+            repo.learnerGroupDao.insert(this)
+        }
+
+        val statement = gson.fromJson(UMIOUtils.readStreamToString(javaClass.getResourceAsStream(statementWithLearnerGroup)), Statement::class.java)
+        endpoint.storeStatements(listOf(statement), "", entry.contentEntryUid)
+
+        val entity = repo.statementDao.findByStatementId("442f1133-bcd0-42b5-957e-4ad36f9414e0")
+        val agent = repo.agentDao.getAgentByAnyId("", "", "group:1", "http://localhost/", "")
+
+        Assert.assertEquals("group registered as accountName ","group:1", agent?.agentAccountName)
+        Assert.assertEquals("entity has learnerGroupUid", learnerGroup.learnerGroupUid, entity!!.statementLearnerGroupUid)
+        Assert.assertEquals("Statement entity has progress set as per JSON",
+                17, entity?.extensionProgress)
+        Assert.assertEquals("Statement has preset Verb UID as expected",
+                VerbEntity.FIXED_UIDS["http://adlnet.gov/expapi/verbs/progressed"],
+                entity?.statementVerbUid)
+        Assert.assertEquals("Statement has contentEntryUid set", entry.contentEntryUid,
+                entity?.statementContentEntryUid)
 
     }
 

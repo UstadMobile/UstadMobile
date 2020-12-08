@@ -2,46 +2,35 @@ package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzworkDetailDescriptionBinding
 import com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission
+import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
-class ClazzWorkBasicDetailsRecyclerAdapter(clazzWork: ClazzWorkWithSubmission?,
-                                           visible: Boolean = false)
-    : ListAdapter<ClazzWorkWithSubmission,
-        ClazzWorkBasicDetailsRecyclerAdapter.ClazzWorkDetailViewHolder>(ClazzWorkDetailOverviewFragment.DU_CLAZZWORKWITHSUBMISSION) {
-
-    var visible: Boolean = visible
-        set(value) {
-            if(field == value)
-                return
-
-            field = value
-        }
+class ClazzWorkBasicDetailsRecyclerAdapter()
+    : SingleItemRecyclerViewAdapter<ClazzWorkBasicDetailsRecyclerAdapter.ClazzWorkDetailViewHolder>() {
 
     class ClazzWorkDetailViewHolder(var itemBinding: ItemClazzworkDetailDescriptionBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
     private var viewHolder: ClazzWorkDetailViewHolder? = null
 
-    var _clazzWork: ClazzWorkWithSubmission? = clazzWork
+    var clazzWork: ClazzWorkWithSubmission? = null
         set(value){
             if(field == value)
                 return
-            notifyDataSetChanged()
+            field = value
             viewHolder?.itemBinding?.clazzWorkWithSubmission = value
             viewHolder?.itemView?.tag = value?.clazzWorkUid?:0L
-            notifyDataSetChanged()
-            field = value
+
         }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzWorkDetailViewHolder {
         return ClazzWorkDetailViewHolder(
                 ItemClazzworkDetailDescriptionBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
-                    it.clazzWorkWithSubmission = _clazzWork
-                    viewHolder?.itemView?.tag = _clazzWork?.clazzWorkUid?:0L
+                    it.clazzWorkWithSubmission = clazzWork
+                    viewHolder?.itemView?.tag = clazzWork?.clazzWorkUid?:0L
                 })
     }
 
@@ -50,13 +39,10 @@ class ClazzWorkBasicDetailsRecyclerAdapter(clazzWork: ClazzWorkWithSubmission?,
         viewHolder = null
     }
 
-    override fun getItemCount(): Int {
-        return if(visible) 1 else 0
-    }
-
     override fun onBindViewHolder(holder: ClazzWorkDetailViewHolder, position: Int) {
-        viewHolder?.itemView?.tag = _clazzWork?.clazzWorkUid?:0L
+        super.onBindViewHolder(holder, position)
+        viewHolder?.itemView?.tag = clazzWork?.clazzWorkUid?:0L
         viewHolder?.itemBinding?.itemClazzworkDetailDescriptionCl?.tag =
-                _clazzWork?.clazzWorkUid?:0L
+                clazzWork?.clazzWorkUid?:0L
     }
 }

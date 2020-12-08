@@ -39,17 +39,20 @@ import kotlin.js.JsName
  */
 interface EpubContentView : UstadView {
 
+    /**
+     * The title of the actual epub. This will be displayed next to the thumbnail above the table of contents
+     */
     @JsName("setContainerTitle")
     var containerTitle: String?
 
+    /**
+     * The window title to use. This is typically updated as the user scrolls to reflect the title
+     * of the page and/or section
+     */
+    var windowTitle: String?
 
     @JsName("setSpineUrls")
     var spineUrls: List<String>?
-
-
-    @JsName("setPageTitle")
-    var pageTitle: String?
-
 
     @JsName("setTableOfContents")
     var tableOfContents: EpubNavItem?
@@ -81,11 +84,13 @@ interface EpubContentView : UstadView {
     var progressValue: Int
 
     /**
+     * Scroll to the given page as per the spinePosition with an optional hash anchor
      *
-     * @param spinePos
+     * @param spinePosition as per the spine position property
+     * @param hashAnchor the anchor (if any)
      */
-    @JsName("goToLinearSpinePosition")
-    var spinePosition: Int
+    fun scrollToSpinePosition(spinePosition: Int, hashAnchor: String? = null)
+
 
     companion object {
 

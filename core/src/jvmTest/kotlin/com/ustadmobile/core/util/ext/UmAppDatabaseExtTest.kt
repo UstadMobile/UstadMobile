@@ -4,6 +4,8 @@ import com.nhaarman.mockitokotlin2.any
 import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
@@ -16,6 +18,8 @@ class UmAppDatabaseExtTest {
 
     private lateinit var db: UmAppDatabase
 
+    private lateinit var repo: UmAppDatabase
+
     private val context = Any()
 
     private lateinit var mockSystemImpl: UstadMobileSystemImpl
@@ -25,6 +29,9 @@ class UmAppDatabaseExtTest {
         db = UmAppDatabase.getInstance(context).also {
             it.clearAllTables()
         }
+
+        repo = db.asRepository(context, "http://localhost/dummy/", "",
+                defaultHttpClient())
 
         mockSystemImpl = mock {
             on { getString(any(), any())}.thenAnswer {
@@ -37,7 +44,7 @@ class UmAppDatabaseExtTest {
     fun givenClazzDoesNotExist_whenCreateClazzAndGroupsCalled_thenClazzGroupsAndEntityRolesCreated() = runBlocking {
         val testClazz = Clazz("Test name")
 
-        db.createNewClazzAndGroups(testClazz, mockSystemImpl, context)
+        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, context)
 
         val clazzInDb = db.clazzDao.findByUid(testClazz.clazzUid)
         Assert.assertEquals("Stored class has same name", testClazz.clazzName,
@@ -52,12 +59,12 @@ class UmAppDatabaseExtTest {
         Assert.assertEquals("Teacher group has entity role", 1,
                 db.entityRoleDao.findByEntitiyAndPersonGroupAndRole(
                         Clazz.TABLE_ID, testClazz.clazzUid, teacherGroup!!.groupUid,
-                        Role.ROLE_TEACHER_UID.toLong()).size)
+                        Role.ROLE_CLAZZ_TEACHER_UID.toLong()).size)
 
         Assert.assertEquals("Student group has entity role", 1,
                 db.entityRoleDao.findByEntitiyAndPersonGroupAndRole(
                         Clazz.TABLE_ID, testClazz.clazzUid, studentGroup!!.groupUid,
-                        Role.ROLE_STUDENT_UID.toLong()).size)
+                        Role.ROLE_CLAZZ_STUDENT_UID.toLong()).size)
     }
 
     @Test
@@ -65,12 +72,12 @@ class UmAppDatabaseExtTest {
         val testClazz = Clazz("Test name")
         val testPerson = Person("teacher", "Teacher", "Test")
 
-        db.createNewClazzAndGroups(testClazz, mockSystemImpl, context)
-        db.personDao.insert(testPerson)
+        repo.createNewClazzAndGroups(testClazz, mockSystemImpl, context)
+        repo.personDao.insert(testPerson)
 
-        db.enrolPersonIntoClazzAtLocalTimezone(testPerson, testClazz.clazzUid, ClazzMember.ROLE_TEACHER)
+        repo.enrolPersonIntoClazzAtLocalTimezone(testPerson, testClazz.clazzUid, ClazzMember.ROLE_TEACHER)
 
-        val personClazzes = db.clazzMemberDao.findAllClazzesByPersonWithClazzAsList(
+        val personClazzes = db.clazzMemberDao.findAllClazzesByPersonWithClazzAsListAsync(
                 testPerson.personUid, systemTimeInMillis())
 
         Assert.assertTrue("PersonMember was created", personClazzes.any { it.clazzMemberClazzUid == testClazz.clazzUid })
@@ -88,15 +95,15 @@ class UmAppDatabaseExtTest {
         testSchool.schoolActive =true
         val testPerson = Person("teacher", "Teacher", "Test")
 
-        testSchool.schoolUid = db.createNewSchoolAndGroups(testSchool, mockSystemImpl, context)
-        testPerson.personUid = db.personDao.insert(testPerson)
+        testSchool.schoolUid = repo.createNewSchoolAndGroups(testSchool, mockSystemImpl, context)
+        testPerson.personUid = repo.personDao.insert(testPerson)
 
-        db.enrollPersonToSchool(testSchool.schoolUid, testPerson.personUid,
-                SchoolMember.SCHOOL_ROLE_TEACHER)
+        repo.enrollPersonToSchool(testSchool.schoolUid, testPerson.personUid,
+                Role.ROLE_SCHOOL_STAFF_UID)
 
         val schoolMembers = db.schoolMemberDao.findBySchoolAndPersonAndRole(
                 testSchool.schoolUid,
-                testPerson.personUid, SchoolMember.SCHOOL_ROLE_TEACHER)
+                testPerson.personUid, Role.ROLE_SCHOOL_STAFF_UID)
 
         Assert.assertTrue("PersonMember was created", schoolMembers.any {
             it.schoolMemberSchoolUid == testSchool.schoolUid })

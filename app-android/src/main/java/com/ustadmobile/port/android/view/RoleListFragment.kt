@@ -1,21 +1,20 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemRoleListItemBinding
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.controller.RoleEditPresenter
 import com.ustadmobile.core.controller.RoleListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RoleListView
 import com.ustadmobile.lib.db.entities.Role
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -25,7 +24,7 @@ import org.kodein.di.on
 
 
 class RoleListFragment(): UstadListViewFragment<Role, Role>(),
-        RoleListView, View.OnClickListener{
+        RoleListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
     override val listPresenter: UstadListPresenter<*, in Role>?
         get() = mPresenter
@@ -52,6 +51,8 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
             val item = getItem(position)
             holder.itemBinding.role = item
             holder.itemBinding.presenter = presenter
+            holder.itemBinding.bitMaskFlags = RoleEditPresenter.FLAGS_AVAILABLE
+            holder.itemView.tag = holder.itemBinding.role?.roleUid
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
@@ -59,6 +60,16 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
             super.onDetachedFromRecyclerView(recyclerView)
             presenter = null
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -70,10 +81,9 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
                 this,  di, viewLifecycleOwner)
         mDataBinding?.presenter = mPresenter
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
-                requireContext().getString(R.string.add_a_new,
-                        requireContext().getString(R.string.role)))
+                requireContext().getString(R.string.add_a_new_role),
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         mDataRecyclerViewAdapter = RoleListRecyclerAdapter(mPresenter)
-        mPresenter?.onCreate(savedInstanceState.toStringMap())
         return view
     }
 
@@ -83,8 +93,15 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
                 requireContext().getString(R.string.role)
     }
 
-    override fun onClick(view: View?) {
-        mPresenter?.handleClickCreateNewFab()
+    override fun onClick(v: View?) {
+
+        if (v?.id == R.id.item_createnew_layout) {
+            navigateToEditEntity(null, R.id.role_edit_dest, Role::class.java)
+        }
+        else {
+            super.onClick(v)
+        }
+
     }
 
     override fun onDestroyView() {

@@ -274,6 +274,8 @@ class BleGattServer
                         "Received bleRequest ${bleRequest.reqUri} ")
 
         val httpd: EmbeddedHTTPD by di.instance()
+
+        //TODO: this should be in try-catch
         val response = httpd.serve(bleRequest)
                 ?: NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, "text/plain", "not found")
         val bleResponse = response.asBleHttpResponse()
@@ -300,6 +302,8 @@ class BleGattServer
         const val ATT_HEADER_SIZE = 3
 
         val CHARACTERISTIC_UUIDS = NetworkManagerBleCommon.BLE_CHARACTERISTICS.map { UUID.fromString(it) }
+
+        const val LOG_TAG = "BleGattServer"
 
     }
 }

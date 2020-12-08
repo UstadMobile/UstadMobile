@@ -66,9 +66,8 @@ tasks.whenTaskAdded { task ->
 }
 
 android {
-    dataBinding {
-        enabled = true
-        enabledForTests = true
+    buildFeatures {
+        dataBinding true
     }
 
     kotlinOptions {
@@ -118,13 +117,12 @@ android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools
 
-    dataBinding {
-        enabled = true
-    }
-
     defaultConfig {
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
+        //When using variables the build analyzer reports that major tasks reran because of a
+        // 'chnage' in the value of minSdkVersion, hence hardcoding them here.
+        minSdkVersion 18
+        targetSdkVersion 29
+
         multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
         versionCode rootProject.ext.ustadVersionCode
@@ -356,6 +354,8 @@ dependencies {
     //Crash reporting
     implementation "ch.acra:acra-http:$version_android_acra"
 
+    implementation 'com.linkedin.android.litr:litr:1.4.3'
+
 
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
     implementation "androidx.appcompat:appcompat:$version_androidx_appcompat"
@@ -441,6 +441,7 @@ dependencies {
     androidTestImplementation project(":lib-test-common")
     androidTestImplementation "androidx.test:core:$version_android_junit_runner"
     androidTestImplementation "androidx.test:core-ktx:$version_android_junit_runner"
+    androidTestImplementation "com.kaspersky.android-components:kaspresso:$version_kaspresso"
 
     androidTestImplementation "io.ktor:ktor-server-servlet:$version_ktor"
     androidTestImplementation "junit:junit:$version_junit"

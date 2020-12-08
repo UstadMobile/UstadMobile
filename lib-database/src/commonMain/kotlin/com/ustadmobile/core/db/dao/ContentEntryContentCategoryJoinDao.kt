@@ -2,14 +2,11 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
-import androidx.room.Update
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ContentEntryContentCategoryJoin
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @Dao
-@UmRepository
+@Repository
 abstract class ContentEntryContentCategoryJoinDao : BaseDao<ContentEntryContentCategoryJoin> {
 
     @Query("SELECT ContentEntryContentCategoryJoin.* FROM ContentEntryContentCategoryJoin " +
@@ -19,8 +16,5 @@ abstract class ContentEntryContentCategoryJoinDao : BaseDao<ContentEntryContentC
 
     @Query("SELECT * from ContentEntryContentCategoryJoin WHERE " + "ceccjContentCategoryUid = :categoryUid AND ceccjContentEntryUid = :contentEntry")
     abstract fun findJoinByParentChildUuids(categoryUid: Long, contentEntry: Long): ContentEntryContentCategoryJoin?
-
-    @Update
-    abstract override fun update(entity: ContentEntryContentCategoryJoin)
 
 }

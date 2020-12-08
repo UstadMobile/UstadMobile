@@ -107,6 +107,13 @@ class ClazzWorkQuestionAndOptionsEditFragment: UstadEditFragment<ClazzWorkQuesti
         }
     }
 
+    override var errorMessage: String? = null
+        set(value) {
+            field = value
+
+            mBinding?.errorText = value
+        }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentClazzWorkQuestionAndOptionsEditBinding.inflate(inflater, container, false).also {
@@ -127,7 +134,7 @@ class ClazzWorkQuestionAndOptionsEditFragment: UstadEditFragment<ClazzWorkQuesti
         optionsRecyclerAdapter?.presenter = mPresenter
         mBinding?.presenter = mPresenter
 
-        setEditFragmentTitle(R.string.question)
+        setEditFragmentTitle(R.string.add_question, R.string.edit_question)
 
         return rootView
     }
@@ -161,7 +168,7 @@ class ClazzWorkQuestionAndOptionsEditFragment: UstadEditFragment<ClazzWorkQuesti
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.question)
+        setEditFragmentTitle(R.string.add_question, R.string.edit_question)
     }
 
     override var entity: ClazzWorkQuestionAndOptions? = null

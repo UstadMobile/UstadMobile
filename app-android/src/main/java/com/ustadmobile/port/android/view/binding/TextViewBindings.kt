@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
+import android.view.View
 import android.widget.Button
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
@@ -45,13 +46,6 @@ fun TextView.setBitmaskListText(textBitmaskValue: Long?, textBitmaskFlags: List<
 
     text = textBitmaskFlags.filter { (it.flagVal and textBitmaskValue) == it.flagVal }
             .joinToString { systemImpl.getString(it.messageId, context) }
-}
-
-@BindingAdapter("presenterFieldHeader")
-fun TextView.setPresenterFieldHeader(presenterField: PersonDetailPresenterField) {
-    if (presenterField.headerMessageId != 0) {
-        text = UstadMobileSystemImpl.instance.getString(presenterField.headerMessageId, context)
-    }
 }
 
 /**
@@ -245,4 +239,26 @@ fun TextView.setResponseTextFilled(responseText: String?){
 @BindingAdapter("memberRoleName")
 fun TextView.setMemberRoleName(clazzMember: ClazzMember?) {
     text = clazzMember?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
+}
+
+
+@BindingAdapter("rolesAndPermissionsText")
+fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
+    val scopeType = when (entityRole.erTableId) {
+        School.TABLE_ID -> {
+            " (" +context.getString(R.string.school)+ ")"
+        }
+        Clazz.TABLE_ID -> {
+            " (" +context.getString(R.string.clazz) + ")"
+        }
+        Person.TABLE_ID -> {
+            " (" + context.getString(R.string.person) + ")"
+        }
+        else -> ""
+    }
+
+    val fullText =entityRole.entityRoleRole?.roleName +  " @ " +
+            entityRole.entityRoleScopeName + scopeType
+    text = fullText
+
 }

@@ -48,7 +48,7 @@ class TestUmAppDb {
 
             install(Routing) {
                 Db()
-                ContainerDownload(db)
+                ContainerDownload()
             }
         }.start(wait = false)
     }

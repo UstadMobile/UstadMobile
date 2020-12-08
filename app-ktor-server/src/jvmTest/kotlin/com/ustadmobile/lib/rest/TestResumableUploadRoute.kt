@@ -43,7 +43,7 @@ class TestResumableUploadRoute {
 
         server = embeddedServer(Netty, port = defaultPort) {
             install(Routing) {
-                ResumableUploadRoute(tmpFolder)
+                ResumableUploadRoute()
             }
         }.start(wait = false)
     }

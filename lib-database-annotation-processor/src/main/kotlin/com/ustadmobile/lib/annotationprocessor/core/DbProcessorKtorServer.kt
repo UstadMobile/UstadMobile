@@ -2,115 +2,49 @@ package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.paging.DataSource
 import androidx.room.Dao
-import androidx.room.Database
-import androidx.room.PrimaryKey
 import androidx.room.Query
+import androidx.room.Database
 import com.google.gson.Gson
 import com.squareup.kotlinpoet.*
 import io.ktor.http.HttpStatusCode
 import io.ktor.routing.Route
-import java.io.File
-import javax.annotation.processing.RoundEnvironment
-import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
-import javax.lang.model.type.DeclaredType
-import javax.lang.model.type.ExecutableType
-import com.ustadmobile.door.DoorDatabase
 import com.google.gson.reflect.TypeToken
 import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
-import com.ustadmobile.door.annotation.EntityWithAttachment
+import com.ustadmobile.door.*
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_KTOR_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SERVER_TYPE_KTOR
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SERVER_TYPE_NANOHTTPD
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import java.util.*
-import javax.lang.model.element.ElementKind
-import com.ustadmobile.door.DoorConstants
-import com.ustadmobile.door.DoorDaoProvider
-import com.ustadmobile.door.NanoHttpdCall
 import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_ANDROID_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.CODEBLOCK_KTOR_NO_CONTENT_RESPOND
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_INSTANCE_MEMBER
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_INSTANCE_TYPETOKEN_MEMBER
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.DI_ON_MEMBER
-import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.NANOHTTPD_URIRESOURCE_FUNPARAMS
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.GET_MEMBER
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.POST_MEMBER
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER
-import io.ktor.application.ApplicationCallPipeline
 import org.kodein.di.DI
+import java.lang.IllegalArgumentException
 import javax.annotation.processing.ProcessingEnvironment
-
-/**
- * Generates a codeblock that will get a parameter from a request and add it to the codeblock
- * with the correct type. This can be with or without a variable declaration.
- *
- * e.g. request.queryParameters['uid']?.toLong() :? 0
- *
- */
-fun generateGetParamFromRequestCodeBlock(typeName: TypeName, paramName: String,
-                                         declareVariableName: String? = null,
-                                         declareVariableType: String = "val",
-                                         gsonVarName: String = "_gson",
-                                         multipartHelperVarName: String? = null,
-                                         serverType: Int = SERVER_TYPE_KTOR): CodeBlock {
-    val codeBlock = CodeBlock.builder()
-    if(declareVariableName != null) {
-        codeBlock.add("%L %L =", declareVariableType, declareVariableName)
-    }
-
-    val precedingCodeblock = CodeBlock.builder()
-
-    if(isQueryParam(typeName)) {
-        if(typeName in QUERY_SINGULAR_TYPES) {
-            if(serverType == SERVER_TYPE_KTOR) {
-                codeBlock.add("%M.request.queryParameters[%S]", DbProcessorKtorServer.CALL_MEMBER, paramName)
-            }else {
-                codeBlock.add("_session.parameters.get(%S)?.get(0)", paramName)
-            }
-            if(typeName == String::class.asTypeName()) {
-                codeBlock.add(" ?: \"\"")
-            }else {
-                codeBlock.add("?.to${(typeName as ClassName).simpleName}() ?: ${defaultVal(typeName)}")
-            }
-        }else {
-            if(serverType == SERVER_TYPE_KTOR) {
-                codeBlock.add("%M.request.queryParameters.getAll(%S)", DbProcessorKtorServer.CALL_MEMBER,
-                        paramName)
-            }else {
-                codeBlock.add("_session.parameters[%S]", paramName)
-            }
-
-            val parameterizedTypeName = typeName as ParameterizedTypeName
-            if(parameterizedTypeName.typeArguments[0] != String::class.asClassName()) {
-                codeBlock.add("·?.map·{·it.to${(parameterizedTypeName.typeArguments[0] as ClassName).simpleName}()·}")
-            }
-            codeBlock.add("·?:·listOf()\n")
-        }
-    }else {
-        val getJsonStrCodeBlock = if(multipartHelperVarName != null) {
-            CodeBlock.of("$multipartHelperVarName.receiveJsonStr()")
-        }else if(serverType == SERVER_TYPE_KTOR){
-            CodeBlock.of("%M.%M<String>()", DbProcessorKtorServer.CALL_MEMBER,
-                    MemberName("io.ktor.request", "receiveOrNull"))
-        }else {
-            CodeBlock.of("mutableMapOf<String,String>().also{_session.parseBody(it)}.get(%S)",
-                    "postData")
-        }
-        codeBlock.add("$gsonVarName.fromJson(")
-                .add(getJsonStrCodeBlock)
-                .add(", object: %T() {}.type)",
-                    TypeToken::class.asClassName().parameterizedBy(removeTypeProjection(typeName)))
-    }
-
-    if(declareVariableName != null){
-        codeBlock.add("\n")
-    }
-
-    return precedingCodeblock.add(codeBlock.build()).build()
-}
+import com.ustadmobile.door.annotation.MasterChangeSeqNum
+import com.ustadmobile.door.annotation.LocalChangeSeqNum
+import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_ANDROID_OUTPUT
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.SUFFIX_JDBC_KT
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER_LOCAL
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER_MASTER
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_NANOHTTPD_URIRESPONDER
+import kotlin.reflect.KClass
+import com.ustadmobile.door.AbstractDoorUriResponder
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_ROUTE
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_NANOHTTPD_ADDURIMAPPING
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_ABSTRACT
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_IMPL
+import javax.annotation.processing.RoundEnvironment
 
 fun CodeBlock.Builder.addNanoHttpdResponse(varName: String, addNonNullOperator: Boolean = false,
                                            applyToResponseCodeBlock: CodeBlock? = null)
@@ -125,108 +59,6 @@ fun CodeBlock.Builder.addKtorResponse(varName: String, addNonNullOperator: Boole
         = add("%M.%M($varName)\n", DbProcessorKtorServer.CALL_MEMBER,
             DbProcessorKtorServer.RESPOND_MEMBER)
 
-/**
- * This extension function is designed to wrapup a NanoHTTPD UriResponder. It will generate an
- * implementation of the get and post function that will call the real function according to the uri.
- * It will also add override functions implementing the delete, put and other function
- *
- * @param nanoHttpdGetFns A list of function names that are get requests
- * @param nanoHttpdPostFns A list of function names that are post requests
- * @param initParamsList A list of the parameters being used in the UriResponder methods (e.g. the
- * real dao,
- */
-fun TypeSpec.Builder.addNanoHttpdUriResponderFuns(nanoHttpdGetFns: List<String>, nanoHttpdPostFns: List<String>,
-                                                  initParamsList: List<ParameterSpec>, daoTypeClassName: ClassName,
-                                                  isSyncable: Boolean): TypeSpec.Builder {
-
-    listOf(nanoHttpdGetFns to "get", nanoHttpdPostFns to "post").forEach {fnType ->
-        val uriResponderFnSpec = FunSpec.builder(fnType.second)
-                .returns(NanoHTTPD.Response::class)
-                .addModifiers(KModifier.OVERRIDE)
-                .addParameters(NANOHTTPD_URIRESOURCE_FUNPARAMS)
-
-        val fnCodeBlock = CodeBlock.builder()
-                .add("val _fnName = _session.uri.%M('/')\n", MemberName("kotlin.text", "substringAfterLast"))
-                .add("val _di = _uriResource.initParameter(0, %T::class.java)\n", DI::class)
-                .add("val _daoProvider = _uriResource.initParameter(1, %T::class.java) as %T\n",
-                    DoorDaoProvider::class,
-                        DoorDaoProvider::class.asClassName().parameterizedBy(
-                                DoorDatabase::class.asClassName(), daoTypeClassName))
-                .add("val _typeToken = _uriResource.initParameter(2, %T::class.java) as %T<%T>\n",
-                    org.kodein.type.TypeToken::class, org.kodein.type.TypeToken::class, DoorDatabase::class)
-                .add("val _call = %T(_uriResource, _urlParams, _session)\n", NanoHttpdCall::class)
-                .add("val _db: %T by _di.%M(_call).%M(_typeToken, tag = %T.TAG_DB)\n", DoorDatabase::class,
-                        DI_ON_MEMBER, DI_INSTANCE_TYPETOKEN_MEMBER, DoorTag::class)
-                .add("val _dao = _daoProvider.getDao(_db)\n")
-                .add("val _gson : %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
-                .apply { takeIf { isSyncable }
-                        ?.add("val _syncHelper = (_uriResource.initParameter(3, %T::class.java) as %T).getDao(_db)\n",
-                                DoorDaoProvider::class, DoorDaoProvider::class.asClassName().parameterizedBy(
-                                DoorDatabase::class.asClassName(), ClassName(daoTypeClassName.packageName,
-                                "${daoTypeClassName.simpleName}_SyncHelper")))
-                        ?.add("val _ktorHelperDao = (_uriResource.initParameter(4, %T::class.java) as %T).getDao(_db)\n",
-                                DoorDaoProvider::class, DoorDaoProvider::class.asClassName().parameterizedBy(
-                                DoorDatabase::class.asClassName(), ClassName(daoTypeClassName.packageName,
-                                "${daoTypeClassName.simpleName}$SUFFIX_KTOR_HELPER")))
-                }
-
-//        initParamsList.forEachIndexed { index, parameterSpec ->
-//            fnCodeBlock.add("val ${parameterSpec.name} = _uriResource.initParameter($index, %T::class.java)\n",
-//                    parameterSpec.type)
-//        }
-
-
-        fnCodeBlock.add("val _clientDbVersion = _session.headers.get(%T.HEADER_DBVERSION)?.toInt() ?: 0\n",
-                    DoorConstants::class)
-        //TODO: re-enable this
-//                .beginControlFlow("if(_clientDbVersion < _minSyncVersion)")
-//                .add("return %T.newFixedLengthResponse(%T.Response.Status.BAD_REQUEST, %T.MIME_TYPE_PLAIN, %S)",
-//                        NanoHTTPD::class, NanoHTTPD::class, DoorConstants::class,
-//                        "Client db version does not meet minimum \$_minSyncVersion")
-//                .endControlFlow()
-
-        val notFoundCodeBlock = CodeBlock.of("%T.newFixedLengthResponse(%T.Status.NOT_FOUND, " +
-                "%T.MIME_TYPE_PLAIN, %S)", NanoHTTPD::class, NanoHTTPD.Response::class,
-                DoorConstants::class, "")
-        if(fnType.first.isEmpty()) {
-            fnCodeBlock.add("return ").add(notFoundCodeBlock).add("\n")
-        }else {
-            fnCodeBlock.beginControlFlow("return when(_fnName)")
-
-            fnType.first.forEach {fnName ->
-                fnCodeBlock.add("%S -> ${fnName}(_uriResource, _urlParams, _session, ${initParamsList.map{it.name}.joinToString()})\n",
-                        fnName)
-            }
-            fnCodeBlock.add("else -> ").add(notFoundCodeBlock).add("\n")
-            fnCodeBlock.endControlFlow()
-        }
-
-        this.addFunction(uriResponderFnSpec
-                .addCode(fnCodeBlock.build())
-                .build())
-    }
-
-    val returnMethodNotSupportedException = CodeBlock.of("return %T.newFixedLengthResponse(" +
-            "%T.Status.METHOD_NOT_ALLOWED, %T.MIME_TYPE_PLAIN, %S)", NanoHTTPD::class,
-            NanoHTTPD.Response::class, DoorConstants::class, "")
-    listOf("put", "delete").forEach {fnName ->
-        this.addFunction(FunSpec.builder(fnName)
-                .addParameters(NANOHTTPD_URIRESOURCE_FUNPARAMS)
-                .addModifiers(KModifier.OVERRIDE)
-                .returns(NanoHTTPD.Response::class)
-                .addCode(returnMethodNotSupportedException)
-                .build())
-    }
-    this.addFunction(FunSpec.builder("other")
-            .addParameter("methodName", String::class)
-            .addParameters(NANOHTTPD_URIRESOURCE_FUNPARAMS)
-            .addModifiers(KModifier.OVERRIDE)
-            .returns(NanoHTTPD.Response::class)
-            .addCode(returnMethodNotSupportedException)
-            .build())
-
-    return this
-}
 
 fun FunSpec.Builder.addParametersForHttpDb(dbTypeElement: TypeElement, isPrimaryDefaultVal: Boolean): FunSpec.Builder {
     addParameter(ParameterSpec.builder("_isPrimary", BOOLEAN)
@@ -235,52 +67,497 @@ fun FunSpec.Builder.addParametersForHttpDb(dbTypeElement: TypeElement, isPrimary
     return this
 }
 
+
+fun CodeBlock.Builder.addRequestDi(diVarName: String = "_di", dbVarName: String = "_db",
+    typeTokenVarName: String = "_typeToken", serverType: Int = SERVER_TYPE_KTOR) : CodeBlock.Builder {
+    if(serverType == SERVER_TYPE_KTOR) {
+        add("val ${diVarName} = %M()\n", MemberName("org.kodein.di.ktor", "di"))
+                .add("val $dbVarName : %T = %M($typeTokenVarName)\n",
+                    TypeVariableName.invoke("T"),
+                    MemberName("com.ustadmobile.door.ext", "unwrappedDbOnCall"))
+    }
+
+    return this
+}
+
 /**
- * Generate the code required for sending a response back with a KTOR HTTP call.
+ * Adds a KTOR Route function for the given DAO to the FileSpec
+ *
+ * e.g. route("DaoName") {
+ * ...
+ * }
+ */
+fun FileSpec.Builder.addDaoKtorRouteFun(daoTypeSpec: TypeSpec, daoClassName: ClassName,
+                                        syncHelperClassName: ClassName = daoClassName.withSuffix("_SyncHelper"),
+                                        processingEnv: ProcessingEnvironment)
+        : FileSpec.Builder {
+
+
+    addFunction(FunSpec.builder("${daoTypeSpec.name}${DbProcessorKtorServer.SUFFIX_KTOR_ROUTE}")
+            .addTypeVariable(TypeVariableName.invoke("T", DoorDatabase::class))
+            .receiver(Route::class)
+            .addParameter("_typeToken",
+                    org.kodein.type.TypeToken::class.asClassName().parameterizedBy(TypeVariableName("T")))
+            .addParameter("_daoFn",
+                    LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
+                            returnType = daoClassName))
+            .apply {
+                if(daoTypeSpec.daoSyncableEntitiesInSelectResults(processingEnv).isNotEmpty()) {
+                    addParameter("_syncHelperFn",
+                            LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
+                                    returnType = syncHelperClassName))
+                    addParameter("_ktorHelperDaoFn",
+                            LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
+                            returnType = daoClassName.withSuffix(SUFFIX_KTOR_HELPER)))
+                }
+            }
+            .addCode(CodeBlock.builder()
+                    .beginControlFlow("%M(%S)",
+                        MemberName("io.ktor.routing", "route"),
+                        daoClassName.simpleName)
+                    .apply {
+                        daoTypeSpec.funSpecs.forEach {daoFunSpec ->
+                            addKtorDaoMethodCode(daoFunSpec, processingEnv)
+                        }
+
+                        daoTypeSpec.daoSyncableEntitiesInSelectResults(processingEnv).forEach {syncableEntity ->
+                            val syncableEntityInfo = SyncableEntityInfo(syncableEntity, processingEnv)
+                            addEntitiesAckKtorRoute(syncableEntityInfo.tracker, syncableEntity)
+                        }
+                    }
+                    .endControlFlow()
+                    .build())
+            .build())
+
+
+    return this
+}
+
+/**
+ * Add a NanoHTTPD Responder class implementation for the DAO to this file
+ */
+fun FileSpec.Builder.addNanoHttpdResponder(daoTypeSpec: TypeSpec, daoClassName: ClassName,
+    processingEnv: ProcessingEnvironment): FileSpec.Builder {
+
+    addType(TypeSpec.classBuilder(daoClassName.withSuffix(SUFFIX_NANOHTTPD_URIRESPONDER))
+            .superclass(AbstractDoorUriResponder::class)
+            .apply {
+                //generate a function for each dao function
+                daoTypeSpec.funSpecs.forEach { daoFunSpec ->
+                    addNanoHttpdDaoFun(daoFunSpec, daoClassName, daoTypeSpec,
+                        processingEnv)
+                }
+
+                addNanoHttpdResponderFun("get", daoClassName, daoTypeSpec, processingEnv)
+                addNanoHttpdResponderFun("post", daoClassName, daoTypeSpec, processingEnv)
+            }
+            .build())
+
+    return this
+}
+
+/**
+ * Add the parameters that are required for all nanohttpd uri responder functions
+ */
+private fun FunSpec.Builder.addNanoHttpdUriResponderParams() =
+        addParameter("_uriResource", RouterNanoHTTPD.UriResource::class)
+        .addParameter("_urlParams",
+                Map::class.parameterizedBy(String::class, String::class))
+        .addParameter("_session", NanoHTTPD.IHTTPSession::class)
+
+fun TypeSpec.Builder.addNanoHttpdDaoFun(daoFunSpec: FunSpec, daoClassName: ClassName,
+                                        daoTypeSpec: TypeSpec,
+                                        processingEnv: ProcessingEnvironment) {
+
+    addFunction(FunSpec.builder(daoFunSpec.name)
+            .returns(NanoHTTPD.Response::class)
+            .addNanoHttpdUriResponderParams()
+            .addParameter("_dao", daoClassName)
+            .addParameter("_gson", Gson::class)
+            .applyIf(daoTypeSpec.daoSyncableEntitiesInSelectResults(processingEnv).isNotEmpty()) {
+                addParameter("_syncHelper", daoClassName.withSuffix("_SyncHelper"))
+                addParameter("_ktorHelperDao", daoClassName.withSuffix(SUFFIX_KTOR_HELPER))
+            }
+            .addCode(CodeBlock.builder()
+                    .apply {
+                        if(daoFunSpec.isQueryWithSyncableResults(processingEnv)) {
+                            addKtorRouteSelectCodeBlock(daoFunSpec, processingEnv,
+                                SERVER_TYPE_NANOHTTPD)
+                        }else {
+                            addHttpServerPassToDaoCodeBlock(daoFunSpec, processingEnv,
+                                serverType = SERVER_TYPE_NANOHTTPD)
+                        }
+
+                    }.build()
+            )
+            .build())
+}
+
+
+/**
+ * Add a function that overrides the get or post function of the NanoHTTPD
+ * responder which will route the query to the appropriate function with
+ * the required parameters (database, dao, gson, etc)
+ */
+fun TypeSpec.Builder.addNanoHttpdResponderFun(methodName: String, daoClassName: ClassName,
+                                              daoTypeSpec: TypeSpec,
+                                              processingEnv: ProcessingEnvironment) : TypeSpec.Builder {
+
+    val isPostFn = methodName.toLowerCase(Locale.ROOT) == "post"
+    val daoFunsToRespond =  daoTypeSpec.funSpecs.filter {
+        it.httpBodyParams().isNotEmpty() == isPostFn
+    }
+
+    fun CodeBlock.Builder.addNanoHttpdReturnNotFound() : CodeBlock.Builder {
+        add("%T.newFixedLengthResponse(%T.Status.NOT_FOUND, " +
+                "%T.MIME_TYPE_PLAIN, %S)", NanoHTTPD::class, NanoHTTPD.Response::class,
+                DoorConstants::class, "")
+        return this
+    }
+
+    var daoParamNames = "_uriResource, _urlParams, _session, _dao, _gson"
+    if(daoTypeSpec.daoSyncableEntitiesInSelectResults(processingEnv).isNotEmpty()) {
+        daoParamNames += ",_syncHelper, _ktorHelperDao"
+    }
+
+    addFunction(FunSpec.builder(methodName)
+            .addModifiers(KModifier.OVERRIDE)
+            .returns(NanoHTTPD.Response::class)
+            .addNanoHttpdUriResponderParams()
+            .addCode(CodeBlock.builder()
+                    .add("val _fnName = _session.uri.%M('/')\n", MemberName("kotlin.text", "substringAfterLast"))
+                    .add("val _di = _uriResource.initParameter(0, %T::class.java)\n", DI::class)
+                    .add("val _daoProvider = _uriResource.initParameter(1, %T::class.java) as %T\n",
+                            DoorDaoProvider::class,
+                            DoorDaoProvider::class.asClassName().parameterizedBy(
+                                    DoorDatabase::class.asClassName(), daoClassName))
+                    .add("val _typeToken = _uriResource.initParameter(2, %T::class.java) as %T\n",
+                        org.kodein.type.TypeToken::class.java,
+                            org.kodein.type.TypeToken::class.parameterizedBy(DoorDatabase::class))
+                    .add("val _call = %T(_uriResource, _urlParams, _session)\n", NanoHttpdCall::class)
+                    .add("val _db: %T by _di.%M(_call).%M(_typeToken, tag = %T.TAG_DB)\n", DoorDatabase::class,
+                            DI_ON_MEMBER, DI_INSTANCE_TYPETOKEN_MEMBER, DoorTag::class)
+                    .add("val _dao = _daoProvider.getDao(_db)\n")
+                    .add("val _gson : %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
+                    .applyIf(daoTypeSpec.daoSyncableEntitiesInSelectResults(processingEnv).isNotEmpty()) {
+                        add("val _syncHelper = (_uriResource.initParameter(3, %T::class.java) as %T).getDao(_db)\n",
+                            DoorDaoProvider::class, DoorDaoProvider::class.asClassName().parameterizedBy(
+                            DoorDatabase::class.asClassName(), daoClassName.withSuffix("_SyncHelper")))
+                        add("val _ktorHelperDao = (_uriResource.initParameter(4, %T::class.java) as %T).getDao(_db)\n",
+                                    DoorDaoProvider::class, DoorDaoProvider::class.asClassName().parameterizedBy(
+                                    DoorDatabase::class.asClassName(), daoClassName.withSuffix(SUFFIX_KTOR_HELPER)))
+                    }
+                    .apply {
+                        if(daoFunsToRespond.isEmpty()) {
+                            add("return ").addNanoHttpdReturnNotFound().add("\n")
+                        }else {
+                            beginControlFlow("return when(_fnName)")
+                            daoFunsToRespond.forEach {
+                                add("%S -> ${it.name}($daoParamNames)\n", it.name)
+                            }
+                            add("else -> ").addNanoHttpdReturnNotFound().add("\n")
+                            endControlFlow()
+                        }
+                    }
+                    .build())
+            .build()
+    )
+
+
+    return this
+}
+
+
+/**
+ * Get a list of parameters of the FunSpec that must be transmitted in the http body (eg. entities)
+ */
+private fun FunSpec.httpBodyParams(): List<ParameterSpec> {
+    return parameters.filter { !it.type.isHttpQueryQueryParam() }
+}
+
+fun CodeBlock.Builder.addKtorDaoMethodCode(daoFunSpec: FunSpec, processingEnv: ProcessingEnvironment) : CodeBlock.Builder {
+    val memberFn = if(daoFunSpec.httpBodyParams().isNotEmpty()) {
+        POST_MEMBER
+    }else {
+        GET_MEMBER
+    }
+
+    beginControlFlow("%M(%S)", memberFn, daoFunSpec.name)
+            .addRequestDi()
+            .add("val _dao = _daoFn(_db)\n")
+            .add("val _gson: %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
+
+
+    if(daoFunSpec.isQueryWithSyncableResults(processingEnv)) {
+        addKtorRouteSelectCodeBlock(daoFunSpec, processingEnv, SERVER_TYPE_KTOR)
+    }else {
+        addHttpServerPassToDaoCodeBlock(daoFunSpec, processingEnv, serverType = SERVER_TYPE_KTOR)
+    }
+
+    endControlFlow()
+
+    return this
+}
+
+/**
+ * Generates a CodeBlock for running an SQL select statement on the KTOR serer and then returning
+ * the result as JSON.
  *
  * e.g.
- *
- * when varName is not nullable:
- * call.respond(_varName)
- *
- * when varName is nullable:
- * if(_varName != null) {
- *   call.respond(varName)
- * }else {
- *   call.sendResponse(HttpResponse.NO_CONTENT, "")
+ * get("methodName") {
+ *   val paramVal = request.queryParameters['uid']?.toLong()
+ *   .. query execution code (as per JDBC)
+ *   call.respond(_result)
  * }
  *
- * when return type is Unit:
- * call.sendResponse(HttpResponse.NO_CONTENT, "")
+ * The method will automatically choose between using get or post, and will use post if there
+ * are any parameters which cannot be sent as query parameters (e.g. JSON), or get otherwise.
  *
- * @param ktorBeforeRespondCodeBlock This codeblock will be added on the KTOR response type before
- * the call.respond line (e.g. to set headers)
- * @param nanoHttpdApplyCodeBlock This codeblock will be added to an also block after returning the
- * nanohttpd response (e.g. to set headers)
+ * This will handle refactoring the query to remove syncable entities already delivered to the
+ * client making the request
+ *
+ * @param daoMethod A FunSpec representing the DAO method that this CodeBlock is being generated for
+ * @param daoTypeEl The DAO element that this is being generated for: optional for error logging purposes
  *
  */
-fun generateRespondCall(returnType: TypeName, varName: String, serverType: Int = SERVER_TYPE_KTOR,
+fun CodeBlock.Builder.addKtorRouteSelectCodeBlock(daoMethod: FunSpec, processingEnv: ProcessingEnvironment,
+                                     serverType: Int = DbProcessorKtorServer.SERVER_TYPE_KTOR) : CodeBlock.Builder {
+
+    val returnTypeName = daoMethod.returnType
+            ?: throw IllegalArgumentException("addKtorRouteSelectCodeBlock for ${daoMethod.name}: has null return type")
+
+    val resultType = returnTypeName.unwrapLiveDataOrDataSourceFactory()
+    val isDataSourceFactory = returnTypeName is ParameterizedTypeName
+            && returnTypeName.rawType == DataSource.Factory::class.asClassName()
+
+    val queryVarsList = daoMethod.parameters.toMutableList()
+    if(isDataSourceFactory){
+        queryVarsList += ParameterSpec.builder(PARAM_NAME_OFFSET, INT).build()
+        queryVarsList += ParameterSpec.builder(PARAM_NAME_LIMIT, INT).build()
+    }
+
+    val syncableEntitiesList = returnTypeName.syncableEntities(processingEnv)
+
+    if(syncableEntitiesList.isNotEmpty()) {
+        addGetClientIdHeader("__clientId", serverType)
+
+        //it is possible that clientId is already a parameter of the function (eg synchelper etc).
+        // We should not add it twice.
+        if(!daoMethod.parameters.any { it.name == "clientId" })
+            queryVarsList  += ParameterSpec.builder("clientId", INT).build()
+    }
+
+    if(serverType != SERVER_TYPE_NANOHTTPD)
+        //This is already a parameter in the nanohttpd function
+        add("val _ktorHelperDao = _ktorHelperDaoFn(_db)\n")
+
+    val modifiedQueryFunSpec = FunSpec.builder(daoMethod.name)
+            .addParameters(queryVarsList)
+            .returns(resultType)
+    modifiedQueryFunSpec.takeIf { KModifier.SUSPEND in daoMethod.modifiers }
+            ?.addModifiers(KModifier.SUSPEND)
+
+    addHttpServerPassToDaoCodeBlock(modifiedQueryFunSpec.build(),
+            processingEnv, daoVarName = "_ktorHelperDao",
+            preexistingVarNames = listOf("clientId"), serverType = serverType, addRespondCall = false)
+
+    addRespondCall(resultType, "_result", serverType)
+
+    return this
+}
+
+/**
+ * Generates a Codeblock that will call the DAO method, and then call.respond with the result
+ *
+ * e.g.
+ * val paramName = request.queryParameters['paramName']?.toLong()
+ * val _result = _dao.methodName(paramName)
+ * call.respond(_result)
+ *
+ * @param daoMethod FunSpec representing the method that is being delegated
+ * @param preexistingVarNames a list of variable names that already exist in the scope being
+ * generated. The name created in scope must be the variable name prefixed with __ e.g.
+ * __paramName.
+ * @param resetChangeSequenceNumbers if true and any parameter is a syncable entity then the
+ * change sequence number fields will be set to zero (to ensure that the database recognizes it
+ * as an updated entity). This avoids a situation where the change sequence number is not
+ * incremented when using REPLACE on Sqlite (because REPLACE = DELETE then INSERT, if the primary
+ * change sequence number is not zero, the trigger does not know if it was the same as before).
+ * If resetChangeSequenceNumbers is null, then it will apply automatically if the DAO function
+ * is receiving a syncable entity or list of syncable entities as a parameter.
+ *
+ * This will skip generation of getting the parameter name from the call (e.g.
+ * no val __paramName = request.queryParameters["paramName"] will be generated
+ */
+fun CodeBlock.Builder.addHttpServerPassToDaoCodeBlock(daoMethod: FunSpec,
+                                         processingEnv: ProcessingEnvironment,
+                                         mutlipartHelperVarName: String? = null,
+                                         beforeDaoCallCode: CodeBlock = CodeBlock.of(""),
+                                         afterDaoCallCode: CodeBlock = CodeBlock.of(""),
+                                         daoVarName: String = "_dao",
+                                         preexistingVarNames: List<String> = listOf(),
+                                         serverType: Int = DbProcessorKtorServer.SERVER_TYPE_KTOR,
+                                         addRespondCall: Boolean = true,
+                                         resetChangeSequenceNumbers: Boolean? = null): CodeBlock.Builder {
+    val getVarsCodeBlock = CodeBlock.builder()
+    val callCodeBlock = CodeBlock.builder()
+
+    val returnType = daoMethod.returnType ?: UNIT
+    if(returnType != UNIT) {
+        callCodeBlock.add("val _result = ")
+    }
+
+    val isLiveData = returnType is ParameterizedTypeName
+            && returnType.rawType == DoorLiveData::class.asClassName()
+    val useRunBlocking = serverType == DbProcessorKtorServer.SERVER_TYPE_NANOHTTPD
+            && (KModifier.SUSPEND in daoMethod.modifiers || isLiveData)
+
+    callCodeBlock.takeIf { useRunBlocking }?.beginControlFlow("%M",
+            MemberName("kotlinx.coroutines", "runBlocking"))
+
+    callCodeBlock.add("$daoVarName.${daoMethod.name}(")
+    var paramOutCount = 0
+    daoMethod.parameters.forEachIndexed {index, param ->
+        val paramTypeName = param.type.javaToKotlinType()
+        if(isContinuationParam(paramTypeName))
+            return@forEachIndexed
+
+        if(paramOutCount > 0)
+            callCodeBlock.add(",")
+
+        callCodeBlock.add("__${param.name}")
+
+        if(param.name !in preexistingVarNames) {
+            getVarsCodeBlock.add("val __${param.name} : %T = ", param.type)
+                .addGetParamFromHttpRequest(paramTypeName, param.name,
+                            multipartHelperVarName = mutlipartHelperVarName,
+                            serverType = serverType)
+                    .add("\n")
+
+            val effectiveResetChangeSeqNum = resetChangeSequenceNumbers ?:
+                (param.type.unwrapListOrArrayComponentType() as? ClassName)?.entityHasSyncableEntityTypes(processingEnv) ?: false
+            if(effectiveResetChangeSeqNum == true) {
+
+                val syncableEntityInfo = SyncableEntityInfo(param.type.asComponentClassNameIfList(),
+                        processingEnv)
+
+                getVarsCodeBlock.addRunCodeBlocksOnParamComponents(ParameterSpec("__${param.name}", param.type),
+                        CodeBlock.of("${syncableEntityInfo.entityMasterCsnField.name} = 0\n"),
+                        CodeBlock.of("${syncableEntityInfo.entityLocalCsnField.name} = 0\n"))
+            }
+        }
+
+
+        paramOutCount++
+    }
+
+
+
+    callCodeBlock.add(")")
+    if(isLiveData) {
+        callCodeBlock.add(".%M()",
+                MemberName("com.ustadmobile.door", "getFirstValue"))
+    }
+    callCodeBlock.add("\n")
+
+    callCodeBlock.takeIf { useRunBlocking }?.endControlFlow()
+
+    var respondResultType = returnType.unwrapLiveDataOrDataSourceFactory()
+    respondResultType = respondResultType.copy(nullable = respondResultType.isNullableAsSelectReturnResult)
+
+    add(getVarsCodeBlock.build())
+    add(beforeDaoCallCode)
+    add(callCodeBlock.build())
+    add(afterDaoCallCode)
+    if(addRespondCall) {
+        addRespondCall(respondResultType, "_result", serverType)
+    }
+
+    return this
+}
+
+fun CodeBlock.Builder.addGetParamFromHttpRequest(typeName: TypeName, paramName: String,
+                                         declareVariableName: String? = null,
+                                         declareVariableType: String = "val",
+                                         gsonVarName: String = "_gson",
+                                         multipartHelperVarName: String? = null,
+                                         serverType: Int = SERVER_TYPE_KTOR): CodeBlock.Builder {
+
+    if(declareVariableName != null) {
+        add("%L %L =", declareVariableType, declareVariableName)
+    }
+
+    if(typeName.isHttpQueryQueryParam()) {
+        if(typeName in QUERY_SINGULAR_TYPES) {
+            if(serverType == SERVER_TYPE_KTOR) {
+                add("%M.request.queryParameters[%S]", DbProcessorKtorServer.CALL_MEMBER, paramName)
+            }else {
+                add("_session.parameters.get(%S)?.get(0)", paramName)
+            }
+            if(typeName == String::class.asTypeName()) {
+                add(" ?: \"\"")
+            }else {
+                add("?.to${(typeName as ClassName).simpleName}() ?: ${typeName.defaultTypeValueCode()}")
+            }
+        }else {
+            if(serverType == SERVER_TYPE_KTOR) {
+                add("%M.request.queryParameters.getAll(%S)", DbProcessorKtorServer.CALL_MEMBER,
+                        paramName)
+            }else {
+                add("_session.parameters[%S]", paramName)
+            }
+
+            val parameterizedTypeName = typeName as ParameterizedTypeName
+            if(parameterizedTypeName.typeArguments[0] != String::class.asClassName()) {
+                add("·?.map·{·it.to${(parameterizedTypeName.typeArguments[0] as ClassName).simpleName}()·}")
+            }
+            add("·?:·listOf()\n")
+        }
+    }else {
+        val getJsonStrCodeBlock = if(multipartHelperVarName != null) {
+            CodeBlock.of("$multipartHelperVarName.receiveJsonStr()")
+        }else if(serverType == SERVER_TYPE_KTOR){
+            CodeBlock.of("%M.%M<String>()", DbProcessorKtorServer.CALL_MEMBER,
+                    MemberName("io.ktor.request", "receiveOrNull"))
+        }else {
+            CodeBlock.of("mutableMapOf<String,String>().also{_session.parseBody(it)}.get(%S)",
+                    "postData")
+        }
+        add("$gsonVarName.fromJson(")
+        add(getJsonStrCodeBlock)
+        add(", object: %T() {}.type)",
+                TypeToken::class.asClassName().parameterizedBy(removeTypeProjection(typeName)))
+    }
+
+    if(declareVariableName != null){
+        add("\n")
+    }
+
+    return this
+}
+
+fun CodeBlock.Builder.addRespondCall(returnType: TypeName, varName: String, serverType: Int = SERVER_TYPE_KTOR,
                         ktorBeforeRespondCodeBlock: CodeBlock? = null,
-                        nanoHttpdApplyCodeBlock: CodeBlock? = null): CodeBlock{
-    val codeBlock = CodeBlock.builder()
+                        nanoHttpdApplyCodeBlock: CodeBlock? = null): CodeBlock.Builder {
+
     if(ktorBeforeRespondCodeBlock != null && serverType == SERVER_TYPE_KTOR)
-        codeBlock.add(ktorBeforeRespondCodeBlock)
+        add(ktorBeforeRespondCodeBlock)
 
     when{
         returnType == UNIT && serverType == SERVER_TYPE_KTOR->
-            codeBlock.add(CODEBLOCK_KTOR_NO_CONTENT_RESPOND)
+            add(CODEBLOCK_KTOR_NO_CONTENT_RESPOND)
 
         returnType == UNIT && serverType == SERVER_TYPE_NANOHTTPD ->
-            codeBlock.add(CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE)
+            add(CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE)
 
-        !isNullableResultType(returnType) && serverType == SERVER_TYPE_KTOR->
-            codeBlock.addKtorResponse(varName)
+        !returnType.isNullableAsSelectReturnResult && serverType == SERVER_TYPE_KTOR->
+            addKtorResponse(varName)
 
-        !isNullableResultType(returnType) && serverType == SERVER_TYPE_NANOHTTPD ->
-            codeBlock.addNanoHttpdResponse(varName, applyToResponseCodeBlock = nanoHttpdApplyCodeBlock)
+        !returnType.isNullableAsSelectReturnResult && serverType == SERVER_TYPE_NANOHTTPD ->
+            addNanoHttpdResponse(varName, applyToResponseCodeBlock = nanoHttpdApplyCodeBlock)
 
 
-        else -> codeBlock.beginControlFlow("if($varName != null)")
+        else -> beginControlFlow("if($varName != null)")
                 .apply {
                     takeIf { serverType == SERVER_TYPE_KTOR }?.addKtorResponse(varName,
                             addNonNullOperator = true)
@@ -297,105 +574,325 @@ fun generateRespondCall(returnType: TypeName, varName: String, serverType: Int =
                 .endControlFlow()
     }
 
-    return codeBlock.build()
+    return this
 }
 
+/**
+ * Convert the given FunSpec to what is required for a KtorHelper function. This will add
+ * offset and limit parameters if the DAO uses DataSource.Factory, and it will add a clientId
+ * parameter.
+ *
+ * The return type will be the result type (e.g. DataSource.Factory or LiveData) will be unwrapped
+ * @param overrides true if this is an override (e.g. abstract DAO or implementation)
+ * @param annotationSpecs if not null, this replaces the original annotations for the function
+ * with the given list
+ */
+fun FunSpec.toKtorHelperFunSpec(overrides: Boolean = false,
+                                annotationSpecs: List<AnnotationSpec>? = null,
+                                isAbstract: Boolean = true) : FunSpec {
+    val resultType = this.returnType?.unwrapLiveDataOrDataSourceFactory()
+    return this.toBuilder()
+            .apply {
+                //Override must be set explicitly, so remove it if it is present
+                modifiers.remove(KModifier.OVERRIDE)
+            }
+            .applyIf(annotationSpecs != null) {
+                annotations.clear()
+                annotationSpecs?.also  { annotations.addAll(it) }
+            }
+            .applyIf(!isAbstract) {
+                modifiers.remove(KModifier.ABSTRACT)
+            }
+            .applyIf(overrides) {
+                addModifiers(KModifier.OVERRIDE)
+            }
+            .applyIf(this.returnType?.isDataSourceFactory() ==true) {
+                addParameter(PARAM_NAME_OFFSET, INT)
+                addParameter(PARAM_NAME_LIMIT, INT)
+            }.applyIf(!parameters.any { it.name == "clientId" }) {
+                addParameter("clientId", INT)
+            }
+            .apply {
+                if(resultType != null)
+                    returns(resultType.copy(nullable = resultType.isNullableAsSelectReturnResult))
+            }
+            .build()
+}
 
-fun CodeBlock.Builder.addRequestDi(diVarName: String = "_di", dbVarName: String = "_db",
-    typeTokenVarName: String = "_typeToken", serverType: Int = SERVER_TYPE_KTOR) : CodeBlock.Builder {
-    if(serverType == SERVER_TYPE_KTOR) {
-        add("val ${diVarName} = %M()\n", MemberName("org.kodein.di.ktor", "di"))
-                .add("val ${dbVarName}: %T by _di.%M(call).%M($typeTokenVarName, tag = %T.TAG_DB)\n",
-                        TypeVariableName.invoke("T"), DI_ON_MEMBER, DI_INSTANCE_TYPETOKEN_MEMBER,
-                        DoorTag::class)
+/**
+ * Used for generating the KTOR helper abstract DAO and implementation functions.
+ * This will find the annotated query SQL and refactor it using
+ * refactorSyncSelectSql.
+ *
+ * @param processingEnv processing environment
+ * @param csnAnnotationClass MasterChangeSeqNum::class or LocalChangeSeqNum::class
+ */
+fun FunSpec.filterAnnotationSpecsAndRefactorToSyncableSql(processingEnv: ProcessingEnvironment,
+    csnAnnotationClass: KClass<out Annotation>) : List<AnnotationSpec>{
+    val resultEntityClassName = returnType?.unwrapQueryResultComponentType()
+            as? ClassName
+            ?: throw IllegalArgumentException("${name} return type is null")
+    val isDataSource = returnType?.isDataSourceFactory() ?: false
+
+    return annotations.mapNotNull {annotationSpec ->
+        if(annotationSpec.className == Query::class.asClassName()) {
+            val sql = refactorSyncSelectSql(daoQuerySql(), resultEntityClassName, processingEnv,
+                    csnAnnotationClass, addOffsetAndLimitParam = isDataSource)
+            AnnotationSpec.builder(Query::class.asClassName())
+                    .addMember("%S", sql).build()
+        }else {
+            null
+        }
     }
+}
+
+/**
+ * Add a KTOR route codeblock that implements the acknwoledge (ack) entities function.
+ */
+fun CodeBlock.Builder.addEntitiesAckKtorRoute(trackerClassName: ClassName,
+                                          entityClassName: ClassName,
+                                          syncHelperVarName: String = "_syncHelper",
+                                          syncHelperFnName: String = "_syncHelperFn",
+                                          dbVarName: String = "_db",
+                                          serverType: Int = SERVER_TYPE_KTOR) : CodeBlock.Builder {
+    beginControlFlow("%M(%S)",
+            DbProcessorKtorServer.POST_MEMBER, "_ack${entityClassName.simpleName}Received")
+            .addRequestDi()
+            .add("val _gson: %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
+            .addEntitiesAckCodeBlock(trackerClassName, syncHelperVarName,
+                    syncHelperFnName = syncHelperFnName, dbVarName = dbVarName, serverType = serverType)
+            .endControlFlow()
 
     return this
 }
 
-internal fun generateUpdateTrackerReceivedCodeBlock(trackerClassName: ClassName, syncHelperVarName: String = "_syncHelper",
-                                                    syncHelperFnName: String = "_syncHelperFn",
-                                                    dbVarName: String = "_db",
-                                                    serverType: Int = SERVER_TYPE_KTOR) =
-    CodeBlock.builder()
-            .addGetClientIdHeader("_clientId", serverType)
-            .add(generateGetParamFromRequestCodeBlock(INT, "reqId", "_requestId",
-                    serverType = serverType))
-            .addRequestDi(serverType = serverType, dbVarName = dbVarName)
-            .apply { takeIf { serverType == SERVER_TYPE_KTOR }?.add("val $syncHelperVarName = $syncHelperFnName($dbVarName)\n") }
-            //TODO: Add the clientId to this query (to prevent other clients interfering)
-            .add("$syncHelperVarName._update${trackerClassName.simpleName}Received(true, _requestId)\n")
-            .apply { takeIf { serverType == SERVER_TYPE_KTOR }?.add(CODEBLOCK_KTOR_NO_CONTENT_RESPOND) }
-            .apply { takeIf { serverType == SERVER_TYPE_NANOHTTPD }?.add(CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE) }
-            .build()
-
-internal fun generateUpdateTrackerReceivedKtorRoute(trackerClassName: ClassName,
-                                                    syncHelperFnName: String = "_syncHelperFn",
-                                                    dbVarName: String = "_db",
-                                                    syncHelperVarName: String = "_syncHelper")=
-    CodeBlock.builder().beginControlFlow("%M(%S)",
-                DbProcessorKtorServer.GET_MEMBER, "_update${trackerClassName.simpleName}Received")
-            .add(generateUpdateTrackerReceivedCodeBlock(trackerClassName, syncHelperVarName,
-                    serverType = SERVER_TYPE_KTOR, syncHelperFnName = syncHelperFnName))
-            .endControlFlow()
-            .build()
-
 /**
- * Generates a function for NanoHTTPD to implement the update syncable tracker received. This function
- * will have the NanoHTTPD standard parameters (uriresource, urlparams, and session) but will not
- * have parameters for parameters that are retrieved from the uriResource itself (e.g. the db,
- * dao, synchelper etc).
+ * Add code block that implements acknowledging (ack) entities received by the client
  */
-internal fun generateUpdateTrackerReceivedNanoHttpdFun(trackerClassName: ClassName, syncHelperVarName: String = "_syncHelper") =
-    FunSpec.builder("_update${trackerClassName.simpleName}Received")
-            .addCode(generateUpdateTrackerReceivedCodeBlock(trackerClassName, syncHelperVarName,
-                        serverType = SERVER_TYPE_NANOHTTPD))
-            .addParameters(NANOHTTPD_URIRESOURCE_FUNPARAMS)
-            .returns(NanoHTTPD.Response::class)
+internal fun CodeBlock.Builder.addEntitiesAckCodeBlock(trackerClassName: ClassName,
+                                        syncHelperVarName: String = "_syncHelper",
+                                        syncHelperFnName: String = "_syncHelperFn",
+                                        dbVarName: String = "_db",
+                                        serverType: Int = SERVER_TYPE_KTOR): CodeBlock.Builder {
 
+    addGetClientIdHeader("_clientId", serverType)
+    addGetParamFromHttpRequest(INT, "reqId", "_requestId",
+            serverType = serverType)
+    add("val _ackList: %T<%T> = ", List::class.asClassName(), EntityAck::class.asClassName())
+    addGetParamFromHttpRequest(
+            List::class.asClassName().parameterizedBy(EntityAck::class.asClassName()),
+            "ackList", serverType = serverType)
+    add("\n")
+    takeIf { serverType == SERVER_TYPE_KTOR }?.add("val $syncHelperVarName = $syncHelperFnName($dbVarName)\n")
+    beginControlFlow("$syncHelperVarName._replace${trackerClassName.simpleName}(_ackList.map  ")
+    add("%T(clientId = _clientId, csn = it.csn, epk = it.epk, rx = true)\n", trackerClassName)
+    endControlFlow()
+    add(")\n")
+    takeIf { serverType == SERVER_TYPE_KTOR }?.add(CODEBLOCK_KTOR_NO_CONTENT_RESPOND)
+    takeIf { serverType == SERVER_TYPE_NANOHTTPD }?.add(CODEBLOCK_NANOHTTPD_NO_CONTENT_RESPONSE)
 
-internal fun generateGetAttachmentDataCodeBlock(entityTypeEl: TypeElement, attachmentsDirVarName: String = "_attachmentsDir"): CodeBlock {
-    val entityPkField = entityTypeEl.enclosedElements
-            .first { it.getAnnotation(PrimaryKey::class.java) != null }
-    return CodeBlock.builder()
-            .beginControlFlow("%M(%S)", DbProcessorKtorServer.GET_MEMBER,
-                    "_get${entityTypeEl.simpleName}AttachmentData")
-            .addRequestDi()
-            .add("val $attachmentsDirVarName : String by _di.%M(call).%M(tag = %T.TAG_ATTACHMENT_DIR)\n",
-                DI_ON_MEMBER, DI_INSTANCE_MEMBER, DoorTag::class)
-            .add(generateGetParamFromRequestCodeBlock(entityPkField.asType().asTypeName(),
-                    "_pk", "_pk"))
-            .add("val _file = %T(\"\$${attachmentsDirVarName}/${entityTypeEl.simpleName}/\$_pk\")\n",
-                    File::class)
-            .add("%M.%M(_file)\n", DbProcessorKtorServer.CALL_MEMBER, MemberName("io.ktor.response",
-                    "respondFile"))
-            .endControlFlow()
-            .build()
+    return this
 }
 
 /**
- * Gives a list of all DAOS on the given database. Returns a list of Pairs where the first element
- * is the TypeElement of the databse and the second is a string representing the correct way to
- * access this DAO (e.g. .name if it's a property, or .name() if it's a function)
+ * Adds the Ktor helper interface for the given DAO to the FileSpec
  */
-internal fun daosOnDatabase(dbTypeElement: TypeElement, processingEnv: ProcessingEnvironment): List<Pair<TypeElement, String>> {
-    return methodsToImplement(dbTypeElement, dbTypeElement.asType() as DeclaredType, processingEnv)
-            .filter{ it.kind == ElementKind.METHOD }
-            .map {it as ExecutableElement }
-            .filter{ processingEnv.typeUtils.asElement(it.returnType) != null}
-            .map {
-                var daoFromDbGetter = ""
-                val daoTypeEl = processingEnv.typeUtils.asElement(it.returnType) as TypeElement
+fun FileSpec.Builder.addKtorHelperInterface(daoTypeSpec: TypeSpec, daoClassName: ClassName,
+                                            processingEnv: ProcessingEnvironment) : FileSpec.Builder {
 
-                if (it.simpleName.toString().startsWith("get")) {
-                    daoFromDbGetter += it.simpleName.substring(3, 4).toLowerCase(Locale.ROOT) + it.simpleName.substring(4)
-                } else {
-                    daoFromDbGetter += "${it.simpleName}()"
+    addType(TypeSpec.interfaceBuilder(daoClassName.withSuffix(SUFFIX_KTOR_HELPER))
+            .apply {
+                daoTypeSpec.funSpecsWithSyncableSelectResults(processingEnv).forEach {
+                    addFunction(it.toKtorHelperFunSpec(annotationSpecs = listOf()))
                 }
-
-                Pair(daoTypeEl, daoFromDbGetter)
             }
+            .build())
+
+    return this
 }
+
+/**
+ * Adds a ktor helper abstract dao to the FileSpec. This is the local or primary variant
+ * which contains all the queries that are needed by KTOR endpoints handling syncable select
+ * results.
+ */
+fun FileSpec.Builder.addKtorAbstractDao(daoTypeSpec: TypeSpec, daoClassName: ClassName,
+                                        csnAnnotationClass: KClass<out Annotation>,
+                                        processingEnv: ProcessingEnvironment): FileSpec.Builder {
+    val suffix = if(csnAnnotationClass == MasterChangeSeqNum::class) {
+        SUFFIX_KTOR_HELPER_MASTER
+    }else {
+        SUFFIX_KTOR_HELPER_LOCAL
+    }
+
+    addType(TypeSpec.classBuilder(daoClassName.withSuffix(suffix))
+            .addModifiers(KModifier.ABSTRACT)
+            .addAnnotation(Dao::class)
+            .addSuperinterface(daoClassName.withSuffix(SUFFIX_KTOR_HELPER))
+            .apply {
+                daoTypeSpec.funSpecsWithSyncableSelectResults(processingEnv).forEach {funSpec ->
+                    addFunction(funSpec.toKtorHelperFunSpec(overrides = true,
+                        annotationSpecs = funSpec.filterAnnotationSpecsAndRefactorToSyncableSql(
+                                processingEnv, csnAnnotationClass)))
+                }
+            }
+            .build()
+    )
+
+    return this
+}
+
+
+/**
+ * Adds a Ktor Route function that will subroute all the DAOs on the given database
+ */
+fun FileSpec.Builder.addDbKtorRouteFunction(dbTypeEl: TypeElement,
+                                            processingEnv: ProcessingEnvironment) : FileSpec.Builder {
+
+    fun CodeBlock.Builder.addDbDaoRouteCall(daoClassName: ClassName, suffixLink: String = "_",
+        addSyncHelper: Boolean, requiresKtorHelper: Boolean) : CodeBlock.Builder {
+        //note syncdao suffix link = "" - and it's being generated in the sync annotation processor, not here
+        val helperClasses = listOf(SUFFIX_KTOR_HELPER_MASTER, SUFFIX_KTOR_HELPER_LOCAL)
+                .map {
+                    daoClassName.withSuffix("$it$suffixLink$SUFFIX_JDBC_KT")
+                }
+        add("%M(\n_typeToken, \n", MemberName(daoClassName.packageName,
+                "${daoClassName.simpleName}$SUFFIX_KTOR_ROUTE"))
+        beginControlFlow("")
+                .add("%T(it)\n", daoClassName.withSuffix("_$SUFFIX_JDBC_KT"))
+                .endControlFlow()
+
+        if(addSyncHelper) {
+            beginControlFlow(", ")
+                    .add(" %T(it)\n", dbTypeEl.asClassNameWithSuffix(SUFFIX_SYNCDAO_IMPL))
+                    .endControlFlow()
+        }
+
+        if(requiresKtorHelper) {
+            add(",")
+            beginControlFlow("")
+                    .beginControlFlow("if(_isPrimary)")
+                    .add("%T(it)\n", helperClasses[0])
+                    .nextControlFlow("else")
+                    .add("%T(it)\n", helperClasses[1])
+                    .endControlFlow()
+                    .endControlFlow()
+        }
+
+        add(")\n\n")
+        return this
+    }
+
+
+
+    val dbClassName = dbTypeEl.asClassName()
+    addFunction(FunSpec.builder("${dbClassName.simpleName}$SUFFIX_KTOR_ROUTE")
+            .receiver(Route::class)
+            .addParameter(ParameterSpec.builder("_isPrimary", BOOLEAN)
+                    .defaultValue(true.toString())
+                    .build())
+            .addCode(CodeBlock.builder()
+                    .beginControlFlow("%M(%S)",
+                            MemberName("io.ktor.routing", "route"),
+                            dbClassName.simpleName)
+                    .apply {
+                        dbTypeEl.getAnnotation(MinSyncVersion::class.java)?.also {
+                            add("%M(${it.value})\n",
+                                    MemberName("com.ustadmobile.door.ktor",
+                                            "addDbVersionCheckIntercept"))
+                        }
+
+                        add("val _typeToken: %T<%T> = %M()\n", org.kodein.type.TypeToken::class.java,
+                                dbTypeEl, DbProcessorKtorServer.DI_ERASED_MEMBER)
+                    }.applyIf(dbTypeEl.isDbSyncable(processingEnv)) {
+                        add("%M(_typeToken)\n", MemberName("com.ustadmobile.door.ktor",
+                                "UpdateNotificationsRoute"))
+
+                        val syncDaoClassName = dbClassName.withSuffix(SUFFIX_SYNCDAO_ABSTRACT)
+                        addDbDaoRouteCall(syncDaoClassName, "_", true, true)
+
+                        dbTypeEl.allDbClassDaoGettersWithRepo(processingEnv).forEach {daoGetter ->
+                            val daoTypeEl = daoGetter.returnType.asTypeElement(processingEnv)
+                                    ?: throw IllegalArgumentException("${daoGetter.simpleName} has no return type?")
+                            val hasKtorAndSyncHelper =daoTypeEl.isDaoThatRequiresSyncHelper(processingEnv)
+                            addDbDaoRouteCall(daoTypeEl.asClassName(), "_",
+                                    hasKtorAndSyncHelper, hasKtorAndSyncHelper)
+
+                        }
+                    }
+                    .endControlFlow()
+                    .build())
+            .build())
+    return this
+}
+
+/**
+ * Add a NanoHTTPD mapper function for the database (maps all DAOs for this database to RouterNanoHTTPD)
+ * to this FileSpec.
+ */
+fun FileSpec.Builder.addDbNanoHttpdMapperFunction(dbTypeElement: TypeElement,
+                                          getHelpersFromDb: Boolean = true,
+                                          processingEnv: ProcessingEnvironment) : FileSpec.Builder {
+
+    val dbTypeClassName = dbTypeElement.asClassName()
+    addFunction(FunSpec.builder("${dbTypeClassName.simpleName}$SUFFIX_NANOHTTPD_ADDURIMAPPING")
+            .addParametersForHttpDb(dbTypeElement, false)
+            .addParameter("_mappingPrefix", String::class)
+            .addParameter("_di", DI::class)
+            .receiver(RouterNanoHTTPD::class)
+            .addCode(CodeBlock.builder()
+                    .add("val _typeToken : %T = %M()\n",
+                            org.kodein.type.TypeToken::class.asClassName().parameterizedBy(dbTypeClassName),
+                            MemberName("org.kodein.type", "erased"))
+                    .applyIf(dbTypeElement.isDbSyncable(processingEnv)) {
+                        val syncDaoProviderType = DoorDaoProvider::class.asTypeName().parameterizedBy(
+                                dbTypeClassName, dbTypeClassName.withSuffix(SUFFIX_SYNCDAO_ABSTRACT))
+                        if (getHelpersFromDb) {
+                            add("val _syncDaoProvider = %T() { it._syncDao() }\n",
+                                    syncDaoProviderType)
+                        } else {
+                            add("val _syncDaoProvider = %T(){ %T(it) }\n",
+                                    syncDaoProviderType, ClassName(dbTypeClassName.packageName,
+                                    "${dbTypeClassName.simpleName}${SUFFIX_SYNCDAO_IMPL}"))
+                        }
+                    }.apply {
+                        dbTypeElement.allDbClassDaoGettersWithRepo(processingEnv).forEach { daoGetter ->
+                            val daoTypeEl = daoGetter.returnType.asTypeElement(processingEnv)
+                                    ?: throw IllegalArgumentException("${daoGetter.simpleName} has no return type?")
+                            add("addRoute(\"\$_mappingPrefix/${daoTypeEl.simpleName}/.*\",\n " +
+                                    "%T::class.java, _di,\n %T(){ it.${daoGetter.accessAsPropertyOrFunctionInvocationCall()} }, _typeToken",
+                                    daoTypeEl.asClassNameWithSuffix(SUFFIX_NANOHTTPD_URIRESPONDER),
+                                    DoorDaoProvider::class.asTypeName().parameterizedBy(
+                                        dbTypeClassName, daoTypeEl.asClassName()))
+                            if(daoTypeEl.isDaoThatRequiresSyncHelper(processingEnv)) {
+                                if(getHelpersFromDb) {
+                                    add("\n,")
+                                    add("_syncDaoProvider,\n ")
+                                    beginControlFlow(" %T()",
+                                            DoorDaoProvider::class.asTypeName().parameterizedBy(
+                                                    dbTypeClassName,
+                                                    daoTypeEl.asClassNameWithSuffix(SUFFIX_KTOR_HELPER)))
+                                    beginControlFlow("if(_isPrimary)")
+                                        add("it._${daoTypeEl.simpleName}$SUFFIX_KTOR_HELPER_MASTER()\n")
+                                    nextControlFlow("else")
+                                        add("it._${daoTypeEl.simpleName}$SUFFIX_KTOR_HELPER_LOCAL()\n")
+                                    endControlFlow()
+                                    endControlFlow()
+                                }
+                            }
+                            add(")\n")
+                        }
+                    }
+                    .build())
+            .build())
+
+
+    return this
+}
+
+
+
+
 
 /**
  * This annotation processor generates a KTOR Route for each DAO, and a KTOR Route for each DAO
@@ -418,365 +915,76 @@ internal fun daosOnDatabase(dbTypeElement: TypeElement, processingEnv: Processin
  *  be generated.
  *
  */
+
+
 class DbProcessorKtorServer: AbstractDbProcessor() {
 
 
 
     override fun process(annotations: MutableSet<out TypeElement>?, roundEnv: RoundEnvironment): Boolean {
-        setupDb(roundEnv)
+        roundEnv.getElementsAnnotatedWith(Database::class.java).map { it as TypeElement}.forEach {dbTypeEl ->
+            FileSpec.builder(dbTypeEl.packageName, "${dbTypeEl.simpleName}$SUFFIX_KTOR_ROUTE")
+                    .addDbKtorRouteFunction(dbTypeEl, processingEnv)
+                    .build()
+                    .writeToDirsFromArg(OPTION_KTOR_OUTPUT)
+            FileSpec.builder(dbTypeEl.packageName, "${dbTypeEl.simpleName}$SUFFIX_NANOHTTPD_ADDURIMAPPING")
+                    .addDbNanoHttpdMapperFunction(dbTypeEl, true, processingEnv)
+                    .build()
+                    .writeToDirsFromArg(OPTION_ANDROID_OUTPUT)
+        }
+
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
+        daos.filter { it is TypeElement && it.isDaoWithRepository }.map { it as TypeElement }.forEach {daoTypeEl ->
+            val daoBaseName = daoTypeEl.simpleName.toString()
+            val daoTypeSpec = daoTypeEl.asTypeSpecStub(processingEnv)
 
-        daos.forEach {
-            val daoSpecs =  generateDaoImplClasses(it as TypeElement)
-            daoSpecs.writeAllSpecs(writeImpl = true, writeKtor = true,
-                    outputSpecArgName = OPTION_KTOR_OUTPUT, useFilerAsDefault = false)
-            daoSpecs.writeAllSpecs(writeNanoHttpd = true,
-                    outputSpecArgName = OPTION_ANDROID_OUTPUT, useFilerAsDefault = false)
+            FileSpec.builder(daoTypeEl.packageName, "${daoTypeEl.simpleName}$SUFFIX_KTOR_ROUTE")
+                    .addDaoKtorRouteFun(daoTypeSpec, daoTypeEl.asClassName(),
+                            processingEnv = processingEnv)
+                    .build()
+                    .writeToDirsFromArg(OPTION_KTOR_OUTPUT)
+
+            FileSpec.builder(daoTypeEl.packageName, "${daoTypeEl.simpleName}$SUFFIX_NANOHTTPD_URIRESPONDER")
+                    .addNanoHttpdResponder(daoTypeSpec, daoTypeEl.asClassName(), processingEnv)
+                    .build()
+                    .writeToDirsFromArg(OPTION_ANDROID_OUTPUT)
+
+            if(daoTypeEl.isDaoThatRequiresKtorHelper) {
+                FileSpec.builder(daoTypeEl.packageName, "$daoBaseName$SUFFIX_KTOR_HELPER")
+                        .addKtorHelperInterface(daoTypeSpec, daoTypeEl.asClassName(),
+                                processingEnv)
+                        .build()
+                        .writeToDirsFromArg(listOf(OPTION_KTOR_OUTPUT, OPTION_ANDROID_OUTPUT))
+                FileSpec.builder(daoTypeEl.packageName, "$daoBaseName$SUFFIX_KTOR_HELPER_MASTER")
+                        .addKtorAbstractDao(daoTypeSpec, daoTypeEl.asClassName(),
+                            MasterChangeSeqNum::class, processingEnv)
+                        .build()
+                        .writeToDirsFromArg(listOf(OPTION_KTOR_OUTPUT, OPTION_ANDROID_OUTPUT))
+                FileSpec.builder(daoTypeEl.packageName, "$daoBaseName$SUFFIX_KTOR_HELPER_LOCAL")
+                        .addKtorAbstractDao(daoTypeSpec, daoTypeEl.asClassName(),
+                            LocalChangeSeqNum::class, processingEnv)
+                        .build()
+                        .writeToDirsFromArg(listOf(OPTION_KTOR_OUTPUT, OPTION_ANDROID_OUTPUT))
+                FileSpec.builder(daoTypeEl.packageName,
+                        "$daoBaseName${SUFFIX_KTOR_HELPER_MASTER}_$SUFFIX_JDBC_KT")
+                        .addKtorHelperDaoImplementation(daoTypeSpec, daoTypeEl.asClassName(),
+                            MasterChangeSeqNum::class, processingEnv)
+                        .build()
+                        .writeToDirsFromArg(OPTION_KTOR_OUTPUT)
+
+                FileSpec.builder(daoTypeEl.packageName,
+                        "$daoBaseName${SUFFIX_KTOR_HELPER_LOCAL}_$SUFFIX_JDBC_KT")
+                        .addKtorHelperDaoImplementation(daoTypeSpec, daoTypeEl.asClassName(),
+                                LocalChangeSeqNum::class, processingEnv)
+                        .build()
+                        .writeToDirsFromArg(OPTION_KTOR_OUTPUT)
+            }
         }
 
-        roundEnv.getElementsAnnotatedWith(Database::class.java).forEach {
-            writeFileSpecToOutputDirs(generateDbRoute(it as TypeElement),
-                    AnnotationProcessorWrapper.OPTION_KTOR_OUTPUT)
-            writeFileSpecToOutputDirs(generateNanoHttpdDbMapper(it as TypeElement,
-                    getHelpersFromDb = true), OPTION_ANDROID_OUTPUT, false)
-        }
 
         return true
     }
-
-    fun generateNanoHttpdDbMapper(dbTypeElement: TypeElement, getHelpersFromDb: Boolean = true): FileSpec {
-        val dbTypeClassName = dbTypeElement.asClassName()
-        val dbMapperFileSpec = FileSpec.builder(dbTypeClassName.packageName,
-                "${dbTypeClassName.simpleName}$SUFFIX_NANOHTTPD_ADDURIMAPPING")
-                .addImport("com.ustadmobile.door", "DoorDbType")
-
-        val dbMapperFn = FunSpec.builder("${dbTypeClassName.simpleName}$SUFFIX_NANOHTTPD_ADDURIMAPPING")
-                .addParametersForHttpDb(dbTypeElement, false)
-                .addParameter("_mappingPrefix", String::class)
-                .addParameter("_di", DI::class)
-                .receiver(RouterNanoHTTPD::class)
-        val codeBlock = CodeBlock.builder()
-                .add("val _typeToken : %T = %M()\n",
-                    org.kodein.type.TypeToken::class.asClassName().parameterizedBy(dbTypeClassName),
-                    MemberName("org.kodein.type", "erased"))
-
-        val isSyncableDb = isSyncableDb(dbTypeElement, processingEnv)
-
-        val syncDaoClassName = ClassName(dbTypeClassName.packageName,
-                "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}")
-
-
-
-        if(isSyncableDb) {
-            val syncDaoProviderType = DoorDaoProvider::class.asTypeName().parameterizedBy(
-                    dbTypeClassName, syncDaoClassName)
-            codeBlock.takeIf { !getHelpersFromDb }?.add("val _syncDaoProvider = %T(){ %T(it) }\n",
-                    syncDaoProviderType, ClassName(dbTypeClassName.packageName,
-                            "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}"))
-            codeBlock.takeIf { getHelpersFromDb }?.add("val _syncDaoProvider = %T() { it._syncDao() }\n",
-                syncDaoProviderType)
-        }
-
-        daosOnDatabase(dbTypeElement, processingEnv).forEach {
-            val daoTypeEl = it.first
-            val daoFromDbGetter = it.second
-            val daoTypeClassName = daoTypeEl.asClassName()
-            val responderUriClassName = ClassName(daoTypeClassName.packageName,
-                    "${daoTypeClassName.simpleName}$SUFFIX_NANOHTTPD_URIRESPONDER")
-
-            val minClientDbVersion = dbTypeElement.getAnnotation(MinSyncVersion::class.java)?.value ?: -1
-            codeBlock.add("addRoute(\"\$_mappingPrefix/${daoTypeClassName.simpleName}/.*\",\n " +
-                    "%T::class.java, _di,\n %T(){ it.$daoFromDbGetter }, _typeToken",
-                    responderUriClassName, DoorDaoProvider::class.asTypeName().parameterizedBy(
-                        dbTypeClassName, daoTypeClassName))
-            if(syncableEntitiesOnDao(daoTypeEl.asClassName(), processingEnv).isNotEmpty()) {
-                val ktorHelperBaseName = "${daoTypeClassName.simpleName}$SUFFIX_KTOR_HELPER"
-                val ktorHelperClassName = ClassName(daoTypeClassName.packageName, ktorHelperBaseName)
-                codeBlock.takeIf { getHelpersFromDb }
-                        ?.add("\n,_syncDaoProvider,\n%T() { if(_isPrimary){it._${ktorHelperBaseName}Master()} else {it._${ktorHelperBaseName}Local()} }",
-                            DoorDaoProvider::class.asTypeName().parameterizedBy(dbTypeClassName, ktorHelperClassName))
-            }
-
-            codeBlock.add(")\n")
-        }
-
-        dbMapperFn.addCode(codeBlock.build())
-        dbMapperFileSpec.addFunction(dbMapperFn.build())
-
-        return dbMapperFileSpec.build()
-    }
-
-    fun generateDbRoute(dbTypeElement: TypeElement): FileSpec {
-        val dbTypeClassName = dbTypeElement.asClassName()
-        val dbRouteFileSpec = FileSpec.builder(dbTypeElement.asClassName().packageName,
-                "${dbTypeElement.simpleName}${SUFFIX_KTOR_ROUTE}")
-            .addImport("com.ustadmobile.door", "DoorDbType")
-            .addImport("io.ktor.response", "header")
-
-        val dbRouteFn = FunSpec.builder("${dbTypeElement.simpleName}${SUFFIX_KTOR_ROUTE}")
-                .receiver(Route::class)
-                .addParametersForHttpDb(dbTypeElement, true)
-
-        val codeBlock = CodeBlock.builder()
-
-        val isSyncableDb = isSyncableDb(dbTypeElement, processingEnv)
-
-        val syncDaoImplClassName = ClassName(dbTypeClassName.packageName,
-                "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_IMPL}")
-
-        codeBlock.beginControlFlow("%M(%S)", MemberName("io.ktor.routing", "route"),
-                dbTypeClassName.simpleName)
-
-        val minSyncVersionAnnotation = dbTypeElement.getAnnotation(MinSyncVersion::class.java)
-        if(minSyncVersionAnnotation != null) {
-            codeBlock.beginControlFlow("this.intercept(%T.Features)", ApplicationCallPipeline::class)
-                    .add("val _clientVersion = this.context.request.headers[%T.HEADER_DBVERSION]?.toInt() ?: 0\n",
-                            DoorConstants::class)
-                    .beginControlFlow("if(_clientVersion < ${minSyncVersionAnnotation.value})")
-                    .add("context.request.call.%M(%T.BadRequest, %S)\n", RESPOND_MEMBER,
-                            HttpStatusCode::class,
-                            "Door DB Version does not meet minimum required: ${minSyncVersionAnnotation.value}")
-                    .add("return@intercept finish()\n")
-                    .endControlFlow()
-                    .endControlFlow()
-        }
-
-
-        codeBlock.add("val _typeToken: %T<%T> = %M()\n", org.kodein.type.TypeToken::class.java,
-            dbTypeElement, DI_ERASED_MEMBER)
-        if(isSyncableDb) {
-            val syncDaoBaseName = "${dbTypeClassName.simpleName}${DbProcessorSync.SUFFIX_SYNCDAO_ABSTRACT}"
-            val helperClasses = listOf(SUFFIX_KTOR_HELPER_MASTER, SUFFIX_KTOR_HELPER_LOCAL)
-                    .map {
-                        ClassName(dbTypeClassName.packageName,
-                                "${syncDaoBaseName}$it${DbProcessorJdbcKotlin.SUFFIX_JDBC_KT}")
-                    }
-            codeBlock.add("%M<%T>(_typeToken, { %T(it) }, ",
-                    MemberName(dbTypeClassName.packageName, "${syncDaoBaseName}$SUFFIX_KTOR_ROUTE"),
-                    dbTypeElement, syncDaoImplClassName)
-                    .add("{ if(_isPrimary)·{·%T(it)·}·else·{·%T(it)·} }", helperClasses[0],
-                            helperClasses[1])
-                    .add(")\n")
-        }
-
-
-        daosOnDatabase(dbTypeElement, processingEnv).forEach {
-            val daoTypeEl = it.first
-            val daoFromDbGetter = it.second
-            val daoTypeClassName = daoTypeEl.asClassName()
-
-            codeBlock.add("%M(_typeToken, {it.$daoFromDbGetter }",
-                    MemberName(daoTypeClassName.packageName, "${daoTypeEl.simpleName}$SUFFIX_KTOR_ROUTE"))
-            if(syncableEntitiesOnDao(daoTypeClassName, processingEnv).isNotEmpty()) {
-                val helperClasses = listOf(SUFFIX_KTOR_HELPER_MASTER, SUFFIX_KTOR_HELPER_LOCAL)
-                        .map {
-                            ClassName(daoTypeClassName.packageName,
-                        "${daoTypeClassName.simpleName}$it${DbProcessorJdbcKotlin.SUFFIX_JDBC_KT}")
-                        }
-                codeBlock.add(", { %T(it) }", syncDaoImplClassName)
-                        .add(",{ if(_isPrimary)·{·%T(it)·}·else·{·%T(it)·} }", helperClasses[0],
-                                helperClasses[1])
-            }
-            codeBlock.add(")\n")
-        }
-        codeBlock.endControlFlow()
-
-        dbRouteFn.addCode(codeBlock.build())
-        dbRouteFileSpec.addFunction(dbRouteFn.build())
-
-        return dbRouteFileSpec.build()
-
-
-    }
-
-
-
-    fun generateDaoImplClasses(daoTypeElement: TypeElement): KtorDaoFileSpecs {
-        val specs = KtorDaoSpecs(daoTypeElement.asClassName().packageName,
-                daoTypeElement.asClassName().simpleName)
-
-        specs.ktorRoute.fileSpec.addImport("com.ustadmobile.door", "DoorDbType")
-                .addImport("io.ktor.response", "header")
-
-        val ktorDaoParams = mutableListOf(
-                ParameterSpec.builder("_typeToken",
-                org.kodein.type.TypeToken::class.asClassName().parameterizedBy(TypeVariableName("T"))).build(),
-                ParameterSpec.builder("_daoFn",
-                        LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
-                        returnType = daoTypeElement.asType().asTypeName()))
-                            .build())
-        val nanoHttpdDaoParams = mutableListOf(
-                ParameterSpec.builder("_dao", daoTypeElement.asClassName()).build(),
-                ParameterSpec.builder("_gson", Gson::class.asClassName()).build())
-
-
-        val daoRouteFn = FunSpec.builder("${daoTypeElement.simpleName}$SUFFIX_KTOR_ROUTE")
-                .addTypeVariable(TypeVariableName.invoke("T", DoorDatabase::class))
-                .receiver(Route::class)
-
-        val ktorHelperClassName = ClassName(daoTypeElement.asClassName().packageName,
-                "${daoTypeElement.simpleName}$SUFFIX_KTOR_HELPER")
-
-        val daoHasSyncableEntities = syncableEntitiesOnDao(daoTypeElement.asClassName(), processingEnv)
-                .isNotEmpty()
-
-        if(daoHasSyncableEntities) {
-            val syncHelperClassName = ClassName(pkgNameOfElement(daoTypeElement, processingEnv),
-                    "${daoTypeElement.simpleName}_SyncHelper")
-            ktorDaoParams += ParameterSpec.builder("_syncHelperFn",
-                    LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
-                            returnType = syncHelperClassName))
-                    .build()
-            ktorDaoParams += ParameterSpec.builder("_ktorHelperDaoFn",
-                    LambdaTypeName.get(parameters = *arrayOf(TypeVariableName("T")),
-                        returnType = ktorHelperClassName))
-                    .build()
-
-            nanoHttpdDaoParams += ParameterSpec.builder("_syncHelper",
-                    syncHelperClassName).build()
-            nanoHttpdDaoParams += ParameterSpec.builder("_ktorHelperDao",
-                    ktorHelperClassName).build()
-        }
-
-        daoRouteFn.addParameters(ktorDaoParams)
-
-        val ktorCodeBlock = CodeBlock.builder()
-            .beginControlFlow("%M(%S)", MemberName("io.ktor.routing", "route"),
-                "${daoTypeElement.simpleName}")
-
-        val nanoHttpdGetFns = mutableListOf<String>()
-        val nanoHttpdPostFns = mutableListOf<String>()
-
-        val implementedMethodNames = mutableSetOf<String>()
-        methodsToImplement(daoTypeElement, daoTypeElement.asType() as DeclaredType, processingEnv,
-                includeImplementedMethods = true).forEach { daoSubEl ->
-            if(daoSubEl.simpleName.toString() in implementedMethodNames) {
-                return@forEach
-            }
-
-            implementedMethodNames += daoSubEl.simpleName.toString()
-            val daoMethodEl = daoSubEl as ExecutableElement
-            val daoMethodResolved = processingEnv.typeUtils.asMemberOf(daoTypeElement.asType() as DeclaredType,
-                    daoMethodEl) as ExecutableType
-            val resolvedReturnTypeName = resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType()
-            val resultType = resolveQueryResultType(resolvedReturnTypeName)
-            val componentEntityType = resolveEntityFromResultType(resultType)
-            val nanoHttpdFun = FunSpec.builder(daoSubEl.simpleName.toString())
-                    .returns(NanoHTTPD.Response::class)
-                    .addParameter("_uriResource", RouterNanoHTTPD.UriResource::class)
-                    .addParameter("_urlParams",
-                            Map::class.parameterizedBy(String::class, String::class))
-                    .addParameter("_session", NanoHTTPD.IHTTPSession::class)
-                    .addParameters(nanoHttpdDaoParams)
-            val nanoHttpdCodeBlock = CodeBlock.builder()
-
-
-            val numNonQueryParams = getHttpBodyParams(daoMethodEl, daoMethodResolved).size
-
-            val memberFn = if(numNonQueryParams == 1){
-                nanoHttpdPostFns.add(daoSubEl.simpleName.toString())
-                POST_MEMBER
-            }else {
-                nanoHttpdGetFns.add(daoSubEl.simpleName.toString())
-                GET_MEMBER
-            }
-
-
-            ktorCodeBlock.beginControlFlow("%M(%S)", memberFn, daoSubEl.simpleName)
-                    .addRequestDi()
-                    .add("val _dao = _daoFn(_db)\n")
-                    .add("val _gson: %T by _di.%M()\n", Gson::class, DI_INSTANCE_MEMBER)
-
-            val funSpec = FunSpec.builder(daoMethodEl.simpleName.toString())
-                    .returns(resolveReturnTypeIfSuspended(daoMethodResolved).javaToKotlinType())
-            funSpec.takeIf {daoMethodResolved.parameterTypes.any { isContinuationParam(it.asTypeName()) }}
-                    ?.addModifiers(KModifier.SUSPEND)
-
-            daoMethodEl.parameters
-                    .filter { !isContinuationParam(it.asType().asTypeName()) }
-                    .forEachIndexed { index, paramEl ->
-                funSpec.addParameter(paramEl.simpleName.toString(),
-                        daoMethodResolved.parameterTypes[index].asTypeName().javaToKotlinType())
-            }
-
-            val queryAnnotation = daoSubEl.getAnnotation(Query::class.java)
-            if(queryAnnotation != null
-                    && componentEntityType is ClassName
-                    && findSyncableEntities(componentEntityType, processingEnv).isNotEmpty()) {
-                //Generate a codeblock to handle syncable result types
-                funSpec.addAnnotation(AnnotationSpec.builder(Query::class.asClassName())
-                        .addMember(CodeBlock.of("%S", queryAnnotation.value)).build())
-                val funSpecBuilt = funSpec.build()
-                ktorCodeBlock
-                        .add("val _ktorHelperDao = _ktorHelperDaoFn(_db)\n")
-                        .add("val _syncHelper = _syncHelperFn(_db)\n")
-                        .add(generateKtorRouteSelectCodeBlock(funSpecBuilt,
-                        daoTypeElement, serverType = SERVER_TYPE_KTOR))
-                nanoHttpdCodeBlock.add(generateKtorRouteSelectCodeBlock(funSpecBuilt,
-                        daoTypeElement, serverType = SERVER_TYPE_NANOHTTPD))
-
-                val isDataSourceFactory = resolvedReturnTypeName is ParameterizedTypeName
-                        && resolvedReturnTypeName.rawType == DataSource.Factory::class.asClassName()
-
-                val helperParamList = funSpecBuilt.parameters.toMutableList()
-                if(isDataSourceFactory) {
-                    helperParamList += ParameterSpec.builder(PARAM_NAME_OFFSET, INT).build()
-                    helperParamList += ParameterSpec.builder(PARAM_NAME_LIMIT, INT).build()
-                }
-                helperParamList += ParameterSpec.builder("clientId", INT).build()
-
-                val querySql = daoSubEl.getAnnotation(Query::class.java).value
-                val helperFunSpec = FunSpec.builder(funSpecBuilt.name)
-                        .addParameters(helperParamList)
-                        .returns(resultType.copy(nullable = isNullableResultType(resultType)))
-                        .build()
-                specs.addHelperQueryFun(helperFunSpec, querySql, componentEntityType,
-                        isDataSourceFactory)
-            }else {
-                val funSpecBuilt = funSpec.build()
-                ktorCodeBlock.add(generateHttpServerPassToDaoCodeBlock(funSpecBuilt,
-                        serverType = SERVER_TYPE_KTOR))
-                nanoHttpdCodeBlock.add(generateHttpServerPassToDaoCodeBlock(funSpecBuilt,
-                        serverType = SERVER_TYPE_NANOHTTPD))
-            }
-
-            ktorCodeBlock.endControlFlow()
-            specs.nanoHttpdResponder.typeSpec.addFunction(nanoHttpdFun
-                    .addCode(nanoHttpdCodeBlock.build())
-                    .build())
-        }
-
-        syncableEntitiesOnDao(daoTypeElement.asClassName(), processingEnv).forEach {
-            val syncableEntityinfo = SyncableEntityInfo(it, processingEnv)
-            ktorCodeBlock.add(generateUpdateTrackerReceivedKtorRoute(syncableEntityinfo.tracker))
-            specs.nanoHttpdResponder.typeSpec.addFunction(generateUpdateTrackerReceivedNanoHttpdFun(
-                    syncableEntityinfo.tracker)
-                    .addParameters(nanoHttpdDaoParams)
-                    .build()
-                    .also { nanoHttpdGetFns.add(it.name) }
-            )
-        }
-
-        queryResultTypesWithAnnotationOnDao(daoTypeElement.asClassName(), EntityWithAttachment::class.java,
-                processingEnv).forEach {
-            val entityTypeEl = processingEnv.elementUtils.getTypeElement(it.canonicalName) as TypeElement
-            ktorCodeBlock.add(generateGetAttachmentDataCodeBlock(entityTypeEl))
-        }
-
-
-
-        specs.nanoHttpdResponder.typeSpec.addNanoHttpdUriResponderFuns(nanoHttpdGetFns,
-                nanoHttpdPostFns, nanoHttpdDaoParams, daoTypeElement.asClassName(),
-                isSyncable = daoHasSyncableEntities)
-
-        ktorCodeBlock.endControlFlow()
-        daoRouteFn.addCode(ktorCodeBlock.build())
-        specs.ktorRoute.fileSpec.addFunction(daoRouteFn.build())
-
-        return specs.toBuiltFileSpecs()
-    }
-
 
 
     companion object {
@@ -821,12 +1029,6 @@ class DbProcessorKtorServer: AbstractDbProcessor() {
 
         internal val CODEBLOCK_KTOR_NO_CONTENT_RESPOND = CodeBlock.of("%M.%M(%T.NoContent, %S)\n",
                 CALL_MEMBER, RESPOND_MEMBER, HttpStatusCode::class, "")
-
-        internal val NANOHTTPD_URIRESOURCE_FUNPARAMS = listOf<ParameterSpec>(
-                ParameterSpec.builder("_uriResource", RouterNanoHTTPD.UriResource::class).build(),
-                ParameterSpec.builder("_urlParams",
-                        Map::class.parameterizedBy(String::class, String::class)).build(),
-                ParameterSpec.builder("_session", NanoHTTPD.IHTTPSession::class).build())
 
     }
 }

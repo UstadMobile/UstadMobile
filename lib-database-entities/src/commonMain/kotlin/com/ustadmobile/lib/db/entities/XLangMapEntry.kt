@@ -10,7 +10,10 @@ import com.ustadmobile.lib.db.entities.XLangMapEntry.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = TABLE_ID,
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${XLangMapEntry.TABLE_ID} AS tableId 
+        FROM DeviceSession"""])
 @Serializable
 data class XLangMapEntry(
         var verbLangMapUid: Long = 0L,

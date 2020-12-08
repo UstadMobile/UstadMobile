@@ -25,6 +25,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -32,7 +33,8 @@ import org.kodein.di.on
 
 
 class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzWorkWithSubmission>(),
-        ClazzWorkSubmissionMarkingView, NewCommentHandler{
+        ClazzWorkSubmissionMarkingView, NewCommentHandler, SimpleButtonHandler,
+        SimpleTwoButtonHandler{
 
     internal var mBinding: FragmentClazzWorkSubmissionMarkingBinding? = null
 
@@ -47,19 +49,23 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         get() = requireContext()
 
     private var submissionHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter?= null
-    private var submissionResultRecyclerAdapter: SubmissionResultRecyclerAdapter? = null
 
     private var markingEditRecyclerAdapter
             : ClazzWorkSubmissionScoreEditRecyclerAdapter? = null
-    private var submissionFreeTextRecyclerAdapter
-            : SubmissionTextEntryWithResultRecyclerAdapter? = null
+
+    private var shortTextSubmissionRecyclerAdapter:
+            ClazzWorkShortTextSubmissionRecyclerAdapter? = null
+
+    private var shortTextResultRecyclerAdapter:
+            ClazzWorkShortTextResultRecyclerAdapter? = null
 
     private var markingHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
     private var questionsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter?= null
-    private var quizQuestionsRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter? = null
+    private var quizViewRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter? = null
     private val quizQuestionAndResponseObserver = Observer<List<ClazzWorkQuestionAndOptionWithResponse>?> {
-        t -> quizQuestionsRecyclerAdapter?.submitList(t)
+        t -> quizViewRecyclerAdapter?.submitList(t)
     }
+    private var quizEditRecyclerAdapter: ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter? = null
 
     private var privateCommentsHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter? = null
     private var privateCommentsObserver: Observer<PagedList<CommentsWithPerson>>? = null
@@ -68,10 +74,11 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
     private var newPrivateCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
     private var privateCommentsMergerRecyclerAdapter: MergeAdapter? = null
     private var submitWithMetricsRecyclerAdapter: ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter ? = null
+    private var recordForStudentButtonRecyclerAdapter: SimpleButtonRecyclerAdapter? = null
+    private var simpleTwoButtonRecyclerAdapter: SimpleTwoButtonRecyclerAdapter? = null
 
     private var detailMergerRecyclerAdapter: MergeAdapter? = null
     private var detailMergerRecyclerView: RecyclerView? = null
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -97,21 +104,30 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
         submitWithMetricsRecyclerAdapter =
                 ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter(
-                        clazzWorkMetrics, entity, mPresenter,false, isMarkingFinished)
-        submissionResultRecyclerAdapter = SubmissionResultRecyclerAdapter(
-                        clazzWorkWithSubmission)
-        submissionResultRecyclerAdapter?.visible = false
+                        clazzWorkMetrics, mPresenter, isMarkingFinished)
 
-        markingEditRecyclerAdapter =
-                ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWorkWithSubmission)
-        markingEditRecyclerAdapter?.visible = false
 
-        submissionFreeTextRecyclerAdapter =
-                SubmissionTextEntryWithResultRecyclerAdapter(
-                        visible = false)
-        submissionFreeTextRecyclerAdapter?.visible = false
-        submissionFreeTextRecyclerAdapter?.markingMode = true
+        quizEditRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseEditRecyclerAdapter()
 
+        recordForStudentButtonRecyclerAdapter =
+                SimpleButtonRecyclerAdapter(getText(R.string.record_for_student).toString(),
+                        this)
+        recordForStudentButtonRecyclerAdapter?.isOutline = true
+        recordForStudentButtonRecyclerAdapter?.visible = true
+
+        simpleTwoButtonRecyclerAdapter = SimpleTwoButtonRecyclerAdapter(
+                getText(R.string.submit).toString(),getText(R.string.cancel).toString(),
+                this)
+        simpleTwoButtonRecyclerAdapter?.visible = false
+
+
+        markingEditRecyclerAdapter = ClazzWorkSubmissionScoreEditRecyclerAdapter(entity)
+
+        shortTextSubmissionRecyclerAdapter = ClazzWorkShortTextSubmissionRecyclerAdapter(entity)
+        shortTextSubmissionRecyclerAdapter?.visible = false
+
+        shortTextResultRecyclerAdapter = ClazzWorkShortTextResultRecyclerAdapter(entity)
+        shortTextResultRecyclerAdapter?.visible = false
 
         submissionHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.submission).toString())
@@ -122,7 +138,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         questionsHeadingRecyclerAdapter?.visible = true
 
         markingHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(getText(R.string.marking).toString())
-        markingHeadingRecyclerAdapter?.visible = true
 
         privateCommentsHeadingRecyclerAdapter = SimpleHeadingRecyclerAdapter(
                 getText(R.string.private_comments).toString()
@@ -136,8 +151,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         )
         newPrivateCommentRecyclerAdapter?.visible = true
 
-        quizQuestionsRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter(
-                false)
+        quizViewRecyclerAdapter = ClazzWorkQuestionAndOptionsWithResponseViewRecyclerAdapter()
 
         privateCommentsRecyclerAdapter = CommentsRecyclerAdapter().also{
             privateCommentsObserver = PagedListSubmitObserver(it)
@@ -148,10 +162,12 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
                 newPrivateCommentRecyclerAdapter)
 
         detailMergerRecyclerAdapter = MergeAdapter(
-                submissionHeadingRecyclerAdapter, submissionFreeTextRecyclerAdapter,
-                quizQuestionsRecyclerAdapter, markingHeadingRecyclerAdapter,
-                markingEditRecyclerAdapter, privateCommentsMergerRecyclerAdapter,
-                submitWithMetricsRecyclerAdapter
+                submissionHeadingRecyclerAdapter, shortTextSubmissionRecyclerAdapter,
+                shortTextResultRecyclerAdapter,
+                quizViewRecyclerAdapter, quizEditRecyclerAdapter,
+                recordForStudentButtonRecyclerAdapter, simpleTwoButtonRecyclerAdapter,
+                markingHeadingRecyclerAdapter, markingEditRecyclerAdapter,
+                privateCommentsMergerRecyclerAdapter, submitWithMetricsRecyclerAdapter
         )
         detailMergerRecyclerView?.adapter = detailMergerRecyclerAdapter
         detailMergerRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
@@ -171,15 +187,68 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
         mBinding = null
         mPresenter = null
         entity = null
+        submissionHeadingRecyclerAdapter = null
+        markingEditRecyclerAdapter = null
+        shortTextSubmissionRecyclerAdapter = null
+        shortTextResultRecyclerAdapter = null
+        markingHeadingRecyclerAdapter = null
+        questionsHeadingRecyclerAdapter = null
+        quizViewRecyclerAdapter = null
+        quizEditRecyclerAdapter = null
+        privateCommentsHeadingRecyclerAdapter = null
         privateCommentsRecyclerAdapter = null
+        newPrivateCommentRecyclerAdapter = null
+        privateCommentsMergerRecyclerAdapter = null
+        submitWithMetricsRecyclerAdapter = null
+        recordForStudentButtonRecyclerAdapter = null
+        simpleTwoButtonRecyclerAdapter = null
+        detailMergerRecyclerAdapter = null
+        detailMergerRecyclerView = null
+
     }
 
-    override fun onResume() {
-        super.onResume()
-    }
+    override var showRecordForStudent: Boolean = false
+        set(value) {
+            field = value
+            recordForStudentButtonRecyclerAdapter?.visible = value
+        }
+
+    override var showSubmissionHeading: Boolean = false
+        set(value) {
+            field = value
+            submissionHeadingRecyclerAdapter?.visible = value
+        }
+
+    override var showSimpleTwoButton: Boolean = false
+        set(value) {
+            field = value
+            simpleTwoButtonRecyclerAdapter?.visible = value
+        }
+
+
+    override var setQuizEditList: Boolean = false
+        set(value) {
+            field = value
+            if(value){
+                quizEditRecyclerAdapter?.submitList(editableQuizQuestions?.value)
+            }else{
+                quizEditRecyclerAdapter?.submitList(listOf())
+            }
+        }
+
+    override var showShortTextResult: Boolean = false
+        set(value) {
+            field = value
+            shortTextResultRecyclerAdapter?.visible = value
+        }
+
+    override var showShortTextSubmission: Boolean = false
+        set(value) {
+            field = value
+            shortTextSubmissionRecyclerAdapter?.visible = value
+        }
 
     override var entity: ClazzMemberAndClazzWorkWithSubmission? = null
-        get() = field
         set(value) {
             field = value
 
@@ -190,84 +259,103 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
             ustadFragmentTitle = value?.person?.fullName()?:""
 
-            val clazzWorkWithSubmission: ClazzWorkWithSubmission =
-                    ClazzWorkWithSubmission().generateWithClazzWorkAndClazzWorkSubmission(
-                            entity?.clazzWork?: ClazzWork(), entity?.submission
-                    )
+            //Don't show the button if submission exists or submission is not required.
+            markingEditRecyclerAdapter?.clazzWorkVal = value
+            markingEditRecyclerAdapter?.visible = true
 
-            submissionResultRecyclerAdapter?.submitList(listOf(clazzWorkWithSubmission))
-            markingEditRecyclerAdapter?.submitList(listOf(clazzWorkWithSubmission))
+            shortTextSubmissionRecyclerAdapter?.clazzWorkWithSubmission = value
+            shortTextResultRecyclerAdapter?.clazzWorkWithSubmission = value
 
-            val submission = entity?.submission
-            if(submission != null && submission.clazzWorkSubmissionUid != 0L){
-                submissionHeadingRecyclerAdapter?.visible = true
-            }else{
-                submissionHeadingRecyclerAdapter?.visible = false
-                quizQuestionsRecyclerAdapter?.submitList(listOf())
+
+            //If already submitted.
+            if(entity?.submission != null && entity?.submission?.clazzWorkSubmissionUid != 0L){
+                markingHeadingRecyclerAdapter?.visible = true
+                markingEditRecyclerAdapter?.visible = true
+                markingEditRecyclerAdapter?.clazzWorkVal = entity
+                markingEditRecyclerAdapter?.notifyDataSetChanged()
+                shortTextResultRecyclerAdapter?.visible = true
             }
-
-            if(entity?.clazzWork?.clazzWorkSubmissionType ==
-                    ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_SHORT_TEXT ){
-                submissionFreeTextRecyclerAdapter?.submitList(listOf(clazzWorkWithSubmission))
-                submissionFreeTextRecyclerAdapter?.visible = true
-            }else{
-                submissionFreeTextRecyclerAdapter?.visible = false
-            }
-
-            submitWithMetricsRecyclerAdapter?.submitList(listOf(clazzWorkMetrics))
-            submitWithMetricsRecyclerAdapter?.visible = true
-            submitWithMetricsRecyclerAdapter?.showNext = isMarkingFinished
-            submitWithMetricsRecyclerAdapter?.passThis = entity
-
 
         }
 
     override var privateComments: DataSource.Factory<Int, CommentsWithPerson>? = null
-        get() = field
         set(value) {
+            field = value
             val privateCommentsObserverVal = privateCommentsObserver?:return
             privateCommentsLiveData?.removeObserver(privateCommentsObserverVal)
             privateCommentsLiveData = value?.asRepositoryLiveData(dbRepo.commentsDao)
-            privateCommentsLiveData?.observe(viewLifecycleOwner, privateCommentsObserverVal)
+            privateCommentsLiveData?.observeIfFragmentViewIsReady(this, privateCommentsObserverVal)
         }
 
 
-    override var submissionQuestionAndOptionsWithResponse
+    override var viewOnlyQuizQuestions
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>? = null
-        get() = field
         set(value) {
             field?.removeObserver(quizQuestionAndResponseObserver)
             field = value
-            value?.observe(viewLifecycleOwner, quizQuestionAndResponseObserver)
+            value?.observeIfFragmentViewIsReady(this, quizQuestionAndResponseObserver)
         }
 
+
+    override var editableQuizQuestions
+            : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>? = null
 
     override var isMarkingFinished: Boolean = false
-        get() = field
-        set(value) {
-            field = value
-        }
+
     override var clazzWorkMetrics: ClazzWorkWithMetrics? = null
-        get() = field
         set(value) {
 
             field = value
-            submitWithMetricsRecyclerAdapter?.visible = true
             submitWithMetricsRecyclerAdapter?.showNext = isMarkingFinished
-            submitWithMetricsRecyclerAdapter?.passThis = entity
             submitWithMetricsRecyclerAdapter?.submitList(listOf(clazzWorkMetrics))
 
         }
 
     override var fieldsEnabled: Boolean = true
-        get() = field
-        set(value) {
-            field = value
-        }
 
     override fun addNewComment2(view: View, entityType: Int, entityUid: Long, comment: String,
                                 public: Boolean, to: Long, from: Long) {
         (view.parent as View).findViewById<EditText>(R.id.item_comment_new_comment_et).setText("")
         mPresenter?.addComment(entityType, entityUid, comment, public, to, from)
+    }
+
+    //On click "Record for student" button
+    override fun onClickButton(view: View) {
+        mPresenter?.handleClickRecordForStudent()
+        //Scroll to top:
+        detailMergerRecyclerView?.smoothScrollToPosition(0);
+    }
+
+
+    //On click 'Submit' on Recording on behalf
+    override fun onClickPrimary(view: View) {
+        simpleTwoButtonRecyclerAdapter?.visible = false
+
+
+        markingHeadingRecyclerAdapter?.visible = true
+        markingEditRecyclerAdapter?.visible = true
+
+        quizEditRecyclerAdapter?.submitList(listOf())
+
+        mPresenter?.handleClickSubmitOnBehalf()
+        recordForStudentButtonRecyclerAdapter?.visible = false
+        quizViewRecyclerAdapter?.submitList(editableQuizQuestions?.value)
+
+        shortTextSubmissionRecyclerAdapter?.showSubmissionEdit = false
+        shortTextSubmissionRecyclerAdapter?.notifyDataSetChanged()
+        shortTextSubmissionRecyclerAdapter?.visible = false
+        submissionHeadingRecyclerAdapter?.visible = true
+
+        shortTextResultRecyclerAdapter?.visible = true
+    }
+
+    //On click cancel for student recording on their behalf
+    override fun onClickSecondary(view: View) {
+        quizEditRecyclerAdapter?.submitList(listOf())
+        simpleTwoButtonRecyclerAdapter?.visible = false
+        recordForStudentButtonRecyclerAdapter?.visible = true
+        shortTextSubmissionRecyclerAdapter?.showSubmissionEdit = false
+
+        shortTextSubmissionRecyclerAdapter?.visible = false
     }
 }

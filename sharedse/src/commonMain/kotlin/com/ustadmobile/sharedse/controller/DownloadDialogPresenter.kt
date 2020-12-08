@@ -8,7 +8,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UMStorageDir
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
@@ -26,8 +25,8 @@ import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.db.entities.DownloadJobSizeInfo
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
+import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.sharedse.network.DownloadPreparationRequester
-import com.ustadmobile.sharedse.network.requestDelete
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
@@ -251,7 +250,7 @@ class DownloadDialogPresenter(context: Any,
         val currentDownloadJobItemVal = currentDownloadJobItem
         when {
             currentDownloadJobItem.isStatusCompletedSuccessfully() && currentDownloadJobItemVal != null ->
-                requestDelete(currentDownloadJobItemVal.djiDjUid, containerDownloadManager, context)
+                createDeleteJobAndRequestPreparation(currentDownloadJobItemVal.djiUid)
 
             currentDownloadJobItem.isStatusPaused() && currentDownloadJobItemVal != null -> GlobalScope.launch {
                 containerDownloadManager.enqueue(currentDownloadJobItemVal.djiDjUid)
@@ -261,6 +260,11 @@ class DownloadDialogPresenter(context: Any,
                 createDownloadJobAndRequestPreparation()
             }
         }
+    }
+
+    private fun createDeleteJobAndRequestPreparation(downloadJobItemUid: Int) {
+        val deleteRequester: DeletePreparationRequester by on(accountManager.activeAccount).instance()
+        deleteRequester.requestDelete(downloadJobItemUid)
     }
 
     /**

@@ -12,15 +12,16 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.tincan.UmAccountActor
+import com.ustadmobile.core.tincan.UmAccountGroupActor
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.XapiPackageContentView
-import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.util.test.extractTestResourceToFile
@@ -37,6 +38,7 @@ import java.util.concurrent.CountDownLatch
 
 class XapiPackageContentPresenterTest {
 
+    private lateinit var learnerGroup: LearnerGroup
     private lateinit var context: Any
 
     val account = UmAccount(42, "username", "fefe1010fe",
@@ -82,7 +84,7 @@ class XapiPackageContentPresenterTest {
         xapiContainer = Container().also {
             it.containerContentEntryUid = contentEntryUid
         }
-        xapiContainer.containerUid = db.containerDao.insert(xapiContainer)
+        xapiContainer.containerUid = repo.containerDao.insert(xapiContainer)
 
         xapiTmpFile = File.createTempFile("testxapipackagecontentpresenter",
                 "xapiTmpFile")
@@ -100,6 +102,43 @@ class XapiPackageContentPresenterTest {
                 Thread(it.getArgument<Any>(0) as Runnable).start()
             }
         }
+
+        learnerGroup = LearnerGroup().apply {
+            learnerGroupUid = 1
+            learnerGroupName = "Test"
+            repo.learnerGroupDao.insert(this)
+        }
+
+        LearnerGroupMember().apply {
+            learnerGroupMemberLgUid = learnerGroup.learnerGroupUid
+            learnerGroupMemberPersonUid = account.personUid
+            learnerGroupMemberRole = LearnerGroupMember.PRIMARY_ROLE
+            repo.learnerGroupMemberDao.insert(this)
+        }
+
+        Person().apply {
+            personUid = 1
+            admin = true
+            username = "Student"
+            firstNames = "Test"
+            lastName = "Student"
+            repo.personDao.insert(this)
+        }
+
+        LearnerGroupMember().apply {
+            learnerGroupMemberLgUid = learnerGroup.learnerGroupUid
+            learnerGroupMemberPersonUid = 1
+            learnerGroupMemberRole = LearnerGroupMember.PARTICIPANT_ROLE
+            repo.learnerGroupMemberDao.insert(this)
+        }
+
+        GroupLearningSession().apply {
+            groupLearningSessionUid = 1
+            groupLearningSessionContentUid = contentEntryUid
+            groupLearningSessionLearnerGroupUid = learnerGroup.learnerGroupUid
+            repo.groupLearningSessionDao.insert(this)
+        }
+
     }
 
     @After
@@ -120,7 +159,7 @@ class XapiPackageContentPresenterTest {
         xapiPresenter.onCreate(null)
 
         argumentCaptor<String> {
-            verify(mockedView, timeout(5000 * 5000)).url = capture()
+            verify(mockedView, timeout(5000 )).url = capture()
             val httpd = di.direct.instance<ContainerMounter>() as EmbeddedHTTPD
             Assert.assertTrue("Mounted path starts with url and html name",
                     firstValue.startsWith(httpd.localHttpUrl) && firstValue.contains("tetris.html"))
@@ -128,6 +167,42 @@ class XapiPackageContentPresenterTest {
             val umAccountActor = Json.parse(UmAccountActor.serializer(), paramsProvided["actor"]!!)
             Assert.assertEquals("Account actor is as expected",
                     account.username, umAccountActor.account.name)
+            val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/${UMURLEncoder.encodeUTF8(endpoint.url)}/xapi/$contentEntryUid/")
+            Assert.assertEquals("Received expected Xapi endpoint: /endpoint/xapi/contentEntryUid",
+                    expectedEndpoint, paramsProvided["endpoint"])
+            Assert.assertEquals("Received expected activity id",
+                    "http://id.tincanapi.com/activity/tincan-prototypes/tetris",
+                    paramsProvided["activity_id"])
+        }
+
+        verify(mockedView, timeout(15000)).contentTitle = "Tin Can Tetris Example"
+    }
+
+
+    @Test
+    fun givenValidXapiPackage_whenCreatedWithGroup_shouldLoadAndSetTitle() {
+        val args = Hashtable<String, String>()
+        Assert.assertNotNull(xapiContainer)
+        args.put(UstadView.ARG_CONTAINER_UID, xapiContainer.containerUid.toString())
+        args[ARG_LEARNER_GROUP_UID] = learnerGroup.learnerGroupUid.toString()
+        args[ARG_CONTENT_ENTRY_UID] = contentEntryUid.toString()
+
+        val xapiPresenter = XapiPackageContentPresenter(context, args, mockedView, di)
+        xapiPresenter.onCreate(null)
+
+        argumentCaptor<String> {
+            verify(mockedView, timeout(5000 )).url = capture()
+            val httpd = di.direct.instance<ContainerMounter>() as EmbeddedHTTPD
+            Assert.assertTrue("Mounted path starts with url and html name",
+                    firstValue.startsWith(httpd.localHttpUrl) && firstValue.contains("tetris.html"))
+            val paramsProvided = UMFileUtil.parseURLQueryString(firstValue)
+            val umAccountGroupActor = Json.parse(UmAccountGroupActor.serializer(), paramsProvided["actor"]!!)
+            Assert.assertEquals("Actor object type is group",
+                    umAccountGroupActor.objectType, "Group")
+            Assert.assertEquals("Actor account name is groupUid",
+                    "group:${learnerGroup.learnerGroupUid}",   umAccountGroupActor.account.name)
+            Assert.assertEquals("Actor member list is 2",
+                   2,  umAccountGroupActor.members.size)
             val expectedEndpoint = UMFileUtil.resolveLink(firstValue, "/${UMURLEncoder.encodeUTF8(endpoint.url)}/xapi/$contentEntryUid/")
             Assert.assertEquals("Received expected Xapi endpoint: /endpoint/xapi/contentEntryUid",
                     expectedEndpoint, paramsProvided["endpoint"])

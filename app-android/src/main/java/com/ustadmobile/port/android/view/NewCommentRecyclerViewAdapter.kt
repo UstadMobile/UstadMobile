@@ -72,6 +72,7 @@ class NewCommentRecyclerViewAdapter(
                     it.entityUid = entityUid
                     it.toComment = commentTo
                     it.fromComment = commentFrom
+
                 })
     }
 

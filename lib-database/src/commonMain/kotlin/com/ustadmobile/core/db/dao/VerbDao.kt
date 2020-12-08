@@ -5,18 +5,14 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.VerbDisplay
 import com.ustadmobile.lib.db.entities.VerbEntity
 import kotlin.js.JsName
 
 @Dao
-@UmRepository
+@Repository
 abstract class VerbDao : BaseDao<VerbEntity> {
-
-    @JsName("insertListAsync")
-    @Insert
-    abstract suspend fun insertListAsync(entityList: List<VerbEntity>)
 
     @Query("SELECT * FROM VerbEntity WHERE urlId = :urlId")
     abstract fun findByUrl(urlId: String?): VerbEntity?

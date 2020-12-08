@@ -1,17 +1,21 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.Embedded
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
-@Entity
+@Entity(indices = [Index(value = ["status","itemType"])])
 @Serializable
-class ScrapeQueueItem() {
+open class ScrapeQueueItem() {
 
     @PrimaryKey(autoGenerate = true)
     var sqiUid: Int = 0
 
     var sqiContentEntryParentUid: Long = 0
+
+    var sqiContentEntryUid: Long = 0
 
     var destDir: String? = null
 
@@ -34,6 +38,8 @@ class ScrapeQueueItem() {
     var timeFinished: Long = 0
 
     var priority: Int = 0
+
+    var overrideEntry: Boolean = false
 
     companion object {
 

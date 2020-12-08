@@ -3,43 +3,29 @@ package com.ustadmobile.port.android.view
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.Navigation
-import androidx.recyclerview.widget.RecyclerView
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.contrib.RecyclerViewActions.actionOnItem
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withTagValue
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
+import com.ustadmobile.port.android.screen.ClazzListScreen
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.*
-import org.hamcrest.Matchers.equalTo
+import com.ustadmobile.test.rules.SystemImplTestNavHostRule
+import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
 @AdbScreenRecord("Class list screen tests")
-class ClazzListFragmentTest  {
+class ClazzListFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
-
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
 
     @AdbScreenRecord("List screen should show class in database and allow clicking on item")
@@ -48,34 +34,54 @@ class ClazzListFragmentTest  {
         val testEntity = Clazz().apply {
             clazzName = "Test Name"
             isClazzActive = true
-            clazzUid = dbRule.db.clazzDao.insert(this)
+            clazzUid = dbRule.repo.clazzDao.insert(this)
         }
 
-        dbRule.insertPersonForActiveUser(Person().apply {
-            admin = true
-            firstNames = "Test"
-            lastName = "User"
-        })
 
-        val fragmentScenario = launchFragmentInContainer(
-            bundleOf(), themeResId = R.style.UmTheme_App){
-            ClazzListFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            } }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
-        fragmentScenario.onFragment {
-            Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
+        init {
+
+            dbRule.insertPersonForActiveUser(Person().apply {
+                admin = true
+                firstNames = "Test"
+                lastName = "User"
+            })
+
+            val fragmentScenario = launchFragmentInContainer(
+                    bundleOf(), themeResId = R.style.UmTheme_App){
+                ClazzListFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                } }
+
+            fragmentScenario.onFragment {
+                Navigation.setViewNavController(it.requireView(), systemImplNavRule.navController)
+            }
+
+        }.run {
+
+            ClazzListScreen{
+
+                recycler{
+
+                    childWith<ClazzListScreen.MainItem> {
+                        withTag(testEntity.clazzUid)
+                    } perform {
+                        click()
+                    }
+
+                }
+
+            }
+
+            Assert.assertEquals("After clicking on item, it navigates to detail view",
+                    R.id.clazz_detail_dest, systemImplNavRule.navController.currentDestination?.id)
+            val currentArgs = systemImplNavRule.navController.currentDestination?.arguments
+            //Note: as of 02/June/2020 arguments were missing even though they were given
+
         }
 
-        onView(withId(R.id.fragment_list_recyclerview)).perform(
-                actionOnItem<RecyclerView.ViewHolder>(withTagValue(equalTo(testEntity.clazzUid)),
-                click()))
 
-        Assert.assertEquals("After clicking on item, it navigates to detail view",
-            R.id.clazz_detail_dest, systemImplNavRule.navController.currentDestination?.id)
-        val currentArgs = systemImplNavRule.navController.currentDestination?.arguments
-        //Note: as of 02/June/2020 arguments were missing even though they were given
+
     }
 
 }

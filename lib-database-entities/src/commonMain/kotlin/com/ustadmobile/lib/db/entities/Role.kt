@@ -1,7 +1,9 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
+import androidx.room.Index
 import androidx.room.PrimaryKey
+import com.ustadmobile.door.ClientSyncManager
 import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
@@ -9,10 +11,27 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 
-@Entity
-@SyncableEntity(tableId = 45)
+@Entity(indices = [
+    //Index to handle permission queries
+    Index(value=["rolePermissions"])
+])
+@SyncableEntity(tableId = Role.TABLE_ID,
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${Role.TABLE_ID} AS tableId 
+        FROM DeviceSession""",
+
+        //Anyone who has this role must do a full resync when the role itself changes
+        """
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClientSyncManager.TABLEID_SYNC_ALL_TABLES} AS tableId FROM 
+        ChangeLog
+        JOIN Role ON ChangeLog.chTableId = ${Role.TABLE_ID} AND ChangeLog.chEntityPk = Role.roleUid
+        JOIN EntityRole ON EntityRole.erRoleUid = Role.roleUid
+        JOIN PersonGroupMember ON PersonGroupMember.groupMemberGroupUid = EntityRole.erGroupUid
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
+        """
+    ])
 @Serializable
-class Role() {
+open class Role() {
 
     @PrimaryKey(autoGenerate = true)
     var roleUid: Long = 0
@@ -32,7 +51,6 @@ class Role() {
 
     //bit flags made of up PERMISSION_ constants
     var rolePermissions: Long = 0
-
 
     constructor(roleName: String, rolePermissions: Long):this() {
         this.roleName = roleName
@@ -69,6 +87,8 @@ class Role() {
     }
 
     companion object {
+
+        const val TABLE_ID = 45
 
         const val PERMISSION_CLAZZ_SELECT: Long = 1
 
@@ -116,12 +136,12 @@ class Role() {
 
         const val PERMISSION_PERSON_PICTURE_UPDATE: Long = 4194304
 
-        const val PERMISSION_CLAZZ_ASSIGNMENT_VIEW : Long = 8388608
+        const val PERMISSION_CLAZZWORK_SELECT : Long = 8388608
 
         //There is no "insert" for CLAZZ_ASSIGNMENT as they are all tied to classes, so are considered updates
-        const val PERMISSION_CLAZZ_ASSIGNMENT_UPDATE : Long = 16777216
+        const val PERMISSION_CLAZZWORK_UPDATE : Long = 16777216
 
-        const val PERMISSION_CLAZZ_ASSIGNMENT_VIEWSTUDENTPROGRESS : Long= 33554432
+        const val PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS : Long= 33554432
 
         const val PERMISSION_CONTENT_SELECT : Long= 67108864
 
@@ -135,15 +155,36 @@ class Role() {
 
         const val PERMISSION_SCHOOL_UPDATE: Long = 2147483648L
 
+        const val PERMISSION_PERSON_DELEGATE: Long = 4294967296L
+
         //Permission to actually open and enter the class (eg. available to accept members, not those with pending requests)
-        const val PERMISSION_CLAZZ_OPEN: Long = 4294967296L
+        const val PERMISSION_CLAZZ_OPEN: Long = 8589934592L
+
+        const val PERMISSION_ROLE_SELECT : Long = 17179869184L
+
+        const val PERMISSION_ROLE_INSERT: Long = 34359738368L
+
+        const val PERMISSION_RESET_PASSWORD: Long = 68719476736L
+
+        const val PERMISSION_SCHOOL_ADD_STAFF: Long = 137438953472L
+
+        const val PERMISSION_SCHOOL_ADD_STUDENT: Long = 274877906944L
+
+        /**
+         * Permission to view the learner records of a person (e.g. Xapi statements, progress, etc)
+         */
+        const val PERMISSION_PERSON_LEARNINGRECORD_SELECT: Long = 549755813888L
+
+        const val PERMISSION_PERSON_LEARNINGRECORD_INSERT: Long = 1099511627776L
+
+        const val PERMISSION_PERSON_LEARNINGRECORD_UPDATE: Long = 2199023255552L
 
         //Predefined roles that are added by the system
-        const val ROLE_TEACHER_NAME = "Teacher"
+        const val ROLE_CLAZZ_TEACHER_NAME = "Teacher"
 
-        const val ROLE_TEACHER_UID = 1001
+        const val ROLE_CLAZZ_TEACHER_UID = 1001
 
-        const val ROLE_TEACHER_PERMISSIONS_DEFAULT: Long =
+        const val ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT: Long =
                 PERMISSION_CLAZZ_SELECT or
                 PERMISSION_CLAZZ_UPDATE or
                 PERMISSION_CLAZZ_OPEN or
@@ -157,26 +198,105 @@ class Role() {
                 PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT or
                 PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT or
                 PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE or
-                PERMISSION_CLAZZ_ASSIGNMENT_VIEW or
-                PERMISSION_CLAZZ_ASSIGNMENT_UPDATE
+                PERMISSION_CLAZZWORK_SELECT or
+                PERMISSION_CLAZZWORK_UPDATE
 
 
-        const val ROLE_STUDENT_NAME = "Student"
+        const val ROLE_CLAZZ_STUDENT_NAME = "Class Student"
 
-        const val ROLE_STUDENT_UID = 1000
+        const val ROLE_CLAZZ_STUDENT_UID = 1000
 
-        const val ROLE_STUDENT_PERMISSIONS_DEFAULT: Long =
+        const val ROLE_CLAZZ_STUDENT_PERMISSIONS_DEFAULT: Long =
                 PERMISSION_CLAZZ_SELECT or
                 PERMISSION_CLAZZ_OPEN or
                 PERMISSION_PERSON_SELECT or
-                PERMISSION_CLAZZ_ASSIGNMENT_VIEW
+                PERMISSION_CLAZZWORK_SELECT
 
-        const val ROLE_STUDENT_PENDING_NAME = "Student Pending"
+        const val ROLE_CLAZZ_STUDENT_PENDING_NAME = "Student Pending"
 
-        const val ROLE_STUDENT_PENDING_UID = 1002
+        const val ROLE_CLAZZ_STUDENT_PENDING_UID = 1002
 
-        const val ROLE_STUDENT_PENDING_PERMISSION_DEFAULT: Long = PERMISSION_CLAZZ_SELECT
+        const val ROLE_CLAZZ_STUDENT_PENDING_PERMISSION_DEFAULT: Long = PERMISSION_CLAZZ_SELECT
 
+        const val ROLE_SCHOOL_STUDENT_UID = 1003
+
+        const val ROLE_SCHOOL_STUDENT_NAME = "School Student"
+
+        const val ROLE_SCHOOL_STUDENT_PERMISSION_DEFAULT: Long = PERMISSION_SCHOOL_SELECT
+
+        const val ROLE_SCHOOL_STAFF_UID = 1004
+
+        const val ROLE_SCHOOL_STAFF_NAME = "School Staff"
+
+        /**
+         * Default permissions for a staff member at school
+         */
+        const val ROLE_SCHOOL_STAFF_PERMISSIONS_DEFAULT: Long = PERMISSION_CLAZZ_SELECT or
+                PERMISSION_CLAZZ_UPDATE or
+                PERMISSION_CLAZZ_OPEN or
+                PERMISSION_CLAZZ_ADD_STUDENT or
+                PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT or
+                PERMISSION_PERSON_SELECT or
+                PERMISSION_PERSON_UPDATE or
+                PERMISSION_PERSON_INSERT or
+                PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT or
+                PERMISSION_CLAZZWORK_SELECT or
+                PERMISSION_SCHOOL_SELECT or
+                PERMISSION_SCHOOL_ADD_STUDENT
+
+
+        const val ROLE_SCHOOL_STUDENT_PENDING_UID = 1005
+
+        const val ROLE_SCHOOL_STUDENT_PENDING_NAME = "School Student Pending"
+
+        const val ROLE_SCHOOL_STUDENT_PENDING_PERMISSION_DEFAULT = PERMISSION_SCHOOL_SELECT
+
+
+        const val ROLE_PRINCIPAL_UID = 1006
+
+        const val ROLE_PRINCIPAL_NAME = "Principal"
+
+        //All permissionss so far
+        const val ROLE_PRINCIPAL_PERMISSIONS_DEFAULT : Long =
+                PERMISSION_CLAZZ_SELECT or
+                        PERMISSION_CLAZZ_INSERT or
+                        PERMISSION_CLAZZ_UPDATE or
+                        PERMISSION_CLAZZ_LOG_ATTENDANCE_INSERT or
+                        PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT or
+                        PERMISSION_SEL_QUESTION_RESPONSE_INSERT or
+                        PERMISSION_PERSON_SELECT or
+                        PERMISSION_PERSON_INSERT or
+                        PERMISSION_PERSON_UPDATE or
+                        PERMISSION_CLAZZ_ADD_TEACHER or
+                        PERMISSION_CLAZZ_ADD_STUDENT or
+                        PERMISSION_CLAZZ_LOG_ATTENDANCE_SELECT or
+                        PERMISSION_CLAZZ_LOG_ATTENDANCE_UPDATE or
+                        PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE or
+                        PERMISSION_CLAZZ_LOG_ACTIVITY_SELECT or
+                        PERMISSION_SEL_QUESTION_RESPONSE_SELECT or
+                        PERMISSION_SEL_QUESTION_RESPONSE_UPDATE or
+                        PERMISSION_SEL_QUESTION_SELECT or
+                        PERMISSION_SEL_QUESTION_INSERT or
+                        PERMISSION_SEL_QUESTION_UPDATE or
+                        PERMISSION_PERSON_PICTURE_SELECT or
+                        PERMISSION_PERSON_PICTURE_INSERT or
+                        PERMISSION_PERSON_PICTURE_UPDATE or
+                        PERMISSION_CLAZZWORK_SELECT  or
+                        PERMISSION_CLAZZWORK_UPDATE  or
+                        PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS or
+                        PERMISSION_CONTENT_SELECT or
+                        PERMISSION_CONTENT_INSERT or
+                        PERMISSION_CONTENT_UPDATE or
+                        PERMISSION_SCHOOL_SELECT or
+                        PERMISSION_SCHOOL_INSERT or
+                        PERMISSION_SCHOOL_UPDATE or
+                        PERMISSION_PERSON_DELEGATE or
+                        PERMISSION_CLAZZ_OPEN or
+                        PERMISSION_ROLE_SELECT  or
+                        PERMISSION_ROLE_INSERT or
+                        PERMISSION_RESET_PASSWORD or
+                        PERMISSION_SCHOOL_ADD_STAFF or
+                        PERMISSION_SCHOOL_ADD_STUDENT
 
     }
 }

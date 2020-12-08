@@ -5,6 +5,8 @@ import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.ext.userAtServer
+import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorMutableLiveData
@@ -19,6 +21,8 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.HttpStatement
 import kotlinx.atomicfu.AtomicRef
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
@@ -49,7 +53,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
     init {
         val accounts: UstadAccounts = systemImpl.getAppPref(ACCOUNTS_PREFKEY, appContext)?.let {
-            Json.parse(UstadAccounts.serializer(), it)
+            safeParse(di, UstadAccounts.serializer(), it)
         } ?: defaultAccount.let { defAccount ->
             UstadAccounts(defAccount.userAtServer, listOf(defAccount))
         }
@@ -96,10 +100,10 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         get() = _storedAccountsLive
 
 
-    suspend fun register(person: PersonWithAccount, endpointUrl: String, makeAccountActive: Boolean = true): UmAccount {
+    suspend fun register(person: PersonWithAccount, endpointUrl: String, makeAccountActive: Boolean = true): UmAccount = withContext(Dispatchers.Default){
         val httpStmt = httpClient.post<HttpStatement>() {
             url("${endpointUrl.removeSuffix("/")}/auth/register")
-            parameter("person", Json.stringify(PersonWithAccount.serializer(), person))
+            parameter("person",  safeStringify(di, PersonWithAccount.serializer(), person))
         }
 
         val (account: UmAccount?, status: Int) = httpStmt.execute { response ->
@@ -115,7 +119,7 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
             if(makeAccountActive){
                 activeAccount = account
             }
-            return account
+            account
         }else if(status == 409){
             throw IllegalStateException("Conflict: username already taken")
         }else {
@@ -152,11 +156,11 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
         val ustadAccounts = UstadAccounts(activeAccount.userAtServer,
             _storedAccounts, accountLastUsedTimeMap)
         systemImpl.setAppPref(ACCOUNTS_PREFKEY,
-                Json.stringify(UstadAccounts.serializer(), ustadAccounts), appContext)
+                safeStringify(di, UstadAccounts.serializer(), ustadAccounts), appContext)
     }
 
 
-    suspend fun login(username: String, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount {
+    suspend fun login(username: String, password: String, endpointUrl: String, replaceActiveAccount: Boolean = false): UmAccount = withContext(Dispatchers.Default){
         val repo: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = UmAppDatabase.TAG_REPO)
         val nodeId = (repo as? DoorDatabaseSyncRepository)?.clientId
                 ?: throw IllegalStateException("Could not open repo for endpoint $endpointUrl")
@@ -197,10 +201,11 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
 
         activeAccount = responseAccount
 
-        return responseAccount
+        //This should not be needed - as responseAccount can be smartcast, but will not otherwise compile
+        responseAccount!!
     }
 
-    suspend fun changePassword(username: String, currentPassword: String?, newPassword: String, endpointUrl: String): UmAccount?{
+    suspend fun changePassword(username: String, currentPassword: String?, newPassword: String, endpointUrl: String): UmAccount? = withContext(Dispatchers.Default){
         val httpStmt = httpClient.post<HttpStatement> {
             url("${endpointUrl.removeSuffix("/")}/password/change")
             parameter("username", username)
@@ -225,7 +230,8 @@ class UstadAccountManager(val systemImpl: UstadMobileSystemImpl, val appContext:
                         || changePasswordResponse.statusCode == 204)) {
             throw IllegalStateException("Server error - response ${changePasswordResponse.statusCode}")
         }
-        return responseAccount
+
+        responseAccount
     }
 
 

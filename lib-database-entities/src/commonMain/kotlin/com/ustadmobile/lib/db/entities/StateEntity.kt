@@ -6,11 +6,23 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
-import com.ustadmobile.lib.db.entities.StateEntity.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = StateEntity.TABLE_ID,
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${StateEntity.TABLE_ID} AS tableId FROM 
+        ChangeLog
+        JOIN StateEntity ON ChangeLog.chTableId = ${StateEntity.TABLE_ID} AND ChangeLog.chEntityPk = StateEntity.stateUid
+        JOIN AgentEntity ON StateEntity.agentUid = AgentEntity.agentUid
+        JOIN DeviceSession ON AgentEntity.agentPersonUid = DeviceSession.dsPersonUid"""],
+    syncFindAllQuery = """
+        SELECT StateEntity.* FROM
+        StateEntity
+        JOIN AgentEntity ON StateEntity.agentUid = AgentEntity.agentUid
+        JOIN DeviceSession ON AgentEntity.agentPersonUid = DeviceSession.dsPersonUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+    """)
 @Serializable
 class StateEntity {
 

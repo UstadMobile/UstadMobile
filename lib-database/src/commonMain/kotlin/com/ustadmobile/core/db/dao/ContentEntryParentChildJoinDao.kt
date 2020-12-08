@@ -1,6 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.room.*
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -9,9 +10,8 @@ import kotlin.js.JsName
 
 data class UmContentEntriesWithFileSize(var numEntries: Int = 0, var fileSize: Long = 0L)
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
+@Repository
 @Dao
-@UmRepository
 abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJoin> {
 
     @JsName("insertListAsync")
@@ -41,9 +41,6 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
     @Query("SELECT * FROM ContentEntryParentChildJoin WHERE " + "cepcjParentContentEntryUid = :parentUid AND cepcjChildContentEntryUid = :childUid LIMIT 1")
     abstract fun findJoinByParentChildUuids(parentUid: Long, childUid: Long): ContentEntryParentChildJoin?
 
-    @Update
-    abstract override fun update(entity: ContentEntryParentChildJoin)
-
     @Query("WITH RECURSIVE ContentEntryRecursive(contentEntryUid,containerSize) AS " +
             "(VALUES (:contentEntryUid,  " +
             "(SELECT Container.fileSize FROM Container WHERE Container.containerContentEntryUid = :contentEntryUid " +
@@ -66,4 +63,10 @@ abstract class ContentEntryParentChildJoinDao : BaseDao<ContentEntryParentChildJ
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertWithReplace(parentChildJoinDao: ContentEntryParentChildJoin)
+
+    @Query("""UPDATE ContentEntryParentChildJoin 
+               SET cepcjParentContentEntryUid = :contentEntryUid, 
+               cepcjLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+               WHERE cepcjUid IN (:selectedItems)""")
+    abstract suspend fun moveListOfEntriesToNewParent(contentEntryUid: Long, selectedItems: List<Long>)
 }

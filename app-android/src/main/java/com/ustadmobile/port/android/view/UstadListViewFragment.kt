@@ -92,7 +92,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         get() = field
         set(value) {
             field = value
-            //todo: invalidate options if required
+            actionMode?.invalidate()
         }
 
     // See https://developer.android.com/guide/topics/ui/menus#CAB
@@ -112,24 +112,20 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         }
 
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            val systemImpl = UstadMobileSystemImpl.instance
-            val fragmentContext = fragmentHost?.requireContext() ?: return false
-
-            fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
-                menu.add(0, item.commandId, index,
-                        systemImpl.getString(item.messageId, fragmentContext)).apply {
-                    val drawable = fragmentContext.getDrawable(SELECTION_ICONS_MAP[item]
-                            ?: R.drawable.ic_delete_black_24dp) ?: return@forEachIndexed
-                    DrawableCompat.setTint(drawable, ContextCompat.getColor(fragmentContext, R.color.onBackgroundColor))
-                    icon = drawable
-                }
-            }
-
             return true
         }
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            return false // if nothing has changed
+            menu.clear()
+            val systemImpl = UstadMobileSystemImpl.instance
+            val fragmentContext = fragmentHost?.requireContext() ?: return false
+            fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
+                val optionText = systemImpl.getString(item.messageId, fragmentContext)
+                menu.add(0, item.commandId, index, optionText).apply {
+                    setIcon(SELECTION_ICONS_MAP[item] ?: R.drawable.ic_delete_black_24dp)
+                }
+            }
+            return true
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
@@ -165,6 +161,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
                         }
                 actionMode = (activity as? AppCompatActivity)?.startSupportActionMode(
                         actionModeCallbackVal)
+                listPresenter?.handleSelectionOptionChanged(t)
             } else if (actionModeVal != null && t.isNullOrEmpty()) {
                 actionModeVal.finish()
             }
@@ -208,6 +205,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         searchManager?.searchListener = listPresenter
+        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -337,7 +335,10 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
         val SELECTION_ICONS_MAP =
                 mapOf(SelectionOption.EDIT to R.drawable.ic_edit_white_24dp,
-                        SelectionOption.DELETE to R.drawable.ic_delete_black_24dp)
+                        SelectionOption.DELETE to R.drawable.ic_delete_black_24dp,
+                        SelectionOption.MOVE to R.drawable.ic_move,
+                        SelectionOption.HIDE to R.drawable.ic_baseline_visibility_off_24,
+                        SelectionOption.UNHIDE to R.drawable.ic_baseline_visibility_24)
 
     }
 

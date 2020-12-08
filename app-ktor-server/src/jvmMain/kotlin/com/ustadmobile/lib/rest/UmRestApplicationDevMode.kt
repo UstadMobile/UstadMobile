@@ -7,6 +7,7 @@ import io.ktor.features.StatusPages
 import io.ktor.http.HttpStatusCode
 import io.ktor.response.respond
 
+@ExperimentalStdlibApi
 fun Application.umRestApplicationDevMode() {
     umRestApplication(devMode = true)
     install(StatusPages) {

@@ -1,25 +1,15 @@
 package com.ustadmobile.core.db.dao
 
-import androidx.paging.DataSource
 import androidx.room.Dao
-import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionOption
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
-@UmRepository
+@Repository
 @Dao
 abstract class ClazzWorkQuestionOptionDao : BaseDao<ClazzWorkQuestionOption>,
         OneToManyJoinDao<ClazzWorkQuestionOption>{
-
-    @Insert
-    abstract override fun insert(entity: ClazzWorkQuestionOption): Long
-
-    @Update
-    abstract override fun update(entity: ClazzWorkQuestionOption)
 
     @Update
     abstract suspend fun updateAsync(entity: ClazzWorkQuestionOption) : Int

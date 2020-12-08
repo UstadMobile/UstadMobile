@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ClazzDetailView
 import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -14,14 +15,13 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SCHOOL_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.withRepoTimeout
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -35,7 +35,7 @@ class ClazzEdit2Presenter(context: Any,
     private val scheduleOneToManyJoinEditHelper
             = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid,
             ARG_SAVEDSTATE_SCHEDULES, Schedule.serializer().list,
-            Schedule.serializer().list, this) {scheduleUid = it}
+            Schedule.serializer().list, this, Schedule::class) {scheduleUid = it}
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -48,9 +48,9 @@ class ClazzEdit2Presenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzWithHolidayCalendarAndSchool? {
         val clazzUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        val clazz = withTimeoutOrNull(2000) {
-            db.clazzDao.takeIf {clazzUid != 0L }?.findByUidWithHolidayCalendarAsync(clazzUid)
-        }  ?: ClazzWithHolidayCalendarAndSchool().also { newClazz ->
+        val clazz = db.withRepoTimeout(2000) {
+            it.clazzDao.takeIf {clazzUid != 0L }?.findByUidWithHolidayCalendarAsync(clazzUid)
+        } ?: ClazzWithHolidayCalendarAndSchool().also { newClazz ->
             newClazz.clazzName = ""
             newClazz.isClazzActive = true
             newClazz.clazzTimeZone = getDefaultTimeZoneId()
@@ -58,8 +58,8 @@ class ClazzEdit2Presenter(context: Any,
             newClazz.school = db.schoolDao.takeIf { newClazz.clazzSchoolUid != 0L }?.findByUidAsync(newClazz.clazzSchoolUid)
         }
 
-        val schedules = withTimeoutOrNull(2000) {
-            db.scheduleDao.takeIf { clazzUid != 0L }?.findAllSchedulesByClazzUidAsync(clazzUid)
+        val schedules = db.withRepoTimeout(2000) {
+            it.scheduleDao.takeIf { clazzUid != 0L }?.findAllSchedulesByClazzUidAsync(clazzUid)
         } ?: listOf()
 
         scheduleOneToManyJoinEditHelper.liveList.sendValue(schedules)
@@ -71,7 +71,7 @@ class ClazzEdit2Presenter(context: Any,
         val clazzJsonStr = bundle[ARG_ENTITY_JSON]
         var clazz: ClazzWithHolidayCalendarAndSchool? = null
         if(clazzJsonStr != null) {
-            clazz = Json.parse(ClazzWithHolidayCalendarAndSchool.serializer(), clazzJsonStr)
+            clazz = safeParse(di, ClazzWithHolidayCalendarAndSchool.serializer(), clazzJsonStr)
         }else {
             clazz = ClazzWithHolidayCalendarAndSchool()
         }
@@ -90,6 +90,8 @@ class ClazzEdit2Presenter(context: Any,
 
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
         GlobalScope.launch(doorMainDispatcher()) {
+            view.loading = true
+            view.fieldsEnabled = false
             if(entity.clazzUid == 0L) {
                 repo.createNewClazzAndGroups(entity, systemImpl, context)
             }else {
@@ -108,6 +110,7 @@ class ClazzEdit2Presenter(context: Any,
                     accountManager.activeAccount.endpointUrl,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
 
+            view.loading = false
             onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
         }
     }

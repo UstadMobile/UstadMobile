@@ -22,6 +22,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.sharedse.impl.http.vhToPxFactor
+
 /**
  * Embedded HTTP Server which runs to serve files directly out of a zipped container on the fly
  *
@@ -113,7 +115,7 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
 
 
     @JvmOverloads
-    override suspend fun mountContainer(endpointUrl: String, containerUid: Long): String {
+    override suspend fun mountContainer(endpointUrl: String, containerUid: Long, filterMode: Int): String {
         val endpoint = Endpoint(endpointUrl)
         val endpointDb: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
         val endpointRepo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
@@ -124,11 +126,15 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
 
         val mountPath = "/${sanitizeDbNameFromUrl(endpointUrl)}/container/$containerUid/"
 
-//        val contPath = mountContainer(containerUid, null)
-//        return UMFileUtil.joinPaths(localHttpUrl, contPath!!)
+        val filters = if(filterMode == ContainerMounter.FILTER_MODE_EPUB) {
+            listOf<MountedContainerResponder.MountedContainerFilter>(EpubContainerFilter(di),
+                CssVhFilter() {vhToPxFactor()})
+        }else {
+            listOf<MountedContainerResponder.MountedContainerFilter>()
+        }
 
         addRoute("$mountPath${MountedContainerResponder.URI_ROUTE_POSTFIX}",
-                MountedContainerResponder::class.java, containerUid.toString(), endpointDb, listOf<MountedContainerResponder.MountedContainerFilter>())
+                MountedContainerResponder::class.java, containerUid.toString(), endpointDb, filters)
         return UMFileUtil.joinPaths(localHttpUrl, mountPath)
     }
 

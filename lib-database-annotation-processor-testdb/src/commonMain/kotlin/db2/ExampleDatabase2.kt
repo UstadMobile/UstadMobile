@@ -3,6 +3,7 @@ package db2
 import androidx.room.Database
 import com.ustadmobile.door.*
 import com.ustadmobile.door.annotation.MinSyncVersion
+import com.ustadmobile.door.entities.*
 import db2.ExampleDatabase2.Companion.DB_VERSION
 
 @Database(version = DB_VERSION, entities = [ExampleEntity2::class, ExampleLinkEntity::class,
@@ -11,7 +12,13 @@ import db2.ExampleDatabase2.Companion.DB_VERSION
     SyncResult::class,
     ExampleSyncableEntity::class,
     OtherSyncableEntity::class,
-    ExampleAttachmentEntity::class
+    ExampleAttachmentEntity::class,
+    ChangeLog::class,
+    AccessGrant::class,
+    UpdateNotification::class,
+    TableSyncStatus::class,
+    SqliteSyncablePk::class,
+    SqliteChangeSeqNums::class
     //#DOORDB_TRACKER_ENTITIES
 
 ])
@@ -29,6 +36,11 @@ abstract class ExampleDatabase2 : DoorDatabase(), SyncableDoorDatabase {
     abstract fun exampleEntityPkIntDao(): ExampleEntityPkIntDao
 
     abstract fun exampleAttachmentDao(): ExampleAttachmentDao
+
+    abstract fun accessGrantDao(): AccessGrantDao
+
+    abstract fun updateNotificationTestDao(): UpdateNotificationTestDao
+
 
     //#DOORDB_SYNCDAO
 

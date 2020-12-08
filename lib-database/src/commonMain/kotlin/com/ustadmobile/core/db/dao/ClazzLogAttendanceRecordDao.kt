@@ -4,13 +4,12 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
 @Dao
+@Repository
 abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
-
-    @Insert
-    abstract override fun insert(entity: ClazzLogAttendanceRecord): Long
 
     @Insert
     abstract suspend fun insertListAsync(entities: List<ClazzLogAttendanceRecord>): Array<Long>
@@ -27,7 +26,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
          LEFT JOIN ClazzMember ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid
          LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
          WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid""")
-    abstract fun findByClazzLogUid(clazzLogUid: Long): List<ClazzLogAttendanceRecordWithPerson>
+    abstract suspend fun findByClazzLogUid(clazzLogUid: Long): List<ClazzLogAttendanceRecordWithPerson>
 
     @Query("""UPDATE ClazzLogAttendanceRecord
         SET clazzLogAttendanceRecordClazzLogUid = :newClazzLogUid,

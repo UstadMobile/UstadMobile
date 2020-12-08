@@ -5,6 +5,9 @@ A content scraper to find and download content to make them available for offlin
 
 ## Setup Chrome Driver for Selenium
 
+if using ubuntu:
+use apt-get install chromium-chromedriver
+
 Download the latest chrome driver for your operating system from http://chromedriver.chromium.org/downloads
 Unzip the file and copy the file path to the chromedriver 
 Open local.properties and add the following line of code:
@@ -26,6 +29,14 @@ shrinker.webp = path_to_file
 
 or for ubuntu only
 use apt-get install webp
+
+## Setup Mogrify
+
+if using ubuntu
+apt-get install imagemagick
+
+On Windows:
+download from https://imagemagick.org/script/download.php
 
 
 ###Find and Scrap Edraak K12 Content

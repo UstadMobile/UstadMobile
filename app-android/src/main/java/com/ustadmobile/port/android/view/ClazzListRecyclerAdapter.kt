@@ -9,12 +9,16 @@ import com.ustadmobile.core.controller.ClazzListItemListener
 import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
-class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?): SelectablePagedListAdapter<ClazzWithListDisplayDetails, ClazzListRecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
+class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?)
+    : SelectablePagedListAdapter<ClazzWithListDisplayDetails,
+        ClazzListRecyclerAdapter.ClazzList2ViewHolder>(DIFF_CALLBACK) {
 
-    class ClazzList2ViewHolder(val itemBinding: ItemClazzListBinding): RecyclerView.ViewHolder(itemBinding.root)
+    class ClazzList2ViewHolder(val itemBinding: ItemClazzListBinding)
+        : RecyclerView.ViewHolder(itemBinding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzList2ViewHolder {
-        val itemBinding = ItemClazzListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        val itemBinding = ItemClazzListBinding.inflate(LayoutInflater.from(parent.context), parent,
+                false)
         return ClazzList2ViewHolder(itemBinding)
     }
 
@@ -39,7 +43,12 @@ class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?): Select
 
             override fun areContentsTheSame(oldItem: ClazzWithListDisplayDetails,
                                             newItem: ClazzWithListDisplayDetails): Boolean {
-                return oldItem == newItem
+                return oldItem.clazzName == newItem.clazzName &&
+                        oldItem.numStudents == newItem.numStudents &&
+                        oldItem.numTeachers == newItem.numTeachers &&
+                        oldItem.clazzDesc == newItem.clazzDesc &&
+                        oldItem.clazzActiveMember?.clazzMemberRole == newItem.clazzActiveMember?.clazzMemberRole &&
+                        oldItem.attendanceAverage == newItem.attendanceAverage
             }
         }
     }

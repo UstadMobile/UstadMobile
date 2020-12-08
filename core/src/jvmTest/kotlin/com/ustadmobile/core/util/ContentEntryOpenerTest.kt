@@ -60,14 +60,14 @@ class ContentEntryOpenerTest {
 
 
         contentEntry = ContentEntry()
-        contentEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(contentEntry)
+        contentEntry.contentEntryUid = umAppRepository.contentEntryDao.insert(contentEntry)
 
         var container = Container()
         container.containerContentEntryUid = contentEntry.contentEntryUid
         container.fileSize = 10
         container.mimeType = "video/mp4"
         container.cntLastModified = System.currentTimeMillis()
-        container.containerUid = umAppDatabase.containerDao.insert(container)
+        container.containerUid = umAppRepository.containerDao.insert(container)
 
         var dj = DownloadJobItem()
         dj.djiContainerUid = container.containerUid
@@ -81,7 +81,7 @@ class ContentEntryOpenerTest {
         runBlocking {
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                 true, false, false)
-            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
+            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any(), any())
         }
     }
 
@@ -90,14 +90,14 @@ class ContentEntryOpenerTest {
         runBlocking {
 
             var contentEntry = ContentEntry()
-            contentEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(contentEntry)
+            contentEntry.contentEntryUid = umAppRepository.contentEntryDao.insert(contentEntry)
 
             var container = Container()
             container.containerContentEntryUid = contentEntry.contentEntryUid
             container.fileSize = 10
             container.mimeType = "video/mp4"
             container.cntLastModified = System.currentTimeMillis()
-            container.containerUid = umAppDatabase.containerDao.insert(container)
+            container.containerUid = umAppRepository.containerDao.insert(container)
 
             var dj = DownloadJobItem()
             dj.djiContainerUid = container.containerUid
@@ -107,7 +107,7 @@ class ContentEntryOpenerTest {
 
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                 true, true, false)
-            verify(impl).go(eq(ContentEntry2DetailView.VIEW_NAME), any(), eq(context))
+            verify(impl).go(eq(ContentEntry2DetailView.VIEW_NAME), any(), eq(context), any())
         }
     }
 
@@ -117,7 +117,7 @@ class ContentEntryOpenerTest {
         runBlocking {
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)
-            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
+            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any(), any())
         }
     }
 
@@ -126,23 +126,24 @@ class ContentEntryOpenerTest {
         runBlocking {
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                     false, true, false)
-            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any())
+            verify(impl).go(eq(VideoPlayerView.VIEW_NAME), any(), any(), any())
         }
     }
+
 
     @Test
     fun givenDownloadNotRequired_whenEntryDownloadedAndMimeTypeDoesNotMatch_openInDefaultViewer(){
         runBlocking {
 
             var contentEntry = ContentEntry()
-            contentEntry.contentEntryUid = umAppDatabase.contentEntryDao.insert(contentEntry)
+            contentEntry.contentEntryUid = umAppRepository.contentEntryDao.insert(contentEntry)
 
             var container = Container()
             container.containerContentEntryUid = contentEntry.contentEntryUid
             container.fileSize = 10
             container.mimeType = "video/wav"
             container.cntLastModified = System.currentTimeMillis()
-            container.containerUid = umAppDatabase.containerDao.insert(container)
+            container.containerUid = umAppRepository.containerDao.insert(container)
 
             var containerEntryFile = ContainerEntryFile()
             containerEntryFile.cefPath = "hello"

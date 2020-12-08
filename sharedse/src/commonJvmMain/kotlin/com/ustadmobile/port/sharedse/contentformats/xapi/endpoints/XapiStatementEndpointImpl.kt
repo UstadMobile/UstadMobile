@@ -232,6 +232,10 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
         val verbEntity = insertOrUpdateVerb(repo.verbDao, statement.verb!!)
         val person = getPerson(repo.personDao, statement.actor!!)
         val agentEntity = getAgent(repo.agentDao, repo.personDao, statement.actor!!)
+        var learnerGroupUid: Long = 0
+        if(agentEntity.agentAccountName?.contains("group:") == true){
+            learnerGroupUid = agentEntity.agentAccountName?.substringAfter(":")?.toLong() ?: 0L
+        }
         val agentUid = agentEntity.agentUid
 
         insertOrUpdateVerbLangMap(repo.xLangMapEntryDao, statement.verb!!, verbEntity,
@@ -319,7 +323,8 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
                 contextStatementId, instructorUid,
                 agentUid, authorityUid, teamUid,
                 subActorUid, subVerbUid, subObjectUid,
-                contentEntryUid = contentEntryUid)
+                contentEntryUid = contentEntryUid,
+                learnerGroupUid = learnerGroupUid)
 
         //ContentEntry should be available locally
         val entry = db.contentEntryDao.findByUid(contentEntryUid)
@@ -328,34 +333,34 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
                     verbEntity)
         }
 
-        if (statement.context != null && statement.context!!.contextActivities != null) {
-
-            val contextActivity = statement.context!!.contextActivities
-            if (contextActivity!!.parent != null) {
-                createAllContextActivities(contextActivity.parent,
-                        statementEntity.statementUid, ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT)
+        val contextActivities = statement.context?.contextActivities
+        if (contextActivities != null) {
+            contextActivities.parent?.also {
+                createAllContextActivities(it, statementEntity.statementUid,
+                        ContextXObjectStatementJoinDao.CONTEXT_FLAG_PARENT)
             }
 
-            if (contextActivity.category != null) {
-                createAllContextActivities(contextActivity.category,
+            contextActivities.category?.also {
+                createAllContextActivities(it,
                         statementEntity.statementUid, ContextXObjectStatementJoinDao.CONTEXT_FLAG_CATEGORY)
             }
-            if (contextActivity.grouping != null) {
-                createAllContextActivities(contextActivity.grouping,
+
+            contextActivities.grouping?.also {
+                createAllContextActivities(it,
                         statementEntity.statementUid, ContextXObjectStatementJoinDao.CONTEXT_FLAG_GROUPING)
             }
-            if (contextActivity.other != null) {
-                createAllContextActivities(contextActivity.other,
+
+            contextActivities.other?.also {
+                createAllContextActivities(it,
                         statementEntity.statementUid, ContextXObjectStatementJoinDao.CONTEXT_FLAG_OTHER)
             }
-
         }
         return statementEntity
     }
 
     fun createAllContextActivities(list: List<XObject>?, statementUid: Long, flag: Int) {
-        for (`object` in list!!) {
-            val xobjectEntity = insertOrUpdateXObject(repo.xObjectDao, `object`, gson, repo.contentEntryDao)
+        list?.filter { it.id != null  }?.forEach { xObject ->
+            val xobjectEntity = insertOrUpdateXObject(repo.xObjectDao, xObject, gson, repo.contentEntryDao)
             insertOrUpdateContextStatementJoin(repo.contextXObjectStatementJoinDao,
                     statementUid, xobjectEntity.xObjectUid, flag)
         }

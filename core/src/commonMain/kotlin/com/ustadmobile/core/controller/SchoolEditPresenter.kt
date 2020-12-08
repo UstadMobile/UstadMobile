@@ -6,7 +6,7 @@ import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.createNewSchoolAndGroups
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.view.ClazzDetailView
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.SchoolDetailView
 import com.ustadmobile.core.view.SchoolEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -46,7 +46,7 @@ class SchoolEditPresenter(context: Any,
 
     private val clazzOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<Clazz>(
             Clazz::clazzUid,"state_Clazz_list", Clazz.serializer().list,
-            Clazz.serializer().list, this) { clazzUid = it }
+            Clazz.serializer().list, this, Clazz::class) { clazzUid = it }
 
     fun handleAddOrEditClazz(clazz: Clazz) {
         clazzOneToManyJoinEditHelper.onEditResult(clazz)
@@ -86,7 +86,7 @@ class SchoolEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: SchoolWithHolidayCalendar? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(SchoolWithHolidayCalendar.serializer(), entityJsonStr)
+            editEntity = safeParse(di, SchoolWithHolidayCalendar.serializer(), entityJsonStr)
         }else {
             editEntity = SchoolWithHolidayCalendar()
         }

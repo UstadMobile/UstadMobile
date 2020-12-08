@@ -96,6 +96,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
             AboutView.VIEW_NAME to "${PACKAGE_NAME}AboutActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
+            HarView.VIEW_NAME to "${PACKAGE_NAME}HarActivity",
             ContentEntryImportLinkView.VIEW_NAME to "${PACKAGE_NAME}ContentEntryImportLinkActivity",
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
@@ -198,7 +199,17 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
                            flags: Int, ustadGoOptions: UstadGoOptions) {
-        val ustadDestination = destinationProvider.lookupDestinationName(viewName)
+
+        val destinationQueryPos = viewName!!.indexOf('?')
+        val viewNameOnly = if (destinationQueryPos == -1) {
+            viewName
+        }else {
+            viewName.substring(0, destinationQueryPos)
+        }
+        val allArgs = args + UMFileUtil.parseURLQueryString(viewName)
+
+
+        val ustadDestination = destinationProvider.lookupDestinationName(viewNameOnly)
         if(ustadDestination != null) {
             val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
 
@@ -224,8 +235,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 }
             }
 
-            navController.navigate(ustadDestination.destinationId, args.toBundleWithNullableValues(),
-                options)
+            navController.navigate(ustadDestination.destinationId,
+                    allArgs.toBundleWithNullableValues(), options)
 
             return
         }
@@ -289,6 +300,20 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         }
     }
 
+    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
+        val navController = navController ?: (context as Activity)
+                .findNavController(destinationProvider.navControllerViewId)
+
+        val popBackDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
+            navController.currentDestination?.id ?: 0
+        }else {
+            destinationProvider.lookupDestinationName(popUpToViewName)
+                    ?.destinationId ?: 0
+        }
+
+        navController.popBackStack(popBackDestId, popUpInclusive)
+    }
+
 
     /**
      * Get a string for use in the UI
@@ -309,40 +334,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      */
     actual override fun getSystemLocale(context: Any): String {
         return Locale.getDefault().toString()
-    }
-
-
-    /**
-     * Get storage directories
-     *
-     * @param context Platform specific context
-     * @param callback Storage dir list callback
-     */
-
-    @Deprecated("Use getStorageDirsAsync instead")
-    actual override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>) {
-        Thread {
-            val dirList = ArrayList<UMStorageDir>()
-            val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
-            val contentDirName = getContentDirName(context)
-
-            var umDir = File(storageOptions[deviceStorageIndex], contentDirName!!)
-            if (!umDir.exists()) umDir.mkdirs()
-            dirList.add(UMStorageDir(umDir.absolutePath,
-                    getString(MessageID.phone_memory, context), true,
-                    isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
-
-            if (storageOptions.size > 1) {
-                val sdCardStorage = storageOptions[sdCardStorageIndex]
-                umDir = File(sdCardStorage, contentDirName)
-                if (!umDir.exists()) umDir.mkdirs()
-                dirList.add(UMStorageDir(umDir.absolutePath,
-                        getString(MessageID.memory_card, context), removableMedia = true,
-                        isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
-            }
-
-            callback.onDone(dirList)
-        }.start()
     }
 
 
@@ -606,7 +597,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
-
     actual companion object {
 
         const val TAG = "UstadMobileImplAndroid"
@@ -627,7 +617,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
 
     }
-
 
 
 }

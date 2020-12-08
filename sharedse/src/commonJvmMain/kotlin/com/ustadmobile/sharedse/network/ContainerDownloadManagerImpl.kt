@@ -23,6 +23,10 @@ import com.ustadmobile.door.DoorObserver
 import org.kodein.di.*
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.sharedse.io.FileSe
+
+import com.ustadmobile.lib.util.getSystemTimeInMillis
+
 /**
  * This class manages a download queue for a given endpoint.
  */
@@ -269,6 +273,25 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         jobsToCommit.clear()
     }
 
+    override suspend fun handleContainerLocalImport(container: Container) {
+
+        val downloadJob = DownloadJob(container.containerContentEntryUid, getSystemTimeInMillis())
+        downloadJob.djStatus = JobStatus.COMPLETE
+        downloadJob.timeRequested = getSystemTimeInMillis()
+        downloadJob.bytesDownloadedSoFar = container.fileSize
+        downloadJob.totalBytesToDownload = container.fileSize
+        downloadJob.djUid = appDb.downloadJobDao.insertAsync(downloadJob).toInt()
+
+        val downloadJobItem = DownloadJobItem(downloadJob, container.containerContentEntryUid,
+                container.containerUid, container.fileSize)
+        downloadJobItem.djiUid = appDb.downloadJobItemDao.insertAsync(downloadJobItem).toInt()
+        downloadJobItem.djiStatus = JobStatus.COMPLETE
+        downloadJobItem.downloadedSoFar = container.fileSize
+
+        handleDownloadJobItemUpdated(downloadJobItem)
+
+    }
+
 
     override suspend fun getDownloadJobItemByContentEntryUid(contentEntryUid: Long): DoorLiveData<DownloadJobItem?> = withContext(singleThreadContext){
         loadContentEntryHolder(contentEntryUid).liveData
@@ -402,6 +425,9 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
             }
         }else {
             onQueueEmpty()
+            if(currentConnectivityStatus?.connectivityState == ConnectivityStatus.STATE_CONNECTED_LOCAL) {
+                networkManager.restoreWifi()
+            }
         }
     }
 
@@ -419,6 +445,41 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
                 checkQueue()
             }
         }
+    }
+
+    override suspend fun deleteDownloadJobItem(downloadJobItemUid: Int, onprogress: (progress: Int) -> Unit): Boolean {
+        appDb.downloadJobItemDao.findByUid(downloadJobItemUid)?: return false
+
+        appDb.downloadJobItemDao.forAllChildDownloadJobItemsRecursiveAsync(downloadJobItemUid) { childItems ->
+            childItems.forEach {
+                appDb.containerEntryDao.deleteByContentEntryUid(it.djiContentEntryUid)
+
+                handleDownloadJobItemUpdated(DownloadJobItem(it).also {
+                    it.djiStatus = JobStatus.DELETED
+                }, autoCommit = false)
+            }
+        }
+
+        commit()
+
+        var numFailures = 0
+        appDb.runInTransaction(Runnable {
+            var zombieEntryFilesList: List<ContainerEntryFile>
+            do {
+                zombieEntryFilesList = appDb.containerEntryFileDao.findZombieEntries()
+                zombieEntryFilesList.forEach {
+                    val filePath = it.cefPath
+                    if(filePath == null || !FileSe(filePath).delete()) {
+                        numFailures++
+                    }
+                }
+
+                appDb.containerEntryFileDao.deleteListOfEntryFiles(zombieEntryFilesList)
+            }while(zombieEntryFilesList.isNotEmpty())
+            onprogress.invoke(100)
+        })
+
+        return numFailures == 0
     }
 
     override suspend fun handleDownloadJobUpdated(downloadJob: DownloadJob) = withContext(singleThreadContext){

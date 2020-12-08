@@ -6,6 +6,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.core.db.UmAppDatabase
 import org.junit.Rule
 import org.junit.Test
+import kotlin.random.Random
 
 
 class TestRoomMigration {
@@ -81,5 +82,130 @@ class TestRoomMigration {
         helper.runMigrationsAndValidate(TEST_DB, 38, true,
                 UmAppDatabase.MIGRATION_37_38)
     }
+
+    @Test
+    fun migrate38to39() {
+        helper.createDatabase(TEST_DB, 38).apply {
+            //The NodeClientId would always have been inserted by the onCreate callback in the previous version
+            execSQL("INSERT INTO SyncNode(nodeClientId,master) VALUES (${Random.nextInt(1, Int.MAX_VALUE)}, 0)")
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 39, true,
+                UmAppDatabase.MIGRATION_38_39)
+    }
+
+    @Test
+    fun migrate39to40() {
+        helper.createDatabase(TEST_DB, 39).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 40, true,
+                UmAppDatabase.MIGRATION_39_40)
+    }
+
+    @Test
+    fun migrate40to41() {
+        helper.createDatabase(TEST_DB, 40).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 41, true,
+                UmAppDatabase.MIGRATION_40_41)
+    }
+
+
+    @Test
+    fun migrate41to42() {
+        helper.createDatabase(TEST_DB, 41).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 42, true,
+                UmAppDatabase.MIGRATION_41_42)
+    }
+    @Test
+    fun migrate42to43() {
+        helper.createDatabase(TEST_DB, 42).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 43, true,
+                UmAppDatabase.MIGRATION_42_43)
+    }
+
+    @Test
+    fun migrate43to44() {
+        helper.createDatabase(TEST_DB, 43).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 44, true,
+                UmAppDatabase.MIGRATION_43_44)
+    }
+
+    @Test
+    fun migrate44to45() {
+        helper.createDatabase(TEST_DB, 44).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 45, true,
+                UmAppDatabase.MIGRATION_44_45)
+    }
+
+    @Test
+    fun migrate45to46() {
+        helper.createDatabase(TEST_DB, 45).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 46, true,
+                UmAppDatabase.MIGRATION_45_46)
+    }
+
+    @Test
+    fun migrate46to47() {
+        helper.createDatabase(TEST_DB, 46).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 47, true,
+                UmAppDatabase.MIGRATION_46_47)
+    }
+
+
+    @Test
+    fun migrate47to48() {
+        helper.createDatabase(TEST_DB, 47).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 47, true,
+                UmAppDatabase.MIGRATION_47_48)
+    }
+
+    @Test
+    fun migrate48to49() {
+        helper.createDatabase(TEST_DB, 48).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 49, true,
+                UmAppDatabase.MIGRATION_48_49)
+    }
+
+
+    @Test
+    fun migrate49to50() {
+        helper.createDatabase(TEST_DB, 49).apply {
+            close()
+        }
+
+        helper.runMigrationsAndValidate(TEST_DB, 50, true,
+                UmAppDatabase.MIGRATION_49_50)
+    }
+
 
 }

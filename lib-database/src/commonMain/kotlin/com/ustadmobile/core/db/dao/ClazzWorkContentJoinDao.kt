@@ -3,13 +3,11 @@ package com.ustadmobile.core.db.dao
 import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzWorkContentJoin
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 
-@UmDao
-@UmRepository
+@Repository
 @Dao
 abstract class ClazzWorkContentJoinDao : BaseDao<ClazzWorkContentJoin>, OneToManyJoinDao<ClazzWorkContentJoin> {
 
@@ -18,22 +16,24 @@ abstract class ClazzWorkContentJoinDao : BaseDao<ClazzWorkContentJoin>, OneToMan
             "AND CAST(clazzWorkContentJoinInactive AS INTEGER) = 0")
     abstract suspend fun findByUidAsync(clazzWorkContentJoinUid: Long) : ClazzWorkContentJoin?
 
-    @Query("""UPDATE ClazzWorkContentJoin SET clazzWorkContentJoinInactive = 1 
+    @Query("""UPDATE ClazzWorkContentJoin SET clazzWorkContentJoinInactive = 1,
+        clazzWorkContentJoinLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
         WHERE clazzWorkContentJoinUid = :clazzWorkContentJoinUid
     """)
     abstract suspend fun deactivateJoin(clazzWorkContentJoinUid : Long ): Int
 
 
     @Query(FINDBY_CLAZZWORK_UID)
-    abstract fun findAllContentByClazzWorkUid(clazzWorkUid: Long, personUid : Long)
+    abstract suspend fun findAllContentByClazzWorkUidAsync(clazzWorkUid: Long, personUid : Long)
             :List <ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
     @Query(FINDBY_CLAZZWORK_UID)
     abstract fun findAllContentByClazzWorkUidDF(clazzWorkUid: Long, personUid : Long)
             :DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
-    @Query("UPDATE ClazzWorkContentJoin SET clazzWorkContentJoinInactive = :active " +
-            "WHERE clazzWorkContentJoinUid = :uid ")
+    @Query("""UPDATE ClazzWorkContentJoin SET clazzWorkContentJoinInactive = :active,
+            clazzWorkContentJoinLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            WHERE clazzWorkContentJoinUid = :uid """)
     abstract suspend fun updateInActiveByClazzWorkQuestionUid(uid: Long, active : Boolean)
 
 

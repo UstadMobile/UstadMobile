@@ -1,10 +1,12 @@
 package com.ustadmobile.core.controller
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.PersonAccountEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -13,6 +15,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithAccount
+import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -35,7 +38,7 @@ class PersonAccountEditPresenter(context: Any,
 
     private var createAccount: Boolean = false
 
-    private var isActiveUserAdmin: Boolean = false
+    private var activeUserHasPasswordResetPermission: Boolean = false
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -50,8 +53,12 @@ class PersonAccountEditPresenter(context: Any,
             db.personDao.findByUid(activePersonUid)
         } ?: Person()
 
-        isActiveUserAdmin = activePerson.admin
-        view.currentPasswordVisible = !isActiveUserAdmin
+        activeUserHasPasswordResetPermission = withTimeoutOrNull(2000) {
+            db.personDao.personHasPermissionAsync(activePersonUid, entityUid,
+                Role.PERMISSION_RESET_PASSWORD, 0)
+        } ?: false
+
+        view.currentPasswordVisible = !activeUserHasPasswordResetPermission
 
         val person = withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.personDao?.findPersonAccountByUid(entityUid)
@@ -64,7 +71,7 @@ class PersonAccountEditPresenter(context: Any,
         super.onLoadFromJson(bundle)
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         return  if(entityJsonStr != null) {
-            Json.parse(PersonWithAccount.serializer(), entityJsonStr)
+            safeParse(di, PersonWithAccount.serializer(), entityJsonStr)
         }else {
             PersonWithAccount()
         }
@@ -78,7 +85,7 @@ class PersonAccountEditPresenter(context: Any,
 
     override fun handleClickSave(entity: PersonWithAccount) {
         GlobalScope.launch(doorMainDispatcher()) {
-            val hasErrors = !isActiveUserAdmin && entity.currentPassword.isNullOrEmpty()
+            val hasErrors = !activeUserHasPasswordResetPermission && entity.currentPassword.isNullOrEmpty()
                     && !createAccount || entity.newPassword.isNullOrEmpty()
                     || entity.confirmedPassword.isNullOrEmpty() || entity.username.isNullOrEmpty()
                     || entity.confirmedPassword != entity.newPassword
@@ -90,7 +97,7 @@ class PersonAccountEditPresenter(context: Any,
                 view.usernameError = if(entity.username.isNullOrEmpty())
                     requiredFieldMessage else null
                 view.currentPasswordError = if(entity.currentPassword.isNullOrEmpty()
-                        && !isActiveUserAdmin && !createAccount)
+                        && !activeUserHasPasswordResetPermission && !createAccount)
                     requiredFieldMessage else null
                 view.newPasswordError = if(entity.newPassword.isNullOrEmpty())
                     requiredFieldMessage else null
@@ -111,7 +118,7 @@ class PersonAccountEditPresenter(context: Any,
                     val currentPassword = entity.currentPassword
                     val newPassword = entity.newPassword
                     val username = entity.username
-                    if(((currentPassword != null && !isActiveUserAdmin) || isActiveUserAdmin)
+                    if(((currentPassword != null && !activeUserHasPasswordResetPermission) || activeUserHasPasswordResetPermission)
                             && newPassword != null && username != null){
                         accountManager.changePassword(username, currentPassword,
                                 newPassword, serverUrl)
@@ -119,6 +126,7 @@ class PersonAccountEditPresenter(context: Any,
                 }
                 view.finishWithResult(listOf(entity))
             } catch (e: Exception){
+                Napier.e("Exception registering user", e)
                 when (e) {
                     is UnauthorizedException -> view.currentPasswordError =
                             impl.getString(MessageID.incorrect_current_password, context)

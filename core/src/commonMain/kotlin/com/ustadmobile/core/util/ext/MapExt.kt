@@ -4,6 +4,8 @@ import com.ustadmobile.core.util.UMURLEncoder
 import io.ktor.client.features.json.defaultSerializer
 import io.ktor.http.content.TextContent
 import kotlinx.serialization.SerializationStrategy
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 
 /**
  * Convert the given String - String map into a query String in the form of key1=value1-url-encoded
@@ -16,4 +18,9 @@ fun <T> MutableMap<String, String>.putEntityAsJson(key: String, serializer: Seri
     val entityVal = entity ?: return
     val jsonStr = (defaultSerializer().write(entityVal) as? TextContent)?.text ?: return
     this[key] = jsonStr
+}
+
+
+fun Map<String, String>.convertToJsonObject(): JsonObject{
+   return JsonObject(this.map { entry -> Pair(entry.key, JsonPrimitive(entry.value)) }.toMap())
 }

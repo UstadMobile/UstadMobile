@@ -89,13 +89,13 @@ class ClazzWorkDetailProgressListPresenterTest {
         }
 
         testClazzWork = runBlocking {
-            db.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
+            repo.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
                     clazzWork, false, ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE,
                     true,0,false, true)
         }
 
         val contentEntriesWithJoin = runBlocking {
-            db.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
+            repo.createTestContentEntriesAndJoinToClazzWork(testClazzWork.clazzWork, 2)
         }
         val contentList = contentEntriesWithJoin.contentList
     }
@@ -115,7 +115,7 @@ class ClazzWorkDetailProgressListPresenterTest {
 
 
         verify(clazzWorkDaoSpy, timeout(5000)).findStudentProgressByClazzWork(
-                testClazzWork.clazzWork.clazzWorkUid)
+                testClazzWork.clazzWork.clazzWorkUid, ClazzWorkDao.SORT_FIRST_NAME_ASC)
         verify(mockView, timeout(5000)).list = any()
 
     }
@@ -133,7 +133,7 @@ class ClazzWorkDetailProgressListPresenterTest {
 
         val list = runBlocking {
             db.clazzWorkDao.findStudentProgressByClazzWorkTest(
-                    testClazzWork.clazzWork.clazzWorkUid)
+                    testClazzWork.clazzWork.clazzWorkUid, ClazzWorkDao.SORT_FIRST_NAME_ASC)
         }
 
         presenter.handleClickEntry(list.get(0))

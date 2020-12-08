@@ -12,7 +12,7 @@
             type="com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission" />
 
         <variable
-            name="markingMode"
+            name="editable"
             type="Boolean" />
 
         <variable
@@ -29,6 +29,7 @@
         android:id="@+id/item_clazzwork_submission_text_entry_cl"
         >
 
+        <!-- TODO: the visibility expression here is quite complex and should be controlled by the presenter, via the view interface -->
         <EditText
             android:id="@+id/item_clazzwork_submission_text_entry_et"
             android:layout_width="0dp"
@@ -39,7 +40,7 @@
             android:hint="@string/submit_your_answer"
             android:inputType="textCapSentences"
             android:singleLine="true"
-            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid ==0L &amp;&amp; clazzWorkWithSubmission.clazzWorkSubmissionType == freeText &amp;&amp; !markingMode)?View.VISIBLE:View.GONE}"
+            android:visibility="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid ==0L &amp;&amp; clazzWorkWithSubmission.clazzWorkSubmissionType == freeText &amp;&amp; editable == true) ? View.VISIBLE : View.GONE}"
             android:text="@={clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionText}"
             android:enabled="@{(clazzWorkWithSubmission.clazzWorkSubmission.clazzWorkSubmissionUid == 0L)}"
             app:layout_constraintEnd_toEndOf="parent"
@@ -47,6 +48,7 @@
             app:layout_constraintTop_toTopOf="parent" />
 
 
+        <!-- TODO: the visibility expression here is quite complex and should be controlled by the presenter, via the view interface -->
         <TextView
             android:id="@+id/item_clazzwork_submission_text_entry_tv"
             android:layout_width="0dp"

@@ -68,8 +68,8 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
         mPresenter = ReportListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this,  di, viewLifecycleOwner)
 
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, requireContext().getString(R.string.add_a_new,
-                requireContext().getString(R.string.report)))
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+                requireContext().getString(R.string.create_a_new_report))
         mDataRecyclerViewAdapter = ReportListRecyclerAdapter(mPresenter)
 
         return view

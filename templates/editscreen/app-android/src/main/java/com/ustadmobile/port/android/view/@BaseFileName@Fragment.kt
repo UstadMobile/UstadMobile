@@ -6,12 +6,11 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.Fragment@BaseFileName@Binding
 import com.ustadmobile.core.controller.@BaseFileName@Presenter
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.@BaseFileName@View
 import com.ustadmobile.lib.db.entities.@Entity@
+import com.ustadmobile.port.android.util.ext.*
 @EditEntity_Import@
 import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
@@ -35,11 +34,8 @@ class @BaseFileName@Fragment: UstadEditFragment<@Entity@>(), @BaseFileName@View,
         }
 
         mPresenter = @BaseFileName@Presenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
+                viewLifecycleOwner, di)
+        mPresenter?.onCreate(backStackSavedState)
 
         return rootView
     }
@@ -53,7 +49,6 @@ class @BaseFileName@Fragment: UstadEditFragment<@Entity@>(), @BaseFileName@View,
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.@Entity_LowerCase@)
     }
 
     override var entity: @EditEntity@? = null

@@ -2,26 +2,30 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UnauthorizedException
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEntryListTabsView
-import com.ustadmobile.core.view.GetStartedView
-import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_VIA_LINK
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
-import com.ustadmobile.core.view.UstadView.Companion.ARG_REGISTRATION_ALLOWED
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
+import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.WorkSpace
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.on
 
 class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2View,
                       di: DI)
@@ -58,53 +62,76 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
             impl.getAppConfigString(
                     AppConfig.KEY_API_URL, "http://localhost", context)?:""
         }
+
+        if(!serverUrl.endsWith("/")){
+            serverUrl += "/"
+        }
         val mWorkSpace = arguments[ARG_WORKSPACE]
         if(mWorkSpace != null){
-            workSpace = Json.parse(WorkSpace.serializer(), mWorkSpace)
+            workSpace = safeParse(di, WorkSpace.serializer(), mWorkSpace)
         }else{
             val isRegistrationAllowed = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_REGISTRATION,
                     context)
-            val isGuestLoginAllowed = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_GUEST_LOGIN,
-                    context)
+            val isGuestLoginAllowed =  if(arguments.containsKey(Login2View.ARG_NO_GUEST)){
+                false
+            }else{
+                impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_GUEST_LOGIN,
+                        context)
+            }
 
             workSpace = WorkSpace().apply {
                 registrationAllowed = isRegistrationAllowed
                 guestLogin = isGuestLoginAllowed
             }
+
         }
 
         view.createAccountVisible = workSpace.registrationAllowed
         view.connectAsGuestVisible = workSpace.guestLogin
+        view.versionInfo = impl.getVersion(context)
     }
 
     fun handleLogin(username: String?, password:String?){
         view.inProgress = true
+        view.loading = true
         view.isEmptyUsername = username == null || username.isEmpty()
         view.isEmptyPassword = password == null || password.isEmpty()
 
         if(username != null && username.isNotEmpty() && password != null && password.isNotEmpty()){
             GlobalScope.launch(doorMainDispatcher()) {
                 try {
-                    val umAccount = accountManager.login(username,password,serverUrl)
+                    val umAccount = accountManager.login(username.trim(),
+                            password.trim() ,serverUrl)
                     view.inProgress = false
-                    view.navigateToNextDestination(umAccount,fromDestination,nextDestination)
+                    view.loading = false
+                    val goOptions = UstadMobileSystemCommon.UstadGoOptions("",
+                            true)
+                    val accountRepo: UmAppDatabase =  di.on(umAccount).direct.instance(tag = DoorTag.TAG_REPO)
+                    (accountRepo as DoorDatabaseSyncRepository).invalidateAllTables()
+                    impl.go(nextDestination, mapOf(), context, goOptions)
                 } catch (e: Exception) {
                     view.errorMessage = impl.getString(if(e is UnauthorizedException)
                         MessageID.wrong_user_pass_combo else
                         MessageID.login_network_error , context)
                     view.inProgress = false
+                    view.loading = false
                     view.clearFields()
                 }
             }
         }else{
             view.inProgress = false
+            view.loading = false
         }
     }
 
     fun handleCreateAccount(){
+        val goOptions = UstadMobileSystemCommon.UstadGoOptions(Login2View.VIEW_NAME,
+                true)
         impl.go(PersonEditView.VIEW_NAME_REGISTER, mapOf(
                 PersonEditView.ARG_REGISTRATION_MODE to true.toString(),
-                ARG_SERVER_URL to serverUrl), context)
+                ARG_NEXT to arguments[ARG_NEXT],
+                REGISTER_VIA_LINK to arguments[REGISTER_VIA_LINK],
+                ARG_SERVER_URL to serverUrl), context, goOptions)
     }
 
     fun handleConnectAsGuest(){

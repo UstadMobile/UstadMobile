@@ -6,41 +6,33 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.core.os.bundleOf
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import androidx.paging.DataSource
-import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkEditBinding
-import com.toughra.ustadmobile.databinding.ItemClazzworkquestionBinding
 import com.toughra.ustadmobile.databinding.ItemContentEntrySimpleListBinding
 import com.ustadmobile.core.controller.ClazzWorkEditPresenter
-import com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.ContentEntryListItemListener
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
-import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
+import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 
 interface ClazzWorkEditFragmentEventHandler {
     fun onClickClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions?)
@@ -75,8 +67,6 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             holder.binding.contentEntry = getItem(position)
         }
     }
-
-
 
     override val viewContext: Any
         get() = requireContext()
@@ -126,7 +116,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
 
         questionRecyclerAdapter?.presenter = mPresenter
 
-        setEditFragmentTitle(R.string.clazz_work)
+        setEditFragmentTitle(R.string.add_a_new_clazzwork, R.string.edit_clazzwork)
 
         return rootView
     }
@@ -149,11 +139,9 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             val contentEntrySelected = it.firstOrNull()?:return@observeResult
             mPresenter?.handleAddOrEditContent(contentEntrySelected)
         }
-
     }
 
     override var timeZone: String = ""
-        get() = field
         set(value) {
             mBinding?.fragmentClazzWorkEditTimezoneTv?.text =
                     getText(R.string.class_timezone).toString() + " " + value
@@ -161,7 +149,6 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         }
 
     override var entity: ClazzWork? = null
-        get() = field
         set(value) {
             field = value
             mBinding?.clazzWork = value
@@ -176,7 +163,6 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
 
     override var clazzWorkQuizQuestionsAndOptions:
             DoorMutableLiveData<List<ClazzWorkQuestionAndOptions>>? = null
-        get() = field
         set(value) {
             field?.removeObserver(questionObserver)
             field = value
@@ -189,7 +175,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         set(value) {
             field?.removeObserver(contentObserver)
             field = value
-            value?.observe(viewLifecycleOwner, contentObserver)
+            value?.observeIfFragmentViewIsReady(this, contentObserver)
         }
 
     override var submissionTypeOptions: List<
@@ -250,7 +236,7 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
 
     override fun onResume() {
         super.onResume()
-        setEditFragmentTitle(R.string.clazz_work)
+        setEditFragmentTitle(R.string.add_a_new_clazzwork, R.string.edit_clazzwork)
     }
 
     override fun handleRemoveClazzWorkQuestion(clazzWorkQuestion: ClazzWorkQuestionAndOptions) {

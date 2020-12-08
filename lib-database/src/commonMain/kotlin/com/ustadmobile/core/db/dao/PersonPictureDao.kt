@@ -4,18 +4,13 @@ import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.GetAttachmentData
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.SetAttachmentData
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.PersonPicture
-import com.ustadmobile.lib.db.entities.Role
 
 
-@UmDao(hasAttachment = true, permissionJoin = " LEFT JOIN Person ON PersonPicture.personPicturePersonUid = Person.personUid ", selectPermissionCondition = PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
-        Role.PERMISSION_PERSON_PICTURE_SELECT + PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION2, updatePermissionCondition = PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION1 +
-        Role.PERMISSION_PERSON_PICTURE_UPDATE + PersonDao.ENTITY_LEVEL_PERMISSION_CONDITION2)
 @Dao
-@UmRepository
+@Repository
 abstract class PersonPictureDao : BaseDao<PersonPicture> {
 
     @SetAttachmentData
