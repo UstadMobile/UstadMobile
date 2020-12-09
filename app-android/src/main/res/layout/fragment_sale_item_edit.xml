@@ -25,8 +25,6 @@
 
     </data>
 
-
-
     <androidx.core.widget.NestedScrollView
         android:id="@+id/fragment_sale_item_edit_edit_scroll"
         android:layout_width="match_parent"
@@ -38,12 +36,11 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-
             <ImageView
                 android:id="@+id/fragment_sale_item_edit_product_iv"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_launcher_icon"
+                android:layout_width="250dp"
+                android:layout_height="250dp"
+                android:src="@drawable/ic_baseline_insert_photo_24"
                 app:layout_constraintStart_toStartOf="parent"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 app:layout_constraintTop_toTopOf="parent"
@@ -147,18 +144,20 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_item_edit_total_title_tv"
-                android:layout_marginVertical="@dimen/dimen_8dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
-                android:hint="@string/delivery_deadline">
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:hint="@string/delivery_deadline"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_sale_item_edit_total_title_tv"
+                tools:layout_editor_absoluteX="16dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/fragment_sale_item_edit_delivery_date_tiet"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
                     android:inputType="@{InputType.TYPE_NULL}"
                     app:dateLong="@={saleItem.saleItemDueDate}"
-                    app:runOnClickWhenFocused="@{true}"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"/>
+                    app:runOnClickWhenFocused="@{true}" />
 
             </com.google.android.material.textfield.TextInputLayout>
 

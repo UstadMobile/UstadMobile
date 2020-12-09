@@ -136,27 +136,19 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
         //TODO
     }
     override fun handleClickRecordDelivery(product: ProductWithInventoryCount) {
-
         navigateToEditEntity(null, R.id.inventoryitem_edit_dest, InventoryItem::class.java,
         argBundle = bundleOf(
                 UstadView.ARG_PRODUCT_UID to arguments?.get(UstadView.ARG_ENTITY_UID).toString()))
-
     }
 
     override fun handleClickRecordSale(product: ProductWithInventoryCount) {
-
-
-
         navigateToEditEntity(null, R.id.sale_edit_dest,
                 Sale::class.java,
                 argBundle = bundleOf(
                         UstadView.ARG_PRODUCT_UID to product.productUid.toString(),
                         UstadView.ARG_CREATE_SALE to "true")
         )
-
     }
-
-
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
@@ -202,9 +194,6 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
         return rootView
     }
 
-
-
-
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
@@ -224,12 +213,6 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
         categoriesRecyclerAdapter = null
         stockRecyclerAdapter = null
         historyRecyclerAdapter = null
-
-    }
-
-    override fun onResume() {
-        super.onResume()
-
 
     }
 

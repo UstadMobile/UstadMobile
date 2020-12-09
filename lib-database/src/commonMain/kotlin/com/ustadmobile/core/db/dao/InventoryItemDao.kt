@@ -61,10 +61,18 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
             (Person.personUid IN (
                 SELECT MEMBER.personUid FROM PersonGroupMember 
                 LEFT JOIN PERSON AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
-                 WHERE groupMemberGroupUid = MLE.personWeGroupUid 
-                AND CAST(groupMemberActive  AS INTEGER) = 1 ) 
+                 WHERE 
+                ( 
+                    groupMemberGroupUid = MLE.personWeGroupUid
+                    OR CAST(MEMBER.admin AS INTEGER) = 1   
+                 )
+                AND CAST(groupMemberActive  AS INTEGER) = 1 
+                AND MEMBER.personGoldoziType = 2
+                )
                 OR 
-                CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END )
+				(CAST(MLE.admin AS INTEGER) = 1 AND Person.personGoldoziType = 2)
+            ) 
+                
         """
 
         const val QUERY_GET_STOCK_LIST_BY_PRODUCT_AND_DELIVERY = """
@@ -75,14 +83,22 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
                 SELECT SUM(inventoryItemQuantity) FROM InventoryItem WHERE      
                 InventoryItem.inventoryItemProductUid = Product.productUid
                 AND InventoryItem.inventoryItemWeUid = Person.personUid
-                AND InventoryItem.inventoryItemLeUid = :leUid
+                AND (
+                    InventoryItem.inventoryItemLeUid = MLE.personUid
+                    OR
+                    CAST(MLE.admin AS INTEGER) = 1
+                    )
+                
                 AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
                 )  as stock , 
                 (
                 SELECT SUM(inventoryItemQuantity) FROM InventoryItem WHERE      
                 InventoryItem.inventoryItemProductUid = Product.productUid
                 AND InventoryItem.inventoryItemWeUid = Person.personUid
-                AND InventoryItem.inventoryItemLeUid = :leUid
+                AND ( 
+                    InventoryItem.inventoryItemLeUid = :leUid
+                    OR CAST(MLE.admin AS INTEGER) = 1 
+                    )
                 AND InventoryItem.inventoryItemSaleDeliveryUid = SaleDelivery.saleDeliveryUid
                 AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
                 ) as selectedStock
@@ -98,9 +114,14 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
                     SELECT MEMBER.personUid FROM PersonGroupMember 
                     LEFT JOIN PERSON AS MEMBER ON MEMBER.personUid = PersonGroupMember.groupMemberPersonUid
                      WHERE groupMemberGroupUid = MLE.personWeGroupUid 
-                    AND CAST(groupMemberActive  AS INTEGER) = 1 ) 
-                    OR 
-                    CASE WHEN (CAST(MLE.admin as INTEGER) = 1) THEN 1 ELSE 0 END )
+                    AND CAST(groupMemberActive  AS INTEGER) = 1 
+                    AND MEMBER.personGoldoziType = 2) 
+                    
+                     )
+                     OR 
+				(CAST(MLE.admin AS INTEGER) = 1 AND Person.personGoldoziType = 2)
+                     
+                     
             
         """
 
@@ -110,7 +131,11 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
                 SELECT SUM(inventoryItemQuantity) FROM InventoryItem WHERE      
                 InventoryItem.inventoryItemProductUid = Product.productUid
                 AND InventoryItem.inventoryItemWeUid = WE.personUid
-                AND InventoryItem.inventoryItemLeUid = :leUid
+                AND (
+                    InventoryItem.inventoryItemLeUid = LE.personUid
+                    OR
+                    CAST(LE.admin AS INTEGER) = 1
+                    )
                 AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
             )  as inventoryCount, 
             0 as inventoryCountDeliveredTotal, 
@@ -123,7 +148,10 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
             
             WHERE 
             CAST(LE.active AS INTEGER) = 1 
-            AND PersonGroupMember.groupMemberGroupUid = LE.personWeGroupUid 
+            AND ( PersonGroupMember.groupMemberGroupUid = LE.personWeGroupUid
+             OR CAST(LE.admin AS INTEGER) = 1 )
+             AND WE.personGoldoziType = 2
+            
             AND CAST(WE.active AS INTEGER) = 1  
             GROUP BY(WE.personUid)  
             
@@ -142,9 +170,13 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
             FROM InventoryItem
                 LEFT JOIN Person AS LE ON LE.personUid = inventoryItemLeUid
                 LEFT JOIN Person AS WE ON WE.personUid = inventoryItemWeUid
+                LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid
             WHERE 
                 inventoryItemProductUid = :productUid 
-                AND inventoryItemLeUid = :leUid
+                AND ( inventoryItemLeUid = MLE.personUid
+                OR CAST(MLE.admin AS INTEGER) = 1
+                )
+                
                 AND CAST(inventoryItemActive AS INTEGER) = 1 
             GROUP BY inventoryItemDateAdded
         """

@@ -21,7 +21,6 @@
         android:background="?attr/selectableItemBackground"
         >
 
-
         <LinearLayout
             android:id="@+id/linearLayoutCompat"
             android:layout_width="match_parent"

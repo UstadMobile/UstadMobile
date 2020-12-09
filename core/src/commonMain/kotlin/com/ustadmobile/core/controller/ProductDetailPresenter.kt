@@ -22,7 +22,6 @@ class ProductDetailPresenter(context: Any,
         get() = PersistenceMode.DB
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        //TODO: this
         return true
     }
 

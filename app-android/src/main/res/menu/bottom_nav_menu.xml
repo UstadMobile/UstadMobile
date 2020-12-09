@@ -14,7 +14,7 @@
     <item
         android:id="@+id/home_wes_dest"
         android:icon="@drawable/ic_group_black_24dp"
-        android:title="@string/wes" />
+        android:title="@string/people" />
 
     <item
         android:id="@+id/home_content_dest"

@@ -112,7 +112,7 @@ class ProductEditPresenter(context: Any,
                 }
             })
 
-            repo.clazzWorkContentJoinDao.deactivateByUids(categoriesToDelete)
+            repo.productCategoryJoinDao.deactivateByUids(categoriesToDelete)
 
             onFinish(ProductDetailView.VIEW_NAME, entity.productUid, entity)
         }
