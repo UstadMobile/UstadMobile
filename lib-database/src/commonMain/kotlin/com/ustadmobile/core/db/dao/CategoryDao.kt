@@ -20,6 +20,11 @@ abstract class CategoryDao : BaseDao<Category> {
     @Update
     abstract suspend fun updateAsync(entity: Category): Int
 
+    @Query("""
+        SELECT * FROM Category WHERE CAST(Category.categoryActive AS INTEGER) = 1
+    """)
+    abstract fun findAllActiveCategories(): DataSource.Factory<Int, Category>
+
 
     @Query("""
         SELECT * FROM Category WHERE categoryUid = :uid 

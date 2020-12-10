@@ -212,6 +212,11 @@
         android:name="com.ustadmobile.port.android.view.ProductListFragment"
         android:label="@string/products">
     </fragment>
+    <fragment
+        android:id="@+id/category_list_dest"
+        android:name="com.ustadmobile.port.android.view.CategoryListFragment"
+        android:label="@string/categories">
+    </fragment>
 
 
     <fragment

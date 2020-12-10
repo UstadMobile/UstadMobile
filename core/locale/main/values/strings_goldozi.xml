@@ -52,6 +52,8 @@
     <string name="x_product_pieces_y">%1$s : pieces %1$s</string>
     <string name="x_total_sales">%1$s Total total sales</string>
     <string name="create_product">New product</string>
+    <string name="create_category">New category</string>
+    <string name="category">Category</string>
     <string name="sell">Sell</string>
     <string name="receive">Receive</string>
     <string name="add_sale">Add Sale</string>
