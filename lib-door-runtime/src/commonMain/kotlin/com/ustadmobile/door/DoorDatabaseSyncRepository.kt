@@ -21,7 +21,12 @@ interface DoorDatabaseSyncRepository: DoorDatabaseRepository {
      */
     val syncHelperEntitiesDao: ISyncHelperEntitiesDao
 
-    suspend fun getAndIncrementSqlitePk(tableId: Int, increment: Int): Long
+    /**
+     * Get the next primary key id for the given table. This uses DoorPrimaryKeyManager
+     *
+     * @param tableId the table id to get the next primary key for
+     */
+    fun nextId(tableId: Int): Long
 
     /**
      * If this is a client repository, then force the client to resync all tables.

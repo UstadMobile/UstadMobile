@@ -25,63 +25,6 @@ import kotlinx.coroutines.GlobalScope
 import java.util.*
 import javax.annotation.processing.ProcessingEnvironment
 
-internal fun newRepositoryClassBuilder(daoType: ClassName, addSyncHelperParam: Boolean = false,
-        extraConstructorParams: List<ParameterSpec> = listOf()): TypeSpec.Builder {
-    val idGetterLambdaType = LambdaTypeName.get(
-            parameters = *arrayOf(DoorDatabase::class.asClassName()), returnType = Int::class.asClassName())
-    val repoClassSpec = TypeSpec.classBuilder("${daoType.simpleName}_${DbProcessorRepository.SUFFIX_REPOSITORY}")
-            .addProperty(PropertySpec.builder("_db", DoorDatabase::class)
-                    .initializer("_db").build())
-            .addProperty(PropertySpec.builder("_repo", DoorDatabaseRepository::class)
-                    .initializer("_repo").build())
-            .addProperty(PropertySpec.builder("_dao",
-                    daoType).initializer("_dao").build())
-            .addProperty(PropertySpec.builder("_httpClient",
-                    HttpClient::class).initializer("_httpClient").build())
-            .addProperty(PropertySpec.builder("_clientId", Int::class)
-                    .getter(FunSpec.getterBuilder().addCode("return _clientIdFn(_db)\n")
-                            .build())
-                    .build())
-            .addProperty(PropertySpec.builder("_clientIdFn",
-                idGetterLambdaType).initializer("_clientIdFn").build())
-            .addProperty(PropertySpec.builder("_endpoint", String::class)
-                    .initializer("_endpoint").build())
-            .addProperty(PropertySpec.builder("_dbPath", String::class)
-                    .initializer("_dbPath").build())
-            .addProperty(PropertySpec.builder("_attachmentsDir", String::class)
-                    .initializer("_attachmentsDir").build())
-            .superclass(daoType)
-            .addAnnotation(AnnotationSpec.builder(Suppress::class)
-                    .addMember("%S", "REDUNDANT_PROJECTION")
-                    .build())
-
-    val primaryConstructorFn = FunSpec.constructorBuilder()
-            .addParameter("_db", DoorDatabase::class)
-            .addParameter("_repo", DoorDatabaseRepository::class)
-            .addParameter("_dao", daoType)
-            .addParameter("_httpClient", HttpClient::class)
-            .addParameter("_clientIdFn", idGetterLambdaType)
-            .addParameter("_endpoint", String::class)
-            .addParameter("_dbPath", String::class)
-            .addParameter("_attachmentsDir", String::class)
-            .apply {
-                takeIf { extraConstructorParams.isNotEmpty() }?.addParameters(extraConstructorParams)
-            }
-
-
-    if(addSyncHelperParam) {
-        val syncHelperClassName = ClassName(daoType.packageName,
-                "${daoType.simpleName}_SyncHelper")
-        primaryConstructorFn.addParameter("_syncHelper",
-                syncHelperClassName)
-        repoClassSpec.addProperty(PropertySpec.builder("_syncHelper", syncHelperClassName)
-                .initializer("_syncHelper").build())
-    }
-    repoClassSpec.primaryConstructor(primaryConstructorFn.build())
-
-    return repoClassSpec
-}
-
 /**
  * Where this TypeElement represents a Database class, this is the property name which should be
  * used for the property name for the SyncDao repo class. It will always be _DatabaseName_SyncDao
@@ -332,16 +275,16 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                             addRepoSyncEntityFunction(entityType, syncRepoVarName)
                         }
 
-                addProperty(PropertySpec.builder("_sqlitePkManager",
-                            DoorSqlitePrimaryKeyManager::class)
-                        .initializer("%T(this)", DoorSqlitePrimaryKeyManager::class)
+                addProperty(PropertySpec.builder("_pkManager",
+                        DoorPrimaryKeyManager::class)
+                        .initializer("%T()", DoorPrimaryKeyManager::class)
                         .build())
-                addFunction(FunSpec.builder("getAndIncrementSqlitePk")
+
+                addFunction(FunSpec.builder("nextId")
                         .addParameter("tableId", INT)
-                        .addParameter("increment", INT)
-                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
-                        .addCode("return _sqlitePkManager.getAndIncrementSqlitePk(tableId, increment)\n")
+                        .addModifiers(KModifier.OVERRIDE)
                         .returns(LONG)
+                        .addCode("return _pkManager.nextId(tableId)\n")
                         .build())
             }
             .apply {
@@ -824,44 +767,21 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
 
             //Use the SQLite Primary key manager if this is an SQLite insert
             if(daoFunSpec.hasAnnotation(Insert::class.java)) {
-                if(!isAlwaysSqlite)
-                    beginControlFlow("if(_db.jdbcDbType == %T.SQLITE)", DoorDbType::class)
-
                 if(entityParam.type.isListOrArray()) {
-                    add("var _nextPk = ")
-                    if(!daoFunSpec.isSuspended) {
-                        beginRunBlockingControlFlow()
-                    }
-                    add("(_repo as %T).getAndIncrementSqlitePk(" +
-                            "${syncableEntityInfo.tableId}, ${entityParam.name}.size)\n",
-                            DoorDatabaseSyncRepository::class)
-                    if(!daoFunSpec.isSuspended) {
-                        endControlFlow()
-                    }
-
                     beginControlFlow("${entityParam.name}.forEach")
                     add("it.${syncableEntityInfo.entityLastChangedByField.name} = _clientId\n")
                     add("it.takeIf { it.${syncableEntityInfo.entityPkField.name} == 0L}?." +
-                            "${syncableEntityInfo.entityPkField.name} = _nextPk++\n")
+                            "${syncableEntityInfo.entityPkField.name} = (_repo as %T).nextId(${syncableEntityInfo.tableId})\n",
+                            DoorDatabaseSyncRepository::class)
                     endControlFlow()
                 }else {
                     add("${entityParam.name}.${syncableEntityInfo.entityLastChangedByField.name}·=·_clientId\n")
                     add("${entityParam.name}.takeIf·{·it.${syncableEntityInfo.entityPkField.name}·==·0L·}" +
                             "?.${syncableEntityInfo.entityPkField.name}·=·")
 
-                    if(!daoFunSpec.isSuspended)
-                        beginRunBlockingControlFlow()
-
-                    add("(_repo·as·%T).getAndIncrementSqlitePk(" +
-                            "${syncableEntityInfo.tableId}, 1)\n", DoorDatabaseSyncRepository::class)
-
-                    if(!daoFunSpec.isSuspended)
-                        endControlFlow()
+                    add("(_repo·as·%T).nextId(" +
+                            "${syncableEntityInfo.tableId})\n", DoorDatabaseSyncRepository::class)
                 }
-
-                if(!isAlwaysSqlite)
-                    endControlFlow()
-
             }
         }
     }

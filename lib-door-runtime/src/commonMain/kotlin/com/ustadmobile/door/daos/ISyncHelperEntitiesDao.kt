@@ -61,10 +61,6 @@ interface ISyncHelperEntitiesDao {
 
     suspend fun updateTableSyncStatusLastSynced(tableId: Int, lastSynced: Long)
 
-    suspend fun selectNextSqliteSyncablePk(tableId: Int): Long
-
-    suspend fun incrementNextSqliteSyncablePk(tableId: Int, increment: Int)
-
     /**
      * Get the clientId for this instance of the database
      */
