@@ -277,7 +277,7 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
 
                 addProperty(PropertySpec.builder("_pkManager",
                         DoorPrimaryKeyManager::class)
-                        .initializer("%T()", DoorPrimaryKeyManager::class)
+                        .initializer("%T(TABLE_ID_MAP.values)", DoorPrimaryKeyManager::class)
                         .build())
 
                 addFunction(FunSpec.builder("nextId")
@@ -286,6 +286,14 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                         .returns(LONG)
                         .addCode("return _pkManager.nextId(tableId)\n")
                         .build())
+
+                addFunction(FunSpec.builder("nextIdAsync")
+                        .addParameter("tableId", INT)
+                        .addModifiers(KModifier.OVERRIDE, KModifier.SUSPEND)
+                        .returns(LONG)
+                        .addCode("return _pkManager.nextIdAsync(tableId)\n")
+                        .build())
+
             }
             .apply {
                 dbTypeElement.allDbClassDaoGetters(processingEnv).forEach { daoGetter ->
@@ -779,8 +787,11 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
                     add("${entityParam.name}.takeIf·{·it.${syncableEntityInfo.entityPkField.name}·==·0L·}" +
                             "?.${syncableEntityInfo.entityPkField.name}·=·")
 
-                    add("(_repo·as·%T).nextId(" +
-                            "${syncableEntityInfo.tableId})\n", DoorDatabaseSyncRepository::class)
+                    add("(_repo·as·%T).nextId", DoorDatabaseSyncRepository::class)
+                    if(daoFunSpec.isSuspended)
+                        add("Async")
+
+                    add("(${syncableEntityInfo.tableId})\n")
                 }
             }
         }
