@@ -826,8 +826,6 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
     if(daoFunSpec.hasReturnType && daoFunSpec.hasAnnotation(Insert::class.java)
             && syncableEntityInfo != null) {
         add("return ")
-        if(!isAlwaysSqlite)
-            beginControlFlow("if(_db.jdbcDbType == %T.SQLITE)", DoorDbType::class)
 
         if(daoFunSpec.parameters.first().type.isListOrArray()) {
             add("${daoFunSpec.parameters[0].name}.map·{·it.${syncableEntityInfo.entityPkField.name}·}")
@@ -839,11 +837,6 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
             add("${daoFunSpec.parameters[0].name}.${syncableEntityInfo.entityPkField.name}·\n")
         }
 
-        if(!isAlwaysSqlite) {
-            nextControlFlow("else")
-            add("return _result\n")
-            endControlFlow()
-        }
     }else if(daoFunSpec.hasReturnType) {
         add("return _result\n")
     }
