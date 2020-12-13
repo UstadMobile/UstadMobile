@@ -18,6 +18,17 @@ class ReportEditFilterFragment : UstadEditFragment<ReportFilter>(), ReportEditFi
     override val mEditPresenter: UstadEditPresenter<*, ReportFilter>?
         get() = mPresenter
 
+    
+    override var conditionsOptions: List<ReportEditFilterPresenter.ConditionTypeOption>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var valueOptions: List<ReportEditFilterPresenter.ValueTypeOption>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var fieldOptions: List<ReportEditFilterPresenter.ValueTypeOption>?
+        get() = TODO("Not yet implemented")
+        set(value) {}
+
     override var fieldsEnabled: Boolean
         get() = TODO("Not yet implemented")
         set(value) {}

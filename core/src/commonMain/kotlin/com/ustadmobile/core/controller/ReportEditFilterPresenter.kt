@@ -1,9 +1,12 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ReportEditFilterView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportFilter
 import org.kodein.di.DI
 
@@ -16,6 +19,29 @@ class ReportEditFilterPresenter(context: Any,
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
+
+    enum class FieldTypeOption(val optionVal: Int, val messageId: Int) {
+
+    }
+
+    class FieldTypeMessageIdOption(day: FieldTypeOption, context: Any)
+        : MessageIdOption(day.messageId, context, day.optionVal)
+
+
+    enum class ConditionTypeOption(val optionVal: Int, val messageId: Int) {
+
+    }
+
+    class ConditionTypeMessageIdOption(day: ConditionTypeOption, context: Any)
+        : MessageIdOption(day.messageId, context, day.optionVal)
+
+    enum class ValueTypeOption(val optionVal: Int, val messageId: Int) {
+
+    }
+
+    class ValueTypeMessageIdOption(day: ValueTypeOption, context: Any)
+        : MessageIdOption(day.messageId, context, day.optionVal)
+
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
