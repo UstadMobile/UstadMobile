@@ -3,7 +3,9 @@ package com.ustadmobile.lib.db.entities
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ReportSeries {
+class ReportSeries{
+
+    var reportSeriesUid: Long = 0
 
     var reportSeriesDataSet: Int = 0
 

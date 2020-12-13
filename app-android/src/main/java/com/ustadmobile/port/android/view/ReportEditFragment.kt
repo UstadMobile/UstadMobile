@@ -35,6 +35,7 @@ interface ReportEditFragmentEventHandler {
     fun onClickNewFilter()
     fun onClickRemoveFilter(filter: ReportFilterWithDisplayDetails)
     fun onClickNewSeries()
+    fun onClickRemoveSeries(reportSeries: ReportSeries)
 }
 
 class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditView, ReportEditFragmentEventHandler,  DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption> {
@@ -56,7 +57,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
     class SeriesViewHolder(val itemBinding: ItemReportEditSeriesBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
     class RecyclerViewSeriesAdapter(val activityEventHandler: ReportEditFragmentEventHandler,
-                                   var presenter: ReportEditPresenter?) : ListAdapter<ReportFilterWithDisplayDetails, SeriesViewHolder>(DIFF_CALLBACK_SERIES) {
+                                   var presenter: ReportEditPresenter?) : ListAdapter<ReportSeries, SeriesViewHolder>(DIFF_CALLBACK_SERIES) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SeriesViewHolder {
             return SeriesViewHolder(ItemReportEditSeriesBinding.inflate(
@@ -160,13 +161,13 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
 
     companion object {
 
-        val DIFF_CALLBACK_SERIES = object : DiffUtil.ItemCallback<ReportFilterWithDisplayDetails>() {
-            override fun areItemsTheSame(oldItem: ReportFilterWithDisplayDetails, newItem: ReportFilterWithDisplayDetails): Boolean {
-                return oldItem.reportFilterUid == newItem.reportFilterUid
+        val DIFF_CALLBACK_SERIES = object : DiffUtil.ItemCallback<ReportSeries>() {
+            override fun areItemsTheSame(oldItem: ReportSeries, newItem: ReportSeries): Boolean {
+                return oldItem.reportSeriesUid == newItem.reportSeriesUid
             }
 
-            override fun areContentsTheSame(oldItem: ReportFilterWithDisplayDetails,
-                                            newItem: ReportFilterWithDisplayDetails): Boolean {
+            override fun areContentsTheSame(oldItem: ReportSeries,
+                                            newItem: ReportSeries): Boolean {
                 return oldItem == newItem
             }
         }
@@ -189,6 +190,10 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
     }
 
     override fun onClickNewSeries() {
+        TODO("Not yet implemented")
+    }
+
+    override fun onClickRemoveSeries(reportSeries: ReportSeries) {
         TODO("Not yet implemented")
     }
 
