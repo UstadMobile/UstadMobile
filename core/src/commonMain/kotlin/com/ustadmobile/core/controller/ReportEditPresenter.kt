@@ -152,6 +152,18 @@ class ReportEditPresenter(context: Any,
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
+    fun handleRemoveSeries(){
+
+    }
+
+    fun handleRemoveFilter(){
+
+    }
+
+    fun handleAddSeriesToReport(){
+        // add series object to report 
+    }
+
     override fun handleClickSave(entity: ReportWithFilters) {
         if (entity.reportTitle.isNullOrEmpty()) {
             view.titleErrorText = systemImpl.getString(MessageID.field_required_prompt, context)
