@@ -85,7 +85,11 @@ abstract class ProductDao : BaseDao<Product> {
         const val FINDWITHCOUNT_BY_UID_QUERY = """
                 SELECT Product.* ,
                  (
-                SELECT CASE WHEN SUM(InventoryItem.inventoryItemQuantity) THEN SUM(InventoryItem.inventoryItemQuantity) ELSE 0 END
+                SELECT 
+                    CASE WHEN CAST(SUM(InventoryItem.inventoryItemQuantity) AS INTEGER) > 0 
+                        THEN SUM(InventoryItem.inventoryItemQuantity) 
+                        ELSE 0 
+                    END
                 FROM InventoryItem WHERE
                 InventoryItem.inventoryItemProductUid = Product.productUid
                 AND (CAST(LE.admin AS INTEGER) = 1 OR InventoryItem.inventoryItemLeUid = LE.personUid)
@@ -102,7 +106,9 @@ abstract class ProductDao : BaseDao<Product> {
         const val QUERY_PRODUCTS_WITH_INVENTORY = """
             SELECT Product.*, 
                 (
-                SELECT CASE WHEN SUM(InventoryItem.inventoryItemQuantity) THEN SUM(InventoryItem.inventoryItemQuantity) ELSE 0 END
+                SELECT CASE WHEN 
+                CAST(SUM(InventoryItem.inventoryItemQuantity) AS INTEGER) > 0 
+                THEN SUM(InventoryItem.inventoryItemQuantity) ELSE 0 END
                 FROM InventoryItem WHERE
                 InventoryItem.inventoryItemProductUid = Product.productUid
                 AND (CAST(LE.admin AS INTEGER) = 1 OR InventoryItem.inventoryItemLeUid = LE.personUid)

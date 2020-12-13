@@ -57,7 +57,7 @@ abstract class SaleDao : BaseDao<Sale> {
         const val QUERY_ALL_LIST = """
             SELECT 
                 SUM((SaleItem.saleItemPricePerPiece)) - coalesce(SaleItem.saleItemDiscount, 0) AS totalSale, 
-                GROUP_CONCAT(DISTINCT Product.productName) AS topProducts, 
+                '' AS topProducts, 
                 0 as personPictureUid ,
                 Person.* 
             FROM Person 
@@ -81,7 +81,7 @@ abstract class SaleDao : BaseDao<Sale> {
         const val QUERY_WE_LIST = """
             SELECT 
                 SUM((SaleItem.saleItemPricePerPiece)) - coalesce(SaleItem.saleItemDiscount, 0) AS totalSale, 
-                GROUP_CONCAT(DISTINCT Product.productName) AS topProducts, 
+                '' AS topProducts, 
                 0 as personPictureUid ,
                 WE.* 
             FROM PersonGroupMember 
@@ -179,14 +179,9 @@ abstract class SaleDao : BaseDao<Sale> {
                           from sale) 
                         AS saleTitleGenPashto, 
                 
-                (Select GROUP_CONCAT(Product.productName)  FROM SaleItem 
-                  LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid 
-                  WHERE SaleItem.saleItemSaleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 ) AS productNames, 
+                '' AS productNames, 
                   
-                (Select GROUP_CONCAT(CASE WHEN Product.productNameDari IS NOT NULL 
-                        AND Product.productNameDari != '' THEN Product.productNameDari ELSE Product.productName END)  FROM SaleItem 
-                  LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid 
-                  WHERE SaleItem.saleItemSaleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 ) AS productNamesDari,
+                '' AS productNamesDari,
                    
                 '' AS locationName, 
                 

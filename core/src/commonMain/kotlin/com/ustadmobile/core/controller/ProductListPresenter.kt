@@ -33,9 +33,6 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-//        TODO("check on add permission for this account: e.g. " +
-//                "repo.clazzDao.personHasPermission(loggedInPersonUid, PERMISSION_CLAZZ_INSERT)")
-
         return true
     }
 
