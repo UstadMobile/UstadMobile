@@ -83,7 +83,7 @@ class ReportEditPresenter(context: Any,
         : MessageIdOption(data.messageId, context, data.optionVal)
 
 
-    val filterOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper(ReportFilterWithDisplayDetails::reportFilterUid,
+ /*   val filterOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper(ReportFilterWithDisplayDetails::reportFilterUid,
             "state_Person_list", ReportFilterWithDisplayDetails.serializer().list,
             ReportFilterWithDisplayDetails.serializer().list, this,
             ReportFilterWithDisplayDetails::class) { reportFilterUid = it }
@@ -94,7 +94,7 @@ class ReportEditPresenter(context: Any,
 
     fun handleRemoveFilter(filter: ReportFilterWithDisplayDetails) {
         filterOneToManyJoinEditHelper.onDeactivateEntity(filter)
-    }
+    }*/
 
 
 
@@ -153,10 +153,6 @@ class ReportEditPresenter(context: Any,
     }
 
     fun handleRemoveSeries(){
-
-    }
-
-    fun handleRemoveFilter(){
 
     }
 

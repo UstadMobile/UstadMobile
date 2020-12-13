@@ -1,16 +1,16 @@
 package com.ustadmobile.port.android.view
 
 import android.widget.AdapterView
-import com.ustadmobile.core.controller.ReportEditFilterPresenter
+import com.ustadmobile.core.controller.ReportFilterEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.ReportEditFilterView
+import com.ustadmobile.core.view.ReportFilterEditView
 import com.ustadmobile.lib.db.entities.ReportFilter
 
-class ReportEditFilterFragment : UstadEditFragment<ReportFilter>(), ReportEditFilterView,
+class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilterEditView,
         DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption> {
 
-    private var mPresenter: ReportEditFilterPresenter? = null
+    private var mPresenter: ReportFilterEditPresenter? = null
 
     override val viewContext: Any
         get() = requireContext()
@@ -18,14 +18,18 @@ class ReportEditFilterFragment : UstadEditFragment<ReportFilter>(), ReportEditFi
     override val mEditPresenter: UstadEditPresenter<*, ReportFilter>?
         get() = mPresenter
 
-    
-    override var conditionsOptions: List<ReportEditFilterPresenter.ConditionTypeOption>?
+
+    override var conditionsOptions: List<ReportFilterEditPresenter.ConditionOption>?
         get() = TODO("Not yet implemented")
         set(value) {}
-    override var valueOptions: List<ReportEditFilterPresenter.ValueTypeOption>?
+    override var dropDownValueOptions: List<ReportFilterEditPresenter.ValueOption>?
         get() = TODO("Not yet implemented")
         set(value) {}
-    override var fieldOptions: List<ReportEditFilterPresenter.ValueTypeOption>?
+
+    override var valueType: ReportFilterEditPresenter.FilterValueType
+        get() = TODO("Not yet implemented")
+        set(value) {}
+    override var fieldOptions: List<ReportFilterEditPresenter.FieldOption>?
         get() = TODO("Not yet implemented")
         set(value) {}
 

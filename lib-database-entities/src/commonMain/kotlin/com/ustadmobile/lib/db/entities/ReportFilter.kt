@@ -11,29 +11,17 @@ import kotlinx.serialization.Serializable
 @Serializable
 open class ReportFilter {
 
-    constructor()
-
-    /*constructor(entityUid: Long, entityType: Int){
-        this.entityUid = entityUid
-        this.entityType = entityType
-    }*/
-
-    @PrimaryKey(autoGenerate = true)
     var reportFilterUid: Long = 0
 
-    var reportFilterReportUid: Long = 0
+    var reportFilterField: Int = 0
 
-    var entityUid: Long = 0
+    var reportFilterCondition: Int = 0
 
-    var entityType: Int = 0
+    var reportFilterValue: String? = null
 
     companion object {
 
-        const val PERSON_FILTER = 50
 
-        const val CONTENT_FILTER = 80
-
-        const val VERB_FILTER = 70
 
     }
 
