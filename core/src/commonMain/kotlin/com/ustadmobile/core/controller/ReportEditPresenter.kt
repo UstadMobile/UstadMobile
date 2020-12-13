@@ -5,6 +5,7 @@ import com.soywiz.klock.days
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.schedule.localEndOfDay
+import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -16,6 +17,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
+import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
@@ -79,6 +81,22 @@ class ReportEditPresenter(context: Any,
 
     class DataSetMessageIdOption(data: DataSetOptions, context: Any)
         : MessageIdOption(data.messageId, context, data.optionVal)
+
+
+    val filterOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper(ReportFilterWithDisplayDetails::reportFilterUid,
+            "state_Person_list", ReportFilterWithDisplayDetails.serializer().list,
+            ReportFilterWithDisplayDetails.serializer().list, this,
+            ReportFilterWithDisplayDetails::class) { reportFilterUid = it }
+
+    fun handleAddOrEditFilter(filter: ReportFilterWithDisplayDetails) {
+        filterOneToManyJoinEditHelper.onEditResult(filter)
+    }
+
+    fun handleRemoveFilter(filter: ReportFilterWithDisplayDetails) {
+        filterOneToManyJoinEditHelper.onDeactivateEntity(filter)
+    }
+
+
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)

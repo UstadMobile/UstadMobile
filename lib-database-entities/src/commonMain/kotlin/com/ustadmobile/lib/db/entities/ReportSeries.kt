@@ -13,6 +13,8 @@ class ReportSeries{
 
     var reportSeriesSubGroup: Int = 0
 
+    var reportSeriesFilter = listOf<ReportFilter>()
+
     companion object {
 
         const val TOTAL_DURATION = 200

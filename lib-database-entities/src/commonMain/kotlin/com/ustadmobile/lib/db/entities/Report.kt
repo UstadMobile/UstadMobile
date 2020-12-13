@@ -30,22 +30,15 @@ open class Report {
 
     var reportOwnerUid: Long = 0
 
-    // TODO: moves to series
-    var chartType: Int = BAR_CHART
-
     var xAxis: Int = DAY
-
-    // TODO: to remove
-    var yAxis: Int = DURATION
-
-    // TODO: moves to series
-    var subGroup: Int = 0
 
     var fromDate: Long = 0
 
     var toDate: Long = 0
 
     var reportTitle: String? = null
+
+    var reportSeries: String? = null
 
     var reportInactive: Boolean = false
 
