@@ -73,6 +73,25 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
 
     }
 
+    class FilterViewHolder(val itemBinding: ItemContentReportEditBinding) : RecyclerView.ViewHolder(itemBinding.root)
+
+    class RecyclerViewFilterAdapter(val activityEventHandler: ReportEditFragmentEventHandler,
+                                    var presenter: ReportEditPresenter?) : ListAdapter<ReportSeries, FilterViewHolder>(DIFF_CALLBACK_SERIES) {
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FilterViewHolder {
+            return FilterViewHolder(ItemContentReportEditBinding.inflate(
+                    LayoutInflater.from(parent.context), parent, false).apply {
+                mPresenter = presenter
+                this.activityEventHandler = activityEventHandler
+            })
+        }
+
+        override fun onBindViewHolder(holder: FilterViewHolder, position: Int) {
+            val item = getItem(position)
+        }
+
+    }
+
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
