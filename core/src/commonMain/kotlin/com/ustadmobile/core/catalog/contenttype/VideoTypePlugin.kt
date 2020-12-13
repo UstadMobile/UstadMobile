@@ -40,6 +40,25 @@ open class VideoTypePlugin : ContentTypePlugin {
 
         const val AUDIO_BIT_RATE = 64000
 
+        /**
+         * Validate a ratio string that should be in the form of "x:y" where x and y are positive,
+         * non-zero integers. ffprobe might return N/A or something other than a valid aspect ratio,
+         * so this input needs validated.
+         *
+         * @return the ratioStr trimmed if it is valid, null otherwise
+         */
+        fun validateRatio(ratioStr: String): String? {
+            val parts = ratioStr.trim().split(':')
+            if(parts.size != 2)
+                return null //not valid
+
+            val partInts = parts.map { it.toIntOrNull() }
+            return if(partInts.all { it != null && it > 0 }) {
+                ratioStr.trim()
+            }else {
+                null
+            }
+        }
 
     }
 

@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
 import ScraperTypes
-import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportManager
@@ -61,9 +60,6 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
     private val logPrefix = "[ScraperManager endpoint url: ${endpoint.url}] "
 
     init {
-
-        Napier.base(DebugAntilog())
-
         LiveDataWorkQueue(db.scrapeQueueItemDao.findNextQueueItems(ScrapeQueueItem.ITEM_TYPE_INDEX),
                 { item1, item2 -> item1.sqiUid == item2.sqiUid },
                 indexTotal) {
