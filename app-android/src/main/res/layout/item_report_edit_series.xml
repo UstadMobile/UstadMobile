@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <import type="com.ustadmobile.core.util.MessageIdOption" />
+
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView" />
+
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener" />
+
+
+        <variable
+            name="mPresenter"
+            type="com.ustadmobile.core.controller.ReportEditPresenter" />
+
+        <variable
+            name="eventHandler"
+            type="com.ustadmobile.port.android.view.ReportEditFragmentEventHandler" />
+
+        <variable
+            name="visualTypeSelectionListener"
+            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+
+        <variable
+            name="visualTypeOptions"
+            type="java.util.List&lt;MessageIdOption&gt;" />
+
+        <variable
+            name="dataSetSelectionListener"
+            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+
+        <variable
+            name="dataSetOptions"
+            type="java.util.List&lt;MessageIdOption&gt;" />
+
+        <variable
+            name="subgroupSelectionListener"
+            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+
+        <variable
+            name="subgroupOptions"
+            type="java.util.List&lt;MessageIdOption&gt;" />
+
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+
+        <TextView
+            android:id="@+id/item_report_series_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:layout_marginBottom="@dimen/dimen_8dp"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/item_report_series_delete_button"
+            tools:text="Series 1"/>
+
+        <Button
+            android:id="@id/item_report_series_delete_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/item_edit_report_dialog_data_set_textinputlayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_report_series_title">
+
+            <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                android:id="@+id/item_edit_report_dialog_data_set_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/xapi_options_data_set"
+                app:messageIdOptions="@{dataSetOptions}"
+                app:onMessageIdOptionSelected="@{dataSetSelectionListener}" />
+            <!--app:selectedMessageIdOption="@={report.chartType}"-->
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/item_edit_report_dialog_visual_type_textinputlayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_edit_report_dialog_data_set_textinputlayout">
+
+            <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                android:id="@+id/item_edit_report_dialog_visual_type_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/xapi_options_visual_type"
+                app:messageIdOptions="@{visualTypeOptions}"
+                app:onMessageIdOptionSelected="@{visualTypeSelectionListener}"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/item_edit_report_dialog_subgroup_textinputlayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_edit_report_dialog_visual_type_textinputlayout">
+
+            <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                android:id="@+id/item_edit_report_dialog_subgroup_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/xapi_options_subgroup"
+                app:messageIdOptions="@{subgroupOptions}"
+                app:onMessageIdOptionSelected="@{subgroupSelectionListener}" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+        <TextView
+            android:id="@+id/item_report_edit_header_filter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:layout_marginBottom="@dimen/dimen_8dp"
+            android:text="@string/filter"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_edit_report_dialog_subgroup_textinputlayout" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/item_report_edit_filter_list"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_report_edit_header_filter"
+            tools:itemCount="2"
+            tools:listitem="@layout/item_person_report_edit" />
+
+        <include
+            android:id="@+id/item_edit_report_filter_add_layout"
+            layout="@layout/item_createnew"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:createNewText="@{@string/filter}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/item_report_edit_filter_list"
+            app:onClickNew="@{() -> eventHandler.onClickNewFilter()}" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+</layout>

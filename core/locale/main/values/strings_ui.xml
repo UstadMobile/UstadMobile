@@ -289,6 +289,8 @@
     <string name="xapi_options_general">General</string>
     <string name="xapi_options_report_title">Report Title</string>
     <string name="xapi_options_visual_type">Visualization Type</string>
+    <string name="xapi_options_data_set">Data set</string>
+    <string name="xapi_options_series">Series</string>
     <string name="xapi_options_axes">Axes</string>
     <string name="xapi_options_y_axes">Y-Axis</string>
     <string name="xapi_options_x_axes">X-Axis</string>
