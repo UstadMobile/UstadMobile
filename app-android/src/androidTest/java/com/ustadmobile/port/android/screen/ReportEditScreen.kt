@@ -3,8 +3,6 @@ package com.ustadmobile.port.android.screen
 import android.content.Context
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.navigation.fragment.findNavController
-import com.agoda.kakao.common.views.KSwipeView
-import com.agoda.kakao.common.views.KView
 import com.agoda.kakao.edit.KTextInputLayout
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
@@ -78,7 +76,7 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
         report.chartType.takeIf { it != reportOnForm?.chartType }?.also {
             testContext.flakySafely {
                 setMessageIdOption(visualTypeValue,
-                        impl.getString(ReportEditPresenter.ChartOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
+                        impl.getString(ReportEditPresenter.VisualTypeOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
             }
         }
 

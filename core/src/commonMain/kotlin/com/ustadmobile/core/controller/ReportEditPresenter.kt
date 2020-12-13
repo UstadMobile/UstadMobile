@@ -31,14 +31,14 @@ class ReportEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    enum class ChartOptions(val optionVal: Int, val messageId: Int) {
+    enum class VisualTypeOptions(val optionVal: Int, val messageId: Int) {
         BARCHART(Report.BAR_CHART,
                 MessageID.bar_chart),
         LINEGRAPH(Report.LINE_GRAPH,
                 MessageID.line_graph)
     }
 
-    class ChartTypeMessageIdOption(day: ChartOptions, context: Any)
+    class VisualTypeMessageIdOption(day: VisualTypeOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
     enum class XAxisOptions(val optionVal: Int, val messageId: Int) {
@@ -59,7 +59,7 @@ class ReportEditPresenter(context: Any,
     class XAxisMessageIdOption(day: XAxisOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
-    class GroupByMessageIdOption(day: XAxisOptions, context: Any)
+    class SubGroupByMessageIdOption(day: XAxisOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
     enum class DataSetOptions(val optionVal: Int, val messageId: Int) {
@@ -100,9 +100,9 @@ class ReportEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.chartOptions = ChartOptions.values().map { ChartTypeMessageIdOption(it, context) }
+        view.visualTypeOptions = VisualTypeOptions.values().map { VisualTypeMessageIdOption(it, context) }
         view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context) }
-        view.groupOptions = XAxisOptions.values().map { GroupByMessageIdOption(it, context) }
+        view.subGroupOptions = XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ReportWithFilters? {
@@ -124,7 +124,7 @@ class ReportEditPresenter(context: Any,
         report.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
         report.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong
 
-        handleXAxisSelected(XAxisOptions.values().map { GroupByMessageIdOption(it, context) }.find { it.code == report.xAxis } as MessageIdOption)
+        handleXAxisSelected(XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }.find { it.code == report.xAxis } as MessageIdOption)
 
         return ReportWithFilters(report, reportFilterList)
     }
@@ -140,7 +140,7 @@ class ReportEditPresenter(context: Any,
             editEntity = ReportWithFilters()
         }
 
-        handleXAxisSelected(XAxisOptions.values().map { GroupByMessageIdOption(it, context) }.find { it.code == editEntity.xAxis } as MessageIdOption)
+        handleXAxisSelected(XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }.find { it.code == editEntity.xAxis } as MessageIdOption)
 
         return editEntity
     }
@@ -160,8 +160,8 @@ class ReportEditPresenter(context: Any,
 
     }
 
-    fun handleAddSeriesToReport(){
-        // add series object to report 
+    fun handleClickAddSeries(){
+        // add series object to report
     }
 
     override fun handleClickSave(entity: ReportWithFilters) {
@@ -237,9 +237,9 @@ class ReportEditPresenter(context: Any,
 
     fun handleXAxisSelected(selectedOption: MessageIdOption) {
         if (selectedOption.code == Report.DAY || selectedOption.code == Report.MONTH || selectedOption.code == Report.WEEK) {
-            view.groupOptions = XAxisOptions.values().map { GroupByMessageIdOption(it, context) }.filter { it.code == Report.GENDER || it.code == Report.CONTENT_ENTRY }
+            view.subGroupOptions = XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }.filter { it.code == Report.GENDER || it.code == Report.CONTENT_ENTRY }
         } else {
-            view.groupOptions = XAxisOptions.values().map { GroupByMessageIdOption(it, context) }
+            view.subGroupOptions = XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }
         }
     }
 

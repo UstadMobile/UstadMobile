@@ -7,13 +7,11 @@ import com.ustadmobile.lib.db.entities.*
 
 interface ReportEditView: UstadEditView<ReportWithFilters> {
 
-    /*var personFilterList : DoorMutableLiveData<List<ReportFilterWithDisplayDetails>>?
-    var verbFilterList : DoorMutableLiveData<List<ReportFilterWithDisplayDetails>>?
-    var contentFilterList: DoorMutableLiveData<List<ReportFilterWithDisplayDetails>>? */
+    var seriesLiveData: DoorMutableLiveData<List<ReportSeries>>?
 
-    var chartOptions: List<ReportEditPresenter.ChartTypeMessageIdOption>?
+    var visualTypeOptions: List<ReportEditPresenter.VisualTypeMessageIdOption>?
     var xAxisOptions: List<ReportEditPresenter.XAxisMessageIdOption>?
-    var groupOptions: List<ReportEditPresenter.GroupByMessageIdOption>?
+    var subGroupOptions: List<ReportEditPresenter.SubGroupByMessageIdOption>?
 
     var titleErrorText: String?
 

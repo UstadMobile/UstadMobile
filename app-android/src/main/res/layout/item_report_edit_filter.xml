@@ -18,7 +18,7 @@
             type="com.ustadmobile.core.controller.ReportEditPresenter" />
 
         <variable
-            name="activityEventHandler"
+            name="eventHandler"
             type="com.ustadmobile.port.android.view.ReportEditFragmentEventHandler" />
 
 
