@@ -12,6 +12,10 @@
             name="listener"
             type="com.ustadmobile.core.controller.SaleItemListItemListener" />
 
+        <variable
+            name="locale"
+            type="String" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -59,7 +63,8 @@
                     android:layout_marginTop="@dimen/dimen_8dp"
                     android:layout_weight="1"
                     android:lines="1"
-                    android:text ="@{saleItem.saleItemProduct.productName}"
+                    app:product="@{saleItem.saleItemProduct}"
+                    app:localeSet="@{locale}"
                     tools:text="Pink Hat"
                     android:textAppearance="@style/TextAppearance.AppCompat"
                     app:layout_constraintStart_toEndOf="@+id/item_sale_item_image"

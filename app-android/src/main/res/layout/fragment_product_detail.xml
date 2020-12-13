@@ -11,6 +11,10 @@
             type="com.ustadmobile.lib.db.entities.ProductWithInventoryCount" />
 
         <variable
+            name="locale"
+            type="String" />
+
+        <variable
             name="fragmentEventHandler"
             type="com.ustadmobile.port.android.view.ProductDetailFragmentEventHandler" />
 
@@ -200,7 +204,8 @@
                 android:id="@+id/description_text"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:text="@{product.productDesc}"
+                app:productDesc="@{product}"
+                app:localeSet="@{locale}"
                 style="@style/TextAppearance.AppCompat.Body1"
                 tools:text="Description of this product"
                 app:layout_constraintTop_toBottomOf="@id/hline2"

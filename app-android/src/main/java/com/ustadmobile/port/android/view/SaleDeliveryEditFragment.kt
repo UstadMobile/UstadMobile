@@ -141,7 +141,7 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
             for(product in value){
 
                 val productTitleRecyclerAdapter =
-                        ProductDeliveryWithProducersSelectionRecyclerAdapter()
+                        ProductDeliveryWithProducersSelectionRecyclerAdapter(requireContext())
                 productTitleRecyclerAdapter?.submitList(listOf(product))
                 mergeAdapter.addAdapter(productTitleRecyclerAdapter)
 

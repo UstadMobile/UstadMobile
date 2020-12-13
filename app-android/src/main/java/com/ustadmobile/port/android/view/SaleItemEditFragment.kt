@@ -18,7 +18,7 @@ import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import kotlinx.android.synthetic.main.fragment_sale_edit.*
-
+import com.ustadmobile.core.impl.UMAndroidUtil.getCurrentLocale
 
 interface SaleItemEditFragmentEventHandler {
 
@@ -41,6 +41,8 @@ class SaleItemEditFragment: UstadEditFragment<SaleItemWithProduct>(), SaleItemEd
                 false).also {
             rootView = it.root
             it.activityEventHandler = this
+            it.locale = getCurrentLocale(requireContext())
+
         }
 
         mPresenter = SaleItemEditPresenter(requireContext(), arguments.toStringMap(),

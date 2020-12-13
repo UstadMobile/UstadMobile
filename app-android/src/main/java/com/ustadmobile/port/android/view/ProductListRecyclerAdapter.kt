@@ -2,18 +2,20 @@
 package com.ustadmobile.port.android.view
 
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemProductListBinding
 import com.ustadmobile.core.controller.ProductListItemListener
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
-class ProductListRecyclerAdapter(var itemListener: ProductListItemListener?)
+class ProductListRecyclerAdapter(var itemListener: ProductListItemListener?, val context: Context)
     : SelectablePagedListAdapter<ProductWithInventoryCount,
         ProductListRecyclerAdapter.ProductListViewHolder>(DIFF_CALLBACK) {
 
@@ -23,6 +25,7 @@ class ProductListRecyclerAdapter(var itemListener: ProductListItemListener?)
         val itemBinding = ItemProductListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         itemBinding.itemListener = itemListener
         itemBinding.selectablePagedListAdapter = this
+        itemBinding.locale = UMAndroidUtil.getCurrentLocale(context)
         return ProductListViewHolder(itemBinding)
     }
 

@@ -1,16 +1,18 @@
 
 package com.ustadmobile.port.android.view
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemSaleitemwithproducerinventoryselectionBinding
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.lib.db.entities.ProductDeliveryWithProductAndTransactions
 
 
-class ProductDeliveryWithProducersSelectionRecyclerAdapter()
+class ProductDeliveryWithProducersSelectionRecyclerAdapter(val context: Context)
     : ListAdapter<ProductDeliveryWithProductAndTransactions,
         ProductDeliveryWithProducersSelectionRecyclerAdapter.InventoryTransactionDetailHolder>(DIFF_CALLBACK) {
 
@@ -26,6 +28,7 @@ class ProductDeliveryWithProducersSelectionRecyclerAdapter()
     override fun onBindViewHolder(holder: InventoryTransactionDetailHolder, position: Int) {
         val item = getItem(position)
         holder.itemBinding.productDeets = item
+        holder.itemBinding.locale = UMAndroidUtil.getCurrentLocale(context)
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

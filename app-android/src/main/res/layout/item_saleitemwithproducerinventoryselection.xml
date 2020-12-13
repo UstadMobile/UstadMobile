@@ -8,6 +8,10 @@
             name="productDeets"
             type="com.ustadmobile.lib.db.entities.ProductDeliveryWithProductAndTransactions" />
 
+        <variable
+            name="locale"
+            type="String" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -33,13 +37,13 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_8dp"
             android:lines="1"
-            android:text="@{productDeets.productName}"
             android:textAppearance="@style/TextAppearance.AppCompat.Medium"
             app:layout_constraintBottom_toBottomOf="@+id/item_sale_item_image"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/item_sale_item_image"
             app:layout_constraintTop_toTopOf="@+id/item_sale_item_image"
             app:productNameWithItemCount="@{productDeets}"
+            app:localeSet="@{locale}"
             tools:text="Pink Hat (10 items)" />
 
 

@@ -34,7 +34,7 @@ class ProductListFragment(): UstadListViewFragment<Product, ProductWithInventory
         mPresenter = ProductListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
 
-        mDataRecyclerViewAdapter = ProductListRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = ProductListRecyclerAdapter(mPresenter, requireContext())
         val createNewText = requireContext().getString(R.string.create_product)
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view

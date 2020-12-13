@@ -2,6 +2,7 @@
 package com.ustadmobile.port.android.view
 
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -9,10 +10,11 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemSaleitemBinding
 import com.ustadmobile.core.controller.SaleItemListItemListener
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 
 
-class SaleItemRecyclerAdapter(var itemListener: SaleItemListItemListener?)
+class SaleItemRecyclerAdapter(var itemListener: SaleItemListItemListener?, val context: Context)
     : ListAdapter<SaleItemWithProduct,
         SaleItemRecyclerAdapter.InventoryTransactionDetailHolder>(DIFF_CALLBACK) {
 
@@ -23,6 +25,7 @@ class SaleItemRecyclerAdapter(var itemListener: SaleItemListItemListener?)
         val itemBinding = ItemSaleitemBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false)
         itemBinding.listener = itemListener
+        itemBinding.locale = UMAndroidUtil.getCurrentLocale(context)
         return InventoryTransactionDetailHolder(itemBinding)
     }
 

@@ -20,6 +20,7 @@ import com.ustadmobile.core.controller.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.InventoryItemDao
 import com.ustadmobile.core.db.dao.ProductDao
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ProductDetailView
@@ -181,6 +182,8 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
                 adapter = picturesRecyclerAdapter
                 layoutManager = LinearLayoutManager(requireContext())
             }
+
+            it.locale = UMAndroidUtil.getCurrentLocale(requireContext())
 
         }
         mBinding?.fragmentEventHandler = this

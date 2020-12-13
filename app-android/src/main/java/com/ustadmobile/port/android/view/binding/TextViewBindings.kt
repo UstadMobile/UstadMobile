@@ -266,15 +266,27 @@ fun TextView.setSaleItemTotal(saleItem: SaleItem?) {
     text = "" + amount.toString()
 }
 
-@BindingAdapter("productNameWithCount")
-fun TextView.setProductNameWithDeliveryCount(saleItemWithProduct: SaleItemWithProduct?){
-    text = "" + saleItemWithProduct?.saleItemProduct?.productName + " (" +
+@BindingAdapter(value =["productNameWithCount", "localeSet"])
+fun TextView.setProductNameWithDeliveryCount(saleItemWithProduct: SaleItemWithProduct?, locale: String){
+    text = "" + saleItemWithProduct?.saleItemProduct?.getNameLocale(locale) + " (" +
             saleItemWithProduct?.deliveredCount + " " + context.getString(R.string.in_stock) + " )"
 }
-@BindingAdapter("productNameWithItemCount")
-fun TextView.setProductNameWithItemCount(productDeet: ProductDeliveryWithProductAndTransactions?){
-    text = "" + productDeet?.productName + " (" +  productDeet?.numItemsExpected + " " + context.getString(R.string.items) + " )"
+@BindingAdapter(value = ["productNameWithItemCount", "localeSet"])
+fun TextView.setProductNameWithItemCount(productDeet: ProductDeliveryWithProductAndTransactions?,
+                locale: String ){
+    text = "" + productDeet?.getNameLocale(locale) + " (" +  productDeet?.numItemsExpected + " " + context.getString(R.string.items) + " )"
 }
+
+@BindingAdapter(value =["product", "localeSet"])
+fun TextView.setProductNameWithLocale(product: Product?, locale: String){
+    text = "" + product?.getNameLocale(locale)
+}
+
+@BindingAdapter(value =["productDesc", "localeSet"])
+fun TextView.setProductDescWithLocale(product: Product?, locale: String){
+    text = "" + product?.getDescLocale(locale)
+}
+
 
 @BindingAdapter("inStockAppend")
 fun TextView.setInStockAppend(stock: Int?){

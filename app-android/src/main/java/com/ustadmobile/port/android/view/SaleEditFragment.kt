@@ -212,7 +212,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         }
 
         //Sale Items
-        saleItemRecyclerAdpater = SaleItemRecyclerAdapter(this)
+        saleItemRecyclerAdpater = SaleItemRecyclerAdapter(this, requireContext())
         saleItemRecyclerView = rootView.findViewById(R.id.fragment_sale_edit_saleitem_rv)
         saleItemRecyclerView?.adapter = saleItemRecyclerAdpater
         saleItemRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
