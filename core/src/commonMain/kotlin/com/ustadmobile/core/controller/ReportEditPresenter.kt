@@ -44,20 +44,6 @@ class ReportEditPresenter(context: Any,
     class ChartTypeMessageIdOption(day: ChartOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
-    enum class YAxisOptions(val optionVal: Int, val messageId: Int) {
-        SCORE(Report.SCORE,
-                MessageID.score),
-        DURATION(Report.DURATION,
-                MessageID.total_duration),
-        AVG_DURATION(Report.AVG_DURATION,
-                MessageID.average_duration),
-        COUNT_ACTIVITIES(Report.COUNT_ACTIVITIES,
-                MessageID.count_activity)
-    }
-
-    class YAxisMessageIdOption(day: YAxisOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
-
     enum class XAxisOptions(val optionVal: Int, val messageId: Int) {
         DAY(Report.DAY,
                 MessageID.day),
@@ -68,7 +54,9 @@ class ReportEditPresenter(context: Any,
         CONTENT_ENTRY(Report.CONTENT_ENTRY,
                 MessageID.xapi_content_entry),
         GENDER(Report.GENDER,
-                MessageID.gender_literal)
+                MessageID.gender_literal),
+        CLASS(Report.CLASS,
+                MessageID.clazz)
     }
 
     class XAxisMessageIdOption(day: XAxisOptions, context: Any)
@@ -77,53 +65,9 @@ class ReportEditPresenter(context: Any,
     class GroupByMessageIdOption(day: XAxisOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
-
-    val personOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper(ReportFilterWithDisplayDetails::reportFilterUid,
-            "state_Person_list", ReportFilterWithDisplayDetails.serializer().list,
-            ReportFilterWithDisplayDetails.serializer().list, this,
-            ReportFilterWithDisplayDetails::class) { reportFilterUid = it }
-
-    fun handleAddOrEditPerson(person: ReportFilterWithDisplayDetails) {
-        personOneToManyJoinEditHelper.onEditResult(person)
-    }
-
-    fun handleRemovePerson(person: ReportFilterWithDisplayDetails) {
-        personOneToManyJoinEditHelper.onDeactivateEntity(person)
-    }
-
-    val verbDisplaynOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper(ReportFilterWithDisplayDetails::reportFilterUid,
-            "state_VerbDisplay_list", ReportFilterWithDisplayDetails.serializer().list,
-            ReportFilterWithDisplayDetails.serializer().list, this,
-            ReportFilterWithDisplayDetails::class) { reportFilterUid = it }
-
-    fun handleAddOrEditVerbDisplay(verbDisplay: ReportFilterWithDisplayDetails) {
-        verbDisplaynOneToManyJoinEditHelper.onEditResult(verbDisplay)
-    }
-
-    fun handleRemoveVerb(verbDisplay: ReportFilterWithDisplayDetails) {
-        verbDisplaynOneToManyJoinEditHelper.onDeactivateEntity(verbDisplay)
-    }
-
-
-    val contentOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper(ReportFilterWithDisplayDetails::reportFilterUid,
-            "state_Content_list", ReportFilterWithDisplayDetails.serializer().list,
-            ReportFilterWithDisplayDetails.serializer().list, this, ReportFilterWithDisplayDetails::class) { reportFilterUid = it }
-
-    fun handleAddOrEditContent(content: ReportFilterWithDisplayDetails) {
-        contentOneToManyJoinEditHelper.onEditResult(content)
-    }
-
-    fun handleRemoveContent(content: ReportFilterWithDisplayDetails) {
-        contentOneToManyJoinEditHelper.onDeactivateEntity(content)
-    }
-
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.personFilterList = personOneToManyJoinEditHelper.liveList
-        view.verbFilterList = verbDisplaynOneToManyJoinEditHelper.liveList
-        view.contentFilterList = contentOneToManyJoinEditHelper.liveList
         view.chartOptions = ChartOptions.values().map { ChartTypeMessageIdOption(it, context) }
-        view.yAxisOptions = YAxisOptions.values().map { YAxisMessageIdOption(it, context) }
         view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context) }
         view.groupOptions = XAxisOptions.values().map { GroupByMessageIdOption(it, context) }
     }
@@ -143,10 +87,6 @@ class ReportEditPresenter(context: Any,
         val personList = groupMap[ReportFilter.PERSON_FILTER] ?: listOf()
         val verbList = groupMap[ReportFilter.VERB_FILTER] ?: listOf()
         val contentUidList = groupMap[ReportFilter.CONTENT_FILTER] ?: listOf()
-
-        personOneToManyJoinEditHelper.liveList.sendValue(personList)
-        verbDisplaynOneToManyJoinEditHelper.liveList.sendValue(verbList)
-        contentOneToManyJoinEditHelper.liveList.sendValue(contentUidList)
 
         report.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
         report.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong
@@ -193,11 +133,11 @@ class ReportEditPresenter(context: Any,
             if (entity.reportUid != 0L) {
                 repo.reportDao.updateAsync(entity)
 
-                listOf(personOneToManyJoinEditHelper, verbDisplaynOneToManyJoinEditHelper, contentOneToManyJoinEditHelper).forEach {
+              /*  listOf(personOneToManyJoinEditHelper, verbDisplaynOneToManyJoinEditHelper, contentOneToManyJoinEditHelper).forEach {
                     repo.reportFilterDao.insertListAsync(it.entitiesToInsert)
                     repo.reportFilterDao.updateAsyncList(it.entitiesToUpdate)
                     repo.reportFilterDao.deactivateByUids(it.primaryKeysToDeactivate)
-                }
+                }*/
 
                 repo.reportDao.updateAsync(entity)
 
@@ -207,15 +147,16 @@ class ReportEditPresenter(context: Any,
 
             } else {
 
-                val personUidList = personOneToManyJoinEditHelper.liveList.getValue()?.map { it.entityUid }
+              /*  val personUidList = personOneToManyJoinEditHelper.liveList.getValue()?.map { it.entityUid }
                         ?: listOf()
                 val verbUidList = verbDisplaynOneToManyJoinEditHelper.liveList.getValue()?.map { it.entityUid }
                         ?: listOf()
                 val entryUidList = contentOneToManyJoinEditHelper.liveList.getValue()?.map { it.entityUid }
-                        ?: listOf()
+                        ?: listOf()*/
 
                 val reportFilterList = mutableListOf<ReportFilter>()
-                personUidList.onEach { personUid ->
+
+              /*  personUidList.onEach { personUid ->
                     reportFilterList.add(ReportFilter().apply {
                         entityUid = personUid
                         entityType = ReportFilter.PERSON_FILTER
@@ -234,7 +175,7 @@ class ReportEditPresenter(context: Any,
                         entityUid = entryUid
                         entityType = ReportFilter.CONTENT_FILTER
                     })
-                }
+                }*/
 
                 entity.reportFilterList = reportFilterList.toList()
 
