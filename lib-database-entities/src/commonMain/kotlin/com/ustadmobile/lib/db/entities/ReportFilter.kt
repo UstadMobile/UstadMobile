@@ -38,6 +38,8 @@ open class ReportFilter {
 
     var reportFilterReportUid: Long = 0
 
+    var reportFilterSeriesUid: Long = 0
+
     var entityUid: Long = 0
 
     var entityType: Int = 0

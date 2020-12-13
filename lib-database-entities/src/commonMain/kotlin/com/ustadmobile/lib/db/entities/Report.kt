@@ -30,12 +30,15 @@ open class Report {
 
     var reportOwnerUid: Long = 0
 
+    // TODO: moves to series
     var chartType: Int = BAR_CHART
 
     var xAxis: Int = DAY
 
+    // TODO: to remove
     var yAxis: Int = DURATION
 
+    // TODO: moves to series
     var subGroup: Int = 0
 
     var fromDate: Long = 0
@@ -61,8 +64,10 @@ open class Report {
 
         const val TABLE_ID = 101
 
+        // TODO: moves to series
         const val BAR_CHART = 100
 
+        // TODO: moves to series
         const val LINE_GRAPH = 101
 
         val listOfGraphs = arrayOf(BAR_CHART, LINE_GRAPH)
@@ -75,7 +80,7 @@ open class Report {
 
         const val COUNT_ACTIVITIES = 203
 
-        val yAxisList = arrayOf(SCORE, DURATION, AVG_DURATION, COUNT_ACTIVITIES)
+        val yAxisList = arrayOf(SCORE, DURATION, AVG_DURATION, COUNT_ACTIVITIES)*/
 
         const val DAY = 300
 
@@ -90,7 +95,9 @@ open class Report {
 
         const val GENDER = 306
 
-        val xAxisList = arrayOf(DAY, WEEK, MONTH, CONTENT_ENTRY, /*LOCATION, */ GENDER)
+        const val CLASS = 307
+
+        val xAxisList = arrayOf(DAY, WEEK, MONTH, CONTENT_ENTRY, /*LOCATION, */ GENDER, CLASS)
 
 
     }
