@@ -8,21 +8,6 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
-@Entity
-@SyncableEntity(tableId = ReportFilter.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ReportFilter.TABLE_ID} AS tableId FROM 
-        ChangeLog
-        JOIN ReportFilter ON ChangeLog.chTableId = ${ReportFilter.TABLE_ID} AND ChangeLog.chEntityPk = ReportFilter.reportFilterUid
-        JOIN Report ON ReportFilter.reportFilterReportUid = Report.reportUid
-        JOIN DeviceSession ON Report.reportOwnerUid = DeviceSession.dsPersonUid"""],
-    syncFindAllQuery = """
-        SELECT ReportFilter.* FROM
-        ReportFilter
-        JOIN Report ON ReportFilter.reportFilterReportUid = Report.reportUid
-        JOIN DeviceSession ON Report.reportOwnerUid = DeviceSession.dsPersonUid
-        WHERE DeviceSession.dsDeviceId = :clientId
-    """)
 @Serializable
 open class ReportFilter {
 
@@ -38,27 +23,11 @@ open class ReportFilter {
 
     var reportFilterReportUid: Long = 0
 
-    var reportFilterSeriesUid: Long = 0
-
     var entityUid: Long = 0
 
     var entityType: Int = 0
 
-    var filterInactive: Boolean = false
-
-    @MasterChangeSeqNum
-    var reportFilterMasterChangeSeqNum: Long = 0
-
-    @LocalChangeSeqNum
-    var reportFilterLocalChangeSeqNum: Long = 0
-
-    @LastChangedBy
-    var reportFilterLastChangedBy: Int = 0
-
-
     companion object {
-
-        const val TABLE_ID = 102
 
         const val PERSON_FILTER = 50
 

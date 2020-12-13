@@ -58,8 +58,6 @@ open class Report {
     @LastChangedBy
     var reportLastChangedBy: Int = 0
 
-
-
     companion object {
 
         const val TABLE_ID = 101

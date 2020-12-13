@@ -274,6 +274,15 @@
     <string name="average_duration" value="202">Average Duration</string>
     <string name="count_activity" value="203"># of activities</string>
 
+
+    <string name="content_total_duration" value="200">total duration</string>
+    <string name="average_duration_session" value="201">average duration per session</string>
+    <string name="count_session" value="202">number of sessions</string>
+    <string name="activity_recorded" value="203">number of activities recorded</string>
+    <string name="average_session_per_content" value="204">average number of sessions per content piece</string>
+    <string name="percent_students_completed"  value="205">% students completed</string>
+    <string name="count_students_completed"  value="206">number of students completed</string>
+
     <string name="xapi_day" value="300">Day</string>
     <string name="xapi_week" value="301">Week</string>
     <string name="xapi_month" value="302">Month</string>
@@ -301,6 +310,9 @@
     <string name="xapi_options_what">What</string>
     <string name="xapi_options_when">When</string>
     <string name="xapi_options_where">Where</string>>
+
+
+    <string name="xapi_content_usage">Content usage - %1$s%</string>
 
     <string name="report">Report</string>
     <string name="create_a_new_report">Create a new report</string>

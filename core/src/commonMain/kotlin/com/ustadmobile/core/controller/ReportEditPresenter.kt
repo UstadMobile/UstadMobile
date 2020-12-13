@@ -5,7 +5,6 @@ import com.soywiz.klock.days
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.schedule.localEndOfDay
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -15,12 +14,8 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportFilter
-import com.ustadmobile.lib.db.entities.ReportFilterWithDisplayDetails
-import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
-import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
@@ -64,6 +59,26 @@ class ReportEditPresenter(context: Any,
 
     class GroupByMessageIdOption(day: XAxisOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
+
+    enum class DataSetOptions(val optionVal: Int, val messageId: Int) {
+        TOTAL_DURATION(ReportSeries.TOTAL_DURATION,
+                MessageID.total_duration),
+        AVERAGE_DURATION(ReportSeries.AVERAGE_DURATION,
+                MessageID.xapi_week),
+        NUMBER_SESSIONS(ReportSeries.NUMBER_SESSIONS,
+                MessageID.xapi_month),
+        ACTIVITIES_RECORDED(ReportSeries.ACTIVITIES_RECORDED,
+                MessageID.xapi_content_entry),
+        AVERAGE_SESSION_PER_CONTENT(ReportSeries.AVERAGE_SESSION_PER_CONTENT,
+                MessageID.gender_literal),
+        PERCENT_STUDENTS_COMPLETED(ReportSeries.PERCENT_STUDENTS_COMPLETED,
+                MessageID.clazz),
+        NUMBER_STUDENTS_COMPLETED(ReportSeries.NUMBER_STUDENTS_COMPLETED,
+                MessageID.clazz)
+    }
+
+    class DataSetMessageIdOption(data: DataSetOptions, context: Any)
+        : MessageIdOption(data.messageId, context, data.optionVal)
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
