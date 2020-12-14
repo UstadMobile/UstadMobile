@@ -116,7 +116,8 @@ abstract class ProductDao : BaseDao<Product> {
                 ) as stock
             FROM Product 
             LEFT JOIN PERSON AS LE ON LE.personUid = :leUid
-            WHERE CAST(productActive AS INTEGER) = 1 
+            WHERE CAST(productActive AS INTEGER) = 1 AND
+            Product.productPersonAdded = LE.personUid OR CAST(LE.admin AS INTEGER) = 1
         """
 
 

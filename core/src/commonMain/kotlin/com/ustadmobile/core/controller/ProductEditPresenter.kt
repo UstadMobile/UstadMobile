@@ -93,7 +93,8 @@ class ProductEditPresenter(context: Any,
 
 
         GlobalScope.launch(doorMainDispatcher()) {
-
+            val loggedInPersonUid = accountManager.activeAccount.personUid
+            entity.productPersonAdded = loggedInPersonUid
             if(entity.productUid == 0L) {
                 entity.productUid = repo.productDao.insertAsync(entity)
             }else {
