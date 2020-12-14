@@ -195,8 +195,10 @@ class ListHeaderRecyclerViewAdapter(onClickNewItem: View.OnClickListener? = null
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         onClickNewItem = null
+        onFilterOptionSelected = null
         boundNewItemViewHolders.clear()
         boundSortItemViewHolders.clear()
+        boundFilterOptionViewHolders.clear()
     }
 
     override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {
