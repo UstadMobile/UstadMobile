@@ -94,6 +94,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         AND Clazz.clazzName like :searchQuery
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
+        AND ( :filter != $FILTER_ACTIVE_ONLY OR (:currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime))
         GROUP BY Clazz.clazzUid, ClazzMember.clazzMemberUid
         ORDER BY CASE :sortOrder
             WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
@@ -113,7 +114,8 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         END DESC
     """)
     abstract fun findClazzesWithPermission(searchQuery: String, personUid: Long,
-                           excludeSchoolUid: Long, sortOrder: Int, permission: Long)
+                           excludeSchoolUid: Long, sortOrder: Int, filter: Int, currentTime: Long,
+                           permission: Long)
             : DataSource.Factory<Int, ClazzWithListDisplayDetails>
 
     @Query("SELECT * FROM Clazz WHERE clazzName = :name and CAST(isClazzActive AS INTEGER) = 1")
@@ -173,6 +175,8 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         const val SORT_ATTENDANCE_ASC = 3
 
         const val SORT_ATTENDANCE_DESC = 4
+
+        const val FILTER_ACTIVE_ONLY = 1
 
         const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
             SELECT DISTINCT Person.PersonUid FROM Person

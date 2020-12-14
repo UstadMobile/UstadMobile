@@ -2,11 +2,14 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_INSERT
@@ -41,13 +44,17 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
         loggedInPersonUid = accountManager.activeAccount.personUid
         selectedSortOption = SORT_OPTIONS[0]
+
+        view.listFilterOptionChips = FILTER_OPTIONS.toListFilterOptions(context, di)
+
         updateList()
     }
 
     private fun updateList() {
         view.list = repo.clazzDao.findClazzesWithPermission(searchText.toQueryLikeParam(),
                 loggedInPersonUid, filterExcludeMembersOfSchool,
-                selectedSortOption?.flag ?: 0, filterByPermission)
+                selectedSortOption?.flag ?: 0, view.checkedFilterOptionChip?.optionId ?: 0,
+                systemTimeInMillis(), filterByPermission)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -75,6 +82,10 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
         updateList()
     }
 
+    override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {
+        super.onListFilterOptionSelected(filterOptionId)
+        updateList()
+    }
 
     companion object {
 
@@ -84,5 +95,8 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
                 SortOrderOption(MessageID.attendance, ClazzDao.SORT_ATTENDANCE_ASC, true),
                 SortOrderOption(MessageID.attendance, ClazzDao.SORT_ATTENDANCE_DESC, false)
         )
+
+        val FILTER_OPTIONS = listOf(MessageID.active_classes to ClazzDao.FILTER_ACTIVE_ONLY,
+                MessageID.all to 0)
     }
 }

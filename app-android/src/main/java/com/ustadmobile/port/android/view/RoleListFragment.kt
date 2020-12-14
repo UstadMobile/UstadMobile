@@ -16,7 +16,7 @@ import com.ustadmobile.core.view.RoleListView
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -80,7 +80,7 @@ class RoleListFragment(): UstadListViewFragment<Role, Role>(),
         mPresenter = RoleListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this,  di, viewLifecycleOwner)
         mDataBinding?.presenter = mPresenter
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_a_new_role),
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         mDataRecyclerViewAdapter = RoleListRecyclerAdapter(mPresenter)

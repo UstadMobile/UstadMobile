@@ -7,6 +7,7 @@ import com.ustadmobile.door.annotation.MinSyncVersion
 import com.ustadmobile.door.entities.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.dbType
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 import kotlin.jvm.Synchronized
@@ -48,7 +49,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 51)
+], version = 52)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -3037,6 +3038,17 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        //One off server only change to update clazz end time default to Long.MAX_VALUE
+        val MIGRATION_51_52 = object: DoorMigration(51, 52) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if(database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("UPDATE Clazz SET clazzEndTime = ${systemTimeInMillis()}," +
+                            "clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) " +
+                            "WHERE clazzEndTime = 0")
+                }
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
@@ -3044,7 +3056,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
                     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
-                    MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51)
+                    MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
+                    MIGRATION_51_52)
 
 
 
