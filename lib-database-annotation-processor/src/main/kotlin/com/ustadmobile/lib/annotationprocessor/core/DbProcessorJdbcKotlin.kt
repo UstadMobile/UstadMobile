@@ -607,8 +607,7 @@ internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
                 codeBlock.add("$execSqlFunName(%S)\n",
                         "INSERT OR REPLACE INTO sqlite_sequence(name,seq) VALUES('${it.simpleName}', ((SELECT nodeClientId FROM SyncNode) << 32)) ")
             }
-            codeBlock.addGenerateSqlitePrimaryKeyInsert(execSqlFunName, syncableEntityInfo)
-                    .addReplaceSqliteChangeSeqNums(execSqlFunName, syncableEntityInfo)
+            codeBlock.addReplaceSqliteChangeSeqNums(execSqlFunName, syncableEntityInfo)
         }else if(jdbcDbType == DoorDbType.POSTGRES){
             codeBlock.add("$execSqlFunName(\"ALTER·SEQUENCE·" +
                     "${it.simpleName}_${syncableEntityInfo.entityPkField.name}_seq·RESTART·WITH·\${_nodeId·shl·32}\")\n")
@@ -634,24 +633,6 @@ internal fun generateInsertTableSyncStatusCodeBlock(dbType: TypeElement,
 
     return codeBlock.build()
 }
-
-
-/**
- * Add to the codeblock to create a line that will set the SqliteSyncablePrimaryKey for the given
- * SyncableEntity.
- *
- * See DoorSqlitePrimaryKeyManager for more information.
- */
-internal fun CodeBlock.Builder.addGenerateSqlitePrimaryKeyInsert(execSqlFn: String,
-                                                        syncableEntityInfo: SyncableEntityInfo) : CodeBlock.Builder{
-    return add("$execSqlFn(%S)\n",
-            "REPLACE INTO SqliteSyncablePk (sspTableId, sspNextPrimaryKey) " +
-            "VALUES (${syncableEntityInfo.tableId}, (SELECT COALESCE((SELECT MAX(${syncableEntityInfo.entityPkField.name}) + 1 " +
-            "FROM ${syncableEntityInfo.syncableEntity.simpleName} WHERE " +
-            "${syncableEntityInfo.entityPkField.name} & (SELECT nodeClientId << 32 FROM SyncNode) = " +
-            "(SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
-}
-
 
 
 /**

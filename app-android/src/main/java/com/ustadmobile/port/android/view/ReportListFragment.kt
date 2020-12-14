@@ -15,7 +15,7 @@ import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -68,7 +68,7 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
         mPresenter = ReportListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this,  di, viewLifecycleOwner)
 
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 requireContext().getString(R.string.create_a_new_report))
         mDataRecyclerViewAdapter = ReportListRecyclerAdapter(mPresenter)
 
