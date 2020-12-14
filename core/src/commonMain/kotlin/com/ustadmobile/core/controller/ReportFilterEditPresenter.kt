@@ -1,11 +1,19 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.createNewSchoolAndGroups
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ReportFilterEditView
+import com.ustadmobile.core.view.ReportFilterEditView.Companion.ARG_REPORT_FILTER
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ReportFilter
+import kotlinx.atomicfu.AtomicLong
+import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 
 
@@ -15,55 +23,98 @@ class ReportFilterEditPresenter(context: Any,
                                 lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
 
+    val reportFilterUids = atomic(1L)
+
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
 
     enum class FieldOption(val optionVal: Int, val messageId: Int) {
-
+        PERSON_GENDER(ReportFilter.FIELD_PERSON_GENDER, MessageID.field_person_gender),
+        PERSON_AGE(ReportFilter.FIELD_PERSON_AGE, MessageID.field_person_age)
     }
 
     class FieldMessageIdOption(day: FieldOption, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
-
     enum class ConditionOption(val optionVal: Int, val messageId: Int) {
-
+        IS_CONDITION(ReportFilter.CONDITION_IS, MessageID.condition_is),
+        IS_NOT_CONDITION(ReportFilter.CONDITION_IS_NOT, MessageID.condition_is_not),
+        GREATER_THAN_CONDITION(ReportFilter.CONDITION_GREATER_THAN, MessageID.condition_greater_than),
+        LESS_THAN_CONDITION(ReportFilter.CONDITION_LESS_THAN, MessageID.condition_less_than)
+        //WITHIN_RANGE_CONDITION(ReportFilter.CONDITION_WITHIN_RANGE, MessageID.class_id),
     }
 
-    class ConditionTypeMessageIdOption(day: ConditionOption, context: Any)
+    class ConditionMessageIdOption(day: ConditionOption, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
+
+    private val fieldToConditionMap = mapOf(
+            ReportFilter.FIELD_PERSON_AGE to
+                    listOf(ConditionOption.GREATER_THAN_CONDITION, ConditionOption.LESS_THAN_CONDITION),
+            ReportFilter.FIELD_PERSON_GENDER to
+                    listOf(ConditionOption.IS_CONDITION, ConditionOption.IS_NOT_CONDITION)
+    )
 
     enum class ValueOption(val optionVal: Int, val messageId: Int) {
 
     }
 
-    class ValueTypeMessageIdOption(day: ValueOption, context: Any)
+    class ValueMessageIdOption(day: ValueOption, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
 
-    enum class FilterValueType{
+    enum class FilterValueType {
         DROPDOWN,
-        INTEGER
+        INTEGER,
+        RANGE
     }
 
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+        view.fieldOptions = FieldOption.values().map { FieldMessageIdOption(it, context) }
+        view.conditionsOptions = ConditionOption.values().map { ConditionMessageIdOption(it, context) }
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ReportFilter? {
-        super.onLoadFromJson(bundle)
+        val entityJsonStr = arguments[ARG_REPORT_FILTER]
 
-        return null
+        val editEntity = if (entityJsonStr != null) {
+            val entity = safeParse(di, ReportFilter.serializer(), entityJsonStr)
+
+            handleFieldOptionSelected(FieldOption.values().map { FieldMessageIdOption(it, context) }.find { it.code == entity.reportFilterField } as MessageIdOption)
+            handleConditionOptionSelected(ConditionOption.values().map { ConditionMessageIdOption(it, context) }.find { it.code == entity.reportFilterCondition } as MessageIdOption)
+
+            entity
+
+        } else {
+            ReportFilter()
+        }
+
+
+        return editEntity
     }
 
     // based on enum selection
-    fun handleFieldOptionSelected(fieldOption: FieldOption){
-        // changes the drop down option of condition and values
+    fun handleFieldOptionSelected(fieldOption: MessageIdOption) {
+        val filteredList = fieldToConditionMap[fieldOption.code]?.map { ConditionMessageIdOption(it, context) } ?: return
+        view.conditionsOptions = filteredList
     }
 
-    fun handleConditionOptionSelected(conditionOption: ConditionOption){
-        
+    fun handleConditionOptionSelected(conditionOption: MessageIdOption) {
+        when (conditionOption.code) {
+            ReportFilter.CONDITION_IS,
+            ReportFilter.CONDITION_IS_NOT -> {
+                view.valueType = FilterValueType.DROPDOWN
+                view.dropDownValueOptions = PersonConstants.GENDER_MESSAGE_ID_MAP.map { MessageIdOption(it.value, context, it.key) }
+            }
+            ReportFilter.CONDITION_WITHIN_RANGE -> {
+                view.valueType = FilterValueType.RANGE
+            }
+            ReportFilter.CONDITION_GREATER_THAN,
+            ReportFilter.CONDITION_LESS_THAN -> {
+                view.valueType = FilterValueType.INTEGER
+            }
+        }
     }
 
 
@@ -74,7 +125,11 @@ class ReportFilterEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: ReportFilter) {
-        TODO("Not yet implemented")
+        if(entity.reportFilterUid == 0L) {
+            entity.reportFilterUid = reportFilterUids.incrementAndGet()
+        }
+
+        view.finishWithResult(listOf(entity))
     }
 
 

@@ -139,7 +139,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                ReportFilterWithDisplayDetails::class.java) {
+                ReportFilter::class.java) {
             val filter = it.firstOrNull() ?: return@observeResult
 
         }

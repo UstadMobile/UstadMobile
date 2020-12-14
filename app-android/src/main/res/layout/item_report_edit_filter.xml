@@ -53,7 +53,7 @@
             android:layout_marginTop="@dimen/dimen_8dp"
             android:layout_marginEnd="@dimen/dimen_8dp"
             android:contentDescription="@string/delete"
-            android:onClick="@{() -> activityEventHandler.onClickRemoveFilter(filter)}"
+            android:onClick="@{() -> eventHandler.onClickRemoveFilter(filter)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_delete_black_24dp" />

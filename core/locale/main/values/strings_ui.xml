@@ -311,6 +311,10 @@
     <string name="xapi_options_when">When</string>
     <string name="xapi_options_where">Where</string>>
 
+    <string name="report_filter_edit_field">Field</string>
+    <string name="report_filter_edit_condition">Condition</string>
+    <string name="report_filter_edit_values">Value(s)</string>
+
 
     <string name="xapi_content_usage">Content usage - %1$s%</string>
 
@@ -320,6 +324,14 @@
     <string name="verb">Verb</string>
     <string name="add_a_new_verb">Add a new verb</string>
     <string name="id_verbentity_urlid">ID: %s</string>
+    <string name="edit_filters">Edit filters</string>
+
+    <string name="field_person_gender">Person - gender</string>
+    <string name="field_person_age">Person - age</string>
+    <string name="condition_is">is</string>
+    <string name="condition_is_not">is not</string>
+    <string name="condition_greater_than">greater than</string>
+    <string name="condition_less_than">less than</string>
 
     <!-- Report filter option - filter report results by person -->
     <string name="add_person_filter">Add person filter</string>

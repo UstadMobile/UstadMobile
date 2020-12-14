@@ -1,11 +1,5 @@
 package com.ustadmobile.lib.db.entities
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -21,7 +15,25 @@ open class ReportFilter {
 
     companion object {
 
+        const val FIELD_PERSON_GENDER = 100
 
+        const val FIELD_PERSON_AGE = 101
+
+
+        const val CONDITION_IS = 200
+
+        const val CONDITION_IS_NOT = 201
+
+        const val CONDITION_GREATER_THAN = 202
+
+        const val CONDITION_LESS_THAN = 203
+
+        const val CONDITION_WITHIN_RANGE = 204
+
+
+        const val VALUE_FLAG_INTEGER = 1
+
+        const val VALUE_FLAG_DROPDOWN = 2
 
     }
 
