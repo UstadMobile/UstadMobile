@@ -282,6 +282,11 @@ fun TextView.setProductNameWithLocale(product: Product?, locale: String){
     text = "" + product?.getNameLocale(locale)
 }
 
+@BindingAdapter(value =["category", "localeSet"])
+fun TextView.setCategoryNameWithLocale(category: Category?, locale: String){
+    text = "" + category?.getNameLocale(locale)
+}
+
 @BindingAdapter(value =["productDesc", "localeSet"])
 fun TextView.setProductDescWithLocale(product: Product?, locale: String){
     text = "" + product?.getDescLocale(locale)

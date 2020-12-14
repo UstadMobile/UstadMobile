@@ -6,6 +6,7 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.Category"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.CategoryListRecyclerAdapter"/>
         <import type="com.ustadmobile.port.android.view.AllCategoryListRecyclerAdapter"/>
 
@@ -18,6 +19,14 @@
             type="AllCategoryListRecyclerAdapter" />
 
         <variable
+            name="categoryDeleteVisible"
+            type="Boolean" />
+
+        <variable
+            name="locale"
+            type="String" />
+
+        <variable
             name="itemListener"
             type="com.ustadmobile.core.controller.CategoryListItemListener" />
 
@@ -28,6 +37,7 @@
         android:background="?android:attr/selectableItemBackground"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginVertical="@dimen/dimen_8dp"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, category)}"
         app:onSelectableItemClicked="@{() -> itemListener.onClickCategory(category)}"
@@ -38,6 +48,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_8dp"
+            android:layout_marginStart="@dimen/dimen_30dp"
             android:src="@drawable/ic_label_24dp"
             android:layout_marginVertical="@dimen/dimen_8dp"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -49,7 +60,8 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_8dp"
-            android:text="@{category.categoryName}"
+            app:category="@{category}"
+            app:localeSet="@{locale}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/item_selquestionoption_secondary_menu_imageview"
             app:layout_constraintStart_toEndOf="@+id/imageButton"
@@ -62,6 +74,7 @@
             android:layout_height="wrap_content"
             android:layout_marginVertical="@dimen/dimen_8dp"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
+            android:visibility="@{categoryDeleteVisible?View.VISIBLE:View.GONE}"
             android:layout_marginBottom="8dp"
             app:srcCompat="@drawable/ic_delete_black_24dp"
             app:layout_constraintBottom_toBottomOf="parent"

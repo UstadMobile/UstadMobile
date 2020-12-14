@@ -2,6 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import androidx.room.ColumnInfo
 import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
@@ -10,7 +11,27 @@ import com.ustadmobile.lib.db.entities.Product.Companion.PRODUCT_TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = PRODUCT_TABLE_ID)
+@SyncableEntity(tableId = PRODUCT_TABLE_ID,
+
+        notifyOnUpdate = [
+        """
+            SELECT DISTINCT DeviceSession.dsDeviceId as deviceId, $PRODUCT_TABLE_ID as tableId
+            FROM ChangeLog 
+            JOIN Product ON ChangeLog.chTableId = $PRODUCT_TABLE_ID 
+                AND Product.productUid = ChangeLog.chEntityPk 
+            JOIN Person ON Person.personUid = Product.productPersonAdded
+                OR CAST(Person.admin AS INTEGER) = 1 
+            JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        """
+        ],
+        syncFindAllQuery = """
+            SELECT Product.* FROM DeviceSession
+             JOIN Person ON Person.personUid = DeviceSession.dsPersonUid
+             JOIN Product ON Product.productPersonAdded = Person.personUid
+                OR CAST(Person.admin AS INTEGER) = 1
+            WHERE DeviceSession.dsDeviceId = :clientId
+        """
+        )
 @Serializable
 open class Product() {
 
@@ -35,6 +56,7 @@ open class Product() {
     var productDateAdded: Long = 0
 
     //Person who added this product (person uid)
+    @ColumnInfo(index=true)
     var productPersonAdded: Long = 0
 
     //Picture uid <-> productPicture 's pk

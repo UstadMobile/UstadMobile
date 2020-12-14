@@ -2,6 +2,7 @@
 package com.ustadmobile.port.android.view
 
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
@@ -9,12 +10,13 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCategoryListBinding
 import com.ustadmobile.core.controller.CategoryListListener
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.lib.db.entities.Category
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
-class CategoryListRecyclerAdapter(var itemListener: CategoryListListener?)
+class CategoryListRecyclerAdapter(var itemListener: CategoryListListener?, val context: Context)
     : ListAdapter<Category,
         CategoryListRecyclerAdapter.InventoryTransactionDetailHolder>(DIFF_CALLBACK) {
 
@@ -25,6 +27,7 @@ class CategoryListRecyclerAdapter(var itemListener: CategoryListListener?)
         val itemBinding = ItemCategoryListBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false)
         itemBinding.itemListener = itemListener
+        itemBinding.locale = UMAndroidUtil.getCurrentLocale(context)
         return InventoryTransactionDetailHolder(itemBinding)
     }
 

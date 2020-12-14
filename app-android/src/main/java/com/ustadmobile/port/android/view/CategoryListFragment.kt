@@ -40,7 +40,7 @@ class CategoryListFragment(): UstadListViewFragment<Category, Category>(),
         mPresenter = CategoryListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
 
-        mDataRecyclerViewAdapter = AllCategoryListRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = AllCategoryListRecyclerAdapter(mPresenter, requireContext())
         val createNewText = requireContext().getString(R.string.create_category)
         mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
         return view
@@ -76,5 +76,9 @@ class CategoryListFragment(): UstadListViewFragment<Category, Category>(),
 
     override val displayTypeRepo: Any?
         get() = dbRepo?.categoryDao
+
+    override fun updateIsAdmin(isAdmin: Boolean) {
+        (mDataRecyclerViewAdapter as AllCategoryListRecyclerAdapter).isAdmin = isAdmin
+    }
 
 }

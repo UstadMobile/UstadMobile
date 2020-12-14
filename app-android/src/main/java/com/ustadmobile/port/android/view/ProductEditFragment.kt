@@ -58,7 +58,7 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
             it.activityEventHandler = this
         }
 
-        categoryListRecyclerAdapter = CategoryListRecyclerAdapter(this)
+        categoryListRecyclerAdapter = CategoryListRecyclerAdapter(this, requireContext())
         categoryListRecyclerView = rootView.findViewById(R.id.fragment_product_edit_category_rv)
         categoryListRecyclerView?.adapter = categoryListRecyclerAdapter
         categoryListRecyclerView?.layoutManager = LinearLayoutManager(requireContext())

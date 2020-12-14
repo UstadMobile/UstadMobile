@@ -2,20 +2,31 @@
 package com.ustadmobile.port.android.view
 
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemAllCategoryListBinding
 import com.ustadmobile.core.controller.CategoryListItemListener
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.lib.db.entities.Category
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
-class AllCategoryListRecyclerAdapter(var itemListener: CategoryListItemListener?)
+class AllCategoryListRecyclerAdapter(var itemListener: CategoryListItemListener?, val context: Context)
     : SelectablePagedListAdapter<Category,
         AllCategoryListRecyclerAdapter.ProductListViewHolder>(DIFF_CALLBACK) {
+
+    private var viewHolder:ProductListViewHolder ? = null
+
+    var isAdmin: Boolean? = false
+        set(value){
+            field = value
+            viewHolder?.itemBinding?.categoryDeleteVisible = value
+
+        }
 
     class ProductListViewHolder(val itemBinding: ItemAllCategoryListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
@@ -23,6 +34,9 @@ class AllCategoryListRecyclerAdapter(var itemListener: CategoryListItemListener?
         val itemBinding = ItemAllCategoryListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         itemBinding.itemListener = itemListener
         itemBinding.selectablePagedListAdapter = this
+        itemBinding.categoryDeleteVisible = isAdmin
+        itemBinding.locale = UMAndroidUtil.getCurrentLocale(context)
+
         return ProductListViewHolder(itemBinding)
     }
 
@@ -35,6 +49,7 @@ class AllCategoryListRecyclerAdapter(var itemListener: CategoryListItemListener?
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
         super.onDetachedFromRecyclerView(recyclerView)
         itemListener = null
+        viewHolder = null
     }
 
     companion object {

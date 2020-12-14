@@ -112,7 +112,8 @@ class ProductEditPresenter(context: Any,
                 }
             })
 
-            repo.productCategoryJoinDao.deactivateByUids(categoriesToDelete)
+            repo.productCategoryJoinDao.deactivateByCategoryAndProductUid(entity.productUid,
+                    categoriesToDelete)
 
             onFinish(ProductDetailView.VIEW_NAME, entity.productUid, entity)
         }

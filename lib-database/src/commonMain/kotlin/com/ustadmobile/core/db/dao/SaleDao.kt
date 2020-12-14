@@ -75,7 +75,7 @@ abstract class SaleDao : BaseDao<Sale> {
                 LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid 
                     AND CAST(Product.productActive AS INTEGER) = 1
             AND CAST(Person.active AS INTEGER) = 1  
-            GROUP BY(Person.personUid)  
+            GROUP BY Person.personUid, SaleItem.saleItemUid  
         """
 
         const val QUERY_WE_LIST = """
@@ -101,6 +101,7 @@ abstract class SaleDao : BaseDao<Sale> {
                     AND CAST(Product.productActive AS INTEGER) = 1
             WHERE PersonGroupMember.groupMemberGroupUid = LE.personWeGroupUid 
             AND CAST(WE.active AS INTEGER) = 1  
+            AND ( CAST(WE.admin AS INTEGER) = 0 OR CAST(LE.admin AS INTEGER) = 1)
             GROUP BY(WE.personUid)  
             
         """
@@ -195,17 +196,17 @@ abstract class SaleDao : BaseDao<Sale> {
                            Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  WHERE Sale.saleUid = sl.saleUid) ,0 
                           ) - COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment 
                               WHERE SalePayment.salePaymentSaleUid = sl.saleUid 
-                               AND SalePayment.salePaymentDone = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1 ) ,
+                               AND CAST(SalePayment.salePaymentDone AS INTEGER) = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1 ) ,
                           0)
                 ) AS saleAmountDue, 
                 
                 'Afs' AS saleCurrency,  
                 
                 coalesce(
-                    ( 
+                    (   
                         SELECT SaleItem.saleItemDueDate FROM SaleItem LEFT JOIN Sale on Sale.saleUid = 
                         SaleItem.saleItemSaleUid WHERE SaleItem.saleItemSaleUid = sl.saleUid  
-                        AND CAST(Sale.saleActive AS INTEGER) = 1  AND SaleItem.saleItemPreOrder = 1 
+                        AND CAST(Sale.saleActive AS INTEGER) = 1  AND CAST(SaleItem.saleItemPreOrder AS INTEGER) = 1 
                         ORDER BY SaleItem.saleItemDueDate ASC LIMIT 1 
                     ) 
                 , 0) AS earliestDueDate,
@@ -213,12 +214,12 @@ abstract class SaleDao : BaseDao<Sale> {
                 (SELECT count(*) FROM SaleItem WHERE SaleItem.saleItemSaleUid = sl.saleUid) AS saleItemCount,
                     COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment  
                     WHERE SalePayment.salePaymentSaleUid = sl.saleUid 
-                    AND SalePayment.salePaymentDone = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1 ) ,0) 
+                    AND CAST(SalePayment.salePaymentDone AS INTEGER) = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1 ) ,0) 
                 AS saleAmountPaid,
                  
                 (select (case  when  
                     (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid 
-                    AND sip.saleItemPreOrder = 1 ) > 0  then 1  else 0 end)  
+                    AND CAST(sip.saleItemPreOrder AS INTEGER) = 1 ) > 0  then 1  else 0 end)  
                 from Sale) AS saleItemPreOrder
                  
                 FROM Sale sl 
@@ -232,9 +233,12 @@ abstract class SaleDao : BaseDao<Sale> {
                 
                 WHERE CAST(sl.saleActive AS INTEGER) = 1
                 
-                AND ( CASE WHEN (CAST(LE.admin as INTEGER) = 1) THEN 1 ELSE 0 END OR sl.salePersonUid = LE.personUid)
+                AND (
+					CAST(LE.admin AS INTEGER) = 1 OR 
+					sl.salePersonUid = LE.personUid
+					)
                 
-                GROUP BY saleUid 
+                GROUP BY saleUid, Customer.personUid 
         """
 
 
