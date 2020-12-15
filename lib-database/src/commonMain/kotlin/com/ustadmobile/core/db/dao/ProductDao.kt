@@ -34,7 +34,8 @@ abstract class ProductDao : BaseDao<Product> {
     abstract suspend fun findProductWithInventoryCountAsync(uid: Long, leUid: Long): ProductWithInventoryCount?
 
     @Query(QUERY_PRODUCTS_WITH_INVENTORY)
-    abstract fun findAllActiveProductWithInventoryCount(leUid: Long): DataSource.Factory<Int, ProductWithInventoryCount>
+    abstract fun findAllActiveProductWithInventoryCount(leUid: Long, searchText: String? = "%")
+            : DataSource.Factory<Int, ProductWithInventoryCount>
 
     @Query("""SELECT * FROM Product 
         WHERE CAST(productActive AS INTEGER) = 1
@@ -116,8 +117,13 @@ abstract class ProductDao : BaseDao<Product> {
                 ) as stock
             FROM Product 
             LEFT JOIN PERSON AS LE ON LE.personUid = :leUid
-            WHERE CAST(productActive AS INTEGER) = 1 AND
-            Product.productPersonAdded = LE.personUid OR CAST(LE.admin AS INTEGER) = 1
+            WHERE CAST(productActive AS INTEGER) = 1
+             
+             AND (lower(Product.productName) like :searchText OR
+                     lower(Product.productNameDari) like :searchText OR 
+                    lower(Product.productNamePashto) like :searchText )
+             
+            AND (Product.productPersonAdded = LE.personUid OR CAST(LE.admin AS INTEGER) = 1)
         """
 
 

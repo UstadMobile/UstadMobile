@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.ClazzWork
@@ -14,13 +15,21 @@ import org.kodein.di.DI
 class ProductListPresenter(context: Any, arguments: Map<String, String>, view: ProductListView,
                            di: DI, lifecycleOwner: DoorLifecycleOwner)
     : UstadListPresenter<ProductListView, Product>(context, arguments, view, di, lifecycleOwner),
-        ProductListItemListener  {
+        ProductListItemListener, OnSearchSubmitted  {
 
     var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
+
+    var searchText: String? = null
 
     enum class SortOrder(val messageId: Int) {
         ORDER_NAME_ASC(MessageID.sort_by_name_asc),
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
+    }
+
+
+    override fun onSearchSubmitted(text: String?) {
+        searchText = text
+        updateListOnView()
     }
 
     class ProductListSortOption(val sortOrder: SortOrder, context: Any) :
@@ -37,9 +46,9 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
     }
 
     private fun updateListOnView() {
-        //TODO: add sort listing
+
         view.list = repo.productDao.findAllActiveProductWithInventoryCount(
-                accountManager.activeAccount.personUid)
+                accountManager.activeAccount.personUid, searchText.toQueryLikeParam())
     }
 
     override fun handleClickCreateNewFab() {
