@@ -145,27 +145,6 @@ android {
     flavorDimensions "config"
 
     productFlavors {
-        /*
-         * The main flavor
-         */
-        vanilla {
-            dimension "config"
-            testApplicationId "com.toughra.ustadmobile.test"
-            versionCode rootProject.ext.ustadVersionCode
-        }
-
-        /*
-         * Our main application does not exceed 64K methods, but it does exceed this limit with
-         * test libraries. Therefor testing on < Android 4.4 requires multidex to be enabled.
-         *
-         * Min SDK version = 18 as this is required by ui-automator
-         */
-        vanillamultidex {
-            dimension "config"
-            minSdkVersion 18
-            multiDexKeepProguard file('multidex-config.pro')
-        }
-
         /**
          * Used for day to day work in Android studio to avoid the need to use multidex when running tests
          */
@@ -319,7 +298,7 @@ dependencies {
     implementation "androidx.activity:activity-ktx:$version_androidx_activity"
     implementation "androidx.fragment:fragment:$version_androidx_fragment"
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy_support"
-    vanillamultidexApi "androidx.multidex:multidex:$version_android_multidex"
+    //vanillamultidexApi "androidx.multidex:multidex:$version_android_multidex"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
