@@ -4,6 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.paging.PagedList
@@ -14,6 +16,7 @@ import com.toughra.ustadmobile.databinding.FragmentProductEditBinding
 import com.ustadmobile.core.controller.CategoryListListener
 import com.ustadmobile.core.controller.ProductEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ProductEditView
@@ -103,6 +106,12 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
         set(value) {
             mBinding?.product = value
             field = value
+            if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                val productName = value?.getNameLocale(UMAndroidUtil.getCurrentLocale(requireContext()))
+                if(productName?.isNotEmpty() == true) {
+                    (activity as? AppCompatActivity)?.supportActionBar?.title = productName
+                }
+            }
         }
     override var categories: DoorMutableLiveData<List<Category>>? = null
         set(value) {
@@ -121,7 +130,6 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
     override fun addNewCategory() {
         onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(Category::class.java, R.id.category_list_dest)
-        //navigateToEditEntity(null, R.id.category_edit_dest, Category::class.java)
     }
 
     override fun onClickDelete(entry: Category) {

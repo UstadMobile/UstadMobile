@@ -4,11 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentCategoryEditBinding
 import com.ustadmobile.core.controller.CategoryEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.CategoryEditView
 import com.ustadmobile.lib.db.entities.Category
@@ -65,6 +68,12 @@ class CategoryEditFragment: UstadEditFragment<Category>(), CategoryEditView{
         set(value) {
             mBinding?.category = value
             field = value
+            if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                val categoryName = value?.getNameLocale(UMAndroidUtil.getCurrentLocale(requireContext()))
+                if(categoryName?.isNotEmpty() == true) {
+                    (activity as? AppCompatActivity)?.supportActionBar?.title = categoryName
+                }
+            }
         }
 
     override var fieldsEnabled: Boolean = false

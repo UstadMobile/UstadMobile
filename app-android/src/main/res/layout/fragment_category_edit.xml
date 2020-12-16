@@ -28,19 +28,19 @@
 
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/fragment_product_edit_edit_scroll"
+        android:id="@+id/fragment_category_edit_edit_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
-            android:id="@+id/fragment_product_edit_edit_clx"
+            android:id="@+id/fragment_category_edit_edit_clx"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:id="@+id/fragment_product_edit_picture_view"
+                android:id="@+id/fragment_category_edit_picture_view"
                 android:layout_width="@dimen/dimen_48dp"
                 android:layout_height="@dimen/dimen_48dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
@@ -51,19 +51,18 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/fragment_product_edit_pictureicon"
+                android:id="@+id/fragment_category_edit_pictureicon"
                 android:layout_width="@dimen/dimen_24dp"
                 android:layout_height="@dimen/dimen_24dp"
-                android:onClick="@{() -> fragmentProductEditPictureView.callOnClick()}"
-                app:layout_constraintBottom_toBottomOf="@+id/fragment_product_edit_picture_view"
+                app:layout_constraintBottom_toBottomOf="@+id/fragment_category_edit_picture_view"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/fragment_product_edit_picture_view"
+                app:layout_constraintTop_toTopOf="@+id/fragment_category_edit_picture_view"
                 app:srcCompat="@drawable/ic_add_a_photo_24"
                 app:tint="?colorOnError" />
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_product_edit_title_eng"
+                android:id="@+id/fragment_category_edit_title_eng"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dimen_16dp"
@@ -73,7 +72,7 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_product_edit_picture_view"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_category_edit_picture_view"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 >
 
@@ -85,7 +84,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_product_edit_desc_til"
+                android:id="@+id/fragment_category_edit_desc_til"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -96,7 +95,7 @@
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_product_edit_title_eng">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_category_edit_title_eng">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
@@ -107,7 +106,7 @@
 
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_product_edit_title_dari_til"
+                android:id="@+id/fragment_category_edit_title_dari_til"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -118,7 +117,7 @@
                 app:hintEnabled="true"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_product_edit_desc_til">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_category_edit_desc_til">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
@@ -131,7 +130,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_product_edit_desc_dari_til"
+                android:id="@+id/fragment_category_edit_desc_dari_til"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -142,7 +141,7 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_product_edit_title_dari_til">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_category_edit_title_dari_til">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:text="@={category.categoryDescDari}"
@@ -152,7 +151,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_product_edit_title_pashto_til"
+                android:id="@+id/fragment_category_edit_title_pashto_til"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -163,7 +162,7 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_product_edit_desc_dari_til">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_category_edit_desc_dari_til">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:text="@={category.categoryDescPashto}"
@@ -173,7 +172,7 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_product_edit_desc_pashto_til"
+                android:id="@+id/fragment_category_edit_desc_pashto_til"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -184,7 +183,7 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_product_edit_title_pashto_til">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_category_edit_title_pashto_til">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:text="@={category.categoryDescPashto}"
@@ -195,7 +194,7 @@
 
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/fragment_product_edit_price_til"
+                android:id="@+id/fragment_category_edit_price_til"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -207,7 +206,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 android:visibility="gone"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_product_edit_desc_pashto_til">
+                app:layout_constraintTop_toBottomOf="@+id/fragment_category_edit_desc_pashto_til">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:text=""
