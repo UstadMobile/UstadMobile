@@ -34,6 +34,7 @@ kotlin {
         }
     }
 
+    /* JS is disabled until upgrade to Kotlin1.4
     js {
         nodejs()
 
@@ -43,7 +44,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
-
+    */
 
     sourceSets {
         commonMain {
@@ -72,6 +73,8 @@ kotlin {
                 implementation "com.github.aakira:napier-jvm:$version_napier"
             }
         }
+
+        /*
         jsMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
@@ -80,7 +83,7 @@ kotlin {
                 implementation "com.github.aakira:napier-js:$version_napier"
             }
         }
-
+        */
     }
 
 }

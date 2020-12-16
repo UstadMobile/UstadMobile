@@ -23,6 +23,7 @@ kotlin {
         }
     }
 
+    /* JS is disabled until after kotlin 1.4 upgrade
     js {
         nodejs()
 
@@ -32,7 +33,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
-
+    */
 
     sourceSets {
         commonMain {
@@ -67,6 +68,7 @@ kotlin {
             }
         }
 
+        /*
         jsMain {
             kotlin.srcDir("build/generated/source/door-js")
             dependencies {
@@ -78,6 +80,7 @@ kotlin {
                 implementation "com.github.aakira:napier-js:$version_napier"
             }
         }
+        */
     }
 
 }

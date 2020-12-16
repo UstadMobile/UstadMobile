@@ -35,6 +35,7 @@ kotlin {
 
     android()
 
+    /* JS is disabled until after Kotlin 1.4 upgrade
     js {
         nodejs()
 
@@ -44,6 +45,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
+    */
 
 
     sourceSets {

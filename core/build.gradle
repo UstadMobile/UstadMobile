@@ -158,6 +158,7 @@ kotlin {
 
     }
 
+    /* JS is disabled until upgrade to Kotlin1.4
     js("js") {
         nodejs()
 
@@ -168,6 +169,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
+    */
 
 
 
@@ -345,7 +347,7 @@ kotlin {
             }
         }
 
-        jsMain {
+        /*jsMain {
             dependencies {
                 implementation project(":lib-database-mpp")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
@@ -358,7 +360,7 @@ kotlin {
                 implementation "io.ktor:ktor-io-js:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
             }
-        }
+        }*/
 
     }
 }

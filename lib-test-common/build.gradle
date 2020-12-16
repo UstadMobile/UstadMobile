@@ -39,6 +39,7 @@ kotlin {
 
     android()
 
+    /* JS is disabled until after kotlin 1.4 upgrade
     js {
         nodejs()
 
@@ -48,6 +49,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
+    */
 
 
     sourceSets {
@@ -67,6 +69,7 @@ kotlin {
             }
         }
 
+        /*
         jsMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
@@ -78,6 +81,7 @@ kotlin {
                 implementation "com.github.aakira:napier-js:$version_napier"
             }
         }
+        */
         commonJvmMain {
             dependencies {
                 implementation "io.ktor:ktor-server-servlet:$version_ktor"
