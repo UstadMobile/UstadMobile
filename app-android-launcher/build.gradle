@@ -58,8 +58,8 @@ android {
 
     defaultConfig {
         applicationId "${baseAppId}.launcher"
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
+        minSdkVersion 21
+        targetSdkVersion 29
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.ext.ustadVersion
         multiDexEnabled true //required for all variants to use java library desugaring
