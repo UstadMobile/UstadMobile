@@ -21,7 +21,7 @@ import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.toughra.ustadmobile.R
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.util.ext.*
 
 
@@ -41,7 +41,7 @@ class LocationListFragment(): UstadListViewFragment<Location, Location>(),
 
         mDataRecyclerViewAdapter = LocationListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.new_location)
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText)
         return view
     }
 

@@ -16,7 +16,7 @@ import com.ustadmobile.lib.db.entities.Role.Companion.PERMISSION_CLAZZ_INSERT
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
-class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: ClazzList2View,
+class   ClazzListPresenter(context: Any, arguments: Map<String, String>, view: ClazzList2View,
                          di: DI, lifecycleOwner: DoorLifecycleOwner,
                          private val clazzList2ItemListener:
                          DefaultClazzListItemListener = DefaultClazzListItemListener(view, ListViewMode.BROWSER, context, di))

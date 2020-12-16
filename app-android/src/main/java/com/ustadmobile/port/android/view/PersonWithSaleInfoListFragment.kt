@@ -14,7 +14,7 @@ import com.ustadmobile.core.view.PersonWithSaleInfoListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.PersonWithSaleInfo
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 
 class PersonWithSaleInfoListFragment(): UstadListViewFragment<PersonWithSaleInfo, PersonWithSaleInfo>(),
@@ -34,8 +34,28 @@ class PersonWithSaleInfoListFragment(): UstadListViewFragment<PersonWithSaleInfo
 
         mDataRecyclerViewAdapter = PersonWithSaleInfoListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_we  )
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText,
+                onFilterOptionSelected = mPresenter)
         return view
+    }
+
+    override fun showAddLE(show: Boolean) {
+
+        val optionList = if(show){
+             listOf(BottomSheetOption(R.drawable.ic_add_black_24dp,
+                requireContext().getString(R.string.new_le), NEW_LE),
+                BottomSheetOption(R.drawable.ic_add_black_24dp, requireContext().getString(R.string.new_we), NEW_PRODUCER),
+                BottomSheetOption(R.drawable.ic_add_black_24dp, requireContext().getString(R.string.new_customer), NEW_CUSTOMER))
+        }else{
+            listOf(BottomSheetOption(R.drawable.ic_add_black_24dp, requireContext().getString(R.string.new_we), NEW_PRODUCER),
+                    BottomSheetOption(R.drawable.ic_add_black_24dp, requireContext().getString(R.string.new_customer), NEW_CUSTOMER))
+        }
+
+
+        fabManager?.onClickListener = {
+            val sheet = OptionsBottomSheetFragment(optionList, this)
+            sheet.show(childFragmentManager, sheet.tag)
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -43,15 +63,15 @@ class PersonWithSaleInfoListFragment(): UstadListViewFragment<PersonWithSaleInfo
         fabManager?.text = requireContext().getText(R.string.person)
 
         //override this to show our own bottom sheet
-        fabManager?.onClickListener = {
-            val optionList =  listOf(BottomSheetOption(R.drawable.ic_add_black_24dp,
-                    requireContext().getString(R.string.new_le), NEW_LE),
-            BottomSheetOption(R.drawable.ic_add_black_24dp, requireContext().getString(R.string.new_we), NEW_PRODUCER),
-            BottomSheetOption(R.drawable.ic_add_black_24dp, requireContext().getString(R.string.new_customer), NEW_CUSTOMER))
-
-            val sheet = OptionsBottomSheetFragment(optionList, this)
-            sheet.show(childFragmentManager, sheet.tag)
-        }
+//        fabManager?.onClickListener = {
+//            val optionList =  listOf(BottomSheetOption(R.drawable.ic_add_black_24dp,
+//                    requireContext().getString(R.string.new_le), NEW_LE),
+//            BottomSheetOption(R.drawable.ic_add_black_24dp, requireContext().getString(R.string.new_we), NEW_PRODUCER),
+//            BottomSheetOption(R.drawable.ic_add_black_24dp, requireContext().getString(R.string.new_customer), NEW_CUSTOMER))
+//
+//            val sheet = OptionsBottomSheetFragment(optionList, this)
+//            sheet.show(childFragmentManager, sheet.tag)
+//        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

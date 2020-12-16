@@ -66,6 +66,8 @@
     <string name="new_we">New WE</string>
     <string name="new_le">New LE</string>
     <string name="new_customer">New customer</string>
+    <string name="le">LE</string>
+    <string name="we">WE</string>
     <string name="new_group">New group</string>
     <string name="new_location">New location</string>
     <string name="edit_location">Edit location</string>

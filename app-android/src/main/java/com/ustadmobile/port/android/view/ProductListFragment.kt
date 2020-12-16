@@ -17,7 +17,7 @@ import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
 import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 class ProductListFragment(): UstadListViewFragment<Product, ProductWithInventoryCount>(),
         ProductListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
@@ -36,7 +36,7 @@ class ProductListFragment(): UstadListViewFragment<Product, ProductWithInventory
 
         mDataRecyclerViewAdapter = ProductListRecyclerAdapter(mPresenter, requireContext())
         val createNewText = requireContext().getString(R.string.create_product)
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText)
         return view
     }
 

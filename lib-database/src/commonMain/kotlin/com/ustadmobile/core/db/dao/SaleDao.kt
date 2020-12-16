@@ -8,6 +8,7 @@ import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Person.*
 import com.ustadmobile.door.annotation.Repository
 
 @Repository
@@ -34,9 +35,15 @@ abstract class SaleDao : BaseDao<Sale> {
     abstract fun findAllProducersAsPersonWithSaleInfo(leUid: Long): DataSource.Factory<Int, PersonWithSaleInfo>
 
     @Query(QUERY_ALL_LIST)
-    abstract fun findAllPersonWithSaleInfo(leUid: Long): DataSource.Factory<Int, PersonWithSaleInfo>
+    abstract fun findAllPersonWithSaleInfo(leUid: Long, filter: Int, searchText: String) : DataSource.Factory<Int, PersonWithSaleInfo>
 
     companion object {
+
+        const val FILTER_ALL = 0
+        const val FILTER_LE_ONLY = 1
+        const val FILTER_WE_ONLY = 2
+        const val FILTER_CUSTOMER_ONLY = 3
+
 
         const val SORT_NAME_ASC = 1
 
@@ -74,7 +81,18 @@ abstract class SaleDao : BaseDao<Sale> {
                     Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1 
                 LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid 
                     AND CAST(Product.productActive AS INTEGER) = 1
-            AND CAST(Person.active AS INTEGER) = 1  
+            WHERE CAST(Person.active AS INTEGER) = 1  
+            AND (CAST(Person.admin AS INTEGER) = 0 OR CAST(LE.admin AS INTEGER) = 1 )
+            AND (Person.personCreatedBy = LE.personUid OR CAST(LE.admin AS INTEGER) = 1)
+            AND CASE :filter WHEN $FILTER_ALL THEN 1 
+                ELSE CAST(Person.admin AS INTEGER) = 0 END
+            AND CASE :filter WHEN $FILTER_LE_ONLY THEN Person.personGoldoziType = 1
+                ELSE 1 END
+            AND CASE :filter WHEN $FILTER_WE_ONLY THEN Person.personGoldoziType = 2
+                ELSE 1 END 
+            AND CASE :filter WHEN $FILTER_CUSTOMER_ONLY THEN Person.personGoldoziType = 0  
+                ELSE 1 END
+            AND Person.firstNames ||' '|| Person.lastName LIKE :searchText
             GROUP BY Person.personUid, SaleItem.saleItemUid  
         """
 
@@ -240,6 +258,7 @@ abstract class SaleDao : BaseDao<Sale> {
                 
                 GROUP BY saleUid, Customer.personUid 
         """
+
 
 
 

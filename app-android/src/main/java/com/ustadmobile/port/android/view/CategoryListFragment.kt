@@ -22,7 +22,7 @@ import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.toughra.ustadmobile.R
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 
 class CategoryListFragment(): UstadListViewFragment<Category, Category>(),
@@ -42,7 +42,7 @@ class CategoryListFragment(): UstadListViewFragment<Category, Category>(),
 
         mDataRecyclerViewAdapter = AllCategoryListRecyclerAdapter(mPresenter, requireContext())
         val createNewText = requireContext().getString(R.string.create_category)
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText)
         return view
     }
 

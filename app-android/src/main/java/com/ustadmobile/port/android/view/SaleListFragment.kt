@@ -11,7 +11,7 @@ import com.ustadmobile.lib.db.entities.Sale
 import com.ustadmobile.lib.db.entities.SaleListDetail
 import com.ustadmobile.lib.db.entities.SaleWithCustomerAndLocation
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 
 class SaleListFragment(): UstadListViewFragment<Sale, SaleListDetail>(),
@@ -30,7 +30,7 @@ class SaleListFragment(): UstadListViewFragment<Sale, SaleListDetail>(),
 
         mDataRecyclerViewAdapter = SaleListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.sale)
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText)
         return view
     }
 
