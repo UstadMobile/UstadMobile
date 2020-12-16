@@ -120,7 +120,7 @@ android {
     defaultConfig {
         //When using variables the build analyzer reports that major tasks reran because of a
         // 'chnage' in the value of minSdkVersion, hence hardcoding them here.
-        minSdkVersion 18
+        minSdkVersion 21
         targetSdkVersion 29
 
         multiDexEnabled true //required for all variants to use java library desugaring
