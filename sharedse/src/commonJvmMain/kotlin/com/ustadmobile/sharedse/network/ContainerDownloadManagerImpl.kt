@@ -251,7 +251,11 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         return newHolder
     }
 
-    suspend fun getDownloadJobItemHolder(jobItemUid: Int) = withContext(singleThreadContext) {
+    /**
+     * This function is used to retrieve a reference to the download job item holder, which might
+     * be needed to prevent unwanted garbage collection
+     */
+    override suspend fun getDownloadJobItemHolderRef(jobItemUid: Int) : Any? = withContext(singleThreadContext) {
         loadDownloadJobItemHolder(jobItemUid)
     }
 

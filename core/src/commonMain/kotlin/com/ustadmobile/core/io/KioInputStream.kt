@@ -1,4 +1,4 @@
-package com.ustadmobile.sharedse.io
+package com.ustadmobile.core.io
 
 import kotlinx.io.InputStream
 

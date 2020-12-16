@@ -9,8 +9,8 @@ android {
     buildToolsVersion rootProject.ext.version_android_buildtools
 
     defaultConfig {
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
+        minSdkVersion 21
+        targetSdkVersion 29
     }
 }
 
@@ -35,6 +35,7 @@ kotlin {
 
     android()
 
+    /* JS is disabled until after Kotlin 1.4 upgrade
     js {
         nodejs()
 
@@ -44,6 +45,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
+    */
 
 
     sourceSets {

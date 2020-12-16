@@ -65,7 +65,7 @@ class SortListFragmentTest : TestCase() {
         }
 
         fragmentScenario.onFragment {
-            val sortOption = it.mNewItemRecyclerViewAdapter!!.sortOptionSelected
+            val sortOption = it.mUstadListHeaderRecyclerViewAdapter!!.sortOptionSelected
             Assert.assertEquals("order set to default ascending",
                     PersonDao.SORT_FIRST_NAME_ASC, sortOption!!.flag)
         }
@@ -91,7 +91,7 @@ class SortListFragmentTest : TestCase() {
                 }
 
                 fragmentScenario.onFragment {
-                    val sortOption = it.mNewItemRecyclerViewAdapter!!.sortOptionSelected
+                    val sortOption = it.mUstadListHeaderRecyclerViewAdapter!!.sortOptionSelected
                     Assert.assertEquals("order changed to descending", PersonDao.SORT_FIRST_NAME_ASC, sortOption!!.flag)
                 }
             }

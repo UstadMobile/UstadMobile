@@ -136,7 +136,8 @@ fun TextView.setTextFromCustomFieldDropDownOption(customFieldValue: CustomFieldV
 @BindingAdapter(value = ["textFromDateLong", "textToDateLong"])
 fun TextView.setTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long) {
     val dateFormat = DateFormat.getDateFormat(context)
-    text = "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} - ${if (textToDateLong > 0) dateFormat.format(textToDateLong) else ""}"
+    text = "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} -" +
+            " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) dateFormat.format(textToDateLong) else ""}"
 }
 
 

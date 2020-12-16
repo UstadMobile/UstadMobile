@@ -1425,15 +1425,19 @@ abstract class AbstractDbProcessor: AbstractProcessor() {
     }
 
     protected fun FileSpec.writeToDirsFromArg(argNames: List<String>, useFilerAsDefault: Boolean = true) {
-        var outputArgDirs = argNames.flatMap {argName ->
-            processingEnv.options[argName]?.split(File.pathSeparator) ?: listOf()
-        }
-        if(useFilerAsDefault && outputArgDirs.isEmpty()) {
-            outputArgDirs = listOf(processingEnv.options["kapt.kotlin.generated"]!!)
+        val outputArgDirs = argNames.flatMap {argName ->
+            processingEnv.options[argName]?.split(File.pathSeparator)
+                    ?: if(useFilerAsDefault) { listOf("filer") } else { listOf() }
         }
 
         outputArgDirs.forEach {
-            writeTo(File(it))
+            val outputPath = if(it == "filer") {
+                processingEnv.options["kapt.kotlin.generated"]!!
+            }else {
+                it
+            }
+
+            writeTo(File(outputPath))
         }
     }
 

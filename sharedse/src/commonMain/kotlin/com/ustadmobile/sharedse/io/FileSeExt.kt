@@ -11,7 +11,7 @@ fun FileSe.readText(): String {
 
     try {
         streamIn = FileInputStreamSe(this)
-        return stringFromUtf8Bytes(UMIOUtils.readStreamToByteArray(streamIn))
+        return UMIOUtils.readStreamToByteArray(streamIn).decodeToString()
     }catch(e: Exception) {
         throw e
     }finally {
@@ -23,7 +23,7 @@ fun FileSe.writeText(text: String) {
     var streamOut = null as OutputStream?
     try {
         streamOut = FileOutputStreamSe(this)
-        streamOut.write(text.toUtf8Bytes())
+        streamOut.write(text.encodeToByteArray())
     }catch(e: Exception) {
         throw e
     }finally {

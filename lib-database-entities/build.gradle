@@ -11,7 +11,7 @@ android {
     buildToolsVersion rootProject.ext.version_android_buildtools
 
     defaultConfig {
-        minSdkVersion 18
+        minSdkVersion 21
         targetSdkVersion 29
     }
 }
@@ -37,6 +37,7 @@ kotlin {
 
     android()
 
+    /* JS is disabled until after Kotlin 1.4 upgrade
     js {
         nodejs()
 
@@ -46,7 +47,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
-
+    */
 
     jvm {
         compilations.main.kotlinOptions {

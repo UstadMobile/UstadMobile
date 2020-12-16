@@ -15,7 +15,7 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMetrics>(),
@@ -61,7 +61,7 @@ class ClazzWorkListFragment(): UstadListViewFragment<ClazzWork, ClazzWorkWithMet
 
         mDataRecyclerViewAdapter = ClazzWorkListRecyclerAdapter(mPresenter, hasResultViewPermission)
 
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_a_new_clazzwork),
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         return view
