@@ -26,6 +26,10 @@ android {
         }
     }
 
+    packagingOptions {
+        exclude 'META-INF/*.kotlin_module'
+    }
+
     defaultConfig {
         minSdkVersion 21
         targetSdkVersion 29
