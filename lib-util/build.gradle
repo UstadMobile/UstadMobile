@@ -102,7 +102,6 @@ kotlin {
 
         jvmMain {
             dependencies {
-                implementation project(":lib-database-mpp")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "com.github.aakira:napier-jvm:$version_napier"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
