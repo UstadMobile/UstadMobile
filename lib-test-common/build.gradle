@@ -88,16 +88,11 @@ kotlin {
         */
         commonJvmMain {
             dependencies {
-                implementation "io.ktor:ktor-server-servlet:$version_ktor"
-                implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "io.ktor:ktor-gson:$version_ktor"
-
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
-                compileOnly project(":app-ktor-server")
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
                 compileOnly project(":lib-door-runtime")
@@ -108,6 +103,11 @@ kotlin {
         jvmMain {
             dependsOn commonJvmMain
             dependencies {
+                compileOnly project(":app-ktor-server")
+                implementation "io.ktor:ktor-server-servlet:$version_ktor"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation "io.ktor:ktor-gson:$version_ktor"
+
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
