@@ -237,6 +237,12 @@ kotlin {
 
         commonTest {
             dependencies {
+
+            }
+        }
+
+        jvmTest {
+            dependencies {
                 implementation project(":lib-database-mpp")
                 implementation project(":lib-database-entities")
                 implementation project(":lib-database")
@@ -244,11 +250,7 @@ kotlin {
 
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "com.soywiz.korlibs.klock:klock:$version_klock"
-            }
-        }
 
-        jvmTest {
-            dependencies {
                 implementation "junit:junit:$version_junit"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
