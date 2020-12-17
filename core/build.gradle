@@ -27,7 +27,7 @@ android {
     }
 
     packagingOptions {
-        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/*.TXT"]
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
     }
 
     defaultConfig {
