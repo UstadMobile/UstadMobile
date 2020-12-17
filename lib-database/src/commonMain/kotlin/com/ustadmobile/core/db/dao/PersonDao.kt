@@ -200,6 +200,7 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("""
          SELECT Person.* 
          FROM Person
+         LEFT JOIN Person AS LE ON LE.personUid = :leUid
          WHERE
         
         Person.personUid NOT IN (:excludeSelected)
@@ -207,6 +208,8 @@ abstract class PersonDao : BaseDao<Person> {
         AND (:filterLE = 0 OR Person.personGoldoziType = ${Person.GOLDOZI_TYPE_LE})
         AND (:filterProducer = 0 OR Person.personGoldoziType = ${Person.GOLDOZI_TYPE_PRODUCER})
         AND (:filterCustomer = 0 OR Person.personGoldoziType = ${Person.GOLDOZI_TYPE_CUSTOMER})
+        AND ( CAST(Person.admin AS INTEGER) = 0 OR CAST(LE.admin AS INTEGER) = 1) 
+        AND Person.personCreatedBy = :leUid
             
          GROUP BY Person.personUid
          ORDER BY CASE(:sortOrder)
@@ -224,7 +227,8 @@ abstract class PersonDao : BaseDao<Person> {
                                             sortOrder: Int,
                                            searchText: String? = "%",
                                            filterLE: Int = 0, filterProducer: Int = 0,
-                                            filterCustomer: Int = 0)
+                                            filterCustomer: Int = 0,
+                                            leUid: Long = -1)
             : DataSource.Factory<Int, PersonWithDisplayDetails>
 
     @Query("""

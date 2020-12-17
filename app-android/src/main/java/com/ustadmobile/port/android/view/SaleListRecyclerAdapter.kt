@@ -41,7 +41,7 @@ class SaleListRecyclerAdapter(var itemListener: SaleListItemListener?): Selectab
             : DiffUtil.ItemCallback<SaleListDetail>() {
             override fun areItemsTheSame(oldItem: SaleListDetail,
                                          newItem: SaleListDetail): Boolean {
-                TODO("e.g. insert primary keys here return oldItem.sale == newItem.sale")
+                return oldItem.saleUid == newItem.saleUid
             }
 
             override fun areContentsTheSame(oldItem: SaleListDetail,

@@ -30,7 +30,8 @@ class SaleListFragment(): UstadListViewFragment<Sale, SaleListDetail>(),
 
         mDataRecyclerViewAdapter = SaleListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.sale)
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText)
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
+                createNewText, onFilterOptionSelected = mPresenter)
         return view
     }
 

@@ -20,7 +20,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 
-class PersonWithSaleInfoListPresenter(context: Any, arguments: Map<String, String>, view: PersonWithSaleInfoListView,
+class PersonWithSaleInfoListPresenter(context: Any, arguments: Map<String, String>,
+                                      view: PersonWithSaleInfoListView,
                                       di: DI, lifecycleOwner: DoorLifecycleOwner)
     : UstadListPresenter<PersonWithSaleInfoListView, PersonWithSaleInfo>(context, arguments, view,
         di, lifecycleOwner), PersonWithSaleInfoListItemListener, OnSearchSubmitted {
@@ -44,7 +45,8 @@ class PersonWithSaleInfoListPresenter(context: Any, arguments: Map<String, Strin
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         updateListOnView()
-        view.sortOptions = SortOrder.values().toList().map { PersonWithSaleInfoListSortOption(it, context) }
+        view.sortOptions = SortOrder.values().toList().map {
+            PersonWithSaleInfoListSortOption(it, context) }
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
         GlobalScope.launch {
@@ -95,22 +97,26 @@ class PersonWithSaleInfoListPresenter(context: Any, arguments: Map<String, Strin
 
     override fun onClickPersonWithSaleInfo(personWithSaleInfo: PersonWithSaleInfo) {
         systemImpl.go(PersonDetailView.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to personWithSaleInfo.personUid.toString()), context)
+                mapOf(UstadView.ARG_ENTITY_UID to personWithSaleInfo.personUid.toString()),
+                context)
     }
 
     fun handleClickAddLE(){
 
-        systemImpl.go(PersonEditView.VIEW_NAME, mapOf(UstadView.ARG_FILTER_PERSON_LE to "true"), context)
+        systemImpl.go(PersonEditView.VIEW_NAME, mapOf(UstadView.ARG_FILTER_PERSON_LE to "true"),
+                context)
     }
 
     fun handleClickAddProducer(){
 
-        systemImpl.go(PersonEditView.VIEW_NAME, mapOf(UstadView.ARG_FILTER_PERSON_WE to "true"), context)
+        systemImpl.go(PersonEditView.VIEW_NAME, mapOf(UstadView.ARG_FILTER_PERSON_WE to "true"),
+                context)
     }
 
     fun handleClickAddCustomer(){
 
-        systemImpl.go(PersonEditView.VIEW_NAME, mapOf(UstadView.ARG_FILTER_PERSON_CUSTOMER to "true"), context)
+        systemImpl.go(PersonEditView.VIEW_NAME,
+                mapOf(UstadView.ARG_FILTER_PERSON_CUSTOMER to "true"), context)
     }
 
     override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {

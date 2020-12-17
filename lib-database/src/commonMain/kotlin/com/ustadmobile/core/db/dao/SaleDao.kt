@@ -22,7 +22,8 @@ abstract class SaleDao : BaseDao<Sale> {
     abstract suspend fun findWithCustomerAndLocationByUidAsync(uid: Long): SaleWithCustomerAndLocation?
 
     @Query(FIND_ALL_SALE_LIST_SALES)
-    abstract fun findAllSales(leUid: Long): DataSource.Factory<Int,SaleListDetail>
+    abstract fun findAllSales(
+            leUid: Long, filter: Int, searchText: String): DataSource.Factory<Int,SaleListDetail>
 
     @Query(""" SELECT Sale.* FROM Sale WHERE CAST(Sale.saleActive AS INTEGER) = 1 """)
     abstract fun findAllSalesList(): List<Sale>
@@ -44,6 +45,8 @@ abstract class SaleDao : BaseDao<Sale> {
         const val FILTER_WE_ONLY = 2
         const val FILTER_CUSTOMER_ONLY = 3
 
+        const val FILTER_ALL_SALES = 0
+        const val FILTER_PAYMENTS_DUE_SALES = 1
 
         const val SORT_NAME_ASC = 1
 
@@ -255,6 +258,14 @@ abstract class SaleDao : BaseDao<Sale> {
 					CAST(LE.admin AS INTEGER) = 1 OR 
 					sl.salePersonUid = LE.personUid
 					)
+
+                AND saleTitleGen LIKE :searchText
+                
+                AND CASE :filter WHEN $FILTER_ALL_SALES THEN 1 
+                    ELSE 1 END
+                AND CASE :filter WHEN $FILTER_PAYMENTS_DUE_SALES THEN 
+                    saleAmountDue > 0
+                    ELSE 1 END
                 
                 GROUP BY saleUid, Customer.personUid 
         """

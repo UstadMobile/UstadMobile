@@ -344,7 +344,26 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.add_a_new_person, R.string.edit_person)
+
+        val arg = arguments
+
+        if(arg != null && arg?.containsKey(UstadView.ARG_FILTER_PERSON_CUSTOMER)  &&
+                arg[UstadView.ARG_FILTER_PERSON_CUSTOMER]?.equals("true")?:false){
+            setEditFragmentTitle(R.string.add_a_new_customer, R.string.edit_person)
+
+        }else if(arg != null && arg?.containsKey(UstadView.ARG_FILTER_PERSON_WE)  &&
+                arg[UstadView.ARG_FILTER_PERSON_WE]?.equals("true") ?: false){
+
+            setEditFragmentTitle(R.string.add_a_new_we, R.string.edit_person)
+        }else if(arg != null && arg?.containsKey(UstadView.ARG_FILTER_PERSON_LE)  &&
+                arg[UstadView.ARG_FILTER_PERSON_LE]?.equals("true") ?: false){
+
+            setEditFragmentTitle(R.string.add_a_new_le, R.string.edit_person)
+        }else{
+            setEditFragmentTitle(R.string.add_a_new_person, R.string.edit_person)
+        }
+
+
         mPresenter?.onCreate(backStackSavedState)
 
         CLAZZ_ROLE_KEY_MAP.forEach {roleOption ->

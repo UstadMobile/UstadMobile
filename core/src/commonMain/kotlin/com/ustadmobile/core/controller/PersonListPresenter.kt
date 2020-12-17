@@ -64,8 +64,10 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         val filterLEInt: Int = if(filterLE){1}else{0}
         val filterProducerInt: Int = if(filterProducer){1}else{0}
         val filterCustomerInt: Int = if(filterCustomer){1}else{0}
+        val loggedInPersonUid = accountManager.activeAccount.personUid
         view.list = repo.personDao.findPersonsWithPermission(filterAlreadySelectedList,
-                 selectedSortOption?.flag ?: 0, searchText.toQueryLikeParam(), filterLEInt, filterProducerInt, filterCustomerInt)
+                 selectedSortOption?.flag ?: 0, searchText.toQueryLikeParam(), filterLEInt,
+                filterProducerInt, filterCustomerInt, loggedInPersonUid)
 
     }
 

@@ -524,6 +524,9 @@
     <string name="assign_to">Assign to</string>
     <string name="person">Person</string>
     <string name="add_a_new_person">Add a new person</string>
+    <string name="add_a_new_le">Add a new LE</string>
+    <string name="add_a_new_we">Add a new WE</string>
+    <string name="add_a_new_customer">Add a new customer</string>
     <string name="edit_person">Edit person</string>
     <string name="permission_person_select">View people</string>
     <string name="permission_person_insert" >Add People</string>

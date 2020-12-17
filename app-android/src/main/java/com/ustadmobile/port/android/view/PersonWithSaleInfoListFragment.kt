@@ -61,17 +61,6 @@ class PersonWithSaleInfoListFragment(): UstadListViewFragment<PersonWithSaleInfo
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fabManager?.text = requireContext().getText(R.string.person)
-
-        //override this to show our own bottom sheet
-//        fabManager?.onClickListener = {
-//            val optionList =  listOf(BottomSheetOption(R.drawable.ic_add_black_24dp,
-//                    requireContext().getString(R.string.new_le), NEW_LE),
-//            BottomSheetOption(R.drawable.ic_add_black_24dp, requireContext().getString(R.string.new_we), NEW_PRODUCER),
-//            BottomSheetOption(R.drawable.ic_add_black_24dp, requireContext().getString(R.string.new_customer), NEW_CUSTOMER))
-//
-//            val sheet = OptionsBottomSheetFragment(optionList, this)
-//            sheet.show(childFragmentManager, sheet.tag)
-//        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

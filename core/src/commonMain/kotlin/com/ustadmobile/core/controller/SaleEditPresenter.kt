@@ -190,6 +190,7 @@ class SaleEditPresenter(context: Any,
 
             saleItemsToInsert.forEach {
                 it.saleItemSaleUid = entity.saleUid
+                it.saleItemUid = 0L
                 it.saleItemUid = repo.saleItemDao.insertAsync(it)
             }
             saleItemstoUpdate.forEach {
