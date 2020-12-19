@@ -175,14 +175,13 @@
     <string name="content_editor_create_new_title">সামগ্রী যুক্ত করুন</string>
     <string name="content_creation_storage_option_title">স্টোরেজ বিকল্প</string>
     <string name="file_required_prompt">আমদানি করা ফাইলটি নির্বাচিত নয়, আবার চেষ্টা করুন</string>
-    <string name="download_state_download">
-        <b>ডাউনলোড করুন</b> মোট %1$s আইটেম,ফাইলগুলো আপনার ডিভাইসের মোট %2$s জায়গা ব্যবহার হবে।</string>
+    <string name="download_state_download"><b>ডাউনলোড করুন</b> মোট %1$s আইটেম,ফাইলগুলো আপনার ডিভাইসের মোট %2$s জায়গা ব্যবহার হবে।</string>
     <string name="content_creation_folder_new_message">নতুন ফোল্ডারটি সফলভাবে যুক্ত হয়েছিল</string>
     <string name="content_creation_folder_update_message">ফোল্ডারটি সফলভাবে আপডেট হয়েছিল</string>
     <string name="error_message_load_page">পৃষ্ঠাটি লোড করতে ব্যর্থ</string>
     <string name="content_editor_save_error">সংরক্ষণের হচ্ছে না, আবার চেষ্টা করুন</string>
-    <string name="supported_files">সমর্থিত ফাইল: <b>" ভিডিও, অডিও, ইপিইউবি,এক্সএপিআই  জিপ, এইচফাইভপি "</b>
-    </string>
+
+    <string name="supported_files">সমর্থিত ফাইল: <b>" ভিডিও, অডিও, ইপিইউবি,এক্সএপিআই  জিপ, এইচফাইভপি "</b></string>
     <string name="download_state_downloading">আপনার ডিভাইস স্টোরেজে মোট %2$s ব্যবহার করা হবে এমন মোট %1$s টি আইটেম &lt;b&gt; ডাউনলোড করা হচ্ছে &lt;/ b&gt;।<b> ডাউনলোড করা হচ্ছে </b>।</string>
     <string name="content_entry_export_message">আপনি আপনার ডিভাইস স্টোরেজে% 1 $ s রফতানি করতে চলেছেন। আপনি কি অবিরত করতে চান\?</string>
     <string name="bar_chart" value="100">বার চার্ট</string>

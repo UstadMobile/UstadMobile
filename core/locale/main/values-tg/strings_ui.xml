@@ -109,12 +109,10 @@
     <string name="download_continue_btn_label">Идома диҳед</string>
     <string name="download_wifi_only">Танҳо WiFi</string>
     <string name="download_calculating">Ҳисоб карда истодааст …</string>
-    <string name="download_state_download">
-        <b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$sи захирахагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
+    <string name="download_state_download"><b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$sи захирахагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="content_font_24">24pt</string>
     <string name="schools">Муассисаҳои таълимӣ</string>
-    <string name="download_state_downloading">
-        <b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s -и захираи дастгоҳи шуморо истифода хоҳанд кард.</string>
+    <string name="download_state_downloading"><b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s -и захираи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="download_downloading_placeholder">Боргирии %1$s аз %2$s</string>
     <string name="download_summary_title">Боргирии фаъол %1$s</string>
     <string name="download_cancel_all">Ҳамаро бекор кардан</string>
@@ -621,8 +619,7 @@
     <string name="student_progress">Пешрафти хонанда</string>
     <string name="use_device_language">Забони дастгоҳ</string>
     <string name="location_permission_details">Ин барнома Bluetooth ва WiFi-ро барои ёфтани корбарони дигар дар наздикӣ истифода мебарад. Он гоҳ барнома метавонад бо корбарони наздик бо суръати баланд боркаш кардани мундариҷаро бидуни дархости дастрасӣ ба Интернет имконият диҳад. Азбаски ин амалро барои муайян кардани макони шумо истифода бурдан мумкин аст, шумо бояд барои муайян кардани ҷойгиршавӣ иҷозат диҳед. Ин барнома натиҷаҳои ин амал ва макони шуморо бо ягон роҳ сабт намекунад. Ин барнома аз рамзи кушодаасос сохта шудааст, ки онро дар github.com/UstadMobile/UstadMobile санҷидан мумкин аст</string>
-    <string name="download_state_downloaded">
-        <b>Бор гардид </b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s-и захирагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
+    <string name="download_state_downloaded"><b>Бор гардид </b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s-и захирагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="download_storage_option_device">Истифодаи %1$s - аз %2$s озод</string>
     <string name="download_storage_permission_message">Ин барнома барои зеркашӣ ва нигоҳ доштани мундариҷа дар корти SD иҷозати файлро талаб мекунад</string>
     <string name="insufficient_space">Ҷойи кофии нигоҳдории мундариҷа мавҷуд нест</string>
@@ -796,8 +793,7 @@
     <string name="id_verbentity_urlid">ID: %s</string>
     <string name="verb">Феъл</string>
     <string name="report">Гузориш</string>
-    <string name="supported_files">Файлҳои дастгиршаванда: <b> Видео, Аудио, EPUB, Xapi Zip, H5P</b>
-    </string>
+    <string name="supported_files">Файлҳои дастгиршаванда: <b> Видео, Аудио, EPUB, Xapi Zip, H5P</b></string>
     <string name="file_required_prompt">Файли воридшаванда интихоб карда нашудааст, бори дигар кӯшиш кунед</string>
     <string name="video">Видео</string>
     <string name="content_type">Навъи мӯҳтаво</string>
