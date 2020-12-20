@@ -45,6 +45,17 @@
             name="reportFilter"
             type="com.ustadmobile.lib.db.entities.ReportFilter" />
 
+        <variable
+            name="fieldErrorText"
+            type="String" />
+
+        <variable
+            name="conditionsErrorText"
+            type="String" />
+
+        <variable
+            name="valuesErrorText"
+            type="String" />
 
     </data>
 
@@ -60,6 +71,8 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_8dp"
             android:layout_marginTop="@dimen/dimen_8dp"
+            app:errorEnabled="true"
+            app:errorText="@{fieldErrorText}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -79,6 +92,8 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            app:errorEnabled="true"
+            app:errorText="@{conditionsErrorText}"
             app:layout_constraintWidth_percent="0.3"
             android:layout_marginHorizontal="@dimen/dimen_8dp"
             android:layout_marginTop="@dimen/dimen_8dp"
@@ -103,6 +118,8 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_8dp"
             android:layout_marginTop="@dimen/dimen_8dp"
+            app:errorEnabled="true"
+            app:errorText="@{valuesErrorText}"
             app:layout_constraintStart_toEndOf="@id/fragment_report_filter_edit_dialog_condition_textinputlayout"
             app:layout_constraintTop_toBottomOf="@+id/fragment_report_filter_edit_dialog_field_textinputlayout"
             app:layout_constraintEnd_toEndOf="parent">
@@ -114,7 +131,7 @@
                 android:hint="@string/report_filter_edit_values"
                 app:messageIdOptions="@{dropDownValueOptions}"
                 app:onMessageIdOptionSelected="@{valuesSelectionListener}"
-                app:selectedMessageIdOption="@{reportFilter.reportFilterValue}"
+                app:selectedMessageIdOption="@={reportFilter.reportFilterDropDownValue}"
                 />
 
         </com.google.android.material.textfield.TextInputLayout>
@@ -127,6 +144,8 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_8dp"
             android:layout_marginTop="@dimen/dimen_8dp"
+            app:errorEnabled="true"
+            app:errorText="@{valuesErrorText}"
             app:layout_constraintStart_toEndOf="@id/fragment_report_filter_edit_dialog_condition_textinputlayout"
             app:layout_constraintTop_toBottomOf="@+id/fragment_report_filter_edit_dialog_field_textinputlayout"
             app:layout_constraintEnd_toEndOf="parent">
@@ -136,6 +155,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:inputType="number"
+                android:text="@={reportFilter.reportFilterValue}"
                 android:hint="@string/report_filter_edit_values"/>
         </com.google.android.material.textfield.TextInputLayout>
 

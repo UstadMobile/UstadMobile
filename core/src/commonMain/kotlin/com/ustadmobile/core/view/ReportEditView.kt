@@ -12,6 +12,7 @@ interface ReportEditView: UstadEditView<ReportWithFilters> {
     var visualTypeOptions: List<ReportEditPresenter.VisualTypeMessageIdOption>?
     var xAxisOptions: List<ReportEditPresenter.XAxisMessageIdOption>?
     var subGroupOptions: List<ReportEditPresenter.SubGroupByMessageIdOption>?
+    var dataSetOptions: List<ReportEditPresenter.DataSetMessageIdOption>?
 
     var titleErrorText: String?
 

@@ -35,7 +35,7 @@ import kotlin.jvm.Volatile
     SchoolMember::class, ClazzWork::class, ClazzWorkContentJoin::class, Comments::class,
     ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
-    Report::class, ReportFilter::class,
+    Report::class,
     DeviceSession::class, WorkSpace::class, ContainerImportJob::class,
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
@@ -189,9 +189,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("reportDao")
     abstract val reportDao: ReportDao
-
-    @JsName("reportFilterDao")
-    abstract val reportFilterDao: ReportFilterDao
 
     @JsName("containerImportJobDao")
     abstract val containerImportJobDao: ContainerImportJobDao

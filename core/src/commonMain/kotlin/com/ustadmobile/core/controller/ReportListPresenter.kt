@@ -64,9 +64,9 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
     }
 
     suspend fun getGraphData(item: Report): ReportGraphHelper.ChartData {
-        val reportList = db.reportFilterDao.findByReportUid(item.reportUid)
+       // val reportList = db.reportFilterDao.findByReportUid(item.reportUid)
         val graphHelper = ReportGraphHelper(context, systemImpl, repo)
-        return graphHelper.getChartDataForReport(ReportWithFilters(item, reportList))
+        return graphHelper.getChartDataForReport(ReportWithFilters(item, listOf()))
     }
 
     override fun onDestroy() {

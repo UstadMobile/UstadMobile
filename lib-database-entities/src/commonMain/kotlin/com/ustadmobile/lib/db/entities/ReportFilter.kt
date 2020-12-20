@@ -7,11 +7,15 @@ open class ReportFilter {
 
     var reportFilterUid: Long = 0
 
+    var reportFilterSeriesUid: Long = 0
+
     var reportFilterField: Int = 0
 
     var reportFilterCondition: Int = 0
 
     var reportFilterValue: String? = null
+
+    var reportFilterDropDownValue: Int = 0
 
     companion object {
 

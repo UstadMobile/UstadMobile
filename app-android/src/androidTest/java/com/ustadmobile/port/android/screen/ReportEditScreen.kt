@@ -29,13 +29,13 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
     val reportTitleInput = KTextInputLayout { withId(R.id.fragment_report_edit_title_layout)}
 
-    val visualTypeValue = KTextView { withId(R.id.fragment_edit_report_dialog_visual_type_text)}
+ /*   val visualTypeValue = KTextView { withId(R.id.fragment_edit_report_dialog_visual_type_text)}
 
-    val yAxisValue = KTextView { withId(R.id.yaxis_value)}
+    val yAxisValue = KTextView { withId(R.id.yaxis_value)}*/
 
     val xAxisValue = KTextView { withId(R.id.fragment_edit_report_dialog_xaxis_text)}
 
-    val subGroupValue = KTextView { withId(R.id.fragment_edit_report_dialog_subgroup_text)}
+   /* val subGroupValue = KTextView { withId(R.id.fragment_edit_report_dialog_subgroup_text)}*/
 
     val fromDateTextInput = KTextInputLayout { withId(R.id.activity_report_edit_fromDate_textinputlayout)}
 
@@ -73,7 +73,7 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
         closeSoftKeyboard()
 
-        report.chartType.takeIf { it != reportOnForm?.chartType }?.also {
+      /*  report.chartType.takeIf { it != reportOnForm?.chartType }?.also {
             testContext.flakySafely {
                 setMessageIdOption(visualTypeValue,
                         impl.getString(ReportEditPresenter.VisualTypeOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
@@ -85,7 +85,7 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
                 setMessageIdOption(yAxisValue,
                         impl.getString(ReportEditPresenter.YAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
             }
-        }
+        }*/
 
         report.xAxis.takeIf { it != reportOnForm?.xAxis }?.also {
             testContext.flakySafely {
@@ -94,12 +94,12 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
             }
         }
 
-        report.subGroup.takeIf { it != reportOnForm?.subGroup }?.also {
+      /*  report.subGroup.takeIf { it != reportOnForm?.subGroup }?.also {
             testContext.flakySafely {
                 setMessageIdOption(subGroupValue,
                         impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
             }
-        }
+        }*/
 
         report.fromDate.takeIf { it != reportOnForm?.fromDate }?.also {
             setDateField(R.id.activity_report_edit_fromDate_textinputlayout, it)
@@ -112,7 +112,7 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
             return
         }
 
-        fragmentScenario?.onFragment { fragment ->
+     /*   fragmentScenario?.onFragment { fragment ->
             fragment.takeIf { verbDisplay != null }
                     ?.findNavController()?.currentBackStackEntry?.savedStateHandle
                     ?.set("VerbDisplay", defaultGson().toJson(listOf(verbDisplay)))
@@ -128,7 +128,7 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
             fragment.takeIf { entry != null }
                     ?.findNavController()?.currentBackStackEntry?.savedStateHandle
                     ?.set("Content", defaultGson().toJson(listOf(entry)))
-        }
+        }*/
 
     }
 

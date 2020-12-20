@@ -47,8 +47,8 @@ class ReportListFragmentTest : TestCase() {
     fun givenReportPresent_whenClickOnReport_thenShouldNavigateToReportDetail() {
         val testEntity = Report().apply {
             reportTitle = "Test Name"
-            chartType = Report.BAR_CHART
-            yAxis = Report.AVG_DURATION
+            //chartType = Report.BAR_CHART
+            //yAxis = Report.AVG_DURATION
             xAxis = Report.MONTH
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong

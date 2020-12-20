@@ -5,28 +5,25 @@ import kotlinx.serialization.Serializable
 @Serializable
 class ReportWithFilters() : Report() {
 
-    constructor(report: Report, filterList: List<ReportFilter>) : this() {
+    constructor(report: Report, reportSeries: List<ReportSeries>) : this() {
         this.reportUid = report.reportUid
         this.reportTitle = report.reportTitle
         this.reportOwnerUid = report.reportOwnerUid
         this.reportInactive = report.reportInactive
         this.fromDate = report.fromDate
         this.toDate = report.toDate
-        this.chartType = report.chartType
-        this.yAxis = report.yAxis
         this.xAxis = report.xAxis
-        this.subGroup = report.subGroup
-        this.reportFilterList = filterList
+        this.reportSeriesList = reportSeries
     }
 
-    var reportFilterList: List<ReportFilter> = listOf()
+    var reportSeriesList: List<ReportSeries> = listOf()
 
 
     data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParams: Array<Any>)
 
 
     fun toSql(): QueryParts {
-        require(xAxis != subGroup) { "XAxis Selection and subGroup selection was the same" }
+     /*   require(xAxis != subGroup) { "XAxis Selection and subGroup selection was the same" }
         val paramList = mutableListOf<Any>()
 
         var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 
@@ -89,8 +86,8 @@ class ReportWithFilters() : Report() {
         if (subGroup != 0) {
             sql += ", subgroup"
         }
-
-        return QueryParts(sql, sqlList, paramList.toTypedArray())
+*/
+        return QueryParts("", "", arrayOf(""))
     }
 
     private fun groupBy(value: Int): String {

@@ -11,6 +11,9 @@
 
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener" />
 
+        <variable
+            name="series"
+            type="com.ustadmobile.lib.db.entities.ReportSeries" />
 
         <variable
             name="mPresenter"
@@ -52,22 +55,32 @@
         android:layout_height="wrap_content">
 
 
-        <TextView
-            android:id="@+id/item_report_series_title"
-            android:layout_width="match_parent"
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/item_report_series_title_text_inputlayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/dimen_8dp"
+            android:layout_marginHorizontal="@dimen/dimen_8dp"
             android:layout_marginTop="@dimen/dimen_8dp"
-            android:layout_marginBottom="@dimen/dimen_8dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/item_report_series_delete_button"
-            tools:text="Series 1"/>
+            app:layout_constraintEnd_toStartOf="@+id/item_report_series_delete_button">
 
-        <Button
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/item_report_series_title_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@{series.reportSeriesName}"
+                android:hint="@string/title" />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <ImageView
             android:id="@id/item_report_series_delete_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:src="@drawable/ic_close_black_24dp"
+            android:padding="@dimen/dimen_8dp"
+            android:onClick="@{() -> eventHandler.onClickRemoveSeries(series)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -79,7 +92,7 @@
             android:layout_marginHorizontal="@dimen/dimen_8dp"
             android:layout_marginTop="@dimen/dimen_8dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/item_report_series_title">
+            app:layout_constraintTop_toBottomOf="@+id/item_report_series_title_text_inputlayout">
 
             <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
                 android:id="@+id/item_edit_report_dialog_data_set_text"
@@ -87,8 +100,8 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/xapi_options_data_set"
                 app:messageIdOptions="@{dataSetOptions}"
-                app:onMessageIdOptionSelected="@{dataSetSelectionListener}" />
-            <!--app:selectedMessageIdOption="@={report.chartType}"-->
+                app:onMessageIdOptionSelected="@{dataSetSelectionListener}"
+                app:selectedMessageIdOption="@={series.reportSeriesDataSet}" />
         </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -108,7 +121,8 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/xapi_options_visual_type"
                 app:messageIdOptions="@{visualTypeOptions}"
-                app:onMessageIdOptionSelected="@{visualTypeSelectionListener}"/>
+                app:onMessageIdOptionSelected="@{visualTypeSelectionListener}"
+                app:selectedMessageIdOption="@={series.reportSeriesVisualType}" />
         </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -128,7 +142,8 @@
                 android:layout_height="wrap_content"
                 android:hint="@string/xapi_options_subgroup"
                 app:messageIdOptions="@{subgroupOptions}"
-                app:onMessageIdOptionSelected="@{subgroupSelectionListener}" />
+                app:onMessageIdOptionSelected="@{subgroupSelectionListener}"
+                app:selectedMessageIdOption="@={series.reportSeriesSubGroup}" />
         </com.google.android.material.textfield.TextInputLayout>
 
 
@@ -160,7 +175,7 @@
             app:createNewText="@{@string/filter}"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/item_report_edit_filter_list"
-            app:onClickNew="@{() -> eventHandler.onClickNewFilter()}" />
+            app:onClickNew="@{() -> eventHandler.onClickNewFilter(series)}" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -5,17 +5,17 @@ import com.soywiz.klock.days
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.schedule.localEndOfDay
-import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
+import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
@@ -28,13 +28,15 @@ class ReportEditPresenter(context: Any,
                           lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<ReportEditView, ReportWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
+    val seriesCounter = atomic(1)
+
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
     enum class VisualTypeOptions(val optionVal: Int, val messageId: Int) {
-        BARCHART(Report.BAR_CHART,
+        BAR_CHART(Report.BAR_CHART,
                 MessageID.bar_chart),
-        LINEGRAPH(Report.LINE_GRAPH,
+        LINE_GRAPH(Report.LINE_GRAPH,
                 MessageID.line_graph)
     }
 
@@ -64,38 +66,23 @@ class ReportEditPresenter(context: Any,
 
     enum class DataSetOptions(val optionVal: Int, val messageId: Int) {
         TOTAL_DURATION(ReportSeries.TOTAL_DURATION,
-                MessageID.total_duration),
+                MessageID.content_total_duration),
         AVERAGE_DURATION(ReportSeries.AVERAGE_DURATION,
-                MessageID.xapi_week),
+                MessageID.average_duration),
         NUMBER_SESSIONS(ReportSeries.NUMBER_SESSIONS,
-                MessageID.xapi_month),
+                MessageID.count_session),
         ACTIVITIES_RECORDED(ReportSeries.ACTIVITIES_RECORDED,
-                MessageID.xapi_content_entry),
+                MessageID.activity_recorded),
         AVERAGE_SESSION_PER_CONTENT(ReportSeries.AVERAGE_SESSION_PER_CONTENT,
-                MessageID.gender_literal),
+                MessageID.average_session_per_content),
         PERCENT_STUDENTS_COMPLETED(ReportSeries.PERCENT_STUDENTS_COMPLETED,
-                MessageID.clazz),
+                MessageID.percent_students_completed),
         NUMBER_STUDENTS_COMPLETED(ReportSeries.NUMBER_STUDENTS_COMPLETED,
-                MessageID.clazz)
+                MessageID.count_students_completed)
     }
 
     class DataSetMessageIdOption(data: DataSetOptions, context: Any)
         : MessageIdOption(data.messageId, context, data.optionVal)
-
-
- /*   val filterOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper(ReportFilterWithDisplayDetails::reportFilterUid,
-            "state_Person_list", ReportFilterWithDisplayDetails.serializer().list,
-            ReportFilterWithDisplayDetails.serializer().list, this,
-            ReportFilterWithDisplayDetails::class) { reportFilterUid = it }
-
-    fun handleAddOrEditFilter(filter: ReportFilterWithDisplayDetails) {
-        filterOneToManyJoinEditHelper.onEditResult(filter)
-    }
-
-    fun handleRemoveFilter(filter: ReportFilterWithDisplayDetails) {
-        filterOneToManyJoinEditHelper.onDeactivateEntity(filter)
-    }*/
-
 
 
     override fun onCreate(savedState: Map<String, String>?) {
@@ -103,44 +90,54 @@ class ReportEditPresenter(context: Any,
         view.visualTypeOptions = VisualTypeOptions.values().map { VisualTypeMessageIdOption(it, context) }
         view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context) }
         view.subGroupOptions = XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }
+        view.dataSetOptions = DataSetOptions.values().map { DataSetMessageIdOption(it, context) }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ReportWithFilters? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        val report = withTimeoutOrNull(2000) {
+        var report = withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.reportDao?.findByUid(entityUid)
-        } ?: Report()
-
-        val reportFilterList = withTimeout(2000) {
-            db.reportFilterDao.findByReportUid(report.reportUid)
         }
 
-        val groupMap = reportFilterList.groupBy { it.entityType }
-        val personList = groupMap[ReportFilter.PERSON_FILTER] ?: listOf()
-        val verbList = groupMap[ReportFilter.VERB_FILTER] ?: listOf()
-        val contentUidList = groupMap[ReportFilter.CONTENT_FILTER] ?: listOf()
-
-        report.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
-        report.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong
+        if(report == null){
+            report = Report()
+            report.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
+            report.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong
+        }
 
         handleXAxisSelected(XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }.find { it.code == report.xAxis } as MessageIdOption)
 
-        return ReportWithFilters(report, reportFilterList)
+        val reportSeries = report.reportSeries
+        var reportSeriesList = listOf<ReportSeries>()
+        if(!reportSeries.isNullOrBlank()) {
+            reportSeriesList = safeParseList(di, ReportSeries.serializer().list, ReportSeries::class, reportSeries)
+            view.seriesLiveData = DoorMutableLiveData(reportSeriesList)
+        }
+
+        return ReportWithFilters(report, reportSeriesList)
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ReportWithFilters? {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: ReportWithFilters
+        val editEntity: ReportWithFilters
         if (entityJsonStr != null) {
             editEntity = safeParse(di, ReportWithFilters.serializer(), entityJsonStr)
         } else {
             editEntity = ReportWithFilters()
+            editEntity.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
+            editEntity.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong
         }
 
         handleXAxisSelected(XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }.find { it.code == editEntity.xAxis } as MessageIdOption)
+        val reportSeries = editEntity.reportSeries
+        val reportSeriesList: List<ReportSeries>
+        if(!reportSeries.isNullOrBlank()) {
+            reportSeriesList = safeParseList(di, ReportSeries.serializer().list, ReportSeries::class, reportSeries)
+            view.seriesLiveData = DoorMutableLiveData(reportSeriesList)
+        }
 
         return editEntity
     }
@@ -152,12 +149,19 @@ class ReportEditPresenter(context: Any,
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
-    fun handleRemoveSeries(){
-
+    fun handleRemoveSeries(series: ReportSeries){
+        val newList = view.seriesLiveData?.getValue()?.minus(series) ?: listOf()
+        view.seriesLiveData = DoorMutableLiveData(newList)
     }
 
     fun handleClickAddSeries(){
-        // add series object to report
+        val series = ReportSeries().apply {
+            val id = seriesCounter.getAndIncrement()
+            reportSeriesName = "Series $id"
+            reportSeriesUid = id.toLong()
+        }
+        val seriesVal = view.seriesLiveData?.getValue() ?: listOf()
+        view.seriesLiveData = DoorMutableLiveData(seriesVal.plus(series))
     }
 
     override fun handleClickSave(entity: ReportWithFilters) {
@@ -168,17 +172,14 @@ class ReportEditPresenter(context: Any,
             view.titleErrorText = null
         }
 
-
         GlobalScope.launch(doorMainDispatcher()) {
 
-            if (entity.reportUid != 0L) {
-                repo.reportDao.updateAsync(entity)
+            val seriesList = view.seriesLiveData?.getValue() ?: listOf()
+            entity.reportSeries = safeStringify(di, ReportSeries.serializer().list,
+                    seriesList)
+            entity.reportSeriesList = seriesList
 
-              /*  listOf(personOneToManyJoinEditHelper, verbDisplaynOneToManyJoinEditHelper, contentOneToManyJoinEditHelper).forEach {
-                    repo.reportFilterDao.insertListAsync(it.entitiesToInsert)
-                    repo.reportFilterDao.updateAsyncList(it.entitiesToUpdate)
-                    repo.reportFilterDao.deactivateByUids(it.primaryKeysToDeactivate)
-                }*/
+            if (entity.reportUid != 0L) {
 
                 repo.reportDao.updateAsync(entity)
 
@@ -187,44 +188,10 @@ class ReportEditPresenter(context: Any,
                 }
 
             } else {
-
-              /*  val personUidList = personOneToManyJoinEditHelper.liveList.getValue()?.map { it.entityUid }
-                        ?: listOf()
-                val verbUidList = verbDisplaynOneToManyJoinEditHelper.liveList.getValue()?.map { it.entityUid }
-                        ?: listOf()
-                val entryUidList = contentOneToManyJoinEditHelper.liveList.getValue()?.map { it.entityUid }
-                        ?: listOf()*/
-
-                val reportFilterList = mutableListOf<ReportFilter>()
-
-              /*  personUidList.onEach { personUid ->
-                    reportFilterList.add(ReportFilter().apply {
-                        entityUid = personUid
-                        entityType = ReportFilter.PERSON_FILTER
-                    })
-                }
-
-                verbUidList.onEach { verbUid ->
-                    reportFilterList.add(ReportFilter().apply {
-                        entityUid = verbUid
-                        entityType = ReportFilter.VERB_FILTER
-                    })
-                }
-
-                entryUidList.onEach { entryUid ->
-                    reportFilterList.add(ReportFilter().apply {
-                        entityUid = entryUid
-                        entityType = ReportFilter.CONTENT_FILTER
-                    })
-                }*/
-
-                entity.reportFilterList = reportFilterList.toList()
-
                 systemImpl.go(ReportDetailView.VIEW_NAME,
                         mapOf(ARG_ENTITY_JSON to
                                 Json.stringify(ReportWithFilters.serializer(), entity)),
                         context)
-
             }
 
 
@@ -233,7 +200,10 @@ class ReportEditPresenter(context: Any,
 
     fun handleXAxisSelected(selectedOption: MessageIdOption) {
         if (selectedOption.code == Report.DAY || selectedOption.code == Report.MONTH || selectedOption.code == Report.WEEK) {
-            view.subGroupOptions = XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }.filter { it.code == Report.GENDER || it.code == Report.CONTENT_ENTRY }
+            view.subGroupOptions = XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }
+                    .filter { it.code == Report.GENDER ||
+                            it.code == Report.CONTENT_ENTRY ||
+                            it.code == Report.CLASS }
         } else {
             view.subGroupOptions = XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }
         }

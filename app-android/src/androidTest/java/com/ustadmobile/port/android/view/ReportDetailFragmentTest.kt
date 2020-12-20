@@ -77,30 +77,30 @@ class ReportDetailFragmentTest(val report: Report) : TestCase() {
         @Parameterized.Parameters
         fun data(): Iterable<Report> {
             return listOf(ReportWithFilters().apply {
-                chartType = Report.BAR_CHART
-                yAxis = Report.AVG_DURATION
+                //chartType = Report.BAR_CHART
+                //yAxis = Report.AVG_DURATION
                 xAxis = Report.MONTH
                 fromDate = DateTime(2019, 4, 10).unixMillisLong
                 toDate = DateTime(2019, 6, 11).unixMillisLong
             },
                     ReportWithFilters().apply {
-                        chartType = Report.LINE_GRAPH
-                        yAxis = Report.AVG_DURATION
+                       // chartType = Report.LINE_GRAPH
+                       // yAxis = Report.AVG_DURATION
                         xAxis = Report.MONTH
                         fromDate = DateTime(2019, 4, 10).unixMillisLong
                         toDate = DateTime(2019, 6, 11).unixMillisLong
                     }, ReportWithFilters().apply {
-                chartType = Report.BAR_CHART
-                yAxis = Report.SCORE
+                //chartType = Report.BAR_CHART
+                //yAxis = Report.SCORE
                 xAxis = Report.MONTH
-                subGroup = Report.GENDER
+                //subGroup = Report.GENDER
                 fromDate = DateTime(2019, 4, 10).unixMillisLong
                 toDate = DateTime(2019, 6, 11).unixMillisLong
             }, ReportWithFilters().apply {
-                chartType = Report.LINE_GRAPH
-                yAxis = Report.SCORE
+                //chartType = Report.LINE_GRAPH
+                //yAxis = Report.SCORE
                 xAxis = Report.MONTH
-                subGroup = Report.CONTENT_ENTRY
+                //subGroup = Report.CONTENT_ENTRY
                 fromDate = DateTime(2019, 4, 10).unixMillisLong
                 toDate = DateTime(2019, 6, 11).unixMillisLong
             })

@@ -13,7 +13,6 @@ import com.ustadmobile.core.controller.ReportFilterEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.ReportFilterEditView
 import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -56,6 +55,25 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             mBinding?.fragmentReportFilterEditDialogValuesDropdownTextinputlayout?.visibility =
                     if(value == ReportFilterEditPresenter.FilterValueType.DROPDOWN)
                         View.VISIBLE else View.GONE
+        }
+
+    override var fieldErrorText: String? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.fieldErrorText = value
+        }
+    override var conditionsErrorText: String? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.conditionsErrorText = value
+        }
+    override var valuesErrorText: String? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.valuesErrorText = value
         }
 
     override var fieldOptions: List<ReportFilterEditPresenter.FieldMessageIdOption>? = null

@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ReportFilterEditView
 import com.ustadmobile.core.view.ReportFilterEditView.Companion.ARG_REPORT_FILTER
 import com.ustadmobile.core.view.UstadEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ReportFilter
@@ -23,7 +24,10 @@ class ReportFilterEditPresenter(context: Any,
                                 lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
 
+     var seriesUid: Long = 0
     val reportFilterUids = atomic(1L)
+
+    val fieldRequiredText = systemImpl.getString(MessageID.field_required_prompt, context)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
@@ -71,6 +75,7 @@ class ReportFilterEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+        seriesUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
         view.fieldOptions = FieldOption.values().map { FieldMessageIdOption(it, context) }
         view.conditionsOptions = ConditionOption.values().map { ConditionMessageIdOption(it, context) }
     }
@@ -125,8 +130,28 @@ class ReportFilterEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: ReportFilter) {
+        if(entity.reportFilterField == 0){
+            view.fieldErrorText = fieldRequiredText
+            return
+        }else{
+            view.fieldErrorText = null
+        }
+        if(entity.reportFilterCondition == 0){
+            view.conditionsErrorText = fieldRequiredText
+            return
+        }else{
+            view.conditionsErrorText = null
+        }
+        if(entity.reportFilterDropDownValue == 0 && entity.reportFilterValue.isNullOrBlank()){
+            view.valuesErrorText = fieldRequiredText
+            return
+        }else {
+            view.valuesErrorText = null
+        }
+
         if(entity.reportFilterUid == 0L) {
             entity.reportFilterUid = reportFilterUids.incrementAndGet()
+            entity.reportFilterSeriesUid = seriesUid
         }
 
         view.finishWithResult(listOf(entity))

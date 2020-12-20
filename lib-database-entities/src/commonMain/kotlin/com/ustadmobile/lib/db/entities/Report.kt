@@ -71,7 +71,7 @@ open class Report {
 
         const val COUNT_ACTIVITIES = 203
 
-        val yAxisList = arrayOf(SCORE, DURATION, AVG_DURATION, COUNT_ACTIVITIES)*/
+        val yAxisList = arrayOf(SCORE, DURATION, AVG_DURATION, COUNT_ACTIVITIES)
 
         const val DAY = 300
 
@@ -101,10 +101,7 @@ open class Report {
 
         if (reportUid != other.reportUid) return false
         if (reportOwnerUid != other.reportOwnerUid) return false
-        if (chartType != other.chartType) return false
         if (xAxis != other.xAxis) return false
-        if (yAxis != other.yAxis) return false
-        if (subGroup != other.subGroup) return false
         if (fromDate != other.fromDate) return false
         if (toDate != other.toDate) return false
         if (reportTitle != other.reportTitle) return false
@@ -116,10 +113,7 @@ open class Report {
     override fun hashCode(): Int {
         var result = reportUid.hashCode()
         result = 31 * result + reportOwnerUid.hashCode()
-        result = 31 * result + chartType
         result = 31 * result + xAxis
-        result = 31 * result + yAxis
-        result = 31 * result + subGroup
         result = 31 * result + fromDate.hashCode()
         result = 31 * result + toDate.hashCode()
         result = 31 * result + (reportTitle?.hashCode() ?: 0)

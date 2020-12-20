@@ -24,9 +24,17 @@ interface ReportFilterEditView: UstadEditView<ReportFilter>{
 
     var valueType: ReportFilterEditPresenter.FilterValueType?
 
+    var fieldErrorText: String?
+
+    var conditionsErrorText: String?
+
+    var valuesErrorText: String?
+
     companion object {
 
         const val ARG_REPORT_FILTER = "ReportFilter"
+
+        const val VIEW_NAME = "ReportFilterEditView"
 
     }
 

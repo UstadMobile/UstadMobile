@@ -88,6 +88,10 @@
         android:name="com.ustadmobile.port.android.view.ReportEditFragment" />
 
     <fragment
+        android:id="@+id/report_filter_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ReportFilterEditFragment"/>
+
+    <fragment
         android:id="@+id/holidaycalendar_list_dest"
         android:name="com.ustadmobile.port.android.view.HolidayCalendarListFragment" />
 
@@ -232,6 +236,7 @@
         android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkFragment"
         android:label=""
         />
+
 
     <fragment
         android:id="@+id/webchunk_view"

@@ -1,12 +1,22 @@
 package com.ustadmobile.port.android.view
 
+import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.test.core.app.ApplicationProvider
+import com.google.gson.Gson
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.controller.ReportFilterEditPresenter
+import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.safeStringify
+import com.ustadmobile.core.view.ReportFilterEditView
+import com.ustadmobile.lib.db.entities.ReportFilter
+import com.ustadmobile.port.android.screen.ReportFilterEditScreen
 import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
+import com.ustadmobile.test.port.android.util.setMessageIdOption
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import org.junit.Assert
@@ -43,6 +53,13 @@ class ReportFilterEditFragmentTest: TestCase()  {
 
         }.run{
 
+            ReportFilterEditScreen{
+
+
+
+
+            }
+
             fragmentScenario.clickOptionMenu(R.id.menu_done)
 
             Assert.assertEquals("After finishing edit report filter, it navigates to report edit view",
@@ -50,5 +67,151 @@ class ReportFilterEditFragmentTest: TestCase()  {
         }
 
     }
+
+
+    @AdbScreenRecord("given existing report filter, update the age value and navigate to report edit screen")
+    @Test
+    fun givenExistingReportFilter_whenPersonAgeUpdated_thenReturnUpdatedValueAndNavigateBackToReportEditScreen() {
+        val existingReportFilter = ReportFilter().apply{
+            reportFilterUid = 1
+            reportFilterField = ReportFilter.FIELD_PERSON_AGE
+            reportFilterCondition = ReportFilter.CONDITION_GREATER_THAN
+            reportFilterValue = 13.toString()
+        }
+
+        val jsonStr = Gson().toJson(existingReportFilter)
+
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                fragmentArgs = bundleOf(ReportFilterEditView.ARG_REPORT_FILTER to jsonStr)) {
+            ReportFilterEditFragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }
+
+        init{
+
+        }.run{
+
+            ReportFilterEditScreen{
+
+                fieldTextValue{
+                    hasText(systemImplNavRule.impl.getString(
+                            ReportFilterEditPresenter.FieldOption.values().find {
+                                report -> report.optionVal ==
+                                    existingReportFilter.reportFilterField }!!.messageId,
+                            ApplicationProvider.getApplicationContext()))
+                }
+
+                conditionTextValue{
+                    hasText(systemImplNavRule.impl.getString(
+                            ReportFilterEditPresenter.ConditionOption.values().find {
+                                report -> report.optionVal ==
+                                    existingReportFilter.reportFilterCondition }!!.messageId,
+                            ApplicationProvider.getApplicationContext()))
+                }
+
+                valuesDropDownTextInputLayout{
+                    isGone()
+                }
+
+                valueIntegerTextInputLayout{
+                    edit{
+                        hasText(existingReportFilter.reportFilterValue!!)
+                        clearText()
+                        replaceText("16")
+                    }
+                }
+
+            }
+
+
+        }
+
+    }
+
+
+    @AdbScreenRecord("given existing report filter when field option changes then other fields are cleared")
+    @Test
+    fun givenExistingReportFilter_whenFieldOptionsChanges_thenOtherFieldsAreCleared() {
+        val existingReportFilter = ReportFilter().apply{
+            reportFilterUid = 1
+            reportFilterField = ReportFilter.FIELD_PERSON_AGE
+            reportFilterCondition = ReportFilter.CONDITION_GREATER_THAN
+            reportFilterValue = 13.toString()
+        }
+
+        val jsonStr = Gson().toJson(existingReportFilter)
+
+        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                fragmentArgs = bundleOf(ReportFilterEditView.ARG_REPORT_FILTER to jsonStr)) {
+            ReportFilterEditFragment().also {
+                it.installNavController(systemImplNavRule.navController)
+            }
+        }
+
+        init{
+
+        }.run{
+
+            ReportFilterEditScreen{
+
+                // before change
+                fieldTextValue{
+                    hasText(systemImplNavRule.impl.getString(
+                            ReportFilterEditPresenter.FieldOption.values().find {
+                                report -> report.optionVal ==
+                                    existingReportFilter.reportFilterField }!!.messageId,
+                            ApplicationProvider.getApplicationContext()))
+                }
+
+                conditionTextValue{
+                    hasText(systemImplNavRule.impl.getString(
+                            ReportFilterEditPresenter.ConditionOption.values().find {
+                                report -> report.optionVal ==
+                                    existingReportFilter.reportFilterCondition }!!.messageId,
+                            ApplicationProvider.getApplicationContext()))
+                }
+
+                valuesDropDownTextInputLayout{
+                    isGone()
+                }
+
+                // make the change
+                setMessageIdOption(fieldTextValue,
+                        systemImplNavRule.impl.getString(ReportFilterEditPresenter.FieldOption.values().find {
+                            report -> report.optionVal ==
+                                ReportFilter.FIELD_PERSON_GENDER }!!.messageId,
+                        ApplicationProvider.getApplicationContext()))
+
+
+                // after change
+                fieldTextValue{
+                    hasText(systemImplNavRule.impl.getString(
+                            ReportFilterEditPresenter.FieldOption.values().find {
+                                report -> report.optionVal ==
+                                    ReportFilter.FIELD_PERSON_GENDER }!!.messageId,
+                            ApplicationProvider.getApplicationContext()))
+                }
+
+
+                conditionTextValue{
+                    hasEmptyText()
+                }
+
+                valueIntegerTextInputLayout{
+                    edit{
+                        hasEmptyText()
+                    }
+                }
+
+
+            }
+
+
+        }
+
+    }
+
+
 
 }

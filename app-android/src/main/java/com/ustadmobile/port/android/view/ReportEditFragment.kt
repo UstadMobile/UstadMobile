@@ -6,6 +6,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
@@ -22,17 +23,17 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.ReportFilter
-import com.ustadmobile.lib.db.entities.ReportFilterWithDisplayDetails
-import com.ustadmobile.lib.db.entities.ReportSeries
-import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 
 interface ReportEditFragmentEventHandler {
-    fun onClickNewFilter()
-    fun onClickRemoveFilter(filter: ReportFilterWithDisplayDetails)
+    fun onClickNewFilter(series: ReportSeries)
+    fun onClickRemoveFilter(filter: ReportFilter)
     fun onClickNewSeries()
     fun onClickRemoveSeries(reportSeries: ReportSeries)
 }
@@ -70,9 +71,14 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
     class SeriesViewHolder(val itemBinding: ItemReportEditSeriesBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
     class RecyclerViewSeriesAdapter(val activityEventHandler: ReportEditFragmentEventHandler,
-                                   var presenter: ReportEditPresenter?) : ListAdapter<ReportSeries, SeriesViewHolder>(DIFF_CALLBACK_SERIES) {
+                                    var presenter: ReportEditPresenter?)
+        : ListAdapter<ReportSeries, SeriesViewHolder>(DIFF_CALLBACK_SERIES) {
 
-        private var filterAdapter: RecyclerViewFilterAdapter? = null
+        var visualOptions: List<ReportEditPresenter.VisualTypeMessageIdOption>? = null
+        var dataSetOptions: List<ReportEditPresenter.DataSetMessageIdOption>? = null
+        var subGroupOptions: List<ReportEditPresenter.SubGroupByMessageIdOption>? = null
+
+        val boundSeriesViewHolder = mutableListOf<SeriesViewHolder>()
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SeriesViewHolder {
             return SeriesViewHolder(ItemReportEditSeriesBinding.inflate(
@@ -83,15 +89,38 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         }
 
         override fun onBindViewHolder(holder: SeriesViewHolder, position: Int) {
-            val item = getItem(position)
+            val series =  getItem(position)
+            holder.itemBinding.series = series
+            holder.itemBinding.visualTypeOptions = visualOptions
+            holder.itemBinding.dataSetOptions = dataSetOptions
+            holder.itemBinding.subgroupOptions = subGroupOptions
+            boundSeriesViewHolder += holder
+
+            val filterRecyclerView = holder.itemBinding.itemReportEditFilterList
+            val filterAdapter = RecyclerViewFilterAdapter(activityEventHandler, presenter)
+            filterRecyclerView.adapter = filterAdapter
+            filterRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
+
+            val filterList = series.reportSeriesFilter
+            filterAdapter.submitList(filterList)
         }
 
+        override fun onViewRecycled(holder: SeriesViewHolder) {
+            super.onViewRecycled(holder)
+            boundSeriesViewHolder -= holder
+        }
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView)
+            boundSeriesViewHolder.clear()
+        }
     }
 
     class FilterViewHolder(val itemBinding: ItemReportEditFilterBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
     class RecyclerViewFilterAdapter(val activityEventHandler: ReportEditFragmentEventHandler,
-                                    var presenter: ReportEditPresenter?) : ListAdapter<ReportFilter, FilterViewHolder>(DIFF_CALLBACK_FILTER) {
+                                    var presenter: ReportEditPresenter?)
+        : ListAdapter<ReportFilter, FilterViewHolder>(DIFF_CALLBACK_FILTER) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FilterViewHolder {
             return FilterViewHolder(ItemReportEditFilterBinding.inflate(
@@ -102,11 +131,10 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         }
 
         override fun onBindViewHolder(holder: FilterViewHolder, position: Int) {
-            val item = getItem(position)
+            holder.itemBinding.filter = getItem(position)
         }
 
     }
-
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -141,7 +169,10 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 ReportFilter::class.java) {
             val filter = it.firstOrNull() ?: return@observeResult
-
+            val currentSeriesHolder = seriesAdapter?.boundSeriesViewHolder?.find {
+                it.itemBinding.series?.reportSeriesUid == filter.reportFilterSeriesUid
+            }
+            currentSeriesHolder?.itemBinding?.series?.reportSeriesFilter?.add(filter)
         }
 
     }
@@ -192,13 +223,34 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
         }
 
     override var visualTypeOptions: List<ReportEditPresenter.VisualTypeMessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+            seriesAdapter?.visualOptions = value
+        }
+
+    override var dataSetOptions: List<ReportEditPresenter.DataSetMessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+            seriesAdapter?.dataSetOptions = value
+        }
 
     override var xAxisOptions: List<ReportEditPresenter.XAxisMessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.xAxisOptions = value
+        }
 
     override var subGroupOptions: List<ReportEditPresenter.SubGroupByMessageIdOption>? = null
         get() = field
-        set(value){
+        set(value) {
             field = value
+            seriesAdapter?.subGroupOptions = value
+            seriesAdapter?.boundSeriesViewHolder?.forEach {
+                it.itemBinding.subgroupOptions = value
+            }
         }
 
     companion object {
@@ -234,20 +286,30 @@ class ReportEditFragment : UstadEditFragment<ReportWithFilters>(), ReportEditVie
 
     }
 
-    override fun onClickNewFilter() {
-        TODO("Not yet implemented")
+    override fun onClickNewFilter(series: ReportSeries) {
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(null,
+                R.id.report_filter_edit_dest,
+                ReportFilter::class.java,
+                argBundle = bundleOf(UstadView.ARG_ENTITY_UID
+                        to series.reportSeriesUid))
     }
 
-    override fun onClickRemoveFilter(filter: ReportFilterWithDisplayDetails) {
-        TODO("Not yet implemented")
+    override fun onClickRemoveFilter(filter: ReportFilter) {
+        val foundSeriesHolder = seriesAdapter?.boundSeriesViewHolder?.find { it.itemBinding.series?.reportSeriesUid == filter.reportFilterSeriesUid }
+        foundSeriesHolder?.itemBinding?.series?.reportSeriesFilter?.remove(filter)
+
+      /*  val seriesWithFilter = seriesAdapter?.currentList?.find { it.reportSeriesUid == filter.reportFilterSeriesUid }
+        val filterToRemove = seriesWithFilter?.reportSeriesFilter?.find { it.reportFilterUid == filter.reportFilterUid }
+        seriesWithFilter?.reportSeriesFilter?.remove(filterToRemove)*/
     }
 
     override fun onClickNewSeries() {
-        TODO("Not yet implemented")
+        mPresenter?.handleClickAddSeries()
     }
 
     override fun onClickRemoveSeries(reportSeries: ReportSeries) {
-        TODO("Not yet implemented")
+        mPresenter?.handleRemoveSeries(reportSeries)
     }
 
 }

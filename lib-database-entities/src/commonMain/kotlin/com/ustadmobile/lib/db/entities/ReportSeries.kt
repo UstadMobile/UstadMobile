@@ -7,13 +7,15 @@ class ReportSeries{
 
     var reportSeriesUid: Long = 0
 
+    var reportSeriesName: String? = null
+
     var reportSeriesDataSet: Int = 0
 
     var reportSeriesVisualType: Int = 0
 
     var reportSeriesSubGroup: Int = 0
 
-    var reportSeriesFilter = listOf<ReportFilter>()
+    var reportSeriesFilter = mutableListOf<ReportFilter>()
 
     companion object {
 
