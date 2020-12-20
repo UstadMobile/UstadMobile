@@ -13,8 +13,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.ReportWithFilters
-import com.ustadmobile.lib.db.entities.VerbDisplay
+import com.ustadmobile.lib.db.entities.ReportFilter
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.port.android.view.ReportEditFragment
 import com.ustadmobile.test.port.android.KNestedScrollView
 import com.ustadmobile.test.port.android.util.setDateField
@@ -56,10 +56,10 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
     }
 
     fun fillFields(fragmentScenario: FragmentScenario<ReportEditFragment>? = null,
-                   report: ReportWithFilters,
-                   reportOnForm: ReportWithFilters? = ReportWithFilters(),
+                   report: ReportWithSeriesWithFilters,
+                   reportOnForm: ReportWithSeriesWithFilters? = ReportWithSeriesWithFilters(),
                    setFieldsRequiringNavigation: Boolean = true, person: Person? = null,
-                   verbDisplay: VerbDisplay? = null, entry: ContentEntry? = null,
+                   reportFilter: ReportFilter? = null, entry: ContentEntry? = null,
                    impl: UstadMobileSystemImpl, context: Context, testContext: TestContext<Unit>) {
 
         report.reportTitle?.takeIf { it != reportOnForm?.reportTitle }?.also {
@@ -73,33 +73,12 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
         closeSoftKeyboard()
 
-      /*  report.chartType.takeIf { it != reportOnForm?.chartType }?.also {
-            testContext.flakySafely {
-                setMessageIdOption(visualTypeValue,
-                        impl.getString(ReportEditPresenter.VisualTypeOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
-            }
-        }
-
-        report.yAxis.takeIf { it != reportOnForm?.yAxis }?.also {
-            testContext.flakySafely {
-                setMessageIdOption(yAxisValue,
-                        impl.getString(ReportEditPresenter.YAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
-            }
-        }*/
-
         report.xAxis.takeIf { it != reportOnForm?.xAxis }?.also {
             testContext.flakySafely {
                 setMessageIdOption(xAxisValue,
                         impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
             }
         }
-
-      /*  report.subGroup.takeIf { it != reportOnForm?.subGroup }?.also {
-            testContext.flakySafely {
-                setMessageIdOption(subGroupValue,
-                        impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
-            }
-        }*/
 
         report.fromDate.takeIf { it != reportOnForm?.fromDate }?.also {
             setDateField(R.id.activity_report_edit_fromDate_textinputlayout, it)
@@ -110,6 +89,12 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
         if (!setFieldsRequiringNavigation) {
             return
+        }
+
+        fragmentScenario?.onFragment { fragment ->
+            fragment.takeIf { reportFilter != null }
+                    ?.findNavController()?.currentBackStackEntry?.savedStateHandle
+                    ?.set("ReportFilter", defaultGson().toJson(listOf(reportFilter)))
         }
 
      /*   fragmentScenario?.onFragment { fragment ->

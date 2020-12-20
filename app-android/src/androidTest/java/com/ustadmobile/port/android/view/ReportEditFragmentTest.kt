@@ -9,6 +9,8 @@ import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.controller.PersonConstants
+import com.ustadmobile.core.controller.SchoolEditPresenter
 import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
@@ -87,11 +89,11 @@ class ReportEditFragmentTest: TestCase() {
             contentEntryUid = dbRule.repo.contentEntryDao.insert(this)
         }
 
-        var currentEntity: ReportWithFilters? = null
+        var currentEntity: ReportWithSeriesWithFilters? = null
         while(currentEntity == null){
             currentEntity = fragmentScenario.nullableLetOnFragment { it.entity}
         }
-        val formVals = ReportWithFilters().apply {
+        val formVals = ReportWithSeriesWithFilters().apply {
             reportTitle = "New Report"
           /*  chartType = Report.LINE_GRAPH
             yAxis = Report.AVG_DURATION*/
@@ -108,7 +110,6 @@ class ReportEditFragmentTest: TestCase() {
             ReportEditScreen{
 
                 fillFields(fragmentScenario, formVals, currentEntity, true,
-                        person, verbDisplay, contentEntry,
                         impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
                         testContext = this@run)
 
@@ -132,23 +133,29 @@ class ReportEditFragmentTest: TestCase() {
     @AdbScreenRecord("with an existing report, when updated, on click done, save on database")
     @Test
     fun givenReportExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
-        val existingReport = ReportWithFilters().apply {
+        val existingReport = ReportWithSeriesWithFilters().apply {
             reportTitle = "New Report"
             xAxis = Report.WEEK
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
-            reportSeriesList = listOf(ReportSeries().apply {
+            val reportSeriesList = listOf(ReportSeries().apply {
                 reportSeriesUid = 1
                 reportSeriesName = "Series 2"
                 reportSeriesDataSet = ReportSeries.TOTAL_DURATION
                 reportSeriesSubGroup = Report.GENDER
                 reportSeriesVisualType = Report.LINE_GRAPH
-                reportSeriesFilter = mutableListOf(ReportFilter().apply {
+                reportSeriesFilters = mutableListOf(ReportFilter().apply {
                     reportFilterUid = 1
                     reportFilterSeriesUid = 1
                     reportFilterField = ReportFilter.FIELD_PERSON_GENDER
                     reportFilterCondition = ReportFilter.CONDITION_IS
                     reportFilterDropDownValue = Person.GENDER_MALE
+                }, ReportFilter().apply {
+                    reportFilterUid = 2
+                    reportFilterSeriesUid = 1
+                    reportFilterField = ReportFilter.FIELD_PERSON_AGE
+                    reportFilterCondition = ReportFilter.CONDITION_GREATER_THAN
+                    reportFilterValue = 13.toString()
                 })
             })
             reportSeries = Gson().toJson(reportSeriesList)
@@ -160,17 +167,16 @@ class ReportEditFragmentTest: TestCase() {
             ReportEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }
 
 
         //Freeze and serialize the value as it was first shown to the user
-        var entityLoadedByFragment: ReportWithFilters? = null
+        var entityLoadedByFragment: ReportWithSeriesWithFilters? = null
         while(entityLoadedByFragment == null){
             entityLoadedByFragment = fragmentScenario.nullableLetOnFragment { it.entity}
         }
         val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
-        val newClazzValues = defaultGson().fromJson(entityLoadedJson, ReportWithFilters::class.java).apply {
+        val newClazzValues = defaultGson().fromJson(entityLoadedJson, ReportWithSeriesWithFilters::class.java).apply {
             reportTitle = "Updated Report"
             xAxis = Report.MONTH
         }
@@ -181,15 +187,22 @@ class ReportEditFragmentTest: TestCase() {
 
             ReportEditScreen{
 
-                fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment,
+                fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment, true,
                         impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
+                        reportFilter = ReportFilter().apply {
+                            reportFilterSeriesUid = 1
+                            reportFilterUid = 1
+                            reportFilterField = ReportFilter.FIELD_PERSON_GENDER
+                            reportFilterCondition = ReportFilter.CONDITION_IS
+                            reportFilterDropDownValue = Person.GENDER_MALE
+                        },
                         testContext = this@run)
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
                 Assert.assertEquals("Entity in database was loaded for user",
                         "New Report",
-                        defaultGson().fromJson(entityLoadedJson, ReportWithFilters::class.java).reportTitle)
+                        defaultGson().fromJson(entityLoadedJson, ReportWithSeriesWithFilters::class.java).reportTitle)
 
                 val updatedEntityFromDb = dbRule.db.reportDao.findByUidLive(existingReport.reportUid)
                         .waitUntilWithFragmentScenario(fragmentScenario) { it?.reportTitle == "Updated Report" }

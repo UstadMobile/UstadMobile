@@ -24,7 +24,7 @@ import com.ustadmobile.core.util.ReportGraphHelper
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.StatementListReport
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
@@ -34,10 +34,10 @@ import org.kodein.di.on
 
 
 interface ReportDetailFragmentEventHandler {
-    fun onClickAddToDashboard(report: ReportWithFilters)
+    fun onClickAddToDashboard(report: ReportWithSeriesWithFilters)
 }
 
-class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDetailView, ReportDetailFragmentEventHandler {
+class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(), ReportDetailView, ReportDetailFragmentEventHandler {
 
     private var mBinding: FragmentReportDetailBinding? = null
 
@@ -184,7 +184,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
         currentLiveData = null
     }
 
-    override var entity: ReportWithFilters? = null
+    override var entity: ReportWithSeriesWithFilters? = null
         get() = field
         set(value) {
             field = value
@@ -193,7 +193,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithFilters>(), ReportDet
         }
 
 
-    override fun onClickAddToDashboard(report: ReportWithFilters) {
+    override fun onClickAddToDashboard(report: ReportWithSeriesWithFilters) {
         mPresenter?.handleOnClickAddFromDashboard(report)
         if (report.reportUid == 0L) {
             findNavController().popBackStack(R.id.report_edit_dest, true)

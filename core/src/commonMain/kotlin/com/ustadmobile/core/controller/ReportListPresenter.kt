@@ -6,7 +6,7 @@ import com.ustadmobile.core.util.ReportGraphHelper
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
@@ -66,7 +66,7 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
     suspend fun getGraphData(item: Report): ReportGraphHelper.ChartData {
        // val reportList = db.reportFilterDao.findByReportUid(item.reportUid)
         val graphHelper = ReportGraphHelper(context, systemImpl, repo)
-        return graphHelper.getChartDataForReport(ReportWithFilters(item, listOf()))
+        return graphHelper.getChartDataForReport(ReportWithSeriesWithFilters(item, listOf()))
     }
 
     override fun onDestroy() {

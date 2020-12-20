@@ -16,7 +16,7 @@ class XapiReportOptionsTest {
         }
 
 
-        val reportFilter = ReportWithFilters(report)
+        val reportFilter = ReportWithSeriesWithFilters(report)
 
         Assert.assertEquals("SELECT AVG(StatementEntity.resultScoreScaled) AS yAxis, " +
                 "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch') " +
@@ -37,7 +37,7 @@ class XapiReportOptionsTest {
         }
 
 
-        val reportFilter = ReportWithFilters(report)
+        val reportFilter = ReportWithSeriesWithFilters(report)
 
         Assert.assertEquals("SELECT SUM(StatementEntity.resultDuration) AS yAxis, " +
                 "strftime('%m %Y', StatementEntity.timestamp/1000, 'unixepoch') " +
@@ -58,7 +58,7 @@ class XapiReportOptionsTest {
         }
 
 
-        val reportFilter = ReportWithFilters(report)
+        val reportFilter = ReportWithSeriesWithFilters(report)
 
         Assert.assertEquals("SELECT COUNT(*) AS yAxis, " +
                 "Person.gender " +
@@ -71,7 +71,7 @@ class XapiReportOptionsTest {
     fun testSqlWithCOUNTAcitivitesWithGenderAsXaxisAndContentEntryAsSubGroupWithWhoListAndVerbList() {
 
 
-        val report = ReportWithFilters().apply {
+        val report = ReportWithSeriesWithFilters().apply {
             chartType = 0
             yAxis = Report.COUNT_ACTIVITIES
             xAxis = Report.GENDER
@@ -104,7 +104,7 @@ class XapiReportOptionsTest {
     fun testSqlWithCOUNTAcitivitesWithGenderAsXaxisAndContentEntryAsSubGroupAndAllFilters() {
 
 
-        val report = ReportWithFilters().apply {
+        val report = ReportWithSeriesWithFilters().apply {
             chartType = 0
             yAxis = Report.COUNT_ACTIVITIES
             xAxis = Report.GENDER

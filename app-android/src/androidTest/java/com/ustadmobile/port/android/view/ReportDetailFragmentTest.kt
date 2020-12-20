@@ -9,7 +9,7 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.port.android.screen.ReportDetailScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.*
@@ -76,27 +76,27 @@ class ReportDetailFragmentTest(val report: Report) : TestCase() {
         @JvmStatic
         @Parameterized.Parameters
         fun data(): Iterable<Report> {
-            return listOf(ReportWithFilters().apply {
+            return listOf(ReportWithSeriesWithFilters().apply {
                 //chartType = Report.BAR_CHART
                 //yAxis = Report.AVG_DURATION
                 xAxis = Report.MONTH
                 fromDate = DateTime(2019, 4, 10).unixMillisLong
                 toDate = DateTime(2019, 6, 11).unixMillisLong
             },
-                    ReportWithFilters().apply {
+                    ReportWithSeriesWithFilters().apply {
                        // chartType = Report.LINE_GRAPH
                        // yAxis = Report.AVG_DURATION
                         xAxis = Report.MONTH
                         fromDate = DateTime(2019, 4, 10).unixMillisLong
                         toDate = DateTime(2019, 6, 11).unixMillisLong
-                    }, ReportWithFilters().apply {
+                    }, ReportWithSeriesWithFilters().apply {
                 //chartType = Report.BAR_CHART
                 //yAxis = Report.SCORE
                 xAxis = Report.MONTH
                 //subGroup = Report.GENDER
                 fromDate = DateTime(2019, 4, 10).unixMillisLong
                 toDate = DateTime(2019, 6, 11).unixMillisLong
-            }, ReportWithFilters().apply {
+            }, ReportWithSeriesWithFilters().apply {
                 //chartType = Report.LINE_GRAPH
                 //yAxis = Report.SCORE
                 xAxis = Report.MONTH

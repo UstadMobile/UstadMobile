@@ -12,7 +12,6 @@ import com.ustadmobile.core.view.ReportEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.atomicfu.atomic
@@ -26,7 +25,7 @@ class ReportEditPresenter(context: Any,
                           arguments: Map<String, String>, view: ReportEditView,
                           di: DI,
                           lifecycleOwner: DoorLifecycleOwner)
-    : UstadEditPresenter<ReportEditView, ReportWithFilters>(context, arguments, view, di, lifecycleOwner) {
+    : UstadEditPresenter<ReportEditView, ReportWithSeriesWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
     val seriesCounter = atomic(1)
 
@@ -93,7 +92,7 @@ class ReportEditPresenter(context: Any,
         view.dataSetOptions = DataSetOptions.values().map { DataSetMessageIdOption(it, context) }
     }
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ReportWithFilters? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ReportWithSeriesWithFilters? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
         var report = withTimeoutOrNull(2000) {
@@ -112,31 +111,40 @@ class ReportEditPresenter(context: Any,
         var reportSeriesList = listOf<ReportSeries>()
         if(!reportSeries.isNullOrBlank()) {
             reportSeriesList = safeParseList(di, ReportSeries.serializer().list, ReportSeries::class, reportSeries)
-            view.seriesLiveData = DoorMutableLiveData(reportSeriesList)
+
+            // set the series counter with an existing series
+            val max = reportSeriesList.maxBy { it.reportSeriesUid }
+            seriesCounter.value = (max?.reportSeriesUid?: 0 + 1).toInt()
         }
 
-        return ReportWithFilters(report, reportSeriesList)
+        return ReportWithSeriesWithFilters(report, reportSeriesList)
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): ReportWithFilters? {
+    override fun onLoadFromJson(bundle: Map<String, String>): ReportWithSeriesWithFilters? {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        val editEntity: ReportWithFilters
+        val editEntity: ReportWithSeriesWithFilters
         if (entityJsonStr != null) {
-            editEntity = safeParse(di, ReportWithFilters.serializer(), entityJsonStr)
+            editEntity = safeParse(di, ReportWithSeriesWithFilters.serializer(), entityJsonStr)
         } else {
-            editEntity = ReportWithFilters()
+            editEntity = ReportWithSeriesWithFilters()
             editEntity.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
             editEntity.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong
         }
 
         handleXAxisSelected(XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }.find { it.code == editEntity.xAxis } as MessageIdOption)
+
         val reportSeries = editEntity.reportSeries
         val reportSeriesList: List<ReportSeries>
         if(!reportSeries.isNullOrBlank()) {
             reportSeriesList = safeParseList(di, ReportSeries.serializer().list, ReportSeries::class, reportSeries)
-            view.seriesLiveData = DoorMutableLiveData(reportSeriesList)
+            editEntity.reportSeriesWithFiltersList = reportSeriesList
+
+            // set the series counter with an existing series
+            val max = reportSeriesList.maxBy { it.reportSeriesUid }
+            seriesCounter.value = (max?.reportSeriesUid?: 0 + 1).toInt()
+
         }
 
         return editEntity
@@ -150,8 +158,11 @@ class ReportEditPresenter(context: Any,
     }
 
     fun handleRemoveSeries(series: ReportSeries){
-        val newList = view.seriesLiveData?.getValue()?.minus(series) ?: listOf()
-        view.seriesLiveData = DoorMutableLiveData(newList)
+        val entityVal = entity
+        val newList = entityVal?.reportSeriesWithFiltersList?.toMutableList() ?: mutableListOf()
+        newList.remove(series)
+        entityVal?.reportSeriesWithFiltersList = newList.toList()
+        view.entity = entityVal
     }
 
     fun handleClickAddSeries(){
@@ -160,11 +171,62 @@ class ReportEditPresenter(context: Any,
             reportSeriesName = "Series $id"
             reportSeriesUid = id.toLong()
         }
-        val seriesVal = view.seriesLiveData?.getValue() ?: listOf()
-        view.seriesLiveData = DoorMutableLiveData(seriesVal.plus(series))
+        val entityVal = entity
+        val newList = entityVal?.reportSeriesWithFiltersList?.toMutableList() ?: mutableListOf()
+        newList.add(series)
+        entityVal?.reportSeriesWithFiltersList = newList.toList()
+        view.entity = entityVal
     }
 
-    override fun handleClickSave(entity: ReportWithFilters) {
+    fun handleAddFilter(newFilter: ReportFilter){
+        val entityVal = entity
+        val newSeriesList = entityVal?.reportSeriesWithFiltersList?.toMutableList() ?: mutableListOf()
+        val seriesToAddFilter = newSeriesList.find { it.reportSeriesUid == newFilter.reportFilterSeriesUid } ?: return
+
+        newSeriesList.remove(seriesToAddFilter)
+        val newFilterList = seriesToAddFilter.reportSeriesFilters.toMutableList()
+        
+        // make sure reportfilterUid is not repeated in the same series list
+        newFilter.reportFilterUid = seriesToAddFilter.reportSeriesFilters.maxBy { it.reportFilterUid }?.reportFilterUid?: 0 + 1
+        newFilterList.add(newFilter)
+
+        newSeriesList.add(ReportSeries().apply {
+            reportSeriesUid = seriesToAddFilter.reportSeriesUid
+            reportSeriesVisualType = seriesToAddFilter.reportSeriesVisualType
+            reportSeriesDataSet = seriesToAddFilter.reportSeriesDataSet
+            reportSeriesSubGroup = seriesToAddFilter.reportSeriesSubGroup
+            reportSeriesName = seriesToAddFilter.reportSeriesName
+            reportSeriesFilters = newFilterList.toList()
+        })
+
+        entityVal?.reportSeriesWithFiltersList = newSeriesList.toList()
+        view.entity = entityVal
+    }
+
+    fun handleRemoveFilter(filter: ReportFilter) {
+        val entityVal = entity
+        val newSeriesList = entityVal?.reportSeriesWithFiltersList?.toMutableList() ?: mutableListOf()
+        val seriesToRemoveFilter = newSeriesList.find { it.reportSeriesUid == filter.reportFilterSeriesUid } ?: return
+
+        newSeriesList.remove(seriesToRemoveFilter)
+        val newFilterList = seriesToRemoveFilter.reportSeriesFilters.toMutableList()
+        newFilterList.remove(filter)
+
+        newSeriesList.add(ReportSeries().apply {
+            reportSeriesUid = seriesToRemoveFilter.reportSeriesUid
+            reportSeriesVisualType = seriesToRemoveFilter.reportSeriesVisualType
+            reportSeriesDataSet = seriesToRemoveFilter.reportSeriesDataSet
+            reportSeriesSubGroup = seriesToRemoveFilter.reportSeriesSubGroup
+            reportSeriesName = seriesToRemoveFilter.reportSeriesName
+            reportSeriesFilters = newFilterList.toList()
+        })
+
+        entityVal?.reportSeriesWithFiltersList = newSeriesList.toList()
+        view.entity = entityVal
+    }
+
+
+    override fun handleClickSave(entity: ReportWithSeriesWithFilters) {
         if (entity.reportTitle.isNullOrEmpty()) {
             view.titleErrorText = systemImpl.getString(MessageID.field_required_prompt, context)
             return
@@ -173,11 +235,6 @@ class ReportEditPresenter(context: Any,
         }
 
         GlobalScope.launch(doorMainDispatcher()) {
-
-            val seriesList = view.seriesLiveData?.getValue() ?: listOf()
-            entity.reportSeries = safeStringify(di, ReportSeries.serializer().list,
-                    seriesList)
-            entity.reportSeriesList = seriesList
 
             if (entity.reportUid != 0L) {
 
@@ -190,10 +247,9 @@ class ReportEditPresenter(context: Any,
             } else {
                 systemImpl.go(ReportDetailView.VIEW_NAME,
                         mapOf(ARG_ENTITY_JSON to
-                                Json.stringify(ReportWithFilters.serializer(), entity)),
+                                Json.stringify(ReportWithSeriesWithFilters.serializer(), entity)),
                         context)
             }
-
 
         }
     }

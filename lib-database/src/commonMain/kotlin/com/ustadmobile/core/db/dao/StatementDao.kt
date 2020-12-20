@@ -34,12 +34,12 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     @RawQuery
     abstract fun getResults(query: DoorQuery): List<ReportData>
 
-    open suspend fun getResultsFromOptions(@ParamName("options") options: ReportWithFilters): List<ReportData> {
+    open suspend fun getResultsFromOptions(@ParamName("options") options: ReportWithSeriesWithFilters): List<ReportData> {
         val sql = options.toSql()
         return getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
     }
 
-    open suspend fun getResultsListFromOptions(@ParamName("options") options: ReportWithFilters): DataSource.Factory<Int, StatementListReport> {
+    open suspend fun getResultsListFromOptions(@ParamName("options") options: ReportWithSeriesWithFilters): DataSource.Factory<Int, StatementListReport> {
         val sql = options.toSql()
         return getListResults(SimpleDoorQuery(sql.sqlListStr, sql.queryParams))
     }

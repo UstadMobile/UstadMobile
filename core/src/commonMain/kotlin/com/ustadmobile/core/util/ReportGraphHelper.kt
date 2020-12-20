@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.*
 
 class ReportGraphHelper(val context: Any, val impl: UstadMobileSystemImpl,val  db: UmAppDatabase) {
 
-    suspend fun getChartDataForReport(reportOptions: ReportWithFilters): ChartData {
+    suspend fun getChartDataForReport(reportOptions: ReportWithSeriesWithFilters): ChartData {
 
         var data = db.statementDao.getResultsFromOptions(reportOptions)
         var time = SECS
@@ -24,11 +24,11 @@ class ReportGraphHelper(val context: Any, val impl: UstadMobileSystemImpl,val  d
         return ChartData(data, xAxisLabel, yAxisLabel, subgroupLabel, reportOptions)
     }
 
-    suspend fun getStatementListForReport(reportOptions: ReportWithFilters): DataSource.Factory<Int, StatementListReport> {
+    suspend fun getStatementListForReport(reportOptions: ReportWithSeriesWithFilters): DataSource.Factory<Int, StatementListReport> {
         return db.statementDao.getResultsListFromOptions(reportOptions)
     }
 
-    data class ChartData(val dataList: List<StatementDao.ReportData>, val xAxisLabel: Map<String, String>, val yAxisLabel: String, val subGroupLabel: Map<String, String>, val reportWithFilters: ReportWithFilters)
+    data class ChartData(val dataList: List<StatementDao.ReportData>, val xAxisLabel: Map<String, String>, val yAxisLabel: String, val subGroupLabel: Map<String, String>, val reportWithFilters: ReportWithSeriesWithFilters)
 
     private fun getMeasureTime(data: List<StatementDao.ReportData>): Int {
         val units = data.maxBy { it.yAxis } ?: return SECS

@@ -8,6 +8,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ReportFilterEditView
 import com.ustadmobile.core.view.ReportFilterEditView.Companion.ARG_REPORT_FILTER
 import com.ustadmobile.core.view.UstadEditView
+import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -24,7 +25,6 @@ class ReportFilterEditPresenter(context: Any,
                                 lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
 
-     var seriesUid: Long = 0
     val reportFilterUids = atomic(1L)
 
     val fieldRequiredText = systemImpl.getString(MessageID.field_required_prompt, context)
@@ -51,13 +51,6 @@ class ReportFilterEditPresenter(context: Any,
     class ConditionMessageIdOption(day: ConditionOption, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
-    private val fieldToConditionMap = mapOf(
-            ReportFilter.FIELD_PERSON_AGE to
-                    listOf(ConditionOption.GREATER_THAN_CONDITION, ConditionOption.LESS_THAN_CONDITION),
-            ReportFilter.FIELD_PERSON_GENDER to
-                    listOf(ConditionOption.IS_CONDITION, ConditionOption.IS_NOT_CONDITION)
-    )
-
     enum class ValueOption(val optionVal: Int, val messageId: Int) {
 
     }
@@ -75,84 +68,75 @@ class ReportFilterEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        seriesUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
         view.fieldOptions = FieldOption.values().map { FieldMessageIdOption(it, context) }
         view.conditionsOptions = ConditionOption.values().map { ConditionMessageIdOption(it, context) }
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ReportFilter? {
-        val entityJsonStr = arguments[ARG_REPORT_FILTER]
+        val entityJsonStr = arguments[ARG_ENTITY_JSON] ?: ""
 
-        val editEntity = if (entityJsonStr != null) {
-            val entity = safeParse(di, ReportFilter.serializer(), entityJsonStr)
+        val entity = safeParse(di, ReportFilter.serializer(), entityJsonStr)
 
-            handleFieldOptionSelected(FieldOption.values().map { FieldMessageIdOption(it, context) }.find { it.code == entity.reportFilterField } as MessageIdOption)
-            handleConditionOptionSelected(ConditionOption.values().map { ConditionMessageIdOption(it, context) }.find { it.code == entity.reportFilterCondition } as MessageIdOption)
+        handleFieldOptionSelected(FieldOption.values().map { FieldMessageIdOption(it, context) }.find { it.code == entity.reportFilterField } as MessageIdOption)
+        handleConditionOptionSelected(ConditionOption.values().map { ConditionMessageIdOption(it, context) }.find { it.code == entity.reportFilterCondition } as MessageIdOption)
 
-            entity
-
-        } else {
-            ReportFilter()
-        }
-
-
-        return editEntity
+        return entity
     }
 
-    // based on enum selection
+
     fun handleFieldOptionSelected(fieldOption: MessageIdOption) {
-        val filteredList = fieldToConditionMap[fieldOption.code]?.map { ConditionMessageIdOption(it, context) } ?: return
-        view.conditionsOptions = filteredList
-    }
+        when(fieldOption.code){
+            ReportFilter.FIELD_PERSON_GENDER -> {
 
-    fun handleConditionOptionSelected(conditionOption: MessageIdOption) {
-        when (conditionOption.code) {
-            ReportFilter.CONDITION_IS,
-            ReportFilter.CONDITION_IS_NOT -> {
+                view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
+                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
+
                 view.valueType = FilterValueType.DROPDOWN
-                view.dropDownValueOptions = PersonConstants.GENDER_MESSAGE_ID_MAP.map { MessageIdOption(it.value, context, it.key) }
+                view.dropDownValueOptions = PersonConstants.GENDER_MESSAGE_ID_MAP
+                        .map { MessageIdOption(it.value, context, it.key) }
             }
-            ReportFilter.CONDITION_WITHIN_RANGE -> {
-                view.valueType = FilterValueType.RANGE
-            }
-            ReportFilter.CONDITION_GREATER_THAN,
-            ReportFilter.CONDITION_LESS_THAN -> {
+
+            ReportFilter.FIELD_PERSON_AGE -> {
+                view.conditionsOptions = listOf(ConditionOption.GREATER_THAN_CONDITION,
+                        ConditionOption.LESS_THAN_CONDITION).map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.INTEGER
             }
         }
+
+    }
+
+    fun handleConditionOptionSelected(conditionOption: MessageIdOption) {
+
     }
 
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        savedState.putEntityAsJson(UstadEditView.ARG_ENTITY_JSON, null, entityVal)
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
     override fun handleClickSave(entity: ReportFilter) {
-        if(entity.reportFilterField == 0){
+        if (entity.reportFilterField == 0) {
             view.fieldErrorText = fieldRequiredText
             return
-        }else{
+        } else {
             view.fieldErrorText = null
         }
-        if(entity.reportFilterCondition == 0){
+        if (entity.reportFilterCondition == 0) {
             view.conditionsErrorText = fieldRequiredText
             return
-        }else{
+        } else {
             view.conditionsErrorText = null
         }
-        if(entity.reportFilterDropDownValue == 0 && entity.reportFilterValue.isNullOrBlank()){
+        if (entity.reportFilterDropDownValue == 0 && entity.reportFilterValue.isNullOrBlank()) {
             view.valuesErrorText = fieldRequiredText
             return
-        }else {
+        } else {
             view.valuesErrorText = null
         }
 
-        if(entity.reportFilterUid == 0L) {
-            entity.reportFilterUid = reportFilterUids.incrementAndGet()
-            entity.reportFilterSeriesUid = seriesUid
-        }
+        entity.reportFilterUid = reportFilterUids.incrementAndGet()
 
         view.finishWithResult(listOf(entity))
     }

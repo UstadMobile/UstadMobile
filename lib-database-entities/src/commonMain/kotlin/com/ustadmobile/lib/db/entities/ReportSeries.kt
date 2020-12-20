@@ -15,7 +15,7 @@ class ReportSeries{
 
     var reportSeriesSubGroup: Int = 0
 
-    var reportSeriesFilter = mutableListOf<ReportFilter>()
+    var reportSeriesFilters = listOf<ReportFilter>()
 
     companion object {
 

@@ -20,7 +20,7 @@ import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.lib.db.entities.ReportFilter
-import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -73,7 +73,7 @@ class ReportDetailPresenterTest {
     fun givenReportExists_whenOnCreateCalled_thenReportIsSetOnView() {
         val repo: UmAppDatabase by di.activeRepoInstance()
 
-        val testEntity = ReportWithFilters().apply {
+        val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
             chartType = Report.BAR_CHART
             xAxis = Report.MONTH
@@ -111,7 +111,7 @@ class ReportDetailPresenterTest {
     fun givenNewReport_whenUserClicksOnAddToDashboard_thenDatabaseIsCreated(){
         val db: UmAppDatabase by di.activeDbInstance()
 
-        val testEntity = ReportWithFilters().apply {
+        val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
             reportTitle = "New Report Title"
             chartType = Report.BAR_CHART
@@ -134,7 +134,7 @@ class ReportDetailPresenterTest {
             )
         }
 
-        val presenterArgs = mapOf(ARG_ENTITY_JSON to Json.stringify(ReportWithFilters.serializer(), testEntity))
+        val presenterArgs = mapOf(ARG_ENTITY_JSON to Json.stringify(ReportWithSeriesWithFilters.serializer(), testEntity))
         val presenter = ReportDetailPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
 
@@ -160,7 +160,7 @@ class ReportDetailPresenterTest {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
-        val testEntity = ReportWithFilters().apply {
+        val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
             chartType = Report.BAR_CHART
             xAxis = Report.MONTH

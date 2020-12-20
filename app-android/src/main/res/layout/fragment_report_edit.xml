@@ -17,7 +17,7 @@
 
         <variable
             name="report"
-            type="com.ustadmobile.lib.db.entities.ReportWithFilters" />
+            type="com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters" />
 
         <variable
             name="loading"

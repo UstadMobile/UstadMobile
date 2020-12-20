@@ -9,7 +9,6 @@ import android.widget.LinearLayout
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.components.Legend
-import com.github.mikephil.charting.components.LimitLine
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
@@ -17,7 +16,7 @@ import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.util.ReportGraphHelper
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 
 
 class XapiChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
@@ -34,7 +33,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         addView(chart)
     }
 
-    private fun createChart(chartData: List<StatementDao.ReportData>, options: ReportWithFilters,
+    private fun createChart(chartData: List<StatementDao.ReportData>, options: ReportWithSeriesWithFilters,
                             xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>): View? {
 
         val xAxisLabelList: MutableSet<String> = mutableSetOf()
