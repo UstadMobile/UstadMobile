@@ -12,7 +12,6 @@ import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 
@@ -42,11 +41,11 @@ class ReportDetailPresenter(context: Any,
             db.reportDao.findByUid(entityUid)
         } ?: Report()
 
-        val reportFilterList = withTimeout(2000) {
+       /* val reportFilterList = withTimeout(2000) {
             db.reportFilterDao.findByReportUid(report.reportUid)
-        }
+        }*/
 
-        val reportWithFilter = ReportWithFilters(report, reportFilterList)
+        val reportWithFilter = ReportWithFilters(report, listOf())
 
         setReportData(reportWithFilter)
 
@@ -99,7 +98,7 @@ class ReportDetailPresenter(context: Any,
      */
     fun handleOnClickAddFromDashboard(report: ReportWithFilters) {
         repo.reportDao.insert(report)
-        repo.reportFilterDao.insertList(report.reportFilterList)
+        //repo.reportFilterDao.insertList(report.reportFilterList)
     }
 
     companion object {

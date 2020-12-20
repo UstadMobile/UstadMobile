@@ -43,7 +43,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         val distinctSubgroups = chartData.distinctBy { it.subgroup }.map { it.subgroup }
         val groupedByXAxis = chartData.groupBy { it.xAxis }
 
-        if (options.chartType == Report.BAR_CHART) {
+        if (1 == Report.BAR_CHART) {
 
             val barChart = BarChart(context)
             val params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
@@ -154,7 +154,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             barChart.invalidate()
 
             return barChart
-        } else if (options.chartType == Report.LINE_GRAPH) {
+        } else if (2 == Report.LINE_GRAPH) {
 
             val lineChart = LineChart(context)
             val params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,

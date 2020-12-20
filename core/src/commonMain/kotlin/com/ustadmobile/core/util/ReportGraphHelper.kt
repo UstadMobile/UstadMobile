@@ -13,13 +13,13 @@ class ReportGraphHelper(val context: Any, val impl: UstadMobileSystemImpl,val  d
 
         var data = db.statementDao.getResultsFromOptions(reportOptions)
         var time = SECS
-        if (reportOptions.yAxis == Report.DURATION || reportOptions.yAxis == Report.AVG_DURATION) {
+       /* if (reportOptions.yAxis == Report.DURATION || reportOptions.yAxis == Report.AVG_DURATION) {
             time = getMeasureTime(data)
             data = changeUnitInList(data, time)
-        }
+        }*/
         val xAxisLabel = getLabelList(reportOptions.xAxis, data.filter { it.xAxis != null  }.map { it.xAxis }.distinct() as List<String>)
-        val subgroupLabel = getLabelList(reportOptions.subGroup, data.filter { it.subgroup != null  }.map { it.subgroup }.distinct() as List<String>)
-        val yAxisLabel = getLabel(reportOptions.yAxis, time)
+        val subgroupLabel = mapOf("" to "") /*getLabelList(reportOptions.subGroup, data.filter { it.subgroup != null  }.map { it.subgroup }.distinct() as List<String>) */
+        val yAxisLabel = "" /*getLabel(reportOptions.yAxis, time) */
 
         return ChartData(data, xAxisLabel, yAxisLabel, subgroupLabel, reportOptions)
     }
