@@ -270,7 +270,7 @@ class PersonEditPresenter(context: Any,
 
                 if (personPicture != null && viewPicturePath != null && currentPath != viewPicturePath) {
                     repo.personPictureDao.setAttachment(personPicture, viewPicturePath)
-                    repo.personPictureDao.update(personPicture)
+                    repo.personPictureDao.updateAsync(personPicture)
                 } else if (viewPicturePath != null && currentPath != viewPicturePath) {
                     personPicture = PersonPicture().apply {
                         personPicturePersonUid = entity.personUid
@@ -281,7 +281,7 @@ class PersonEditPresenter(context: Any,
                     //picture has been removed
                     personPicture.personPictureActive = false
                     repo.personPictureDao.setAttachmentDataFromUri(personPicture, null, context)
-                    repo.personPictureDao.update(personPicture)
+                    repo.personPictureDao.updateAsync(personPicture)
                 }
 
                 onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)
