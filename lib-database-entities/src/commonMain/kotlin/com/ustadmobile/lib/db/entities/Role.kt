@@ -298,5 +298,18 @@ open class Role() {
                         PERMISSION_SCHOOL_ADD_STAFF or
                         PERMISSION_SCHOOL_ADD_STUDENT
 
+
+        const val ROLE_LE_UID = 1007
+
+        const val ROLE_LE_NAME = "Lead Entrepreneur"
+
+        //All permissionss so far
+        const val ROLE_LE_PERMISSIONS_DEFAULT : Long =
+
+                        PERMISSION_PERSON_SELECT or
+                        PERMISSION_PERSON_INSERT or
+                        PERMISSION_PERSON_UPDATE or
+                        PERMISSION_CONTENT_SELECT
+
     }
 }

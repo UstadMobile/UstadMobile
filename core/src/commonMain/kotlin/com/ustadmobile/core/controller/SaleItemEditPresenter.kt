@@ -14,6 +14,7 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.SaleItem
 import com.ustadmobile.lib.db.entities.SaleItemWithProduct
 import com.ustadmobile.lib.db.entities.Product
+import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
 
 import io.ktor.client.features.json.defaultSerializer
 import io.ktor.http.content.TextContent
@@ -48,15 +49,20 @@ class SaleItemEditPresenter(context: Any,
             db.productDao.findByUidAsync(productUid)
         }?:Product()
 
-        val saleItemWithProduct = withTimeout(2000){
-            db.saleItemDao.findWithProductByUidAsync(entityUid)
+        val productWithInventoryCount = withTimeout(2000){
+            db.productDao.findProductWithInventoryCountAsync(productUid,
+                    accountManager.activeAccount.personUid)
+        }?:ProductWithInventoryCount()
+
+
+        return withTimeout(2000){
+            db.saleItemDao.findWithProductByUidAsync(entityUid,
+                    accountManager.activeAccount.personUid)
         }?:SaleItemWithProduct().apply{
-            saleItemProduct = product
-            saleItemProductUid = product.productUid
+            saleItemProduct = productWithInventoryCount
+            deliveredCount = productWithInventoryCount.stock
+            saleItemProductUid = productWithInventoryCount.productUid
         }
-
-
-        return saleItemWithProduct
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): SaleItemWithProduct? {

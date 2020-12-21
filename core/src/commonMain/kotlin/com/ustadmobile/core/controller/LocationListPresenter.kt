@@ -8,7 +8,9 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.Location
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 
 class LocationListPresenter(context: Any, arguments: Map<String, String>, view: LocationListView,
@@ -33,8 +35,12 @@ class LocationListPresenter(context: Any, arguments: Map<String, String>, view: 
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        //TODO:
-        return true
+        val person = withTimeoutOrNull(2000){
+            repo.personDao.findByUidAsync(account?.personUid?: 0L)
+        } ?:Person()
+
+
+        return person.admin
     }
 
     private fun updateListOnView() {

@@ -268,6 +268,8 @@ abstract class SaleDao : BaseDao<Sale> {
                     ELSE 1 END
                 
                 GROUP BY saleUid, Customer.personUid 
+                
+                ORDER BY saleLastUpdateDate DESC
         """
 
 

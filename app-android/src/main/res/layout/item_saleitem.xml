@@ -33,7 +33,7 @@
             android:layout_marginBottom="8dp"
             android:orientation="horizontal"
             android:visibility="visible"
-            android:weightSum="5"
+            android:weightSum="6"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -51,18 +51,17 @@
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
-                android:layout_weight="1"
+                android:layout_weight="2"
                 android:orientation="vertical"
                 android:visibility="visible"
                 android:weightSum="2">
 
                 <TextView
                     android:id="@+id/item_sale_item_name"
-                    android:layout_width="wrap_content"
+                    android:layout_width="100dp"
+                    android:lines="2"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="@dimen/dimen_8dp"
-                    android:layout_weight="1"
-                    android:lines="1"
                     app:product="@{saleItem.saleItemProduct}"
                     app:localeSet="@{locale}"
                     tools:text="Pink Hat"
@@ -72,100 +71,41 @@
 
             </LinearLayout>
 
-
-            <LinearLayout
+            <TextView
+                android:id="@+id/item_sale_item_quantity"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:weightSum="2">
+                tools:text="21"
+                android:text="@{`` + saleItem.saleItemQuantity}"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                />
 
-                <TextView
-                    android:id="@+id/item_sale_item_quantity_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/quantity"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    app:layout_constraintStart_toEndOf="@+id/item_sale_item_name"
-                    app:layout_constraintTop_toTopOf="parent" />
 
-                <TextView
-                    android:id="@+id/item_sale_item_quantity"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dimen_8dp"
-                    android:layout_weight="1"
-                    tools:text="21"
-                    android:text="@{`` + saleItem.saleItemQuantity}"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    app:layout_constraintStart_toEndOf="@+id/textView19"
-                    app:layout_constraintTop_toBottomOf="@+id/item_sale_item_quantity_title" />
 
-            </LinearLayout>
-
-            <LinearLayout
+            <TextView
+                android:id="@+id/item_sale_item_price"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:weightSum="2">
-
-                <TextView
-                    android:id="@+id/item_sale_item_price_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/price"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    app:layout_constraintStart_toEndOf="@+id/item_sale_item_quantity_title"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/item_sale_item_price"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dimen_8dp"
-                    android:layout_weight="1"
-                    android:text="@{`` + saleItem.saleItemPricePerPiece}"
-                    tools:text="420"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    app:layout_constraintStart_toEndOf="@+id/item_sale_item_quantity"
-                    app:layout_constraintTop_toBottomOf="@+id/textView23" />
-
-            </LinearLayout>
+                android:text="@{`` + saleItem.saleItemPricePerPiece}"
+                tools:text="420.0"
+                android:textAppearance="@style/TextAppearance.AppCompat" />
 
 
-            <LinearLayout
+            <TextView
+                android:id="@+id/item_sale_item_total"
                 android:layout_width="wrap_content"
-                android:layout_height="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_weight="1"
-                android:orientation="vertical"
-                android:weightSum="2">
-
-                <TextView
-                    android:id="@+id/item_sale_item_total_title"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/total"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    app:layout_constraintStart_toEndOf="@+id/item_sale_item_quantity_title"
-                    app:layout_constraintTop_toTopOf="parent" />
-
-                <TextView
-                    android:id="@+id/item_sale_item_total"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="@dimen/dimen_8dp"
-                    android:layout_weight="1"
-                    app:saleItemTotal="@{saleItem}"
-                    tools:text="8820"
-                    android:textAppearance="@style/TextAppearance.AppCompat"
-                    app:layout_constraintStart_toEndOf="@+id/item_sale_item_quantity"
-                    app:layout_constraintTop_toBottomOf="@+id/textView23" />
-
-            </LinearLayout>
+                app:saleItemTotal="@{saleItem}"
+                tools:text="8820.0"
+                android:textAppearance="@style/TextAppearance.AppCompat"
+                app:layout_constraintStart_toEndOf="@+id/item_sale_item_quantity"
+                app:layout_constraintTop_toBottomOf="@+id/textView23" />
 
         </LinearLayout>
 

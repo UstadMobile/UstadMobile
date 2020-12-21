@@ -228,7 +228,7 @@
     <fragment
         android:id="@+id/home_wes_dest"
         android:name="com.ustadmobile.port.android.view.PersonWithSaleInfoListFragment"
-        android:label="@string/wes">
+        android:label="@string/people">
     </fragment>
 
     <fragment

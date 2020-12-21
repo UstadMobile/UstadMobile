@@ -50,13 +50,13 @@ abstract class SaleItemDao : BaseDao<SaleItem>, OneToManyJoinDao<SaleItem> {
 
 
     @Query(QUERY_FIND_WITH_PRODUCT_BY_UID)
-    abstract suspend fun findWithProductByUidAsync(uid: Long): SaleItemWithProduct?
+    abstract suspend fun findWithProductByUidAsync(uid: Long, leUid: Long): SaleItemWithProduct?
 
     @Query("SELECT * FROM SaleItem WHERE CAST(saleItemActive AS INTEGER) = 1 ")
     abstract fun findAllActiveLive(): DoorLiveData<List<SaleItem>>
 
     @Query(QUERY_FIND_WITH_PRODUCT_BY_UID)
-    abstract fun findWithProductByUidLive(uid: Long): DoorLiveData<SaleItemWithProduct?>
+    abstract fun findWithProductByUidLive(uid: Long, leUid: Long): DoorLiveData<SaleItemWithProduct?>
 
     companion object {
 
@@ -67,8 +67,21 @@ abstract class SaleItemDao : BaseDao<SaleItem>, OneToManyJoinDao<SaleItem> {
         const val SELECT_ACCOUNT_IS_ADMIN = "(SELECT admin FROM Person WHERE personUid = :accountPersonUid)"
 
         const val QUERY_FIND_WITH_PRODUCT_BY_UID = """
-            SELECT SaleItem.* , Product.*, 0 as deliveredCount FROM SaleItem 
+            SELECT SaleItem.* , Product.*, 
+            ( 
+            SELECT 
+                    CASE WHEN CAST(SUM(InventoryItem.inventoryItemQuantity) AS INTEGER) > 0 
+                        THEN SUM(InventoryItem.inventoryItemQuantity) 
+                        ELSE 0 
+                    END
+                FROM InventoryItem WHERE
+                InventoryItem.inventoryItemProductUid = Product.productUid
+                AND (CAST(LE.admin AS INTEGER) = 1 OR InventoryItem.inventoryItemLeUid = LE.personUid)
+                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+            ) as deliveredCount 
+            FROM SaleItem 
             LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid
+            LEFT JOIN PERSON AS LE ON LE.personUid = :leUid
             WHERE SaleItem.saleItemUid = :uid AND CAST(SaleItem.saleItemActive AS INTEGER ) = 1
         """
         const val QUERY_ALL_ACTIVE_SALE_ITEM_LIST =
