@@ -22,6 +22,12 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
     }
+
+    packagingOptions {
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+    }
+
+
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
@@ -90,7 +96,7 @@ kotlin {
 
         commonTest {
             dependencies {
-                implementation project(":lib-database-mpp")
+
             }
         }
 

@@ -33,6 +33,7 @@ import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.TRACKER_SUFFIX
 import kotlin.RuntimeException
+import com.ustadmobile.door.annotation.PgOnConflict
 
 val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
         String::class.asTypeName(), String::class.asTypeName().copy(nullable = true))
@@ -962,7 +963,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
         insertFun.addCode(generateInsertCodeBlock(
                 insertFun.parameters[0],
                 resolvedReturnType, entityTypeEl.asEntityTypeSpec(),
-                daoTypeBuilder, upsertMode))
+                daoTypeBuilder, upsertMode,
+                pgOnConflict = daoMethod.getAnnotation(PgOnConflict::class.java)?.value))
         return insertFun.build()
     }
 

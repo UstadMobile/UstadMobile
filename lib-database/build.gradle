@@ -61,7 +61,7 @@ kotlin {
                 implementation project(":lib-database-annotations")
                 implementation "com.github.aakira:napier:$version_napier"
                 compileOnly project(":lib-room-annotations")
-
+ 
             }
         }
 
@@ -70,7 +70,7 @@ kotlin {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                implementation "com.github.aakira:napier-jvm:$version_napier"
+                compileOnly "com.github.aakira:napier-jvm:$version_napier"
             }
         }
 
