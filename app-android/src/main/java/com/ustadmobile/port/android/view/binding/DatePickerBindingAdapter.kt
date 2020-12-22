@@ -20,13 +20,21 @@ import java.util.*
 
 
 /**
+ * Shorthand to check if this Long represents a date that has really been set by the user, or is just
+ * a default. 0 and Long.MAX_VALUE are reserved defaults. MAX_VALUE is used for end times to simplify
+ * queries.
+ */
+private val Long.isSet: Boolean
+    get() = this != 0L && this != Long.MAX_VALUE
+
+/**
  * Data binding Adapter for Date picker types.
  * Contains the logic for linking editText dates with Datepicker
  */
 
 fun updateDateOnEditText(et: TextView, date: Long) {
     val dateFormatter = DateFormat.getDateFormat(et.context)
-    if (date == 0L) {
+    if (!date.isSet) {
         et.setText("")
     } else {
         et.setText(dateFormatter.format(date))
@@ -40,7 +48,7 @@ fun updateDateOnEditText(et: TextView, date: Long) {
 
 fun updateDateOnEditTextWithExtraText(prepent: String, append: String, et: TextView, date: Long) {
     val dateFormatter = DateFormat.getDateFormat(et.context)
-    if (date == 0L) {
+    if (!date.isSet) {
         et.setText(prepent + " " + append)
     } else {
         et.setText(prepent + " " + dateFormatter.format(date) + " - " + append)

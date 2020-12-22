@@ -10,8 +10,17 @@ android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+    }
+
     defaultConfig {
-        minSdkVersion 18
+        minSdkVersion 21
         targetSdkVersion 29
     }
 }
@@ -37,6 +46,7 @@ kotlin {
 
     android()
 
+    /* JS is disabled until after Kotlin 1.4 upgrade
     js {
         nodejs()
 
@@ -46,7 +56,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
-
+    */
 
     jvm {
         compilations.main.kotlinOptions {

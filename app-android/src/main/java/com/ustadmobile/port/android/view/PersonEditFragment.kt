@@ -16,7 +16,6 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
-import com.google.gson.Gson
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzEditBinding
@@ -31,10 +30,9 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
-import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import org.kodein.di.instance
 import java.io.File
 
@@ -103,9 +101,9 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
     private var clazzMemberWithClazzRecyclerAdapter: ClazzMemberWithClazzRecyclerAdapter? = null
 
-    private var clazzMemberNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+    private var clazzMemberUstadListHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
 
-    private var rolesAndPermissionNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+    private var rolesAndPermissionUstadListHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
     
     private val clazzMemberWithClazzObserver = Observer<List<ClazzMemberWithClazz>?> {
         t -> clazzMemberWithClazzRecyclerAdapter?.submitList(t)
@@ -284,21 +282,21 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 di, viewLifecycleOwner)
         clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(this, mPresenter)
         rolesAndPermissionRecyclerAdapter = EntityRoleRecyclerAdapter(true, this)
-        clazzMemberNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(
+        clazzMemberUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
                 View.OnClickListener { onClickNewClazzMemberWithClazz() },
                 requireContext().getString(R.string.add_person_to_class)).apply {
             newItemVisible = true
         }
-        rolesAndPermissionNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(
+        rolesAndPermissionUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
                 View.OnClickListener { onClickNewRoleAndAssignment() },
                 requireContext().getString(R.string.add_role_permission)).apply {
             newItemVisible = true
         }
         mBinding?.clazzlistRecyclerview?.adapter = MergeAdapter(clazzMemberWithClazzRecyclerAdapter,
-                clazzMemberNewItemRecyclerViewAdapter)
+                clazzMemberUstadListHeaderRecyclerViewAdapter)
 
         mBinding?.rolesAndPermissionsRv?.adapter = MergeAdapter(rolesAndPermissionRecyclerAdapter,
-                rolesAndPermissionNewItemRecyclerViewAdapter)
+                rolesAndPermissionUstadListHeaderRecyclerViewAdapter)
 
         mBinding?.usernameText?.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}

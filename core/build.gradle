@@ -26,8 +26,12 @@ android {
         }
     }
 
+    packagingOptions {
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+    }
+
     defaultConfig {
-        minSdkVersion 18
+        minSdkVersion 21
         targetSdkVersion 29
         missingDimensionStrategy 'api', 'api18'
         multiDexEnabled true
@@ -158,6 +162,7 @@ kotlin {
 
     }
 
+    /* JS is disabled until upgrade to Kotlin1.4
     js("js") {
         nodejs()
 
@@ -168,6 +173,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
+    */
 
 
 
@@ -232,10 +238,7 @@ kotlin {
 
         commonTest {
             dependencies {
-                implementation project(":lib-database-mpp")
-                implementation project(":lib-database-entities")
-                implementation project(":lib-database")
-                implementation project(":lib-test-common")
+
             }
         }
 
@@ -244,6 +247,10 @@ kotlin {
                 implementation "junit:junit:$version_junit"
                 implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation project(":lib-database-mpp")
+                implementation project(":lib-database-entities")
+                implementation project(":lib-database")
+                implementation project(":lib-test-common")
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
@@ -312,40 +319,7 @@ kotlin {
             dependsOn commonJvmMain
         }
 
-        androidTest{
-            dependencies{
-                implementation "junit:junit:$version_junit"
-                implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.github.aakira:napier-android:$version_napier"
-                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
-
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-
-                implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "androidx.test:runner:$version_android_junit_runner"
-                implementation "androidx.test:rules:$version_android_junit_runner"
-
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-
-                api project(":sharedse")
-                api project(":lib-room-annotations")
-                api project(":core")
-                api project(":lib-database-annotations")
-                api project(":lib-database-android")
-                api project(":lib-door-runtime")
-                api project(":lib-database-mpp")
-
-                implementation "org.robolectric:robolectric:$version_android_roboelectric"
-            }
-        }
-
-        jsMain {
+        /*jsMain {
             dependencies {
                 implementation project(":lib-database-mpp")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
@@ -358,7 +332,7 @@ kotlin {
                 implementation "io.ktor:ktor-io-js:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
             }
-        }
+        }*/
 
     }
 }

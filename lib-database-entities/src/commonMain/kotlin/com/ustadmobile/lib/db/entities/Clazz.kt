@@ -56,7 +56,7 @@ open class Clazz() {
 
     var clazzStartTime: Long = 0
 
-    var clazzEndTime: Long = 0
+    var clazzEndTime: Long = Long.MAX_VALUE
 
     //Clazz features
     var clazzFeatures: Long = (CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_CLAZZWORK)

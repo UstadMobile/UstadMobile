@@ -38,7 +38,7 @@ class TestWorkSpaceRoute {
 
     lateinit var httpClient: HttpClient
 
-    @Before
+    //@Before
     fun setup() {
         db = DatabaseBuilder.databaseBuilder(Any() ,UmAppDatabase::class, "UmAppDatabase").build()
         db.clearAllTables()
@@ -60,13 +60,13 @@ class TestWorkSpaceRoute {
         }
     }
 
-    @After
+    //@After
     fun tearDown() {
         server.stop(0, 5000)
         httpClient.close()
     }
 
-    @Test
+    //@Test
     fun givenAvailableWorkSpace_whenRequested_thenShouldReturnWorkSpaceObject() {
         val workSpace = WorkSpace().apply {
             name = "UmTestWorkspace"

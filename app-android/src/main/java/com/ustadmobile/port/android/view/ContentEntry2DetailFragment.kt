@@ -1,12 +1,8 @@
 package com.ustadmobile.port.android.view
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
-import android.content.DialogInterface
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
-import androidx.appcompat.app.AlertDialog
+import android.view.*
 import androidx.lifecycle.*
 import androidx.paging.DataSource
 import androidx.paging.PagedList
@@ -44,8 +40,6 @@ import org.kodein.di.on
 interface ContentEntryDetailFragmentEventHandler {
 
     fun handleOnClickOpenDownloadButton()
-
-    fun handleOnClickGroupActivityButton()
 
     fun handleOnClickDeleteButton()
 }
@@ -111,9 +105,6 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
         mPresenter?.handleOnClickOpenDownloadButton()
     }
 
-    override fun handleOnClickGroupActivityButton() {
-        mPresenter?.handleOnClickGroupActivityButton()
-    }
 
     override fun handleOnClickDeleteButton() {
         MaterialAlertDialogBuilder(requireContext())
@@ -147,6 +138,9 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
     override var downloadJobItem: DownloadJobItem? = null
         set(value) {
             Napier.d("ContentEntryDetail: Download Status = ${downloadJobItem?.djiStatus} currentDownloadJobItemStatus = $currentDownloadJobItemStatus")
+            if(field.isStatusCompleted() != value.isStatusCompleted())
+                activity?.invalidateOptionsMenu()
+
             mBinding?.downloadJobItem = value
             if(currentDownloadJobItemStatus != value?.djiStatus) {
                 when {
@@ -240,6 +234,22 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             viewLifecycleOwner.lifecycle.addObserver(it)
         }
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_content_entry, menu)
+        menu.findItem(R.id.content_entry_group_activity).isVisible = downloadJobItem.isStatusCompleted()
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.content_entry_group_activity -> {
+                mPresenter?.handleOnClickGroupActivityButton()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onDestroyView() {

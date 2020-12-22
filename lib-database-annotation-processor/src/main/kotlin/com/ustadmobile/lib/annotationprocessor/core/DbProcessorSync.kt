@@ -273,6 +273,9 @@ fun TypeSpec.Builder.addSyncDaoFunsForEntity(entityType: TypeElement, isOverride
             .addAnnotation(AnnotationSpec.builder(Insert::class)
                     .addMember("onConflict = ${OnConflictStrategy.REPLACE}")
                     .build())
+            .addAnnotation(AnnotationSpec.builder(PgOnConflict::class)
+                    .addMember("%S", "ON CONFLICT(epk, clientId) DO UPDATE SET csn = excluded.csn")
+                    .build())
             .addParameter("trkEntities",
                     List::class.asClassName().parameterizedBy(entityType.asClassNameWithSuffix(SUFFIX_ENTITY_TRK)))
             .build())

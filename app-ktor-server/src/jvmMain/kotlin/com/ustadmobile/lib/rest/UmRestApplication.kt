@@ -74,6 +74,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     install(CallLogging)
 
     //TODO: Put in a proper log filter here
+    Napier.takeLogarithm()
     Napier.base(DebugAntilog())
 
     install(ContentNegotiation) {

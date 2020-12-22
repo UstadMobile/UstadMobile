@@ -15,8 +15,6 @@ object ContentEntryDetailScreen : KScreen<ContentEntryDetailScreen>() {
     override val viewClass: Class<*>?
         get() = ContentEntry2DetailFragment::class.java
 
-    val groupActivityButton = KTextView { withId(R.id.entry_detail_group_activity_button) }
-
     val entryTitleTextView = KTextView { withId(R.id.entry_detail_title)}
 
     val progress = KProgressBar { withId(R.id.entry_detail_progress_bar)}

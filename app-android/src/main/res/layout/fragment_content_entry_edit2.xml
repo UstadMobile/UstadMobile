@@ -317,7 +317,6 @@
                 android:layout_margin="@dimen/dimen_20dp"
                 android:clickable="true"
                 android:focusable="true"
-                android:visibility="@{contentEntry.leaf ? View.VISIBLE: View.GONE}"
                 android:id="@+id/entry_content_compress"
                 android:layout_width="match_parent"
                 app:layout_constraintStart_toStartOf="parent"

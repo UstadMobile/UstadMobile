@@ -33,6 +33,7 @@ import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.annotation.QueryLiveTables
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.TRACKER_SUFFIX
 import kotlin.RuntimeException
+import com.ustadmobile.door.annotation.PgOnConflict
 
 val QUERY_SINGULAR_TYPES = listOf(INT, LONG, SHORT, BYTE, BOOLEAN, FLOAT, DOUBLE,
         String::class.asTypeName(), String::class.asTypeName().copy(nullable = true))
@@ -607,8 +608,7 @@ internal fun generateInsertNodeIdFun(dbType: TypeElement, jdbcDbType: Int,
                 codeBlock.add("$execSqlFunName(%S)\n",
                         "INSERT OR REPLACE INTO sqlite_sequence(name,seq) VALUES('${it.simpleName}', ((SELECT nodeClientId FROM SyncNode) << 32)) ")
             }
-            codeBlock.addGenerateSqlitePrimaryKeyInsert(execSqlFunName, syncableEntityInfo)
-                    .addReplaceSqliteChangeSeqNums(execSqlFunName, syncableEntityInfo)
+            codeBlock.addReplaceSqliteChangeSeqNums(execSqlFunName, syncableEntityInfo)
         }else if(jdbcDbType == DoorDbType.POSTGRES){
             codeBlock.add("$execSqlFunName(\"ALTER·SEQUENCE·" +
                     "${it.simpleName}_${syncableEntityInfo.entityPkField.name}_seq·RESTART·WITH·\${_nodeId·shl·32}\")\n")
@@ -634,24 +634,6 @@ internal fun generateInsertTableSyncStatusCodeBlock(dbType: TypeElement,
 
     return codeBlock.build()
 }
-
-
-/**
- * Add to the codeblock to create a line that will set the SqliteSyncablePrimaryKey for the given
- * SyncableEntity.
- *
- * See DoorSqlitePrimaryKeyManager for more information.
- */
-internal fun CodeBlock.Builder.addGenerateSqlitePrimaryKeyInsert(execSqlFn: String,
-                                                        syncableEntityInfo: SyncableEntityInfo) : CodeBlock.Builder{
-    return add("$execSqlFn(%S)\n",
-            "REPLACE INTO SqliteSyncablePk (sspTableId, sspNextPrimaryKey) " +
-            "VALUES (${syncableEntityInfo.tableId}, (SELECT COALESCE((SELECT MAX(${syncableEntityInfo.entityPkField.name}) + 1 " +
-            "FROM ${syncableEntityInfo.syncableEntity.simpleName} WHERE " +
-            "${syncableEntityInfo.entityPkField.name} & (SELECT nodeClientId << 32 FROM SyncNode) = " +
-            "(SELECT nodeClientId << 32 FROM SyncNode)), (SELECT nodeClientId << 32 FROM SyncNode)+1)))")
-}
-
 
 
 /**
@@ -981,7 +963,8 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
         insertFun.addCode(generateInsertCodeBlock(
                 insertFun.parameters[0],
                 resolvedReturnType, entityTypeEl.asEntityTypeSpec(),
-                daoTypeBuilder, upsertMode))
+                daoTypeBuilder, upsertMode,
+                pgOnConflict = daoMethod.getAnnotation(PgOnConflict::class.java)?.value))
         return insertFun.build()
     }
 

@@ -89,12 +89,6 @@ abstract class SyncHelperEntitiesDao : ISyncHelperEntitiesDao {
     @Query(value = "UPDATE TableSyncStatus SET tsLastSynced = :lastSynced WHERE tsTableId = :tableId")
     override abstract suspend fun updateTableSyncStatusLastSynced(tableId: Int, lastSynced: Long)
 
-    @Query("SELECT COALESCE((SELECT sspNextPrimaryKey FROM SqliteSyncablePk WHERE sspTableId = :tableId), 1)")
-    override abstract suspend fun selectNextSqliteSyncablePk(tableId: Int): Long
-
-    @Query("UPDATE SqliteSyncablePk SET sspNextPrimaryKey = sspNextPrimaryKey + :increment WHERE sspTableId = :tableId")
-    override abstract suspend fun incrementNextSqliteSyncablePk(tableId: Int, increment: Int)
-
     @Query("SELECT nodeClientId FROM SyncNode LIMIT 1")
     override abstract fun findSyncNodeClientId(): Int
 
