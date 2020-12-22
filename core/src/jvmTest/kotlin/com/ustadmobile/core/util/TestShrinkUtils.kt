@@ -57,7 +57,9 @@ class TestShrinkUtils {
 
         ShrinkUtils.optimiseVideo(videoFile, newVideo, newVideoDimensions, fileVideoDimensions.third)
 
-        Assert.assertTrue("optimzed file", newVideo.length() < videoFile.length())
+        Assert.assertTrue("New video is smaller than old video", newVideo.length() < videoFile.length())
+        Assert.assertTrue("New video file exists", newVideo.exists())
+        Assert.assertTrue("New video has a size > 0", newVideo.length() > 0)
 
     }
 

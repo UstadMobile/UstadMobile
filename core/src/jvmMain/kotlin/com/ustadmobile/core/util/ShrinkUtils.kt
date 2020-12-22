@@ -95,8 +95,6 @@ object ShrinkUtils {
         ffmpegCommand += listOf("-framerate", VideoTypePlugin.VIDEO_FRAME_RATE.toString(),
                 "-c:v", "libx264", "-b:v", VideoTypePlugin.VIDEO_BIT_RATE.toString(),
                 "-c:a", "aac", "-b:a", VideoTypePlugin.AUDIO_BIT_RATE.toString(),
-                "-ar", VideoTypePlugin.AUDIO_SAMPLE_RATE.toString(),
-                "-ac", VideoTypePlugin.AUDIO_CHANNEL_COUNT.toString(),
                 "-vbr", "on", "-y", destFile.path)
 
         val builder = ProcessBuilder(ffmpegCommand)
