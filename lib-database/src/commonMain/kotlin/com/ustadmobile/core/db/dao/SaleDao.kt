@@ -36,7 +36,8 @@ abstract class SaleDao : BaseDao<Sale> {
     abstract fun findAllProducersAsPersonWithSaleInfo(leUid: Long): DataSource.Factory<Int, PersonWithSaleInfo>
 
     @Query(QUERY_ALL_LIST)
-    abstract fun findAllPersonWithSaleInfo(leUid: Long, filter: Int, searchText: String) : DataSource.Factory<Int, PersonWithSaleInfo>
+    abstract fun findAllPersonWithSaleInfo(leUid: Long, filter: Int,
+                                           searchText: String) : DataSource.Factory<Int, PersonWithSaleInfo>
 
     companion object {
 
@@ -87,14 +88,14 @@ abstract class SaleDao : BaseDao<Sale> {
             WHERE CAST(Person.active AS INTEGER) = 1  
             AND (CAST(Person.admin AS INTEGER) = 0 OR CAST(LE.admin AS INTEGER) = 1 )
             AND (Person.personCreatedBy = LE.personUid OR CAST(LE.admin AS INTEGER) = 1)
-            AND CASE :filter WHEN $FILTER_ALL THEN 1 
+            AND CASE :filter WHEN $FILTER_ALL THEN Person.personGoldoziType > -1 
                 ELSE CAST(Person.admin AS INTEGER) = 0 END
             AND CASE :filter WHEN $FILTER_LE_ONLY THEN Person.personGoldoziType = 1
-                ELSE 1 END
+                ELSE Person.personGoldoziType > -1 END
             AND CASE :filter WHEN $FILTER_WE_ONLY THEN Person.personGoldoziType = 2
-                ELSE 1 END 
+                ELSE Person.personGoldoziType > -1 END 
             AND CASE :filter WHEN $FILTER_CUSTOMER_ONLY THEN Person.personGoldoziType = 0  
-                ELSE 1 END
+                ELSE Person.personGoldoziType > -1 END
             AND Person.firstNames ||' '|| Person.lastName LIKE :searchText
             GROUP BY Person.personUid, SaleItem.saleItemUid  
         """
@@ -212,14 +213,7 @@ abstract class SaleDao : BaseDao<Sale> {
                            Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  WHERE Sale.saleUid = sl.saleUid) ,0 
                 ) AS saleAmount, 
                 
-                (COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - 
-                           SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = 
-                           Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  WHERE Sale.saleUid = sl.saleUid) ,0 
-                          ) - COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment 
-                              WHERE SalePayment.salePaymentSaleUid = sl.saleUid 
-                               AND CAST(SalePayment.salePaymentDone AS INTEGER) = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1 ) ,
-                          0)
-                ) AS saleAmountDue, 
+                (0) AS saleAmountDue, 
                 
                 'Afs' AS saleCurrency,  
                 
@@ -259,13 +253,41 @@ abstract class SaleDao : BaseDao<Sale> {
 					sl.salePersonUid = LE.personUid
 					)
 
-                AND saleTitleGen LIKE :searchText
+                AND 
+            
+                 (SELECT SaleItem.saleItemQuantity 
+                  FROM Sale stg 
+                  LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = stg.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  
+                  WHERE stg.saleUid = sl.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1 
+                  ORDER BY stg.saleCreationDate ASC LIMIT 1 
+                  )  
+                  || 'x ' || 
+                  (SELECT Product.productName 
+                  FROM SaleItem sitg 
+                  LEFT JOIN Product ON Product.productUid = sitg.saleItemProductUid 
+                  WHERE sitg.saleItemSaleUid = sl.saleUid AND CAST(sitg.saleItemActive AS INTEGER) = 1  
+                  ORDER BY sitg.saleItemCreationDate ASC LIMIT 1) 
+                  || 
+                  (select 
+                      (case  
+                      when  
+                      (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid 
+                                and CAST(sid.saleItemActive AS INTEGER) = 1 ) > 1 
+                      then '...'  
+                      else '' 
+                  end) 
+                  from sale) LIKE :searchText
                 
-                AND CASE :filter WHEN $FILTER_ALL_SALES THEN 1 
-                    ELSE 1 END
                 AND CASE :filter WHEN $FILTER_PAYMENTS_DUE_SALES THEN 
-                    saleAmountDue > 0
-                    ELSE 1 END
+                    (COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - 
+                           SUM(Sale.saleDiscount)  FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = 
+                           Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  WHERE Sale.saleUid = sl.saleUid) ,0 
+                          ) - COALESCE((SELECT SUM(SalePayment.salePaymentPaidAmount) FROM SalePayment 
+                              WHERE SalePayment.salePaymentSaleUid = sl.saleUid 
+                               AND CAST(SalePayment.salePaymentDone AS INTEGER) = 1 AND CAST(SalePayment.salePaymentActive AS INTEGER) = 1 ) ,
+                          0)
+                    ) > 0
+                    ELSE CAST(sl.saleActive AS INTEGER) = 1 END
                 
                 GROUP BY saleUid, Customer.personUid 
                 

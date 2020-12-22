@@ -19,7 +19,6 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CREATE_SALE
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
@@ -44,12 +43,12 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         get() = mPresenter
 
     //Sale Item stuff
-    private var saleItemRecyclerAdpater: SaleItemRecyclerAdapter? = null
+    private var saleItemRecyclerAdapter: SaleItemRecyclerAdapter? = null
     private var saleItemRecyclerView : RecyclerView? = null
     private val saleItemObserver = Observer<List<SaleItemWithProduct>?> {
         t ->
         run {
-            saleItemRecyclerAdpater?.submitList(t)
+            saleItemRecyclerAdapter?.submitList(t)
         }
     }
 
@@ -212,9 +211,9 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         }
 
         //Sale Items
-        saleItemRecyclerAdpater = SaleItemRecyclerAdapter(this, requireContext())
+        saleItemRecyclerAdapter = SaleItemRecyclerAdapter(this, requireContext())
         saleItemRecyclerView = rootView.findViewById(R.id.fragment_sale_edit_saleitem_rv)
-        saleItemRecyclerView?.adapter = saleItemRecyclerAdpater
+        saleItemRecyclerView?.adapter = saleItemRecyclerAdapter
         saleItemRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
         //Sale Deliveries
@@ -295,7 +294,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         entity = null
         saleItemRecyclerView?.adapter = null
         saleItemRecyclerView = null
-        saleItemRecyclerAdpater = null
+        saleItemRecyclerAdapter = null
         saleItemList = null
 
         saleDeliveryRecyclerView?.adapter = null

@@ -22,6 +22,7 @@
         android:layout_width="@dimen/dimen_90dp"
         android:layout_height="@dimen/dimen_90dp"
         app:layout_constraintEnd_toEndOf="parent"
+        android:visibility="gone"
         app:layout_constraintTop_toTopOf="parent"
         android:layout_alignParentEnd="true"
         android:layout_marginEnd="@dimen/dimen_16dp"
@@ -109,6 +110,7 @@
         app:layout_constraintBottom_toTopOf="@+id/irc_logo"
         android:text="@string/created_partnership"
         app:layout_constraintStart_toEndOf="@+id/get_started_btn"
+        android:visibility="gone"
         android:textDirection="rtl"
         android:layout_marginEnd="@dimen/dimen_16dp"
         app:layout_constraintEnd_toEndOf="parent"
@@ -117,6 +119,7 @@
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@id/irc_logo"
         android:layout_marginBottom="@dimen/dimen_16dp"
+        android:visibility="gone"
         android:layout_width="53dp"
         android:layout_height="@dimen/dimen_70dp"
         app:layout_constraintEnd_toEndOf="parent"

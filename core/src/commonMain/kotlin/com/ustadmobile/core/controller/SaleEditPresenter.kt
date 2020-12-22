@@ -52,7 +52,7 @@ class SaleEditPresenter(context: Any,
     //Sale Delivery edit helper
     private val saleDeliveryEditHelper = DefaultOneToManyJoinEditHelper<SaleDeliveryAndItems>(
             SaleDeliveryAndItems::saleDeliveryUid,
-            "SaleDeliveryAndItems", SaleDeliveryAndItems.serializer().list,
+            "SaleDeliveryAndItemsKey", SaleDeliveryAndItems.serializer().list,
             SaleDeliveryAndItems.serializer().list, this, SaleDeliveryAndItems::class) {
                 saleDeliveryUid = it }
 
@@ -68,7 +68,7 @@ class SaleEditPresenter(context: Any,
     //Sale Payment edit helper
     private val salePaymentEditHelper = DefaultOneToManyJoinEditHelper<SalePaymentWithSaleItems>(
             SalePaymentWithSaleItems::salePaymentUid ,
-            "SalePaymentWithSaleItems", SalePaymentWithSaleItems.serializer().list,
+            "SalePaymentWithSaleItemsKey", SalePaymentWithSaleItems.serializer().list,
             SalePaymentWithSaleItems.serializer().list, this,
                 SalePaymentWithSaleItems::class) { salePaymentUid = it }
 
@@ -157,6 +157,7 @@ class SaleEditPresenter(context: Any,
             editEntity = SaleWithCustomerAndLocation()
         }
 
+        saleItemEditHelper.onLoadFromJsonSavedState(bundle)
         saleDeliveryEditHelper.onLoadFromJsonSavedState(bundle)
         salePaymentEditHelper.onLoadFromJsonSavedState(bundle)
 

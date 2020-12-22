@@ -81,4 +81,15 @@
     <string name="end_is_before_start_error">End is before start</string>
     <string name="signature">Signature</string>
     <string name="clear">Clear</string>
+    <string name="welcome_goldozi">Welcome to Goldozi</string>
+    <string name="swipe_to_learn_more">Swipe to learn more</string>
+    <string name="get_started">Get started</string>
+    <string name="show_products_to_customer">Show products to customer</string>
+    <string name="track_stock_sales">Track your stock and sales</string>
+    <string name="onboarding_goldozi_1">Welcome to Goldozi.</string>
+    <string name="onboarding_goldozi_1b">Swipe to learn more.</string>
+    <string name="onboarding_goldozi_2">Show products to customers.</string>
+    <string name="onboarding_goldozi_3">Track your stock and sales.</string>
+    <string name="onboarding_goldozi_4">Review your courses.</string>
+    <string name="onboarding_empty"> </string>
 </resources>
