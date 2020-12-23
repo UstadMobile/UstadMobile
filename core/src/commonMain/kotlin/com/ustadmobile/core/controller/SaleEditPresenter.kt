@@ -157,9 +157,9 @@ class SaleEditPresenter(context: Any,
             editEntity = SaleWithCustomerAndLocation()
         }
 
-        saleItemEditHelper.onLoadFromJsonSavedState(bundle)
-        saleDeliveryEditHelper.onLoadFromJsonSavedState(bundle)
-        salePaymentEditHelper.onLoadFromJsonSavedState(bundle)
+//        saleItemEditHelper.onLoadFromJsonSavedState(bundle)
+//        saleDeliveryEditHelper.onLoadFromJsonSavedState(bundle)
+//        salePaymentEditHelper.onLoadFromJsonSavedState(bundle)
 
 
         return editEntity
@@ -205,8 +205,10 @@ class SaleEditPresenter(context: Any,
             val deliveriesToUpdate = saleDeliveryEditHelper.entitiesToUpdate
             val deliveriesToDelete = saleDeliveryEditHelper.primaryKeysToDeactivate
 
-            deliveriesToUpdate.forEach {
+            deliveriesToInsert.forEach {
                 it.saleDeliverySaleUid = entity.saleUid
+                //TODO: Check:
+                it.saleDeliveryUid = 0L
                 if(it.saleDeliveryUid == 0L) {
                     it.saleDeliveryUid = repo.saleDeliveryDao.insertAsync(it)
                 }
@@ -258,7 +260,7 @@ class SaleEditPresenter(context: Any,
             }
             val paymentsToInsertPaymentsOnly = mutableListOf<SalePayment>()
             for(everyPayment in paymentsToInsert){
-                paymentsToUpdatePaymentsOnly.add(everyPayment)
+                paymentsToInsertPaymentsOnly.add(everyPayment)
             }
             paymentsToInsertPaymentsOnly.forEach {
                 it.salePaymentSaleUid = entity.saleUid
