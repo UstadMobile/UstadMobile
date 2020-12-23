@@ -6,6 +6,8 @@ import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.squareup.picasso.OkHttp3Downloader
+import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -212,6 +214,16 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<BleGattServer>()
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
+
+            val downloader = if(Build.VERSION.SDK_INT >= 21) {
+                OkHttp3Downloader(instance<OkHttpClient>())
+            }else {
+                PicassoUrlConnectionDownloader()
+            }
+
+            Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
+                    .downloader(downloader)
+                    .build())
         }
     }
 
@@ -223,8 +235,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
         super.onCreate()
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
         Napier.base(DebugAntilog())
-        initPicasso(applicationContext)
-
     }
 
     override fun attachBaseContext(base: Context) {
