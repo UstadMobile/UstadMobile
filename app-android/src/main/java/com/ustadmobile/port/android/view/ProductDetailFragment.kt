@@ -126,15 +126,12 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
     private var repo: UmAppDatabase? = null
 
     override fun onClickEntry(entry: Category) {
-        //TODO
     }
 
     override fun onClickEntry(entry: InventoryTransactionDetail) {
-        //TODO
     }
 
     override fun onClickPerson(person: PersonWithInventoryCount) {
-        //TODO
     }
     override fun handleClickRecordDelivery(product: ProductWithInventoryCount) {
         navigateToEditEntity(null, R.id.inventoryitem_edit_dest, InventoryItem::class.java,
@@ -213,6 +210,7 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
         categoryLiveData = null
         stockLiveData = null
         historyLiveData = null
+
         categoriesRecyclerAdapter = null
         stockRecyclerAdapter = null
         historyRecyclerAdapter = null

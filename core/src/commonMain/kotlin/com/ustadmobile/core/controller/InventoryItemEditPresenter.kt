@@ -34,7 +34,7 @@ class InventoryItemEditPresenter(context: Any,
 
     val producerSelectionEditHelper = DefaultOneToManyJoinEditHelper<PersonWithInventoryItemAndStock>(
             PersonWithInventoryItemAndStock::personUid,
-            "PersonWithInventoryItemAndStock", PersonWithInventoryItemAndStock.serializer().list,
+            "PersonWithInventoryItemAndStockKey", PersonWithInventoryItemAndStock.serializer().list,
             PersonWithInventoryItemAndStock.serializer().list, this,
                 PersonWithInventoryItemAndStock::class) { personUid = it }
 

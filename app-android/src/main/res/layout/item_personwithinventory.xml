@@ -12,6 +12,10 @@
             name="saleDeliveryMode"
             type="Boolean" />
 
+        <variable
+            name="newSaleDelivery"
+            type="Boolean" />
+
 
     </data>
 
@@ -51,6 +55,7 @@
             android:max="100"
             app:setSeekBarMax="@{person}"
             app:deliveryMode="@{saleDeliveryMode}"
+            app:newSaleDelivery="@{newSaleDelivery}"
             app:seekBarProgress = "@={person.selectedStock}"
             android:min="0"
             android:thumb="@drawable/seekbar_thumb"
@@ -69,8 +74,9 @@
             android:importantForAutofill="no"
             android:inputType="number"
             android:singleLine="false"
-
             app:seekCountET="@={person.selectedStock}"
+            app:newSaleDelivery="@{newSaleDelivery}"
+            app:etPerson="@{person}"
             android:textAlignment="center"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_name"

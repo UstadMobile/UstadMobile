@@ -235,7 +235,7 @@ abstract class SaleDao : BaseDao<Sale> {
                 (select (case  when  
                     (SELECT count(*) from SaleItem sip where sip.saleItemSaleUid = sl.saleUid 
                     AND CAST(sip.saleItemPreOrder AS INTEGER) = 1 ) > 0  then 1  else 0 end)  
-                from Sale) AS saleItemPreOrder
+                from Sale limit 1) AS saleItemPreOrder
                  
                 FROM Sale sl 
                 LEFT JOIN Person AS Customer ON Customer.personUid = sl.saleCustomerUid
@@ -272,11 +272,11 @@ abstract class SaleDao : BaseDao<Sale> {
                       (case  
                       when  
                       (SELECT count(*) from SaleItem sid where sid.saleItemSaleUid = sl.saleUid 
-                                and CAST(sid.saleItemActive AS INTEGER) = 1 ) > 1 
+                                and CAST(sid.saleItemActive AS INTEGER) = 1 limit 1) > 1 
                       then '...'  
                       else '' 
                   end) 
-                  from sale) LIKE :searchText
+                  from sale limit 1) LIKE :searchText
                 
                 AND CASE :filter WHEN $FILTER_PAYMENTS_DUE_SALES THEN 
                     (COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - 

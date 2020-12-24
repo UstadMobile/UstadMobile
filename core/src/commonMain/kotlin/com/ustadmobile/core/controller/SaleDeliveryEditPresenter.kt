@@ -61,33 +61,39 @@ class SaleDeliveryEditPresenter(context: Any,
         GlobalScope.launch {
 
 
-            val allProductsWithProducers = mutableListOf<ProductDeliveryWithProductAndTransactions>()
+            var allProductsWithProducers = mutableListOf<ProductDeliveryWithProductAndTransactions>()
             //Build product and we selection list ie ProductDeliveryWithProductAndTransactions
             for ((productUid, quantity) in quantityMap) {
-                //4. Get transactions
-                var producersTransactions = withTimeout(2000) {
-                    db.inventoryItemDao.getStockAndDeliveryListByProduct(productUid,
-                            loggedInPersonUid, editEntity?.saleDeliveryUid ?: 0L)
-                }
 
-                val product = withTimeout(2000){
-                    db.productDao.findByUidAsync(productUid)
-                }
+                // If already in json, use that, else get it from DB
+                if(!editEntity.deliveryDetails.isEmpty()){
+                    allProductsWithProducers = editEntity.deliveryDetails.toMutableList()
+                }else {
 
-                //5. Create product with transactions
-                val productWithWE = ProductDeliveryWithProductAndTransactions().apply {
-                    numItemsExpected = quantity
-                    transactions = producersTransactions
-                    productName = product?.productName
-                    this.productUid = product?.productUid?:0L
-                }
-                allProductsWithProducers.add(productWithWE)
+                    //4. Get transactions
+                    var producersTransactions = withTimeout(2000) {
+                        db.inventoryItemDao.getStockAndDeliveryListByProduct(productUid,
+                                loggedInPersonUid, editEntity?.saleDeliveryUid ?: 0L)
+                    }
 
+                    val product = withTimeout(2000) {
+                        db.productDao.findByUidAsync(productUid)
+                    }
+
+                    //5. Create product with transactions
+                    val productWithWE = ProductDeliveryWithProductAndTransactions().apply {
+                        numItemsExpected = quantity
+                        transactions = producersTransactions
+                        productName = product?.productName
+                        this.productUid = product?.productUid ?: 0L
+                    }
+                    allProductsWithProducers.add(productWithWE)
+
+                }
             }
 
             view.runOnUiThread(Runnable {
                 view.productWithDeliveriesList = allProductsWithProducers
-
             })
         }
 
@@ -102,10 +108,9 @@ class SaleDeliveryEditPresenter(context: Any,
     }
 
     override fun handleClickSave(entity: SaleDeliveryAndItems) {
-        val saleUid = arguments[UstadView.ARG_SALE_UID]?.toLong() ?: 0L
         val deliveryDetailsOnView = view.productWithDeliveriesList
 
-        //1. Do validation
+        //Do validation
         var validated: Boolean = true
         for(product in deliveryDetailsOnView){
             val totalSelectedStock = product.transactions?.sumBy{it.selectedStock}

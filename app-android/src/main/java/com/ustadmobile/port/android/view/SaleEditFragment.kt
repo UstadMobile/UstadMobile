@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSaleEditBinding
 import com.ustadmobile.core.controller.*
+import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SaleEditView
@@ -142,7 +143,8 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         navigateToEditEntity(saleDeliveryWithItems, R.id.saledelivery_edit_dest,
                 SaleDeliveryAndItems::class.java,
                 argBundle = bundleOf(
-                        UstadView.ARG_SALE_UID to entity?.saleUid.toString()))
+                        UstadView.ARG_SALE_UID to entity?.saleUid.toString(),
+                        UstadView.ARG_NEW_SALE_DELIVERY to "true"))
     }
 
     override fun addPayment() {
@@ -150,6 +152,7 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         val salePaymentWithDiscount = SalePaymentWithSaleItems().apply {
             saleItems = saleItemList?.value ?: listOf()
             saleDiscount = entity?.saleDiscount ?: 0L
+            salePaymentPaidDate = UMCalendarUtil.getDateInMilliPlusDays(0)
         }
         navigateToEditEntity(salePaymentWithDiscount, R.id.salepayment_edit_dest,
                 SalePaymentWithSaleItems::class.java)

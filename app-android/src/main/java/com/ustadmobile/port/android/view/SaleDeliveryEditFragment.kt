@@ -22,6 +22,7 @@ import com.ustadmobile.lib.db.entities.SaleDeliveryAndItems
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.caverock.androidsvg.SVG
 import com.caverock.androidsvg.SVGParseException
+import com.ustadmobile.core.view.UstadView
 
 interface SaleDeliveryEditFragmentEventHandler: SignaturePad.OnSignedListener {
 
@@ -145,8 +146,10 @@ class SaleDeliveryEditFragment: UstadEditFragment<SaleDeliveryAndItems>(), SaleD
                 productTitleRecyclerAdapter?.submitList(listOf(product))
                 mergeAdapter.addAdapter(productTitleRecyclerAdapter)
 
+                val newDelivery = (arguments?.containsKey(UstadView.ARG_NEW_SALE_DELIVERY)?:false
+                        && arguments?.get(UstadView.ARG_NEW_SALE_DELIVERY)?.equals("true") ?: false)
                 val deliverySelectionRecyclerAdapter = PersonWithInventoryListRecyclerAdapter(
-                        true)
+                        true, newDelivery)
                 deliverySelectionRecyclerAdapter?.submitList(product.transactions)
                 mergeAdapter?.addAdapter(deliverySelectionRecyclerAdapter)
 

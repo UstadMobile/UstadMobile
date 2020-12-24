@@ -228,15 +228,17 @@ class SaleEditPresenter(context: Any,
                     val productUid = producerSelection.productUid
                     for(everyTransaction in producerSelection?.transactions?:
                                 emptyList<PersonWithInventoryItemAndStock>()) {
-                        InventoryItem().apply{
-                            inventoryItemProductUid = productUid
-                            inventoryItemLeUid = loggedInPersonUid
-                            inventoryItemWeUid = everyTransaction.personUid
-                            inventoryItemDateAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
-                            inventoryItemSaleUid = entity.saleUid
-                            inventoryItemSaleDeliveryUid = saleDeliveryUid
-                            inventoryItemQuantity = everyTransaction.selectedStock * -1L
-                            inventoryItemUid = repo.inventoryItemDao.insertAsync(this)
+                        if(everyTransaction.selectedStock != 0) {
+                            InventoryItem().apply {
+                                inventoryItemProductUid = productUid
+                                inventoryItemLeUid = loggedInPersonUid
+                                inventoryItemWeUid = everyTransaction.personUid
+                                inventoryItemDateAdded = UMCalendarUtil.getDateInMilliPlusDays(0)
+                                inventoryItemSaleUid = entity.saleUid
+                                inventoryItemSaleDeliveryUid = saleDeliveryUid
+                                inventoryItemQuantity = everyTransaction.selectedStock * -1L
+                                inventoryItemUid = repo.inventoryItemDao.insertAsync(this)
+                            }
                         }
                     }
                 }
@@ -260,6 +262,7 @@ class SaleEditPresenter(context: Any,
             }
             val paymentsToInsertPaymentsOnly = mutableListOf<SalePayment>()
             for(everyPayment in paymentsToInsert){
+                everyPayment.salePaymentUid = 0L
                 paymentsToInsertPaymentsOnly.add(everyPayment)
             }
             paymentsToInsertPaymentsOnly.forEach {

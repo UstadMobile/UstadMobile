@@ -85,14 +85,11 @@ fun TextView.setTimeZoneTextEntity(entityRole: EntityRoleWithNameAndRole?) {
     text = entityRole?.entityRoleScopeName?:"" + scopeText
 }
 
-//@BindingAdapter("saleItemWithProductForPricePerPiece")
-//fun TextInputEditText.setPricePerPiece(saleItemWithProduct: SaleItemWithProduct){
-//    if(saleItemWithProduct.saleItemPricePerPiece == 0F){
-//        setText(saleItemWithProduct.saleItemProduct?.productBasePrice.toString())
-//    }else{
-//        setText(saleItemWithProduct.saleItemPricePerPiece.toString())
-//    }
-//}
+@BindingAdapter(value = ["newSaleDelivery","etPerson"])
+fun TextView.setEtEnabledForSeekBar(newSaleDelivery: Boolean,
+                                    personWithInventory: PersonWithInventoryItemAndStock){
+    isEnabled = newSaleDelivery
+}
 
 
 @BindingAdapter(value = ["createNewFormatText", "createNewFormatArg"], requireAll = true)

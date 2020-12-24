@@ -33,7 +33,7 @@
         android:id="@+id/fragment_sale_item_edit_edit_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="@dimen/dimen_64dp"
+        android:paddingBottom="@dimen/dimen_80dp"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
         <androidx.constraintlayout.widget.ConstraintLayout
@@ -130,7 +130,6 @@
                 style="@style/TextAppearance.AppCompat.Subhead"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 tools:text="12000 AFs"
-                app:saleItemTotal="@{saleItem}"
                 />
 
             <TextView

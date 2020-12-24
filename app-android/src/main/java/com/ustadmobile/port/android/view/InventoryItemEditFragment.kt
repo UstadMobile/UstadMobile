@@ -81,7 +81,6 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
 
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
-
     }
 
     override fun onDestroyView() {

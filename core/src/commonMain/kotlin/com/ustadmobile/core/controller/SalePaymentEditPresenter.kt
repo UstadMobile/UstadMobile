@@ -51,6 +51,7 @@ class SalePaymentEditPresenter(context: Any,
             editEntity = safeParse(di, SalePaymentWithSaleItems.serializer(), entityJsonStr)
         }else {
             editEntity = SalePaymentWithSaleItems()
+            editEntity.salePaymentPaidDate = UMCalendarUtil.getDateInMilliPlusDays(0)
         }
         //1. Get all saleItems from JSON
         val saleItems = editEntity.saleItems

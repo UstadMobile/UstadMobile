@@ -1,9 +1,12 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.*
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSaleItemEditBinding
 import com.ustadmobile.core.controller.SaleItemEditPresenter
@@ -45,6 +48,36 @@ class SaleItemEditFragment: UstadEditFragment<SaleItemWithProduct>(), SaleItemEd
 
         }
 
+        mBinding?.fragmentSaleItemEditQuantityTiet?.addTextChangedListener(object: TextWatcher{
+            override fun afterTextChanged(p0: Editable?) {}
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                val quantity = p0.toString()
+                val quantityValue = quantity.toLongOrNull()?:0L
+                val price =mBinding?.fragmentSaleItemEditPriceeachTiet?.text.toString()
+                val priceFloat = price.toFloatOrNull()?:0F
+                if(price.isNotEmpty() && quantity.isNotEmpty()) {
+                    val total: Float = quantityValue * priceFloat
+                    updateTotal(total)
+                }
+            }
+        })
+
+        mBinding?.fragmentSaleItemEditPriceeachTiet?.addTextChangedListener(object: TextWatcher{
+            override fun afterTextChanged(p0: Editable?) {}
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                val price = p0.toString()
+                val quantity = mBinding?.fragmentSaleItemEditQuantityTiet?.text.toString()
+                val quantityValue = quantity.toLongOrNull()?:0L
+                val priceValue: Float = price.toFloatOrNull()?:0F
+                if(price.isNotEmpty() && quantity.isNotEmpty()) {
+                    val total: Float = priceValue * quantityValue
+                    updateTotal(total)
+                }
+            }
+        })
+
         mPresenter = SaleItemEditPresenter(requireContext(), arguments.toStringMap(),
                 this, di, viewLifecycleOwner)
 
@@ -83,6 +116,10 @@ class SaleItemEditFragment: UstadEditFragment<SaleItemWithProduct>(), SaleItemEd
     override fun goToNewSale(saleItem: SaleItemWithProduct) {
         //TODO :Fix this
         //navigateToEditEntity(saleItem, R.id.sale_edit_dest, SaleItemWithProduct::class.java)
+    }
+
+    override fun updateTotal(total: Float){
+        mBinding?.fragmentSaleItemEditTotalValueTv?.text = total.toString()
     }
 
     override var fieldsEnabled: Boolean = false

@@ -160,7 +160,12 @@ fun TextView.setSchoolGenderText(gender: Int) {
 
 @BindingAdapter(value = ["inventoryDescriptionStockCount", "inventoryDescriptionWeNames"])
 fun TextView.setInventoryDescription(stockCount: Int, weNames: String){
-    text = context.getString(R.string.x_item_by_y, stockCount.toString(), weNames)
+    val positiveStock = if(stockCount < 0){
+        stockCount * -1
+    }else{
+        stockCount
+    }
+    text = context.getString(R.string.x_item_by_y, positiveStock.toString(), weNames)
 }
 
 @BindingAdapter("inventoryType")
@@ -168,7 +173,7 @@ fun TextView.getInventoryType(saleUid: Long){
     if(saleUid == 0L){
         text = context.getString(R.string.receive)
     }else{
-        text = context.getString(R.string.sell)
+        text = context.getString(R.string.deliver)
     }
 }
 
@@ -320,13 +325,20 @@ fun TextView.setWeTotalSale(personWithSaleInfo: PersonWithSaleInfo?){
             " " +  context.getString(R.string.total_sales)
 }
 
-@BindingAdapter(value = ["setSeekBarMax", "deliveryMode"])
-fun SeekBar.setMaxForWE(personWithInventory: PersonWithInventoryItemAndStock, saleDeliveryMode: Boolean){
+@BindingAdapter(value = ["setSeekBarMax", "deliveryMode", "newSaleDelivery"])
+fun SeekBar.setMaxForWE(personWithInventory: PersonWithInventoryItemAndStock,
+                        saleDeliveryMode: Boolean, newSaleDelivery: Boolean){
     if(saleDeliveryMode){
-        max = personWithInventory.stock
+        //Set max to selected if > stock
+        if(personWithInventory.selectedStock > personWithInventory.stock){
+            max = personWithInventory.selectedStock
+        }else {
+            max = personWithInventory.stock
+        }
     }else{
         max = 100
     }
+    isEnabled = newSaleDelivery
 }
 
 @BindingAdapter("seekBarProgress")

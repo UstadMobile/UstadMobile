@@ -5,6 +5,7 @@
 
     <data>
         <import type="android.view.View"/>
+        <import type="android.text.InputType" />
 
         <variable
             name="product"
@@ -216,6 +217,7 @@
                     android:text="@={`` + product.productBasePrice}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="@{InputType.TYPE_CLASS_NUMBER}"
                     android:hint="@string/price_afn" />
             </com.google.android.material.textfield.TextInputLayout>
             

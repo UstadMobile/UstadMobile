@@ -12,7 +12,8 @@ import com.toughra.ustadmobile.databinding.ItemPersonwithinventoryBinding
 import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
 
 
-class PersonWithInventoryListRecyclerAdapter(var deliveryMode: Boolean = false)
+class PersonWithInventoryListRecyclerAdapter(var deliveryMode: Boolean = false,
+                                             var newDelivery: Boolean = false )
     : ListAdapter<PersonWithInventoryItemAndStock,
         PersonWithInventoryListRecyclerAdapter.InventoryTransactionDetailHolder>(DIFF_CALLBACK) {
 
@@ -33,6 +34,8 @@ class PersonWithInventoryListRecyclerAdapter(var deliveryMode: Boolean = false)
 
 
     var saleDeliveryMode: Boolean? = deliveryMode
+    var newSaleDelivery: Boolean? = newDelivery
+
 
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): InventoryTransactionDetailHolder {
@@ -45,6 +48,7 @@ class PersonWithInventoryListRecyclerAdapter(var deliveryMode: Boolean = false)
         val item = getItem(position)
         holder.itemBinding.person = item
         holder.itemBinding.saleDeliveryMode = saleDeliveryMode
+        holder.itemBinding.newSaleDelivery = newSaleDelivery
         holder.itemBinding.viewProducerWithInventorySelectionSeekbar.setOnSeekBarChangeListener(holder)
 
 
