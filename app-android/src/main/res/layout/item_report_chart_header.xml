@@ -5,7 +5,7 @@
 
     <data>
 
-        <import type="com.ustadmobile.core.util.ReportGraphHelper.ChartData" />
+        <import type="com.ustadmobile.core.util.ext.ChartData" />
         <import type="android.view.View"/>
         <import type="com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters" />
         <import type="com.ustadmobile.port.android.view.ReportDetailFragment" />
@@ -67,7 +67,6 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:gravity="bottom|end"
-            android:text="@{chart.YAxisLabel}"
             tools:text="Yaxis here"
             app:layout_constraintBottom_toBottomOf="@+id/preview_add_to_dashboard_button"
             app:layout_constraintStart_toStartOf="parent"

@@ -49,9 +49,9 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
             (holder.itemBinding.listReportChart.getTag(R.id.tag_graphlookup_key) as? Job)?.cancel()
             val graphJob = GlobalScope.async(Dispatchers.Main) {
-                val chartData = presenter?.getGraphData(item)
-                holder.itemBinding.listReportChart.setChartData(chartData)
-                holder.itemBinding.chart = chartData
+               // val chartData = presenter?.getGraphData(item)
+               // holder.itemBinding.listReportChart.setChartData(chartData)
+               // holder.itemBinding.chart = chartData
             }
             holder.itemBinding.listReportChart.setTag(R.id.tag_graphlookup_key, graphJob)
 

@@ -75,24 +75,9 @@ class ReportDetailPresenterTest {
 
         val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
-            chartType = Report.BAR_CHART
             xAxis = Report.MONTH
             fromDate =  DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
-            reportFilterList = listOf(
-                    ReportFilter().apply {
-                        entityUid = 100
-                        entityType = ReportFilter.PERSON_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 200
-                        entityType = ReportFilter.VERB_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 300
-                        entityType = ReportFilter.CONTENT_FILTER
-                    }
-            )
             reportUid = repo.reportDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())
@@ -114,24 +99,9 @@ class ReportDetailPresenterTest {
         val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
             reportTitle = "New Report Title"
-            chartType = Report.BAR_CHART
             xAxis = Report.MONTH
             fromDate =  DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
-            reportFilterList = listOf(
-                    ReportFilter().apply {
-                        entityUid = 100
-                        entityType = ReportFilter.PERSON_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 200
-                        entityType = ReportFilter.VERB_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 300
-                        entityType = ReportFilter.CONTENT_FILTER
-                    }
-            )
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_JSON to Json.stringify(ReportWithSeriesWithFilters.serializer(), testEntity))
@@ -162,24 +132,9 @@ class ReportDetailPresenterTest {
 
         val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
-            chartType = Report.BAR_CHART
             xAxis = Report.MONTH
             fromDate =  DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
-            reportFilterList = listOf(
-                    ReportFilter().apply {
-                        entityUid = 100
-                        entityType = ReportFilter.PERSON_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 200
-                        entityType = ReportFilter.VERB_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 300
-                        entityType = ReportFilter.CONTENT_FILTER
-                    }
-            )
             reportUid = repo.reportDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())

@@ -2,16 +2,20 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ReportGraphHelper
+import com.ustadmobile.core.util.ext.generateChartData
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
+import kotlinx.serialization.builtins.list
 import org.kodein.di.DI
 
 
@@ -29,8 +33,6 @@ class ReportDetailPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
-
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ReportWithSeriesWithFilters? {
@@ -41,11 +43,15 @@ class ReportDetailPresenter(context: Any,
             db.reportDao.findByUid(entityUid)
         } ?: Report()
 
-       /* val reportFilterList = withTimeout(2000) {
-            db.reportFilterDao.findByReportUid(report.reportUid)
-        }*/
 
-        val reportWithFilter = ReportWithSeriesWithFilters(report, listOf())
+        val series = if(!report.reportSeries.isNullOrEmpty()){
+            safeParseList(di, ReportSeries.serializer().list,
+                    ReportSeries::class, report.reportSeries ?: "")
+        }else{
+            listOf()
+        }
+
+        val reportWithFilter = ReportWithSeriesWithFilters(report, series)
 
         setReportData(reportWithFilter)
 
@@ -56,25 +62,23 @@ class ReportDetailPresenter(context: Any,
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[UstadEditView.ARG_ENTITY_JSON]
-        val editEntity: ReportWithSeriesWithFilters?
-        editEntity = if (entityJsonStr != null) {
-            safeParse(di, ReportWithSeriesWithFilters.serializer(), entityJsonStr)
-        } else {
-            ReportWithSeriesWithFilters()
+        var editEntity: ReportWithSeriesWithFilters? = null
+        if (entityJsonStr != null) {
+            editEntity = safeParse(di, ReportWithSeriesWithFilters.serializer(), entityJsonStr)
+            setReportData(editEntity)
         }
 
-        setReportData(editEntity)
 
         return editEntity
     }
 
     private fun setReportData(reportWithFilters: ReportWithSeriesWithFilters) {
         GlobalScope.launch {
-            val chartData = graphHelper.getChartDataForReport(reportWithFilters)
-            val statementList = graphHelper.getStatementListForReport(reportWithFilters)
+            val chartData = db.generateChartData(reportWithFilters, context, systemImpl)
+            //val statementList = graphHelper.getStatementListForReport(reportWithFilters)
             view.runOnUiThread(Runnable {
                 view.chartData = chartData
-                view.statementList = statementList
+                //view.statementList = statementList
             })
 
         }
@@ -98,7 +102,6 @@ class ReportDetailPresenter(context: Any,
      */
     fun handleOnClickAddFromDashboard(report: ReportWithSeriesWithFilters) {
         repo.reportDao.insert(report)
-        //repo.reportFilterDao.insertList(report.reportFilterList)
     }
 
     companion object {

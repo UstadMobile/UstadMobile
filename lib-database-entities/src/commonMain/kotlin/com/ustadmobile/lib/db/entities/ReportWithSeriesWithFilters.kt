@@ -24,8 +24,7 @@ class ReportWithSeriesWithFilters() : Report() {
 
 
     fun toSql(): QueryParts {
-     /*   require(xAxis != subGroup) { "XAxis Selection and subGroup selection was the same" }
-        val paramList = mutableListOf<Any>()
+      /*  val paramList = mutableListOf<Any>()
 
         var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 
                 FROM StatementEntity 
@@ -86,9 +85,8 @@ class ReportWithSeriesWithFilters() : Report() {
         sql += "GROUP BY xAxis"
         if (subGroup != 0) {
             sql += ", subgroup"
-        }
-*/
-        return QueryParts("", "", arrayOf(""))
+        } */
+        return QueryParts("" , "", arrayOf(""))
     }
 
     private fun groupBy(value: Int): String {
@@ -97,7 +95,6 @@ class ReportWithSeriesWithFilters() : Report() {
             WEEK -> "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') "
             MONTH -> "strftime('%m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
             CONTENT_ENTRY -> "StatementEntity.xObjectUid "
-            //LOCATION -> "Location.title"
             GENDER -> "Person.gender "
             else -> ""
         }
@@ -110,9 +107,16 @@ class ReportWithSeriesWithFilters() : Report() {
 
         other as ReportWithSeriesWithFilters
 
+        if (reportSeriesWithFiltersList != other.reportSeriesWithFiltersList) return false
+
         return true
     }
 
+    override fun hashCode(): Int {
+        var result = super.hashCode()
+        result = 31 * result + reportSeriesWithFiltersList.hashCode()
+        return result
+    }
 
 
     companion object{

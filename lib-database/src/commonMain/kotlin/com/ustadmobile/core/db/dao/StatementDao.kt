@@ -39,13 +39,17 @@ abstract class StatementDao : BaseDao<StatementEntity> {
         return getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
     }
 
-    open suspend fun getResultsListFromOptions(@ParamName("options") options: ReportWithSeriesWithFilters): DataSource.Factory<Int, StatementListReport> {
+    open suspend fun getResults(sqlStr: String, paramsList: Array<Any>): List<ReportData> {
+        return getResults(SimpleDoorQuery(sqlStr, paramsList))
+    }
+
+    open suspend fun getResultsListFromOptions(@ParamName("options") options: ReportWithSeriesWithFilters): DataSource.Factory<Int, StatementEntityWithDisplay> {
         val sql = options.toSql()
         return getListResults(SimpleDoorQuery(sql.sqlListStr, sql.queryParams))
     }
 
     @RawQuery(observedEntities = [StatementEntity::class, Person::class, XLangMapEntry::class])
-    abstract fun getListResults(query: DoorQuery): DataSource.Factory<Int, StatementListReport>
+    abstract fun getListResults(query: DoorQuery): DataSource.Factory<Int, StatementEntityWithDisplay>
 
 
     // This is required because of above raw query

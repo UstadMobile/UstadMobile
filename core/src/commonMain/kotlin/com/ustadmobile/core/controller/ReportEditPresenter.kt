@@ -185,7 +185,7 @@ class ReportEditPresenter(context: Any,
 
         newSeriesList.remove(seriesToAddFilter)
         val newFilterList = seriesToAddFilter.reportSeriesFilters.toMutableList()
-        
+
         // make sure reportfilterUid is not repeated in the same series list
         newFilter.reportFilterUid = seriesToAddFilter.reportSeriesFilters.maxBy { it.reportFilterUid }?.reportFilterUid?: 0 + 1
         newFilterList.add(newFilter)

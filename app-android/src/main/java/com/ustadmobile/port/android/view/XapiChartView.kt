@@ -6,17 +6,15 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.charts.LineChart
+import com.github.mikephil.charting.charts.CombinedChart
 import com.github.mikephil.charting.components.Legend
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.ustadmobile.core.db.dao.StatementDao
-import com.ustadmobile.core.util.ReportGraphHelper
+import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
+import com.ustadmobile.port.android.util.graph.asValueFormatter
 
 
 class XapiChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
@@ -24,238 +22,191 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
     var colorList = listOf("#009688", "#FF9800", "#2196F3", "#f44336", "#673AB7", "#607D8B", "#E91E63", "#9C27B0", "#795548", "9E9E9E", "#4CAF50")
 
-    fun setChartData(chartData: ReportGraphHelper.ChartData?) {
+    fun setChartData(chartData: ChartData?) {
         if (chartData == null) {
             return
         }
         removeAllViewsInLayout()
-        val chart = createChart(chartData.dataList, chartData.reportWithFilters, chartData.xAxisLabel, chartData.subGroupLabel)
+        val chart = createChart(chartData)
         addView(chart)
     }
 
-    private fun createChart(chartData: List<StatementDao.ReportData>, options: ReportWithSeriesWithFilters,
-                            xAxisLabels: Map<String, String>, subgroupLabels: Map<String, String>): View? {
+    private fun createChart(chartData: ChartData): View {
 
-        val xAxisLabelList: MutableSet<String> = mutableSetOf()
-        val subgroupList: MutableSet<String> = mutableSetOf()
-        //get a list of distinct subgroups
-        val distinctSubgroups = chartData.distinctBy { it.subgroup }.map { it.subgroup }
-        val groupedByXAxis = chartData.groupBy { it.xAxis }
-
-        if (1 == Report.BAR_CHART) {
-
-            val barChart = BarChart(context)
-            val params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
+        val combinedChart = CombinedChart(context).apply{
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT)
-            barChart.layoutParams = params
-
-            barChart.xAxis.isEnabled = true
-            barChart.xAxis.setDrawGridLines(false)
-            barChart.xAxis.setDrawLabels(true)
-
-            //Left Values
-            barChart.axisLeft.isEnabled = true
-
-            //Right Values:
-            barChart.axisRight.isEnabled = false
-
-            //Legend:
-            barChart.legend.horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
-            barChart.legend.verticalAlignment = Legend.LegendVerticalAlignment.TOP
-            barChart.legend.setDrawInside(true)
-
-            //Label Description
-            barChart.description.isEnabled = false
-
-            barChart.setTouchEnabled(false)
-
-            val barData = BarData()
-            if(subgroupLabels.isEmpty()){
-
-
-                val xAxisList = mutableListOf<BarEntry>()
-                groupedByXAxis.keys.forEachIndexed{ idx, xAxisKey ->
-
-                    xAxisLabelList.add(xAxisLabels[xAxisKey] ?: error(""))
-                    val barValue = groupedByXAxis[xAxisKey]?.first()?.yAxis ?: 0f
-                    val barEntry = BarEntry((idx).toFloat(), barValue)
-                    xAxisList.add(barEntry)
-                }
-
-
-                val barDataSet = BarDataSet(xAxisList, "")
-                barDataSet.setDrawValues(false)
-                barDataSet.color = Color.parseColor(colorList[0])
-                barData.addDataSet(barDataSet)
-                barData.barWidth = 0.9f
-                barChart.data = barData
-                barChart.setFitBars(true)
-                barChart.legend.isEnabled = false
-
-               val xAxis = barChart.xAxis
-                barChart.axisLeft.axisMinimum = 0f
-                barChart.xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
-                barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
-                barChart.xAxis.granularity = 1f
-                xAxis.labelRotationAngle = -45f
-                barChart.xAxis.isGranularityEnabled = true
-
-
-            }else{
-
-                val secondList = mutableListOf<MutableList<BarEntry>>()
-                distinctSubgroups.forEachIndexed { idx, subGroup ->
-                    val xAxisList = mutableListOf<BarEntry>()
-                    subgroupList.add(subgroupLabels[subGroup] ?: error(""))
-                    groupedByXAxis.keys.forEach { xAxisKey ->
-                        xAxisLabelList.add(xAxisLabels[xAxisKey] ?: error(""))
-                        val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
-                        val barValue = barReportData?.yAxis ?: 0f
-                        val barEntry = BarEntry((idx).toFloat(), barValue)
-                        xAxisList.add(barEntry)
-                    }
-                    secondList.add(xAxisList)
-                }
-
-                val sizeOfX = subgroupList.size
-                val barSpace = 0.01f
-                val groupSpace = 0.08f
-                val barWidth = (1 - groupSpace) / sizeOfX - barSpace
-
-                barData.barWidth = barWidth
-                secondList.forEachIndexed { idx, it ->
-                    val barDataSet = BarDataSet(it, subgroupList.elementAt(idx))
-                    barDataSet.color = Color.parseColor(colorList[idx])
-                    barDataSet.setDrawValues(false)
-                    barData.addDataSet(barDataSet)
-                }
-
-                val xAxis = barChart.xAxis
-                barChart.axisLeft.axisMinimum = 0f
-                barChart.xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
-                barChart.data = barData
-                barChart.legend.isEnabled = true
-
-
-                barChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
-                barChart.xAxis.setCenterAxisLabels(true)
-                barChart.xAxis.granularity = 1f
-                xAxis.labelRotationAngle = -45f
-                barChart.xAxis.isGranularityEnabled = true
-                xAxis.axisMinimum = 0f
-                xAxis.axisMaximum = xAxisLabelList.size.toFloat()
-                barChart.xAxis.mAxisMaximum = 0 + barChart.barData.getGroupWidth(groupSpace, barSpace) * xAxis.axisMaximum
-                if(sizeOfX > 1){
-                    barChart.groupBars(0f, groupSpace, barSpace)
-                }
+            xAxis.apply {
+                setDrawGridLines(false)
+                setDrawLabels(true)
+                setCenterAxisLabels(false)
+                isEnabled = true
+                position = XAxis.XAxisPosition.BOTTOM
+                granularity = 1f
+                labelRotationAngle = -45f
+                isGranularityEnabled = true
+                axisMinimum = 0f
             }
 
-            barChart.invalidate()
-
-            return barChart
-        } else if (2 == Report.LINE_GRAPH) {
-
-            val lineChart = LineChart(context)
-            val params = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT)
-            lineChart.layoutParams = params
-
-
-            lineChart.xAxis.isEnabled = true
-            lineChart.xAxis.setDrawGridLines(false)
-            lineChart.xAxis.setDrawLabels(true)
-
-            //Left Values
-            lineChart.axisLeft.isEnabled = true
-
-            //Right Values:
-            lineChart.axisRight.isEnabled = false
-
-            //Legend:
-            lineChart.legend.horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
-            lineChart.legend.verticalAlignment = Legend.LegendVerticalAlignment.TOP
-            lineChart.legend.setDrawInside(true)
-
-            //Label Description
-            lineChart.description.isEnabled = false
-            lineChart.setTouchEnabled(false)
-
-
-            val barData = LineData()
-            if(subgroupLabels.isEmpty()){
-
-
-                val xAxisList = mutableListOf<Entry>()
-                groupedByXAxis.keys.forEachIndexed{ idx, xAxisKey ->
-
-                    xAxisLabelList.add(xAxisLabels[xAxisKey] ?: error(""))
-                    val barValue = groupedByXAxis[xAxisKey]?.first()?.yAxis ?: 0f
-                    val barEntry = Entry((idx).toFloat(), barValue)
-                    xAxisList.add(barEntry)
-                }
-
-                val barDataSet = LineDataSet(xAxisList, "")
-                barDataSet.setDrawValues(false)
-                barDataSet.color = Color.parseColor(colorList[0])
-                barData.addDataSet(barDataSet)
-                lineChart.data = barData
-                lineChart.legend.isEnabled = false
-
-                val xAxis = lineChart.xAxis
-                lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
-                xAxis.granularity = 1f
-                xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
-                xAxis.labelRotationAngle = -45f
-                xAxis.axisMinimum = 0f
-
-
-            }else {
-
-
-                val secondList = mutableListOf<MutableList<Entry>>()
-                distinctSubgroups.forEach { subGroup ->
-                    val xAxisList = mutableListOf<Entry>()
-                    subgroupList.add(subgroupLabels[subGroup] ?: error(""))
-                    groupedByXAxis.keys.forEachIndexed { idx, xAxisKey ->
-                        xAxisLabelList.add(xAxisLabels[xAxisKey] ?: error(""))
-                        val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
-                        val barValue = barReportData?.yAxis ?: 0f
-                        val barEntry = Entry((idx).toFloat(), barValue)
-                        xAxisList.add(barEntry)
-                    }
-                    secondList.add(xAxisList)
-                }
-
-
-
-                secondList.forEachIndexed { idx, it ->
-                    val barDataSet = LineDataSet(it, subgroupList.elementAt(idx))
-                    barDataSet.axisDependency = YAxis.AxisDependency.LEFT
-                    barDataSet.color = Color.parseColor(colorList[idx])
-                    barDataSet.setDrawValues(false)
-                    barData.addDataSet(barDataSet)
-                }
-                lineChart.data = barData
-                lineChart.legend.isEnabled = true
-
-
-                val xAxis = lineChart.xAxis
-                lineChart.xAxis.position = XAxis.XAxisPosition.BOTTOM
-                xAxis.granularity = 1f
-                xAxis.valueFormatter = IndexAxisValueFormatter(xAxisLabelList)
-                xAxis.labelRotationAngle = -45f
-                xAxis.axisMinimum = 0f
-
-
+            axisLeft.apply {
+                isEnabled = true
+                axisMinimum = 0f
             }
+            axisRight.isEnabled = false
 
+            legend.apply {
+                horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
+                verticalAlignment = Legend.LegendVerticalAlignment.TOP
+                setDrawInside(true)
+                isEnabled = true
+            }
+            description.isEnabled = false
+            setTouchEnabled(false)
 
-
-            lineChart.invalidate()
-
-            return lineChart
         }
-        return null
+
+        val combinedData = CombinedData()
+
+        val distinctXAxisSet = mutableSetOf<String>()
+        chartData.seriesData.forEach{
+            distinctXAxisSet.addAll(it.dataList.distinctBy { it.xAxis }.mapNotNull { it.xAxis })
+        }
+        combinedChart.xAxis.valueFormatter = IndexAxisValueFormatter(
+                chartData.xAxisValueFormatter?.formatAsList(distinctXAxisSet.toList())
+                        ?: distinctXAxisSet)
+
+        var colorCount = 0
+        chartData.seriesData.forEach { it ->
+
+            val groupByXAxis = it.dataList.groupBy { it.xAxis }
+            val distinctSubgroups = it.dataList.distinctBy { it.subgroup }.mapNotNull { it.subgroup }
+
+            if(it.series.reportSeriesVisualType == Report.BAR_CHART){
+
+                if(distinctSubgroups.isEmpty()){
+
+                    val barEntryList = mutableListOf<BarEntry>()
+                    distinctXAxisSet.forEachIndexed { idx, xAxisKey ->
+                        val barValue = groupByXAxis[xAxisKey]?.firstOrNull()?.yAxis ?: 0f
+                        val barEntry = BarEntry((idx).toFloat(), chartData.yAxisValueFormatter
+                                ?.asValueFormatter()?.getFormattedValue(barValue)?.toFloat() ?: barValue)
+                        barEntryList.add(barEntry)
+                    }
+
+                    val barDataSet = BarDataSet(barEntryList, it.series.reportSeriesName)
+                    barDataSet.setDrawValues(false)
+                    barDataSet.color = Color.parseColor(colorList[colorCount++])
+                    barDataSet.valueFormatter = chartData.xAxisValueFormatter?.asValueFormatter()
+
+                    val barData = combinedData.barData?: BarData()
+                    barData.barWidth = 0.9f
+                    barData.addDataSet(barDataSet)
+                    combinedData.setData(barData)
+
+
+                }else {
+
+                    val barData = combinedData.barData?: BarData()
+                    distinctSubgroups.forEachIndexed { idx, subGroup ->
+
+                        val barEntryList = mutableListOf<BarEntry>()
+                        distinctXAxisSet.forEach { xAxisKey ->
+                            val barReportData = groupByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
+                            val barValue = barReportData?.yAxis ?: 0f
+                            val barEntry = BarEntry((idx).toFloat(), chartData.yAxisValueFormatter
+                                    ?.asValueFormatter()?.getFormattedValue(barValue)?.toFloat() ?: barValue)
+                            barEntryList.add(barEntry)
+                        }
+
+
+                        val barDataSet = BarDataSet(barEntryList, """${it.series.reportSeriesName} 
+                            - ${it.subGroupFormatter?.format(subGroup) ?: subGroup}""".trimMargin())
+                        barDataSet.color = Color.parseColor(colorList[colorCount++])
+                        barDataSet.setDrawValues(false)
+                        barData.addDataSet(barDataSet)
+                    }
+                    combinedData.setData(barData)
+
+                }
+
+
+            }else if(it.series.reportSeriesVisualType == Report.LINE_GRAPH){
+
+                if(distinctSubgroups.isEmpty()){
+
+                    val xAxisList = mutableListOf<Entry>()
+                    distinctXAxisSet.forEachIndexed { idx, xAxisKey ->
+                        val barValue = groupByXAxis[xAxisKey]?.firstOrNull()?.yAxis ?: 0f
+                        val barEntry = BarEntry((idx).toFloat(), chartData.yAxisValueFormatter
+                                ?.asValueFormatter()?.getFormattedValue(barValue)?.toFloat() ?: barValue)
+                        xAxisList.add(barEntry)
+                    }
+
+                    val lineDataSet = LineDataSet(xAxisList, it.series.reportSeriesName)
+                    lineDataSet.setDrawValues(false)
+                    lineDataSet.color = Color.parseColor(colorList[colorCount++])
+
+                    val lineData = combinedData.lineData?: LineData()
+                    lineData.addDataSet(lineDataSet)
+                    combinedData.setData(lineData)
+
+                }else{
+
+                    val lineData = combinedData.lineData?: LineData()
+                    distinctSubgroups.forEach { subGroup ->
+
+                        val lineEntryList = mutableListOf<Entry>()
+                        distinctXAxisSet.forEachIndexed { idx, xAxisKey ->
+
+                            val barReportData = groupByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
+                            val barValue = barReportData?.yAxis ?: 0f
+                            val barEntry = Entry((idx).toFloat(), chartData.yAxisValueFormatter
+                                    ?.asValueFormatter()?.getFormattedValue(barValue)?.toFloat()  ?: barValue)
+                            lineEntryList.add(barEntry)
+                        }
+
+                        val barDataSet = LineDataSet(lineEntryList, """${it.series.reportSeriesName} 
+                            - ${it.subGroupFormatter?.format(subGroup) ?: subGroup}""".trimMargin())
+                        barDataSet.axisDependency = YAxis.AxisDependency.LEFT
+                        barDataSet.color = Color.parseColor(colorList[colorCount++])
+                        barDataSet.setDrawValues(false)
+                        lineData.addDataSet(barDataSet)
+                    }
+
+                    combinedData.setData(lineData)
+
+                }
+
+            }
+
+        }
+
+
+        val barData = combinedData.barData ?: BarData()
+        if(barData.dataSetCount >= 2){
+            val sizeOfX = barData.dataSetCount.toFloat()
+            val barSpace = 0.01f
+            val groupSpace = 0.08f
+            val barWidth = (1 - groupSpace) / sizeOfX - barSpace
+
+            barData.barWidth = barWidth
+            combinedChart.xAxis.mAxisMaximum = sizeOfX
+            combinedChart.xAxis.mAxisMaximum = 0 +
+                    combinedData.barData.getGroupWidth(groupSpace, barSpace) *
+                    sizeOfX
+
+            if (sizeOfX > 1) {
+                barData.groupBars(0f, groupSpace, barSpace)
+            }
+
+            combinedChart.xAxis.setCenterAxisLabels(true)
+
+        }
+
+
+        combinedChart.data = combinedData
+        combinedChart.invalidate()
+        return combinedChart
     }
 
 

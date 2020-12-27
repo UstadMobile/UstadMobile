@@ -20,12 +20,12 @@ import com.ustadmobile.core.controller.ReportDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
-import com.ustadmobile.core.util.ReportGraphHelper
+import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
-import com.ustadmobile.lib.db.entities.StatementListReport
+import com.ustadmobile.lib.db.entities.StatementEntityWithDisplay
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
@@ -59,7 +59,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
     class ChartViewHolder(val itemBinding: ItemReportChartHeaderBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
     class RecyclerViewChartAdapter(val activityEventHandler: ReportDetailFragmentEventHandler,
-                                   var presenter: ReportDetailPresenter?) : ListAdapter<ReportGraphHelper.ChartData, ChartViewHolder>(DIFFUTIL_CHART) {
+                                   var presenter: ReportDetailPresenter?) : ListAdapter<ChartData, ChartViewHolder>(DIFFUTIL_CHART) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChartViewHolder {
             return ChartViewHolder(ItemReportChartHeaderBinding.inflate(
@@ -80,7 +80,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
     class StatementViewRecyclerAdapter(
             val activityEventHandler: ReportDetailFragmentEventHandler,
             var presenter: ReportDetailPresenter?) :
-            PagedListAdapter<StatementListReport,
+            PagedListAdapter<StatementEntityWithDisplay,
                     StatementViewRecyclerAdapter.StatementViewHolder>(DIFFUTIL_STATEMENT) {
 
         class StatementViewHolder(val binding: ItemReportStatementListBinding) :
@@ -104,12 +104,12 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
     }
 
 
-    private var statementListObserver: Observer<PagedList<StatementListReport>>? = null
+    private var statementListObserver: Observer<PagedList<StatementEntityWithDisplay>>? = null
 
 
-    private var currentLiveData: LiveData<PagedList<StatementListReport>>? = null
+    private var currentLiveData: LiveData<PagedList<StatementEntityWithDisplay>>? = null
 
-    override var statementList: DataSource.Factory<Int, StatementListReport>? = null
+    override var statementList: DataSource.Factory<Int, StatementEntityWithDisplay>? = null
         get() = field
         set(value) {
             val statementObsVal = statementListObserver ?: return
@@ -121,7 +121,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         }
 
 
-    override var chartData: ReportGraphHelper.ChartData? = null
+    override var chartData: ChartData? = null
         get() = field
         set(value) {
             field = value
@@ -203,22 +203,22 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
 
     companion object {
 
-        val DIFFUTIL_STATEMENT = object : DiffUtil.ItemCallback<StatementListReport>() {
-            override fun areItemsTheSame(oldItem: StatementListReport, newItem: StatementListReport): Boolean {
+        val DIFFUTIL_STATEMENT = object : DiffUtil.ItemCallback<StatementEntityWithDisplay>() {
+            override fun areItemsTheSame(oldItem: StatementEntityWithDisplay, newItem: StatementEntityWithDisplay): Boolean {
                 return oldItem.statementUid == newItem.statementUid
             }
 
-            override fun areContentsTheSame(oldItem: StatementListReport, newItem: StatementListReport): Boolean {
+            override fun areContentsTheSame(oldItem: StatementEntityWithDisplay, newItem: StatementEntityWithDisplay): Boolean {
                 return oldItem == newItem
             }
         }
 
-        val DIFFUTIL_CHART = object : DiffUtil.ItemCallback<ReportGraphHelper.ChartData>() {
-            override fun areItemsTheSame(oldItem: ReportGraphHelper.ChartData, newItem: ReportGraphHelper.ChartData): Boolean {
+        val DIFFUTIL_CHART = object : DiffUtil.ItemCallback<ChartData>() {
+            override fun areItemsTheSame(oldItem: ChartData, newItem: ChartData): Boolean {
                 return oldItem.reportWithFilters.reportUid == newItem.reportWithFilters.reportUid
             }
 
-            override fun areContentsTheSame(oldItem: ReportGraphHelper.ChartData, newItem: ReportGraphHelper.ChartData): Boolean {
+            override fun areContentsTheSame(oldItem: ChartData, newItem: ChartData): Boolean {
                 return oldItem == newItem
             }
         }

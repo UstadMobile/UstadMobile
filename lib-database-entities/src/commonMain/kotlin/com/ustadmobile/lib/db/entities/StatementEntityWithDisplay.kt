@@ -4,7 +4,7 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class StatementListReport : StatementEntity() {
+class StatementEntityWithDisplay : StatementEntity() {
 
     @Embedded
     var person: Person? = null
