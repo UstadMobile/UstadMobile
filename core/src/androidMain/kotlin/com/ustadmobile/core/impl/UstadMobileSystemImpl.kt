@@ -54,6 +54,11 @@ import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.android.closestDI
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.io.*
 import java.util.*
 import java.util.zip.GZIPInputStream
@@ -101,12 +106,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
     )
-
-
-    val destinationProvider: DestinationProvider by lazy {
-        Class.forName("com.ustadmobile.port.android.impl.ViewNameToDestMap").newInstance() as DestinationProvider
-    }
-
 
     private abstract class UmCallbackAsyncTask<A, P, R>
     (protected var umCallback: UmCallback<R>) : AsyncTask<A, P, R>() {
@@ -209,6 +208,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         val allArgs = args + UMFileUtil.parseURLQueryString(viewName)
 
 
+        val di: DI by closestDI(context as Context)
+        val destinationProvider: DestinationProvider = di.direct.instance()
+
         val ustadDestination = destinationProvider.lookupDestinationName(viewNameOnly)
         if(ustadDestination != null) {
             val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
@@ -301,6 +303,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
+        val di : DI by closestDI { context as Context }
+        val destinationProvider: DestinationProvider = di.direct.instance()
+
         val navController = navController ?: (context as Activity)
                 .findNavController(destinationProvider.navControllerViewId)
 

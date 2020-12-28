@@ -21,6 +21,7 @@ import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzEditBinding
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
@@ -33,6 +34,7 @@ import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
+import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.File
 
@@ -244,9 +246,10 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
 
     override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
-        val impl: UstadMobileSystemImpl by instance()
         val navController = findNavController()
-        val umNextDestination = impl.destinationProvider.lookupDestinationName(nextDestination)
+        val destinationProvider: DestinationProvider = di.direct.instance()
+
+        val umNextDestination = destinationProvider.lookupDestinationName(nextDestination)
         navController.currentBackStackEntry?.savedStateHandle?.set(UstadView.ARG_SNACK_MESSAGE,
                 String.format(getString(R.string.logged_in_as),account?.username,account?.endpointUrl))
         if(umNextDestination != null){

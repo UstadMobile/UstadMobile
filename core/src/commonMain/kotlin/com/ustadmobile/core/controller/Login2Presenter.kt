@@ -7,11 +7,13 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_VIA_LINK
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
 import com.ustadmobile.door.DoorDatabaseSyncRepository
@@ -21,7 +23,6 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.WorkSpace
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -125,13 +126,15 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     }
 
     fun handleCreateAccount(){
-        val goOptions = UstadMobileSystemCommon.UstadGoOptions(Login2View.VIEW_NAME,
-                true)
-        impl.go(PersonEditView.VIEW_NAME_REGISTER, mapOf(
+        val args = mutableMapOf(
                 PersonEditView.ARG_REGISTRATION_MODE to true.toString(),
-                ARG_NEXT to arguments[ARG_NEXT],
-                REGISTER_VIA_LINK to arguments[REGISTER_VIA_LINK],
-                ARG_SERVER_URL to serverUrl), context, goOptions)
+                ARG_SERVER_URL to serverUrl,
+                ARG_POPUPTO_ON_FINISH to (arguments[ARG_POPUPTO_ON_FINISH] ?: Login2View.VIEW_NAME))
+
+        args.putFromOtherMapIfPresent(arguments, ARG_NEXT)
+        args.putFromOtherMapIfPresent(arguments, REGISTER_VIA_LINK)
+
+        impl.go(WorkspaceTermsView.VIEW_NAME, args, context)
     }
 
     fun handleConnectAsGuest(){

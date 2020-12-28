@@ -273,4 +273,9 @@
         android:name="com.ustadmobile.port.android.view.ClazzLogEditFragment"
         android:label="@string/add_a_new_occurrence"/>
 
+    <fragment
+        android:id="@+id/workspace_terms_dest"
+        android:name="com.ustadmobile.port.android.view.WorkspaceTermsFragment"/>
+
+
 </navigation>

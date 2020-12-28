@@ -39,6 +39,7 @@ import kotlin.jvm.Volatile
     DeviceSession::class, WorkSpace::class, ContainerImportJob::class,
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
+    WorkspaceTerms::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -49,7 +50,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 52)
+], version = 53)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -277,6 +278,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("workSpaceDao")
     abstract val workSpaceDao: WorkSpaceDao
+
+    abstract val workspaceTermsDao: WorkspaceTermsDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
@@ -3049,6 +3052,135 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        //Add the WorkspaceTerms syncable entity
+        val MIGRATION_52_53 = object: DoorMigration(52, 53) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if(database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS WorkspaceTerms (  termsHtml  TEXT , wtLang  TEXT , wtLastChangedBy  INTEGER  NOT NULL , wtPrimaryCsn  BIGINT  NOT NULL , wtLocalCsn  BIGINT  NOT NULL , wtUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS WorkspaceTerms_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS WorkspaceTerms_lcsn_seq")
+                    database.execSQL("""
+                      |CREATE OR REPLACE FUNCTION 
+                      | inccsn_272_fn() RETURNS trigger AS ${'$'}${'$'}
+                      | BEGIN  
+                      | UPDATE WorkspaceTerms SET wtLocalCsn =
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.wtLocalCsn 
+                      | ELSE NEXTVAL('WorkspaceTerms_lcsn_seq') END),
+                      | wtPrimaryCsn = 
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                      | THEN NEXTVAL('WorkspaceTerms_mcsn_seq') 
+                      | ELSE NEW.wtPrimaryCsn END)
+                      | WHERE wtUid = NEW.wtUid;
+                      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      | SELECT 272, NEW.wtUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+                      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+                      | RETURN null;
+                      | END ${'$'}${'$'}
+                      | LANGUAGE plpgsql
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER inccsn_272_trig 
+                      |AFTER UPDATE OR INSERT ON WorkspaceTerms 
+                      |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                      |EXECUTE PROCEDURE inccsn_272_fn()
+                      """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS WorkspaceTerms_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE 
+                      | INDEX index_WorkspaceTerms_trk_clientId_epk_csn 
+                      |ON WorkspaceTerms_trk (clientId, epk, csn)
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE 
+                      |UNIQUE INDEX index_WorkspaceTerms_trk_epk_clientId 
+                      |ON WorkspaceTerms_trk (epk, clientId)
+                      """.trimMargin())
+                }else {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS WorkspaceTerms (  termsHtml  TEXT , wtLang  TEXT , wtLastChangedBy  INTEGER  NOT NULL , wtPrimaryCsn  INTEGER  NOT NULL , wtLocalCsn  INTEGER  NOT NULL , wtUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE TRIGGER INS_LOC_272
+                      |AFTER INSERT ON WorkspaceTerms
+                      |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                      |    NEW.wtLocalCsn = 0)
+                      |BEGIN
+                      |    UPDATE WorkspaceTerms
+                      |    SET wtPrimaryCsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 272)
+                      |    WHERE wtUid = NEW.wtUid;
+                      |    
+                      |    UPDATE SqliteChangeSeqNums
+                      |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+                      |    WHERE sCsnTableId = 272;
+                      |END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |            CREATE TRIGGER INS_PRI_272
+                      |            AFTER INSERT ON WorkspaceTerms
+                      |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                      |                NEW.wtPrimaryCsn = 0)
+                      |            BEGIN
+                      |                UPDATE WorkspaceTerms
+                      |                SET wtPrimaryCsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 272)
+                      |                WHERE wtUid = NEW.wtUid;
+                      |                
+                      |                UPDATE SqliteChangeSeqNums
+                      |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                      |                WHERE sCsnTableId = 272;
+                      |                
+                      |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      |SELECT 272, NEW.wtUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                      |            END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER UPD_LOC_272
+                      |AFTER UPDATE ON WorkspaceTerms
+                      |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                      |    AND (NEW.wtLocalCsn == OLD.wtLocalCsn OR
+                      |        NEW.wtLocalCsn == 0))
+                      |BEGIN
+                      |    UPDATE WorkspaceTerms
+                      |    SET wtLocalCsn = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 272) 
+                      |    WHERE wtUid = NEW.wtUid;
+                      |    
+                      |    UPDATE SqliteChangeSeqNums 
+                      |    SET sCsnNextLocal = sCsnNextLocal + 1
+                      |    WHERE sCsnTableId = 272;
+                      |END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |            CREATE TRIGGER UPD_PRI_272
+                      |            AFTER UPDATE ON WorkspaceTerms
+                      |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                      |                AND (NEW.wtPrimaryCsn == OLD.wtPrimaryCsn OR
+                      |                    NEW.wtPrimaryCsn == 0))
+                      |            BEGIN
+                      |                UPDATE WorkspaceTerms
+                      |                SET wtPrimaryCsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 272)
+                      |                WHERE wtUid = NEW.wtUid;
+                      |                
+                      |                UPDATE SqliteChangeSeqNums
+                      |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                      |                WHERE sCsnTableId = 272;
+                      |                
+                      |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      |SELECT 272, NEW.wtUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                      |            END
+                      """.trimMargin())
+                    database.execSQL("REPLACE INTO SqliteChangeSeqNums(sCsnTableId, sCsnNextLocal, sCsnNextPrimary) VALUES(272, 1, 1)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS WorkspaceTerms_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL , reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL, pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE 
+                      | INDEX index_WorkspaceTerms_trk_clientId_epk_csn 
+                      |ON WorkspaceTerms_trk (clientId, epk, csn)
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE 
+                      |UNIQUE INDEX index_WorkspaceTerms_trk_epk_clientId 
+                      |ON WorkspaceTerms_trk (epk, clientId)
+                      """.trimMargin())
+                }
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
@@ -3057,7 +3189,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
-                    MIGRATION_51_52)
+                    MIGRATION_51_52, MIGRATION_52_53)
 
 
 

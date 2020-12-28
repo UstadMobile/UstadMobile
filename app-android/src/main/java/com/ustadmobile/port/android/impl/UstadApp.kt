@@ -51,8 +51,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
+import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.networkmanager.*
+import io.ktor.client.*
 import io.ktor.client.features.json.*
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
@@ -205,6 +207,13 @@ open class UstadApp : BaseUstadApp(), DIAware {
             }
         }
 
+        bind<HttpClient>() with singleton {
+            defaultHttpClient()
+        }
+
+        bind<DestinationProvider>() with singleton {
+            ViewNameToDestMap()
+        }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 

@@ -3,21 +3,41 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="com.toughra.ustadmobile">
 
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" /> <!-- Required for BLE peer-to-peer GATT server -->
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+
+    <!-- Required for BLE peer-to-peer GATT server -->
     <uses-permission android:name="android.permission.BLUETOOTH" />
-    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" /> <!-- Required for saving files to external SD -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.INTERNET" /> <!-- Used for content editing when a user wants to add pictures/video from camera -->
-    <uses-permission android:name="android.permission.CAMERA" /> <!-- Required for peer-to-peer connecting using WiFi direct -->
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+
+    <!--
+    Normally required when users are selecting an external file (e.g. content to import, picture, etc).
+    -->
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Used for content editing when a user wants to add pictures/video from camera -->
+    <!--
+    Temporarily disabled until we introduce syncable attachments
+    <uses-permission android:name="android.permission.CAMERA" />
+    -->
+
+    <!-- Required for peer-to-peer connecting using WiFi direct -->
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- Required to use BLE scanning for peer devices -->
+
     <!-- Location permissions required for BLE scanning and WiFi scanning -->
+    <!--
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    -->
+
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" /> <!-- To obtain wifi lock to avoid wifi powering down during download -->
-    <uses-permission android:name="android.permission.WAKE_LOCK" /> <!-- To show download progress indicator -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+
+    <!-- Required to show download progress indicator -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
 
     <uses-feature

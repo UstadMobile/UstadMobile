@@ -39,7 +39,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"
-            android:hint="@{String.format(@string/organisation,@string/link.toLowerCase())}"
+            android:hint="@{String.format(@string/workspace,@string/link.toLowerCase())}"
             app:errorEnabled="@{linkError}"
             app:errorTextColor="?colorError"
             app:hintEnabled="true"

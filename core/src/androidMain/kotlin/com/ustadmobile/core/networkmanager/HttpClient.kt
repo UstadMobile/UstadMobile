@@ -5,6 +5,7 @@ import com.google.gson.Gson
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.features.*
 import io.ktor.client.features.json.GsonSerializer
 import io.ktor.client.features.json.JsonFeature
 import okhttp3.Dispatcher
@@ -41,12 +42,14 @@ fun defaultGson() = defaultGson
 private val httpClient = if(Build.VERSION.SDK_INT < OK_HTTP_MIN_SDKVERSION) {
     HttpClient(Android) {
         install(JsonFeature)
+        install(HttpTimeout)
     }
 }else {
     HttpClient(OkHttp) {
         install(JsonFeature) {
             serializer = defaultGsonSerializer
         }
+        install(HttpTimeout)
 
         val dispatcher = Dispatcher()
         dispatcher.maxRequests = 30

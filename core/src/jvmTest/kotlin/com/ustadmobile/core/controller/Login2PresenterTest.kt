@@ -10,10 +10,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEntryListTabsView
-import com.ustadmobile.core.view.GetStartedView
-import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
@@ -163,7 +160,7 @@ class Login2PresenterTest {
         val presenter = Login2Presenter(context, createParams(registration = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleCreateAccount()
-        verify(impl).go(eq(PersonEditView.VIEW_NAME_REGISTER), any(), any(), any())
+        verify(impl).go(eq(WorkspaceTermsView.VIEW_NAME), any(), any())
     }
 
     @Test

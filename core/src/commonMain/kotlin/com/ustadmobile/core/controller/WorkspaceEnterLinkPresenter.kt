@@ -9,6 +9,8 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
 import com.ustadmobile.core.view.WorkspaceEnterLinkView
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.WorkSpace
+import io.ktor.client.*
+import io.ktor.client.features.*
 import io.ktor.client.request.get
 import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
@@ -24,6 +26,8 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
     private var checkTextLinkJob: Deferred<Unit>? = null
 
     private val impl: UstadMobileSystemImpl by instance()
+
+    private val httpClient: HttpClient by instance()
 
     fun handleClickNext(){
         val mWorkSpace = workSpace
@@ -44,14 +48,20 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
             try {
                 var formattedHref = if(href.startsWith("http")) href else "https://$href"
                 formattedHref = UMFileUtil.joinPaths(formattedHref, "Workspace","verify")
-                workSpace = defaultHttpClient().get<WorkSpace>(formattedHref)
-                view.progressVisible = false
+                workSpace = httpClient.get<WorkSpace>(formattedHref) {
+                    timeout {
+                        requestTimeoutMillis = LINK_REQUEST_TIMEOUT
+                    }
+                }
                 view.validLink = workSpace != null
             }catch (e: Exception) {
-                view.progressVisible = false
                 view.validLink = false
             }
-             return@async
+
+            view.progressVisible = false
+            checkTextLinkJob = null
+
+            return@async
         }
     }
 
@@ -59,6 +69,12 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
         super.onDestroy()
         checkTextLinkJob = null
         workSpace = null
+    }
+
+    companion object {
+
+        const val LINK_REQUEST_TIMEOUT: Long = 10000
+
     }
 
 }

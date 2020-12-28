@@ -45,3 +45,29 @@ suspend fun <T : DoorDatabase, R> T.withRepoTimeout(timeMillis: Long, block: sus
         return block(this)
     }
 }
+
+/**
+ * Runs a block of code on the database first (e.g. to immediately fetch the local value), and then
+ * on the repository (e.g. to get an update if it is available).
+ *
+ * The function will first be invoked with the database and null as parameters. It will then be
+ * invoked with the repository and the value returned from it's previous run on the database as
+ * parameters.
+ *
+ * If a timeout occurs then the return value will be the value from invocation on the database
+ */
+@Suppress("UNCHECKED_CAST")
+suspend fun <T: DoorDatabase, R> T.onDbThenRepoWithTimeout(timeMillis: Long, block: suspend (doorDb: T, lastResult: R?) -> R) : R{
+    if(this is DoorDatabaseRepository) {
+        val dbResult = block(this.db as T, null)
+        try {
+            return withTimeout(timeMillis) {
+                block(this@onDbThenRepoWithTimeout, dbResult)
+            }
+        }catch(e: TimeoutCancellationException) {
+            return dbResult
+        }
+    }else {
+        return block(this, null)
+    }
+}
