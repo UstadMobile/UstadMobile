@@ -125,9 +125,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                         isPrimary = true, sqliteDir = File(storageRoot, context.identifier(dbMode)))
             }
 
-            UmAppDatabase.getInstance(Any(), dbName).also {
-                it.ktorInitDb()
-            }
+            UmAppDatabase.getInstance(Any(), dbName)
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {

@@ -11,18 +11,16 @@ import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomStringUtils
 import java.io.File
 
-fun UmAppDatabase.ktorInitDb() {
+fun UmAppDatabase.ktorInitDbWithRepo(repo: UmAppDatabase, passwordFilePath: String) {
     if(workSpaceDao.getWorkSpace() == null) {
-        workSpaceDao.insert(WorkSpace().apply {
+        repo.workSpaceDao.insert(WorkSpace().apply {
             uid = 1L
             name = "UstadmobileWorkspace"
             guestLogin = true
             registrationAllowed = true
         })
     }
-}
 
-fun UmAppDatabase.ktorInitDbWithRepo(repo: UmAppDatabase, passwordFilePath: String) {
     val adminuser = personDao.findByUsername("admin")
 
     if (adminuser == null) {

@@ -9,6 +9,7 @@ import io.ktor.response.respond
 import io.ktor.routing.Route
 import io.ktor.routing.get
 import io.ktor.routing.route
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.ktor.di
 import org.kodein.di.on
@@ -18,6 +19,10 @@ fun Route.WorkSpaceRoute() {
         get("verify") {
             val _di = di()
             val db: UmAppDatabase by _di.on(call).instance(tag = DoorTag.TAG_DB)
+
+            //Make sure the repo has been initialized
+            _di.on(call).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_REPO)
+
             val workSpace = db.workSpaceDao.getWorkSpace()
             call.respond(if(workSpace != null)  HttpStatusCode.OK else HttpStatusCode.NotFound,
                     workSpace?:WorkSpace())

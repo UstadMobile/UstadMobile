@@ -78,7 +78,9 @@ class ViewNameToDestMap: DestinationProvider {
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             WorkspaceTermsView.VIEW_NAME to UstadDestination(R.id.workspace_terms_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
-            WorkspaceDetailView.VIEW_NAME to UstadDestination(R.id.workspace_detail_dest)
+            WorkspaceDetailView.VIEW_NAME to UstadDestination(R.id.workspace_detail_dest),
+            WorkSpaceEditView.VIEW_NAME to UstadDestination(R.id.workspace_edit_dest,
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL)
     )
 
     override val navControllerViewId: Int

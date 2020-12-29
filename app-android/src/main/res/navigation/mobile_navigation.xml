@@ -283,5 +283,10 @@
         android:name="com.ustadmobile.port.android.view.WorkspaceDetailFragment"
         android:label="@string/workspace" />
 
+    <fragment
+        android:id="@+id/workspace_edit_dest"
+        android:name="com.ustadmobile.port.android.view.WorkSpaceEditFragment"
+        android:label="@string/edit_workspace"/>
+
 
 </navigation>

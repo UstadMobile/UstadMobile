@@ -1,9 +1,11 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.WorkspaceDetailView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.WorkSpaceEditView
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.WorkSpace
@@ -45,6 +47,10 @@ class WorkspaceDetailPresenter(context: Any,
         return workspace
     }
 
+    override fun handleClickEdit() {
+        systemImpl.go(WorkSpaceEditView.VIEW_NAME,
+            mapOf(ARG_ENTITY_UID to entity?.uid?.toString()), context)
+    }
 
     companion object {
 
