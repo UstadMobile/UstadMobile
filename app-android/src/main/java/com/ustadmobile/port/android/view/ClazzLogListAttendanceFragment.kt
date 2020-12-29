@@ -17,6 +17,7 @@ import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.PercentFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzLogListAttendanceChartheaderBinding
@@ -176,8 +177,10 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
                 chart.description.isEnabled = false
                 chart.axisRight.setDrawLabels(false)
                 val dateFormatter = DateFormat.getDateFormat(parent.context)
-                chart.xAxis.setValueFormatter { value, axis ->
-                    dateFormatter.format(value)
+                chart.xAxis.valueFormatter = object: ValueFormatter(){
+                    override fun getFormattedValue(value: Float): String {
+                        return dateFormatter.format(value)
+                    }
                 }
                 chart.xAxis.position = XAxis.XAxisPosition.BOTTOM
                 chart.xAxis.labelRotationAngle = 45f
@@ -189,8 +192,11 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
                 chart.xAxis.granularity = (1000 * 60 * 60 * 24 * 2).toFloat()
                 chart.axisLeft.axisMinimum = 0f
                 chart.axisLeft.axisMaximum = 100f
-
-                chart.axisLeft.valueFormatter = PercentFormatter(DecimalFormat("###,###,##0"))
+                chart.axisLeft.valueFormatter = object: ValueFormatter(){
+                    override fun getFormattedValue(value: Float): String {
+                        return DecimalFormat("###,###,##0").format(value)
+                    }
+                }
                 var lastCheckedId = R.id.chip_last_week
                 chipGroup.check(lastCheckedId)
                 chipGroup.setOnCheckedChangeListener { group, checkedId ->
