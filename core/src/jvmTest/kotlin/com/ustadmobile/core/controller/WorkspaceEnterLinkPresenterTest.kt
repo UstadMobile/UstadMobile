@@ -4,6 +4,9 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.WorkspaceEnterLinkView
 import com.ustadmobile.lib.db.entities.WorkSpace
+import io.ktor.client.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -44,6 +47,12 @@ class WorkspaceEnterLinkPresenterTest {
         impl = mock{}
         di = DI {
             bind<UstadMobileSystemImpl>() with singleton { impl }
+            bind<HttpClient>() with singleton {
+                HttpClient() {
+                    install(JsonFeature)
+                    install(HttpTimeout)
+                }
+            }
         }
 
         presenter = WorkspaceEnterLinkPresenter(context, mapOf(), view, di)

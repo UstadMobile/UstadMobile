@@ -32,8 +32,15 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
     fun handleClickNext(){
         val mWorkSpace = workSpace
         if(mWorkSpace != null){
-            impl.go(Login2View.VIEW_NAME, mapOf(ARG_SERVER_URL to view.workspaceLink,
-                    ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(),mWorkSpace)), context)
+            val args = arguments.toMutableMap().also {
+                val workspaceLink = view.workspaceLink
+                if(workspaceLink != null)
+                    it[ARG_SERVER_URL] = workspaceLink
+
+                it[ARG_WORKSPACE] = Json.stringify(WorkSpace.serializer(), mWorkSpace)
+            }
+
+            impl.go(Login2View.VIEW_NAME, args, context)
         }
     }
 

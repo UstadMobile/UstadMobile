@@ -14,6 +14,11 @@ class SettingsFragment : UstadBaseFragment(), SettingsView {
 
     internal lateinit var mPresenter: SettingsPresenter
 
+    override var workspaceSettingsVisible: Boolean = false
+        set(value) {
+            field = value
+        }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
 

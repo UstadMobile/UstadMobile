@@ -275,7 +275,13 @@
 
     <fragment
         android:id="@+id/workspace_terms_dest"
-        android:name="com.ustadmobile.port.android.view.WorkspaceTermsFragment"/>
+        android:name="com.ustadmobile.port.android.view.WorkspaceTermsFragment"
+        android:label="@string/terms_and_policies" />
+
+    <fragment
+        android:id="@+id/workspace_detail_dest"
+        android:name="com.ustadmobile.port.android.view.WorkspaceDetailFragment"
+        android:label="@string/workspace" />
 
 
 </navigation>

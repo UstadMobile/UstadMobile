@@ -347,7 +347,6 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.add_a_new_person, R.string.edit_person)
         mPresenter?.onCreate(backStackSavedState)
 
         CLAZZ_ROLE_KEY_MAP.forEach {roleOption ->
@@ -370,6 +369,11 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             mPresenter?.handleAddOrEditRoleAndPermission(entityRole)
         }
 
+        if(registrationMode == true) {
+            ustadFragmentTitle = requireContext().getString(R.string.register)
+        }else {
+            setEditFragmentTitle(R.string.add_a_new_person, R.string.edit_person)
+        }
 
     }
 

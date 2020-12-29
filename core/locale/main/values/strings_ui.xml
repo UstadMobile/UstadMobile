@@ -851,4 +851,16 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="active_classes">Active classes</string>
 
+    <string name="terms_and_policies">Terms and policies</string>
+
+    <string name="manage_workspace">Manage workspace settings and policies</string>
+
+    <string name="guest_login_enabled">Guest login enabled</string>
+
+    <string name="registration_allowed">Registration allowed</string>
+
+    <string name="yes">Yes</string>
+
+    <string name="no">No</string>
+
 </resources>

@@ -77,7 +77,8 @@ class ViewNameToDestMap: DestinationProvider {
             ClazzLogEditView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             WorkspaceTermsView.VIEW_NAME to UstadDestination(R.id.workspace_terms_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true)
+                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
+            WorkspaceDetailView.VIEW_NAME to UstadDestination(R.id.workspace_detail_dest)
     )
 
     override val navControllerViewId: Int
