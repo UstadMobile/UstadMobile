@@ -115,6 +115,8 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
         private var graphDateRange: Pair<Float, Float>? = null
 
+        private var decimalFormat = DecimalFormat("###,###,##0")
+
         override fun onChanged(t: ClazzLogListAttendancePresenter.AttendanceGraphData?) {
             val graphData = t ?: return
             val contextVal = context ?: return
@@ -194,7 +196,7 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
                 chart.axisLeft.axisMaximum = 100f
                 chart.axisLeft.valueFormatter = object: ValueFormatter(){
                     override fun getFormattedValue(value: Float): String {
-                        return DecimalFormat("###,###,##0").format(value)
+                        return "${decimalFormat.format(value)}%"
                     }
                 }
                 var lastCheckedId = R.id.chip_last_week
