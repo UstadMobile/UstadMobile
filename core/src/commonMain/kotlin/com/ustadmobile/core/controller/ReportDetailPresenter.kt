@@ -1,8 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.ReportGraphHelper
 import com.ustadmobile.core.util.ext.generateChartData
+import com.ustadmobile.core.util.ext.generateStatementList
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.util.safeParseList
 import com.ustadmobile.core.view.ReportDetailView
@@ -23,9 +23,6 @@ class ReportDetailPresenter(context: Any,
                             arguments: Map<String, String>, view: ReportDetailView,
                             di: DI, lifecycleOwner: DoorLifecycleOwner)
     : UstadDetailPresenter<ReportDetailView, ReportWithSeriesWithFilters>(context, arguments, view, di, lifecycleOwner) {
-
-
-    private val graphHelper = ReportGraphHelper(context, systemImpl, repo)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -75,10 +72,10 @@ class ReportDetailPresenter(context: Any,
     private fun setReportData(reportWithFilters: ReportWithSeriesWithFilters) {
         GlobalScope.launch {
             val chartData = db.generateChartData(reportWithFilters, context, systemImpl)
-            //val statementList = graphHelper.getStatementListForReport(reportWithFilters)
+            val statementList = db.generateStatementList(reportWithFilters)
             view.runOnUiThread(Runnable {
                 view.chartData = chartData
-                //view.statementList = statementList
+                view.statementList = statementList
             })
 
         }

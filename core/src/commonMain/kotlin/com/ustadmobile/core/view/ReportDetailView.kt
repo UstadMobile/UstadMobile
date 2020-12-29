@@ -1,16 +1,16 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.core.util.ReportGraphHelper
+import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
-import com.ustadmobile.lib.db.entities.StatementListReport
+import com.ustadmobile.lib.db.entities.StatementEntityWithDisplay
 
 
 interface ReportDetailView: UstadDetailView<ReportWithSeriesWithFilters> {
 
-    var statementList: DataSource.Factory<Int, StatementListReport>?
+    var statementList: List<DataSource.Factory<Int, StatementEntityWithDisplay>>?
 
-    var chartData: ReportGraphHelper.ChartData?
+    var chartData: ChartData?
 
     companion object {
 

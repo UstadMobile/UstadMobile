@@ -101,8 +101,8 @@ class ReportEditPresenter(context: Any,
 
         if(report == null){
             report = Report()
-            report.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
-            report.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong
+         /*   report.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
+            report.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong*/
         }
 
         handleXAxisSelected(XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }.find { it.code == report.xAxis } as MessageIdOption)
@@ -129,8 +129,8 @@ class ReportEditPresenter(context: Any,
             editEntity = safeParse(di, ReportWithSeriesWithFilters.serializer(), entityJsonStr)
         } else {
             editEntity = ReportWithSeriesWithFilters()
-            editEntity.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
-            editEntity.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong
+           /* editEntity.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
+            editEntity.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong*/
         }
 
         handleXAxisSelected(XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }.find { it.code == editEntity.xAxis } as MessageIdOption)

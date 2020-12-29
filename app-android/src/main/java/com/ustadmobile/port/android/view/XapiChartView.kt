@@ -52,11 +52,15 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 isEnabled = true
                 axisMinimum = 0f
             }
-            axisRight.isEnabled = false
+            axisRight.apply {
+                isEnabled = true
+                axisMinimum = 0f
+            }
 
             legend.apply {
                 horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
                 verticalAlignment = Legend.LegendVerticalAlignment.TOP
+                isWordWrapEnabled = true
                 setDrawInside(true)
                 isEnabled = true
             }
@@ -67,19 +71,20 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
         val combinedData = CombinedData()
 
-        val distinctXAxisSet = mutableSetOf<String>()
-        chartData.seriesData.forEach{
-            distinctXAxisSet.addAll(it.dataList.distinctBy { it.xAxis }.mapNotNull { it.xAxis })
-        }
+        val distinctXAxisSet = chartData.seriesData.flatMap { it.dataList }
+                .mapNotNull { it.xAxis }.toSet()
+        // TODO consider sorting for calendar
         combinedChart.xAxis.valueFormatter = IndexAxisValueFormatter(
                 chartData.xAxisValueFormatter?.formatAsList(distinctXAxisSet.toList())
                         ?: distinctXAxisSet)
+        combinedChart.xAxis.labelCount = distinctXAxisSet.size
+
 
         var colorCount = 0
         chartData.seriesData.forEach { it ->
 
-            val groupByXAxis = it.dataList.groupBy { it.xAxis }
-            val distinctSubgroups = it.dataList.distinctBy { it.subgroup }.mapNotNull { it.subgroup }
+            val groupedByXAxis = it.dataList.groupBy { it.xAxis }
+            val distinctSubgroups = it.dataList.mapNotNull { it.subgroup }.toSet()
 
             if(it.series.reportSeriesVisualType == Report.BAR_CHART){
 
@@ -87,7 +92,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
                     val barEntryList = mutableListOf<BarEntry>()
                     distinctXAxisSet.forEachIndexed { idx, xAxisKey ->
-                        val barValue = groupByXAxis[xAxisKey]?.firstOrNull()?.yAxis ?: 0f
+                        val barValue = groupedByXAxis[xAxisKey]?.firstOrNull()?.yAxis ?: 0f
                         val barEntry = BarEntry((idx).toFloat(), chartData.yAxisValueFormatter
                                 ?.asValueFormatter()?.getFormattedValue(barValue)?.toFloat() ?: barValue)
                         barEntryList.add(barEntry)
@@ -96,10 +101,8 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                     val barDataSet = BarDataSet(barEntryList, it.series.reportSeriesName)
                     barDataSet.setDrawValues(false)
                     barDataSet.color = Color.parseColor(colorList[colorCount++])
-                    barDataSet.valueFormatter = chartData.xAxisValueFormatter?.asValueFormatter()
 
                     val barData = combinedData.barData?: BarData()
-                    barData.barWidth = 0.9f
                     barData.addDataSet(barDataSet)
                     combinedData.setData(barData)
 
@@ -111,7 +114,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
                         val barEntryList = mutableListOf<BarEntry>()
                         distinctXAxisSet.forEach { xAxisKey ->
-                            val barReportData = groupByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
+                            val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
                             val barValue = barReportData?.yAxis ?: 0f
                             val barEntry = BarEntry((idx).toFloat(), chartData.yAxisValueFormatter
                                     ?.asValueFormatter()?.getFormattedValue(barValue)?.toFloat() ?: barValue)
@@ -119,8 +122,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                         }
 
 
-                        val barDataSet = BarDataSet(barEntryList, """${it.series.reportSeriesName} 
-                            - ${it.subGroupFormatter?.format(subGroup) ?: subGroup}""".trimMargin())
+                        val barDataSet = BarDataSet(barEntryList, """${it.series.reportSeriesName} - ${it.subGroupFormatter?.format(subGroup) ?: subGroup}""".trimMargin())
                         barDataSet.color = Color.parseColor(colorList[colorCount++])
                         barDataSet.setDrawValues(false)
                         barData.addDataSet(barDataSet)
@@ -136,7 +138,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
                     val xAxisList = mutableListOf<Entry>()
                     distinctXAxisSet.forEachIndexed { idx, xAxisKey ->
-                        val barValue = groupByXAxis[xAxisKey]?.firstOrNull()?.yAxis ?: 0f
+                        val barValue = groupedByXAxis[xAxisKey]?.firstOrNull()?.yAxis ?: 0f
                         val barEntry = BarEntry((idx).toFloat(), chartData.yAxisValueFormatter
                                 ?.asValueFormatter()?.getFormattedValue(barValue)?.toFloat() ?: barValue)
                         xAxisList.add(barEntry)
@@ -158,19 +160,23 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                         val lineEntryList = mutableListOf<Entry>()
                         distinctXAxisSet.forEachIndexed { idx, xAxisKey ->
 
-                            val barReportData = groupByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
+                            val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
                             val barValue = barReportData?.yAxis ?: 0f
-                            val barEntry = Entry((idx).toFloat(), chartData.yAxisValueFormatter
+                            val barEntry = Entry((idx).toFloat() + 0.5f, chartData.yAxisValueFormatter
                                     ?.asValueFormatter()?.getFormattedValue(barValue)?.toFloat()  ?: barValue)
                             lineEntryList.add(barEntry)
                         }
 
-                        val barDataSet = LineDataSet(lineEntryList, """${it.series.reportSeriesName} 
-                            - ${it.subGroupFormatter?.format(subGroup) ?: subGroup}""".trimMargin())
-                        barDataSet.axisDependency = YAxis.AxisDependency.LEFT
-                        barDataSet.color = Color.parseColor(colorList[colorCount++])
-                        barDataSet.setDrawValues(false)
-                        lineData.addDataSet(barDataSet)
+                        val lineDataSet = LineDataSet(lineEntryList, """${it.series.reportSeriesName} - ${it.subGroupFormatter?.format(subGroup) ?: subGroup}""".trimMargin()).apply {
+                            axisDependency = YAxis.AxisDependency.LEFT
+                            val colorSelected = Color.parseColor(colorList[colorCount++])
+                            color = colorSelected
+                            setCircleColor(colorSelected)
+                            setDrawValues(false)
+                            lineWidth = 2.5f
+
+                        }
+                        lineData.addDataSet(lineDataSet)
                     }
 
                     combinedData.setData(lineData)
@@ -184,24 +190,21 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
         val barData = combinedData.barData ?: BarData()
         if(barData.dataSetCount >= 2){
-            val sizeOfX = barData.dataSetCount.toFloat()
+            val numberOfDataSets = barData.dataSetCount.toFloat()
             val barSpace = 0.01f
             val groupSpace = 0.08f
-            val barWidth = (1 - groupSpace) / sizeOfX - barSpace
+            val barWidth = (1 - groupSpace) / numberOfDataSets - barSpace
 
             barData.barWidth = barWidth
-            combinedChart.xAxis.mAxisMaximum = sizeOfX
-            combinedChart.xAxis.mAxisMaximum = 0 +
-                    combinedData.barData.getGroupWidth(groupSpace, barSpace) *
-                    sizeOfX
-
-            if (sizeOfX > 1) {
+            combinedChart.xAxis.mAxisMaximum = numberOfDataSets
+            combinedChart.xAxis.mAxisMaximum = combinedData.barData
+                    .getGroupWidth(groupSpace, barSpace) * numberOfDataSets
+            if (barData.dataSetCount  > 1) {
                 barData.groupBars(0f, groupSpace, barSpace)
             }
 
-            combinedChart.xAxis.setCenterAxisLabels(true)
-
         }
+
 
 
         combinedChart.data = combinedData

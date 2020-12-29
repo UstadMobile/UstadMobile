@@ -49,7 +49,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 52)
+], version = 53)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -3046,6 +3046,35 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_52_53 = object: DoorMigration(52, 53) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("DROP TABLE IF EXISTS ReportFilter")
+                database.execSQL("DROP TABLE IF EXISTS ReportFilter_trk")
+                database.execSQL("""ALTER TABLE Report 
+                        ADD COLUMN reportSeries TEXT""".trimMargin())
+                if(database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("""ALTER TABLE Report 
+                        DROP COLUMN chartType""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report 
+                        DROP COLUMN yAxis""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report 
+                        DROP COLUMN subGroup""".trimMargin())
+
+                }else if(database.dbType() == DoorDbType.SQLITE){
+
+                    database.execSQL("ALTER TABLE Report RENAME to Report_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Report (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `reportTitle` TEXT, `reportSeries` TEXT, `reportInactive` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL)")
+                    database.execSQL("INSERT INTO Report (reportUid, reportOwnerUid, xAxis, fromDate, toDate, reportTitle, reportInactive, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy, reportSeries) SELECT reportUid, reportOwnerUid, xAxis, fromDate, toDate, reportTitle, reportInactive, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy, reportSeries FROM Report_OLD")
+                    database.execSQL("DROP TABLE Report_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Report_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL( "CREATE INDEX IF NOT EXISTS `index_Report_trk_clientId_epk_csn` ON Report_trk (`clientId`, `epk`, `csn`)")
+                }
+
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
@@ -3054,7 +3083,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
-                    MIGRATION_51_52)
+                    MIGRATION_51_52,MIGRATION_52_53)
 
 
 

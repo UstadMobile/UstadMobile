@@ -225,7 +225,7 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
         val reportList = statementDao.getResults(it.value.sqlStr, it.value.queryParams)
         val series = it.key
 
-        xAxisList.addAll(reportList.distinctBy { it.xAxis }.mapNotNull { it.xAxis })
+        xAxisList.addAll(reportList.mapNotNull { it.xAxis }.toSet())
         if(series.reportSeriesDataSet == ReportSeries.AVERAGE_DURATION
                 || series.reportSeriesDataSet == ReportSeries.TOTAL_DURATION){
             yAxisValueFormatter = TimeFormatter()
@@ -233,8 +233,9 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
 
         val subGroupFormatter = when(series.reportSeriesSubGroup){
             Report.CLASS -> {
-                val listOfUids = reportList.distinctBy { it.subgroup }.mapNotNull { it.subgroup?.toLong() }
+                val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
                 val clazzLabelList = clazzDao.getClassNamesFromListOfIds(listOfUids)
+                        .map { it.uid to it.labelName }.toMap()
                 UidAndLabelFormatter(clazzLabelList)
             }
             Report.GENDER -> {
@@ -245,8 +246,9 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                         impl, context)
             }
             Report.CONTENT_ENTRY ->{
-                val listOfUids = reportList.distinctBy { it.subgroup }.mapNotNull { it.subgroup?.toLong() }
+                val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
                 val entryLabelList = contentEntryDao.getContentEntryFromUids(listOfUids)
+                        .map { it.uid to it.labelName }.toMap()
                 UidAndLabelFormatter(entryLabelList)
             }
             else ->{
@@ -259,7 +261,8 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
 
     val xAxisFormatter = when(report.xAxis){
         Report.CLASS -> {
-            val clazzLabelList = clazzDao.getClassNamesFromListOfIds(xAxisList.map { it.toLong() })
+            val clazzLabelList = clazzDao.getClassNamesFromListOfIds(xAxisList
+                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(clazzLabelList)
         }
         Report.GENDER -> {
@@ -270,7 +273,8 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                     impl, context)
         }
         Report.CONTENT_ENTRY ->{
-            val entryLabelList = contentEntryDao.getContentEntryFromUids(xAxisList.map { it.toLong() })
+            val entryLabelList = contentEntryDao.getContentEntryFromUids(xAxisList
+                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(entryLabelList)
         }
         else ->{
