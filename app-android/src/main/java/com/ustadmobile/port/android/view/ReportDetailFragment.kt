@@ -28,11 +28,10 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.StatementEntityWithDisplay
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import kotlin.math.max
+import kotlin.math.abs
 
 
 interface ReportDetailFragmentEventHandler {
@@ -103,26 +102,26 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         }
     }
 
-    class AdapterSourceHolder(val adapter: StatementViewRecyclerAdapter,
+    class AdapterSourceHolder(val statementAdapter: StatementViewRecyclerAdapter,
+                              val seriesHeaderAdapter: SimpleHeadingRecyclerAdapter,
                               val dbRepo: UmAppDatabase?,
-                              val lifecycleOwner: LifecycleOwner){
+                              val lifecycleOwner: LifecycleOwner): Observer<PagedList<StatementEntityWithDisplay>> {
 
-        private var statementListObserver: Observer<PagedList<StatementEntityWithDisplay>>? = null
+        val adapter = MergeAdapter(seriesHeaderAdapter, statementAdapter)
 
         private var currentLiveData: LiveData<PagedList<StatementEntityWithDisplay>>? = null
 
         var source: DataSource.Factory<Int, StatementEntityWithDisplay>? = null
-            set(value){
-                val statementObsVal = statementListObserver ?: return
-                currentLiveData?.removeObserver(statementObsVal)
+            set(value) {
+                currentLiveData?.removeObserver(this)
                 val displayTypeRepoVal = dbRepo?.statementDao ?: return
                 currentLiveData = value?.asRepositoryLiveData(displayTypeRepoVal)
-                currentLiveData?.observe(lifecycleOwner, statementObsVal)
+                currentLiveData?.observe(lifecycleOwner, this)
                 field = value
             }
 
-        init{
-            statementListObserver = PagedListSubmitObserver(adapter)
+        override fun onChanged(t: PagedList<StatementEntityWithDisplay>?) {
+            statementAdapter.submitList(t)
         }
 
     }
@@ -132,34 +131,32 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
     override var statementList: List<DataSource.Factory<Int, StatementEntityWithDisplay>>? = null
         get() = field
         set(value) {
-            val maxSize = max(value?.size ?: 0, adapterSourceHolderList.size)
-            for(i in 0..maxSize){
 
-                val sourceFromList = value?.getOrNull(i)
-                val adapterHolder = adapterSourceHolderList.getOrNull(i)
+            val sizeDiff = (value?.size ?: 0) - adapterSourceHolderList.size
+            if (sizeDiff > 0) {
 
-                when {
-                    sourceFromList == null && adapterHolder == null -> {
-                        return
-                    }
-                    sourceFromList == null -> {
-                        val adapter = adapterHolder?.adapter ?: return
-                        adapterHolder.source = null
-                        mergeAdapter?.removeAdapter(adapter)
-                    }
-                    adapterHolder == null -> {
-                        val statementAdapter = StatementViewRecyclerAdapter(this, mPresenter)
-                        val sourceHolder = AdapterSourceHolder(statementAdapter, dbRepo, this)
-                        sourceHolder.source = sourceFromList
-                        adapterSourceHolderList.add(sourceHolder)
-                        mergeAdapter?.addAdapter(statementAdapter)
-                    }
-                    else -> {
-                        adapterHolder.source = sourceFromList
-                    }
+                repeat(sizeDiff) {
+                    val statementAdapter = StatementViewRecyclerAdapter(this, mPresenter)
+                    val seriesHeaderAdapter = SimpleHeadingRecyclerAdapter(chartData?.seriesData?.get(it)?.series?.reportSeriesName ?: "Label not found")
+                    seriesHeaderAdapter.visible = true
+                    val sourceHolder = AdapterSourceHolder(statementAdapter, seriesHeaderAdapter, dbRepo, this)
+                    adapterSourceHolderList.add(sourceHolder)
+                    mergeAdapter?.addAdapter(sourceHolder.adapter)
+                }
+
+            } else if (sizeDiff < 0) {
+
+                repeat(abs(sizeDiff)){
+                    val holder = adapterSourceHolderList.removeAt(it)
+                    holder.source = null
+                    mergeAdapter?.removeAdapter(holder.adapter)
                 }
             }
 
+            adapterSourceHolderList.forEachIndexed { idx, holder ->
+                holder.seriesHeaderAdapter.headingText = chartData?.seriesData?.get(idx)?.series?.reportSeriesName ?: "Label not found"
+                holder.source = value?.get(idx)
+            }
 
             field = value
         }
@@ -220,7 +217,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         mergeAdapter = null
         dbRepo = null
         chartData = null
-        adapterSourceHolderList.forEach{
+        adapterSourceHolderList.forEach {
             it.source = null
         }
         adapterSourceHolderList.clear()
@@ -261,6 +258,16 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
             }
 
             override fun areContentsTheSame(oldItem: ChartData, newItem: ChartData): Boolean {
+                return oldItem == newItem
+            }
+        }
+
+        val DIFFUTIL_HEADER = object : DiffUtil.ItemCallback<String>() {
+            override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
+                return oldItem == newItem
+            }
+
+            override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
                 return oldItem == newItem
             }
         }
