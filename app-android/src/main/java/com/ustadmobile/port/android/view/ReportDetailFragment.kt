@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -31,6 +32,7 @@ import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import kotlin.math.max
 
 
 interface ReportDetailFragmentEventHandler {
@@ -47,8 +49,6 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         get() = mPresenter
 
     private var chartAdapter: RecyclerViewChartAdapter? = null
-
-    private var statementAdapter: StatementViewRecyclerAdapter? = null
 
     private var mergeAdapter: MergeAdapter? = null
 
@@ -103,20 +103,64 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         }
     }
 
+    class AdapterSourceHolder(val adapter: StatementViewRecyclerAdapter,
+                              val dbRepo: UmAppDatabase?,
+                              val lifecycleOwner: LifecycleOwner){
 
-    private var statementListObserver: Observer<PagedList<StatementEntityWithDisplay>>? = null
+        private var statementListObserver: Observer<PagedList<StatementEntityWithDisplay>>? = null
 
+        private var currentLiveData: LiveData<PagedList<StatementEntityWithDisplay>>? = null
 
-    private var currentLiveData: LiveData<PagedList<StatementEntityWithDisplay>>? = null
+        var source: DataSource.Factory<Int, StatementEntityWithDisplay>? = null
+            set(value){
+                val statementObsVal = statementListObserver ?: return
+                currentLiveData?.removeObserver(statementObsVal)
+                val displayTypeRepoVal = dbRepo?.statementDao ?: return
+                currentLiveData = value?.asRepositoryLiveData(displayTypeRepoVal)
+                currentLiveData?.observe(lifecycleOwner, statementObsVal)
+                field = value
+            }
 
-    override var statementList: DataSource.Factory<Int, StatementEntityWithDisplay>? = null
+        init{
+            statementListObserver = PagedListSubmitObserver(adapter)
+        }
+
+    }
+
+    private var adapterSourceHolderList = mutableListOf<AdapterSourceHolder>()
+
+    override var statementList: List<DataSource.Factory<Int, StatementEntityWithDisplay>>? = null
         get() = field
         set(value) {
-            val statementObsVal = statementListObserver ?: return
-            currentLiveData?.removeObserver(statementObsVal)
-            val displayTypeRepoVal = dbRepo?.statementDao ?: return
-            currentLiveData = value?.asRepositoryLiveData(displayTypeRepoVal)
-            currentLiveData?.observe(this, statementObsVal)
+            val maxSize = max(value?.size ?: 0, adapterSourceHolderList.size)
+            for(i in 0..maxSize){
+
+                val sourceFromList = value?.getOrNull(i)
+                val adapterHolder = adapterSourceHolderList.getOrNull(i)
+
+                when {
+                    sourceFromList == null && adapterHolder == null -> {
+                        return
+                    }
+                    sourceFromList == null -> {
+                        val adapter = adapterHolder?.adapter ?: return
+                        adapterHolder.source = null
+                        mergeAdapter?.removeAdapter(adapter)
+                    }
+                    adapterHolder == null -> {
+                        val statementAdapter = StatementViewRecyclerAdapter(this, mPresenter)
+                        val sourceHolder = AdapterSourceHolder(statementAdapter, dbRepo, this)
+                        sourceHolder.source = sourceFromList
+                        adapterSourceHolderList.add(sourceHolder)
+                        mergeAdapter?.addAdapter(statementAdapter)
+                    }
+                    else -> {
+                        adapterHolder.source = sourceFromList
+                    }
+                }
+            }
+
+
             field = value
         }
 
@@ -138,11 +182,8 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         reportRecyclerView = rootView.findViewById(R.id.fragment_detail_report_list)
         chartAdapter = RecyclerViewChartAdapter(this, null)
-        statementAdapter = StatementViewRecyclerAdapter(this, null).also {
-            statementListObserver = PagedListSubmitObserver(it)
-        }
 
-        mergeAdapter = MergeAdapter(chartAdapter, statementAdapter)
+        mergeAdapter = MergeAdapter(chartAdapter)
         reportRecyclerView?.adapter = mergeAdapter
         reportRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 
@@ -150,7 +191,6 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
                 di, viewLifecycleOwner)
 
         chartAdapter?.presenter = mPresenter
-        statementAdapter?.presenter = mPresenter
 
         return rootView
     }
@@ -177,11 +217,13 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         mPresenter = null
         entity = null
         chartAdapter = null
-        statementAdapter = null
         mergeAdapter = null
         dbRepo = null
         chartData = null
-        currentLiveData = null
+        adapterSourceHolderList.forEach{
+            it.source = null
+        }
+        adapterSourceHolderList.clear()
     }
 
     override var entity: ReportWithSeriesWithFilters? = null

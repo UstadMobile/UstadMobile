@@ -70,12 +70,14 @@ class ReportDetailPresenter(context: Any,
     }
 
     private fun setReportData(reportWithFilters: ReportWithSeriesWithFilters) {
+        view.loading = true
         GlobalScope.launch {
             val chartData = db.generateChartData(reportWithFilters, context, systemImpl)
             val statementList = db.generateStatementList(reportWithFilters)
             view.runOnUiThread(Runnable {
                 view.chartData = chartData
                 view.statementList = statementList
+                view.loading = false
             })
 
         }
