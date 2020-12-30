@@ -2,4 +2,9 @@
 <resources>
     <string name="sales">فروشات</string>
     <string name="products">محصولات</string>
+    <string name="wes">خانم های گلدوز</string>
+    <string name="x_in_stock">%1$ در انبار</string>
+    <string name="x_afs">%1$s افغانی</string>
+    <string name="price">قیمت</string>
+    <string name="receive_inventory">دریافت موجودی</string>
 </resources>
