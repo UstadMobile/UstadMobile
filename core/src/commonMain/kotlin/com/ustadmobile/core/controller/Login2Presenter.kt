@@ -129,12 +129,14 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         val args = mutableMapOf(
                 PersonEditView.ARG_REGISTRATION_MODE to true.toString(),
                 ARG_SERVER_URL to serverUrl,
+                WorkspaceTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
+                WorkspaceTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
                 ARG_POPUPTO_ON_FINISH to (arguments[ARG_POPUPTO_ON_FINISH] ?: Login2View.VIEW_NAME))
 
         args.putFromOtherMapIfPresent(arguments, ARG_NEXT)
         args.putFromOtherMapIfPresent(arguments, REGISTER_VIA_LINK)
 
-        impl.go(WorkspaceTermsView.VIEW_NAME, args, context)
+        impl.go(WorkspaceTermsDetailView.VIEW_NAME, args, context)
     }
 
     fun handleConnectAsGuest(){

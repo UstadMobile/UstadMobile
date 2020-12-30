@@ -32,11 +32,11 @@ val DoorDatabase.syncableAndPrimary: Boolean
  * used as the database for the fallback to running from the
  */
 @Suppress("UNCHECKED_CAST")
-suspend fun <T : DoorDatabase, R> T.withRepoTimeout(timeMillis: Long, block: suspend (T) -> R) : R {
+suspend fun <T : DoorDatabase, R> T.onRepoWithFallbackToDb(timeMillis: Long, block: suspend (T) -> R) : R {
     if(this is DoorDatabaseRepository) {
         try {
             return withTimeout(timeMillis) {
-                block(this@withRepoTimeout)
+                block(this@onRepoWithFallbackToDb)
             }
         }catch(e: TimeoutCancellationException) {
             return block(this.db as T)

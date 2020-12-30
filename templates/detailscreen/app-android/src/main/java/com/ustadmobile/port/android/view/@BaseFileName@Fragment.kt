@@ -6,7 +6,6 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.Fragment@Entity@DetailBinding
 import com.ustadmobile.core.controller.@Entity@DetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
@@ -26,6 +25,10 @@ class @BaseFileName@Fragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@De
 
     private var mPresenter: @Entity@DetailPresenter? = null
 
+    override val detailPresenter: UstadDetailPresenter<*, *>?
+        get() = mPresenter
+
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = Fragment@Entity@DetailBinding.inflate(inflater, container, false).also {
@@ -34,7 +37,7 @@ class @BaseFileName@Fragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@De
 
         mPresenter = @Entity@DetailPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)
-        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
 
         return rootView
     }
@@ -46,24 +49,11 @@ class @BaseFileName@Fragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@De
         entity = null
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        //TODO: Set title here
-    }
-
     override var entity: @DisplayEntity@? = null
         get() = field
         set(value) {
             field = value
             mBinding?.@Entity_VariableName@ = value
-        }
-
-    override var editButtonMode: EditButtonMode = EditButtonMode.GONE
-        get() = field
-        set(value) {
-            mBinding?.editButtonMode = value
-            field = value
         }
 
 }

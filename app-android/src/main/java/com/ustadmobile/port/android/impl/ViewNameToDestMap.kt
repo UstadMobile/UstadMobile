@@ -76,11 +76,11 @@ class ViewNameToDestMap: DestinationProvider {
             TimeZoneListView.VIEW_NAME to UstadDestination(R.id.time_zone_list_dest),
             ClazzLogEditView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
-            WorkspaceTermsView.VIEW_NAME to UstadDestination(R.id.workspace_terms_dest,
-                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
             WorkspaceDetailView.VIEW_NAME to UstadDestination(R.id.workspace_detail_dest),
             WorkSpaceEditView.VIEW_NAME to UstadDestination(R.id.workspace_edit_dest,
-                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL)
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
+            WorkspaceTermsDetailView.VIEW_NAME to UstadDestination(R.id.workspace_terms_detail_dest,
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true)
     )
 
     override val navControllerViewId: Int

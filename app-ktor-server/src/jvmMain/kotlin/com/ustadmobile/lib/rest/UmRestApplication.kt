@@ -17,7 +17,6 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
-import com.ustadmobile.lib.rest.ext.ktorInitDb
 import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application

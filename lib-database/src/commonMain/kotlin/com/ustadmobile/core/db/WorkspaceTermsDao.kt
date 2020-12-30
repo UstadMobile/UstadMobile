@@ -20,7 +20,7 @@ abstract class WorkspaceTermsDao {
     abstract suspend fun findWorkspaceTerms(langCode: String): WorkspaceTerms?
 
     @Insert
-    abstract suspend fun insertAsync(workspaceTerms: WorkspaceTerms)
+    abstract suspend fun insertAsync(workspaceTerms: WorkspaceTerms): Long
 
     @Query("SELECT * FROM WorkspaceTerms WHERE wtUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): WorkspaceTerms?
