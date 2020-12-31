@@ -11,14 +11,20 @@ import kotlinx.serialization.Serializable
 @Entity
 @Serializable
 @SyncableEntity(tableId = WorkspaceTerms.TABLE_ID)
-class WorkspaceTerms {
+open class WorkspaceTerms {
 
     @PrimaryKey(autoGenerate = true)
     var wtUid: Long = 0
 
     var termsHtml: String? = null
 
+    //Two letter code for easier direct queries
     var wtLang: String? = null
+
+    //Foreign key to the language object
+    var wtLangUid: Long = 0
+
+    var wtActive: Boolean = true
 
     @LastChangedBy
     var wtLastChangedBy: Int = 0

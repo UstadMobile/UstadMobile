@@ -93,6 +93,33 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/guest_enabled_switch" />
 
+            <TextView
+                android:id="@+id/fragment_work_space_edit_terms_rv"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginTop="8dp"
+                android:text="@string/terms_and_policies"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/registration_allowed_switch" />
+
+            <include layout="@layout/item_createnew"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:onClickNew="@{() -> activityEventHandler.onClickNewWorkspaceTerms()}"
+                app:createNewText="@{@string/terms_and_policies}"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_work_space_edit_terms_rv"
+                app:layout_constraintStart_toStartOf="parent"
+                />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/workspace_terms_rv"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                tools:itemCount="2"
+                app:layout_constraintTop_toBottomOf="@+id/item_createnew_layout"
+                app:layout_constraintStart_toStartOf="parent" />
+
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>

@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 54,
-    "identityHash": "a55914bdf8853cd344503c8d966a876f",
+    "identityHash": "9b60244223dfbba35217abfe534e95b4",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -2142,7 +2142,7 @@
       },
       {
         "tableName": "Language",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`langUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `iso_639_1_standard` TEXT, `iso_639_2_standard` TEXT, `iso_639_3_standard` TEXT, `langLocalChangeSeqNum` INTEGER NOT NULL, `langMasterChangeSeqNum` INTEGER NOT NULL, `langLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`langUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `name` TEXT, `iso_639_1_standard` TEXT, `iso_639_2_standard` TEXT, `iso_639_3_standard` TEXT, `Language_Type` TEXT, `langLocalChangeSeqNum` INTEGER NOT NULL, `langMasterChangeSeqNum` INTEGER NOT NULL, `langLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "langUid",
@@ -2171,6 +2171,12 @@
           {
             "fieldPath": "iso_639_3_standard",
             "columnName": "iso_639_3_standard",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "Language_Type",
+            "columnName": "Language_Type",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -5376,7 +5382,7 @@
       },
       {
         "tableName": "WorkspaceTerms",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wtUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `termsHtml` TEXT, `wtLang` TEXT, `wtLastChangedBy` INTEGER NOT NULL, `wtPrimaryCsn` INTEGER NOT NULL, `wtLocalCsn` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wtUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `termsHtml` TEXT, `wtLang` TEXT, `wtLangUid` INTEGER NOT NULL, `wtActive` INTEGER NOT NULL, `wtLastChangedBy` INTEGER NOT NULL, `wtPrimaryCsn` INTEGER NOT NULL, `wtLocalCsn` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "wtUid",
@@ -5395,6 +5401,18 @@
             "columnName": "wtLang",
             "affinity": "TEXT",
             "notNull": false
+          },
+          {
+            "fieldPath": "wtLangUid",
+            "columnName": "wtLangUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wtActive",
+            "columnName": "wtActive",
+            "affinity": "INTEGER",
+            "notNull": true
           },
           {
             "fieldPath": "wtLastChangedBy",
@@ -9714,7 +9732,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'a55914bdf8853cd344503c8d966a876f')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9b60244223dfbba35217abfe534e95b4')"
     ]
   }
 }

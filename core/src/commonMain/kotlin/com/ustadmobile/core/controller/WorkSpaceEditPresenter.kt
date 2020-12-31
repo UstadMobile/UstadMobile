@@ -11,16 +11,15 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.WorkSpace
 
-import com.ustadmobile.lib.db.entities.UmAccount
-import io.ktor.client.features.json.defaultSerializer
-import io.ktor.http.content.TextContent
 import kotlinx.coroutines.*
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import org.kodein.di.DI
 import com.ustadmobile.core.util.safeParse
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
+import com.ustadmobile.lib.db.entities.WorkspaceTerms
+import com.ustadmobile.lib.db.entities.WorkspaceTermsWithLanguage
+import kotlinx.serialization.builtins.list
 
 
 class WorkSpaceEditPresenter(context: Any,
@@ -32,6 +31,21 @@ class WorkSpaceEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
+    val workspaceTermsOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<WorkspaceTermsWithLanguage>(WorkspaceTerms::wtUid,
+            "state_WorkspaceTerms_list", WorkspaceTerms.serializer().list,
+            WorkspaceTermsWithLanguage.serializer().list, this, WorkspaceTermsWithLanguage::class) {
+        wtUid = it
+    }
+
+    fun handleAddOrEditWorkspaceTerms(workspaceTerms: WorkspaceTermsWithLanguage) {
+        workspaceTermsOneToManyJoinEditHelper.onEditResult(workspaceTerms)
+    }
+
+    fun handleRemoveWorkspaceTerms(workspaceTerms: WorkspaceTermsWithLanguage) {
+        workspaceTermsOneToManyJoinEditHelper.onDeactivateEntity(workspaceTerms)
+    }
+
+
     /*
      * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
      * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
@@ -39,16 +53,22 @@ class WorkSpaceEditPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-
+        view.workspaceTermsList = workspaceTermsOneToManyJoinEditHelper.liveList
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): WorkSpace? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        //TODO: Load the list for any one to many join helper here
-        val workSpace = withTimeoutOrNull(5000) {
-            db.workSpaceDao.getWorkspaceAsync()
+        val workSpace = db.onRepoWithFallbackToDb(5000) {
+            it.workSpaceDao.getWorkspaceAsync()
         } ?: WorkSpace()
+
+        val workspaceTerms = db.onRepoWithFallbackToDb(5000) {
+            it.workspaceTermsDao.findAllWithLanguageAsList()
+        }
+
+        workspaceTermsOneToManyJoinEditHelper.liveList.sendValue(workspaceTerms)
+
         return workSpace
     }
 
@@ -77,7 +97,10 @@ class WorkSpaceEditPresenter(context: Any,
         GlobalScope.launch(doorMainDispatcher()) {
             repo.workSpaceDao.updateAsync(entity)
 
-            //TODO: Call commitToDatabase on any onetomany join helpers
+            workspaceTermsOneToManyJoinEditHelper.commitToDatabase(repo.workspaceTermsDao) {
+                //no need to set the foreign key
+            }
+
             view.finishWithResult(listOf(entity))
         }
     }

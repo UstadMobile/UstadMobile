@@ -14,7 +14,6 @@ import com.ustadmobile.lib.db.entities.WorkSpace
 
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
-import com.ustadmobile.core.db.waitUntil
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance

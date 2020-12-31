@@ -31,6 +31,9 @@ class Language() {
     // 3 letter code
     var iso_639_3_standard: String? = null
 
+    //Language Type - we are only normally interested in "L"
+    var Language_Type: String? = null
+
     @LocalChangeSeqNum
     var langLocalChangeSeqNum: Long = 0
 

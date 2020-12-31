@@ -397,6 +397,9 @@ dependencies {
     //dependency injection
     implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
+    //HTML editor
+    implementation "com.github.wordpress-mobile.WordPress-Aztec-Android:aztec:$version_android_aztec"
+
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"
     testImplementation "androidx.test:core:$version_android_junit_runner"

@@ -288,5 +288,9 @@
         android:name="com.ustadmobile.port.android.view.WorkspaceTermsDetailFragment"
         android:label="@string/terms_and_policies"/>
 
+    <fragment
+        android:id="@+id/workspace_terms_edit_dest"
+        android:name="com.ustadmobile.port.android.view.WorkspaceTermsEditFragment"/>
+
 
 </navigation>
