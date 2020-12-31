@@ -136,6 +136,8 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
         sql += ", subgroup"
     }
 
+    //sqlList += " ORDER BY StatementEntity.timestamp DESC"
+
 
     return QueryParts(sql, sqlList, paramList.toTypedArray())
 }
@@ -145,7 +147,7 @@ private fun groupBy(value: Int): String {
         Report.DAY -> "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
         Report.WEEK -> "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') "
         Report.MONTH -> "strftime('%m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
-        Report.CONTENT_ENTRY -> "StatementEntity.xObjectUid "
+        Report.CONTENT_ENTRY -> "StatementEntity.statementContentEntryUid "
         Report.GENDER -> "Person.gender "
         Report.CLASS -> "Clazz.clazzUid "
         else -> ""

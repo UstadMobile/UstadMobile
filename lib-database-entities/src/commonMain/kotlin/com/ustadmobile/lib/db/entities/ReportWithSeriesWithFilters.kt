@@ -19,9 +19,6 @@ class ReportWithSeriesWithFilters() : Report() {
 
     var reportSeriesWithFiltersList = listOf<ReportSeries>()
 
-
-    data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParams: Array<Any>)
-
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || this::class != other::class) return false
@@ -38,12 +35,5 @@ class ReportWithSeriesWithFilters() : Report() {
         var result = super.hashCode()
         result = 31 * result + reportSeriesWithFiltersList.hashCode()
         return result
-    }
-
-
-    companion object{
-
-
-
     }
 }

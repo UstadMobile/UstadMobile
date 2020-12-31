@@ -27,7 +27,7 @@ class ReportEditPresenter(context: Any,
                           lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<ReportEditView, ReportWithSeriesWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
-    val seriesCounter = atomic(1)
+    val seriesCounter = atomic(0)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -86,6 +86,7 @@ class ReportEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+
         view.visualTypeOptions = VisualTypeOptions.values().map { VisualTypeMessageIdOption(it, context) }
         view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context) }
         view.subGroupOptions = XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }
@@ -111,10 +112,15 @@ class ReportEditPresenter(context: Any,
         var reportSeriesList = listOf<ReportSeries>()
         if(!reportSeries.isNullOrBlank()) {
             reportSeriesList = safeParseList(di, ReportSeries.serializer().list, ReportSeries::class, reportSeries)
-
             // set the series counter with an existing series
             val max = reportSeriesList.maxBy { it.reportSeriesUid }
             seriesCounter.value = (max?.reportSeriesUid?: 0 + 1).toInt()
+        }else{
+            reportSeriesList = listOf(ReportSeries().apply {
+                val id = seriesCounter.getAndIncrement()
+                reportSeriesName = "Series $id"
+                reportSeriesUid = id.toLong()
+            })
         }
 
         return ReportWithSeriesWithFilters(report, reportSeriesList)
@@ -139,13 +145,17 @@ class ReportEditPresenter(context: Any,
         val reportSeriesList: List<ReportSeries>
         if(!reportSeries.isNullOrBlank()) {
             reportSeriesList = safeParseList(di, ReportSeries.serializer().list, ReportSeries::class, reportSeries)
-            editEntity.reportSeriesWithFiltersList = reportSeriesList
-
             // set the series counter with an existing series
             val max = reportSeriesList.maxBy { it.reportSeriesUid }
             seriesCounter.value = (max?.reportSeriesUid?: 0 + 1).toInt()
-
+        }else{
+            reportSeriesList = listOf(ReportSeries().apply {
+                val id = seriesCounter.getAndIncrement()
+                reportSeriesName = "Series $id"
+                reportSeriesUid = id.toLong()
+            })
         }
+        editEntity.reportSeriesWithFiltersList = reportSeriesList
 
         return editEntity
     }
@@ -249,7 +259,7 @@ class ReportEditPresenter(context: Any,
             } else {
                 systemImpl.go(ReportDetailView.VIEW_NAME,
                         mapOf(ARG_ENTITY_JSON to
-                                Json.stringify(ReportWithSeriesWithFilters.serializer(), entity)),
+                                safeStringify(di, ReportWithSeriesWithFilters.serializer(), entity)),
                         context)
             }
 
@@ -265,12 +275,6 @@ class ReportEditPresenter(context: Any,
         } else {
             view.subGroupOptions = XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }
         }
-    }
-
-    companion object {
-
-        //TODO: Add constants for keys that would be used for any One To Many Join helpers
-
     }
 
 }
