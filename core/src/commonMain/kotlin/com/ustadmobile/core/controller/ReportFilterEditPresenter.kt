@@ -12,6 +12,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ReportFilter
 import kotlinx.atomicfu.AtomicLong
 import kotlinx.atomicfu.atomic
@@ -55,6 +56,8 @@ class ReportFilterEditPresenter(context: Any,
 
     }
 
+
+
     class ValueMessageIdOption(day: ValueOption, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
@@ -77,8 +80,12 @@ class ReportFilterEditPresenter(context: Any,
 
         val entity = safeParse(di, ReportFilter.serializer(), entityJsonStr)
 
-        handleFieldOptionSelected(FieldOption.values().map { FieldMessageIdOption(it, context) }.find { it.code == entity.reportFilterField } as MessageIdOption)
-        handleConditionOptionSelected(ConditionOption.values().map { ConditionMessageIdOption(it, context) }.find { it.code == entity.reportFilterCondition } as MessageIdOption)
+        if(entity.reportFilterField != 0){
+            handleFieldOptionSelected(FieldOption.values().map { FieldMessageIdOption(it, context) }.find { it.code == entity.reportFilterField } as MessageIdOption)
+        }
+        if(entity.reportFilterCondition != 0){
+            handleConditionOptionSelected(ConditionOption.values().map { ConditionMessageIdOption(it, context) }.find { it.code == entity.reportFilterCondition } as MessageIdOption)
+        }
 
         return entity
     }
@@ -92,7 +99,7 @@ class ReportFilterEditPresenter(context: Any,
                         ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
 
                 view.valueType = FilterValueType.DROPDOWN
-                view.dropDownValueOptions = PersonConstants.GENDER_MESSAGE_ID_MAP
+                view.dropDownValueOptions = genderMap
                         .map { MessageIdOption(it.value, context, it.key) }
             }
 
@@ -141,5 +148,11 @@ class ReportFilterEditPresenter(context: Any,
         view.finishWithResult(listOf(entity))
     }
 
+    companion object{
+
+        val genderMap = mapOf(Person.GENDER_UNSET to MessageID.unset)
+                .plus(PersonConstants.GENDER_MESSAGE_ID_MAP)
+
+    }
 
 }

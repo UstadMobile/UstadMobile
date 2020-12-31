@@ -27,6 +27,7 @@ class ReportDetailPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
+    val loggedInPersonUid = accountManager.activeAccount.personUid
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -65,15 +66,14 @@ class ReportDetailPresenter(context: Any,
             setReportData(editEntity)
         }
 
-
         return editEntity
     }
 
     private fun setReportData(reportWithFilters: ReportWithSeriesWithFilters) {
         view.loading = true
         GlobalScope.launch {
-            val chartData = db.generateChartData(reportWithFilters, context, systemImpl)
-            val statementList = db.generateStatementList(reportWithFilters)
+            val chartData = db.generateChartData(reportWithFilters, context, systemImpl, loggedInPersonUid)
+            val statementList = db.generateStatementList(reportWithFilters, loggedInPersonUid)
             view.runOnUiThread(Runnable {
                 view.chartData = chartData
                 view.statementList = statementList
@@ -100,7 +100,9 @@ class ReportDetailPresenter(context: Any,
      *
      */
     fun handleOnClickAddFromDashboard(report: ReportWithSeriesWithFilters) {
-        repo.reportDao.insert(report)
+        GlobalScope.launch(){
+            repo.reportDao.insert(report)
+        }
     }
 
     companion object {

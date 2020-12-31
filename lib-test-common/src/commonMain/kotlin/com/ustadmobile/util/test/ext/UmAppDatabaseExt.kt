@@ -460,8 +460,8 @@ suspend fun UmAppDatabase.insertTestStatements() {
     }
 
     val thirdPerson = Person().apply {
-        firstNames = "Super"
-        lastName = "Woman"
+        firstNames = "Jane"
+        lastName = "Doe"
         gender = Person.GENDER_FEMALE
         dateOfBirth = Date(1992, 4,12).dateTimeDayStart.unixMillisLong
         personUid = personDao.insert(this)

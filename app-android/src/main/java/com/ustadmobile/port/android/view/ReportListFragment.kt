@@ -8,6 +8,7 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemReportListBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ReportListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -65,9 +66,10 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
                 }else{
                     listOf()
                 }
+                val accountManager: UstadAccountManager = di.direct.instance()
                 val reportWithSeriesWithFilters = ReportWithSeriesWithFilters(item, series)
                 val chartData = dbRepo?.generateChartData(reportWithSeriesWithFilters,
-                        holder.itemView.context, di.direct.instance())
+                        holder.itemView.context, di.direct.instance(), accountManager.activeAccount.personUid)
                 holder.itemBinding.listReportChart.setChartData(chartData)
                 holder.itemBinding.chart = chartData
             }

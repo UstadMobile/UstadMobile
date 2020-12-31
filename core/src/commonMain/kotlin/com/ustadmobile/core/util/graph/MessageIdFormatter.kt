@@ -11,7 +11,7 @@ class MessageIdFormatter(val map: Map<String, Int>,
     }
 
     override fun formatAsList(option: List<Any>): List<String> {
-        return option.map { systemImpl.getString(map[option as String] ?: MessageID.nothing_here, context) }
+        return option.map { format(it) }
     }
 
 }

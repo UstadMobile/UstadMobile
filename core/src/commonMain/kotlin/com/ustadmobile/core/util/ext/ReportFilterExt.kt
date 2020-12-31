@@ -16,9 +16,9 @@ fun ReportFilter.toDisplayString(context: Any): String {
 
     var valueString = reportFilterValue
     if(reportFilterValue.isNullOrBlank()){
-        val selectedOption = PersonConstants.GENDER_MESSAGE_ID_MAP.keys
+        val selectedOption = ReportFilterEditPresenter.genderMap.keys
                 .find { it == reportFilterDropDownValue }
-        val selectedMessagedId = PersonConstants.GENDER_MESSAGE_ID_MAP[selectedOption] ?: 0
+        val selectedMessagedId =  ReportFilterEditPresenter.genderMap[selectedOption] ?: 0
         valueString = UstadMobileSystemImpl.instance.getString(selectedMessagedId, context)
     }
 

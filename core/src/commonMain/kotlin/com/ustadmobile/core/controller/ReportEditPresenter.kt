@@ -65,7 +65,7 @@ class ReportEditPresenter(context: Any,
 
     enum class DataSetOptions(val optionVal: Int, val messageId: Int) {
         TOTAL_DURATION(ReportSeries.TOTAL_DURATION,
-                MessageID.content_total_duration),
+                MessageID.total_duration),
         AVERAGE_DURATION(ReportSeries.AVERAGE_DURATION,
                 MessageID.average_duration),
         NUMBER_SESSIONS(ReportSeries.NUMBER_SESSIONS,
@@ -233,6 +233,8 @@ class ReportEditPresenter(context: Any,
         } else {
             view.titleErrorText = null
         }
+
+        entity.reportSeries = safeStringify(di, ReportSeries.serializer().list, entity.reportSeriesWithFiltersList)
 
         GlobalScope.launch(doorMainDispatcher()) {
 

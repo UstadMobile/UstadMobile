@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.LastChangedBy
@@ -38,6 +39,7 @@ open class StatementEntity {
 
     var statementId: String? = null
 
+    @ColumnInfo(index = true)
     var statementPersonUid: Long = 0
 
     var statementVerbUid: Long = 0

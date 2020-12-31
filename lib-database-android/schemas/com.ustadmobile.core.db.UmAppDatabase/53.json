@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 53,
-    "identityHash": "d93a88dd2c1f2128708e8098b659d2c8",
+    "identityHash": "800d138141f5d365525939a6c6fbac55",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -3478,7 +3478,16 @@
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_StatementEntity_statementPersonUid",
+            "unique": false,
+            "columnNames": [
+              "statementPersonUid"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_StatementEntity_statementPersonUid` ON `${TABLE_NAME}` (`statementPersonUid`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -9344,7 +9353,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd93a88dd2c1f2128708e8098b659d2c8')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '800d138141f5d365525939a6c6fbac55')"
     ]
   }
 }

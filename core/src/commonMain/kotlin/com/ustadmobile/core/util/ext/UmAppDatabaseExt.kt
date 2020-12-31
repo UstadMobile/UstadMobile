@@ -212,9 +212,9 @@ fun UmAppDatabase.insertPersonOnlyAndGroup(entity: Person): Person{
 }
 
 suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
-                                    context: Any, impl: UstadMobileSystemImpl): ChartData{
+                                            context: Any, impl: UstadMobileSystemImpl, loggedInPersonUid: Long): ChartData{
 
-    val queries = report.generateSql()
+    val queries = report.generateSql(loggedInPersonUid)
     val seriesDataList = mutableListOf<SeriesData>()
 
     var yAxisValueFormatter: LabelValueFormatter? = null
@@ -242,7 +242,8 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                 MessageIdFormatter(
                         mapOf(Person.GENDER_MALE.toString() to MessageID.male,
                                 Person.GENDER_FEMALE.toString() to MessageID.female,
-                                Person.GENDER_OTHER.toString() to MessageID.other),
+                                Person.GENDER_OTHER.toString() to MessageID.other,
+                                Person.GENDER_UNSET.toString() to MessageID.unset),
                         impl, context)
             }
             Report.CONTENT_ENTRY ->{
@@ -285,10 +286,10 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
     return ChartData(seriesDataList.toList(), report, yAxisValueFormatter, xAxisFormatter)
 }
 
-fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters):
+fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters, loggedInPersonUid: Long):
         List<DataSource.Factory<Int, StatementEntityWithDisplay>> {
 
-    val queries = report.generateSql()
+    val queries = report.generateSql(loggedInPersonUid)
     val statementDataSourceList = mutableListOf<DataSource.Factory<Int, StatementEntityWithDisplay>>()
     queries.forEach {
         statementDataSourceList.add(statementDao.getListResults(SimpleDoorQuery(it.value.sqlListStr, it.value.queryParams)))

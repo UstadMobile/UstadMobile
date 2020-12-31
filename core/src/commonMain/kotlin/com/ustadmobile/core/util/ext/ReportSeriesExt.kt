@@ -2,10 +2,7 @@ package com.ustadmobile.core.util.ext
 
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.years
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportFilter
-import com.ustadmobile.lib.db.entities.ReportSeries
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.ACTIVITIES_RECORDED
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_DURATION
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_SESSION_PER_CONTENT
@@ -16,7 +13,7 @@ import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_DURATION
 
 data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParams: Array<Any>)
 
-fun ReportSeries.toSql(report: Report): QueryParts {
+fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
 
     val paramList = mutableListOf<Any>()
 
@@ -34,9 +31,15 @@ fun ReportSeries.toSql(report: Report): QueryParts {
         else -> ""
     }
 
+    val personPermission = """${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} 
+        ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+         LEFT JOIN StatementEntity ON StatementEntity.statementPersonUid = Person.personUid """.replace(":accountPersonUid","?")
+    paramList.add(accountPersonUid)
+    paramList.add(accountPersonUid)
+
+
     var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 
-                FROM StatementEntity 
-                LEFT JOIN Person ON Person.personUid = StatementEntity.statementPersonUid 
+                $personPermission 
                 LEFT JOIN XLangMapEntry ON StatementEntity.statementVerbUid = XLangMapEntry.verbLangMapUid """
 
 
@@ -44,21 +47,20 @@ fun ReportSeries.toSql(report: Report): QueryParts {
     if (reportSeriesSubGroup != 0) {
         sql += " , " + groupBy(reportSeriesSubGroup) + "AS subgroup "
     }
-    sql += "FROM StatementEntity "
 
-    if (report.xAxis == Report.GENDER || reportSeriesSubGroup == Report.GENDER){
-        sql += "LEFT JOIN PERSON ON Person.personUid = StatementEntity.statementPersonUid "
-    }
+    sql += personPermission
+
     if(report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS){
         sql += "LEFT JOIN ClazzMember ON StatementEntity.statementPersonUid = ClazzMember.clazzMemberPersonUid "
         sql += "LEFT JOIN Clazz ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid "
     }
 
-    if((report.toDate > 0 || report.fromDate > 0) || reportSeriesFilters.isNotEmpty()){
+    val where = "WHERE PersonGroupMember.groupMemberPersonUid = ? "
+    sql += where
+    sqlList += where
+    paramList.add(accountPersonUid)
 
-        val where = "WHERE "
-        sql += where
-        sqlList += where
+    if((report.toDate > 0 || report.fromDate > 0) || reportSeriesFilters.isNotEmpty()){
 
         val whereList = mutableListOf<String>()
         reportSeriesFilters.forEach { filter ->
@@ -73,10 +75,10 @@ fun ReportSeries.toSql(report: Report): QueryParts {
                     when(filter.reportFilterCondition){
 
                         ReportFilter.CONDITION_GREATER_THAN ->{
-                            whereList.add("Person.dateOfBirth >= ${dateTimeAge.dateDayStart.unixMillisLong}")
+                            whereList.add("Person.dateOfBirth >= ${dateTimeAge.dateDayStart.unixMillisLong} ")
                         }
                         ReportFilter.CONDITION_LESS_THAN ->{
-                            whereList.add("Person.dateOfBirth <= ${dateTimeAge.dateDayStart.unixMillisLong}")
+                            whereList.add("Person.dateOfBirth <= ${dateTimeAge.dateDayStart.unixMillisLong} ")
                         }
 
                     }
@@ -89,26 +91,26 @@ fun ReportSeries.toSql(report: Report): QueryParts {
 
                             when(filter.reportFilterDropDownValue){
                                 Person.GENDER_MALE -> {
-                                    whereList.add("Person.gender = ${Person.GENDER_MALE}")
+                                    whereList.add("Person.gender = ${Person.GENDER_MALE} ")
                                 }
                                 Person.GENDER_FEMALE -> {
-                                    whereList.add("Person.gender = ${Person.GENDER_FEMALE}")
+                                    whereList.add("Person.gender = ${Person.GENDER_FEMALE} ")
                                 }
                                 Person.GENDER_OTHER ->{
-                                    whereList.add("Person.gender = ${Person.GENDER_OTHER}")
+                                    whereList.add("Person.gender = ${Person.GENDER_OTHER} ")
                                 }
                             }
                         }
                         ReportFilter.CONDITION_IS_NOT ->{
                             when(filter.reportFilterDropDownValue){
                                 Person.GENDER_MALE -> {
-                                    whereList.add("Person.gender != ${Person.GENDER_MALE}")
+                                    whereList.add("Person.gender != ${Person.GENDER_MALE} ")
                                 }
                                 Person.GENDER_FEMALE -> {
-                                    whereList.add("Person.gender != ${Person.GENDER_FEMALE}")
+                                    whereList.add("Person.gender != ${Person.GENDER_FEMALE} ")
                                 }
                                 Person.GENDER_OTHER ->{
-                                    whereList.add("Person.gender != ${Person.GENDER_OTHER}")
+                                    whereList.add("Person.gender != ${Person.GENDER_OTHER} ")
                                 }
                             }
                         }
@@ -122,7 +124,7 @@ fun ReportSeries.toSql(report: Report): QueryParts {
             paramList.add(report.fromDate)
             paramList.add(report.toDate)
         }
-        val whereListStr = whereList.joinToString(" AND ")
+        val whereListStr = " AND " + whereList.joinToString(" AND ")
         sql += whereListStr
         sqlList += whereListStr
 

@@ -270,18 +270,13 @@
     <string name="line_graph" value="101">Line Graph</string>
 
     <string name="score" value="200">Average Score</string>
-    <string name="total_duration" value="201">Total Duration</string>
-    <string name="average_duration" value="202">Average Duration</string>
-    <string name="count_activity" value="203"># of activities</string>
-
-
-    <string name="content_total_duration" value="200">total duration</string>
-    <string name="average_duration_session" value="201">average duration per session</string>
-    <string name="count_session" value="202">number of sessions</string>
-    <string name="activity_recorded" value="203">number of activities recorded</string>
-    <string name="average_session_per_content" value="204">average number of sessions per content piece</string>
+    <string name="total_duration" value="200">Total duration</string>
+    <string name="average_duration" value="201">Average Duration</string>
+    <string name="count_session" value="202">Number of sessions</string>
+    <string name="activity_recorded" value="203">Number of activities recorded</string>
+    <string name="average_session_per_content" value="204">Average number of sessions per content piece</string>
     <string name="percent_students_completed"  value="205">% students completed</string>
-    <string name="count_students_completed"  value="206">number of students completed</string>
+    <string name="count_students_completed"  value="206">Number of students completed</string>
 
     <string name="xapi_day" value="300">Day</string>
     <string name="xapi_week" value="301">Week</string>
