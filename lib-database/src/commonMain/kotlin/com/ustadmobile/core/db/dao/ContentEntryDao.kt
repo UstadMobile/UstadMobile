@@ -256,7 +256,7 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @Query("""Select ContentEntry.contentEntryUid AS uid, ContentEntry.title As labelName 
                     from ContentEntry WHERE contentEntryUid IN (:contentEntryUids)""")
-    abstract fun getContentEntryFromUids(contentEntryUids: List<Long>): List<UidAndLabel>
+    abstract suspend fun getContentEntryFromUids(contentEntryUids: List<Long>): List<UidAndLabel>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertWithReplace(entry: ContentEntry)

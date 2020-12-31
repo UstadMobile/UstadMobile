@@ -120,7 +120,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
 
     @Query("SELECT Clazz.clazzUid AS uid, Clazz.clazzName AS labelName From Clazz WHERE clazzUid IN (:ids)")
-    abstract fun getClassNamesFromListOfIds(ids: List<Long>): List<UidAndLabel>
+    abstract suspend fun getClassNamesFromListOfIds(ids: List<Long>): List<UidAndLabel>
 
     @Query("SELECT * FROM Clazz WHERE clazzName = :name and CAST(isClazzActive AS INTEGER) = 1")
     abstract fun findByClazzName(name: String): List<Clazz>

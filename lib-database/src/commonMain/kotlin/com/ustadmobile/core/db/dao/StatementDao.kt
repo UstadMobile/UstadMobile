@@ -32,7 +32,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     abstract fun findByStatementIdList(id: List<String>): List<StatementEntity>
 
     @RawQuery
-    abstract fun getResults(query: DoorQuery): List<ReportData>
+    abstract suspend fun getResults(query: DoorQuery): List<ReportData>
 
     open suspend fun getResults(sqlStr: String, paramsList: Array<Any>): List<ReportData> {
         return getResults(SimpleDoorQuery(sqlStr, paramsList))

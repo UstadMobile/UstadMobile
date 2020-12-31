@@ -270,7 +270,8 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
             MessageIdFormatter(
                     mapOf(Person.GENDER_MALE.toString() to MessageID.male,
                             Person.GENDER_FEMALE.toString() to MessageID.female,
-                            Person.GENDER_OTHER.toString() to MessageID.other),
+                            Person.GENDER_OTHER.toString() to MessageID.other,
+                            Person.GENDER_UNSET.toString() to MessageID.unset),
                     impl, context)
         }
         Report.CONTENT_ENTRY ->{
