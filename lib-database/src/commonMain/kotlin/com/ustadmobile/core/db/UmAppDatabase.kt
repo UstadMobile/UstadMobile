@@ -3181,6 +3181,148 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_53_54 = object: DoorMigration(53, 54) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE WorkSpaceTerms ADD COLUMN wtLangUid INTEGER DEFAULT 0 NOT NULL")
+                database.execSQL("ALTER TABLE WorkspaceTerms ADD COLUMN wtActive INTEGER DEFAULT 0 NOT NULL")
+
+                database.execSQL("ALTER TABLE WorkSpace ADD COLUMN wsPcsn INTEGER DEFAULT 0 NOT NULL")
+                database.execSQL("ALTER TABLE WorkSpace ADD COLUMN wsLcsn INTEGER DEFAULT 0 NOT NULL")
+                database.execSQL("ALTER TABLE WorkSpace ADD COLUMN wsLcb INTEGER DEFAULT 0 NOT NULL")
+
+                database.execSQL("ALTER TABLE Language ADD COLUMN Language_Type TEXT")
+
+                //Change WorkSpace into a SyncableEntity
+                if(database.dbType() == DoorDbType.POSTGRES) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS WorkSpace_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE 
+                      | INDEX index_WorkSpace_trk_clientId_epk_csn 
+                      |ON WorkSpace_trk (clientId, epk, csn)
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE 
+                      |UNIQUE INDEX index_WorkSpace_trk_epk_clientId 
+                      |ON WorkSpace_trk (epk, clientId)
+                      """.trimMargin())
+
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS WorkSpace_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS WorkSpace_lcsn_seq")
+
+                    database.execSQL("""
+                      |CREATE OR REPLACE FUNCTION 
+                      | inccsn_189_fn() RETURNS trigger AS ${'$'}${'$'}
+                      | BEGIN  
+                      | UPDATE WorkSpace SET wsLcsn =
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.wsLcsn 
+                      | ELSE NEXTVAL('WorkSpace_lcsn_seq') END),
+                      | wsPcsn = 
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                      | THEN NEXTVAL('WorkSpace_mcsn_seq') 
+                      | ELSE NEW.wsPcsn END)
+                      | WHERE uid = NEW.uid;
+                      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      | SELECT 189, NEW.uid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+                      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+                      | RETURN null;
+                      | END ${'$'}${'$'}
+                      | LANGUAGE plpgsql
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER inccsn_189_trig 
+                      |AFTER UPDATE OR INSERT ON WorkSpace 
+                      |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                      |EXECUTE PROCEDURE inccsn_189_fn()
+                      """.trimMargin())
+
+                }else {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS WorkSpace_trk (  epk  INTEGER NOT NULL, clientId  INTEGER  NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL, reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL, pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE 
+                      | INDEX index_WorkSpace_trk_clientId_epk_csn 
+                      |ON WorkSpace_trk (clientId, epk, csn)
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE 
+                      |UNIQUE INDEX index_WorkSpace_trk_epk_clientId 
+                      |ON WorkSpace_trk (epk, clientId)
+                      """.trimMargin())
+
+
+                    database.execSQL("""
+                      |CREATE TRIGGER INS_LOC_189
+                      |AFTER INSERT ON WorkSpace
+                      |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                      |    NEW.wsLcsn = 0)
+                      |BEGIN
+                      |    UPDATE WorkSpace
+                      |    SET wsPcsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 189)
+                      |    WHERE uid = NEW.uid;
+                      |    
+                      |    UPDATE SqliteChangeSeqNums
+                      |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+                      |    WHERE sCsnTableId = 189;
+                      |END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |            CREATE TRIGGER INS_PRI_189
+                      |            AFTER INSERT ON WorkSpace
+                      |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                      |                NEW.wsPcsn = 0)
+                      |            BEGIN
+                      |                UPDATE WorkSpace
+                      |                SET wsPcsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 189)
+                      |                WHERE uid = NEW.uid;
+                      |                
+                      |                UPDATE SqliteChangeSeqNums
+                      |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                      |                WHERE sCsnTableId = 189;
+                      |                
+                      |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      |SELECT 189, NEW.uid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                      |            END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER UPD_LOC_189
+                      |AFTER UPDATE ON WorkSpace
+                      |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                      |    AND (NEW.wsLcsn == OLD.wsLcsn OR
+                      |        NEW.wsLcsn == 0))
+                      |BEGIN
+                      |    UPDATE WorkSpace
+                      |    SET wsLcsn = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 189) 
+                      |    WHERE uid = NEW.uid;
+                      |    
+                      |    UPDATE SqliteChangeSeqNums 
+                      |    SET sCsnNextLocal = sCsnNextLocal + 1
+                      |    WHERE sCsnTableId = 189;
+                      |END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |            CREATE TRIGGER UPD_PRI_189
+                      |            AFTER UPDATE ON WorkSpace
+                      |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                      |                AND (NEW.wsPcsn == OLD.wsPcsn OR
+                      |                    NEW.wsPcsn == 0))
+                      |            BEGIN
+                      |                UPDATE WorkSpace
+                      |                SET wsPcsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 189)
+                      |                WHERE uid = NEW.uid;
+                      |                
+                      |                UPDATE SqliteChangeSeqNums
+                      |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                      |                WHERE sCsnTableId = 189;
+                      |                
+                      |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      |SELECT 189, NEW.uid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                      |            END
+                      """.trimMargin())
+
+                }
+            }
+        }
+
+        val ffbca3 = "a"
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
@@ -3189,7 +3331,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
-                    MIGRATION_51_52, MIGRATION_52_53)
+                    MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54)
 
 
 
