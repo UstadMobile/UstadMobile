@@ -4,9 +4,9 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class WorkspaceTermsWithLanguage : WorkspaceTerms(){
+class SiteTermsWithLanguage : SiteTerms(){
 
     @Embedded
-    var wtLanguage: Language? = null
+    var stLanguage: Language? = null
 
 }

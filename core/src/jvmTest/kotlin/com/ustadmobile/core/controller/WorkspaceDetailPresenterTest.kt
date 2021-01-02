@@ -7,24 +7,17 @@ import org.junit.Test
 import com.ustadmobile.core.view.WorkspaceDetailView
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.WorkspaceTermsDao
-import com.ustadmobile.core.db.dao.WorkSpaceDao
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.db.SiteTermsDao
+import com.ustadmobile.core.db.dao.SiteDao
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorLifecycleObserver
 
-import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.WorkSpace
-import com.ustadmobile.lib.db.entities.WorkspaceTerms
-import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
-import org.kodein.di.direct
-import org.kodein.di.instance
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -43,9 +36,9 @@ class WorkspaceDetailPresenterTest {
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
-    private lateinit var repoWorkspaceDaoSpy: WorkSpaceDao
+    private lateinit var repoWorkspaceDaoSpy: SiteDao
 
-    private lateinit var repoWorkspaceTermsDaoSpy: WorkspaceTermsDao
+    private lateinit var repoWorkspaceTermsDaoSpy: SiteTermsDao
 
     private lateinit var di: DI
 
@@ -63,11 +56,11 @@ class WorkspaceDetailPresenterTest {
 
         val repo: UmAppDatabase by di.activeRepoInstance()
 
-        repoWorkspaceDaoSpy = spy(repo.workSpaceDao)
-        whenever(repo.workSpaceDao).thenReturn(repoWorkspaceDaoSpy)
+        repoWorkspaceDaoSpy = spy(repo.siteDao)
+        whenever(repo.siteDao).thenReturn(repoWorkspaceDaoSpy)
 
-        repoWorkspaceTermsDaoSpy = spy(repo.workspaceTermsDao)
-        whenever(repo.workspaceTermsDao).thenReturn(repoWorkspaceTermsDaoSpy)
+        repoWorkspaceTermsDaoSpy = spy(repo.siteTermsDao)
+        whenever(repo.siteTermsDao).thenReturn(repoWorkspaceTermsDaoSpy)
     }
 
     @Test
@@ -78,7 +71,7 @@ class WorkspaceDetailPresenterTest {
 
         val testEntity = WorkSpace().apply {
             //set variables here
-            this.uid = repo.workSpaceDao.insert(this)
+            this.uid = repo.siteDao.insert(this)
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.uid.toString())

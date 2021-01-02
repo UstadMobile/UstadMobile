@@ -14,20 +14,17 @@ import com.toughra.ustadmobile.databinding.ItemWorkspaceTermsBinding
 import com.ustadmobile.core.controller.WorkSpaceEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.observeResult
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.WorkSpaceEditView
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.WorkSpace
-import com.ustadmobile.lib.db.entities.WorkspaceTerms
-import com.ustadmobile.lib.db.entities.WorkspaceTermsWithLanguage
+import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 
 interface WorkSpaceEditFragmentEventHandler {
 
-    fun onClickEditWorkspaceTerms(workspaceTerms: WorkspaceTermsWithLanguage?)
+    fun onClickEditWorkspaceTerms(workspaceTerms: SiteTermsWithLanguage?)
 
     fun onClickNewWorkspaceTerms()
 
@@ -44,7 +41,7 @@ class WorkSpaceEditFragment: UstadEditFragment<WorkSpace>(), WorkSpaceEditView, 
 
 
     class WorkspaceTermsRecyclerAdapter(val activityEventHandler: WorkSpaceEditFragmentEventHandler,
-            var presenter: WorkSpaceEditPresenter?): ListAdapter<WorkspaceTermsWithLanguage, WorkspaceTermsRecyclerAdapter.WorkspaceTermsViewHolder>(DIFF_CALLBACK_WORKSPACETERMS) {
+            var presenter: WorkSpaceEditPresenter?): ListAdapter<SiteTermsWithLanguage, WorkspaceTermsRecyclerAdapter.WorkspaceTermsViewHolder>(DIFF_CALLBACK_WORKSPACETERMS) {
 
             class WorkspaceTermsViewHolder(val binding: ItemWorkspaceTermsBinding): RecyclerView.ViewHolder(binding.root)
 
@@ -61,7 +58,7 @@ class WorkSpaceEditFragment: UstadEditFragment<WorkSpace>(), WorkSpaceEditView, 
             }
         }
 
-    override var workspaceTermsList: DoorLiveData<List<WorkspaceTermsWithLanguage>>? = null
+    override var workspaceTermsList: DoorLiveData<List<SiteTermsWithLanguage>>? = null
         get() = field
         set(value) {
             field?.removeObserver(workspaceTermsObserver)
@@ -73,13 +70,13 @@ class WorkSpaceEditFragment: UstadEditFragment<WorkSpace>(), WorkSpaceEditView, 
 
     //private var workspaceTermsRecyclerView: RecyclerView? = null
 
-    private val workspaceTermsObserver = Observer<List<WorkspaceTermsWithLanguage>?> {
+    private val workspaceTermsObserver = Observer<List<SiteTermsWithLanguage>?> {
         t -> workspaceTermsRecyclerAdapter?.submitList(t)
     }
 
-    override fun onClickEditWorkspaceTerms(workspaceTerms: WorkspaceTermsWithLanguage?) {
+    override fun onClickEditWorkspaceTerms(workspaceTerms: SiteTermsWithLanguage?) {
         onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(workspaceTerms, R.id.workspace_terms_edit_dest, WorkspaceTermsWithLanguage::class.java)
+        navigateToEditEntity(workspaceTerms, R.id.workspace_terms_edit_dest, SiteTermsWithLanguage::class.java)
     }
 
     override fun onClickNewWorkspaceTerms() = onClickEditWorkspaceTerms(null)
@@ -109,7 +106,7 @@ class WorkSpaceEditFragment: UstadEditFragment<WorkSpace>(), WorkSpaceEditView, 
         super.onViewCreated(view, savedInstanceState)
 
         findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                WorkspaceTermsWithLanguage::class.java) {
+                SiteTermsWithLanguage::class.java) {
             val workspaceTerms = it.firstOrNull() ?: return@observeResult
 
             mPresenter?.handleAddOrEditWorkspaceTerms(workspaceTerms)
@@ -143,12 +140,12 @@ class WorkSpaceEditFragment: UstadEditFragment<WorkSpace>(), WorkSpaceEditView, 
 
     companion object {
 
-        val DIFF_CALLBACK_WORKSPACETERMS = object: DiffUtil.ItemCallback<WorkspaceTermsWithLanguage>() {
-            override fun areItemsTheSame(oldItem: WorkspaceTermsWithLanguage, newItem: WorkspaceTermsWithLanguage): Boolean {
-                return oldItem.wtUid == newItem.wtUid
+        val DIFF_CALLBACK_WORKSPACETERMS = object: DiffUtil.ItemCallback<SiteTermsWithLanguage>() {
+            override fun areItemsTheSame(oldItem: SiteTermsWithLanguage, newItem: SiteTermsWithLanguage): Boolean {
+                return oldItem.sTermsUid == newItem.sTermsUid
             }
 
-            override fun areContentsTheSame(oldItem: WorkspaceTermsWithLanguage, newItem: WorkspaceTermsWithLanguage): Boolean {
+            override fun areContentsTheSame(oldItem: SiteTermsWithLanguage, newItem: SiteTermsWithLanguage): Boolean {
                 return oldItem.wtLang == newItem.wtLang
                         && oldItem.termsHtml == newItem.termsHtml
             }

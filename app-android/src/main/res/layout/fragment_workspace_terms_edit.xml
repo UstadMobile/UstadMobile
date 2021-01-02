@@ -11,7 +11,7 @@
 
         <variable
             name="workspaceTerms"
-            type="com.ustadmobile.lib.db.entities.WorkspaceTermsWithLanguage" />
+            type="com.ustadmobile.lib.db.entities.SiteTermsWithLanguage" />
 
         <variable
             name="loading"
@@ -54,7 +54,7 @@
                     app:runOnClickWhenFocused="@{true}"
                     android:onClick="@{() -> activityEventHandler.onClickLanguage()}"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    android:text="@{workspaceTerms.wtLanguage.name}"
+                    android:text="@{workspaceTerms.stLanguage.name}"
                     android:hint="@string/language" />
             </com.google.android.material.textfield.TextInputLayout>
 

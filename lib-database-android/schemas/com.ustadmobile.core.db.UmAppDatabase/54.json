@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 54,
-    "identityHash": "9b60244223dfbba35217abfe534e95b4",
+    "identityHash": "db8f2bea6d789afe3751481e8d56998e",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5059,36 +5059,36 @@
         "foreignKeys": []
       },
       {
-        "tableName": "WorkSpace",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`uid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `wsPcsn` INTEGER NOT NULL, `wsLcsn` INTEGER NOT NULL, `wsLcb` INTEGER NOT NULL, `name` TEXT, `guestLogin` INTEGER NOT NULL, `registrationAllowed` INTEGER NOT NULL)",
+        "tableName": "Site",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`siteUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `sitePcsn` INTEGER NOT NULL, `siteLcsn` INTEGER NOT NULL, `siteLcb` INTEGER NOT NULL, `siteName` TEXT, `guestLogin` INTEGER NOT NULL, `registrationAllowed` INTEGER NOT NULL)",
         "fields": [
           {
-            "fieldPath": "uid",
-            "columnName": "uid",
+            "fieldPath": "siteUid",
+            "columnName": "siteUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "wsPcsn",
-            "columnName": "wsPcsn",
+            "fieldPath": "sitePcsn",
+            "columnName": "sitePcsn",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "wsLcsn",
-            "columnName": "wsLcsn",
+            "fieldPath": "siteLcsn",
+            "columnName": "siteLcsn",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "wsLcb",
-            "columnName": "wsLcb",
+            "fieldPath": "siteLcb",
+            "columnName": "siteLcb",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "name",
-            "columnName": "name",
+            "fieldPath": "siteName",
+            "columnName": "siteName",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -5107,7 +5107,7 @@
         ],
         "primaryKey": {
           "columnNames": [
-            "uid"
+            "siteUid"
           ],
           "autoGenerate": true
         },
@@ -5381,12 +5381,12 @@
         "foreignKeys": []
       },
       {
-        "tableName": "WorkspaceTerms",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wtUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `termsHtml` TEXT, `wtLang` TEXT, `wtLangUid` INTEGER NOT NULL, `wtActive` INTEGER NOT NULL, `wtLastChangedBy` INTEGER NOT NULL, `wtPrimaryCsn` INTEGER NOT NULL, `wtLocalCsn` INTEGER NOT NULL)",
+        "tableName": "SiteTerms",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`sTermsUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `termsHtml` TEXT, `sTermsLang` TEXT, `sTermsLangUid` INTEGER NOT NULL, `sTermsActive` INTEGER NOT NULL, `sTermsLastChangedBy` INTEGER NOT NULL, `sTermsPrimaryCsn` INTEGER NOT NULL, `sTermsLocalCsn` INTEGER NOT NULL)",
         "fields": [
           {
-            "fieldPath": "wtUid",
-            "columnName": "wtUid",
+            "fieldPath": "sTermsUid",
+            "columnName": "sTermsUid",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -5397,45 +5397,45 @@
             "notNull": false
           },
           {
-            "fieldPath": "wtLang",
-            "columnName": "wtLang",
+            "fieldPath": "sTermsLang",
+            "columnName": "sTermsLang",
             "affinity": "TEXT",
             "notNull": false
           },
           {
-            "fieldPath": "wtLangUid",
-            "columnName": "wtLangUid",
+            "fieldPath": "sTermsLangUid",
+            "columnName": "sTermsLangUid",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "wtActive",
-            "columnName": "wtActive",
+            "fieldPath": "sTermsActive",
+            "columnName": "sTermsActive",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "wtLastChangedBy",
-            "columnName": "wtLastChangedBy",
+            "fieldPath": "sTermsLastChangedBy",
+            "columnName": "sTermsLastChangedBy",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "wtPrimaryCsn",
-            "columnName": "wtPrimaryCsn",
+            "fieldPath": "sTermsPrimaryCsn",
+            "columnName": "sTermsPrimaryCsn",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "wtLocalCsn",
-            "columnName": "wtLocalCsn",
+            "fieldPath": "sTermsLocalCsn",
+            "columnName": "sTermsLocalCsn",
             "affinity": "INTEGER",
             "notNull": true
           }
         ],
         "primaryKey": {
           "columnNames": [
-            "wtUid"
+            "sTermsUid"
           ],
           "autoGenerate": true
         },
@@ -9349,7 +9349,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "WorkSpace_trk",
+        "tableName": "Site_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
           {
@@ -9403,23 +9403,23 @@
         },
         "indices": [
           {
-            "name": "index_WorkSpace_trk_clientId_epk_csn",
+            "name": "index_Site_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_WorkSpace_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_Site_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
           },
           {
-            "name": "index_WorkSpace_trk_epk_clientId",
+            "name": "index_Site_trk_epk_clientId",
             "unique": true,
             "columnNames": [
               "epk",
               "clientId"
             ],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_WorkSpace_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_Site_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -9653,7 +9653,7 @@
         "foreignKeys": []
       },
       {
-        "tableName": "WorkspaceTerms_trk",
+        "tableName": "SiteTerms_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
           {
@@ -9707,23 +9707,23 @@
         },
         "indices": [
           {
-            "name": "index_WorkspaceTerms_trk_clientId_epk_csn",
+            "name": "index_SiteTerms_trk_clientId_epk_csn",
             "unique": false,
             "columnNames": [
               "clientId",
               "epk",
               "csn"
             ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_WorkspaceTerms_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_SiteTerms_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
           },
           {
-            "name": "index_WorkspaceTerms_trk_epk_clientId",
+            "name": "index_SiteTerms_trk_epk_clientId",
             "unique": true,
             "columnNames": [
               "epk",
               "clientId"
             ],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_WorkspaceTerms_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_SiteTerms_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
           }
         ],
         "foreignKeys": []
@@ -9732,7 +9732,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9b60244223dfbba35217abfe534e95b4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'db8f2bea6d789afe3751481e8d56998e')"
     ]
   }
 }

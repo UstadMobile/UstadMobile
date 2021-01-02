@@ -36,10 +36,10 @@ import kotlin.jvm.Volatile
     ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
     Report::class, ReportFilter::class,
-    DeviceSession::class, WorkSpace::class, ContainerImportJob::class,
+    DeviceSession::class, Site::class, ContainerImportJob::class,
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
-    WorkspaceTerms::class,
+    SiteTerms::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -276,10 +276,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("deviceSessionDao")
     abstract val deviceSessionDao: DeviceSessionDao
 
-    @JsName("workSpaceDao")
-    abstract val workSpaceDao: WorkSpaceDao
+    abstract val siteDao: SiteDao
 
-    abstract val workspaceTermsDao: WorkspaceTermsDao
+    abstract val siteTermsDao: SiteTermsDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
@@ -3183,46 +3182,47 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         val MIGRATION_53_54 = object: DoorMigration(53, 54) {
             override fun migrate(database: DoorSqlDatabase) {
-                database.execSQL("ALTER TABLE WorkSpaceTerms ADD COLUMN wtLangUid INTEGER DEFAULT 0 NOT NULL")
-                database.execSQL("ALTER TABLE WorkspaceTerms ADD COLUMN wtActive INTEGER DEFAULT 0 NOT NULL")
-
-                database.execSQL("ALTER TABLE WorkSpace ADD COLUMN wsPcsn INTEGER DEFAULT 0 NOT NULL")
-                database.execSQL("ALTER TABLE WorkSpace ADD COLUMN wsLcsn INTEGER DEFAULT 0 NOT NULL")
-                database.execSQL("ALTER TABLE WorkSpace ADD COLUMN wsLcb INTEGER DEFAULT 0 NOT NULL")
-
                 database.execSQL("ALTER TABLE Language ADD COLUMN Language_Type TEXT")
 
                 //Change WorkSpace into a SyncableEntity
                 if(database.dbType() == DoorDbType.POSTGRES) {
-                    database.execSQL("CREATE TABLE IF NOT EXISTS WorkSpace_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    //TODO: sync annotation add columns to table
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Site_trk (  epk  BIGINT NOT NULL, clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  BOOL NOT NULL, reqId  INTEGER NOT NULL, ts  BIGINT NOT NULL, pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("""
                       |CREATE 
-                      | INDEX index_WorkSpace_trk_clientId_epk_csn 
-                      |ON WorkSpace_trk (clientId, epk, csn)
+                      | INDEX index_Site_trk_clientId_epk_csn 
+                      |ON Site_trk (clientId, epk, csn)
                       """.trimMargin())
                     database.execSQL("""
                       |CREATE 
-                      |UNIQUE INDEX index_WorkSpace_trk_epk_clientId 
-                      |ON WorkSpace_trk (epk, clientId)
+                      |UNIQUE INDEX index_Site_trk_epk_clientId 
+                      |ON Site_trk (epk, clientId)
                       """.trimMargin())
 
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS WorkSpace_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS WorkSpace_lcsn_seq")
+                    database.execSQL("ALTER TABLE WorkSpace RENAME TO Site")
+                    database.execSQL("ALTER TABLE Site RENAME COLUMN uid TO siteUid")
+                    database.execSQL("ALTER TABLE Site ADD COLUMN sitePcsn BIGINT NOT NULL")
+                    database.execSQL("ALTER TABLE Site ADD COLUMN siteLcsn BIGINT NOT NULL")
+                    database.execSQL("ALTER TABLE Site ADD COLUMN siteLcb INTEGER NOT NULL")
+                    database.execSQL("ALTER TABLE Site RENAME COLUMN name to siteName")
+
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS Site_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS Site_lcsn_seq")
 
                     database.execSQL("""
                       |CREATE OR REPLACE FUNCTION 
-                      | inccsn_189_fn() RETURNS trigger AS ${'$'}${'$'}
+                      | `inccsn_189_fn`() RETURNS trigger AS ${'$'}${'$'}
                       | BEGIN  
-                      | UPDATE WorkSpace SET wsLcsn =
-                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.wsLcsn 
-                      | ELSE NEXTVAL('WorkSpace_lcsn_seq') END),
-                      | wsPcsn = 
+                      | UPDATE Site SET siteLcsn =
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.siteLcsn 
+                      | ELSE NEXTVAL('Site_lcsn_seq') END),
+                      | sitePcsn = 
                       | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
-                      | THEN NEXTVAL('WorkSpace_mcsn_seq') 
-                      | ELSE NEW.wsPcsn END)
-                      | WHERE uid = NEW.uid;
+                      | THEN NEXTVAL('Site_mcsn_seq') 
+                      | ELSE NEW.sitePcsn END)
+                      | WHERE siteUid = NEW.siteUid;
                       | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
-                      | SELECT 189, NEW.uid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+                      | SELECT 189, NEW.siteUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
                       | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
                       | RETURN null;
                       | END ${'$'}${'$'}
@@ -3230,34 +3230,76 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       """.trimMargin())
                     database.execSQL("""
                       |CREATE TRIGGER inccsn_189_trig 
-                      |AFTER UPDATE OR INSERT ON WorkSpace 
+                      |AFTER UPDATE OR INSERT ON Site 
                       |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                       |EXECUTE PROCEDURE inccsn_189_fn()
                       """.trimMargin())
 
+
+                    database.execSQL("DROP TABLE WorkspaceTerms")
+
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SiteTerms (  termsHtml  TEXT , sTermsLang  TEXT , sTermsLangUid  BIGINT  NOT NULL , sTermsActive  BOOL  NOT NULL , sTermsLastChangedBy  INTEGER  NOT NULL , sTermsPrimaryCsn  BIGINT  NOT NULL , sTermsLocalCsn  BIGINT  NOT NULL , sTermsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SiteTerms_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS SiteTerms_lcsn_seq")
+                    database.execSQL("""
+                      |CREATE OR REPLACE FUNCTION 
+                      | inccsn_272_fn() RETURNS trigger AS ${'$'}${'$'}
+                      | BEGIN  
+                      | UPDATE SiteTerms SET sTermsLocalCsn =
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.sTermsLocalCsn 
+                      | ELSE NEXTVAL('SiteTerms_lcsn_seq') END),
+                      | sTermsPrimaryCsn = 
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                      | THEN NEXTVAL('SiteTerms_mcsn_seq') 
+                      | ELSE NEW.sTermsPrimaryCsn END)
+                      | WHERE sTermsUid = NEW.sTermsUid;
+                      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      | SELECT 272, NEW.sTermsUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+                      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+                      | RETURN null;
+                      | END ${'$'}${'$'}
+                      | LANGUAGE plpgsql
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER inccsn_272_trig 
+                      |AFTER UPDATE OR INSERT ON SiteTerms 
+                      |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                      |EXECUTE PROCEDURE inccsn_272_fn()
+                      """.trimMargin())
+
+
                 }else {
-                    database.execSQL("CREATE TABLE IF NOT EXISTS WorkSpace_trk (  epk  INTEGER NOT NULL, clientId  INTEGER  NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL, reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL, pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    //Create site table as a syncable entity
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Site (  sitePcsn  INTEGER  NOT NULL , siteLcsn  INTEGER  NOT NULL , siteLcb  INTEGER  NOT NULL , siteName  TEXT , guestLogin  INTEGER  NOT NULL , registrationAllowed  INTEGER  NOT NULL , siteUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                        INSERT INTO Site (siteUid, sitePcsn, siteLcsn, siteLcb, siteName, guestLogin, registrationAllowed) 
+                        SELECT uid AS siteUid, 0 AS sitePcsn, 0 AS siteLcsn, 0 AS siteLcb, name AS siteName, guestLogin, registrationAllowed 
+                        FROM WorkSpace""")
+                    database.execSQL("DROP TABLE WorkSpace")
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Site_trk (  epk  INTEGER NOT NULL, clientId  INTEGER  NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL, reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL, pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                       |CREATE 
-                      | INDEX index_WorkSpace_trk_clientId_epk_csn 
-                      |ON WorkSpace_trk (clientId, epk, csn)
+                      | INDEX index_Site_trk_clientId_epk_csn 
+                      |ON Site_trk (clientId, epk, csn)
                       """.trimMargin())
                     database.execSQL("""
                       |CREATE 
-                      |UNIQUE INDEX index_WorkSpace_trk_epk_clientId 
-                      |ON WorkSpace_trk (epk, clientId)
+                      |UNIQUE INDEX index_Site_trk_epk_clientId 
+                      |ON Site_trk (epk, clientId)
                       """.trimMargin())
 
 
                     database.execSQL("""
                       |CREATE TRIGGER INS_LOC_189
-                      |AFTER INSERT ON WorkSpace
+                      |AFTER INSERT ON Site
                       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
-                      |    NEW.wsLcsn = 0)
+                      |    NEW.siteLcsn = 0)
                       |BEGIN
-                      |    UPDATE WorkSpace
-                      |    SET wsPcsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 189)
-                      |    WHERE uid = NEW.uid;
+                      |    UPDATE Site
+                      |    SET sitePcsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 189)
+                      |    WHERE siteUid = NEW.siteUid;
                       |    
                       |    UPDATE SqliteChangeSeqNums
                       |    SET sCsnNextPrimary = sCsnNextPrimary + 1
@@ -3266,32 +3308,32 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       """.trimMargin())
                     database.execSQL("""
                       |            CREATE TRIGGER INS_PRI_189
-                      |            AFTER INSERT ON WorkSpace
+                      |            AFTER INSERT ON Site
                       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
-                      |                NEW.wsPcsn = 0)
+                      |                NEW.sitePcsn = 0)
                       |            BEGIN
-                      |                UPDATE WorkSpace
-                      |                SET wsPcsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 189)
-                      |                WHERE uid = NEW.uid;
+                      |                UPDATE Site
+                      |                SET sitePcsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 189)
+                      |                WHERE siteUid = NEW.siteUid;
                       |                
                       |                UPDATE SqliteChangeSeqNums
                       |                SET sCsnNextPrimary = sCsnNextPrimary + 1
                       |                WHERE sCsnTableId = 189;
                       |                
                       |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
-                      |SELECT 189, NEW.uid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                      |SELECT 189, NEW.siteUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
                       |            END
                       """.trimMargin())
                     database.execSQL("""
                       |CREATE TRIGGER UPD_LOC_189
-                      |AFTER UPDATE ON WorkSpace
+                      |AFTER UPDATE ON Site
                       |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
-                      |    AND (NEW.wsLcsn == OLD.wsLcsn OR
-                      |        NEW.wsLcsn == 0))
+                      |    AND (NEW.siteLcsn == OLD.siteLcsn OR
+                      |        NEW.siteLcsn == 0))
                       |BEGIN
-                      |    UPDATE WorkSpace
-                      |    SET wsLcsn = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 189) 
-                      |    WHERE uid = NEW.uid;
+                      |    UPDATE Site
+                      |    SET siteLcsn = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 189) 
+                      |    WHERE siteUid = NEW.siteUid;
                       |    
                       |    UPDATE SqliteChangeSeqNums 
                       |    SET sCsnNextLocal = sCsnNextLocal + 1
@@ -3300,29 +3342,112 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       """.trimMargin())
                     database.execSQL("""
                       |            CREATE TRIGGER UPD_PRI_189
-                      |            AFTER UPDATE ON WorkSpace
+                      |            AFTER UPDATE ON Site
                       |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
-                      |                AND (NEW.wsPcsn == OLD.wsPcsn OR
-                      |                    NEW.wsPcsn == 0))
+                      |                AND (NEW.sitePcsn == OLD.sitePcsn OR
+                      |                    NEW.sitePcsn == 0))
                       |            BEGIN
-                      |                UPDATE WorkSpace
-                      |                SET wsPcsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 189)
-                      |                WHERE uid = NEW.uid;
+                      |                UPDATE Site
+                      |                SET sitePcsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 189)
+                      |                WHERE siteUid = NEW.siteUid;
                       |                
                       |                UPDATE SqliteChangeSeqNums
                       |                SET sCsnNextPrimary = sCsnNextPrimary + 1
                       |                WHERE sCsnTableId = 189;
                       |                
                       |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
-                      |SELECT 189, NEW.uid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                      |SELECT 189, NEW.siteUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
                       |            END
+                      """.trimMargin())
+
+                    //Create SiteTerms as a syncable entity that replaces WorkspaceTerms
+                    database.execSQL("DROP TABLE WorkspaceTerms")
+                    database.execSQL("DROP TABLE WorkspaceTerms_trk")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SiteTerms (  termsHtml  TEXT , sTermsLang  TEXT , sTermsLangUid  INTEGER  NOT NULL , sTermsActive  INTEGER  NOT NULL , sTermsLastChangedBy  INTEGER  NOT NULL , sTermsPrimaryCsn  INTEGER  NOT NULL , sTermsLocalCsn  INTEGER  NOT NULL , sTermsUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+
+                    database.execSQL("""
+                      |CREATE TRIGGER INS_LOC_272
+                      |AFTER INSERT ON SiteTerms
+                      |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                      |    NEW.sTermsLocalCsn = 0)
+                      |BEGIN
+                      |    UPDATE SiteTerms
+                      |    SET sTermsPrimaryCsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 272)
+                      |    WHERE sTermsUid = NEW.sTermsUid;
+                      |    
+                      |    UPDATE SqliteChangeSeqNums
+                      |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+                      |    WHERE sCsnTableId = 272;
+                      |END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |            CREATE TRIGGER INS_PRI_272
+                      |            AFTER INSERT ON SiteTerms
+                      |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                      |                NEW.sTermsPrimaryCsn = 0)
+                      |            BEGIN
+                      |                UPDATE SiteTerms
+                      |                SET sTermsPrimaryCsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 272)
+                      |                WHERE sTermsUid = NEW.sTermsUid;
+                      |                
+                      |                UPDATE SqliteChangeSeqNums
+                      |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                      |                WHERE sCsnTableId = 272;
+                      |                
+                      |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      |SELECT 272, NEW.sTermsUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                      |            END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER UPD_LOC_272
+                      |AFTER UPDATE ON SiteTerms
+                      |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                      |    AND (NEW.sTermsLocalCsn == OLD.sTermsLocalCsn OR
+                      |        NEW.sTermsLocalCsn == 0))
+                      |BEGIN
+                      |    UPDATE SiteTerms
+                      |    SET sTermsLocalCsn = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 272) 
+                      |    WHERE sTermsUid = NEW.sTermsUid;
+                      |    
+                      |    UPDATE SqliteChangeSeqNums 
+                      |    SET sCsnNextLocal = sCsnNextLocal + 1
+                      |    WHERE sCsnTableId = 272;
+                      |END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |            CREATE TRIGGER UPD_PRI_272
+                      |            AFTER UPDATE ON SiteTerms
+                      |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                      |                AND (NEW.sTermsPrimaryCsn == OLD.sTermsPrimaryCsn OR
+                      |                    NEW.sTermsPrimaryCsn == 0))
+                      |            BEGIN
+                      |                UPDATE SiteTerms
+                      |                SET sTermsPrimaryCsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 272)
+                      |                WHERE sTermsUid = NEW.sTermsUid;
+                      |                
+                      |                UPDATE SqliteChangeSeqNums
+                      |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                      |                WHERE sCsnTableId = 272;
+                      |                
+                      |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      |SELECT 272, NEW.sTermsUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                      |            END
+                      """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SiteTerms_trk (  epk  INTEGER NOT NULL , clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL, reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL, pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE 
+                      | INDEX index_SiteTerms_trk_clientId_epk_csn 
+                      |ON SiteTerms_trk (clientId, epk, csn)
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE 
+                      |UNIQUE INDEX index_SiteTerms_trk_epk_clientId 
+                      |ON SiteTerms_trk (epk, clientId)
                       """.trimMargin())
 
                 }
             }
         }
-
-        val ffbca3 = "a"
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 

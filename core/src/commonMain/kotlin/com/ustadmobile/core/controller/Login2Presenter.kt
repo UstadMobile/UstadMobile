@@ -20,7 +20,7 @@ import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.lib.db.entities.Site
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -42,7 +42,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
 
     private val accountManager: UstadAccountManager by instance()
 
-    private lateinit var workSpace: WorkSpace
+    private lateinit var workSpace: Site
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -69,7 +69,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         }
         val mWorkSpace = arguments[ARG_WORKSPACE]
         if(mWorkSpace != null){
-            workSpace = safeParse(di, WorkSpace.serializer(), mWorkSpace)
+            workSpace = safeParse(di, Site.serializer(), mWorkSpace)
         }else{
             val isRegistrationAllowed = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_REGISTRATION,
                     context)
@@ -80,7 +80,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                         context)
             }
 
-            workSpace = WorkSpace().apply {
+            workSpace = Site().apply {
                 registrationAllowed = isRegistrationAllowed
                 guestLogin = isGuestLoginAllowed
             }

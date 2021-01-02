@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
-import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.navigation.fragment.findNavController
 import androidx.test.core.app.ApplicationProvider
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -14,7 +12,7 @@ import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.networkmanager.defaultGson
 
-import com.ustadmobile.lib.db.entities.WorkspaceTerms
+import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.test.port.android.util.*
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -60,7 +58,7 @@ class WorkspaceTermsEditFragmentTest : TestCase(){
         }
 
         val currentEntity = fragmentScenario.letOnFragment { it.entity }
-        val formVals = WorkspaceTerms().apply {
+        val formVals = SiteTerms().apply {
             //TODO: set the values that will be entered on the form here
             //e.g. workspaceTermsName = "New WorkspaceTerms"
         }
@@ -95,9 +93,9 @@ class WorkspaceTermsEditFragmentTest : TestCase(){
     @AdbScreenRecord("given WorkspaceTerms exists when updated then should be updated on database")
     @Test
     fun givenWorkspaceTermsExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
-        val existingWorkspaceTerms = WorkspaceTerms().apply {
+        val existingWorkspaceTerms = SiteTerms().apply {
             workspaceTermsName = "New WorkspaceTerms"
-            workspaceTermsUid = dbRule.db.workspaceTermsDao.insert(this)
+            workspaceTermsUid = dbRule.db.siteTermsDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
@@ -111,7 +109,7 @@ class WorkspaceTermsEditFragmentTest : TestCase(){
         //Freeze and serialize the value as it was first shown to the user
         val entityLoadedByFragment = fragmentScenario.letOnFragment { it.entity }
         val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
-        val newClazzValues = defaultGson().fromJson(entityLoadedJson, WorkspaceTerms::class.java).apply {
+        val newClazzValues = defaultGson().fromJson(entityLoadedJson, SiteTerms::class.java).apply {
             workspaceTermsName = "Updated WorkspaceTerms"
         }
 
@@ -130,7 +128,7 @@ class WorkspaceTermsEditFragmentTest : TestCase(){
 
                 Assert.assertEquals("Entity in database was loaded for user",
                         "New WorkspaceTerms",
-                        defaultGson().fromJson(entityLoadedJson, WorkspaceTerms::class.java).clazzName)
+                        defaultGson().fromJson(entityLoadedJson, SiteTerms::class.java).clazzName)
 
                 val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existingWorkspaceTerms.workspaceTermsUid)
                         .waitUntilWithFragmentScenario(fragmentScenario) { it?.clazzName == "Updated WorkspaceTerms" }

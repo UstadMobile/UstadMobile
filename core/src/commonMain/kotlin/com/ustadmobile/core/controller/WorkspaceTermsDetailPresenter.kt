@@ -13,7 +13,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.db.entities.WorkspaceTerms
+import com.ustadmobile.lib.db.entities.SiteTerms
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -24,7 +24,7 @@ class WorkspaceTermsDetailPresenter(context: Any,
         arguments: Map<String, String>, view: WorkspaceTermsDetailView,
         lifecycleOwner: DoorLifecycleOwner,
         di: DI)
-    : UstadDetailPresenter<WorkspaceTermsDetailView, WorkspaceTerms>(context, arguments, view, di, lifecycleOwner) {
+    : UstadDetailPresenter<WorkspaceTermsDetailView, SiteTerms>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -47,7 +47,7 @@ class WorkspaceTermsDetailPresenter(context: Any,
     }
 
 
-    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): WorkspaceTerms? {
+    override suspend fun onLoadEntityFromDb(db: UmAppDatabase): SiteTerms? {
         //The active account has not been set or changed yet - the db could be from another endpoint
         //Therefor we will lookup the db/repo ourselves instead of using the val provided by the argument
         //itself.
@@ -67,9 +67,9 @@ class WorkspaceTermsDetailPresenter(context: Any,
 
         return dbToUse.onRepoWithFallbackToDb(5000) {
             if(arguments[ARG_USE_DISPLAY_LOCALE]?.toBoolean() == true) {
-                db.workspaceTermsDao.findWorkspaceTerms(displayedLocale)
+                db.siteTermsDao.findSiteTerms(displayedLocale)
             }else {
-                db.workspaceTermsDao.findByUidAsync(entityUid)
+                db.siteTermsDao.findByUidAsync(entityUid)
             }
         }
     }

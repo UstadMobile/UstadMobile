@@ -1,9 +1,9 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.lib.db.entities.WorkspaceTermsWithLanguage
+import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 
 
-interface WorkspaceTermsEditView: UstadEditView<WorkspaceTermsWithLanguage> {
+interface WorkspaceTermsEditView: UstadEditView<SiteTermsWithLanguage> {
 
     companion object {
 

@@ -7,18 +7,17 @@ import org.junit.Test
 import com.ustadmobile.core.view.WorkspaceTermsDetailView
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.WorkspaceTermsDao
+import com.ustadmobile.core.db.SiteTermsDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.util.*
 import com.ustadmobile.door.DoorLifecycleObserver
 
-import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.WorkspaceTerms
+import com.ustadmobile.lib.db.entities.SiteTerms
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.*
 
@@ -39,7 +38,7 @@ class WorkspaceTermsDetailPresenterTest {
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
-    private lateinit var repoWorkspaceTermsDaoSpy: WorkspaceTermsDao
+    private lateinit var repoWorkspaceTermsDaoSpy: SiteTermsDao
 
     private lateinit var di: DI
 
@@ -64,8 +63,8 @@ class WorkspaceTermsDetailPresenterTest {
         val repo: UmAppDatabase by di.activeRepoInstance()
 
 
-        repoWorkspaceTermsDaoSpy = spy(repo.workspaceTermsDao)
-        whenever(repo.workspaceTermsDao).thenReturn(repoWorkspaceTermsDaoSpy)
+        repoWorkspaceTermsDaoSpy = spy(repo.siteTermsDao)
+        whenever(repo.siteTermsDao).thenReturn(repoWorkspaceTermsDaoSpy)
 
         //TODO: insert any entities required for all tests
     }
@@ -75,12 +74,12 @@ class WorkspaceTermsDetailPresenterTest {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()
 
-        val testEntity = WorkspaceTerms().apply {
+        val testEntity = SiteTerms().apply {
             //set variables here
-            wtUid = runBlocking { repo.workspaceTermsDao.insertAsync(this@apply) }
+            sTermsUid = runBlocking { repo.siteTermsDao.insertAsync(this@apply) }
         }
 
-        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.wtUid.toString())
+        val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.sTermsUid.toString())
 
         val presenter = WorkspaceTermsDetailPresenter(context, presenterArgs, mockView,
                 mockLifecycleOwner, di)
@@ -90,7 +89,7 @@ class WorkspaceTermsDetailPresenterTest {
 
         val entityValSet = mockView.captureLastEntityValue()!!
         Assert.assertEquals("Expected entity was set on view",
-                testEntity.wtUid, entityValSet.wtUid)
+                testEntity.sTermsUid, entityValSet.wtUid)
     }
 
     @Test
@@ -103,11 +102,11 @@ class WorkspaceTermsDetailPresenterTest {
 
         val repo: UmAppDatabase by di.activeRepoInstance()
 
-        val testEntity = WorkspaceTerms().apply {
+        val testEntity = SiteTerms().apply {
             //set variables here
             termsHtml = "Salam"
             wtLang = "fa"
-            wtUid = runBlocking { repo.workspaceTermsDao.insertAsync(this@apply) }
+            sTermsUid = runBlocking { repo.siteTermsDao.insertAsync(this@apply) }
         }
 
         val presenter = WorkspaceTermsDetailPresenter(Any(),
@@ -123,7 +122,7 @@ class WorkspaceTermsDetailPresenterTest {
         }
 
         verifyBlocking(repoWorkspaceTermsDaoSpy, timeout(1000)) {
-            findWorkspaceTerms("fa")
+            findSiteTerms("fa")
         }
 
         verify(mockView, timeout(1000)).acceptButtonVisible = true

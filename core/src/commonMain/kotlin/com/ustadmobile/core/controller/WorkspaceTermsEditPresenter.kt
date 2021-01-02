@@ -6,7 +6,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.WorkspaceTermsEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.WorkspaceTermsWithLanguage
+import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -16,7 +16,7 @@ class WorkspaceTermsEditPresenter(context: Any,
         arguments: Map<String, String>, view: WorkspaceTermsEditView,
         lifecycleOwner: DoorLifecycleOwner,
         di: DI)
-    : UstadEditPresenter<WorkspaceTermsEditView, WorkspaceTermsWithLanguage>(context, arguments, view, di, lifecycleOwner) {
+    : UstadEditPresenter<WorkspaceTermsEditView, SiteTermsWithLanguage>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
@@ -31,15 +31,15 @@ class WorkspaceTermsEditPresenter(context: Any,
         //TODO: Set any additional fields (e.g. joinlist) on the view
     }
 
-    override fun onLoadFromJson(bundle: Map<String, String>): WorkspaceTermsWithLanguage? {
+    override fun onLoadFromJson(bundle: Map<String, String>): SiteTermsWithLanguage? {
         super.onLoadFromJson(bundle)
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
-        var editEntity: WorkspaceTermsWithLanguage? = null
+        var editEntity: SiteTermsWithLanguage? = null
         if(entityJsonStr != null) {
-            editEntity = safeParse(di, WorkspaceTermsWithLanguage.serializer(), entityJsonStr)
+            editEntity = safeParse(di, SiteTermsWithLanguage.serializer(), entityJsonStr)
         }else {
-            editEntity = WorkspaceTermsWithLanguage()
+            editEntity = SiteTermsWithLanguage()
         }
 
         return editEntity
@@ -52,7 +52,7 @@ class WorkspaceTermsEditPresenter(context: Any,
                 entityVal)
     }
 
-    override fun handleClickSave(entity: WorkspaceTermsWithLanguage) {
+    override fun handleClickSave(entity: SiteTermsWithLanguage) {
         //TODO: Any validation that is needed before accepting / saving this entity
         //TODO: Only save to the database when the persistence mode is PERSISTENCE_MODE.DB
         GlobalScope.launch(doorMainDispatcher()) {

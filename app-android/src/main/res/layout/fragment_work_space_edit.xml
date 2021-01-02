@@ -8,7 +8,7 @@
 
         <variable
             name="workSpace"
-            type="com.ustadmobile.lib.db.entities.WorkSpace" />
+            type="com.ustadmobile.lib.db.entities.Site" />
 
         <variable
             name="loading"

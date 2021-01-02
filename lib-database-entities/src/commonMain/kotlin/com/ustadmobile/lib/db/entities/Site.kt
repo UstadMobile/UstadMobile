@@ -8,24 +8,27 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
+/**
+ * Represents the site as a whole. There is only ever one row.
+ */
 @Entity
 @Serializable
 @SyncableEntity(tableId = 189)
-open class WorkSpace {
+open class Site {
 
     @PrimaryKey(autoGenerate = true)
-    var uid: Long = 0
+    var siteUid: Long = 0
 
     @MasterChangeSeqNum
-    var wsPcsn: Long = 0
+    var sitePcsn: Long = 0
 
     @LocalChangeSeqNum
-    var wsLcsn: Long = 0
+    var siteLcsn: Long = 0
 
     @LastChangedBy
-    var wsLcb: Int = 0
+    var siteLcb: Int = 0
 
-    var name: String? = null
+    var siteName: String? = null
 
     var guestLogin: Boolean = true
 

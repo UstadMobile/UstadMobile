@@ -8,7 +8,7 @@ import com.ustadmobile.core.view.WorkSpaceEditView
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.core.db.dao.WorkSpaceDao
+import com.ustadmobile.core.db.dao.SiteDao
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.WorkSpace
 
@@ -41,7 +41,7 @@ class WorkSpaceEditPresenterTest {
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
-    private lateinit var repoWorkSpaceDaoSpy: WorkSpaceDao
+    private lateinit var repoWorkSpaceDaoSpy: SiteDao
 
     @Before
     fun setup() {
@@ -57,8 +57,8 @@ class WorkSpaceEditPresenterTest {
 
         val repo: UmAppDatabase by di.activeRepoInstance()
 
-        repoWorkSpaceDaoSpy = spy(repo.workSpaceDao)
-        whenever(repo.workSpaceDao).thenReturn(repoWorkSpaceDaoSpy)
+        repoWorkSpaceDaoSpy = spy(repo.siteDao)
+        whenever(repo.siteDao).thenReturn(repoWorkSpaceDaoSpy)
 
         //TODO: insert any entities required for all tests
     }
@@ -70,7 +70,7 @@ class WorkSpaceEditPresenterTest {
 
         val testEntity = WorkSpace().apply {
             name = "Spelling Clazz"
-            uid = repo.workSpaceDao.insert(this)
+            uid = repo.siteDao.insert(this)
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.uid.toString())
@@ -87,11 +87,11 @@ class WorkSpaceEditPresenterTest {
 
         runBlocking {
             db.waitUntil(5000, listOf("WorkSpace")) {
-                db.workSpaceDao.getWorkSpace()?.name == "New Spelling Clazz"
+                db.siteDao.getSite()?.name == "New Spelling Clazz"
             }
         }
 
-        val entitySaved = db.workSpaceDao.getWorkSpace()
+        val entitySaved = db.siteDao.getSite()
 
         Assert.assertEquals("Name was saved and updated",
                 "New Spelling Clazz", entitySaved!!.name)

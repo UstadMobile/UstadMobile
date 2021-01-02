@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
-import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.navigation.fragment.findNavController
 import androidx.test.core.app.ApplicationProvider
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -97,7 +95,7 @@ class WorkSpaceEditFragmentTest : TestCase(){
     fun givenWorkSpaceExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
         val existingWorkSpace = WorkSpace().apply {
             workSpaceName = "New WorkSpace"
-            workSpaceUid = dbRule.db.workSpaceDao.insert(this)
+            workSpaceUid = dbRule.db.siteDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,

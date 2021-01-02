@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
-import android.graphics.Color
 import android.os.Bundle
 import android.view.*
-import androidx.core.content.ContextCompat
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentWorkspaceTermsEditBinding
@@ -13,8 +11,7 @@ import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.WorkspaceTermsEditView
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.WorkspaceTerms
-import com.ustadmobile.lib.db.entities.WorkspaceTermsWithLanguage
+import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import org.wordpress.aztec.Aztec
@@ -27,14 +24,14 @@ interface WorkspaceTermsEditFragmentEventHandler {
     fun onClickLanguage()
 }
 
-class WorkspaceTermsEditFragment: UstadEditFragment<WorkspaceTermsWithLanguage>(), WorkspaceTermsEditView, WorkspaceTermsEditFragmentEventHandler,
+class WorkspaceTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), WorkspaceTermsEditView, WorkspaceTermsEditFragmentEventHandler,
     IAztecToolbarClickListener{
 
     private var mBinding: FragmentWorkspaceTermsEditBinding? = null
 
     private var mPresenter: WorkspaceTermsEditPresenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, WorkspaceTermsWithLanguage>?
+    override val mEditPresenter: UstadEditPresenter<*, SiteTermsWithLanguage>?
         get() = mPresenter
 
 
@@ -66,7 +63,7 @@ class WorkspaceTermsEditFragment: UstadEditFragment<WorkspaceTermsWithLanguage>(
         findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
             Language::class.java) {
             val selectedLang = it.firstOrNull() ?: return@observeResult
-            entity?.wtLanguage = selectedLang
+            entity?.stLanguage = selectedLang
             entity?.wtLang = selectedLang.iso_639_1_standard
             mBinding?.workspaceTerms = entity
         }
@@ -120,7 +117,7 @@ class WorkspaceTermsEditFragment: UstadEditFragment<WorkspaceTermsWithLanguage>(
         entity = null
     }
 
-    override var entity: WorkspaceTermsWithLanguage? = null
+    override var entity: SiteTermsWithLanguage? = null
         get() = field
         set(value) {
             field = value

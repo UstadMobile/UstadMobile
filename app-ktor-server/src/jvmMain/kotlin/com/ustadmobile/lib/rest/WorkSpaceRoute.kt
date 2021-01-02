@@ -23,7 +23,7 @@ fun Route.WorkSpaceRoute() {
             //Make sure the repo has been initialized
             _di.on(call).direct.instance<UmAppDatabase>(tag = DoorTag.TAG_REPO)
 
-            val workSpace = db.workSpaceDao.getWorkSpace()
+            val workSpace = db.siteDao.getSite()
             call.respond(if(workSpace != null)  HttpStatusCode.OK else HttpStatusCode.NotFound,
                     workSpace?:WorkSpace())
         }

@@ -10,30 +10,30 @@ import kotlinx.serialization.Serializable
 
 @Entity
 @Serializable
-@SyncableEntity(tableId = WorkspaceTerms.TABLE_ID)
-open class WorkspaceTerms {
+@SyncableEntity(tableId = SiteTerms.TABLE_ID)
+open class SiteTerms {
 
     @PrimaryKey(autoGenerate = true)
-    var wtUid: Long = 0
+    var sTermsUid: Long = 0
 
     var termsHtml: String? = null
 
     //Two letter code for easier direct queries
-    var wtLang: String? = null
+    var sTermsLang: String? = null
 
     //Foreign key to the language object
-    var wtLangUid: Long = 0
+    var sTermsLangUid: Long = 0
 
-    var wtActive: Boolean = true
+    var sTermsActive: Boolean = true
 
     @LastChangedBy
-    var wtLastChangedBy: Int = 0
+    var sTermsLastChangedBy: Int = 0
 
     @MasterChangeSeqNum
-    var wtPrimaryCsn: Long = 0
+    var sTermsPrimaryCsn: Long = 0
 
     @LocalChangeSeqNum
-    var wtLocalCsn: Long = 0
+    var sTermsLocalCsn: Long = 0
 
     companion object {
 

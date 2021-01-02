@@ -9,11 +9,11 @@ import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.controller.WorkspaceTermsDetailPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.WorkspaceTermsDetailView
-import com.ustadmobile.lib.db.entities.WorkspaceTerms
+import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
 
-class WorkspaceTermsDetailFragment: UstadDetailFragment<WorkspaceTerms>(), WorkspaceTermsDetailView {
+class WorkspaceTermsDetailFragment: UstadDetailFragment<SiteTerms>(), WorkspaceTermsDetailView {
 
     private var mBinding: FragmentWorkspaceTermsDetailBinding? = null
 
@@ -28,7 +28,7 @@ class WorkspaceTermsDetailFragment: UstadDetailFragment<WorkspaceTerms>(), Works
             activity?.invalidateOptionsMenu()
         }
 
-    override var entity: WorkspaceTerms? = null
+    override var entity: SiteTerms? = null
         get() = field
         set(value) {
             field = value

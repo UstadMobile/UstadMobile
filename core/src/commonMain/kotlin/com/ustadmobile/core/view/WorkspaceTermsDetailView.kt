@@ -1,9 +1,9 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.lib.db.entities.WorkspaceTerms
+import com.ustadmobile.lib.db.entities.SiteTerms
 
 
-interface WorkspaceTermsDetailView: UstadDetailView<WorkspaceTerms> {
+interface WorkspaceTermsDetailView: UstadDetailView<SiteTerms> {
 
     var acceptButtonVisible: Boolean
 

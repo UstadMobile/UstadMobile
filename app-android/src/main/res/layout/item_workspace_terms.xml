@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <variable name="workspaceTerms" type="com.ustadmobile.lib.db.entities.WorkspaceTermsWithLanguage" />
+        <variable name="workspaceTerms" type="com.ustadmobile.lib.db.entities.SiteTermsWithLanguage" />
 
         <variable name="mPresenter"
             type="com.ustadmobile.core.controller.WorkSpaceEditPresenter" />

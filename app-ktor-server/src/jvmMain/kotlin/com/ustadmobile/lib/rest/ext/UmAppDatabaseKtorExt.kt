@@ -4,9 +4,7 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
@@ -20,8 +18,8 @@ import java.io.InputStreamReader
 import java.util.ArrayList
 
 fun UmAppDatabase.ktorInitDbWithRepo(repo: UmAppDatabase, passwordFilePath: String) {
-    if(workSpaceDao.getWorkSpace() == null) {
-        repo.workSpaceDao.insert(WorkSpace().apply {
+    if(siteDao.getSite() == null) {
+        repo.siteDao.insert(WorkSpace().apply {
             uid = 1L
             name = "UstadmobileWorkspace"
             guestLogin = false

@@ -7,16 +7,14 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentWorkspaceDetailBinding
 import com.toughra.ustadmobile.databinding.ItemWorkspaceBinding
 import com.ustadmobile.core.controller.WorkspaceDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.WorkspaceDetailView
-import com.ustadmobile.core.view.EditButtonMode
-import com.ustadmobile.lib.db.entities.WorkSpace
-import com.ustadmobile.lib.db.entities.WorkspaceTerms
+import com.ustadmobile.lib.db.entities.Site
+import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.port.android.util.ext.*
 
 
@@ -24,11 +22,11 @@ interface WorkspaceDetailFragmentEventHandler {
 
 }
 
-class WorkspaceDetailFragment: UstadDetailFragment<WorkSpace>(), WorkspaceDetailView, WorkspaceDetailFragmentEventHandler {
+class WorkspaceDetailFragment: UstadDetailFragment<Site>(), WorkspaceDetailView, WorkspaceDetailFragmentEventHandler {
 
     class WorkspaceViewHolder(val mBinding: ItemWorkspaceBinding): RecyclerView.ViewHolder(mBinding.root)
 
-    class WorkspaceRecyclerViewAdapter : ListAdapter<WorkSpace, WorkspaceViewHolder>(DIFFUTIL_WORKSPACE) {
+    class WorkspaceRecyclerViewAdapter : ListAdapter<Site, WorkspaceViewHolder>(DIFFUTIL_WORKSPACE) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WorkspaceViewHolder {
             return WorkspaceViewHolder(ItemWorkspaceBinding.inflate(LayoutInflater.from(parent.context),
@@ -50,7 +48,7 @@ class WorkspaceDetailFragment: UstadDetailFragment<WorkSpace>(), WorkspaceDetail
     private var workspaceRecyclerViewAdapter: WorkspaceRecyclerViewAdapter? = null
 
 
-    override var entity: WorkSpace? = null
+    override var entity: Site? = null
         get() = field
         set(value) {
             field = value
@@ -63,7 +61,7 @@ class WorkspaceDetailFragment: UstadDetailFragment<WorkSpace>(), WorkspaceDetail
         }
 
 
-    override var workspaceTermsList: DataSource.Factory<Int, WorkspaceTerms>? = null
+    override var workspaceTermsList: DataSource.Factory<Int, SiteTerms>? = null
         get() = field
         set(value) {
             field = value
@@ -98,12 +96,12 @@ class WorkspaceDetailFragment: UstadDetailFragment<WorkSpace>(), WorkspaceDetail
 
 
     companion object {
-        val DIFFUTIL_WORKSPACE = object: DiffUtil.ItemCallback<WorkSpace>() {
-            override fun areItemsTheSame(oldItem: WorkSpace, newItem: WorkSpace): Boolean {
+        val DIFFUTIL_WORKSPACE = object: DiffUtil.ItemCallback<Site>() {
+            override fun areItemsTheSame(oldItem: Site, newItem: Site): Boolean {
                 return oldItem.uid == newItem.uid
             }
 
-            override fun areContentsTheSame(oldItem: WorkSpace, newItem: WorkSpace): Boolean {
+            override fun areContentsTheSame(oldItem: Site, newItem: Site): Boolean {
                 return oldItem.name == newItem.name &&
                         oldItem.registrationAllowed == newItem.registrationAllowed &&
                         oldItem.guestLogin == newItem.guestLogin

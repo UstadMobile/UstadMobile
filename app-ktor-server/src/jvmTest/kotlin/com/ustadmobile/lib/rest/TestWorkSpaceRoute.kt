@@ -1,18 +1,13 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonAuth
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.WorkSpace
 import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
-import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpStatement
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
@@ -25,11 +20,7 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
-import java.util.concurrent.TimeUnit
 
 class TestWorkSpaceRoute {
     lateinit var server: ApplicationEngine
@@ -73,7 +64,7 @@ class TestWorkSpaceRoute {
             guestLogin = true
             registrationAllowed = true
         }
-        workSpace.uid = db.workSpaceDao.insert(workSpace)
+        workSpace.uid = db.siteDao.insert(workSpace)
 
         runBlocking {
             val response = httpClient.get<HttpStatement> {

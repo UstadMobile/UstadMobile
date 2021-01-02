@@ -6,7 +6,7 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.port.android.screen.WorkSpaceEnterLinkScreen
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -55,7 +55,7 @@ class WorkspaceEnterLinkFragmentTest : TestCase(){
 
         init{
 
-            val workSpace = Json.stringify(WorkSpace.serializer(), WorkSpace().apply {
+            val workSpace = Json.stringify(Site.serializer(), Site().apply {
                 name = "Dummy workspace"
                 registrationAllowed = true
                 guestLogin = true
