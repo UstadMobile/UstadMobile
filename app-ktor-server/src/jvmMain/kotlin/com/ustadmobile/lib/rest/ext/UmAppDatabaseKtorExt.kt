@@ -5,10 +5,7 @@ import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonAuth
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.encryptPassword
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomStringUtils
@@ -19,9 +16,9 @@ import java.util.ArrayList
 
 fun UmAppDatabase.ktorInitDbWithRepo(repo: UmAppDatabase, passwordFilePath: String) {
     if(siteDao.getSite() == null) {
-        repo.siteDao.insert(WorkSpace().apply {
-            uid = 1L
-            name = "UstadmobileWorkspace"
+        repo.siteDao.insert(Site().apply {
+            siteUid = 1L
+            siteName = "UstadmobileWorkspace"
             guestLogin = false
             registrationAllowed = false
         })

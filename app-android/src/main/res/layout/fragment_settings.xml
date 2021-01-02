@@ -143,7 +143,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/dimen_8dp"
                     android:layout_marginTop="@dimen/dimen_8dp"
-                    android:text="@string/workspace"
+                    android:text="@string/site"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_workspace_iv"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -155,7 +155,7 @@
                     android:layout_marginStart="@dimen/dimen_8dp"
                     android:layout_marginTop="@dimen/dimen_8dp"
                     android:layout_marginBottom="@dimen/dimen_8dp"
-                    android:text="@string/manage_workspace"
+                    android:text="@string/manage_site_settings"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_workspace_iv"
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings2_workspace_title" />

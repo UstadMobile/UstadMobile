@@ -1,13 +1,13 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTerms
 
 
-interface WorkspaceDetailView: UstadDetailView<WorkSpace> {
+interface SiteDetailView: UstadDetailView<Site> {
 
-    var workspaceTermsList: DataSource.Factory<Int, SiteTerms>?
+    var siteTermsList: DataSource.Factory<Int, SiteTerms>?
 
     companion object {
 

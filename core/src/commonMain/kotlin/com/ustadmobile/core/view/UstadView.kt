@@ -117,7 +117,7 @@ interface UstadView {
 
         const val ARG_NEXT = "next"
 
-        const val ARG_WORKSPACE = "workspace"
+        const val ARG_SITE = "site"
 
         const val ARG_SERVER_URL = "serverUrl"
 

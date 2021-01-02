@@ -10,7 +10,7 @@
 
 
         <variable
-            name="workspaceTerms"
+            name="siteTerms"
             type="com.ustadmobile.lib.db.entities.SiteTermsWithLanguage" />
 
         <variable
@@ -23,7 +23,7 @@
 
         <variable
             name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.WorkspaceTermsEditFragmentEventHandler" />
+            type="com.ustadmobile.port.android.view.SiteTermsEditFragmentEventHandler" />
 
     </data>
 
@@ -54,7 +54,7 @@
                     app:runOnClickWhenFocused="@{true}"
                     android:onClick="@{() -> activityEventHandler.onClickLanguage()}"
                     android:inputType="@{InputType.TYPE_NULL}"
-                    android:text="@{workspaceTerms.stLanguage.name}"
+                    android:text="@{siteTerms.stLanguage.name}"
                     android:hint="@string/language" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -79,11 +79,6 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 />
-
-            <!-- TODO: Put the actual view for editing WorkspaceTerms here using two-way data binding -->
-            <!-- Available templates:
-            onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-            -->
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

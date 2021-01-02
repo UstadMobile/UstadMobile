@@ -1,14 +1,13 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
-import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
-import com.ustadmobile.core.view.WorkspaceEnterLinkView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
+import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.request.get
@@ -17,11 +16,11 @@ import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
-class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, view: WorkspaceEnterLinkView,
-                                  di: DI) :
-        UstadBaseController<WorkspaceEnterLinkView>(context, arguments, view, di) {
+class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view: SiteEnterLinkView,
+                             di: DI) :
+        UstadBaseController<SiteEnterLinkView>(context, arguments, view, di) {
 
-    private var workSpace: WorkSpace? = null
+    private var site: Site? = null
 
     private var checkTextLinkJob: Deferred<Unit>? = null
 
@@ -30,14 +29,14 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
     private val httpClient: HttpClient by instance()
 
     fun handleClickNext(){
-        val mWorkSpace = workSpace
-        if(mWorkSpace != null){
+        val mSite = site
+        if(mSite != null){
             val args = arguments.toMutableMap().also {
-                val workspaceLink = view.workspaceLink
-                if(workspaceLink != null)
-                    it[ARG_SERVER_URL] = workspaceLink
+                val siteLink = view.siteLink
+                if(siteLink != null)
+                    it[ARG_SERVER_URL] = siteLink
 
-                it[ARG_WORKSPACE] = Json.stringify(WorkSpace.serializer(), mWorkSpace)
+                it[ARG_SITE] = Json.stringify(Site.serializer(), mSite)
             }
 
             impl.go(Login2View.VIEW_NAME, args, context)
@@ -54,13 +53,13 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
         checkTextLinkJob = GlobalScope.async(doorMainDispatcher()) {
             try {
                 var formattedHref = if(href.startsWith("http")) href else "https://$href"
-                formattedHref = UMFileUtil.joinPaths(formattedHref, "Workspace","verify")
-                workSpace = httpClient.get<WorkSpace>(formattedHref) {
+                formattedHref = UMFileUtil.joinPaths(formattedHref, "Site","verify")
+                site = httpClient.get<Site>(formattedHref) {
                     timeout {
                         requestTimeoutMillis = LINK_REQUEST_TIMEOUT
                     }
                 }
-                view.validLink = workSpace != null
+                view.validLink = site != null
             }catch (e: Exception) {
                 view.validLink = false
             }
@@ -72,10 +71,19 @@ class WorkspaceEnterLinkPresenter(context: Any, arguments: Map<String, String>, 
         }
     }
 
+    fun handleClickUsePublicLibrary() {
+
+    }
+
+    fun handleClickCreateNewSite() {
+
+    }
+
+
     override fun onDestroy() {
         super.onDestroy()
         checkTextLinkJob = null
-        workSpace = null
+        site = null
     }
 
     companion object {

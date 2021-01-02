@@ -46,7 +46,7 @@
                 android:layout_marginStart="@dimen/dimen_8dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="8dp"
-                android:text="@string/use_public_library"
+                android:text="@string/use_public_library_site"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imageView1"
@@ -93,7 +93,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintVertical_bias="0.0"
-                app:srcCompat="@drawable/workspace_join_24px" />
+                app:srcCompat="@drawable/link" />
 
             <TextView
                 android:id="@+id/textView3"
@@ -102,7 +102,7 @@
                 android:layout_marginStart="@dimen/dimen_8dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="8dp"
-                android:text="@string/join_existing_workspace"
+                android:text="@string/connect_to_existing_site"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imageView2"
@@ -117,7 +117,7 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="@dimen/dimen_8dp"
                 android:maxLines="2"
-                android:text="@string/existing_organisation"
+                android:text="@string/existing_site_text"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -159,7 +159,7 @@
                 android:layout_marginStart="@dimen/dimen_8dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="8dp"
-                android:text="@string/create_organisation"
+                android:text="@string/create_site"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/imageView3"
@@ -174,7 +174,7 @@
                 android:layout_marginEnd="8dp"
                 android:layout_marginBottom="@dimen/dimen_8dp"
                 android:maxLines="2"
-                android:text="@string/create_workspace_organisation"
+                android:text="@string/create_site_text"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"

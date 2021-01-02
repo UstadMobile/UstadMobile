@@ -20,7 +20,7 @@ class GetStartedPresenter(context: Any, arguments: Map<String, String>, view: Ge
     }
 
     fun joinExistingWorkSpace(){
-        impl.go(WorkspaceEnterLinkView.VIEW_NAME, arguments, context)
+        impl.go(SiteEnterLinkView.VIEW_NAME, arguments, context)
     }
 
     fun createNewWorkSpace(){

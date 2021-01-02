@@ -34,7 +34,7 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
             it[UstadView.ARG_POPUPTO_ON_FINISH] = AccountListView.VIEW_NAME
         }
 
-        impl.go(if(canSelectServer) GetStartedView.VIEW_NAME else Login2View.VIEW_NAME,args, context)
+        impl.go(if(canSelectServer) SiteEnterLinkView.VIEW_NAME else Login2View.VIEW_NAME,args, context)
     }
 
     fun handleClickDeleteAccount(account: UmAccount){

@@ -24,7 +24,7 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>, view: Sett
     }
 
     fun handleClickWorkspace() {
-        impl.go(WorkspaceDetailView.VIEW_NAME, mapOf(), context)
+        impl.go(SiteDetailView.VIEW_NAME, mapOf(), context)
     }
 
 }

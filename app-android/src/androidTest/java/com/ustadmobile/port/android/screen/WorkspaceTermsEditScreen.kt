@@ -7,7 +7,7 @@ import com.agoda.kakao.edit.KTextInputLayout
 import com.kaspersky.kaspresso.screens.KScreen
 import com.kaspersky.kaspresso.testcases.core.testcontext.TestContext
 import com.toughra.ustadmobile.R
-import com.ustadmobile.port.android.view.WorkspaceTermsEditFragment
+import com.ustadmobile.port.android.view.SiteTermsEditFragment
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultGson
 
@@ -16,12 +16,12 @@ object WorkspaceTermsEditScreen : KScreen<WorkspaceTermsEditScreen>() {
     override val layoutId: Int?
         get() = R.layout.fragment_report_edit
     override val viewClass: Class<*>?
-        get() = WorkspaceTermsEditFragment::class.java
+        get() = SiteTermsEditFragment::class.java
 
     val WorkspaceTermsTitleInput = KTextInputLayout { withId(R.id.id_of_textfield_input_layout)}
 
 
-    fun fillFields(fragmentScenario: FragmentScenario<WorkspaceTermsEditFragment>,
+    fun fillFields(fragmentScenario: FragmentScenario<SiteTermsEditFragment>,
                    workspaceTerms: WorkspaceTerms,
                    workspaceTermsOnForm: WorkspaceTerms?,
                    setFieldsRequiringNavigation: Boolean = true,

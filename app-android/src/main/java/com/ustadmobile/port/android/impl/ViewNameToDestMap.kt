@@ -60,7 +60,7 @@ class ViewNameToDestMap: DestinationProvider {
             ReportEditView.VIEW_NAME to UstadDestination(R.id.report_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             ReportDetailView.VIEW_NAME to UstadDestination(R.id.report_detail_dest),
-            WorkspaceEnterLinkView.VIEW_NAME to UstadDestination(R.id.workspace_enterlink_dest,
+            SiteEnterLinkView.VIEW_NAME to UstadDestination(R.id.workspace_enterlink_dest,
                 hideBottomNavigation = true),
             Login2View.VIEW_NAME to UstadDestination(R.id.login_dest, hideBottomNavigation = true),
             GetStartedView.VIEW_NAME to UstadDestination(R.id.account_get_started_dest,
@@ -76,12 +76,12 @@ class ViewNameToDestMap: DestinationProvider {
             TimeZoneListView.VIEW_NAME to UstadDestination(R.id.time_zone_list_dest),
             ClazzLogEditView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
-            WorkspaceDetailView.VIEW_NAME to UstadDestination(R.id.workspace_detail_dest),
-            WorkSpaceEditView.VIEW_NAME to UstadDestination(R.id.workspace_edit_dest,
+            SiteDetailView.VIEW_NAME to UstadDestination(R.id.site_detail_dest),
+            SiteEditView.VIEW_NAME to UstadDestination(R.id.site_edit_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
-            WorkspaceTermsEditView.VIEW_NAME to UstadDestination(R.id.workspace_terms_edit_dest,
+            SiteTermsEditView.VIEW_NAME to UstadDestination(R.id.site_terms_edit_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
-            WorkspaceTermsDetailView.VIEW_NAME to UstadDestination(R.id.workspace_terms_detail_dest,
+            SiteTermsDetailView.VIEW_NAME to UstadDestination(R.id.site_terms_detail_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL)
     )
 

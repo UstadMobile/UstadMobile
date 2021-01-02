@@ -15,7 +15,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
-import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.DoorTag
@@ -67,7 +67,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         if(!serverUrl.endsWith("/")){
             serverUrl += "/"
         }
-        val mWorkSpace = arguments[ARG_WORKSPACE]
+        val mWorkSpace = arguments[ARG_SITE]
         if(mWorkSpace != null){
             workSpace = safeParse(di, Site.serializer(), mWorkSpace)
         }else{
@@ -129,14 +129,14 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         val args = mutableMapOf(
                 PersonEditView.ARG_REGISTRATION_MODE to true.toString(),
                 ARG_SERVER_URL to serverUrl,
-                WorkspaceTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
-                WorkspaceTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
+                SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString(),
+                SiteTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
                 ARG_POPUPTO_ON_FINISH to (arguments[ARG_POPUPTO_ON_FINISH] ?: Login2View.VIEW_NAME))
 
         args.putFromOtherMapIfPresent(arguments, ARG_NEXT)
         args.putFromOtherMapIfPresent(arguments, REGISTER_VIA_LINK)
 
-        impl.go(WorkspaceTermsDetailView.VIEW_NAME, args, context)
+        impl.go(SiteTermsDetailView.VIEW_NAME, args, context)
     }
 
     fun handleConnectAsGuest(){

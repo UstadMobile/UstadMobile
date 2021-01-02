@@ -1,10 +1,10 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.view.WorkspaceDetailView
+import com.ustadmobile.core.view.SiteDetailView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.WorkSpaceEditView
+import com.ustadmobile.core.view.SiteEditView
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.Site
@@ -12,11 +12,11 @@ import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 
 
-class WorkspaceDetailPresenter(context: Any,
-        arguments: Map<String, String>, view: WorkspaceDetailView,
-        lifecycleOwner: DoorLifecycleOwner,
-        di: DI)
-    : UstadDetailPresenter<WorkspaceDetailView, Site>(context, arguments, view, di, lifecycleOwner) {
+class SiteDetailPresenter(context: Any,
+                          arguments: Map<String, String>, view: SiteDetailView,
+                          lifecycleOwner: DoorLifecycleOwner,
+                          di: DI)
+    : UstadDetailPresenter<SiteDetailView, Site>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -40,15 +40,15 @@ class WorkspaceDetailPresenter(context: Any,
         } ?: Site()
 
         if(db !is DoorDatabaseRepository) {
-            view.workspaceTermsList = repo.siteTermsDao.findAllTermsAsFactory()
+            view.siteTermsList = repo.siteTermsDao.findAllTermsAsFactory()
         }
 
         return workspace
     }
 
     override fun handleClickEdit() {
-        systemImpl.go(WorkSpaceEditView.VIEW_NAME,
-            mapOf(ARG_ENTITY_UID to entity?.uid?.toString()), context)
+        systemImpl.go(SiteEditView.VIEW_NAME,
+            mapOf(ARG_ENTITY_UID to entity?.siteUid?.toString()), context)
     }
 
     companion object {

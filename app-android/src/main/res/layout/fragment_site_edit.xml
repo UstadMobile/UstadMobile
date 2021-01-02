@@ -7,7 +7,7 @@
         <import type="android.view.View"/>
 
         <variable
-            name="workSpace"
+            name="site"
             type="com.ustadmobile.lib.db.entities.Site" />
 
         <variable
@@ -20,14 +20,14 @@
 
         <variable
             name="activityEventHandler"
-            type="com.ustadmobile.port.android.view.WorkSpaceEditFragmentEventHandler" />
+            type="com.ustadmobile.port.android.view.SiteEditFragmentEventHandler" />
 
     </data>
 
 
 
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/fragment_work_space_edit_edit_scroll"
+        android:id="@+id/fragment_site_edit_edit_scroll"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
@@ -36,14 +36,6 @@
             android:id="@+id/fragment_work_space_edit_edit_clx"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
-
-
-
-
-            <!-- TODO: Put the actual view for editing WorkSpace here using two-way data binding -->
-            <!-- Available templates:
-            onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-            -->
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/title_textedit"
@@ -62,8 +54,8 @@
                     android:layout_height="wrap_content"
                     android:maxLines="1"
                     android:inputType="text"
-                    android:text="@={workSpace.name}"
-                    tools:text="Workspace Name"
+                    android:text="@={site.siteName}"
+                    tools:text="Site Name"
                     android:hint="@string/name" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -75,7 +67,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:text="@string/guest_login_enabled"
-                android:checked="@={workSpace.guestLogin}"
+                android:checked="@={site.guestLogin}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/title_textedit" />
@@ -88,7 +80,7 @@
                 android:layout_marginTop="8dp"
                 android:layout_marginEnd="8dp"
                 android:text="@string/registration_allowed"
-                android:checked="@={workSpace.registrationAllowed}"
+                android:checked="@={site.registrationAllowed}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/guest_enabled_switch" />
@@ -106,14 +98,14 @@
             <include layout="@layout/item_createnew"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:onClickNew="@{() -> activityEventHandler.onClickNewWorkspaceTerms()}"
+                app:onClickNew="@{() -> activityEventHandler.onClickNewSiteTerms()}"
                 app:createNewText="@{@string/terms_and_policies}"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_work_space_edit_terms_rv"
                 app:layout_constraintStart_toStartOf="parent"
                 />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/workspace_terms_rv"
+                android:id="@+id/site_terms_rv"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 tools:itemCount="2"

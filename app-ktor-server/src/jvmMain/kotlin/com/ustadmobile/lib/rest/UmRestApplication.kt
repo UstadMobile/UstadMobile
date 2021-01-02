@@ -163,7 +163,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ResumableUploadRoute()
         ContainerUpload()
         UmAppDatabase_KtorRoute(true)
-        WorkSpaceRoute()
+        SiteRoute()
         ContentEntryLinkImporter()
         if (devMode) {
             DevModeRoute()

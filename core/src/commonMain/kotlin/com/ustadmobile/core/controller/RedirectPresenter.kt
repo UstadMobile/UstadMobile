@@ -34,7 +34,7 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
                 args.putAll(UMFileUtil.parseURLQueryString(nextViewArg))
                 nextViewArg.substringBefore('?')
             } else if (cameFromGetStarted) {
-                if (canSelectServer) GetStartedView.VIEW_NAME else Login2View.VIEW_NAME
+                if (canSelectServer) SiteEnterLinkView.VIEW_NAME else Login2View.VIEW_NAME
             } else {
                 ContentEntryListTabsView.VIEW_NAME
             }

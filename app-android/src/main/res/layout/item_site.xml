@@ -5,8 +5,8 @@
 
     <data>
         <variable
-            name="workspace"
-            type="com.ustadmobile.lib.db.entities.WorkSpace" />
+            name="site"
+            type="com.ustadmobile.lib.db.entities.Site" />
 
     </data>
 
@@ -16,7 +16,7 @@
 
 
         <ImageView
-            android:id="@+id/workspace_title_icon"
+            android:id="@+id/site_name_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -28,29 +28,29 @@
             app:srcCompat="@drawable/workspace_join_24px" />
 
         <TextView
-            android:id="@+id/workspace_title_text"
+            android:id="@+id/site_name_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="@{workspace.name}"
-            tools:text="Workspace Name"
+            android:text="@{site.siteName}"
+            tools:text="Site Name"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-            app:layout_constraintStart_toEndOf="@+id/workspace_title_icon"
+            app:layout_constraintStart_toEndOf="@+id/site_name_icon"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
-            android:id="@+id/workspace_title_label"
+            android:id="@+id/site_name_label"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="@string/title"
-            app:layout_constraintStart_toEndOf="@+id/workspace_title_icon"
-            app:layout_constraintTop_toBottomOf="@+id/workspace_title_text" />
+            android:text="@string/name"
+            app:layout_constraintStart_toEndOf="@+id/site_name_icon"
+            app:layout_constraintTop_toBottomOf="@+id/site_name_text" />
 
         <ImageView
-            android:id="@+id/workspace_guest_icon"
+            android:id="@+id/site_guest_icon"
             android:importantForAccessibility="no"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -58,7 +58,7 @@
             android:layout_marginTop="8dp"
             app:tint="?colorOnIconTint"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/workspace_title_label"
+            app:layout_constraintTop_toBottomOf="@+id/site_name_label"
             app:srcCompat="@drawable/ic_baseline_meeting_room_24" />
 
         <TextView
@@ -67,10 +67,10 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="@{workspace.guestLogin ? @string/yes : @string/no}"
+            android:text="@{site.guestLogin ? @string/yes : @string/no}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-            app:layout_constraintStart_toEndOf="@+id/workspace_guest_icon"
-            app:layout_constraintTop_toBottomOf="@+id/workspace_title_label" />
+            app:layout_constraintStart_toEndOf="@+id/site_guest_icon"
+            app:layout_constraintTop_toBottomOf="@+id/site_name_label" />
 
         <TextView
             android:id="@+id/guest_label"
@@ -79,7 +79,7 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
             android:text="@string/guest_login_enabled"
-            app:layout_constraintStart_toEndOf="@+id/workspace_guest_icon"
+            app:layout_constraintStart_toEndOf="@+id/site_guest_icon"
             app:layout_constraintTop_toBottomOf="@+id/workspace_guest_text" />
 
         <ImageView
@@ -99,7 +99,7 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="8dp"
-            android:text="@{workspace.registrationAllowed ? @string/yes : @string/no}"
+            android:text="@{site.registrationAllowed ? @string/yes : @string/no}"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             app:layout_constraintStart_toEndOf="@+id/register_allow_icon"
             app:layout_constraintTop_toBottomOf="@+id/guest_label" />

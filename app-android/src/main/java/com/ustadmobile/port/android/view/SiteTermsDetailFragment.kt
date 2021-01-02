@@ -4,20 +4,20 @@ import android.os.Bundle
 import android.view.*
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentWorkspaceTermsDetailBinding
+import com.toughra.ustadmobile.databinding.FragmentSiteTermsDetailBinding
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.controller.WorkspaceTermsDetailPresenter
+import com.ustadmobile.core.controller.SiteTermsDetailPresenter
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.WorkspaceTermsDetailView
+import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
 
-class WorkspaceTermsDetailFragment: UstadDetailFragment<SiteTerms>(), WorkspaceTermsDetailView {
+class SiteTermsDetailFragment: UstadDetailFragment<SiteTerms>(), SiteTermsDetailView {
 
-    private var mBinding: FragmentWorkspaceTermsDetailBinding? = null
+    private var mBinding: FragmentSiteTermsDetailBinding? = null
 
-    private var mPresenter: WorkspaceTermsDetailPresenter? = null
+    private var mPresenter: SiteTermsDetailPresenter? = null
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
@@ -45,11 +45,11 @@ class WorkspaceTermsDetailFragment: UstadDetailFragment<SiteTerms>(), WorkspaceT
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentWorkspaceTermsDetailBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentSiteTermsDetailBinding.inflate(inflater, container, false).also {
             rootView = it.root
         }
 
-        mPresenter = WorkspaceTermsDetailPresenter(requireContext(), arguments.toStringMap(), this,
+        mPresenter = SiteTermsDetailPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
 

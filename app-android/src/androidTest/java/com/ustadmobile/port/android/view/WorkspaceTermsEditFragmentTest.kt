@@ -52,7 +52,7 @@ class WorkspaceTermsEditFragmentTest : TestCase(){
     @Test
     fun givenNoWorkspaceTermsPresentYet_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
-            WorkspaceTermsEditFragment(). also {
+            SiteTermsEditFragment(). also {
                 it.installNavController(systemImplNavRule.navController)
             }
         }
@@ -100,7 +100,7 @@ class WorkspaceTermsEditFragmentTest : TestCase(){
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingWorkspaceTerms.workspaceTermsUid)) {
-            WorkspaceTermsEditFragment().also {
+            SiteTermsEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)

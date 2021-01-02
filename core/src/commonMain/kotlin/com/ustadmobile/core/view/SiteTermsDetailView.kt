@@ -3,13 +3,13 @@ package com.ustadmobile.core.view
 import com.ustadmobile.lib.db.entities.SiteTerms
 
 
-interface WorkspaceTermsDetailView: UstadDetailView<SiteTerms> {
+interface SiteTermsDetailView: UstadDetailView<SiteTerms> {
 
     var acceptButtonVisible: Boolean
 
     companion object {
 
-        const val VIEW_NAME = "WorkspaceTermsDetailView"
+        const val VIEW_NAME = "SiteTermsDetailView"
 
         /**
          * If this argument is provided and true, then terms will be looked up according to the

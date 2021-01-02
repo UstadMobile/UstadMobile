@@ -3201,9 +3201,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                     database.execSQL("ALTER TABLE WorkSpace RENAME TO Site")
                     database.execSQL("ALTER TABLE Site RENAME COLUMN uid TO siteUid")
-                    database.execSQL("ALTER TABLE Site ADD COLUMN sitePcsn BIGINT NOT NULL")
-                    database.execSQL("ALTER TABLE Site ADD COLUMN siteLcsn BIGINT NOT NULL")
-                    database.execSQL("ALTER TABLE Site ADD COLUMN siteLcb INTEGER NOT NULL")
+                    database.execSQL("ALTER TABLE Site ADD COLUMN sitePcsn BIGINT DEFAULT 0 NOT NULL")
+                    database.execSQL("ALTER TABLE Site ADD COLUMN siteLcsn BIGINT DEFAULT 0 NOT NULL")
+                    database.execSQL("ALTER TABLE Site ADD COLUMN siteLcb INTEGER DEFAULT 0 NOT NULL")
                     database.execSQL("ALTER TABLE Site RENAME COLUMN name to siteName")
 
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS Site_mcsn_seq")
@@ -3211,7 +3211,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                     database.execSQL("""
                       |CREATE OR REPLACE FUNCTION 
-                      | `inccsn_189_fn`() RETURNS trigger AS ${'$'}${'$'}
+                      | inccsn_189_fn() RETURNS trigger AS ${'$'}${'$'}
                       | BEGIN  
                       | UPDATE Site SET siteLcsn =
                       | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.siteLcsn 

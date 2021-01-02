@@ -9,56 +9,56 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentWorkSpaceEditBinding
-import com.toughra.ustadmobile.databinding.ItemWorkspaceTermsBinding
-import com.ustadmobile.core.controller.WorkSpaceEditPresenter
+import com.toughra.ustadmobile.databinding.FragmentSiteEditBinding
+import com.toughra.ustadmobile.databinding.ItemSiteTermsBinding
+import com.ustadmobile.core.controller.SiteEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.WorkSpaceEditView
+import com.ustadmobile.core.view.SiteEditView
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.port.android.util.ext.*
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 
-interface WorkSpaceEditFragmentEventHandler {
+interface SiteEditFragmentEventHandler {
 
-    fun onClickEditWorkspaceTerms(workspaceTerms: SiteTermsWithLanguage?)
+    fun onClickEditSiteTerms(workspaceTerms: SiteTermsWithLanguage?)
 
-    fun onClickNewWorkspaceTerms()
+    fun onClickNewSiteTerms()
 
 }
 
-class WorkSpaceEditFragment: UstadEditFragment<WorkSpace>(), WorkSpaceEditView, WorkSpaceEditFragmentEventHandler {
+class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView, SiteEditFragmentEventHandler {
 
-    private var mBinding: FragmentWorkSpaceEditBinding? = null
+    private var mBinding: FragmentSiteEditBinding? = null
 
-    private var mPresenter: WorkSpaceEditPresenter? = null
+    private var mPresenter: SiteEditPresenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, WorkSpace>?
+    override val mEditPresenter: UstadEditPresenter<*, Site>?
         get() = mPresenter
 
 
-    class WorkspaceTermsRecyclerAdapter(val activityEventHandler: WorkSpaceEditFragmentEventHandler,
-            var presenter: WorkSpaceEditPresenter?): ListAdapter<SiteTermsWithLanguage, WorkspaceTermsRecyclerAdapter.WorkspaceTermsViewHolder>(DIFF_CALLBACK_WORKSPACETERMS) {
+    class SiteTermsRecyclerAdapter(val activityEventHandler: SiteEditFragmentEventHandler,
+                                   var presenter: SiteEditPresenter?): ListAdapter<SiteTermsWithLanguage, SiteTermsRecyclerAdapter.SiteTermsViewHolder>(DIFF_CALLBACK_WORKSPACETERMS) {
 
-            class WorkspaceTermsViewHolder(val binding: ItemWorkspaceTermsBinding): RecyclerView.ViewHolder(binding.root)
+            class SiteTermsViewHolder(val binding: ItemSiteTermsBinding): RecyclerView.ViewHolder(binding.root)
 
-            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): WorkspaceTermsViewHolder {
-                val viewHolder = WorkspaceTermsViewHolder(ItemWorkspaceTermsBinding.inflate(
+            override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SiteTermsViewHolder {
+                val viewHolder = SiteTermsViewHolder(ItemSiteTermsBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false))
                 viewHolder.binding.mPresenter = presenter
                 viewHolder.binding.mEventHandler = activityEventHandler
                 return viewHolder
             }
 
-            override fun onBindViewHolder(holder: WorkspaceTermsViewHolder, position: Int) {
-                holder.binding.workspaceTerms = getItem(position)
+            override fun onBindViewHolder(holder: SiteTermsViewHolder, position: Int) {
+                holder.binding.siteTerms = getItem(position)
             }
         }
 
-    override var workspaceTermsList: DoorLiveData<List<SiteTermsWithLanguage>>? = null
+    override var siteTermsList: DoorLiveData<List<SiteTermsWithLanguage>>? = null
         get() = field
         set(value) {
             field?.removeObserver(workspaceTermsObserver)
@@ -66,36 +66,36 @@ class WorkSpaceEditFragment: UstadEditFragment<WorkSpace>(), WorkSpaceEditView, 
             value?.observe(this, workspaceTermsObserver)
         }
 
-    private var workspaceTermsRecyclerAdapter: WorkspaceTermsRecyclerAdapter? = null
+    private var siteTermsRecyclerAdapter: SiteTermsRecyclerAdapter? = null
 
     //private var workspaceTermsRecyclerView: RecyclerView? = null
 
     private val workspaceTermsObserver = Observer<List<SiteTermsWithLanguage>?> {
-        t -> workspaceTermsRecyclerAdapter?.submitList(t)
+        t -> siteTermsRecyclerAdapter?.submitList(t)
     }
 
-    override fun onClickEditWorkspaceTerms(workspaceTerms: SiteTermsWithLanguage?) {
+    override fun onClickEditSiteTerms(workspaceTerms: SiteTermsWithLanguage?) {
         onSaveStateToBackStackStateHandle()
-        navigateToEditEntity(workspaceTerms, R.id.workspace_terms_edit_dest, SiteTermsWithLanguage::class.java)
+        navigateToEditEntity(workspaceTerms, R.id.site_terms_edit_dest, SiteTermsWithLanguage::class.java)
     }
 
-    override fun onClickNewWorkspaceTerms() = onClickEditWorkspaceTerms(null)
+    override fun onClickNewSiteTerms() = onClickEditSiteTerms(null)
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentWorkSpaceEditBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentSiteEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
 
-            workspaceTermsRecyclerAdapter = WorkspaceTermsRecyclerAdapter(this, null)
-            it.workspaceTermsRv.adapter = workspaceTermsRecyclerAdapter
-            it.workspaceTermsRv.layoutManager = LinearLayoutManager(requireContext())
+            siteTermsRecyclerAdapter = SiteTermsRecyclerAdapter(this, null)
+            it.siteTermsRv.adapter = siteTermsRecyclerAdapter
+            it.siteTermsRv.layoutManager = LinearLayoutManager(requireContext())
             it.activityEventHandler = this
         }
 
-        mPresenter = WorkSpaceEditPresenter(requireContext(), arguments.toStringMap(), this,
+        mPresenter = SiteEditPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)
 
-        workspaceTermsRecyclerAdapter?.presenter = mPresenter
+        siteTermsRecyclerAdapter?.presenter = mPresenter
 
         mPresenter?.onCreate(backStackSavedState)
 
@@ -109,7 +109,7 @@ class WorkSpaceEditFragment: UstadEditFragment<WorkSpace>(), WorkSpaceEditView, 
                 SiteTermsWithLanguage::class.java) {
             val workspaceTerms = it.firstOrNull() ?: return@observeResult
 
-            mPresenter?.handleAddOrEditWorkspaceTerms(workspaceTerms)
+            mPresenter?.handleAddOrEditSiteTerms(workspaceTerms)
         }
     }
 
@@ -124,11 +124,11 @@ class WorkSpaceEditFragment: UstadEditFragment<WorkSpace>(), WorkSpaceEditView, 
         super.onResume()
     }
 
-    override var entity: WorkSpace? = null
+    override var entity: Site? = null
         get() = field
         set(value) {
             field = value
-            mBinding?.workSpace = value
+            mBinding?.site = value
         }
 
     override var fieldsEnabled: Boolean = false
@@ -146,7 +146,7 @@ class WorkSpaceEditFragment: UstadEditFragment<WorkSpace>(), WorkSpaceEditView, 
             }
 
             override fun areContentsTheSame(oldItem: SiteTermsWithLanguage, newItem: SiteTermsWithLanguage): Boolean {
-                return oldItem.wtLang == newItem.wtLang
+                return oldItem.sTermsLang == newItem.sTermsLang
                         && oldItem.termsHtml == newItem.termsHtml
             }
         }

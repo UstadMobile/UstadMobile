@@ -24,11 +24,7 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
-import java.util.concurrent.TimeUnit
 
 
 /**
@@ -54,7 +50,7 @@ class TestLoginRoute {
             }
 
             install(Routing) {
-                WorkSpaceRoute()
+                SiteRoute()
             }
         }.start(wait = false)
 

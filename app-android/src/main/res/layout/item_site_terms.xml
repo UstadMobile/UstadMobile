@@ -4,27 +4,27 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <variable name="workspaceTerms" type="com.ustadmobile.lib.db.entities.SiteTermsWithLanguage" />
+        <variable name="siteTerms" type="com.ustadmobile.lib.db.entities.SiteTermsWithLanguage" />
 
         <variable name="mPresenter"
-            type="com.ustadmobile.core.controller.WorkSpaceEditPresenter" />
+            type="com.ustadmobile.core.controller.SiteEditPresenter" />
 
         <variable name="mEventHandler"
-            type="com.ustadmobile.port.android.view.WorkSpaceEditFragmentEventHandler" />
+            type="com.ustadmobile.port.android.view.SiteEditFragmentEventHandler" />
 
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> mEventHandler.onClickEditWorkspaceTerms(workspaceTerms)}"
+        android:onClick="@{() -> mEventHandler.onClickEditSiteTerms(siteTerms)}"
         android:background="?attr/selectableItemBackground">
 
 
         <!-- Line 1-->
         <TextView
             android:id="@+id/item_workspaceterms_line1_text"
-            android:text="@{workspaceTerms.termsHtml}"
+            android:text="@{siteTerms.termsHtml}"
             tools:text="Lang"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -55,7 +55,7 @@
             app:tint="?colorOnIconTint"
             android:contentDescription="@string/delete"
             android:background="?attr/selectableItemBackgroundBorderless"
-            android:onClick="@{() -> mPresenter.handleRemoveWorkspaceTerms(workspaceTerms)}" />
+            android:onClick="@{() -> mPresenter.handleRemoveSiteTerms(siteTerms)}" />
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

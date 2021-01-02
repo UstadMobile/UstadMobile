@@ -205,7 +205,7 @@
 
     <fragment
         android:id="@+id/workspace_enterlink_dest"
-        android:name="com.ustadmobile.port.android.view.WorkspaceEnterLinkFragment"
+        android:name="com.ustadmobile.port.android.view.SiteEnterLinkFragment"
         android:label="@string/workspace"
         />
 
@@ -274,23 +274,23 @@
         android:label="@string/add_a_new_occurrence"/>
 
     <fragment
-        android:id="@+id/workspace_detail_dest"
-        android:name="com.ustadmobile.port.android.view.WorkspaceDetailFragment"
-        android:label="@string/workspace" />
+        android:id="@+id/site_detail_dest"
+        android:name="com.ustadmobile.port.android.view.SiteDetailFragment"
+        android:label="@string/site" />
 
     <fragment
-        android:id="@+id/workspace_edit_dest"
-        android:name="com.ustadmobile.port.android.view.WorkSpaceEditFragment"
-        android:label="@string/edit_workspace"/>
+        android:id="@+id/site_edit_dest"
+        android:name="com.ustadmobile.port.android.view.SiteEditFragment"
+        android:label="@string/edit_site"/>
 
     <fragment
-        android:id="@+id/workspace_terms_detail_dest"
-        android:name="com.ustadmobile.port.android.view.WorkspaceTermsDetailFragment"
+        android:id="@+id/site_terms_detail_dest"
+        android:name="com.ustadmobile.port.android.view.SiteTermsDetailFragment"
         android:label="@string/terms_and_policies"/>
 
     <fragment
-        android:id="@+id/workspace_terms_edit_dest"
-        android:name="com.ustadmobile.port.android.view.WorkspaceTermsEditFragment"/>
+        android:id="@+id/site_terms_edit_dest"
+        android:name="com.ustadmobile.port.android.view.SiteTermsEditFragment"/>
 
 
 </navigation>

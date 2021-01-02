@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.view.WorkSpaceEditView
+import com.ustadmobile.core.view.SiteEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Site
@@ -19,27 +19,27 @@ import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import kotlinx.serialization.builtins.list
 
 
-class WorkSpaceEditPresenter(context: Any,
-        arguments: Map<String, String>, view: WorkSpaceEditView,
-        lifecycleOwner: DoorLifecycleOwner,
-        di: DI)
-    : UstadEditPresenter<WorkSpaceEditView, Site>(context, arguments, view, di, lifecycleOwner) {
+class SiteEditPresenter(context: Any,
+                        arguments: Map<String, String>, view: SiteEditView,
+                        lifecycleOwner: DoorLifecycleOwner,
+                        di: DI)
+    : UstadEditPresenter<SiteEditView, Site>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    val workspaceTermsOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<SiteTermsWithLanguage>(SiteTerms::sTermsUid,
-            "state_WorkspaceTerms_list", SiteTerms.serializer().list,
+    val siteTermsOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<SiteTermsWithLanguage>(SiteTerms::sTermsUid,
+            "state_SiteTerms_list", SiteTerms.serializer().list,
             SiteTermsWithLanguage.serializer().list, this, SiteTermsWithLanguage::class) {
         sTermsUid = it
     }
 
-    fun handleAddOrEditWorkspaceTerms(workspaceTerms: SiteTermsWithLanguage) {
-        workspaceTermsOneToManyJoinEditHelper.onEditResult(workspaceTerms)
+    fun handleAddOrEditSiteTerms(siteTerms: SiteTermsWithLanguage) {
+        siteTermsOneToManyJoinEditHelper.onEditResult(siteTerms)
     }
 
-    fun handleRemoveWorkspaceTerms(workspaceTerms: SiteTermsWithLanguage) {
-        workspaceTermsOneToManyJoinEditHelper.onDeactivateEntity(workspaceTerms)
+    fun handleRemoveSiteTerms(siteTerms: SiteTermsWithLanguage) {
+        siteTermsOneToManyJoinEditHelper.onDeactivateEntity(siteTerms)
     }
 
 
@@ -50,23 +50,23 @@ class WorkSpaceEditPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        view.workspaceTermsList = workspaceTermsOneToManyJoinEditHelper.liveList
+        view.siteTermsList = siteTermsOneToManyJoinEditHelper.liveList
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): Site? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        val workSpace = db.onRepoWithFallbackToDb(5000) {
+        val site = db.onRepoWithFallbackToDb(5000) {
             it.siteDao.getSiteAsync()
         } ?: Site()
 
-        val workspaceTerms = db.onRepoWithFallbackToDb(5000) {
+        val siteTerms = db.onRepoWithFallbackToDb(5000) {
             it.siteTermsDao.findAllWithLanguageAsList()
         }
 
-        workspaceTermsOneToManyJoinEditHelper.liveList.sendValue(workspaceTerms)
+        siteTermsOneToManyJoinEditHelper.liveList.sendValue(siteTerms)
 
-        return workSpace
+        return site
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): Site? {
@@ -94,7 +94,7 @@ class WorkSpaceEditPresenter(context: Any,
         GlobalScope.launch(doorMainDispatcher()) {
             repo.siteDao.updateAsync(entity)
 
-            workspaceTermsOneToManyJoinEditHelper.commitToDatabase(repo.siteTermsDao) {
+            siteTermsOneToManyJoinEditHelper.commitToDatabase(repo.siteTermsDao) {
                 //no need to set the foreign key
             }
 

@@ -7,7 +7,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.UstadEditView
-import com.ustadmobile.core.view.WorkspaceTermsEditView
+import com.ustadmobile.core.view.SiteTermsEditView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.SiteTerms
@@ -22,7 +22,7 @@ import org.kodein.di.DI
  *
  * Note:
  */
-class WorkspaceTermsEditPresenterTest {
+class SiteTermsEditPresenterTest {
 
     @JvmField
     @Rule
@@ -30,7 +30,7 @@ class WorkspaceTermsEditPresenterTest {
 
     private lateinit var di: DI
 
-    private lateinit var mockView: WorkspaceTermsEditView
+    private lateinit var mockView: SiteTermsEditView
 
     private lateinit var context: Any
 
@@ -63,7 +63,7 @@ class WorkspaceTermsEditPresenterTest {
 
         val presenterArgs = mapOf(UstadEditView.ARG_ENTITY_JSON to testEntitySerialized)
 
-        val presenter = WorkspaceTermsEditPresenter(context,
+        val presenter = SiteTermsEditPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 

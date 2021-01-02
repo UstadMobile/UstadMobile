@@ -3,7 +3,7 @@ package com.ustadmobile.core.view
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 
 
-interface WorkspaceTermsEditView: UstadEditView<SiteTermsWithLanguage> {
+interface SiteTermsEditView: UstadEditView<SiteTermsWithLanguage> {
 
     companion object {
 

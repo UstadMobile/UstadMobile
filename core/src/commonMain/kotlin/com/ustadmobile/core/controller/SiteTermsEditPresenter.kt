@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.WorkspaceTermsEditView
+import com.ustadmobile.core.view.SiteTermsEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
@@ -12,11 +12,11 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 
-class WorkspaceTermsEditPresenter(context: Any,
-        arguments: Map<String, String>, view: WorkspaceTermsEditView,
-        lifecycleOwner: DoorLifecycleOwner,
-        di: DI)
-    : UstadEditPresenter<WorkspaceTermsEditView, SiteTermsWithLanguage>(context, arguments, view, di, lifecycleOwner) {
+class SiteTermsEditPresenter(context: Any,
+                             arguments: Map<String, String>, view: SiteTermsEditView,
+                             lifecycleOwner: DoorLifecycleOwner,
+                             di: DI)
+    : UstadEditPresenter<SiteTermsEditView, SiteTermsWithLanguage>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON

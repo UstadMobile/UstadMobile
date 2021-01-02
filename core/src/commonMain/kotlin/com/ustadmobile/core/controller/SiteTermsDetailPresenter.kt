@@ -5,9 +5,9 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.WorkspaceTermsDetailView
-import com.ustadmobile.core.view.WorkspaceTermsDetailView.Companion.ARG_SHOW_ACCEPT_BUTTON
-import com.ustadmobile.core.view.WorkspaceTermsDetailView.Companion.ARG_USE_DISPLAY_LOCALE
+import com.ustadmobile.core.view.SiteTermsDetailView
+import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_SHOW_ACCEPT_BUTTON
+import com.ustadmobile.core.view.SiteTermsDetailView.Companion.ARG_USE_DISPLAY_LOCALE
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.DoorTag
@@ -20,11 +20,11 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 
-class WorkspaceTermsDetailPresenter(context: Any,
-        arguments: Map<String, String>, view: WorkspaceTermsDetailView,
-        lifecycleOwner: DoorLifecycleOwner,
-        di: DI)
-    : UstadDetailPresenter<WorkspaceTermsDetailView, SiteTerms>(context, arguments, view, di, lifecycleOwner) {
+class SiteTermsDetailPresenter(context: Any,
+                               arguments: Map<String, String>, view: SiteTermsDetailView,
+                               lifecycleOwner: DoorLifecycleOwner,
+                               di: DI)
+    : UstadDetailPresenter<SiteTermsDetailView, SiteTerms>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

@@ -2,8 +2,8 @@ package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.WorkspaceEnterLinkView
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.core.view.SiteEnterLinkView
+import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
@@ -20,13 +20,13 @@ import org.kodein.di.singleton
 import org.mockito.ArgumentMatchers
 
 
-class WorkspaceEnterLinkPresenterTest {
+class SiteEnterLinkPresenterTest {
 
     private lateinit var impl: UstadMobileSystemImpl
 
-    private lateinit var view: WorkspaceEnterLinkView
+    private lateinit var view: SiteEnterLinkView
 
-    private lateinit var presenter:WorkspaceEnterLinkPresenter
+    private lateinit var presenter:SiteEnterLinkPresenter
 
     private val context = Any()
 
@@ -55,7 +55,7 @@ class WorkspaceEnterLinkPresenterTest {
             }
         }
 
-        presenter = WorkspaceEnterLinkPresenter(context, mapOf(), view, di)
+        presenter = SiteEnterLinkPresenter(context, mapOf(), view, di)
         mockWebServer = MockWebServer()
         mockWebServer.start()
     }
@@ -67,8 +67,8 @@ class WorkspaceEnterLinkPresenterTest {
 
     @Test
     fun givenValidWorkSpaceLink_whenCheckedAndIsValid_shouldAllowToGoToNextScreen() {
-        val workSpace = Json.stringify(WorkSpace.serializer(), WorkSpace().apply {
-                    name = "Dummy workspace"
+        val workSpace = Json.stringify(Site.serializer(), Site().apply {
+                    siteName = "Dummy site"
                     registrationAllowed = true
                     guestLogin = true
                 })
@@ -79,7 +79,7 @@ class WorkspaceEnterLinkPresenterTest {
 
         val workSpacelink = "${mockWebServer.url("/")}"
 
-        val presenter = WorkspaceEnterLinkPresenter(context,
+        val presenter = SiteEnterLinkPresenter(context,
                 mapOf(), view, di)
 
         presenter.handleCheckLinkText(workSpacelink)
@@ -90,7 +90,7 @@ class WorkspaceEnterLinkPresenterTest {
     fun givenInValidWorkSpaceLink_whenCheckedAndIsValid_shouldNotAllowToGoToNextScreen() {
         mockWebServer.enqueue(MockResponse().setResponseCode(404))
         val workSpacelink = "${mockWebServer.url("/")}"
-        val presenter = WorkspaceEnterLinkPresenter(context,
+        val presenter = SiteEnterLinkPresenter(context,
                 mapOf(), view, di)
 
         presenter.handleCheckLinkText(workSpacelink)

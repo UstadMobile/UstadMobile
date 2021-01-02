@@ -5,7 +5,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.GetStartedView
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.OnBoardingView
-import com.ustadmobile.core.view.WorkspaceEnterLinkView
+import com.ustadmobile.core.view.SiteEnterLinkView
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -58,7 +58,7 @@ class GetStartedPresenterTest {
         argumentCaptor<String>{
             verify(impl).go(capture(), any(), any())
             Assert.assertEquals("Enter link screen was opened",
-                    WorkspaceEnterLinkView.VIEW_NAME, firstValue)
+                    SiteEnterLinkView.VIEW_NAME, firstValue)
         }
     }
 

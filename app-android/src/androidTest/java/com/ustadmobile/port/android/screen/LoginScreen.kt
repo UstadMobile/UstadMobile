@@ -46,7 +46,7 @@ object LoginScreen : KScreen<LoginScreen>() {
             guestLogin = guestConnection
             registrationAllowed = registration
         }
-        val args = mapOf(UstadView.ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), workspace))
+        val args = mapOf(UstadView.ARG_SITE to Json.stringify(WorkSpace.serializer(), workspace))
         val bundle = args.plus(mapOf(UstadView.ARG_SERVER_URL to serverUrl,
                 UstadView.ARG_NEXT to ContentEntryListTabsView.VIEW_NAME) as Map<String, String>).toBundle()
 

@@ -4,7 +4,7 @@ package com.ustadmobile.core.controller
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.ustadmobile.core.view.WorkspaceTermsDetailView
+import com.ustadmobile.core.view.SiteTermsDetailView
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.SiteTermsDao
@@ -26,13 +26,13 @@ import org.kodein.di.*
  *
  * Note:
  */
-class WorkspaceTermsDetailPresenterTest {
+class SiteTermsDetailPresenterTest {
 
     @JvmField
     @Rule
     var ustadTestRule = UstadTestRule()
 
-    private lateinit var mockView: WorkspaceTermsDetailView
+    private lateinit var mockView: SiteTermsDetailView
 
     private lateinit var context: Any
 
@@ -81,7 +81,7 @@ class WorkspaceTermsDetailPresenterTest {
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.sTermsUid.toString())
 
-        val presenter = WorkspaceTermsDetailPresenter(context, presenterArgs, mockView,
+        val presenter = SiteTermsDetailPresenter(context, presenterArgs, mockView,
                 mockLifecycleOwner, di)
 
 
@@ -89,7 +89,7 @@ class WorkspaceTermsDetailPresenterTest {
 
         val entityValSet = mockView.captureLastEntityValue()!!
         Assert.assertEquals("Expected entity was set on view",
-                testEntity.sTermsUid, entityValSet.wtUid)
+                testEntity.sTermsUid, entityValSet.sTermsUid)
     }
 
     @Test
@@ -105,14 +105,14 @@ class WorkspaceTermsDetailPresenterTest {
         val testEntity = SiteTerms().apply {
             //set variables here
             termsHtml = "Salam"
-            wtLang = "fa"
+            sTermsLang = "fa"
             sTermsUid = runBlocking { repo.siteTermsDao.insertAsync(this@apply) }
         }
 
-        val presenter = WorkspaceTermsDetailPresenter(Any(),
+        val presenter = SiteTermsDetailPresenter(Any(),
                 mapOf(UstadView.ARG_SERVER_URL to "http://localhost/",
-                    WorkspaceTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
-                    WorkspaceTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString()),
+                    SiteTermsDetailView.ARG_USE_DISPLAY_LOCALE to true.toString(),
+                    SiteTermsDetailView.ARG_SHOW_ACCEPT_BUTTON to true.toString()),
                 mockView, mockLifecycleOwner, di)
 
         presenter.onCreate(null)

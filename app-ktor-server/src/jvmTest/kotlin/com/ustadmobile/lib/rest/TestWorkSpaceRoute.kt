@@ -42,7 +42,7 @@ class TestWorkSpaceRoute {
             }
 
             install(Routing) {
-                WorkSpaceRoute()
+                SiteRoute()
             }
         }.start(wait = false)
 

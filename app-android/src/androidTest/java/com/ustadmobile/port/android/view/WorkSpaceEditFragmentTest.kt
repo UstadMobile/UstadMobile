@@ -52,7 +52,7 @@ class WorkSpaceEditFragmentTest : TestCase(){
     @Test
     fun givenNoWorkSpacePresentYet_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
-            WorkSpaceEditFragment(). also {
+            SiteEditFragment(). also {
                 it.installNavController(systemImplNavRule.navController)
             }
         }
@@ -100,7 +100,7 @@ class WorkSpaceEditFragmentTest : TestCase(){
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingWorkSpace.workSpaceUid)) {
-            WorkSpaceEditFragment().also {
+            SiteEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
         }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)

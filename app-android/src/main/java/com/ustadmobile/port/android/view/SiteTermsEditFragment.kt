@@ -4,12 +4,12 @@ import android.os.Bundle
 import android.view.*
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentWorkspaceTermsEditBinding
+import com.toughra.ustadmobile.databinding.FragmentSiteTermsEditBinding
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.controller.WorkspaceTermsEditPresenter
+import com.ustadmobile.core.controller.SiteTermsEditPresenter
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.WorkspaceTermsEditView
+import com.ustadmobile.core.view.SiteTermsEditView
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import com.ustadmobile.port.android.util.ext.*
@@ -20,16 +20,16 @@ import org.wordpress.aztec.plugins.CssUnderlinePlugin
 import org.wordpress.aztec.toolbar.IAztecToolbarClickListener
 
 
-interface WorkspaceTermsEditFragmentEventHandler {
+interface SiteTermsEditFragmentEventHandler {
     fun onClickLanguage()
 }
 
-class WorkspaceTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), WorkspaceTermsEditView, WorkspaceTermsEditFragmentEventHandler,
+class SiteTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), SiteTermsEditView, SiteTermsEditFragmentEventHandler,
     IAztecToolbarClickListener{
 
-    private var mBinding: FragmentWorkspaceTermsEditBinding? = null
+    private var mBinding: FragmentSiteTermsEditBinding? = null
 
-    private var mPresenter: WorkspaceTermsEditPresenter? = null
+    private var mPresenter: SiteTermsEditPresenter? = null
 
     override val mEditPresenter: UstadEditPresenter<*, SiteTermsWithLanguage>?
         get() = mPresenter
@@ -39,7 +39,7 @@ class WorkspaceTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), Wo
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentWorkspaceTermsEditBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentSiteTermsEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.activityEventHandler = this
             aztec = Aztec.with(it.editor,  it.formattingToolbar, this).also {
@@ -50,7 +50,7 @@ class WorkspaceTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), Wo
 
         }
 
-        mPresenter = WorkspaceTermsEditPresenter(requireContext(), arguments.toStringMap(), this,
+        mPresenter = SiteTermsEditPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)
         mPresenter?.onCreate(backStackSavedState)
 
@@ -64,19 +64,20 @@ class WorkspaceTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), Wo
             Language::class.java) {
             val selectedLang = it.firstOrNull() ?: return@observeResult
             entity?.stLanguage = selectedLang
-            entity?.wtLang = selectedLang.iso_639_1_standard
-            mBinding?.workspaceTerms = entity
+            entity?.sTermsLang = selectedLang.iso_639_1_standard
+            entity?.sTermsLangUid = selectedLang.langUid
+            mBinding?.siteTerms = entity
         }
     }
 
     override fun onSaveStateToBackStackStateHandle() {
-        mBinding?.workspaceTerms?.termsHtml = aztec?.visualEditor?.toHtml()
+        mBinding?.siteTerms?.termsHtml = aztec?.visualEditor?.toHtml()
         super.onSaveStateToBackStackStateHandle()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if(item.itemId == R.id.menu_done) {
-            mBinding?.workspaceTerms?.termsHtml = aztec?.visualEditor?.toHtml()
+            mBinding?.siteTerms?.termsHtml = aztec?.visualEditor?.toHtml()
         }
 
         return super.onOptionsItemSelected(item)
@@ -121,7 +122,7 @@ class WorkspaceTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), Wo
         get() = field
         set(value) {
             field = value
-            mBinding?.workspaceTerms = value
+            mBinding?.siteTerms = value
             val termsHtmlVal = value?.termsHtml
             if(termsHtmlVal != null)
                 aztec?.visualEditor?.fromHtml(termsHtmlVal)

@@ -41,7 +41,7 @@ class WorkspaceTermsDetailFragmentTest : TestCase(){
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(ARG_ENTITY_UID to existingClazz.clazzUid)) {
-            WorkspaceTermsDetailFragment().also {
+            SiteTermsDetailFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
         }
