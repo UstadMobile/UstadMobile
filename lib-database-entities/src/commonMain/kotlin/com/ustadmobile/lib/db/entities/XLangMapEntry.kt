@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.LastChangedBy
@@ -16,6 +17,7 @@ import kotlinx.serialization.Serializable
         FROM DeviceSession"""])
 @Serializable
 data class XLangMapEntry(
+        @ColumnInfo(index = true)
         var verbLangMapUid: Long = 0L,
         var objectLangMapUid: Long = 0L,
         var languageLangMapUid: Long = 0L,

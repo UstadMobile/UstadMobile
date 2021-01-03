@@ -221,6 +221,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
             it.source = null
         }
         adapterSourceHolderList.clear()
+        reportRecyclerView = null
     }
 
     override var entity: ReportWithSeriesWithFilters? = null
@@ -258,16 +259,6 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
             }
 
             override fun areContentsTheSame(oldItem: ChartData, newItem: ChartData): Boolean {
-                return oldItem == newItem
-            }
-        }
-
-        val DIFFUTIL_HEADER = object : DiffUtil.ItemCallback<String>() {
-            override fun areItemsTheSame(oldItem: String, newItem: String): Boolean {
-                return oldItem == newItem
-            }
-
-            override fun areContentsTheSame(oldItem: String, newItem: String): Boolean {
                 return oldItem == newItem
             }
         }

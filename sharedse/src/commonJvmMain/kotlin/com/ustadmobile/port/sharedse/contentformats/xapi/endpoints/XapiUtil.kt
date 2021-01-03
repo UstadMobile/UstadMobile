@@ -55,10 +55,20 @@ object XapiUtil {
                 val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
                 val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
 
-                XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid
-                        ?: 0, it.value)
+                val existingMap = dao.getXLangMapFromVerb(verbEntity.verbUid, lang.langUid)
+
+                if(existingMap == null){
+                    XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid
+                            ?: 0, it.value)
+                }else{
+                    null
+                }
+
+            }.filterNotNull()
+
+            if (listToInsert != null && listToInsert.isNotEmpty()) {
+                dao.insertList(listToInsert)
             }
-            dao.insertList(listToInsert)
         }
     }
 
@@ -70,10 +80,16 @@ object XapiUtil {
             val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
             val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
 
-            XLangMapEntry(0, xObjectEntity.xObjectUid, lang.langUid, variant?.langVariantUid
-                    ?: 0, it.value)
-        }
-        if (listToInsert != null) {
+            val existingMap = dao.getXLangMapFromObject(xObjectEntity.xObjectUid, lang.langUid)
+
+            if(existingMap == null){
+                XLangMapEntry(0, xObjectEntity.xObjectUid, lang.langUid, variant?.langVariantUid
+                        ?: 0, it.value)
+            }else{
+                null
+            }
+        }.filterNotNull()
+        if (listToInsert != null && listToInsert.isNotEmpty()) {
             dao.insertList(listToInsert)
         }
     }
