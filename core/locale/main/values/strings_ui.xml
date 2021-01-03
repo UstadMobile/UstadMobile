@@ -876,6 +876,12 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="or">OR</string>
 
-    <string name="sites_can_be_help_text">Sites can be created for schools, projects, and organizations, etc. Each site has its own users, administrators, content, classes, schools, and more.</string>
+    <string name="sites_can_be_help_text">Sites can be created for schools, projects, and organizations, etc. Each site can have its\' own users, administrators, content, classes, schools, and more.</string>
+
+    <string name="connect_to_site">Connect to site</string>
+
+    <string name="terms_and_policies_text">Terms and policies text</string>
+
+    <string name="edit_terms_and_policies">Edit terms and policies</string>
 
 </resources>

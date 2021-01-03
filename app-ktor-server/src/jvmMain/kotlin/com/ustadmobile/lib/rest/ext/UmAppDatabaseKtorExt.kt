@@ -18,7 +18,7 @@ fun UmAppDatabase.ktorInitDbWithRepo(repo: UmAppDatabase, passwordFilePath: Stri
     if(siteDao.getSite() == null) {
         repo.siteDao.insert(Site().apply {
             siteUid = 1L
-            siteName = "UstadmobileWorkspace"
+            siteName = "My Site"
             guestLogin = false
             registrationAllowed = false
         })

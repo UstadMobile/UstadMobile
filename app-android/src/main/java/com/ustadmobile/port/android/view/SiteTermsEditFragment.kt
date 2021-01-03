@@ -37,6 +37,12 @@ class SiteTermsEditFragment: UstadEditFragment<SiteTermsWithLanguage>(), SiteTer
 
     private var aztec: Aztec? = null
 
+    override var languageError: String?
+        get() = mBinding?.languageError
+        set(value) {
+            mBinding?.languageError = value
+        }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentSiteTermsEditBinding.inflate(inflater, container, false).also {

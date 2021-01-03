@@ -18,8 +18,7 @@ class ViewNameToDestMap: DestinationProvider {
             HolidayCalendarListView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_list_dest),
             HolidayCalendarEditView.VIEW_NAME to UstadDestination(R.id.holidaycalendar_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
-            SettingsView.VIEW_NAME to UstadDestination(R.id.settings_list_dest,
-                hideBottomNavigation = true),
+            SettingsView.VIEW_NAME to UstadDestination(R.id.settings_list_dest),
             RoleListView.VIEW_NAME to UstadDestination(R.id.role_list_dest),
             RoleEditView.VIEW_NAME to UstadDestination(R.id.role_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
@@ -78,11 +77,12 @@ class ViewNameToDestMap: DestinationProvider {
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             SiteDetailView.VIEW_NAME to UstadDestination(R.id.site_detail_dest),
             SiteEditView.VIEW_NAME to UstadDestination(R.id.site_edit_dest,
-                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             SiteTermsEditView.VIEW_NAME to UstadDestination(R.id.site_terms_edit_dest,
                 actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true),
-            SiteTermsDetailView.VIEW_NAME to UstadDestination(R.id.site_terms_detail_dest,
-                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL)
+            SiteTermsDetailView.VIEW_NAME to UstadDestination(R.id.site_terms_detail_dest),
+            SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS to UstadDestination(R.id.site_terms_detail_accept_dest,
+                actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL, hideBottomNavigation = true)
     )
 
     override val navControllerViewId: Int

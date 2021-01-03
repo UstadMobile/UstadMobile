@@ -36,14 +36,9 @@ class SiteTermsDetailPresenter(context: Any,
     }
 
 
+    //Terms are never edited directly from the detail view. It is done using site edit
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        if((account?.personUid ?: 0L) == 0L || view.acceptButtonVisible) {
-            return false
-        }else {
-            return repo.onRepoWithFallbackToDb(5000) {
-                it.personDao.personIsAdmin(account?.personUid ?: 0)
-            }
-        }
+        return false
     }
 
 

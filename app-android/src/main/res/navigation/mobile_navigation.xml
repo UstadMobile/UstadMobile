@@ -206,7 +206,7 @@
     <fragment
         android:id="@+id/workspace_enterlink_dest"
         android:name="com.ustadmobile.port.android.view.SiteEnterLinkFragment"
-        android:label="@string/workspace"
+        android:label="@string/connect_to_site"
         />
 
     <fragment
@@ -289,8 +289,14 @@
         android:label="@string/terms_and_policies"/>
 
     <fragment
+        android:id="@+id/site_terms_detail_accept_dest"
+        android:name="com.ustadmobile.port.android.view.SiteTermsDetailFragment"
+        android:label="@string/terms_and_policies"/>
+
+    <fragment
         android:id="@+id/site_terms_edit_dest"
-        android:name="com.ustadmobile.port.android.view.SiteTermsEditFragment"/>
+        android:name="com.ustadmobile.port.android.view.SiteTermsEditFragment"
+        android:label="@string/edit_terms_and_policies"/>
 
 
 </navigation>

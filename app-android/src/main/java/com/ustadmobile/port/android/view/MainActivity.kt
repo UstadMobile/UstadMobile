@@ -137,7 +137,12 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
             (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
         (mBinding.root.collapsing_toolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
 
-        slideBottomNavigation(true)
+        mBinding.bottomNavView.visibility = if(ustadDestination?.hideBottomNavigation == true) {
+            View.GONE
+        } else {
+            slideBottomNavigation(true)
+            View.VISIBLE
+        }
     }
 
     fun onAppBarExpand(expand: Boolean){
@@ -167,14 +172,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         menu.findItem(R.id.menu_main_settings).isVisible = (mainScreenItemsVisible && mIsAdmin == true)
         menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
         searchView = menu.findItem(R.id.menu_search).actionView as SearchView
-
-        val currentDestination = destinationProvider.lookupDestinationById(currentFrag)
-
-        mBinding.bottomNavView.visibility = if(currentDestination?.hideBottomNavigation == true) {
-            View.GONE
-        } else {
-            View.VISIBLE
-        }
 
         if (mainScreenItemsVisible) {
             setUserProfile(menu.findItem(R.id.menu_main_profile))

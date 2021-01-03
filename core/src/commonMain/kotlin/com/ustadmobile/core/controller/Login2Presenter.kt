@@ -136,7 +136,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         args.putFromOtherMapIfPresent(arguments, ARG_NEXT)
         args.putFromOtherMapIfPresent(arguments, REGISTER_VIA_LINK)
 
-        impl.go(SiteTermsDetailView.VIEW_NAME, args, context)
+        impl.go(SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS, args, context)
     }
 
     fun handleConnectAsGuest(){

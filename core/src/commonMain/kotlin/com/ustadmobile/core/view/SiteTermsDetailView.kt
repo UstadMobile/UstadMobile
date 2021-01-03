@@ -11,6 +11,9 @@ interface SiteTermsDetailView: UstadDetailView<SiteTerms> {
 
         const val VIEW_NAME = "SiteTermsDetailView"
 
+        //Additional alias view name - set to hide bottom navigation
+        const val VIEW_NAME_ACCEPT_TERMS = "SiteTermsDetailAcceptTerms"
+
         /**
          * If this argument is provided and true, then terms will be looked up according to the
          * user's locale. No entity uid is required for this.

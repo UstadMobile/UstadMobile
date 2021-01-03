@@ -25,6 +25,11 @@
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.SiteTermsEditFragmentEventHandler" />
 
+        <variable
+            name="languageError"
+            type="String" />
+
+
     </data>
 
 
@@ -46,7 +51,11 @@
                 android:layout_marginEnd="8dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+                app:layout_constraintTop_toTopOf="parent"
+                app:errorTextColor="?colorError"
+                app:error="@{languageError}"
+                app:errorEnabled="true"
+                >
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:layout_width="match_parent"
@@ -56,6 +65,7 @@
                     android:inputType="@{InputType.TYPE_NULL}"
                     android:text="@{siteTerms.stLanguage.name}"
                     android:hint="@string/language" />
+
             </com.google.android.material.textfield.TextInputLayout>
 
             <org.wordpress.aztec.AztecText

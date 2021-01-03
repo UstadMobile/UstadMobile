@@ -10,7 +10,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentSiteEditBinding
-import com.toughra.ustadmobile.databinding.ItemSiteTermsBinding
+import com.toughra.ustadmobile.databinding.ItemSiteTermsEditBinding
 import com.ustadmobile.core.controller.SiteEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.observeResult
@@ -43,10 +43,10 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView, SiteEditFragmen
     class SiteTermsRecyclerAdapter(val activityEventHandler: SiteEditFragmentEventHandler,
                                    var presenter: SiteEditPresenter?): ListAdapter<SiteTermsWithLanguage, SiteTermsRecyclerAdapter.SiteTermsViewHolder>(DIFF_CALLBACK_WORKSPACETERMS) {
 
-            class SiteTermsViewHolder(val binding: ItemSiteTermsBinding): RecyclerView.ViewHolder(binding.root)
+            class SiteTermsViewHolder(val binding: ItemSiteTermsEditBinding): RecyclerView.ViewHolder(binding.root)
 
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SiteTermsViewHolder {
-                val viewHolder = SiteTermsViewHolder(ItemSiteTermsBinding.inflate(
+                val viewHolder = SiteTermsViewHolder(ItemSiteTermsEditBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false))
                 viewHolder.binding.mPresenter = presenter
                 viewHolder.binding.mEventHandler = activityEventHandler

@@ -5,9 +5,12 @@ import com.ustadmobile.core.view.SiteDetailView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.SiteEditView
+import com.ustadmobile.core.view.SiteTermsDetailView
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.db.entities.Site
+import com.ustadmobile.lib.db.entities.SiteTerms
+import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
 
@@ -49,6 +52,11 @@ class SiteDetailPresenter(context: Any,
     override fun handleClickEdit() {
         systemImpl.go(SiteEditView.VIEW_NAME,
             mapOf(ARG_ENTITY_UID to entity?.siteUid?.toString()), context)
+    }
+
+    fun handleClickTerms(terms: SiteTermsWithLanguage?){
+        systemImpl.go(SiteTermsDetailView.VIEW_NAME,
+                mapOf(ARG_ENTITY_UID to terms?.sTermsUid?.toString()), context)
     }
 
     companion object {

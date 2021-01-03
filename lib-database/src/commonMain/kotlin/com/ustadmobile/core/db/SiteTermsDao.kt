@@ -28,12 +28,16 @@ abstract class SiteTermsDao : OneToManyJoinDao<SiteTerms> {
     @Query("SELECT * FROM SiteTerms WHERE sTermsUid = :uid")
     abstract suspend fun findByUidAsync(uid: Long): SiteTerms?
 
-    @Query("SELECT * FROM SiteTerms")
-    abstract fun findAllTermsAsFactory(): DataSource.Factory<Int, SiteTerms>
+    @Query("""SELECT SiteTerms.*, Language.* 
+        FROM SiteTerms 
+        LEFT JOIN Language ON SiteTerms.sTermsLangUid = Language.langUid
+        WHERE CAST(sTermsActive AS INTEGER) = 1
+    """)
+    abstract fun findAllTermsAsFactory(): DataSource.Factory<Int, SiteTermsWithLanguage>
 
     @Query("""SELECT SiteTerms.*, Language.*
         FROM SiteTerms
-        LEFT JOIN Language ON SiteTerms.sTermsLang = Language.langUid
+        LEFT JOIN Language ON SiteTerms.sTermsLangUid = Language.langUid
         WHERE CAST(sTermsActive AS INTEGER) = 1
     """)
     abstract suspend fun findAllWithLanguageAsList(): List<SiteTermsWithLanguage>
