@@ -40,7 +40,9 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
 
     var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 
                 $personPermission 
-                LEFT JOIN XLangMapEntry ON StatementEntity.statementVerbUid = XLangMapEntry.verbLangMapUid """
+                LEFT JOIN XLangMapEntry ON XLangMapEntry.statementLangMapUid = 
+                (SELECT statementLangMapUid FROM XLangMapEntry 
+                WHERE statementVerbUid = StatementEntity.statementVerbUid LIMIT 1)"""
 
 
     sql += groupBy(report.xAxis) + "AS xAxis "
@@ -131,12 +133,12 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
     }
 
 
-    sql += "GROUP BY xAxis"
+    sql += " GROUP BY xAxis "
     if (reportSeriesSubGroup != 0) {
-        sql += ", subgroup"
+        sql += " , subgroup "
     }
 
-    //sqlList += " ORDER BY StatementEntity.timestamp DESC"
+    sqlList += " GROUP BY StatementEntity.statementUid ORDER BY StatementEntity.timestamp DESC"
 
 
     return QueryParts(sql, sqlList, paramList.toTypedArray())
