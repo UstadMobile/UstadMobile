@@ -22,7 +22,7 @@ import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 
-class TestSiteSpaceRoute {
+class TestSiteRoute {
     lateinit var server: ApplicationEngine
 
     lateinit var db: UmAppDatabase
