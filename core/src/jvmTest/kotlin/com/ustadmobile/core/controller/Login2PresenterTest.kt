@@ -160,7 +160,7 @@ class Login2PresenterTest {
         val presenter = Login2Presenter(context, createParams(registration = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleCreateAccount()
-        verify(impl).go(eq(SiteTermsDetailView.VIEW_NAME), any(), any())
+        verify(impl).go(eq(SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS), any(), any())
     }
 
     @Test

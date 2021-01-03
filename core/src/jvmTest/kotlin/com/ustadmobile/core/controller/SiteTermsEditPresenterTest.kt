@@ -10,7 +10,9 @@ import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.SiteTermsEditView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.SiteTerms
+import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -54,12 +56,15 @@ class SiteTermsEditPresenterTest {
 
     @Test
     fun givenExistingWorkspaceTerms_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
-        val testEntity = SiteTerms().apply {
+        val testEntity = SiteTermsWithLanguage().apply {
             termsHtml = "All your base are belong to us"
-
+            stLanguage = Language().apply {
+                name = "English"
+                iso_639_1_standard = "en"
+            }
         }
 
-        val testEntitySerialized = safeStringify(di, SiteTerms.serializer(), testEntity)
+        val testEntitySerialized = safeStringify(di, SiteTermsWithLanguage.serializer(), testEntity)
 
         val presenterArgs = mapOf(UstadEditView.ARG_ENTITY_JSON to testEntitySerialized)
 

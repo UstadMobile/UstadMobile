@@ -42,7 +42,7 @@ class RedirectPresenterTest {
         mPresenter = RedirectPresenter(context, mapOf(UstadView.ARG_FROM to OnBoardingView.VIEW_NAME),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(mockedView).showNextScreen(eq(GetStartedView.VIEW_NAME), any())
+        verify(mockedView).showNextScreen(eq(SiteEnterLinkView.VIEW_NAME), any())
     }
 
     @Test
