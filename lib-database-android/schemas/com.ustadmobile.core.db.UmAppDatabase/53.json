@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 53,
-    "identityHash": "800d138141f5d365525939a6c6fbac55",
+    "identityHash": "d7014fcb08aa8616aadeb2d3d4c560a3",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -3821,7 +3821,16 @@
           ],
           "autoGenerate": true
         },
-        "indices": [],
+        "indices": [
+          {
+            "name": "index_XLangMapEntry_verbLangMapUid",
+            "unique": false,
+            "columnNames": [
+              "verbLangMapUid"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_verbLangMapUid` ON `${TABLE_NAME}` (`verbLangMapUid`)"
+          }
+        ],
         "foreignKeys": []
       },
       {
@@ -9353,7 +9362,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '800d138141f5d365525939a6c6fbac55')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd7014fcb08aa8616aadeb2d3d4c560a3')"
     ]
   }
 }

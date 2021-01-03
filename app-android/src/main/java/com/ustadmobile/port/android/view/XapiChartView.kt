@@ -47,7 +47,6 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 isGranularityEnabled = true
                 axisMinimum = 0f
             }
-
             axisLeft.apply {
                 isEnabled = true
                 axisMinimum = 0f
@@ -162,7 +161,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
                             val barReportData = groupedByXAxis[xAxisKey]?.firstOrNull { it.subgroup == subGroup }
                             val barValue = barReportData?.yAxis ?: 0f
-                            val barEntry = Entry((idx).toFloat() + 0.5f, chartData.yAxisValueFormatter
+                            val barEntry = Entry((idx).toFloat(), chartData.yAxisValueFormatter
                                     ?.asValueFormatter()?.getFormattedValue(barValue)?.toFloat()  ?: barValue)
                             lineEntryList.add(barEntry)
                         }
@@ -205,7 +204,13 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
         }
 
-
+        val yAxisMax = combinedData.yMax * 0.15f
+        combinedChart.axisLeft.apply {
+            axisMaximum = combinedData.yMax + yAxisMax
+        }
+        combinedChart.axisRight.apply {
+            axisMaximum = combinedData.yMax + yAxisMax
+        }
 
         combinedChart.data = combinedData
         combinedChart.invalidate()

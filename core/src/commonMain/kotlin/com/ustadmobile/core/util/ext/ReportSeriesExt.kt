@@ -23,11 +23,11 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
         NUMBER_SESSIONS -> "COUNT(DISTINCT StatementEntity.contextRegistration) As yAxis, "
         ACTIVITIES_RECORDED -> "COUNT(StatementEntity.statementId) AS yAxis, "
         AVERAGE_SESSION_PER_CONTENT -> "COUNT(DISTINCT StatementEntity.contextRegistration) As yAxis, "
-        PERCENT_STUDENTS_COMPLETED -> """COUNT(DISTINCT CASE WHEN StatementEntity.resultCompletion 
-                THEN StatementEntity.statementPersonUid ELSE NULL) / 
-                COUNT(StatementEntity.resultCompletion) AS yAxis, """.trimMargin()
+        PERCENT_STUDENTS_COMPLETED -> """((CAST(COUNT(DISTINCT CASE WHEN 
+            StatementEntity.resultCompletion THEN StatementEntity.statementPersonUid ELSE NULL END) 
+            AS REAL) / COUNT(StatementEntity.resultCompletion)) * 100) as yAxis, """.trimMargin()
         NUMBER_STUDENTS_COMPLETED -> """COUNT(DISTINCT CASE WHEN StatementEntity.resultCompletion 
-                THEN StatementEntity.statementPersonUid ELSE NULL) AS yAxis, """.trimMargin()
+                THEN StatementEntity.statementPersonUid ELSE NULL END) AS yAxis, """.trimMargin()
         else -> ""
     }
 

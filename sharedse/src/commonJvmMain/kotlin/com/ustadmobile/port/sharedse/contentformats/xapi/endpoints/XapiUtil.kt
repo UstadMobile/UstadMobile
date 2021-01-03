@@ -64,7 +64,7 @@ object XapiUtil {
                     null
                 }
 
-            }.filterNotNull()
+            }?.filterNotNull()
 
             if (listToInsert != null && listToInsert.isNotEmpty()) {
                 dao.insertList(listToInsert)
@@ -88,7 +88,7 @@ object XapiUtil {
             }else{
                 null
             }
-        }.filterNotNull()
+        }?.filterNotNull()
         if (listToInsert != null && listToInsert.isNotEmpty()) {
             dao.insertList(listToInsert)
         }
