@@ -137,11 +137,15 @@ class SiteDetailFragment: UstadDetailFragment<Site>(), SiteDetailView, Workspace
             layoutManager = LinearLayoutManager(requireContext())
         }
 
+        return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         mPresenter = SiteDetailPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)
         mPresenter?.onCreate(backStackSavedState)
-
-        return rootView
     }
 
     override fun onDestroyView() {

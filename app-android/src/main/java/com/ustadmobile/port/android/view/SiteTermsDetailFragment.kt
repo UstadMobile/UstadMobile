@@ -49,11 +49,15 @@ class SiteTermsDetailFragment: UstadDetailFragment<SiteTerms>(), SiteTermsDetail
             rootView = it.root
         }
 
+        return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         mPresenter = SiteTermsDetailPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
-
-        return rootView
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

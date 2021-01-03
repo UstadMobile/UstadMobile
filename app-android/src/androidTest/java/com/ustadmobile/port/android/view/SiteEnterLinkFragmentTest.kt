@@ -7,7 +7,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.lib.db.entities.Site
-import com.ustadmobile.port.android.screen.WorkSpaceEnterLinkScreen
+import com.ustadmobile.port.android.screen.SiteEnterLinkScreen
 import com.ustadmobile.test.port.android.UmViewActions.hasInputLayoutError
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import kotlinx.serialization.json.Json
@@ -23,7 +23,7 @@ import org.junit.Test
 
 @AdbScreenRecord("Workspace screen Test")
 @ExperimentalStdlibApi
-class WorkspaceEnterLinkFragmentTest : TestCase(){
+class SiteEnterLinkFragmentTest : TestCase(){
 
     @JvmField
     @Rule
@@ -55,14 +55,14 @@ class WorkspaceEnterLinkFragmentTest : TestCase(){
 
         init{
 
-            val workSpace = Json.stringify(Site.serializer(), Site().apply {
-                name = "Dummy workspace"
+            val site = Json.stringify(Site.serializer(), Site().apply {
+                siteName = "Dummy workspace"
                 registrationAllowed = true
                 guestLogin = true
             })
 
             val buffer = Buffer()
-            buffer.write((workSpace.toByteArray()))
+            buffer.write((site.toByteArray()))
             buffer.flush()
 
             mockWebServer.enqueue(MockResponse()
@@ -73,7 +73,7 @@ class WorkspaceEnterLinkFragmentTest : TestCase(){
 
         }.run{
 
-            WorkSpaceEnterLinkScreen{
+            SiteEnterLinkScreen{
 
                 launchFragment(mockWebServer.url("/").toString(), systemImplNavRule)
                 nextButton{
@@ -99,7 +99,7 @@ class WorkspaceEnterLinkFragmentTest : TestCase(){
             mockWebServer.enqueue(MockResponse().setResponseCode(404))
         }.run {
 
-            WorkSpaceEnterLinkScreen {
+            SiteEnterLinkScreen {
 
                 launchFragment(mockWebServer.url("/").toString(), systemImplNavRule)
 

@@ -92,12 +92,9 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView, SiteEditFragmen
             it.activityEventHandler = this
         }
 
-        mPresenter = SiteEditPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
 
-        siteTermsRecyclerAdapter?.presenter = mPresenter
 
-        mPresenter?.onCreate(backStackSavedState)
+
 
         return rootView
     }
@@ -111,6 +108,12 @@ class SiteEditFragment: UstadEditFragment<Site>(), SiteEditView, SiteEditFragmen
 
             mPresenter?.handleAddOrEditSiteTerms(workspaceTerms)
         }
+
+        mPresenter = SiteEditPresenter(requireContext(), arguments.toStringMap(), this,
+                viewLifecycleOwner, di)
+        siteTermsRecyclerAdapter?.presenter = mPresenter
+
+        mPresenter?.onCreate(backStackSavedState)
     }
 
     override fun onDestroyView() {

@@ -2,7 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.lib.db.entities.Site
 import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
@@ -22,7 +22,7 @@ import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 
-class TestWorkSpaceRoute {
+class TestSiteSpaceRoute {
     lateinit var server: ApplicationEngine
 
     lateinit var db: UmAppDatabase
@@ -59,12 +59,12 @@ class TestWorkSpaceRoute {
 
     //@Test
     fun givenAvailableWorkSpace_whenRequested_thenShouldReturnWorkSpaceObject() {
-        val workSpace = WorkSpace().apply {
-            name = "UmTestWorkspace"
+        val site = Site().apply {
+            siteName = "UmTestWorkspace"
             guestLogin = true
             registrationAllowed = true
         }
-        workSpace.uid = db.siteDao.insert(workSpace)
+        site.siteUid = db.siteDao.insert(site)
 
         runBlocking {
             val response = httpClient.get<HttpStatement> {
@@ -74,12 +74,12 @@ class TestWorkSpaceRoute {
                 }
             }.execute()
 
-            val mWorkSpace = response.receive<WorkSpace>()
+            val mWorkSpace = response.receive<Site>()
 
             Assert.assertEquals("Workspace was retrieved, response code is 200",
                     HttpStatusCode.OK, response.status.value)
             Assert.assertEquals("Valid workspace was retrieved",
-                    mWorkSpace.uid, workSpace.uid)
+                    mWorkSpace.siteUid, site.siteUid)
         }
     }
 }

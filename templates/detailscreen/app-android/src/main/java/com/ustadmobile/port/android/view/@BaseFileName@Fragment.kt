@@ -35,11 +35,13 @@ class @BaseFileName@Fragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@De
             rootView = it.root
         }
 
+        return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         mPresenter = @Entity@DetailPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
-
-        return rootView
     }
 
     override fun onDestroyView() {

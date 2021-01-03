@@ -10,7 +10,7 @@ import com.ustadmobile.port.android.view.SiteEnterLinkFragment
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 
-object WorkSpaceEnterLinkScreen : KScreen<WorkSpaceEnterLinkScreen>() {
+object SiteEnterLinkScreen : KScreen<SiteEnterLinkScreen>() {
 
     override val layoutId: Int?
         get() = R.layout.fragment_site_enter_link

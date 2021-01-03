@@ -9,7 +9,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.port.android.view.Login2Fragment
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -41,12 +41,12 @@ object LoginScreen : KScreen<LoginScreen>() {
     fun launchFragment(serverUrl: String? = null, fillAllFields: Boolean = false,
                        registration: Boolean = false, guestConnection: Boolean = false, systemImplNavRule: SystemImplTestNavHostRule) {
 
-        val workspace = WorkSpace().apply {
-            name = ""
+        val workspace = Site().apply {
+            siteName = ""
             guestLogin = guestConnection
             registrationAllowed = registration
         }
-        val args = mapOf(UstadView.ARG_SITE to Json.stringify(WorkSpace.serializer(), workspace))
+        val args = mapOf(UstadView.ARG_SITE to Json.stringify(Site.serializer(), workspace))
         val bundle = args.plus(mapOf(UstadView.ARG_SERVER_URL to serverUrl,
                 UstadView.ARG_NEXT to ContentEntryListTabsView.VIEW_NAME) as Map<String, String>).toBundle()
 
