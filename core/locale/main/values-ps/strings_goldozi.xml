@@ -2,18 +2,18 @@
 <resources>
     <!--Goldozi-->
     <string name="app_name_goldozi">ګلدوزی</string>
-    <string name="sales">خرڅلاوی</string>
-    <string name="all_sales">ټول خرڅلاو</string>
-    <string name="pre_orders">مخکینی فرمایشات</string>
-    <string name="payments_due">داداینی وړپیسی</string>
+    <string name="sales">پلورونه</string>
+    <string name="all_sales">ټول پلورونه</string>
+    <string name="pre_orders">مخکیني فرمایشونه</string>
+    <string name="payments_due">د اداینی وړپیسی</string>
     <string name="sort_by">د اڼل ترتیب</string>
     <string name="sort_by_recent">اوسنی/نوی</string>
     <string name="sort_by_amount">مقدار</string>
     <string name="sort_by_location">ځای </string>
     <string name="record_sale">د خرڅلاو ثبت</string>
     <string name="inventory">موجودی</string>
-    <string name="items">توکی</string>
-    <string name="add_item">د توکو زیاتول</string>
+    <string name="items">توکي</string>
+    <string name="add_item">د توکي اضافه کول</string>
     <string name="select_producer">د تولید کوونکی انتخاب</string>
     <string name="most_recent">بیخی اوسنی</string>
     <string name="more">نور</string>
@@ -44,11 +44,11 @@
     <string name="sale_details">د خرڅلاوی تفصیلات</string>
     <string name="sale_detail">د خرڅلاوی تفصیل</string>
     <string name="search">لټل</string>
-    <string name="onboarding_goldozi_1">ګلدوزی ته ښه راغلاست.</string>
-    <string name="onboarding_goldozi_1b">په دې هکله د زده ګړې لپاره د سکرین په مخ کش کړئ.</string>
-    <string name="onboarding_goldozi_2">محصولات پیریدونکو ته ښکاره کړئ.</string>
-    <string name="onboarding_goldozi_3">د خپل ذخیره او خرڅلاوو تعقیبول.</string>
-    <string name="onboarding_goldozi_4">د خپل کورسونو کتنه.</string>
+    <string name="onboarding_goldozi_1">ګلدوزۍ ته ښه راغلاست</string>
+    <string name="onboarding_goldozi_1b">د لا معلوماتو لپاره یې کیکاږۍ</string>
+    <string name="onboarding_goldozi_2">پیرودونکو ته د محصولاتو ښودل</string>
+    <string name="onboarding_goldozi_3">خپل ګدام او پلور تعقیب کړئ.</string>
+    <string name="onboarding_goldozi_4">خپلو کورسونو ته بیا کتنه وکړئ.</string>
     <string name="onboarding_empty"> </string>
     <string name="sort_by_most_used">تر ټولو ډیر استفاده شوی</string>
     <string name="sort_by_name_asc">نوم(asc)</string>
@@ -66,7 +66,7 @@
     <string name="confirm_logout_confirmation">آیا تاسو غواړئ چې ووځئ؟</string>
     <string name="payments_heading">اداینه</string>
     <string name="payment_amount">د اداینې مقدار</string>
-    <string name="payment_date">د اداینې نیټه</string>
+    <string name="payment_date">د تادیې نیټه</string>
     <string name="order_due_date">د فرمایش ټاکلی نیټه</string>
     <string name="not_delivered">و نه سپارل شو</string>
     <string name="passwords_dont_match">پټ نوم سره ورته نه دي بیا هڅه وکړئ</string>
@@ -80,8 +80,8 @@
     <string name="create_new_subcategory">د نوی فرعی کټګوری جوړول</string>
     <string name="title">عنوان</string>
     <string name="description">تشریح</string>
-    <string name="title_english">عنوان (انګلیسی) </string>
-    <string name="title_dari">عنوان (دری)</string>
+    <string name="title_english">عنوان (انګلیسي)</string>
+    <string name="title_dari">عنوان (دري)</string>
     <string name="title_pashto">عنوان (پښتو)</string>
     <string name="desc_english">مالومات(انګلیسي)</string>
     <string name="desc_dari">تشریح (دری)</string>
@@ -91,11 +91,11 @@
     <string name="take_photo">تصویر اخیستل</string>
     <string name="choose_photo">تصویر غوره کول</string>
     <string name="create_new_item">د نوی توکی جوړول</string>
-    <string name="categories">کټګورئ</string>
+    <string name="categories">برخي</string>
     <string name="item_added_to_catalog">توکی په کټلاګ کې اضافه شو</string>
     <string name="category_added_to_catalog">کټلاګ په کټلاګ کې اضافه شو</string>
     <string name="undo">ناکړ</string>
-    <string name="item">توکي</string>
+    <string name="item">توکی</string>
     <string name="subcategory">فرعی کټګوری</string>
     <string name="sign_in">ننوتل</string>
     <string name="confirm_fingerprint">د ادامه ورکولو لپاره د ګوتې نښه تائیدول</string>
@@ -106,7 +106,7 @@
     <string name="sale_list_sort_by_total_desc">ټولټال(desc)</string>
     <string name="sale_list_sort_by_date_desc">نیټه(desc)</string>
     <string name="sale_list_sort_by_date_asc">نیټه(asc)</string>
-    <string name="category">کټګوری</string>
+    <string name="category">برخه</string>
     <string name="add_subcategory">د فرعی کټګوری زیاتول</string>
     <string name="item_deleted">توک له کټلاګ څخه ړنګ شو</string>
     <string name="category_deleted">کټګوری له کتلاګ څخه ړنګ شو</string>
@@ -204,7 +204,7 @@
     <string name="weeks">اووني</string>
     <string name="years">کلونه</string>
     <!--Sprint8-->
-    <string name="customer">پیریدونکی</string>
+    <string name="customer">پیرودونکی</string>
     <string name="customer_details">د پیریدونکی په اړه تفصیل</string>
     <string name="select_customers">Select Customers</string>
     <string name="new_customer">نوی پیریدونکی</string>
@@ -227,7 +227,7 @@
     <string name="select_type">ډول یې غوره کړئ</string>
     <string name="select_producers">تولید کوونکي غوره کړئ</string>
     <string name="sale_product_inventory">د توکی موجودي</string>
-    <string name="sell">خرڅول</string>
+    <string name="sell">پلورل</string>
     <string name="by">په واسطه</string>
     <string name="select_sale_type">د خرڅلا ډول غوره کړئ</string>
     <string name="sold_now">اوس خرڅ شوی</string>
@@ -235,9 +235,9 @@
     <string name="by_you">ستاسو لخوا</string>
     <string name="sale_list_sort_by_total_ascending">ټولټال (په صعودی بڼه)</string>
     <string name="sale_list_sort_by_total_descending">ټولټال (په نزولی بڼه)</string>
-    <string name="deliveries">سپارل شوي</string>
+    <string name="deliveries">تحویلۍ</string>
     <string name="add_delivery">د سپارلو زیاتول</string>
-    <string name="record_delivery">د سپارلو ثبتول</string>
+    <string name="record_delivery">د تحویلۍ ثبت</string>
     <string name="already_delivered">له مخکی سپارل شوی</string>
     <string name="remaining">پاتی</string>
     <string name="over_selected_delivery">مهربانی وکړئ د محصول لپاره په ذخیره کې پاتی شوی توکو څخه لږي توکي غوره کړئ</string>
