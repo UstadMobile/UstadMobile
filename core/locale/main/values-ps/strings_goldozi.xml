@@ -32,7 +32,7 @@
     <string name="add_payment">د تادیاتو زیاتول</string>
     <string name="order_total">د فرمایش ټولټال:</string>
     <string name="discount">تخفیف:</string>
-    <string name="balance_due">پاتې پیسی</string>
+    <string name="balance_due">پاتې پیسې</string>
     <string name="order_notes">د فرمایش یادښتونه</string>
     <string name="collections">ټولګه</string>
     <string name="by_collection">د ټولګی په اساس</string>
