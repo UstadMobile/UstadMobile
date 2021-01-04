@@ -92,6 +92,9 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
                         ReportFilter.CONDITION_IS -> {
 
                             when(filter.reportFilterDropDownValue){
+                                Person.GENDER_UNSET -> {
+                                    whereList.add("Person.gender = ${Person.GENDER_UNSET} ")
+                                }
                                 Person.GENDER_MALE -> {
                                     whereList.add("Person.gender = ${Person.GENDER_MALE} ")
                                 }
@@ -105,6 +108,9 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
                         }
                         ReportFilter.CONDITION_IS_NOT ->{
                             when(filter.reportFilterDropDownValue){
+                                Person.GENDER_UNSET -> {
+                                    whereList.add("Person.gender != ${Person.GENDER_UNSET} ")
+                                }
                                 Person.GENDER_MALE -> {
                                     whereList.add("Person.gender != ${Person.GENDER_MALE} ")
                                 }

@@ -61,7 +61,24 @@ class ReportEditPresenter(context: Any,
     class XAxisMessageIdOption(day: XAxisOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
-    class SubGroupByMessageIdOption(day: XAxisOptions, context: Any)
+    enum class SubGroupOptions(val optionVal: Int, val messageId: Int) {
+        NONE(ReportSeries.NONE,
+                MessageID.None),
+        DAY(Report.DAY,
+                MessageID.day),
+        WEEK(Report.WEEK,
+                MessageID.xapi_week),
+        MONTH(Report.MONTH,
+                MessageID.xapi_month),
+        CONTENT_ENTRY(Report.CONTENT_ENTRY,
+                MessageID.xapi_content_entry),
+        GENDER(Report.GENDER,
+                MessageID.gender_literal),
+        CLASS(Report.CLASS,
+                MessageID.clazz)
+    }
+
+    class SubGroupByMessageIdOption(day: SubGroupOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
     enum class DataSetOptions(val optionVal: Int, val messageId: Int) {
@@ -90,24 +107,18 @@ class ReportEditPresenter(context: Any,
 
         view.visualTypeOptions = VisualTypeOptions.values().map { VisualTypeMessageIdOption(it, context) }
         view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context) }
-        view.subGroupOptions = XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }
+        view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
         view.dataSetOptions = DataSetOptions.values().map { DataSetMessageIdOption(it, context) }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ReportWithSeriesWithFilters? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        var report = db.withRepoTimeout(2000) {
+        val report = db.withRepoTimeout(2000) {
             it.takeIf { entityUid != 0L }?.reportDao?.findByUid(entityUid)
-        }
+        } ?: Report()
 
-        if(report == null){
-            report = Report()
-         /*   report.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
-            report.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong*/
-        }
-
-        handleXAxisSelected(XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }.find { it.code == report.xAxis } as MessageIdOption)
+        handleXAxisSelected(XAxisOptions.values().map { XAxisMessageIdOption(it, context) }.find { it.code == report.xAxis } as MessageIdOption)
 
         val reportSeries = report.reportSeries
         var reportSeriesList = listOf<ReportSeries>()
@@ -132,31 +143,33 @@ class ReportEditPresenter(context: Any,
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         val editEntity: ReportWithSeriesWithFilters
-        if (entityJsonStr != null) {
-            editEntity = safeParse(di, ReportWithSeriesWithFilters.serializer(), entityJsonStr)
+        editEntity = if (entityJsonStr != null) {
+            safeParse(di, ReportWithSeriesWithFilters.serializer(), entityJsonStr)
         } else {
-            editEntity = ReportWithSeriesWithFilters()
-           /* editEntity.fromDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong - 7.days.millisecondsLong
-            editEntity.toDate = DateTime.nowLocal().localEndOfDay.utc.unixMillisLong*/
+            ReportWithSeriesWithFilters()
         }
 
-        handleXAxisSelected(XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }.find { it.code == editEntity.xAxis } as MessageIdOption)
+        handleXAxisSelected(XAxisOptions.values().map { XAxisMessageIdOption(it, context) }.find { it.code == editEntity.xAxis } as MessageIdOption)
 
         val reportSeries = editEntity.reportSeries
         val reportSeriesList: List<ReportSeries>
         if(!reportSeries.isNullOrBlank()) {
+
             reportSeriesList = safeParseList(di, ReportSeries.serializer().list, ReportSeries::class, reportSeries)
             // set the series counter with an existing series
             val max = reportSeriesList.maxBy { it.reportSeriesUid }
-            seriesCounter.value = (max?.reportSeriesUid?: 0 + 1).toInt()
-        }else{
+            seriesCounter.value = ((max?.reportSeriesUid?: 0) + 1).toInt()
+            editEntity.reportSeriesWithFiltersList = reportSeriesList
+
+        }else if(editEntity.reportSeriesWithFiltersList.isEmpty()){
             reportSeriesList = listOf(ReportSeries().apply {
                 val id = seriesCounter.getAndIncrement()
                 reportSeriesName = "Series $id"
                 reportSeriesUid = id.toLong()
             })
+            editEntity.reportSeriesWithFiltersList = reportSeriesList
         }
-        editEntity.reportSeriesWithFiltersList = reportSeriesList
+
 
         return editEntity
     }
@@ -164,7 +177,8 @@ class ReportEditPresenter(context: Any,
 
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
-        val entityVal = entity
+        val entityVal = entity ?: return
+        entityVal.reportSeries = safeStringify(di, ReportSeries.serializer().list, entityVal.reportSeriesWithFiltersList)
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
@@ -269,12 +283,12 @@ class ReportEditPresenter(context: Any,
 
     fun handleXAxisSelected(selectedOption: MessageIdOption) {
         if (selectedOption.code == Report.DAY || selectedOption.code == Report.MONTH || selectedOption.code == Report.WEEK) {
-            view.subGroupOptions = XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }
+            view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
                     .filter { it.code == Report.GENDER ||
                             it.code == Report.CONTENT_ENTRY ||
-                            it.code == Report.CLASS }
+                            it.code == Report.CLASS || it.code == ReportSeries.NONE}
         } else {
-            view.subGroupOptions = XAxisOptions.values().map { SubGroupByMessageIdOption(it, context) }
+            view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
         }
     }
 

@@ -13,7 +13,7 @@ class ReportSeries{
 
     var reportSeriesVisualType: Int = 0
 
-    var reportSeriesSubGroup: Int = 0
+    var reportSeriesSubGroup: Int = NONE
 
     var reportSeriesFilters = listOf<ReportFilter>()
 
@@ -32,6 +32,8 @@ class ReportSeries{
         const val PERCENT_STUDENTS_COMPLETED = 205
 
         const val NUMBER_STUDENTS_COMPLETED = 206
+
+        const val NONE = 0
 
     }
 

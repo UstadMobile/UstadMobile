@@ -137,8 +137,14 @@ class ReportFilterEditPresenter(context: Any,
             view.conditionsErrorText = null
         }
         if (entity.reportFilterDropDownValue == 0 && entity.reportFilterValue.isNullOrBlank()) {
-            view.valuesErrorText = fieldRequiredText
-            return
+
+            // if gender, value can be 0 for unset gender
+            if(entity.reportFilterField == ReportFilter.FIELD_PERSON_GENDER){
+                view.valuesErrorText = null
+            }else{
+                view.valuesErrorText = fieldRequiredText
+                return
+            }
         } else {
             view.valuesErrorText = null
         }

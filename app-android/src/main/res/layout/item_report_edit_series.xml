@@ -70,7 +70,7 @@
                 android:id="@+id/item_report_series_title_text"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@{series.reportSeriesName}"
+                android:text="@={series.reportSeriesName}"
                 android:hint="@string/title" />
         </com.google.android.material.textfield.TextInputLayout>
 

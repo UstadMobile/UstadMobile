@@ -92,7 +92,6 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
 
             val filterRecyclerView = holder.itemBinding.itemReportEditFilterList
             holder.filterList = series.reportSeriesFilters
-            Napier.d(tag= "ReportSeriesList" ,message = "number of filters = ${series.reportSeriesFilters.size}")
             filterRecyclerView.adapter = holder.filterAdapter
             filterRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
         }
@@ -182,6 +181,8 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
         mBinding = null
         mPresenter = null
         entity = null
+        seriesRecyclerView = null
+        seriesAdapter = null
     }
 
     override fun onResume() {
