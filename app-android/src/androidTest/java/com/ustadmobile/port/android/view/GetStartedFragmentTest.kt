@@ -3,25 +3,15 @@ package com.ustadmobile.port.android.view
 import android.content.Intent
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.intent.Intents
 import androidx.test.espresso.intent.Intents.intended
 import androidx.test.espresso.intent.matcher.IntentMatchers.hasAction
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.port.android.screen.GetStartedScreen
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import junit.framework.Assert.assertEquals
 import org.junit.Rule
 import org.junit.Test
@@ -73,7 +63,7 @@ class GetStartedFragmentTest {
         }
 
         assertEquals("It navigated to workspace enter link screen",
-                R.id.workspace_enterlink_dest, systemImplNavRule.navController.currentDestination?.id)
+                R.id.site_enterlink_dest, systemImplNavRule.navController.currentDestination?.id)
     }
 
 

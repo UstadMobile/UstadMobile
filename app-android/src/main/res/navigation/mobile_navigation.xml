@@ -204,7 +204,7 @@
         />
 
     <fragment
-        android:id="@+id/workspace_enterlink_dest"
+        android:id="@+id/site_enterlink_dest"
         android:name="com.ustadmobile.port.android.view.SiteEnterLinkFragment"
         android:label="@string/connect_to_site"
         />
