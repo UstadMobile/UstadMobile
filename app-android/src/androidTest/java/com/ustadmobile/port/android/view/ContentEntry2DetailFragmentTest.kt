@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
 import android.content.Intent
 import androidx.core.os.bundleOf

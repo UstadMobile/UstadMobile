@@ -9,11 +9,6 @@
     <uses-permission android:name="android.permission.BLUETOOTH" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
 
-    <!--
-    Normally required when users are selecting an external file (e.g. content to import, picture, etc).
-    -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-
     <uses-permission android:name="android.permission.INTERNET" />
 
     <!-- Used for content editing when a user wants to add pictures/video from camera -->
