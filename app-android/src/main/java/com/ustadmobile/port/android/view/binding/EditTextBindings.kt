@@ -138,7 +138,11 @@ fun EditText.setInventoryCount(value: Int){
 
 @InverseBindingAdapter(attribute = "seekCountET")
 fun getInventoryCount(et: EditText): Int{
-    return et.text.toString().toInt()
+    if(et.text.toString().isEmpty()){
+        return 0
+    }else {
+        return et.text.toString().toInt()
+    }
 }
 
 @BindingAdapter("seekCountETAttrChanged")

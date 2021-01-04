@@ -58,7 +58,7 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
             it.activityEventHandler = this
         }
 
-        producersRecyclerAdapter = PersonWithInventoryListRecyclerAdapter()
+        producersRecyclerAdapter = PersonWithInventoryListRecyclerAdapter(newDelivery = true)
         producersListRecyclerView = rootView.findViewById(R.id.fragment_inventory_item_edit_edit_producers_rv)
         producersListRecyclerView?.adapter = producersRecyclerAdapter
         producersListRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
@@ -96,6 +96,7 @@ class InventoryItemEditFragment: UstadEditFragment<InventoryItem>(), InventoryIt
     override fun onResume() {
         super.onResume()
         setEditFragmentTitle(R.string.receive_inventory, R.string.receive_inventory)
+        mPresenter?.loadList()
     }
 
     override var entity: InventoryItem? = null

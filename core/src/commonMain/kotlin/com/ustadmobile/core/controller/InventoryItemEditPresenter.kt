@@ -65,6 +65,17 @@ class InventoryItemEditPresenter(context: Any,
         return InventoryItem()
     }
 
+    public fun loadList(){
+        val loggedInPersonUid = accountManager.activeAccount.personUid
+
+        GlobalScope.launch {
+            val producers = withTimeout(2000){
+                db.inventoryItemDao.getAllWeWithNewInventoryItem(loggedInPersonUid)
+            }
+            producerSelectionEditHelper.liveList.sendValue(producers)
+        }
+    }
+
     override fun onLoadFromJson(bundle: Map<String, String>): InventoryItem? {
         super.onLoadFromJson(bundle)
 
@@ -99,13 +110,15 @@ class InventoryItemEditPresenter(context: Any,
             val commonDate = UMCalendarUtil.getDateInMilliPlusDays(0)
 
             for(producerInventory in itemsToUpdate){
-                val newInventory = InventoryItem().apply{
-                    inventoryItemProductUid = productUid
-                    inventoryItemLeUid = loggedInPersonUid
-                    inventoryItemWeUid = producerInventory.personUid
-                    inventoryItemDateAdded = commonDate
-                    inventoryItemQuantity = producerInventory.selectedStock?.toLong()?:0L
-                    inventoryItemUid = repo.inventoryItemDao.insertAsync(this)
+                if(producerInventory.selectedStock?.toLong()?:0L > 0L) {
+                    val newInventory = InventoryItem().apply {
+                        inventoryItemProductUid = productUid
+                        inventoryItemLeUid = loggedInPersonUid
+                        inventoryItemWeUid = producerInventory.personUid
+                        inventoryItemDateAdded = commonDate
+                        inventoryItemQuantity = producerInventory.selectedStock?.toLong() ?: 0L
+                        inventoryItemUid = repo.inventoryItemDao.insertAsync(this)
+                    }
                 }
             }
 
