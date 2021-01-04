@@ -198,12 +198,6 @@
         android:label="" />
 
     <fragment
-        android:id="@+id/account_get_started_dest"
-        android:name="com.ustadmobile.port.android.view.GetStartedFragment"
-        android:label="@string/lets_get_started_label"
-        />
-
-    <fragment
         android:id="@+id/site_enterlink_dest"
         android:name="com.ustadmobile.port.android.view.SiteEnterLinkFragment"
         android:label="@string/connect_to_site"

@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
@@ -72,11 +73,19 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
     }
 
     fun handleClickUsePublicLibrary() {
+        val args = arguments.toMutableMap().also {
+            it[ARG_SERVER_URL] = "https://library.ustadmobile.app/"
+            it[ARG_SITE] = safeStringify(di, Site.serializer(), Site().apply {
+                registrationAllowed = true
+                guestLogin = true
+            })
+        }
 
+        impl.go(Login2View.VIEW_NAME, args, context)
     }
 
     fun handleClickCreateNewSite() {
-
+        impl.openLinkInBrowser("https://www.ustadmobile.com/hosting/", context)
     }
 
 

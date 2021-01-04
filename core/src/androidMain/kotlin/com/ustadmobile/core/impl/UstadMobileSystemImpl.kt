@@ -36,6 +36,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
@@ -599,6 +600,14 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         }
 
         return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
+    }
+
+    /**
+     * Open the given link in a browser and/or tab depending on the platform
+     */
+    actual fun openLinkInBrowser(url: String, context: Any) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        (context as Context).startActivity(intent)
     }
 
 

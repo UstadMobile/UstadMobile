@@ -55,7 +55,7 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
             arguments.getValue(ARG_FROM)
         }else{
             val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
-            if(canSelectServer) GetStartedView.VIEW_NAME else Login2View.VIEW_NAME
+            if(canSelectServer) SiteEnterLinkView.VIEW_NAME else Login2View.VIEW_NAME
         }
         serverUrl = if (arguments.containsKey(ARG_SERVER_URL)) {
             arguments.getValue(ARG_SERVER_URL)

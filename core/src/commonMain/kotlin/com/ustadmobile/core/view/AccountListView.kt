@@ -11,8 +11,6 @@ interface AccountListView : UstadView {
 
     fun showContentEntryList(account: UmAccount)
 
-    fun showGetStarted()
-
     companion object {
 
         const val VIEW_NAME = "AccountListView"

@@ -134,6 +134,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/use_public_site"
+                android:onClick="@{() -> presenter.handleClickUsePublicLibrary()}"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
@@ -146,6 +147,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/create_new_site"
+                android:onClick="@{() -> presenter.handleClickCreateNewSite()}"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"

@@ -62,8 +62,6 @@ class ViewNameToDestMap: DestinationProvider {
             SiteEnterLinkView.VIEW_NAME to UstadDestination(R.id.site_enterlink_dest,
                 hideBottomNavigation = true),
             Login2View.VIEW_NAME to UstadDestination(R.id.login_dest, hideBottomNavigation = true),
-            GetStartedView.VIEW_NAME to UstadDestination(R.id.account_get_started_dest,
-                    hideBottomNavigation = true),
             AccountListView.VIEW_NAME to UstadDestination(R.id.account_list_dest),
             PersonAccountEditView.VIEW_NAME to UstadDestination(R.id.person_account_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),

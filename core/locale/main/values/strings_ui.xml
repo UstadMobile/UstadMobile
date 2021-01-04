@@ -742,13 +742,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="workspace">Workspace</string>
     <string name="organisation">Organisation %1$s</string>
     <string name="use_public_library_site">Use public library site</string>
-    <string name="access_open_education">Access thousands of open education resources personally</string>
-    <string name="connect_to_existing_site">Connect to an existing site</string>
 
-
-    <string name="existing_site_text">Each site can have its own content, users, classes schools and administrators.</string>
     <string name="create_site">Create a new site</string>
-    <string name="create_site_text">Create a new site for your organization, project, etc.</string>
     <string name="connect_as_guest">Connect as guest</string>
     <string name="create_account">Create account</string>
 

@@ -51,10 +51,11 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     }
 
     fun handleClickLogout(account: UmAccount){
+        //TODO: Fix this - the if condition can never be satisifed
         accountManager.removeAccount(account)
         if(accountManager.storedAccounts.size == 1
                 && accountManager.storedAccounts.contains(account)){
-            view.showGetStarted()
+            //view.showGetStarted()
         }
     }
 

@@ -1,5 +1,7 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
