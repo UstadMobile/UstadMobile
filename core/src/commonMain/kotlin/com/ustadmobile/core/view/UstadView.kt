@@ -117,13 +117,11 @@ interface UstadView {
 
         const val ARG_NEXT = "next"
 
-        const val ARG_WORKSPACE = "workspace"
+        const val ARG_SITE = "site"
 
         const val ARG_SERVER_URL = "serverUrl"
 
         const val ARG_INTENT = "argIntent"
-
-        const val ARG_FROM = "from"
 
         const val ARG_SNACK_MESSAGE = "snack_message"
 
@@ -145,6 +143,17 @@ interface UstadView {
         const val ARG_CREATE_SALE = "argCreateSale"
 
         const val ARG_NEW_SALE_DELIVERY = "argNewSaleDelivery"
+
+        /**
+         * Tasks that involve multiple destinations (e.g. Login - AcceptTerms - PersonEditRegister )
+         * might need to pop off multiple destinations from the stack when they are done.
+         *
+         * The final destination in the stack might be reachable via different routes (e.g. it might
+         * have started from the login screen, or the account list screen) . The POPUPTO_ON_FINISH
+         * arg is intended to be used in such situations. It can be supplied by the initiator and
+         * passed through until it is used by the final destination.
+         */
+        const val ARG_POPUPTO_ON_FINISH = "popUpToOnFinish"
 
         /**
          * Argument to pass to tell a fragment where on the back stack a result (e.g. entity selected

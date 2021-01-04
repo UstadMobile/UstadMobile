@@ -5,7 +5,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.LINK_INTENT_F
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import org.kodein.di.DI
@@ -19,7 +18,6 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        val cameFromGetStarted = arguments[ARG_FROM] == OnBoardingView.VIEW_NAME
         val nextViewArg = arguments[ARG_NEXT]
         val intentArg = arguments[ARG_INTENT]
 
@@ -28,13 +26,18 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
         }else {
             val canSelectServer = systemImpl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION,
                     context)
+            val userHasLoggedInOrSelectedGuest = systemImpl.getAppPref(
+                    Login2Presenter.PREFKEY_USER_LOGGED_IN, "false", context).toBoolean()
 
             val args = mutableMapOf<String, String>()
             val destination = if (nextViewArg != null) {
                 args.putAll(UMFileUtil.parseURLQueryString(nextViewArg))
                 nextViewArg.substringBefore('?')
-            } else if (cameFromGetStarted) {
-                if (canSelectServer) GetStartedView.VIEW_NAME else Login2View.VIEW_NAME
+            } else if (!userHasLoggedInOrSelectedGuest) {
+                if (canSelectServer)
+                    SiteEnterLinkView.VIEW_NAME
+                else
+                    Login2View.VIEW_NAME
             } else {
                 ProductListView.VIEW_NAME
             }

@@ -17,7 +17,6 @@ import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
-import com.ustadmobile.lib.rest.ext.ktorInitDb
 import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
@@ -125,9 +124,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                         isPrimary = true, sqliteDir = File(storageRoot, context.identifier(dbMode)))
             }
 
-            UmAppDatabase.getInstance(Any(), dbName).also {
-                it.ktorInitDb()
-            }
+            UmAppDatabase.getInstance(Any(), dbName)
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
@@ -166,7 +163,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ResumableUploadRoute()
         ContainerUpload()
         UmAppDatabase_KtorRoute(true)
-        WorkSpaceRoute()
+        SiteRoute()
         ContentEntryLinkImporter()
         if (devMode) {
             DevModeRoute()

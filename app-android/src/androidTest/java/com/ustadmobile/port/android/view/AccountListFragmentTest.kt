@@ -165,23 +165,19 @@ class AccountListFragmentTest : TestCase() {
 
     }
 
-    @AdbScreenRecord("given add account button when clicked should open get started screen")
+    @AdbScreenRecord("given add account button when clicked should open enter link screen")
     @Test
-    fun givenAddAccountButton_whenClicked_thenShouldOpenGetStarted() {
-
-
+    fun givenAddAccountButton_whenClicked_thenShouldOpenEnterLinkScreen() {
         init {
             launchFragment()
-
         }.run {
-
             AccountListScreen {
                 recycler {
                     childAt<AccountListScreen.NewLayout>(1) {
                         newLayout {
                             click()
                             assertEquals("It navigated to the get started screen",
-                                    R.id.account_get_started_dest,
+                                    R.id.site_enterlink_dest,
                                     systemImplNavRule.navController.currentDestination?.id)
                         }
                     }

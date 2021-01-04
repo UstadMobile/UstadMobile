@@ -5,8 +5,10 @@ import android.content.Intent
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
+import androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.web.webdriver.Locator
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.agoda.kakao.common.views.KView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
@@ -102,7 +104,10 @@ class LearnerGroupEndToEndTest : TestCase() {
         }.run {
 
             ContentEntryDetailScreen {
-                groupActivityButton {
+                openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
+                KView {
+                    withText(R.string.group_activity)
+                } perform {
                     click()
                 }
             }
@@ -188,7 +193,7 @@ class LearnerGroupEndToEndTest : TestCase() {
             }
             pressBack()
             ContentEntryDetailScreen {
-                groupActivityButton {
+                entryTitleTextView {
                     isVisible()
                     isDisplayed()
                 }

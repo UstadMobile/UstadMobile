@@ -1,14 +1,14 @@
 package com.ustadmobile.core.view
 
-interface WorkspaceEnterLinkView : UstadView {
+interface SiteEnterLinkView : UstadView {
 
-    var workspaceLink:String?
+    var siteLink: String?
 
     var validLink: Boolean
 
     var progressVisible: Boolean
 
     companion object {
-        val VIEW_NAME = "WorkspaceEnterLinkView"
+        val VIEW_NAME = "SiteEnterLinkView"
     }
 }

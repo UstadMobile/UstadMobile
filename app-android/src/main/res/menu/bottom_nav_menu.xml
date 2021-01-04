@@ -41,13 +41,11 @@
 <!--        android:icon="@drawable/ic_report_24dp"-->
 <!--        android:title="@string/reports" />-->
 
-    <!--
-
-
     <item
-        android:id="@+id/home_feed_dest"
-        android:icon="@drawable/ic_newspaper"
-        android:title="@string/feed"/>
-    -->
+        android:visible="false"
+        android:id="@+id/report_list_dest"
+        android:icon="@drawable/ic_report_24dp"
+        android:title="@string/reports" />
+
 
 </menu>

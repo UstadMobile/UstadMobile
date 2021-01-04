@@ -1,5 +1,7 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.text.Editable
@@ -8,33 +10,33 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentWorkSpaceEnterLinkBinding
-import com.ustadmobile.core.controller.WorkspaceEnterLinkPresenter
+import com.toughra.ustadmobile.databinding.FragmentSiteEnterLinkBinding
+import com.ustadmobile.core.controller.SiteEnterLinkPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.WorkspaceEnterLinkView
+import com.ustadmobile.core.view.SiteEnterLinkView
 
 
-class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
+class SiteEnterLinkFragment : UstadBaseFragment(), SiteEnterLinkView{
 
-    private var mBinding: FragmentWorkSpaceEnterLinkBinding? = null
+    private var mBinding: FragmentSiteEnterLinkBinding? = null
 
-    private var mPresenter: WorkspaceEnterLinkPresenter? = null
+    private var mPresenter: SiteEnterLinkPresenter? = null
 
     private val inputCheckDelay: Long = 500
 
     private val inputCheckHandler: Handler = Handler()
 
     private val inputCheckerCallback = Runnable {
-        val typedLink = workspaceLink
+        val typedLink = siteLink
         if(typedLink != null){
             progressVisible = true
             mPresenter?.handleCheckLinkText(typedLink)
         }
     }
 
-    override var workspaceLink: String?
-        get() = mBinding?.workspaceLink
+    override var siteLink: String?
+        get() = mBinding?.siteLink
         set(value) {}
 
     override var validLink: Boolean = false
@@ -51,19 +53,19 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
         }
 
     private fun handleError(isError: Boolean){
-        mBinding?.workspaceLinkView?.isErrorEnabled = isError
-        mBinding?.workspaceLinkView?.error = if(isError) getString(R.string.invalid_link) else null
+        mBinding?.siteLinkView?.isErrorEnabled = isError
+        mBinding?.siteLinkView?.error = if(isError) getString(R.string.invalid_link) else null
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentWorkSpaceEnterLinkBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentSiteEnterLinkBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.showButton = false
             it.showProgress = false
         }
-        mPresenter = WorkspaceEnterLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
+        mPresenter = SiteEnterLinkPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di)
         mPresenter?.onCreate(savedInstanceState.toStringMap())
         mBinding?.presenter = mPresenter
@@ -84,7 +86,7 @@ class WorkspaceEnterLinkFragment : UstadBaseFragment(), WorkspaceEnterLinkView{
         super.onDestroyView()
         mPresenter?.onDestroy()
         mPresenter = null
-        workspaceLink = null
+        siteLink = null
         mBinding = null
     }
 }
