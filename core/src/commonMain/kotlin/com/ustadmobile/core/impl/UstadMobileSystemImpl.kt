@@ -169,6 +169,12 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
      */
     fun canWriteFileInDir(dirPath: String): Boolean
 
+    /**
+     * Open the given link in a browser and/or tab depending on the platform
+     */
+    fun openLinkInBrowser(url: String, context: Any)
+
+
     companion object {
 
         /**

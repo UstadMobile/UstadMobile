@@ -10,18 +10,15 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.view.ContentEntryListTabsView
-import com.ustadmobile.core.view.GetStartedView
-import com.ustadmobile.core.view.Login2View
-import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
-import com.ustadmobile.core.view.UstadView.Companion.ARG_WORKSPACE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.lib.db.entities.Site
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.db.entities.WorkSpace
 import com.ustadmobile.util.test.ext.bindJndiForActiveEndpoint
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
@@ -103,12 +100,12 @@ class Login2PresenterTest {
 
     private fun createParams(registration:Boolean = false, guestConnection:Boolean = false,
                              extraParam: Map<String, String> = mapOf()): Map<String,String>{
-        val workspace = WorkSpace().apply {
-            name = ""
+        val site = Site().apply {
+            siteName = ""
             guestLogin = guestConnection
             registrationAllowed = registration
         }
-        var args = mapOf(ARG_WORKSPACE to Json.stringify(WorkSpace.serializer(), workspace))
+        var args = mapOf(ARG_SITE to Json.stringify(Site.serializer(), site))
         args = args.plus(extraParam)
         return args
     }
@@ -163,7 +160,7 @@ class Login2PresenterTest {
         val presenter = Login2Presenter(context, createParams(registration = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleCreateAccount()
-        verify(impl).go(eq(PersonEditView.VIEW_NAME_REGISTER), any(), any(), any())
+        verify(impl).go(eq(SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS), any(), any())
     }
 
     @Test

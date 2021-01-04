@@ -24,3 +24,15 @@ fun <T> MutableMap<String, String>.putEntityAsJson(key: String, serializer: Seri
 fun Map<String, String>.convertToJsonObject(): JsonObject{
    return JsonObject(this.map { entry -> Pair(entry.key, JsonPrimitive(entry.value)) }.toMap())
 }
+
+/**
+ * Puts a value in the receiver Map if it is present in the other map. This can be useful to
+ * selectively copy keys from one map to another, whilst avoiding putting the string "null" in
+ * by accident
+ */
+fun <K, V> MutableMap<K, V>.putFromOtherMapIfPresent(otherMap: Map<K, V>, keyVal: K) {
+    val otherMapVal = otherMap[keyVal]
+    if(otherMapVal != null) {
+        put(keyVal, otherMapVal)
+    }
+}

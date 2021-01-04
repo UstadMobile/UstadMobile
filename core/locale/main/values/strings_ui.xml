@@ -741,12 +741,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="return_only">Return and finish</string>
     <string name="workspace">Workspace</string>
     <string name="organisation">Organisation %1$s</string>
-    <string name="use_public_library">Use public library</string>
-    <string name="access_open_education">Access thousands of open education resources personally</string>
-    <string name="join_existing_workspace">Join existing organization workspace</string>
-    <string name="existing_organisation">Your organization is already using Ustad Mobile</string>
-    <string name="create_organisation">Create new organization workspace</string>
-    <string name="create_workspace_organisation">Create a new workspace for your organization\'s students and teachers on Ustad Mobile</string>
+    <string name="use_public_library_site">Use public library site</string>
+
+    <string name="create_site">Create a new site</string>
     <string name="connect_as_guest">Connect as guest</string>
     <string name="create_account">Create account</string>
 
@@ -850,5 +847,36 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="add_a_new_occurrence">Add a new occurrence</string>
 
     <string name="active_classes">Active classes</string>
+
+    <string name="terms_and_policies">Terms and policies</string>
+
+    <string name="manage_site_settings">Manage site settings and policies</string>
+
+    <string name="guest_login_enabled">Guest login enabled</string>
+
+    <string name="registration_allowed">Registration allowed</string>
+
+    <string name="yes">Yes</string>
+
+    <string name="no">No</string>
+
+    <string name="edit_site">Edit site</string>
+
+    <!--Ustad Mobile supports multiple sites. Each site has it's own user accounts, content, classes, schools, etc. -->
+    <string name="site">Site</string>
+
+    <string name="site_link">Site link</string>
+
+    <string name="please_enter_the_linK">Please enter the link for your site provided by your teacher or administrator:</string>
+
+    <string name="or">OR</string>
+
+    <string name="sites_can_be_help_text">Sites can be created for schools, projects, and organizations, etc. Each site can have its\' own users, administrators, content, classes, schools, and more.</string>
+
+    <string name="connect_to_site">Connect to site</string>
+
+    <string name="terms_and_policies_text">Terms and policies text</string>
+
+    <string name="edit_terms_and_policies">Edit terms and policies</string>
 
 </resources>

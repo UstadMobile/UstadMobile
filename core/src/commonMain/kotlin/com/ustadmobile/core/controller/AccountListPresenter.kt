@@ -6,6 +6,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -27,8 +28,13 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
 
     fun handleClickAddAccount(){
         val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
-        val args = arguments.plus(Pair(ARG_FROM, AccountListView.VIEW_NAME))
-        impl.go(if(canSelectServer) GetStartedView.VIEW_NAME else Login2View.VIEW_NAME,args, context)
+        val args = arguments.toMutableMap().also {
+            it[ARG_FROM] = AccountListView.VIEW_NAME
+            it[ARG_NEXT] = AccountListView.VIEW_NAME
+            it[UstadView.ARG_POPUPTO_ON_FINISH] = AccountListView.VIEW_NAME
+        }
+
+        impl.go(if(canSelectServer) SiteEnterLinkView.VIEW_NAME else Login2View.VIEW_NAME,args, context)
     }
 
     fun handleClickDeleteAccount(account: UmAccount){
@@ -45,10 +51,11 @@ class AccountListPresenter(context: Any, arguments: Map<String, String>, view: A
     }
 
     fun handleClickLogout(account: UmAccount){
+        //TODO: Fix this - the if condition can never be satisifed
         accountManager.removeAccount(account)
         if(accountManager.storedAccounts.size == 1
                 && accountManager.storedAccounts.contains(account)){
-            view.showGetStarted()
+            //view.showGetStarted()
         }
     }
 

@@ -1,18 +1,13 @@
 package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.door.DatabaseBuilder
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonAuth
-import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.lib.db.entities.Site
 import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
-import io.ktor.client.request.parameter
 import io.ktor.client.statement.HttpStatement
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
@@ -25,13 +20,9 @@ import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import kotlinx.coroutines.runBlocking
-import org.junit.After
 import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
-import java.util.concurrent.TimeUnit
 
-class TestWorkSpaceRoute {
+class TestSiteRoute {
     lateinit var server: ApplicationEngine
 
     lateinit var db: UmAppDatabase
@@ -51,7 +42,7 @@ class TestWorkSpaceRoute {
             }
 
             install(Routing) {
-                WorkSpaceRoute()
+                SiteRoute()
             }
         }.start(wait = false)
 
@@ -68,12 +59,12 @@ class TestWorkSpaceRoute {
 
     //@Test
     fun givenAvailableWorkSpace_whenRequested_thenShouldReturnWorkSpaceObject() {
-        val workSpace = WorkSpace().apply {
-            name = "UmTestWorkspace"
+        val site = Site().apply {
+            siteName = "UmTestWorkspace"
             guestLogin = true
             registrationAllowed = true
         }
-        workSpace.uid = db.workSpaceDao.insert(workSpace)
+        site.siteUid = db.siteDao.insert(site)
 
         runBlocking {
             val response = httpClient.get<HttpStatement> {
@@ -83,12 +74,12 @@ class TestWorkSpaceRoute {
                 }
             }.execute()
 
-            val mWorkSpace = response.receive<WorkSpace>()
+            val mWorkSpace = response.receive<Site>()
 
             Assert.assertEquals("Workspace was retrieved, response code is 200",
                     HttpStatusCode.OK, response.status.value)
             Assert.assertEquals("Valid workspace was retrieved",
-                    mWorkSpace.uid, workSpace.uid)
+                    mWorkSpace.siteUid, site.siteUid)
         }
     }
 }

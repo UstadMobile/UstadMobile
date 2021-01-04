@@ -58,10 +58,6 @@ class ContentEntry2DetailFragmentTest : TestCase() {
     @Rule
     val adbScreenRecordRule = AdbScreenRecordRule()
 
-    @JvmField
-    @Rule
-    val grantPermissionRule = GrantPermissionRule.grant(WRITE_EXTERNAL_STORAGE)
-
     private lateinit var di: DI
 
     @Before
