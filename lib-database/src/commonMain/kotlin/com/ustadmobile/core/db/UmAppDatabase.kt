@@ -3200,6 +3200,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       """.trimMargin())
 
                     database.execSQL("ALTER TABLE WorkSpace RENAME TO Site")
+                    database.execSQL("ALTER SEQUENCE workspace_uid_seq RENAME TO site_siteuid_seq")
                     database.execSQL("ALTER TABLE Site RENAME COLUMN uid TO siteUid")
                     database.execSQL("ALTER TABLE Site ADD COLUMN sitePcsn BIGINT DEFAULT 0 NOT NULL")
                     database.execSQL("ALTER TABLE Site ADD COLUMN siteLcsn BIGINT DEFAULT 0 NOT NULL")
