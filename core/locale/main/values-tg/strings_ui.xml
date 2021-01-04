@@ -832,12 +832,12 @@
     <string name="my">%1$s-и ман</string>
     <string name="create_account">Таъсиси саҳифа</string>
     <string name="connect_as_guest">Ҳамчун меҳмон пайваст шавед</string>
-    <string name="create_workspace_organisation">Дар Ustad Mobile барои хонандагон ва омӯзгорони муассисаи худ як фазои кории нав эҷод кунед</string>
-    <string name="create_organisation">Таъсиси фазои нави корӣ</string>
-    <string name="existing_organisation">Муассисаи шумо аллакай Ustad Mobile-ро истифода мебарад</string>
-    <string name="join_existing_workspace">Ҳамроҳ шудан ба фазои кории мавҷуда</string>
+    <string name="create_site_text">Дар Ustad Mobile барои хонандагон ва омӯзгорони муассисаи худ як фазои кории нав эҷод кунед</string>
+    <string name="create_site">Таъсиси фазои нави корӣ</string>
+    <string name="existing_site_text">Муассисаи шумо аллакай Ustad Mobile-ро истифода мебарад</string>
+    <string name="connect_to_existing_site">Ҳамроҳ шудан ба фазои кории мавҷуда</string>
     <string name="access_open_education">Шахсан ба ҳазорон захираҳои таълимии кушода дастрасӣ пайдо кунед</string>
-    <string name="use_public_library">Аз китобхонаи ҷамъиятӣ истифода баред</string>
+    <string name="use_public_library_site">Аз китобхонаи ҷамъиятӣ истифода баред</string>
     <string name="organisation">%1$s-и муассиса</string>
     <string name="workspace">Фазои корӣ</string>
     <string name="not_answered">Ҷавоб надод</string>

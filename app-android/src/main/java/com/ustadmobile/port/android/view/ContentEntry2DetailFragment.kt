@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.os.Bundle
 import android.view.*
 import androidx.lifecycle.*
@@ -16,7 +15,6 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntry2DetailBinding
 import com.toughra.ustadmobile.databinding.ItemEntryTranslationBinding
-import com.toughra.ustadmobile.generated.callback.OnClickListener
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.ContentEntry2DetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
@@ -31,7 +29,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
-import com.ustadmobile.port.android.view.ext.runAfterRequestingPermissionIfNeeded
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -130,9 +127,7 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
 
     override fun showDownloadDialog(args: Map<String, String>) {
         val systemImpl: UstadMobileSystemImpl = direct.instance()
-        runAfterRequestingPermissionIfNeeded(WRITE_EXTERNAL_STORAGE) {
-            systemImpl.go("DownloadDialog", args, requireContext())
-        }
+        systemImpl.go("DownloadDialog", args, requireContext())
     }
 
     override var downloadJobItem: DownloadJobItem? = null

@@ -49,10 +49,6 @@ class VideoContentFragmentTest : TestCase() {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    @get:Rule
-    var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION)
-
     var container: Container? = null
 
     @Before

@@ -1,7 +1,8 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Language
@@ -10,36 +11,41 @@ import org.kodein.di.DI
 
 class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: LanguageListView,
                             di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<LanguageListView, Language>(context, arguments, view, di, lifecycleOwner) {
-
-
-    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
+    : UstadListPresenter<LanguageListView, Language>(context, arguments, view, di, lifecycleOwner),
+        OnSearchSubmitted, OnSortOptionSelected {
 
     private var loggedInPersonUid: Long = 0
 
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
-    }
+    private var searchText: String? = null
 
-    class LanguageListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    private var currentSortOrder: Int = LanguageDao.SORT_LANGNAME_ASC
+
+    override val sortOptions: List<SortOrderOption>
+        get() = SORT_OPTIONS
+
+
+    override fun onClickSort(sortOption: SortOrderOption) {
+        currentSortOrder = sortOption.flag
+        getAndSetList()
+    }
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.sortOptions = SortOrder.values().toList().map { LanguageListSortOption(it, context) }
         loggedInPersonUid = accountManager.activeAccount.personUid
         getAndSetList()
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return true
+        return false
     }
 
-    private fun getAndSetList(sortOrder: SortOrder = currentSortOrder) {
-        view.list = when(sortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.languageDao.publicLanguagesOrderByNameAsc()
-            SortOrder.ORDER_NAME_DSC -> repo.languageDao.publicLanguagesOrderByNameDesc()
-        }
+    override fun onSearchSubmitted(text: String?) {
+        searchText = text
+        getAndSetList()
+    }
+
+    private fun getAndSetList() {
+        view.list = repo.languageDao.findLanguagesAsSource(currentSortOrder, searchText)
     }
 
 
@@ -49,11 +55,10 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
 
     override fun handleClickCreateNewFab() {}
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? LanguageListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            getAndSetList(currentSortOrder)
-        }
+    companion object {
+        val SORT_OPTIONS = listOf(
+                SortOrderOption(MessageID.name, LanguageDao.SORT_LANGNAME_ASC, true),
+                SortOrderOption(MessageID.name, LanguageDao.SORT_LANGNAME_DESC, false))
     }
+
 }

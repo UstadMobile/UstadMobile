@@ -1,24 +1,29 @@
 
 package com.ustadmobile.core.controller
 
+
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.@BaseFileName@View
-import com.ustadmobile.core.view.@Entity@DetailView
 import com.nhaarman.mockitokotlin2.*
-import com.ustadmobile.core.util.SystemImplRule
-import com.ustadmobile.core.util.UmAppDatabaseClientRule
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.@Entity@Dao
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.@Entity@
 @EditEntity_Import@
+
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
-import com.ustadmobile.core.db.waitUntil
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeDbInstance
+import com.ustadmobile.core.util.activeRepoInstance
 import kotlinx.coroutines.runBlocking
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.test.waitUntil
+import org.kodein.di.DI
+
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -29,11 +34,9 @@ class @BaseFileName@PresenterTest {
 
     @JvmField
     @Rule
-    var systemImplRule = SystemImplRule()
+    var ustadTestRule = UstadTestRule()
 
-    @JvmField
-    @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    private lateinit var di: DI
 
     private lateinit var mockView: @BaseFileName@View
 
@@ -50,8 +53,15 @@ class @BaseFileName@PresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repo@Entity@DaoSpy = spy(clientDbRule.db.@Entity_VariableName@Dao)
-        whenever(clientDbRule.db.@Entity_VariableName@Dao).thenReturn(repo@Entity@DaoSpy)
+
+        di = DI {
+            import(ustadTestRule.diModule)
+        }
+
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        repo@Entity@DaoSpy = spy(repo.@Entity_VariableName@Dao)
+        whenever(repo.@Entity_VariableName@Dao).thenReturn(repo@Entity@DaoSpy)
 
         //TODO: insert any entities required for all tests
     }
@@ -61,9 +71,7 @@ class @BaseFileName@PresenterTest {
         val presenterArgs = mapOf<String, String>()
 
         val presenter = @BaseFileName@Presenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         val initialEntity = mockView.captureLastEntityValue()!!
@@ -74,11 +82,19 @@ class @BaseFileName@PresenterTest {
         presenter.handleClickSave(initialEntity)
 
         val existingEntitiesLive = clientDbRule.db.@Entity_VariableName@Dao.findAllLive()
-        val entitySaved = runBlocking {
-            existingEntitiesLive.waitUntil { it.size == 1 }
-        }.getValue()!!.first()
+
+        //TODO: wait until the presenter has saved the entity e.g.
+        /*
+        runBlocking {
+            db.waitUntil(5000, listOf("@Entity")) {
+                db.@Entity_VariableName@Dao.findBySomeCondition()?.someField == initialEntity.someField
+            }
+        }
+
+        val entitySaved = db.@Entity_VariableName@Dao.findBySomeCondition()
         Assert.assertEquals("Entity was saved to database", "Bob",
                 entitySaved.someNameField)
+        */
     }
 
     @Test
@@ -90,9 +106,7 @@ class @BaseFileName@PresenterTest {
 
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.@Entity_VariableName@Uid.toString())
         val presenter = @BaseFileName@Presenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+                presenterArgs, mockView, mockLifecycleOwner, di)
         presenter.onCreate(null)
 
         val initialEntity = mockView.captureLastEntityValue()!!
@@ -102,10 +116,13 @@ class @BaseFileName@PresenterTest {
 
         presenter.handleClickSave(initialEntity)
 
-        val entitySaved = runBlocking {
-            clientDbRule.db.@Entity_VariableName@Dao.findByUidLive(testEntity.@Entity_VariableName@Uid)
-                    .waitUntil(5000) { it?.someName == "New Spelling Clazz" }.getValue()
+        runBlocking {
+            db.waitUntil(5000, listOf("@Entity@")) {
+                db.@Entity_VariableName@Dao.findByUid(testEntity.@Entity_VariableName@Uid)?.someName == "NewSpelling Clazz"
+            }
         }
+
+        val entitySaved = db.@Entity_VariableName@Dao.findByUid(testEntity.@Entity_VariableName@Uid)
 
         Assert.assertEquals("Name was saved and updated",
                 "New Spelling Clazz", entitySaved!!.someName)

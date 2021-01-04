@@ -805,12 +805,12 @@
     <string name="my">%1$s ي</string>
     <string name="create_account">انشاء حساب</string>
     <string name="connect_as_guest">الاتصال كضيف</string>
-    <string name="create_workspace_organisation">انشاء مساحة عمل جديدة لطلاب و معلمات المنظمة على استاذ موبايل</string>
-    <string name="create_organisation">انشاء مساحة عمل جديدة للمنظمة</string>
-    <string name="existing_organisation">المنظمة تستخدم استاذ موبايل</string>
-    <string name="join_existing_workspace">الانضمام إلى مساحة عمل في منظمة موجودة</string>
+    <string name="create_site_text">انشاء مساحة عمل جديدة لطلاب و معلمات المنظمة على استاذ موبايل</string>
+    <string name="create_site">انشاء مساحة عمل جديدة للمنظمة</string>
+    <string name="existing_site_text">المنظمة تستخدم استاذ موبايل</string>
+    <string name="connect_to_existing_site">الانضمام إلى مساحة عمل في منظمة موجودة</string>
     <string name="access_open_education">الحصول على الالاف من مصادر التعليم المفتوحة شخصيا</string>
-    <string name="use_public_library">استخدم المكتبة العامة</string>
+    <string name="use_public_library_site">استخدم المكتبة العامة</string>
     <string name="organisation">%1$s منظمة</string>
     <string name="workspace">مساحة عمل</string>
     <string name="not_answered">لم يتم الاجابة</string>

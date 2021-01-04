@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.content.Context
 import android.content.Intent
 import androidx.core.os.bundleOf
@@ -57,10 +56,6 @@ class ContentEntry2DetailFragmentTest : TestCase() {
     @JvmField
     @Rule
     val adbScreenRecordRule = AdbScreenRecordRule()
-
-    @JvmField
-    @Rule
-    val grantPermissionRule = GrantPermissionRule.grant(WRITE_EXTERNAL_STORAGE)
 
     private lateinit var di: DI
 
