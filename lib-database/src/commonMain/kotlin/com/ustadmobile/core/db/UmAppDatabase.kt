@@ -3070,6 +3070,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("DROP TABLE Report_OLD")
                     database.execSQL("CREATE TABLE IF NOT EXISTS Report_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL( "CREATE INDEX IF NOT EXISTS `index_Report_trk_clientId_epk_csn` ON Report_trk (`clientId`, `epk`, `csn`)")
+                    database.execSQL( "CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_verbLangMapUid` ON XLangMapEntry (`verbLangMapUid`)")
+
                 }
 
             }
