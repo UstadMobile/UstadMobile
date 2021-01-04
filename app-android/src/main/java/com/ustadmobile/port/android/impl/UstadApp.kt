@@ -6,6 +6,8 @@ import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.squareup.picasso.OkHttp3Downloader
+import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -49,8 +51,10 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
+import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.networkmanager.*
+import io.ktor.client.*
 import io.ktor.client.features.json.*
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
@@ -203,6 +207,13 @@ open class UstadApp : BaseUstadApp(), DIAware {
             }
         }
 
+        bind<HttpClient>() with singleton {
+            defaultHttpClient()
+        }
+
+        bind<DestinationProvider>() with singleton {
+            ViewNameToDestMap()
+        }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 
@@ -212,6 +223,16 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<BleGattServer>()
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
+
+            val downloader = if(Build.VERSION.SDK_INT >= 21) {
+                OkHttp3Downloader(instance<OkHttpClient>())
+            }else {
+                PicassoUrlConnectionDownloader()
+            }
+
+            Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
+                    .downloader(downloader)
+                    .build())
         }
     }
 
@@ -223,8 +244,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
         super.onCreate()
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
         Napier.base(DebugAntilog())
-        initPicasso(applicationContext)
-
     }
 
     override fun attachBaseContext(base: Context) {

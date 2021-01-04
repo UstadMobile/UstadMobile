@@ -70,12 +70,12 @@ subprojects {
 
 
 //Major.minor.database version
-version = "0.3.18"
+version = "0.3.19"
 group = "com.ustadmobile.app"
 
 ext {
     ustadVersion = project.version
-    ustadVersionCode = 196
+    ustadVersionCode = 197
 
     version_gradle_buildconfig_plugin = "1.1.7"
     version_jacoco_tool = "0.8.5"
@@ -132,7 +132,7 @@ ext {
     version_android_buildtools = "29.0.3"
     version_android_compile_sdk = 29
     version_android_target_sdk = 29
-    version_android_min_sdk = 18
+    version_android_min_sdk = 21
     version_android_picasso = 2.71828
     version_android_desugar_jdk_libs = "1.0.10"
     version_kaspresso = "1.1.0"
@@ -181,6 +181,7 @@ ext {
     version_android_circleimageview = "3.1.0"
     version_android_adbscreenrecorder = "0.1-alpha03"
     version_androidx_viewpager2 = "1.1.0-alpha01"
+    version_android_aztec = "v1.3.44"
 
     version_js_node = "10.15.1"
     version_js_yarn="1.13.0"

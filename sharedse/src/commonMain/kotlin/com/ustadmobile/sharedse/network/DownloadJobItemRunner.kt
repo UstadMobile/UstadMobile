@@ -41,7 +41,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
-import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -135,7 +134,7 @@ class DownloadJobItemRunner
 
     private var startDownloadFnJob: Deferred<Int>? = null
 
-    private var downloadManagerHolderRef: ContainerDownloadManagerImpl.DownloadJobItemHolder? = null
+    private var downloadManagerHolderRef: Any? = null
 
     private val timeSinceStart
         get() = getSystemTimeInMillis() - startTime
@@ -228,12 +227,14 @@ class DownloadJobItemRunner
             throw IllegalStateException("Can only call download() once on DownloadJobItemRunner!")
         }
 
-        val containerDownloadManagerVal = containerDownloadManager
-        downloadManagerHolderRef = if(containerDownloadManagerVal is ContainerDownloadManagerImpl) {
-            containerDownloadManagerVal.getDownloadJobItemHolder(downloadItem.djiUid)
-        }else {
-            null
-        }
+        //val containerDownloadManagerVal = containerDownloadManager
+        downloadManagerHolderRef = containerDownloadManager.getDownloadJobItemHolderRef(downloadItem.djiUid)
+//
+//                if(containerDownloadManagerVal is ContainerDownloadManagerImpl) {
+//            containerDownloadManagerVal.getDownloadJobItemHolder(downloadItem.djiUid)
+//        }else {
+//            null
+//        }
 
         downloadCalled = true
 

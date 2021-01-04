@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 53,
-    "identityHash": "d7014fcb08aa8616aadeb2d3d4c560a3",
+    "identityHash": "d73766b1409b55a6c6b6704a5662affa",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -3478,16 +3478,7 @@
           ],
           "autoGenerate": true
         },
-        "indices": [
-          {
-            "name": "index_StatementEntity_statementPersonUid",
-            "unique": false,
-            "columnNames": [
-              "statementPersonUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StatementEntity_statementPersonUid` ON `${TABLE_NAME}` (`statementPersonUid`)"
-          }
-        ],
+        "indices": [],
         "foreignKeys": []
       },
       {
@@ -3821,16 +3812,7 @@
           ],
           "autoGenerate": true
         },
-        "indices": [
-          {
-            "name": "index_XLangMapEntry_verbLangMapUid",
-            "unique": false,
-            "columnNames": [
-              "verbLangMapUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_verbLangMapUid` ON `${TABLE_NAME}` (`verbLangMapUid`)"
-          }
-        ],
+        "indices": [],
         "foreignKeys": []
       },
       {
@@ -4880,7 +4862,7 @@
       },
       {
         "tableName": "Report",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `reportTitle` TEXT, `reportSeries` TEXT, `reportInactive` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `chartType` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `yAxis` INTEGER NOT NULL, `subGroup` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `reportTitle` TEXT, `reportInactive` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "reportUid",
@@ -4895,8 +4877,26 @@
             "notNull": true
           },
           {
+            "fieldPath": "chartType",
+            "columnName": "chartType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "xAxis",
             "columnName": "xAxis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "yAxis",
+            "columnName": "yAxis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "subGroup",
+            "columnName": "subGroup",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -4915,12 +4915,6 @@
           {
             "fieldPath": "reportTitle",
             "columnName": "reportTitle",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "reportSeries",
-            "columnName": "reportSeries",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -4952,6 +4946,68 @@
         "primaryKey": {
           "columnNames": [
             "reportUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ReportFilter",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportFilterUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportFilterReportUid` INTEGER NOT NULL, `entityUid` INTEGER NOT NULL, `entityType` INTEGER NOT NULL, `filterInactive` INTEGER NOT NULL, `reportFilterMasterChangeSeqNum` INTEGER NOT NULL, `reportFilterLocalChangeSeqNum` INTEGER NOT NULL, `reportFilterLastChangedBy` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "reportFilterUid",
+            "columnName": "reportFilterUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportFilterReportUid",
+            "columnName": "reportFilterReportUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "entityUid",
+            "columnName": "entityUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "entityType",
+            "columnName": "entityType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filterInactive",
+            "columnName": "filterInactive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportFilterMasterChangeSeqNum",
+            "columnName": "reportFilterMasterChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportFilterLocalChangeSeqNum",
+            "columnName": "reportFilterLocalChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportFilterLastChangedBy",
+            "columnName": "reportFilterLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "reportFilterUid"
           ],
           "autoGenerate": true
         },
@@ -5294,6 +5350,56 @@
         "primaryKey": {
           "columnNames": [
             "groupLearningSessionUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "WorkspaceTerms",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`wtUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `termsHtml` TEXT, `wtLang` TEXT, `wtLastChangedBy` INTEGER NOT NULL, `wtPrimaryCsn` INTEGER NOT NULL, `wtLocalCsn` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "wtUid",
+            "columnName": "wtUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "termsHtml",
+            "columnName": "termsHtml",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "wtLang",
+            "columnName": "wtLang",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "wtLastChangedBy",
+            "columnName": "wtLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wtPrimaryCsn",
+            "columnName": "wtPrimaryCsn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "wtLocalCsn",
+            "columnName": "wtLocalCsn",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "wtUid"
           ],
           "autoGenerate": true
         },
@@ -9131,6 +9237,82 @@
         "foreignKeys": []
       },
       {
+        "tableName": "ReportFilter_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ReportFilter_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ReportFilter_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ReportFilter_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ReportFilter_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
         "tableName": "LearnerGroup_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
@@ -9357,12 +9539,88 @@
           }
         ],
         "foreignKeys": []
+      },
+      {
+        "tableName": "WorkspaceTerms_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_WorkspaceTerms_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_WorkspaceTerms_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_WorkspaceTerms_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_WorkspaceTerms_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd7014fcb08aa8616aadeb2d3d4c560a3')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'd73766b1409b55a6c6b6704a5662affa')"
     ]
   }
 }

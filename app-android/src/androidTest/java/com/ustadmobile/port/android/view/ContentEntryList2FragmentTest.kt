@@ -83,6 +83,8 @@ class ContentEntryList2FragmentTest : TestCase() {
         }
     }
 
+    /*
+    Disabled 17/Dec/20
     @AdbScreenRecord("Given content entry list in a picker mode when create new content is clicked should show content creation options")
     @Test
     fun givenContentEntryListOpenedInPickerMode_whenCreateNewContentClicked_shouldShowContentCreationOptions() {
@@ -127,6 +129,7 @@ class ContentEntryList2FragmentTest : TestCase() {
 
 
     }
+     */
 
     @AdbScreenRecord("Given content entry list in a picker mode when folder entry clicked should open it and allow entry selection")
     @Test

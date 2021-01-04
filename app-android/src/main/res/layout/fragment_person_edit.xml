@@ -55,6 +55,7 @@
             android:layout_height="wrap_content">
 
             <de.hdodenhof.circleimageview.CircleImageView
+                android:visibility="gone"
                 android:id="@+id/item_presenter_field_row_image_view"
                 android:layout_width="@dimen/dimen_48dp"
                 android:layout_height="@dimen/dimen_48dp"
@@ -66,6 +67,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatImageView
+                android:visibility="gone"
                 android:id="@+id/item_presenter_field_row_picture_photoicon"
                 android:layout_width="@dimen/dimen_24dp"
                 android:layout_height="@dimen/dimen_24dp"
@@ -88,11 +90,13 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/item_presenter_field_row_image_view"
+                app:layout_constraintTop_toTopOf="parent"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 >
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:maxLines="1"
+                    android:inputType="text"
                     android:id="@+id/firstnames_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -118,6 +122,8 @@
                     android:id="@+id/lastname_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:inputType="text"
                     android:hint="@string/last_name"
                     android:text="@={person.lastName}" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -192,6 +198,8 @@
                     android:text="@={person.phoneNum}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:inputType="text"
                     android:hint="@string/phone_number" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -214,6 +222,7 @@
                     android:text="@={person.emailAddr}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="text"
                     android:hint="@string/email" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -259,7 +268,10 @@
                     android:text="@={person.username}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/username" />
+                    android:maxLines="1"
+                    android:hint="@string/username"
+                    android:inputType="textNoSuggestions"
+                    />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout

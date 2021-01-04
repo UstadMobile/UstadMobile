@@ -16,6 +16,7 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import org.kodein.di.DI
 
 
 class @Entity@DetailPresenter(context: Any,
@@ -35,6 +36,10 @@ class @Entity@DetailPresenter(context: Any,
         super.onCreate(savedState)
 
         //TODO: Set any additional fields (e.g. joinlist) on the view
+    }
+
+    override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
+        TODO("Not yet implemented")
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): @DisplayEntity@? {

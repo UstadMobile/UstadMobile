@@ -12,7 +12,6 @@ import kotlinx.serialization.Serializable
  * updated, re-downloaded after the user deletes it, etc)
  */
 @Entity
-@Serializable
 open class DownloadJobItem() {
 
     @PrimaryKey(autoGenerate = true)

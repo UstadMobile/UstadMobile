@@ -22,12 +22,12 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.android.view.ext.runAfterRequestingPermissionIfNeeded
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -45,9 +45,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     private var localAvailabilityCallback: ContentEntryLocalAvailabilityPagedListCallback? = null
 
     override fun showDownloadDialog(args: Map<String, String>) {
-        runAfterRequestingPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
-            UstadMobileSystemImpl.instance.go(DownloadDialogView.VIEW_NAME, args, requireContext())
-        }
+        val systemImpl : UstadMobileSystemImpl = di.direct.instance()
+        systemImpl.go(DownloadDialogView.VIEW_NAME, args, requireContext())
     }
 
     override var title: String? = null

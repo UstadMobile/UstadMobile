@@ -1,5 +1,6 @@
 package com.ustadmobile.sharedse.io
 
+import com.ustadmobile.core.io.KioInputStream
 import com.ustadmobile.lib.util.sumByLong
 import io.ktor.utils.io.core.ByteOrder
 import kotlinx.io.*

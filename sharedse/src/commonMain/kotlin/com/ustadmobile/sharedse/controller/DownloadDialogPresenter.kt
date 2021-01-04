@@ -83,7 +83,10 @@ class DownloadDialogPresenter(context: Any,
 
     private val appDatabaseRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
 
-    private val downloadJobItemObserver = object: DoorObserver<DownloadJobItem?> {
+    /**
+     * If this is private, Kotlinx serialization will refuse to compile compileKotlinMetadata
+     */
+    val downloadJobItemObserver = object: DoorObserver<DownloadJobItem?> {
         override fun onChanged(t: DownloadJobItem?) {
             currentDownloadJobItem = t
             val newDownloadJobIdVal = t?.djiDjUid ?: 0

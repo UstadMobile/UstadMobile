@@ -69,4 +69,13 @@
         <item name="itemTextAppearance">?attr/textAppearanceBody2</item>
     </style>
 
+    <!-- Aztec HTML Editor -->
+    <style name="UmTheme.AztecTextStyle" parent="AztecTextStyle">
+        <item name="textColor">@color/onBackgroundColor</item>
+        <item name="bulletColor">@color/onBackgroundColor</item>
+        <item name="preformatColor">@color/onBackgroundColor</item>
+        <item name="bulletWidth">4dp</item>
+    </style>
+
+
 </resources>

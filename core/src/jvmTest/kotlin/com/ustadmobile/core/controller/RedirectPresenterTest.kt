@@ -37,16 +37,18 @@ class RedirectPresenterTest {
     }
 
     @Test
-    fun givenAppLaunched_whenNavigateFromOnBoardingScreen_thenShouldNavigateToGetStarted() {
+    fun givenAppLaunched_whenUserHasNotLoggedInBefore_thenShouldNavigateToGetStarted() {
         whenever(impl.getAppConfigBoolean(eq(AppConfig.KEY_ALLOW_SERVER_SELECTION), any())).thenReturn(true)
-        mPresenter = RedirectPresenter(context, mapOf(UstadView.ARG_FROM to OnBoardingView.VIEW_NAME),
+        whenever(impl.getAppPref(eq(Login2Presenter.PREFKEY_USER_LOGGED_IN), eq("false"), any())).thenReturn("false")
+        mPresenter = RedirectPresenter(context, mapOf(),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(mockedView).showNextScreen(eq(GetStartedView.VIEW_NAME), any())
+        verify(mockedView).showNextScreen(eq(SiteEnterLinkView.VIEW_NAME), any())
     }
 
     @Test
-    fun givenAppLaunched_whenNavigateFromOtherScreens_thenShouldNavigateContentList() {
+    fun givenAppLaunched_whenUserHasLoggedInBefore_thenShouldNavigateContentList() {
+        whenever(impl.getAppPref(eq(Login2Presenter.PREFKEY_USER_LOGGED_IN), eq("false"), any())).thenReturn("true")
         mPresenter = RedirectPresenter(context, mapOf(),
                 mockedView, di)
         mPresenter.onCreate(null)

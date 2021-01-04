@@ -300,4 +300,11 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         }
     }
 
+    /**
+     * Open the given link in a browser and/or tab depending on the platform
+     */
+    actual fun openLinkInBrowser(url: String, context: Any) {
+        //On JVM - do nothing at the moment. This is only used for unit testing with verify calls.
+    }
+
 }
