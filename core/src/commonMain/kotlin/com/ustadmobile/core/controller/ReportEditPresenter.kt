@@ -13,7 +13,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.door.ext.withRepoTimeout
+import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
@@ -114,7 +114,7 @@ class ReportEditPresenter(context: Any,
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ReportWithSeriesWithFilters? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
-        val report = db.withRepoTimeout(2000) {
+        val report = db.onRepoWithFallbackToDb(2000) {
             it.takeIf { entityUid != 0L }?.reportDao?.findByUid(entityUid)
         } ?: Report()
 
