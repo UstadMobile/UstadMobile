@@ -2,11 +2,13 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.ext.putIfNotAlreadySet
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
 import com.ustadmobile.core.view.SiteEnterLinkView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Site
 import io.ktor.client.*
@@ -39,6 +41,8 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
 
                 it[ARG_SITE] = Json.stringify(Site.serializer(), mSite)
             }
+
+            args.putIfNotAlreadySet(ARG_POPUPTO_ON_FINISH, SiteEnterLinkView.VIEW_NAME)
 
             impl.go(Login2View.VIEW_NAME, args, context)
         }
@@ -80,6 +84,7 @@ class SiteEnterLinkPresenter(context: Any, arguments: Map<String, String>, view:
                 guestLogin = true
             })
         }
+        args.putIfNotAlreadySet(ARG_POPUPTO_ON_FINISH, SiteEnterLinkView.VIEW_NAME)
 
         impl.go(Login2View.VIEW_NAME, args, context)
     }

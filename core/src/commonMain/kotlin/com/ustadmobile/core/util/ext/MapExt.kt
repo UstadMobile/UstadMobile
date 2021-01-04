@@ -36,3 +36,11 @@ fun <K, V> MutableMap<K, V>.putFromOtherMapIfPresent(otherMap: Map<K, V>, keyVal
         put(keyVal, otherMapVal)
     }
 }
+
+/**
+ * No overwrite put
+ */
+fun <K, V> MutableMap<K, V>.putIfNotAlreadySet(key: K, keyVal: V) {
+    if(!containsKey(key))
+        put(key, keyVal)
+}

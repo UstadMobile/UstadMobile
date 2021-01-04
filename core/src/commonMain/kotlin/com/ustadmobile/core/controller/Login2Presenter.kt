@@ -11,7 +11,6 @@ import com.ustadmobile.core.util.ext.putFromOtherMapIfPresent
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonEditView.Companion.REGISTER_VIA_LINK
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
@@ -34,7 +33,6 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
 
     private  lateinit var nextDestination: String
 
-    private lateinit var fromDestination: String
 
     private lateinit var serverUrl: String
 
@@ -51,12 +49,6 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                 AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context) ?:
                 ContentEntryListTabsView.VIEW_NAME
 
-        fromDestination = if(arguments.containsKey(ARG_FROM)){
-            arguments.getValue(ARG_FROM)
-        }else{
-            val canSelectServer = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_SERVER_SELECTION, context)
-            if(canSelectServer) SiteEnterLinkView.VIEW_NAME else Login2View.VIEW_NAME
-        }
         serverUrl = if (arguments.containsKey(ARG_SERVER_URL)) {
             arguments.getValue(ARG_SERVER_URL)
         } else {
@@ -92,6 +84,19 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
         view.versionInfo = impl.getVersion(context)
     }
 
+    /**
+     * After the user has logged in successfully or selected to proceed as a guest, go to the next
+     * destination as per the arguments. This includes popping off the stack (using ARG_POPUPTO_ON_FINISH
+     * or at least removing the login screen itself from the stack).
+     */
+    private fun goToNextDestAfterLoginOrGuestSelected() {
+        impl.setAppPref(PREFKEY_USER_LOGGED_IN, "true", context)
+        val goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                arguments[ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST,
+                true)
+        impl.go(nextDestination, mapOf(), context, goOptions)
+    }
+
     fun handleLogin(username: String?, password:String?){
         view.inProgress = true
         view.loading = true
@@ -105,11 +110,10 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
                             password.trim() ,serverUrl)
                     view.inProgress = false
                     view.loading = false
-                    val goOptions = UstadMobileSystemCommon.UstadGoOptions("",
-                            true)
+
                     val accountRepo: UmAppDatabase =  di.on(umAccount).direct.instance(tag = DoorTag.TAG_REPO)
                     (accountRepo as DoorDatabaseSyncRepository).invalidateAllTables()
-                    impl.go(nextDestination, mapOf(), context, goOptions)
+                    goToNextDestAfterLoginOrGuestSelected()
                 } catch (e: Exception) {
                     view.errorMessage = impl.getString(if(e is UnauthorizedException)
                         MessageID.wrong_user_pass_combo else
@@ -142,8 +146,16 @@ class Login2Presenter(context: Any, arguments: Map<String, String>, view: Login2
     fun handleConnectAsGuest(){
         accountManager.activeAccount = UmAccount(0L,"guest",
                 "",serverUrl,"Guest","User")
-        impl.go(ContentEntryListTabsView.VIEW_NAME, arguments, context)
+        goToNextDestAfterLoginOrGuestSelected()
     }
 
+    companion object {
 
+        /**
+         * This preference key is used to track whether or not a user has ever logged in or
+         * selected to continue as a guest.
+         */
+        const val PREFKEY_USER_LOGGED_IN = "loggedIn"
+
+    }
 }

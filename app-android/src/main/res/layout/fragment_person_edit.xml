@@ -55,6 +55,7 @@
             android:layout_height="wrap_content">
 
             <de.hdodenhof.circleimageview.CircleImageView
+                android:visibility="gone"
                 android:id="@+id/item_presenter_field_row_image_view"
                 android:layout_width="@dimen/dimen_48dp"
                 android:layout_height="@dimen/dimen_48dp"
@@ -66,6 +67,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <androidx.appcompat.widget.AppCompatImageView
+                android:visibility="gone"
                 android:id="@+id/item_presenter_field_row_picture_photoicon"
                 android:layout_width="@dimen/dimen_24dp"
                 android:layout_height="@dimen/dimen_24dp"
@@ -88,7 +90,7 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/item_presenter_field_row_image_view"
+                app:layout_constraintTop_toTopOf="parent"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 >
 

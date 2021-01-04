@@ -11,7 +11,6 @@ import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SITE
@@ -165,16 +164,10 @@ class Login2PresenterTest {
 
     @Test
     fun givenConnectAsGuestIsVisible_whenClicked_shouldOpenContentSection(){
-        whenever(impl.getAppConfigString(any(), any(), any())).thenReturn  ("true")
         val presenter = Login2Presenter(context, createParams(guestConnection = true), view, di)
         presenter.onCreate(mapOf())
         presenter.handleConnectAsGuest()
-        argumentCaptor<String>{
-            verify(impl).go(capture(), any(), any())
-            Assert.assertEquals("Content screen was opened",
-                    ContentEntryListTabsView.VIEW_NAME, firstValue)
-        }
-
+        verify(impl).go(eq(ContentEntryListTabsView.VIEW_NAME), any(), any(), any())
     }
 
     @Test
@@ -189,7 +182,7 @@ class Login2PresenterTest {
 
         val presenter = Login2Presenter(context,
                 createParams(extraParam = mapOf(ARG_SERVER_URL to httpUrl,
-                        ARG_FROM to fromDestination, ARG_NEXT to nextDestination)), view, di)
+                        ARG_NEXT to nextDestination)), view, di)
         presenter.onCreate(null)
 
         presenter.handleLogin(VALID_USER, VALID_PASS)
@@ -333,7 +326,7 @@ class Login2PresenterTest {
 
         val presenter = Login2Presenter(context,
                 createParams(extraParam = mapOf(ARG_SERVER_URL to httpUrl,
-                        ARG_FROM to fromDestination, ARG_NEXT to nextDestination)), view, di)
+                        ARG_NEXT to nextDestination)), view, di)
         presenter.onCreate(null)
 
         presenter.handleLogin(" $VALID_USER ", "$VALID_PASS ")
