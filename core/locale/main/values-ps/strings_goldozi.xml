@@ -19,7 +19,7 @@
     <string name="record_sale">د پلور ثبت</string>
     <string name="stock">ګدام</string>
     <string name="history">مخینه</string>
-    <string name="x_item_by_y">ترتیب په</string>
+    <string name="x_item_by_y">%1$s ترتیب په %2$s</string>
     <string name="edit_product">د محصول سمون</string>
     <string name="title_english">عنوان (انګلیسي)</string>
     <string name="title_dari">عنوان (دري)</string>
