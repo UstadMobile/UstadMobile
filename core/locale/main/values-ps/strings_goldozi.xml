@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="product">ګلدوزي</string>
+    <string name="product">محصول</string>
     <string name="receive_inventory">د موجودۍ ترلاسه کول</string>
     <string name="edit_category">د برخې سمون</string>
     <string name="add_product">د محصول اضافه کول</string>
-    <string name="payments_due">د اداینی وړپیسی</string>
+    <string name="payments_due">د تادیې وړ پیسي</string>
     <string name="deliveries">تحویلۍ</string>
     <string name="balance_due">پاتې پیسی</string>
     <string name="record_delivery">د تحویلۍ ثبت</string>
