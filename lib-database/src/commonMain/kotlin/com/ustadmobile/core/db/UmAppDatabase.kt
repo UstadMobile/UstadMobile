@@ -3083,7 +3083,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         //Add the WorkspaceTerms syncable entity
-        val MIGRATION_52_53 = object: DoorMigration(52, 53) {
+        val MIGRATION_152_153 = object: DoorMigration(152, 153) {
             override fun migrate(database: DoorSqlDatabase) {
                 if(database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("CREATE TABLE IF NOT EXISTS WorkspaceTerms (  termsHtml  TEXT , wtLang  TEXT , wtLastChangedBy  INTEGER  NOT NULL , wtPrimaryCsn  BIGINT  NOT NULL , wtLocalCsn  BIGINT  NOT NULL , wtUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
@@ -3211,7 +3211,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_53_54 = object: DoorMigration(53, 54) {
+        val MIGRATION_153_154 = object: DoorMigration(153, 154) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("ALTER TABLE Language ADD COLUMN Language_Type TEXT")
 
@@ -3487,7 +3487,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
-                    MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54)
+                    MIGRATION_51_52, MIGRATION_152_153, MIGRATION_153_154)
 
 
 
