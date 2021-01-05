@@ -3231,6 +3231,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       """.trimMargin())
 
                     database.execSQL("ALTER TABLE WorkSpace RENAME TO Site")
+                    database.execSQL("ALTER SEQUENCE workspace_uid_seq RENAME TO site_siteuid_seq")
                     database.execSQL("ALTER TABLE Site RENAME COLUMN uid TO siteUid")
                     database.execSQL("ALTER TABLE Site ADD COLUMN sitePcsn BIGINT DEFAULT 0 NOT NULL")
                     database.execSQL("ALTER TABLE Site ADD COLUMN siteLcsn BIGINT DEFAULT 0 NOT NULL")
@@ -3299,6 +3300,17 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       |EXECUTE PROCEDURE inccsn_272_fn()
                       """.trimMargin())
 
+                    database.execSQL("CREATE TABLE IF NOT EXISTS SiteTerms_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE 
+                      | INDEX index_SiteTerms_trk_clientId_epk_csn 
+                      |ON SiteTerms_trk (clientId, epk, csn)
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE 
+                      |UNIQUE INDEX index_SiteTerms_trk_epk_clientId 
+                      |ON SiteTerms_trk (epk, clientId)
+                      """.trimMargin())
 
                 }else {
                     //Create site table as a syncable entity
