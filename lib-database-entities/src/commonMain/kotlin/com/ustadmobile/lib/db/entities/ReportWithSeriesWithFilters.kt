@@ -17,7 +17,7 @@ class ReportWithSeriesWithFilters() : Report() {
         reportSeriesWithFiltersList = reportSeries
     }
 
-    var reportSeriesWithFiltersList = listOf<ReportSeries>()
+    var reportSeriesWithFiltersList: List<ReportSeries> ?= null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

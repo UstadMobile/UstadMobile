@@ -20,9 +20,11 @@ import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.lib.db.entities.ReportFilter
+import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -84,7 +86,6 @@ class ReportDetailPresenterTest {
         val presenter = ReportDetailPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
 
-
         presenter.onCreate(null)
 
         val entityValSet = mockView.captureLastEntityValue()!!
@@ -96,12 +97,21 @@ class ReportDetailPresenterTest {
     fun givenNewReport_whenUserClicksOnAddToDashboard_thenDatabaseIsCreated(){
         val db: UmAppDatabase by di.activeDbInstance()
 
+        val reportSeriesList = listOf(ReportSeries().apply {
+                reportSeriesDataSet = ReportSeries.TOTAL_DURATION
+                reportSeriesVisualType = Report.LINE_GRAPH
+                reportSeriesSubGroup = Report.CLASS
+                reportSeriesUid = 4
+                reportSeriesName = "total duration"
+        })
+
         val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
             reportTitle = "New Report Title"
             xAxis = Report.MONTH
             fromDate =  DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
+            reportSeries = Json.stringify(ReportSeries.serializer().list, reportSeriesList)
         }
 
         val presenterArgs = mapOf(ARG_ENTITY_JSON to Json.stringify(ReportWithSeriesWithFilters.serializer(), testEntity))
@@ -109,7 +119,6 @@ class ReportDetailPresenterTest {
                 presenterArgs, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
-
 
         presenter.handleOnClickAddFromDashboard(testEntity)
 

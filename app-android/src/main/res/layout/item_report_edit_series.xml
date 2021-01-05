@@ -10,6 +10,7 @@
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView" />
 
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener" />
+        <import type="android.view.View"/>
 
         <variable
             name="series"
@@ -47,6 +48,10 @@
             name="subgroupOptions"
             type="java.util.List&lt;MessageIdOption&gt;" />
 
+        <variable
+            name="showDeleteButton"
+            type="Boolean" />
+
     </data>
 
 
@@ -80,6 +85,7 @@
             android:layout_height="wrap_content"
             android:src="@drawable/ic_close_black_24dp"
             android:padding="@dimen/dimen_8dp"
+            android:visibility="@{showDeleteButton ? View.VISIBLE : View.GONE}"
             android:onClick="@{() -> eventHandler.onClickRemoveSeries(series)}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

@@ -15,7 +15,7 @@ class ReportSeries{
 
     var reportSeriesSubGroup: Int = NONE
 
-    var reportSeriesFilters = listOf<ReportFilter>()
+    var reportSeriesFilters: List<ReportFilter>? = null
 
     companion object {
 

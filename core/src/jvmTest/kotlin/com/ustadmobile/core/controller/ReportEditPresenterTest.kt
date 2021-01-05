@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ReportDao
@@ -74,7 +75,7 @@ class ReportEditPresenterTest {
 
         presenter.handleClickSave(initialEntity)
 
-        val jsonStr = Json.stringify(ReportWithSeriesWithFilters.serializer(), initialEntity)
+        val jsonStr = Gson().toJson(initialEntity)
 
         verify(systemImpl, timeout(5000)).go(eq(ReportDetailView.VIEW_NAME),
               eq(mapOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)), eq(context))
@@ -97,11 +98,7 @@ class ReportEditPresenterTest {
 
         // verify its never called because view would show as error
         verify(systemImpl, never()).go(eq(ReportDetailView.VIEW_NAME),
-                eq(mapOf(UstadEditView.ARG_ENTITY_JSON to """{"reportUid":0,"reportOwnerUid":0,
-                    |"chartType":100,"xAxis":300,"yAxis":201,"subGroup":0,"fromDate":0,"toDate":0,
-                    |"reportTitle":"New Report Title","reportInactive":false,
-                    |"reportMasterChangeSeqNum":0,"reportLocalChangeSeqNum":0,
-                    |"reportLastChangedBy":0,"reportFilterList":[]}"}""".trimMargin())), any())
+                eq(mapOf(UstadEditView.ARG_ENTITY_JSON to "".trimMargin())), any())
 
     }
 

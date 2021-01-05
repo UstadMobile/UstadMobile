@@ -72,6 +72,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
         var visualOptions: List<ReportEditPresenter.VisualTypeMessageIdOption>? = null
         var dataSetOptions: List<ReportEditPresenter.DataSetMessageIdOption>? = null
         var subGroupOptions: List<ReportEditPresenter.SubGroupByMessageIdOption>? = null
+        var showDeleteButton: Boolean = false
         val boundSeriesViewHolder = mutableListOf<SeriesViewHolder>()
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SeriesViewHolder {
@@ -88,9 +89,11 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
             holder.itemBinding.visualTypeOptions = visualOptions
             holder.itemBinding.dataSetOptions = dataSetOptions
             holder.itemBinding.subgroupOptions = subGroupOptions
+            holder.itemBinding.showDeleteButton = showDeleteButton
             boundSeriesViewHolder += holder
 
             val filterRecyclerView = holder.itemBinding.itemReportEditFilterList
+
             holder.filterList = series.reportSeriesFilters
             filterRecyclerView.adapter = holder.filterAdapter
             filterRecyclerView.layoutManager = LinearLayoutManager(holder.itemView.context)
@@ -197,6 +200,11 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
             mBinding?.report = value
             mBinding?.xAxisOptions = this.xAxisOptions
             seriesAdapter?.submitList(value?.reportSeriesWithFiltersList)
+            val showDeleteButton = (value?.reportSeriesWithFiltersList?.size ?: 0) > 1
+            seriesAdapter?.showDeleteButton = showDeleteButton
+            seriesAdapter?.boundSeriesViewHolder?.forEach {
+                it.itemBinding.showDeleteButton = showDeleteButton
+            }
         }
 
     override var fieldsEnabled: Boolean = false

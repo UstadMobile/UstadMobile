@@ -161,7 +161,7 @@ class ReportEditPresenter(context: Any,
             seriesCounter.value = ((max?.reportSeriesUid?: 0) + 1).toInt()
             editEntity.reportSeriesWithFiltersList = reportSeriesList
 
-        }else if(editEntity.reportSeriesWithFiltersList.isEmpty()){
+        }else if(editEntity.reportSeriesWithFiltersList?.isEmpty() == true){
             reportSeriesList = listOf(ReportSeries().apply {
                 val id = seriesCounter.getAndIncrement()
                 reportSeriesName = "Series $id"
@@ -178,7 +178,7 @@ class ReportEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity ?: return
-        entityVal.reportSeries = safeStringify(di, ReportSeries.serializer().list, entityVal.reportSeriesWithFiltersList)
+        entityVal.reportSeries = safeStringify(di, ReportSeries.serializer().list, entityVal.reportSeriesWithFiltersList ?: listOf())
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
@@ -209,11 +209,11 @@ class ReportEditPresenter(context: Any,
         val seriesToAddFilter = newSeriesList.find { it.reportSeriesUid == newFilter.reportFilterSeriesUid } ?: return
 
         newSeriesList.remove(seriesToAddFilter)
-        val newFilterList = seriesToAddFilter.reportSeriesFilters.toMutableList()
+        val newFilterList = seriesToAddFilter.reportSeriesFilters?.toMutableList()
 
         // make sure reportfilterUid is not repeated in the same series list
-        newFilter.reportFilterUid = seriesToAddFilter.reportSeriesFilters.maxBy { it.reportFilterUid }?.reportFilterUid?: 0 + 1
-        newFilterList.add(newFilter)
+        newFilter.reportFilterUid = seriesToAddFilter.reportSeriesFilters?.maxBy { it.reportFilterUid }?.reportFilterUid?: 0 + 1
+        newFilterList?.add(newFilter)
 
         newSeriesList.add(ReportSeries().apply {
             reportSeriesUid = seriesToAddFilter.reportSeriesUid
@@ -221,7 +221,7 @@ class ReportEditPresenter(context: Any,
             reportSeriesDataSet = seriesToAddFilter.reportSeriesDataSet
             reportSeriesSubGroup = seriesToAddFilter.reportSeriesSubGroup
             reportSeriesName = seriesToAddFilter.reportSeriesName
-            reportSeriesFilters = newFilterList.toList()
+            reportSeriesFilters = newFilterList?.toList()
         })
 
         entityVal?.reportSeriesWithFiltersList = newSeriesList.toList()
@@ -234,8 +234,8 @@ class ReportEditPresenter(context: Any,
         val seriesToRemoveFilter = newSeriesList.find { it.reportSeriesUid == filter.reportFilterSeriesUid } ?: return
 
         newSeriesList.remove(seriesToRemoveFilter)
-        val newFilterList = seriesToRemoveFilter.reportSeriesFilters.toMutableList()
-        newFilterList.remove(filter)
+        val newFilterList = seriesToRemoveFilter.reportSeriesFilters?.toMutableList()
+        newFilterList?.remove(filter)
 
         newSeriesList.add(ReportSeries().apply {
             reportSeriesUid = seriesToRemoveFilter.reportSeriesUid
@@ -243,7 +243,7 @@ class ReportEditPresenter(context: Any,
             reportSeriesDataSet = seriesToRemoveFilter.reportSeriesDataSet
             reportSeriesSubGroup = seriesToRemoveFilter.reportSeriesSubGroup
             reportSeriesName = seriesToRemoveFilter.reportSeriesName
-            reportSeriesFilters = newFilterList.toList()
+            reportSeriesFilters = newFilterList?.toList()
         })
 
         entityVal?.reportSeriesWithFiltersList = newSeriesList.toList()
@@ -259,7 +259,7 @@ class ReportEditPresenter(context: Any,
             view.titleErrorText = null
         }
 
-        entity.reportSeries = safeStringify(di, ReportSeries.serializer().list, entity.reportSeriesWithFiltersList)
+        entity.reportSeries = safeStringify(di, ReportSeries.serializer().list, entity.reportSeriesWithFiltersList?: listOf())
 
         GlobalScope.launch(doorMainDispatcher()) {
 

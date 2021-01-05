@@ -62,10 +62,10 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
     sqlList += where
     paramList.add(accountPersonUid)
 
-    if((report.toDate > 0 || report.fromDate > 0) || reportSeriesFilters.isNotEmpty()){
+    if((report.toDate > 0 || report.fromDate > 0) || reportSeriesFilters?.isNotEmpty() == true){
 
         val whereList = mutableListOf<String>()
-        reportSeriesFilters.forEach { filter ->
+        reportSeriesFilters?.forEach { filter ->
 
             when(filter.reportFilterField){
 
