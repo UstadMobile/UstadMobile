@@ -95,10 +95,7 @@ class ReportEditFragmentTest: TestCase() {
         }
         val formVals = ReportWithSeriesWithFilters().apply {
             reportTitle = "New Report"
-          /*  chartType = Report.LINE_GRAPH
-            yAxis = Report.AVG_DURATION*/
             xAxis = Report.WEEK
-          /*  subGroup = Report.GENDER*/
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
         }
@@ -143,7 +140,7 @@ class ReportEditFragmentTest: TestCase() {
                 reportSeriesName = "Series 2"
                 reportSeriesDataSet = ReportSeries.TOTAL_DURATION
                 reportSeriesSubGroup = Report.GENDER
-                reportSeriesVisualType = Report.LINE_GRAPH
+                reportSeriesVisualType = ReportSeries.LINE_GRAPH
                 reportSeriesFilters = mutableListOf(ReportFilter().apply {
                     reportFilterUid = 1
                     reportFilterSeriesUid = 1
@@ -206,24 +203,9 @@ class ReportEditFragmentTest: TestCase() {
 
                 val updatedEntityFromDb = dbRule.db.reportDao.findByUidLive(existingReport.reportUid)
                         .waitUntilWithFragmentScenario(fragmentScenario) { it?.reportTitle == "Updated Report" }
-             /*   val reportFilerListFromDb = dbRule.db.reportFilterDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
-                    it.isNotEmpty()
-                }*/
 
                 Assert.assertEquals("Report name is updated", "Updated Report",
                         updatedEntityFromDb?.reportTitle)
-             /*   Assert.assertEquals("chart type updated", Report.BAR_CHART,
-                        updatedEntityFromDb?.chartType)
-                Assert.assertEquals("y axis updated", Report.COUNT_ACTIVITIES,
-                        updatedEntityFromDb?.yAxis)
-                Assert.assertEquals("y axis updated", Report.COUNT_ACTIVITIES,
-                        updatedEntityFromDb?.yAxis)
-                Assert.assertEquals("x axis updated", Report.MONTH,
-                        updatedEntityFromDb?.xAxis)
-                Assert.assertEquals("subgroup updated", Report.GENDER,
-                        updatedEntityFromDb?.subGroup)
-                Assert.assertEquals("one filter added", 1,
-                        reportFilerListFromDb!!.size)*/
             }
 
         }

@@ -2,21 +2,14 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.createNewSchoolAndGroups
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ReportFilterEditView
-import com.ustadmobile.core.view.ReportFilterEditView.Companion.ARG_REPORT_FILTER
-import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.ReportFilter
-import kotlinx.atomicfu.AtomicLong
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 
 

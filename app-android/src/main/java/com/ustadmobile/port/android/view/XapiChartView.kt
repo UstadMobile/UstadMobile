@@ -14,6 +14,7 @@ import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.port.android.util.graph.asValueFormatter
 
 
@@ -82,7 +83,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             val groupedByXAxis = it.dataList.filter { it.xAxis != null }.groupBy { it.xAxis }
             val distinctSubgroups = it.dataList.mapNotNull { it.subgroup }.toSet()
 
-            if (it.series.reportSeriesVisualType == Report.BAR_CHART) {
+            if (it.series.reportSeriesVisualType == ReportSeries.BAR_CHART) {
 
                 if (distinctSubgroups.isEmpty()) {
 
@@ -130,7 +131,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 }
 
 
-            } else if (it.series.reportSeriesVisualType == Report.LINE_GRAPH) {
+            } else if (it.series.reportSeriesVisualType == ReportSeries.LINE_GRAPH) {
 
                 if (distinctSubgroups.isEmpty()) {
 

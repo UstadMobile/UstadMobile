@@ -22,9 +22,11 @@ object ReportFilterEditScreen: KScreen<ReportFilterEditScreen>() {
 
     val valuesDropDownTextInputLayout = KTextInputLayout { withId(R.id.fragment_report_filter_edit_dialog_values_dropdown_textinputlayout)}
 
-    val valueDropDownTextValue = KTextView { withId(R.id.fragment_report_filter_edit_dialog_values_number_text)}
+    val valueDropDownTextValue = KTextView { withId(R.id.fragment_report_filter_edit_dialog_values_text)}
 
     val valueIntegerTextInputLayout = KTextInputLayout { withId(R.id.fragment_report_filter_edit_dialog_values_number_textinputlayout)}
+
+    val valueNumberTextValue = KTextView { withId(R.id.fragment_report_filter_edit_dialog_values_number_text)}
 
 
 }

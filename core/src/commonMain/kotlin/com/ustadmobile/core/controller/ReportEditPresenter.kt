@@ -34,9 +34,9 @@ class ReportEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
     enum class VisualTypeOptions(val optionVal: Int, val messageId: Int) {
-        BAR_CHART(Report.BAR_CHART,
+        BAR_CHART(ReportSeries.BAR_CHART,
                 MessageID.bar_chart),
-        LINE_GRAPH(Report.LINE_GRAPH,
+        LINE_GRAPH(ReportSeries.LINE_GRAPH,
                 MessageID.line_graph)
     }
 

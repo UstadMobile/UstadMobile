@@ -9,9 +9,8 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.controller.ReportFilterEditPresenter
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.safeStringify
-import com.ustadmobile.core.view.ReportFilterEditView
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.port.android.screen.ReportFilterEditScreen
 import com.ustadmobile.test.port.android.util.clickOptionMenu
@@ -39,11 +38,16 @@ class ReportFilterEditFragmentTest: TestCase()  {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
-
     @AdbScreenRecord("with no report present, fill all the fields and navigate to detail")
     @Test
     fun givenNoReportFilterPresentYet_whenPersonGenderFilledIn_thenShouldNavigateBackToReportEditScreen() {
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
+        val defaultFilter = ReportFilter().apply {
+            reportFilterUid = 1
+        }
+        val jsonStr = Gson().toJson(defaultFilter)
+
+        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                fragmentArgs = bundleOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)) {
             ReportFilterEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
@@ -55,15 +59,24 @@ class ReportFilterEditFragmentTest: TestCase()  {
 
             ReportFilterEditScreen{
 
+                setMessageIdOption(fieldTextValue,
+                        systemImplNavRule.impl.getString(MessageID.field_person_gender,
+                                ApplicationProvider.getApplicationContext()))
 
+                setMessageIdOption(conditionTextValue,
+                        systemImplNavRule.impl.getString(MessageID.condition_is_not,
+                                ApplicationProvider.getApplicationContext()))
+
+                setMessageIdOption(valueDropDownTextValue,
+                        systemImplNavRule.impl.getString(MessageID.unset,
+                                ApplicationProvider.getApplicationContext()))
 
 
             }
 
             fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-            Assert.assertEquals("After finishing edit report filter, it navigates to report edit view",
-                    R.id.report_edit_dest, systemImplNavRule.navController.currentDestination?.id)
+
         }
 
     }
@@ -82,7 +95,7 @@ class ReportFilterEditFragmentTest: TestCase()  {
         val jsonStr = Gson().toJson(existingReportFilter)
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(ReportFilterEditView.ARG_REPORT_FILTER to jsonStr)) {
+                fragmentArgs = bundleOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)) {
             ReportFilterEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
@@ -143,7 +156,7 @@ class ReportFilterEditFragmentTest: TestCase()  {
         val jsonStr = Gson().toJson(existingReportFilter)
 
         launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(ReportFilterEditView.ARG_REPORT_FILTER to jsonStr)) {
+                fragmentArgs = bundleOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)) {
             ReportFilterEditFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }

@@ -32,8 +32,6 @@ interface ReportFilterEditView: UstadEditView<ReportFilter>{
 
     companion object {
 
-        const val ARG_REPORT_FILTER = "ReportFilter"
-
         const val VIEW_NAME = "ReportFilterEditView"
 
     }

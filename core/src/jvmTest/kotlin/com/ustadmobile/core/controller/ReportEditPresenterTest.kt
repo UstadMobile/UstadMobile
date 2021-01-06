@@ -111,7 +111,7 @@ class ReportEditPresenterTest {
 
         val reportSeriesList = listOf(ReportSeries().apply {
             reportSeriesDataSet = ReportSeries.TOTAL_DURATION
-            reportSeriesVisualType = Report.LINE_GRAPH
+            reportSeriesVisualType = ReportSeries.LINE_GRAPH
             reportSeriesSubGroup = Report.CLASS
             reportSeriesUid = 4
             reportSeriesName = "total duration"

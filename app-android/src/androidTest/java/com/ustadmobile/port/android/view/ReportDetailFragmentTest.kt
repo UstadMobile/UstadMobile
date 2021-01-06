@@ -94,14 +94,14 @@ class ReportDetailFragmentTest(val report: Report) : TestCase() {
                         toDate = DateTime(2019, 6, 11).unixMillisLong
                         reportSeriesWithFiltersList = listOf(ReportSeries().apply {
                             reportSeriesDataSet = ReportSeries.TOTAL_DURATION
-                            reportSeriesVisualType = Report.LINE_GRAPH
+                            reportSeriesVisualType = ReportSeries.LINE_GRAPH
                             reportSeriesSubGroup = Report.CLASS
                             reportSeriesUid = 4
                             reportSeriesName = "Total duration"
 
                         }, ReportSeries().apply {
                                     reportSeriesDataSet = ReportSeries.AVERAGE_DURATION
-                                    reportSeriesVisualType = Report.BAR_CHART
+                                    reportSeriesVisualType = ReportSeries.BAR_CHART
                                 reportSeriesSubGroup = Report.MONTH
                                     reportSeriesUid = 5
                                     reportSeriesName = "Average duration"
