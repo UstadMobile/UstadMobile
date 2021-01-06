@@ -1,9 +1,14 @@
 package com.ustadmobile.port.android.screen
 
 import android.content.Context
+import android.view.View
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.navigation.fragment.findNavController
+import androidx.test.espresso.matcher.ViewMatchers.withId
 import com.agoda.kakao.edit.KTextInputLayout
+import com.agoda.kakao.image.KImageView
+import com.agoda.kakao.recycler.KRecyclerItem
+import com.agoda.kakao.recycler.KRecyclerView
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.kaspersky.kaspresso.testcases.core.testcontext.TestContext
@@ -19,6 +24,7 @@ import com.ustadmobile.port.android.view.ReportEditFragment
 import com.ustadmobile.test.port.android.KNestedScrollView
 import com.ustadmobile.test.port.android.util.setDateField
 import com.ustadmobile.test.port.android.util.setMessageIdOption
+import org.hamcrest.Matcher
 
 object ReportEditScreen : KScreen<ReportEditScreen>() {
 
@@ -35,6 +41,34 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
     val toDateTextInput = KTextInputLayout { withId(R.id.activity_report_edit_toDate_textinputlayout)}
 
+    val seriesRecycler: KRecyclerView = KRecyclerView({
+        withId(R.id.activity_report_edit_series_list)
+    }, itemTypeBuilder = {
+        itemType(::Series)
+    })
+
+
+    class Series(parent: Matcher<View>) : KRecyclerItem<Series>(parent) {
+
+        val seriesNameTextInput = KTextInputLayout(parent) { withId(R.id.item_report_series_title_text_inputlayout)}
+
+        val seriesNameTextView = KTextView(parent) { withId(R.id.item_report_series_title_text)}
+
+        val deleteButton = KImageView(parent) { withId(R.id.item_report_series_delete_button)}
+
+        val dataSetTextInput = KTextInputLayout(parent) { withId(R.id.item_edit_report_dialog_data_set_textinputlayout)}
+
+        val dataSetTextView = KTextView(parent) { withId(R.id.item_edit_report_dialog_data_set_text)}
+
+        val visualTypeTextInput = KTextInputLayout(parent) { withId(R.id.item_edit_report_dialog_visual_type_textinputlayout)}
+
+        val visualTypeTextView = KTextView(parent) { withId(R.id.item_edit_report_dialog_visual_type_text)}
+
+        val subgroupTextInput = KTextInputLayout(parent) { withId(R.id.item_edit_report_dialog_subgroup_textinputlayout)}
+
+        val subgroupTextView = KTextView(parent) { withId(R.id.item_edit_report_dialog_subgroup_text)}
+
+    }
 
     val nestScroll = KNestedScrollView {
         withId(R.id.fragment_report_edit_edit_scroll)

@@ -1,10 +1,7 @@
 package com.ustadmobile.core.controller
 
-import com.soywiz.klock.DateTime
-import com.soywiz.klock.days
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ReportDetailView
@@ -18,7 +15,6 @@ import com.ustadmobile.lib.db.entities.*
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 
