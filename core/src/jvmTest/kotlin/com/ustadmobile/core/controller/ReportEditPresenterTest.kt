@@ -15,8 +15,9 @@ import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import org.junit.Assert
 import org.junit.Before
@@ -107,8 +108,21 @@ class ReportEditPresenterTest {
     fun givenExistingReport_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()
+
+        val reportSeriesList = listOf(ReportSeries().apply {
+            reportSeriesDataSet = ReportSeries.TOTAL_DURATION
+            reportSeriesVisualType = Report.LINE_GRAPH
+            reportSeriesSubGroup = Report.CLASS
+            reportSeriesUid = 4
+            reportSeriesName = "total duration"
+        })
+
+
         val testEntity = ReportWithSeriesWithFilters().apply {
             reportTitle = "Old Title"
+            xAxis = Report.MONTH
+            reportSeries = Json.stringify(ReportSeries.serializer().list, reportSeriesList)
+            reportSeriesWithFiltersList = reportSeriesList
             reportUid = repo.reportDao.insert(this)
         }
 
