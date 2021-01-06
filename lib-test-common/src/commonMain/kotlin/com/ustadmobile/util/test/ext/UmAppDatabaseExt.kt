@@ -478,12 +478,14 @@ suspend fun UmAppDatabase.insertTestStatements() {
 
     val arabicClazz = Clazz().apply {
         clazzName = "Arabic"
-        clazzUid = clazzDao.insert(this)
+        clazzUid = 200
+        clazzDao.insert(this)
     }
 
     val scienceClazz = Clazz().apply {
         clazzName = "science"
-        clazzUid = clazzDao.insert(this)
+        clazzUid = 400
+        clazzDao.insert(this)
     }
 
      ClazzMember().apply {
@@ -548,11 +550,13 @@ suspend fun UmAppDatabase.insertTestStatements() {
 
     val firstEntry = ContentEntry()
     firstEntry.title = "Ustad Mobile"
-    firstEntry.contentEntryUid = contentEntryDao.insert(firstEntry)
+    firstEntry.contentEntryUid =  532
+   contentEntryDao.insert(firstEntry)
 
     var secondEntry = ContentEntry()
     secondEntry.title = "Khan Academy"
-    secondEntry.contentEntryUid = contentEntryDao.insert(secondEntry)
+    secondEntry.contentEntryUid = 530
+    contentEntryDao.insert(secondEntry)
 
     var firstsecondJoin = ContentEntryParentChildJoin()
     firstsecondJoin.cepcjParentContentEntryUid = firstEntry.contentEntryUid
@@ -561,7 +565,8 @@ suspend fun UmAppDatabase.insertTestStatements() {
 
     var phetEntry = ContentEntry()
     phetEntry.title = "PHET"
-    phetEntry.contentEntryUid = contentEntryDao.insert(phetEntry)
+    phetEntry.contentEntryUid = 232
+    contentEntryDao.insert(phetEntry)
 
     var phetJoin = ContentEntryParentChildJoin()
     phetJoin.cepcjParentContentEntryUid = firstEntry.contentEntryUid
@@ -570,7 +575,8 @@ suspend fun UmAppDatabase.insertTestStatements() {
 
     var edraakEntry = ContentEntry()
     edraakEntry.title = "EDRAAK"
-    edraakEntry.contentEntryUid = contentEntryDao.insert(edraakEntry)
+    edraakEntry.contentEntryUid = 3423
+    contentEntryDao.insert(edraakEntry)
 
     var edraakJoin = ContentEntryParentChildJoin()
     edraakJoin.cepcjParentContentEntryUid = firstEntry.contentEntryUid
@@ -579,7 +585,8 @@ suspend fun UmAppDatabase.insertTestStatements() {
 
     var khanclass1 = ContentEntry()
     khanclass1.title = "Content 1"
-    khanclass1.contentEntryUid = contentEntryDao.insert(khanclass1)
+    khanclass1.contentEntryUid = 23223
+    contentEntryDao.insert(khanclass1)
 
 
     var khanclassJoin = ContentEntryParentChildJoin()
@@ -589,7 +596,8 @@ suspend fun UmAppDatabase.insertTestStatements() {
 
     var khanclass2 = ContentEntry()
     khanclass2.title = "Content 2"
-    khanclass2.contentEntryUid = contentEntryDao.insert(khanclass2)
+    khanclass2.contentEntryUid = 2422
+    contentEntryDao.insert(khanclass2)
 
     var khanclass2Join = ContentEntryParentChildJoin()
     khanclass2Join.cepcjParentContentEntryUid = secondEntry.contentEntryUid
@@ -631,8 +639,10 @@ suspend fun UmAppDatabase.insertTestStatements() {
         contextRegistration = KmpUuid.randomUUID().toString()
         statementVerbUid = firstVerb.verbUid
         xObjectUid = firstObject.xObjectUid
+        statementContentEntryUid = khanclass1.contentEntryUid
         resultSuccess = StatementEntity.RESULT_FAILURE
         timestamp = DateTime(2019, 6, 11).unixMillisLong
+        statementId = KmpUuid.randomUUID().toString()
         statementUid = statementDao.insert(this)
     }
   
@@ -646,7 +656,9 @@ suspend fun UmAppDatabase.insertTestStatements() {
         contextRegistration = KmpUuid.randomUUID().toString()
         statementVerbUid = secondVerb.verbUid
         xObjectUid = firstObject.xObjectUid
+        statementContentEntryUid = khanclass1.contentEntryUid
         resultSuccess = StatementEntity.RESULT_SUCCESS
+        statementId = KmpUuid.randomUUID().toString()
         timestamp = DateTime(2019, 5, 1).unixMillisLong
         statementUid = statementDao.insert(this)
     }
@@ -660,7 +672,9 @@ suspend fun UmAppDatabase.insertTestStatements() {
         contextRegistration = commonSessionForSecondPerson
         statementVerbUid = firstVerb.verbUid
         xObjectUid = secondObject.xObjectUid
+        statementContentEntryUid = khanclass2.contentEntryUid
         resultSuccess = StatementEntity.RESULT_FAILURE
+        statementId = KmpUuid.randomUUID().toString()
         timestamp = DateTime(2019, 4, 10).unixMillisLong
         statementUid = statementDao.insert(this)
     }
@@ -675,6 +689,8 @@ suspend fun UmAppDatabase.insertTestStatements() {
         contextRegistration = commonSession
         statementVerbUid = firstVerb.verbUid
         xObjectUid = secondObject.xObjectUid
+        statementContentEntryUid = khanclass2.contentEntryUid
+        statementId = KmpUuid.randomUUID().toString()
         resultSuccess = StatementEntity.RESULT_SUCCESS
         timestamp = DateTime(2019, 6, 30).unixMillisLong
         statementUid = statementDao.insert(this)
@@ -690,6 +706,8 @@ suspend fun UmAppDatabase.insertTestStatements() {
         contextRegistration = KmpUuid.randomUUID().toString()
         statementVerbUid = thirdVerb.verbUid
         xObjectUid = firstObject.xObjectUid
+        statementContentEntryUid = khanclass1.contentEntryUid
+        statementId = KmpUuid.randomUUID().toString()
         resultSuccess = StatementEntity.RESULT_SUCCESS
         timestamp = DateTime(2019, 7, 10).unixMillisLong
         statementUid = statementDao.insert(this)
@@ -704,8 +722,10 @@ suspend fun UmAppDatabase.insertTestStatements() {
         resultCompletion = true
         contextRegistration = commonSession
         statementVerbUid = firstVerb.verbUid
+        statementId = KmpUuid.randomUUID().toString()
         resultSuccess = StatementEntity.RESULT_FAILURE
         xObjectUid = secondObject.xObjectUid
+        statementContentEntryUid = khanclass2.contentEntryUid
         timestamp = DateTime(2019, 5, 25).unixMillisLong
         statementUid = statementDao.insert(this)
     }
@@ -720,6 +740,8 @@ suspend fun UmAppDatabase.insertTestStatements() {
         contextRegistration = commonSessionForSecondPerson
         statementVerbUid = firstVerb.verbUid
         xObjectUid = firstObject.xObjectUid
+        statementContentEntryUid = khanclass1.contentEntryUid
+        statementId = KmpUuid.randomUUID().toString()
         resultSuccess = StatementEntity.RESULT_FAILURE
         timestamp = DateTime(2019, 6, 11).unixMillisLong
         statementUid = statementDao.insert(this)
@@ -734,6 +756,8 @@ suspend fun UmAppDatabase.insertTestStatements() {
             contextRegistration = KmpUuid.randomUUID().toString()
             statementVerbUid = firstVerb.verbUid
             xObjectUid = firstObject.xObjectUid
+            statementContentEntryUid = khanclass1.contentEntryUid
+            statementId = KmpUuid.randomUUID().toString()
             resultSuccess = StatementEntity.RESULT_SUCCESS
             timestamp = DateTime(2019, 6, 11).unixMillisLong
             statementUid = statementDao.insert(this)

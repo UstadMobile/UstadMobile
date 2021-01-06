@@ -42,7 +42,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
                 $personPermission 
                 LEFT JOIN XLangMapEntry ON XLangMapEntry.statementLangMapUid = 
                 (SELECT statementLangMapUid FROM XLangMapEntry 
-                WHERE statementVerbUid = StatementEntity.statementVerbUid LIMIT 1)"""
+                WHERE statementVerbUid = StatementEntity.statementVerbUid LIMIT 1) """
 
 
     sql += groupBy(report.xAxis) + "AS xAxis "
@@ -57,7 +57,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
         sql += "LEFT JOIN Clazz ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid "
     }
 
-    val where = "WHERE PersonGroupMember.groupMemberPersonUid = ? "
+    val where = " WHERE PersonGroupMember.groupMemberPersonUid = ? "
     sql += where
     sqlList += where
     paramList.add(accountPersonUid)

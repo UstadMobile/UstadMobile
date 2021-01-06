@@ -46,7 +46,6 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 labelRotationAngle = -45f
                 isGranularityEnabled = true
                 axisMinimum = 0f
-
             }
             axisLeft.apply {
                 isEnabled = true
@@ -66,11 +65,9 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             }
             description.isEnabled = false
             setTouchEnabled(false)
-
         }
 
         val combinedData = CombinedData()
-
         val distinctXAxisSet = chartData.seriesData.flatMap { it.dataList }
                 .mapNotNull { it.xAxis }.toSet()
         // TODO consider sorting for calendar
@@ -200,10 +197,11 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             val barWidth = (((1 - groupSpace) / numberOfDataSets) - barSpace)
 
             barData.barWidth = barWidth
-            barData.groupBars(0f, groupSpace, barSpace)
             combinedChart.xAxis.setCenterAxisLabels(true)
-            // do not change to this
+            // do not change this for group
             combinedChart.xAxis.setAxisMaximum(distinctXAxisSet.size.toFloat())
+            barData.groupBars(0f, groupSpace, barSpace)
+
         }
 
 
@@ -214,6 +212,8 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         combinedChart.axisRight.apply {
             axisMaximum = combinedData.yMax + yAxisMax
         }
+
+
 
         combinedChart.data = combinedData
         combinedChart.invalidate()
