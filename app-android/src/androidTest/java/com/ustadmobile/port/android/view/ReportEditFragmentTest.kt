@@ -60,35 +60,6 @@ class ReportEditFragmentTest: TestCase() {
             }
         }
 
-        val verb = VerbEntity().apply {
-            urlId = "progressed"
-            verbUid = dbRule.repo.verbDao.insert(this)
-        }
-
-        val xlangEntry = XLangMapEntry().apply {
-            verbLangMapUid = verb.verbUid
-            valueLangMap = "Progress"
-            statementLangMapUid = dbRule.repo.xLangMapEntryDao.insert(this)
-        }
-
-        val verbDisplay = VerbDisplay().apply {
-            verbUid = verb.verbUid
-            urlId = verb.urlId
-            display = xlangEntry.valueLangMap
-        }
-
-        val person = Person().apply {
-            firstNames = "Ustad"
-            lastName = "Mobile"
-            personUid = dbRule.repo.personDao.insert(this)
-        }
-
-        val contentEntry = ContentEntry().apply {
-            title = "Khan Academy"
-            description = "content here"
-            contentEntryUid = dbRule.repo.contentEntryDao.insert(this)
-        }
-
         var currentEntity: ReportWithSeriesWithFilters? = null
         while(currentEntity == null){
             currentEntity = fragmentScenario.nullableLetOnFragment { it.entity}

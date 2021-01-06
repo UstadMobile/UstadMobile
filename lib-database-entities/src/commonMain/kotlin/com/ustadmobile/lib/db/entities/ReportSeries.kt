@@ -19,6 +19,11 @@ class ReportSeries{
 
     companion object {
 
+        const val BAR_CHART = 100
+
+        const val LINE_GRAPH = 101
+
+
         const val TOTAL_DURATION = 200
 
         const val AVERAGE_DURATION = 201

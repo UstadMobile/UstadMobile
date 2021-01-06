@@ -55,24 +55,6 @@ open class Report {
 
         const val TABLE_ID = 101
 
-        // TODO: moves to series
-        const val BAR_CHART = 100
-
-        // TODO: moves to series
-        const val LINE_GRAPH = 101
-
-        val listOfGraphs = arrayOf(BAR_CHART, LINE_GRAPH)
-
-        const val SCORE = 200
-
-        const val DURATION = 201
-
-        const val AVG_DURATION = 202
-
-        const val COUNT_ACTIVITIES = 203
-
-        val yAxisList = arrayOf(SCORE, DURATION, AVG_DURATION, COUNT_ACTIVITIES)
-
         const val DAY = 300
 
         const val WEEK = 301
@@ -81,15 +63,9 @@ open class Report {
 
         const val CONTENT_ENTRY = 304
 
-        //TODO to be put back when varuna merges his branch
-        // private const val LOCATION = MessageID.xapi_location
-
         const val GENDER = 306
 
         const val CLASS = 307
-
-        val xAxisList = arrayOf(DAY, WEEK, MONTH, CONTENT_ENTRY, /*LOCATION, */ GENDER, CLASS)
-
 
     }
 
