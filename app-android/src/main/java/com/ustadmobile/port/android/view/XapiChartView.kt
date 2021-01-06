@@ -45,7 +45,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                 granularity = 1f
                 labelRotationAngle = -45f
                 isGranularityEnabled = true
-                axisMinimum = 0f
+                setAxisMinimum(0f)
             }
             axisLeft.apply {
                 isEnabled = true
@@ -74,7 +74,6 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         combinedChart.xAxis.valueFormatter = IndexAxisValueFormatter(
                 chartData.xAxisValueFormatter?.formatAsList(distinctXAxisSet.toList())
                         ?: distinctXAxisSet)
-        combinedChart.xAxis.setLabelCount(distinctXAxisSet.size, true)
 
 
         var colorCount = 0
@@ -194,7 +193,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             val numberOfDataSets = barData.dataSetCount.toFloat()
             val barSpace = 0.01f
             val groupSpace = 0.05f
-            val barWidth = (((1 - groupSpace) / numberOfDataSets) - barSpace)
+            val barWidth = ((1 - groupSpace) / numberOfDataSets) - barSpace
 
             barData.barWidth = barWidth
             combinedChart.xAxis.setCenterAxisLabels(true)

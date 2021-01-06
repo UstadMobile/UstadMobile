@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.graphics.Color
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -8,6 +9,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
@@ -43,6 +45,12 @@ class ReportDetailFragmentTest(val report: Report) : TestCase() {
     @Before
     fun setup() {
         runBlocking {
+            dbRule.insertPersonForActiveUser(Person().apply {
+                firstNames = "Bob"
+                lastName = "Jones"
+                admin = true
+                personUid = 42
+            })
             dbRule.repo.insertTestStatements()
         }
     }
@@ -51,7 +59,6 @@ class ReportDetailFragmentTest(val report: Report) : TestCase() {
     @AdbScreenRecord("show report on detail")
     @Test
     fun givenReportExists_whenLaunched_thenShouldShowReport() {
-
 
         init {
             dbRule.repo.reportDao.insert(report)
@@ -79,39 +86,28 @@ class ReportDetailFragmentTest(val report: Report) : TestCase() {
         @JvmStatic
         @Parameterized.Parameters
         fun data(): Iterable<Report> {
-            return listOf(/*ReportWithSeriesWithFilters().apply {
-                reportUid = 1
-                xAxis = Report.MONTH
-                fromDate = DateTime(2019, 3, 10).unixMillisLong
-                toDate = DateTime(2019, 6, 11).unixMillisLong
-                reportSeriesWithFiltersList = listOf(ReportSeries().apply {
-                    reportSeriesDataSet = ReportSeries.NUMBER_SESSIONS
-                    reportSeriesVisualType = Report.BAR_CHART
-                    reportSeriesUid = 2
-                    reportSeriesName = "sessions"
-                })
-                reportSeries = Json.stringify(ReportSeries.serializer().list, reportSeriesWithFiltersList)
-            },*/
-                    ReportWithSeriesWithFilters().apply {
+            return listOf(
+               ReportWithSeriesWithFilters().apply {
                         reportUid = 3
                         xAxis = Report.CONTENT_ENTRY
                         fromDate = DateTime(2019, 3, 10).unixMillisLong
                         toDate = DateTime(2019, 6, 11).unixMillisLong
                         reportSeriesWithFiltersList = listOf(ReportSeries().apply {
                             reportSeriesDataSet = ReportSeries.TOTAL_DURATION
-                            reportSeriesVisualType = Report.BAR_CHART
+                            reportSeriesVisualType = Report.LINE_GRAPH
                             reportSeriesSubGroup = Report.CLASS
                             reportSeriesUid = 4
-                            reportSeriesName = "total duration"
+                            reportSeriesName = "Total duration"
 
                         }, ReportSeries().apply {
                                     reportSeriesDataSet = ReportSeries.AVERAGE_DURATION
                                     reportSeriesVisualType = Report.BAR_CHART
                                 reportSeriesSubGroup = Report.MONTH
                                     reportSeriesUid = 5
-                                    reportSeriesName = "duration"
+                                    reportSeriesName = "Average duration"
                                 })
-                        reportSeries = Json.stringify(ReportSeries.serializer().list, reportSeriesWithFiltersList)
+                        reportSeries = Json.stringify(ReportSeries.serializer().list,
+                                reportSeriesWithFiltersList ?: listOf())
                     })
         }
 
