@@ -34,7 +34,8 @@ abstract class ProductDao : BaseDao<Product> {
     abstract suspend fun findProductWithInventoryCountAsync(uid: Long, leUid: Long): ProductWithInventoryCount?
 
     @Query(QUERY_PRODUCTS_WITH_INVENTORY)
-    abstract fun findAllActiveProductWithInventoryCount(leUid: Long, searchText: String? = "%")
+    abstract fun findAllActiveProductWithInventoryCount(leUid: Long, searchText: String? = "%",
+                categoryUid: Long)
             : DataSource.Factory<Int, ProductWithInventoryCount>
 
     @Query("""SELECT * FROM Product 
@@ -71,6 +72,9 @@ abstract class ProductDao : BaseDao<Product> {
     @Query(QUERY_FIND_ALL_CATEGORY_BY_PRODUCT)
     abstract suspend  fun findAllCategoriesOfProductUidAsync(productUid: Long): List<Category>
 
+
+    @Query(QUERY_FIND_ALL_CATEGORY_BY_LE)
+    abstract suspend fun findAllCategoriesByLeUidAsync(leUid: Long): List<Category>
 
     companion object {
 
@@ -124,6 +128,14 @@ abstract class ProductDao : BaseDao<Product> {
                     lower(Product.productNamePashto) like :searchText )
              
             AND (Product.productPersonAdded = LE.personUid OR CAST(LE.admin AS INTEGER) = 1)
+            
+            AND (:categoryUid = 0 OR Product.productUid IN 
+                    (SELECT productCategoryJoinProductUid FROM ProductCategoryJoin
+                    WHERE
+                    productCategoryJoinCategoryUid = :categoryUid
+                    AND CAST(productCategoryJoinActive AS INTEGER) = 1
+                    )
+                )
         """
 
 
@@ -133,8 +145,29 @@ abstract class ProductDao : BaseDao<Product> {
             WHERE 
             ProductCategoryJoin.productCategoryJoinProductUid = :productUid
             AND CAST(productCategoryJoinActive AS INTEGER ) = 1 
+            GROUP BY Category.categoryUid
             ORDER BY ProductCategoryJoin.productCategoryJoinDateCreated DESC
         """
+
+
+
+        const val QUERY_FIND_ALL_CATEGORY_BY_LE = """
+            SELECT Category.* FROM ProductCategoryJoin
+            LEFT JOIN Category ON Category.categoryUid = ProductCategoryJoin.productCategoryJoinCategoryUid
+            LEFT JOIN Person AS LE ON LE.personUid = :leUid
+            WHERE 
+            ProductCategoryJoin.productCategoryJoinProductUid IN 
+    
+            (SELECT Product.productUid FROM Product WHERE 
+                Product.productPersonAdded = LE.personUid OR CAST(LE.admin AS INTEGER) = 1
+            )
+            
+            
+            AND CAST(productCategoryJoinActive AS INTEGER ) = 1
+             GROUP BY Category.categoryUid
+            ORDER BY ProductCategoryJoin.productCategoryJoinDateCreated DESC
+        """
+
 
     }
 }

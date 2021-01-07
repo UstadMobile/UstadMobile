@@ -53,7 +53,7 @@ class   ClazzListPresenter(context: Any, arguments: Map<String, String>, view: C
     private fun updateList() {
         view.list = repo.clazzDao.findClazzesWithPermission(searchText.toQueryLikeParam(),
                 loggedInPersonUid, filterExcludeMembersOfSchool,
-                selectedSortOption?.flag ?: 0, view.checkedFilterOptionChip?.optionId ?: 0,
+                selectedSortOption?.flag ?: 0, view.checkedFilterOptionChip?.optionId?.toInt() ?: 0,
                 systemTimeInMillis(), filterByPermission)
     }
 

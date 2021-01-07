@@ -8,6 +8,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ProductListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ProductListView
 import com.ustadmobile.core.view.SaleItemEditView
 import com.ustadmobile.core.view.UstadView
@@ -31,12 +32,13 @@ class ProductListFragment(): UstadListViewFragment<Product, ProductWithInventory
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        mPresenter = ProductListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
+        mPresenter = ProductListPresenter(requireContext(), arguments.toStringMap(),
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ProductListRecyclerAdapter(mPresenter, requireContext())
         val createNewText = requireContext().getString(R.string.create_product)
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText)
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
+                createNewText, onFilterOptionSelected = mPresenter)
         return view
     }
 

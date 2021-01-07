@@ -20,6 +20,7 @@
 
             <!-- Holiday Calendars-->
             <androidx.constraintlayout.widget.ConstraintLayout
+                android:visibility="gone"
                 android:id="@+id/activity_settings2_holiday_calendar_cl"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -71,6 +72,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_8dp"
+                android:visibility="gone"
                 android:background="?android:selectableItemBackground"
                 android:onClick="@{() -> presenter.goToRolesList()}">
 
@@ -171,6 +173,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_8dp"
+                android:visibility="gone"
                 android:background="?android:selectableItemBackground"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

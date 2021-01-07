@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
@@ -9,6 +10,9 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.Product
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
@@ -26,6 +30,7 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
         ORDER_NAME_DSC(MessageID.sort_by_name_desc)
     }
 
+    var categoryMap = mutableMapOf<Int, Long>()
 
     override fun onSearchSubmitted(text: String?) {
         searchText = text
@@ -39,6 +44,31 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
         super.onCreate(savedState)
         updateListOnView()
         view.sortOptions = SortOrder.values().toList().map { ProductListSortOption(it, context) }
+
+        GlobalScope.launch {
+
+            val loggedInPersonUid = accountManager.activeAccount.personUid
+            val categories = repo.productDao.findAllCategoriesByLeUidAsync(loggedInPersonUid)
+            var filterIdOption: MutableList<ListFilterIdOption> = mutableListOf()
+            filterIdOption.add(ListFilterIdOption(systemImpl.getString(MessageID.all, context),0))
+            var index = 1
+            for(everyCategory in categories){
+                filterIdOption.add(ListFilterIdOption(everyCategory.categoryName?:"",
+                        index))
+
+                categoryMap[index] = everyCategory.categoryUid
+                index++
+            }
+
+            view.runOnUiThread(Runnable {
+                view.listFilterOptionChips = filterIdOption
+            })
+        }
+    }
+
+    override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {
+        super.onListFilterOptionSelected(filterOptionId)
+        updateListOnView()
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -48,7 +78,8 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
     private fun updateListOnView() {
 
         view.list = repo.productDao.findAllActiveProductWithInventoryCount(
-                accountManager.activeAccount.personUid, searchText.toQueryLikeParam())
+                accountManager.activeAccount.personUid, searchText.toQueryLikeParam(),
+                categoryMap[view.checkedFilterOptionChip?.optionId?:0]?:0)
     }
 
     override fun handleClickCreateNewFab() {
@@ -99,5 +130,9 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
                         mapOf(UstadView.ARG_ENTITY_UID to product.productUid.toString()), context)
             }
         }
+    }
+
+    companion object{
+
     }
 }
