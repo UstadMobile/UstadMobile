@@ -50,7 +50,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 54)
+], version = 55)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -3458,6 +3458,22 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       """.trimMargin())
 
                 }
+            }
+        }
+
+        val MIGRATION_54_55 = object: DoorMigration(54, 55) {
+
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE Person ADD COLUMN parentalApprovalContact TEXT")
+                val longSqlType = if(database.dbType() == DoorDbType.POSTGRES) {
+                    "BIGINT"
+                }else {
+                    "INTEGER"
+                }
+
+                database.execSQL("ALTER TABLE Person ADD COLUMN personParentsGroupUid $longSqlType NOT NULL DEFAULT 0")
+                database.execSQL("ALTER TABLE Person ADD COLUMN personParentApprovalUid $longSqlType NOT NULL DEFAULT 0")
+
             }
         }
 

@@ -71,6 +71,10 @@ open class PersonGroup() {
         const val TABLE_ID = 43
 
         const val PERSONGROUP_FLAG_DEFAULT = 0
+
         const val PERSONGROUP_FLAG_PERSONGROUP = 1
+
+        const val PERSONGROUP_FLAG_PARENT_GROUP = 2
+
     }
 }

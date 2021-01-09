@@ -86,7 +86,7 @@ open class Person() {
      */
     var personOrgId: String? = null
 
-    //This person's groupUid
+    //The PersonGroup that is created for this individual
     var personGroupUid: Long = 0L
 
     @MasterChangeSeqNum
@@ -97,6 +97,14 @@ open class Person() {
 
     @LastChangedBy
     var personLastChangedBy: Int = 0
+
+    var parentalApprovalContact: String? = null
+
+    //The PersonGroup that is created for parents where this person is a child
+    var personParentsGroupUid: Long = 0
+
+    //The approval entity which granted this minor access
+    var personParentApprovalUid: Long = 0
 
     fun fullName():String{
         var f = ""

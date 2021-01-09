@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
 import com.soywiz.klock.DateTime
+import com.soywiz.klock.years
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.EntityRoleDao
@@ -10,8 +11,10 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveRepoInstance
+import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.RegisterMinorWaitForParentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SERVER_URL
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -25,10 +28,7 @@ import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okio.Buffer
-import org.junit.After
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
@@ -161,7 +161,7 @@ class PersonEditPresenterTest  {
 
     @Test
     fun givenPresenterCreatedInRegistrationMode_whenUsernameAndPasswordNotFilledClickSave_shouldShowErrors() {
-        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to true.toString())
+        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to PersonEditView.REGISTER_MODE_ENABLED.toString())
 
         val person = createPerson(leftOutPassword = true)
         val presenter = PersonEditPresenter(context, args,mockView, di,mockLifecycleOwner)
@@ -178,7 +178,7 @@ class PersonEditPresenterTest  {
 
     @Test
     fun givenPresenterCreatedInRegistrationMode_whenDateOfBirthNotFilledClickSave_shouldShowErrors() {
-        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to true.toString())
+        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to PersonEditView.REGISTER_MODE_ENABLED.toString())
 
         val person = createPerson(leftOutDateOfBirth = true)
         val presenter = PersonEditPresenter(context, args,mockView, di,mockLifecycleOwner)
@@ -193,25 +193,8 @@ class PersonEditPresenterTest  {
     }
 
     @Test
-    fun givenPresenterCreatedInRegistrationMode_whenDateOfBirthIsLessThan13YearsOfAgeAndClickSave_shouldShowErrors() {
-        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to true.toString())
-
-        val person = createPerson(selectedDateOfBirth = DateTime(2020,11,24).unixMillisLong)
-        val presenter = PersonEditPresenter(context, args,mockView, di,mockLifecycleOwner)
-
-        presenter.onCreate(null)
-
-        presenter.handleClickSave(person)
-        val expectedMessage = impl.getString(MessageID.underRegistrationAgeError, context)
-
-        verify(mockView, timeout(timeoutInMill)).dateOfBirthError = eq(expectedMessage)
-
-    }
-
-
-    @Test
     fun givenPresenterCreatedInRegistrationMode_whenPasswordAndConfirmPasswordDoesNotMatchClickSave_shouldShowErrors() {
-        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to true.toString())
+        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to PersonEditView.REGISTER_MODE_ENABLED.toString())
 
         val person = createPerson(false).apply {
             username = "dummyUsername"
@@ -236,7 +219,9 @@ class PersonEditPresenterTest  {
                 .setBody(Buffer().write(Json.stringify(UmAccount.serializer(),
                         UmAccount(0L)).toByteArray())))
 
-        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to true.toString(), ARG_SERVER_URL to serverUrl)
+        val args = mapOf(
+                PersonEditView.ARG_REGISTRATION_MODE to PersonEditView.REGISTER_MODE_ENABLED.toString(),
+                ARG_SERVER_URL to serverUrl)
 
         val person = createPerson().apply {
             username = "dummyUsername"
@@ -249,7 +234,7 @@ class PersonEditPresenterTest  {
 
         argumentCaptor<PersonWithAccount>().apply {
             verifyBlocking(accountManager, timeout(timeoutInMill)){
-                register(capture(), eq(serverUrl), eq(true))
+                register(capture(), eq(serverUrl), eq(false))
                 assertEquals("Person registration was done", person.personUid, firstValue.personUid)
             }
         }
@@ -276,6 +261,72 @@ class PersonEditPresenterTest  {
             }
         }
     }
+
+    @Test
+    fun givenPresenterCreatedInRegisterMinorMode_whenFormFilledAndClickSave_thenShouldGoToWaitForParentScreen() {
+        val minorDateOfBirth = (DateTime.now() - 10.years).unixMillisLong
+        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to
+                (PersonEditView.REGISTER_MODE_ENABLED or PersonEditView.REGISTER_MODE_MINOR).toString(),
+                ARG_SERVER_URL to serverUrl,
+                PersonEditView.ARG_DATE_OF_BIRTH to minorDateOfBirth.toString())
+
+        val presenter = PersonEditPresenter(context, args, mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+        val personToRegister : PersonWithAccount = mockView.captureLastEntityValue(5000)!!
+        personToRegister.apply {
+            parentalApprovalContact = "parent@email.com"
+            firstNames = "Jane"
+            lastName = "Doe"
+            username = "janedoe"
+            newPassword = "secret"
+            confirmedPassword = "secret"
+        }
+
+        presenter.handleClickSave(personToRegister)
+
+
+        argumentCaptor<PersonWithAccount>().apply {
+            verifyBlocking(accountManager, timeout(timeoutInMill)){
+                register(capture(), eq(serverUrl), eq(false))
+                assertEquals("Person registration was done", personToRegister.personUid,
+                        firstValue.personUid)
+            }
+        }
+
+        argumentCaptor<Map<String, String>> {
+            verify(impl, timeout(5000)).go(eq(RegisterMinorWaitForParentView.VIEW_NAME),
+                    capture(), any(), any())
+            Assert.assertEquals("Arg for username was provided", personToRegister.username,
+                    firstValue[RegisterMinorWaitForParentView.ARG_USERNAME])
+        }
+    }
+
+    @Test
+    fun givenPresenterCreatedInRegisterMinorMode_whenNoParentEmailGiven_thenShouldShowFieldRequiredError() {
+        val minorDateOfBirth = (DateTime.now() - 10.years).unixMillisLong
+        val args = mapOf(PersonEditView.ARG_REGISTRATION_MODE to
+                (PersonEditView.REGISTER_MODE_ENABLED or PersonEditView.REGISTER_MODE_MINOR).toString(),
+                PersonEditView.ARG_DATE_OF_BIRTH to minorDateOfBirth.toString())
+
+        val presenter = PersonEditPresenter(context, args, mockView, di, mockLifecycleOwner)
+        presenter.onCreate(null)
+
+        val personToRegister = mockView.captureLastEntityValue(5000)!!
+        personToRegister.apply {
+            parentalApprovalContact = null
+            firstNames = "Jane"
+            lastName = "Doe"
+            username = "janedoe"
+            newPassword = "secret"
+            confirmedPassword = "secret"
+        }
+
+        presenter.handleClickSave(personToRegister)
+
+        verify(mockView, timeout(5000)).parentContactError = impl.getString(
+                MessageID.field_required_prompt, context)
+    }
+
 
 
 

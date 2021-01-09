@@ -8,7 +8,7 @@ import io.ktor.content.*
 import io.ktor.http.*
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
-
+import com.ustadmobile.door.util.DoorSyncableSqlGenerator
 /**
  * Generate a delegation style function call, e.g.
  * varName.callMethod(param1, param2, param3)
@@ -183,39 +183,12 @@ fun CodeBlock.Builder.addSyncableEntityInsertTriggersSqlite(execSqlFn: String, s
     val pkFieldName = syncableEntityInfo.entityPkField.name
     val tableId = syncableEntityInfo.tableId
 
-    add("$execSqlFn(%S)\n", """
-            CREATE TRIGGER INS_LOC_${syncableEntityInfo.tableId}
-            AFTER INSERT ON $entityName
-            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
-                NEW.$localCsnFieldName = 0)
-            BEGIN
-                UPDATE $entityName
-                SET $primaryCsnFieldName = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId)
-                WHERE $pkFieldName = NEW.$pkFieldName;
-                
-                UPDATE SqliteChangeSeqNums
-                SET sCsnNextPrimary = sCsnNextPrimary + 1
-                WHERE sCsnTableId = $tableId;
-            END
-        """.trimIndent())
+    val syncableEntityTriggerStmts = DoorSyncableSqlGenerator.generateSyncableEntityInsertTriggersSqliteV1(
+            entityName, tableId, pkFieldName, primaryCsnFieldName, localCsnFieldName)
 
-    add("$execSqlFn(%S)\n", """
-            CREATE TRIGGER INS_PRI_${syncableEntityInfo.tableId}
-            AFTER INSERT ON $entityName
-            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
-                NEW.$primaryCsnFieldName = 0)
-            BEGIN
-                UPDATE $entityName
-                SET $primaryCsnFieldName = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = $tableId)
-                WHERE $pkFieldName = NEW.$pkFieldName;
-                
-                UPDATE SqliteChangeSeqNums
-                SET sCsnNextPrimary = sCsnNextPrimary + 1
-                WHERE sCsnTableId = $tableId;
-                
-                ${syncableEntityInfo.sqliteChangeLogInsertSql};
-            END
-        """.trimIndent())
+    syncableEntityTriggerStmts.forEach {
+        add("$execSqlFn(%S)\n", it)
+    }
 
     return this
 }

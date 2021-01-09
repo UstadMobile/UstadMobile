@@ -1,30 +1,22 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
-import com.soywiz.klock.until
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
-import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
+import com.ustadmobile.core.util.ext.*
 import com.ustadmobile.core.util.safeParse
-import com.ustadmobile.core.view.ContentEntryListTabsView
-import com.ustadmobile.core.view.PersonDetailView
-import com.ustadmobile.core.view.PersonEditView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.client.features.json.*
@@ -32,7 +24,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -51,7 +42,11 @@ class PersonEditPresenter(context: Any,
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
-    private var registrationMode: Boolean = false
+    /**
+     * The registration mode flags. This can include none, enabled (when registration is taking place),
+     * and REGISTER_MODE_MINOR
+     */
+    private var registrationModeFlags: Int = PersonEditView.REGISTER_MODE_NONE
 
     private var loggedInPerson: Person? = null
 
@@ -93,7 +88,8 @@ class PersonEditPresenter(context: Any,
 
         view.rolesAndPermissionsList = rolesAndPermissionEditHelper.liveList
 
-        registrationMode = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toBoolean()?:false
+        registrationModeFlags = arguments[PersonEditView.ARG_REGISTRATION_MODE]?.toInt() ?: PersonEditView.REGISTER_MODE_NONE
+
         regViaLink = arguments[PersonEditView.REGISTER_VIA_LINK]?.toBoolean()?:false
 
         serverUrl = if (arguments.containsKey(UstadView.ARG_SERVER_URL)) {
@@ -106,7 +102,7 @@ class PersonEditPresenter(context: Any,
                 AppConfig.KEY_FIRST_DEST, ContentEntryListTabsView.VIEW_NAME, context)
                 ?: ContentEntryListTabsView.VIEW_NAME
 
-        view.registrationMode = registrationMode
+        view.registrationMode = registrationModeFlags
 
     }
 
@@ -115,7 +111,9 @@ class PersonEditPresenter(context: Any,
 
         val person = withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.personDao?.findPersonAccountByUid(entityUid)
-        } ?: PersonWithAccount()
+        } ?: PersonWithAccount().also {
+            it.dateOfBirth = arguments[PersonEditView.ARG_DATE_OF_BIRTH]?.toLong() ?: 0L
+        }
 
         val personPicture = withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
@@ -185,7 +183,8 @@ class PersonEditPresenter(context: Any,
             passwordError != null ||
             confirmError != null ||
             dateOfBirthError != null ||
-            noMatchPasswordError != null
+            noMatchPasswordError != null ||
+            parentContactError != null
 
     override fun handleClickSave(entity: PersonWithAccount) {
         view.loading = true
@@ -197,17 +196,17 @@ class PersonEditPresenter(context: Any,
             view.confirmError = null
             view.dateOfBirthError = null
             view.noMatchPasswordError = null
+            view.parentContactError = null
 
-            if(registrationMode) {
+            if(registrationModeFlags.hasFlag(PersonEditView.REGISTER_MODE_ENABLED)) {
                 val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
 
                 view.takeIf { entity.username.isNullOrEmpty() }?.usernameError = requiredFieldMessage
                 view.takeIf { entity.newPassword.isNullOrEmpty() }?.passwordError = requiredFieldMessage
                 view.takeIf { entity.confirmedPassword.isNullOrEmpty() }?.confirmError = requiredFieldMessage
+                view.takeIf { entity.parentalApprovalContact.isNullOrEmpty()}?.parentContactError = requiredFieldMessage
 
                 view.takeIf { entity.dateOfBirth == 0L }?.dateOfBirthError = requiredFieldMessage
-                view.takeIf { !regViaLink && DateTime(entity.dateOfBirth).age() < 13 }?.dateOfBirthError =
-                        impl.getString(MessageID.underRegistrationAgeError, context)
                 view.takeIf { entity.confirmedPassword != entity.newPassword }?.noMatchPasswordError =
                         impl.getString(MessageID.filed_password_no_match, context)
 
@@ -218,12 +217,27 @@ class PersonEditPresenter(context: Any,
                 }
 
                 try {
-                    val umAccount = accountManager.register(entity, serverUrl)
-                    accountManager.activeAccount = umAccount
+                    val umAccount = accountManager.register(entity, serverUrl, makeAccountActive = false)
                     val goOptions = UstadMobileSystemCommon.UstadGoOptions(
                             arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST,
                             true)
-                    impl.go(nextDestination, mapOf(), context, goOptions)
+                    if(registrationModeFlags.hasFlag(PersonEditView.REGISTER_MODE_MINOR)) {
+                        nextDestination = "RegisterMinorWaitForParent"
+                        val args = mutableMapOf<String, String>().also {
+                            it.put(RegisterMinorWaitForParentView.ARG_USERNAME,
+                                    entity.username ?: "")
+                            it.put(RegisterMinorWaitForParentView.ARG_PARENT_CONTACT,
+                                    entity.parentalApprovalContact ?: "")
+                            it.put(RegisterMinorWaitForParentView.ARG_PASSWORD,
+                                    entity.newPassword ?: "")
+                            it.putFromOtherMapIfPresent(arguments, UstadView.ARG_POPUPTO_ON_FINISH)
+                        }
+
+                        impl.go(RegisterMinorWaitForParentView.VIEW_NAME, args, context, goOptions)
+                    }else {
+                        accountManager.activeAccount = umAccount
+                        impl.go(nextDestination, mapOf(), context, goOptions)
+                    }
                 } catch (e: Exception) {
                     if (e is IllegalStateException) {
                         view.usernameError = impl.getString(MessageID.person_exists, context)

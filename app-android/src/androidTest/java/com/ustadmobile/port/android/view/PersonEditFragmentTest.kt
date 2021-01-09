@@ -9,6 +9,7 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
+import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.lib.db.entities.EntityRoleWithNameAndRole
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Role
@@ -83,7 +84,7 @@ class PersonEditFragmentTest : TestCase() {
         }.run {
 
             PersonEditScreen {
-                launchFragment(false, fillForm = false,
+                launchFragment(PersonEditView.REGISTER_MODE_NONE, fillForm = false,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
                         impl = impl, context = context, testContext = this@run, databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
                 scrollToBottom()
@@ -133,7 +134,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
 
-                launchFragment(false, leftOutPassword = true, leftOutUsername = true,
+                launchFragment(PersonEditView.REGISTER_MODE_NONE, leftOutPassword = true, leftOutUsername = true,
                         fillForm = true, entityRoles = entityRoles,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
                         impl = impl, context = context, testContext = this@run,
@@ -195,7 +196,7 @@ class PersonEditFragmentTest : TestCase() {
         }.run {
             PersonEditScreen {
 
-                launchFragment(false, leftOutPassword = true, leftOutUsername = true,
+                launchFragment(PersonEditView.REGISTER_MODE_NONE, leftOutPassword = true, leftOutUsername = true,
                         fillForm = false, entityRoles = entityRoles, personUid = person!!.personUid,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
                         impl = impl, context = context, testContext = this@run,
@@ -234,7 +235,7 @@ class PersonEditFragmentTest : TestCase() {
 
         }.run {
             PersonEditScreen {
-                launchFragment(false, fillForm = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
+                launchFragment(PersonEditView.REGISTER_MODE_NONE, fillForm = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
                         impl = impl, context = context, testContext = this@run,
                 databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
@@ -261,8 +262,7 @@ class PersonEditFragmentTest : TestCase() {
 
         }.run {
             PersonEditScreen {
-
-                launchFragment(true, fillForm = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
+                launchFragment(PersonEditView.REGISTER_MODE_ENABLED, fillForm = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
                         impl = impl, context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
@@ -287,7 +287,7 @@ class PersonEditFragmentTest : TestCase() {
         }.run {
             PersonEditScreen {
 
-                launchFragment(registrationMode = true, leftOutPassword = true, leftOutUsername = true,
+                launchFragment(registrationMode = PersonEditView.REGISTER_MODE_ENABLED, leftOutPassword = true, leftOutUsername = true,
                         serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
                         impl = impl, context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
@@ -317,7 +317,7 @@ class PersonEditFragmentTest : TestCase() {
             PersonEditScreen {
 
 
-                launchFragment(registrationMode = true, leftOutDateOfBirth = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
+                launchFragment(registrationMode = PersonEditView.REGISTER_MODE_ENABLED, leftOutDateOfBirth = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
                         impl = impl, context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
@@ -329,29 +329,6 @@ class PersonEditFragmentTest : TestCase() {
         }
     }
 
-    @AdbScreenRecord("given person edit opened in registration mode when dateOfBirth " +
-            "is less than 13 years of age and save is clicked should show errors")
-    @Test
-    fun givenPersonEditOpenedInRegistrationMode_whenDateOfBirthIsLessThan13YearsOfAge_thenShouldShowErrors() {
-
-        init {
-
-        }.run {
-            PersonEditScreen {
-
-                launchFragment(registrationMode = true,
-                        selectedDateOfBirth = DateTime(2010, 10, 24).unixMillisLong, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
-                        impl = impl, context = context, testContext = this@run,
-                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
-
-                birthdayTextInput {
-                    hasInputLayoutError(context.getString(R.string.underRegistrationAgeError))
-                }
-            }
-        }
-    }
-
-
     @AdbScreenRecord("given person edit opened in registration mode when password " +
             "doesn't match and save is clicked should show errors")
     @Test
@@ -362,7 +339,7 @@ class PersonEditFragmentTest : TestCase() {
         }.run {
             PersonEditScreen {
 
-                launchFragment(registrationMode = true, misMatchPassword = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
+                launchFragment(registrationMode = PersonEditView.REGISTER_MODE_ENABLED, misMatchPassword = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
                         impl = impl, context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
@@ -391,7 +368,7 @@ class PersonEditFragmentTest : TestCase() {
 
             PersonEditScreen {
 
-                launchFragment(registrationMode = true, misMatchPassword = false, leftOutUsername = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
+                launchFragment(registrationMode = PersonEditView.REGISTER_MODE_ENABLED, misMatchPassword = false, leftOutUsername = false, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
                         impl = impl, context = context, testContext = this@run,
                         databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
 
