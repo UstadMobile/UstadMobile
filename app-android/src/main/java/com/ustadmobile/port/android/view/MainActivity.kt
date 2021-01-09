@@ -102,7 +102,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private fun loadFromUriString(uri: String?){
 
-        UstadMobileSystemImpl.instance.go(uri, getActivityContext())
+        //UstadMobileSystemImpl.instance.go(uri, getActivityContext())
 
     }
 

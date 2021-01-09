@@ -50,6 +50,12 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
         const val ARG_REGISTRATION_MODE = "RegMode"
 
         /**
+         * If the form is in registration mode, then the date of birth must be supplied as an
+         * argument.
+         */
+        const val ARG_DATE_OF_BIRTH = "DateOfBirth"
+
+        /**
          * If this is set then this means that the person registering has come from a link. Since someone in the system has invited another person
          * we use this flag to remove the age restrictions of being under 13 to sign up.
          */

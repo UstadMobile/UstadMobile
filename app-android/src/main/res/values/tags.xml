@@ -2,6 +2,7 @@
 <resources>
     <item name="tag_datelong" type="id"/>
     <item name="tag_dateusespinner" type="id"/>
+    <item name="tag_inverse_binding_listener" type="id"/>
     <item name="tag_timelong" type="id"/>
     <item name="tag_messageidoptions" type="id"/>
     <item name="tag_imagefilepath" type="id"/>

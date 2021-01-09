@@ -137,10 +137,10 @@ abstract class UstadMobileSystemCommon {
      * @param destination Destination name in the form of ViewName?arg1=val1&arg2=val2 etc.
      * @param context System context object
      */
-    open fun go(destination: String?, context: Any) {
+    open fun go(destination: String, context: Any) {
         val destinationParsed =
-        if(destination?.contains(LINK_INTENT_FILTER) == true){
-            val destinationIndex : Int? = destination.indexOf("/${LINK_INTENT_FILTER}").plus(10)
+        if(destination.contains(LINK_INTENT_FILTER) == true){
+            val destinationIndex : Int = destination.indexOf("/${LINK_INTENT_FILTER}").plus(10)
 
             val apiUrl = destination.substring(0, destination.indexOf("/${LINK_INTENT_FILTER}")) + '/'
 
