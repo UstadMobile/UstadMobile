@@ -883,4 +883,11 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="parents_email_address">Parents\' email address</string>
 
+    <!--The instructions that are given to children when parental approval is required for them to create an account. %1$s is replaced with the parents email address or phone number -->
+    <string name="we_sent_a_message_to_your_parent">We sent a message to your parent ( %1$s ) so they can approve your registration. You can login using the username and password you set after your parent approves.</string>
+
+    <string name="toggle_visibility">Toggle visibility</string>
+
+    <string name="almost_done">Almost done</string>
+
 </resources>

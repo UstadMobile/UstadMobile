@@ -218,10 +218,10 @@ class PersonEditPresenter(context: Any,
 
                 try {
                     val umAccount = accountManager.register(entity, serverUrl, makeAccountActive = false)
-                    val goOptions = UstadMobileSystemCommon.UstadGoOptions(
-                            arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST,
-                            true)
+                    val popUpToViewName = arguments[UstadView.ARG_POPUPTO_ON_FINISH] ?: UstadView.CURRENT_DEST
                     if(registrationModeFlags.hasFlag(PersonEditView.REGISTER_MODE_MINOR)) {
+                        val goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                                popUpToViewName, false)
                         nextDestination = "RegisterMinorWaitForParent"
                         val args = mutableMapOf<String, String>().also {
                             it.put(RegisterMinorWaitForParentView.ARG_USERNAME,
@@ -235,6 +235,8 @@ class PersonEditPresenter(context: Any,
 
                         impl.go(RegisterMinorWaitForParentView.VIEW_NAME, args, context, goOptions)
                     }else {
+                        val goOptions = UstadMobileSystemCommon.UstadGoOptions(
+                                popUpToViewName, true)
                         accountManager.activeAccount = umAccount
                         impl.go(nextDestination, mapOf(), context, goOptions)
                     }

@@ -1,6 +1,14 @@
 package com.ustadmobile.core.view
 
-interface RegisterMinorWaitForParentView {
+interface RegisterMinorWaitForParentView : UstadView {
+
+    var username: String?
+
+    var password: String?
+
+    var parentContact: String?
+
+    var passwordVisible: Boolean
 
     companion object {
 
