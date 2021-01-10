@@ -157,13 +157,6 @@ class ReportEditFragmentTest: TestCase() {
 
                 fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment, true,
                         impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
-                        reportFilter = ReportFilter().apply {
-                            reportFilterSeriesUid = 1
-                            reportFilterUid = 1
-                            reportFilterField = ReportFilter.FIELD_PERSON_GENDER
-                            reportFilterCondition = ReportFilter.CONDITION_IS
-                            reportFilterDropDownValue = Person.GENDER_MALE
-                        },
                         testContext = this@run)
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)

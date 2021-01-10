@@ -98,14 +98,20 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fabManager?.text = requireContext().getText(R.string.report)
+
+
+
     }
 
     /**
      * OnClick function that will handle when the user clicks to create a new item
      */
-    override fun onClick(view: View?) {
-        if (view?.id == R.id.item_createnew_layout)
+    override fun onClick(v: View?) {
+        if (v?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.report_edit_dest, Report::class.java)
+        else{
+            super.onClick(v)
+        }
     }
 
     override fun onDestroyView() {
