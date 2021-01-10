@@ -297,5 +297,10 @@
         android:name="com.ustadmobile.port.android.view.RegisterMinorWaitForParentFragment"
         android:label="@string/almost_done"/>
 
+    <fragment
+        android:id="@+id/register_age_redirect_dest"
+        android:name="com.ustadmobile.port.android.view.RegisterAgeRedirectFragment"
+        android:label="@string/register"/>
+
 
 </navigation>

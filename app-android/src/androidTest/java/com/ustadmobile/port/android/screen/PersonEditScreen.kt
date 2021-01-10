@@ -55,11 +55,13 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
 
     val usernameTextInput = KTextInputLayout { withId(R.id.username_textinputlayout) }
 
-    val passwordTextInput = KTextInputLayout { withId(R.id.username_textinputlayout) }
+    val passwordTextInput = KTextInputLayout { withId(R.id.password_textinputlayout) }
 
     val firstNameTextInput = KTextInputLayout { withId(R.id.firstnames_textinputlayout) }
 
     val lastNameTextInput = KTextInputLayout { withId(R.id.lastname_textInputLayout) }
+
+    val parentsContactsInput = KTextInputLayout { withId(R.id.parent_contact_textInputLayout) }
 
     val confirmPassTextInput = KTextInputLayout { withId(R.id.confirm_password_textinputlayout) }
 

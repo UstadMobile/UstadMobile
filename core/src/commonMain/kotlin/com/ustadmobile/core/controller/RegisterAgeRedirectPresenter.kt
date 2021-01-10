@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileConstants
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.view.PersonEditView
@@ -31,9 +32,12 @@ class RegisterAgeRedirectPresenter(context: Any, arguments: Map<String, String>,
 
         //If the person is a minor, they do not accept terms and conditions themselves. Their
         // account needs approval
-        val viewName =  if(ageDateTime.age() < 13) {
+        val viewName =  if(ageDateTime.age() < UstadMobileConstants.MINOR_AGE_THRESHOLD) {
+            args[PersonEditView.ARG_REGISTRATION_MODE] =
+                    (PersonEditView.REGISTER_MODE_ENABLED + PersonEditView.REGISTER_MODE_MINOR).toString()
             PersonEditView.VIEW_NAME_REGISTER
         }else {
+            args[PersonEditView.ARG_REGISTRATION_MODE] = PersonEditView.REGISTER_MODE_ENABLED.toString()
             SiteTermsDetailView.VIEW_NAME_ACCEPT_TERMS
         }
 
