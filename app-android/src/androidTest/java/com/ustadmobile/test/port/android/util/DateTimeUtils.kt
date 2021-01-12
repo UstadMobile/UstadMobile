@@ -28,10 +28,10 @@ fun setDateField(viewId: Int, timeInMillis: Long, timeZoneId: String = "UTC") {
     KDatePicker {
         withClassName(equalTo(DatePicker::class.java.name))
     } perform {
-        setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
+        setDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1,
                 cal.get(Calendar.DAY_OF_MONTH))
 
-        hasDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH),
+        hasDate(cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1,
                 cal.get(Calendar.DAY_OF_MONTH))
     }
     KView {

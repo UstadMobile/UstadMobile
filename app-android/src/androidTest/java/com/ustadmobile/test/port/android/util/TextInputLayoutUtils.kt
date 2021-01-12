@@ -17,4 +17,7 @@ fun setMessageIdOption(view: KTextView, message: String){
         isDisplayed()
         click()
     }
+
+    view.hasText(message)
+
 }

@@ -50,8 +50,6 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
     })
 
 
-
-
     class Series(parent: Matcher<View>) : KRecyclerItem<Series>(parent) {
 
         val seriesNameTextInput = KTextInputLayout(parent) { withId(R.id.item_report_series_title_text_inputlayout) }

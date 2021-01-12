@@ -124,6 +124,9 @@
     <string name="preparing">Preparing</string>
 
 
+    <string name="fixed_date">Fixed Date</string>
+    <string name="relative_date">Relative Date</string>
+
 
     <!-- Registration dialog feedback -->
     <string name="field_required_prompt">This field is required</string>
@@ -285,6 +288,7 @@
     <string name="xapi_content_entry" value="304">Content Entry</string>
     <string name="xapi_clear" >Clear</string>
 
+    <string name="year">Year</string>
 
     <string name="from">From</string>
 

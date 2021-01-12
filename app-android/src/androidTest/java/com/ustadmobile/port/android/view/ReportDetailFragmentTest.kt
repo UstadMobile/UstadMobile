@@ -89,23 +89,17 @@ class ReportDetailFragmentTest(val report: Report) : TestCase() {
             return listOf(
                ReportWithSeriesWithFilters().apply {
                         reportUid = 3
-                        xAxis = Report.CONTENT_ENTRY
+                        xAxis = Report.MONTH
                         fromDate = DateTime(2019, 3, 10).unixMillisLong
                         toDate = DateTime(2019, 6, 11).unixMillisLong
                         reportSeriesWithFiltersList = listOf(ReportSeries().apply {
                             reportSeriesDataSet = ReportSeries.TOTAL_DURATION
-                            reportSeriesVisualType = ReportSeries.LINE_GRAPH
+                            reportSeriesVisualType = ReportSeries.BAR_CHART
                             reportSeriesSubGroup = Report.CLASS
                             reportSeriesUid = 4
                             reportSeriesName = "Total duration"
 
-                        }, ReportSeries().apply {
-                                    reportSeriesDataSet = ReportSeries.AVERAGE_DURATION
-                                    reportSeriesVisualType = ReportSeries.BAR_CHART
-                                reportSeriesSubGroup = Report.MONTH
-                                    reportSeriesUid = 5
-                                    reportSeriesName = "Average duration"
-                                })
+                        })
                         reportSeries = Json.stringify(ReportSeries.serializer().list,
                                 reportSeriesWithFiltersList ?: listOf())
                     })

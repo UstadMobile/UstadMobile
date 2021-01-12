@@ -192,6 +192,11 @@
         />
 
     <fragment
+        android:id="@+id/date_range_dest"
+        android:name="com.ustadmobile.port.android.view.DateRangeFragment"
+        />
+
+    <fragment
         android:id="@+id/content_xapi_dest"
         android:name="com.ustadmobile.port.android.view.XapiPackageContentFragment"
         android:label="" />

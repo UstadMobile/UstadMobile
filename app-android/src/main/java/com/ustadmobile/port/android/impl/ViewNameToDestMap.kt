@@ -60,6 +60,7 @@ class ViewNameToDestMap: DestinationProvider {
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             ReportFilterEditView.VIEW_NAME to UstadDestination(R.id.report_filter_edit_dest),
             ReportDetailView.VIEW_NAME to UstadDestination(R.id.report_detail_dest),
+            DateRangeView.VIEW_NAME to UstadDestination(R.id.date_range_dest),
             SiteEnterLinkView.VIEW_NAME to UstadDestination(R.id.site_enterlink_dest,
                 hideBottomNavigation = true),
             Login2View.VIEW_NAME to UstadDestination(R.id.login_dest, hideBottomNavigation = true),
