@@ -90,6 +90,8 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
             holder.itemBinding.dataSetOptions = dataSetOptions
             holder.itemBinding.subgroupOptions = subGroupOptions
             holder.itemBinding.showDeleteButton = showDeleteButton
+            holder.itemBinding.itemEditReportDialogVisualTypeText.tag = series.reportSeriesVisualType
+            holder.itemBinding.seriesLayout.tag = series.reportSeriesUid
             boundSeriesViewHolder += holder
 
             val filterRecyclerView = holder.itemBinding.itemReportEditFilterList
@@ -125,7 +127,8 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
         }
 
         override fun onBindViewHolder(holder: FilterViewHolder, position: Int) {
-            holder.itemBinding.filter = getItem(position)
+            val filter = getItem(position)
+            holder.itemBinding.filter = filter
         }
 
     }

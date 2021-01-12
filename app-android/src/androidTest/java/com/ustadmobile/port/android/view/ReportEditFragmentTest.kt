@@ -3,14 +3,14 @@ package com.ustadmobile.port.android.view
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
+import com.example.libtestutil.MyClass
 import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.controller.PersonConstants
-import com.ustadmobile.core.controller.SchoolEditPresenter
 import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
@@ -21,10 +21,10 @@ import com.ustadmobile.test.port.android.util.*
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
+
 
 @AdbScreenRecord("Report edit screen tests")
 class ReportEditFragmentTest: TestCase() {
@@ -60,15 +60,18 @@ class ReportEditFragmentTest: TestCase() {
             }
         }
 
-        var currentEntity: ReportWithSeriesWithFilters? = null
-        while(currentEntity == null){
-            currentEntity = fragmentScenario.nullableLetOnFragment { it.entity}
-        }
+        val currentEntity: ReportWithSeriesWithFilters? =
+                fragmentScenario.waitUntilLetOnFragment { it.entity }
         val formVals = ReportWithSeriesWithFilters().apply {
             reportTitle = "New Report"
             xAxis = Report.WEEK
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
+            reportSeriesWithFiltersList = listOf(ReportSeries().apply {
+                reportSeriesName = "Total Duration"
+                reportSeriesVisualType = ReportSeries.BAR_CHART
+                reportSeriesDataSet = ReportSeries.TOTAL_DURATION
+            })
         }
 
         init{
@@ -144,9 +147,25 @@ class ReportEditFragmentTest: TestCase() {
             entityLoadedByFragment = fragmentScenario.nullableLetOnFragment { it.entity}
         }
         val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
-        val newClazzValues = defaultGson().fromJson(entityLoadedJson, ReportWithSeriesWithFilters::class.java).apply {
+        val updatedReport = defaultGson().fromJson(entityLoadedJson, ReportWithSeriesWithFilters::class.java).apply {
             reportTitle = "Updated Report"
             xAxis = Report.MONTH
+            val reportSeriesList = listOf(ReportSeries().apply {
+                reportSeriesUid = 1
+                reportSeriesName = "Series 2"
+                reportSeriesDataSet = ReportSeries.TOTAL_DURATION
+                reportSeriesSubGroup = Report.GENDER
+                reportSeriesVisualType = ReportSeries.BAR_CHART
+                reportSeriesFilters = mutableListOf(ReportFilter().apply {
+                    reportFilterUid = 1
+                    reportFilterSeriesUid = 1
+                    reportFilterField = ReportFilter.FIELD_PERSON_GENDER
+                    reportFilterCondition = ReportFilter.CONDITION_IS
+                    reportFilterDropDownValue = Person.GENDER_MALE
+                })
+            })
+            reportSeriesWithFiltersList = reportSeriesList
+            reportSeries = Gson().toJson(reportSeriesList)
         }
 
         init{
@@ -155,7 +174,7 @@ class ReportEditFragmentTest: TestCase() {
 
             ReportEditScreen{
 
-                fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment, true,
+                fillFields(fragmentScenario, updatedReport, entityLoadedByFragment, true,
                         impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
                         testContext = this@run)
 
@@ -165,11 +184,21 @@ class ReportEditFragmentTest: TestCase() {
                         "New Report",
                         defaultGson().fromJson(entityLoadedJson, ReportWithSeriesWithFilters::class.java).reportTitle)
 
+
                 val updatedEntityFromDb = dbRule.db.reportDao.findByUidLive(existingReport.reportUid)
                         .waitUntilWithFragmentScenario(fragmentScenario) { it?.reportTitle == "Updated Report" }
 
+                val listSeriesType = object : TypeToken<ArrayList<ReportSeries?>?>() {}.type
+                val seriesList = defaultGson().fromJson<List<ReportSeries>>(updatedEntityFromDb!!.reportSeries, listSeriesType)
+
                 Assert.assertEquals("Report name is updated", "Updated Report",
-                        updatedEntityFromDb?.reportTitle)
+                        updatedEntityFromDb.reportTitle)
+
+                Assert.assertEquals("Series changed to bar chart", ReportSeries.BAR_CHART,
+                        seriesList[0].reportSeriesVisualType)
+
+                Assert.assertEquals("Filter size reduced to 1", 1,
+                        seriesList[0].reportSeriesFilters!!.size)
             }
 
         }

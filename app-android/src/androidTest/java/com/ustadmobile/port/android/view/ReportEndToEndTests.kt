@@ -1,8 +1,10 @@
 package com.ustadmobile.port.android.view
 
 import android.app.Application
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
@@ -19,10 +21,11 @@ import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 @AdbScreenRecord("Report end-to-end test")
 class ReportEndToEndTests : TestCase() {
-
 
     @JvmField
     @Rule
@@ -40,17 +43,9 @@ class ReportEndToEndTests : TestCase() {
 
     @Before
     fun setup() {
-        systemImplNavRule.impl.messageIdMap = MessageIDMap.ID_MAP
         runBlocking {
-            dbRule.insertPersonForActiveUser(Person().apply {
-                firstNames = "Bob"
-                lastName = "Jones"
-                admin = true
-                personUid = 42
-            })
             dbRule.repo.insertTestStatements()
         }
-
     }
 
 
@@ -75,9 +70,16 @@ class ReportEndToEndTests : TestCase() {
             })
         }
 
-        val activityScenario = launchActivity<MainActivity>()
-
+        var activityScenario: ActivityScenario<MainActivity>? = null
         init {
+
+            dbRule.insertPersonForActiveUser(Person().apply {
+                admin = true
+                firstNames = "Bob"
+                lastName = "Jones"
+                username = "admin"
+            })
+            activityScenario = launchActivity()
 
         }.run {
 
@@ -92,7 +94,7 @@ class ReportEndToEndTests : TestCase() {
 
             ReportEditScreen {
 
-                fillFields(report = reportToCreate, setFieldsRequiringNavigation = false,
+                fillFields(updatedReport = reportToCreate, setFieldsRequiringNavigation = false,
                         impl = systemImplNavRule.impl, context = context, testContext = this@run)
 
             }
@@ -110,7 +112,7 @@ class ReportEndToEndTests : TestCase() {
             }
 
             val createdReport = runBlocking {
-                dbRule.db.reportDao.findAllLive().waitUntilWithActivityScenario(activityScenario) { it.size == 1 }
+                dbRule.db.reportDao.findAllLive().waitUntilWithActivityScenario(activityScenario!!) { it.size == 1 }
             }!!.first()
 
             ReportListScreen {

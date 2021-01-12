@@ -3,24 +3,19 @@ package com.ustadmobile.port.android.screen
 import android.content.Context
 import android.view.View
 import androidx.fragment.app.testing.FragmentScenario
-import androidx.navigation.fragment.findNavController
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.espresso.action.ViewActions
+import com.agoda.kakao.common.views.KSwipeView
 import com.agoda.kakao.edit.KTextInputLayout
 import com.agoda.kakao.image.KImageView
 import com.agoda.kakao.recycler.KRecyclerItem
 import com.agoda.kakao.recycler.KRecyclerView
-import com.agoda.kakao.text.KButton
 import com.agoda.kakao.text.KTextView
-import com.google.android.material.textfield.TextInputLayout
 import com.kaspersky.kaspresso.screens.KScreen
 import com.kaspersky.kaspresso.testcases.core.testcontext.TestContext
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultGson
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.ReportFilter
+import com.ustadmobile.core.util.ext.toDisplayString
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.port.android.view.ReportEditFragment
 import com.ustadmobile.test.port.android.KNestedScrollView
@@ -34,6 +29,9 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
         get() = R.layout.fragment_report_edit
     override val viewClass: Class<*>?
         get() = ReportEditFragment::class.java
+
+
+    val nestedScroll = KSwipeView { withId(R.id.fragment_report_edit_edit_scroll) }
 
     val reportTitleInput = KTextInputLayout { withId(R.id.fragment_report_edit_title_layout) }
 
@@ -76,9 +74,9 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
     class Filter(parent: Matcher<View>) : KRecyclerItem<Filter>(parent) {
 
-        val filterName = KTextView(parent) { withId(R.id.item_clazz_simple_line1_text)}
+        val filterName = KTextView(parent) { withId(R.id.item_clazz_simple_line1_text) }
 
-        val filterDeleteButton = KImageView(parent) { withId(R.id.item_clazz_simple_secondary_menu_imageview)}
+        val filterDeleteButton = KImageView(parent) { withId(R.id.item_clazz_simple_secondary_menu_imageview) }
     }
 
 
@@ -87,12 +85,12 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
     }
 
     fun fillFields(fragmentScenario: FragmentScenario<ReportEditFragment>? = null,
-                   report: ReportWithSeriesWithFilters,
+                   updatedReport: ReportWithSeriesWithFilters,
                    reportOnForm: ReportWithSeriesWithFilters? = ReportWithSeriesWithFilters(),
                    setFieldsRequiringNavigation: Boolean = true,
                    impl: UstadMobileSystemImpl, context: Context, testContext: TestContext<Unit>) {
 
-        report.reportTitle?.takeIf { it != reportOnForm?.reportTitle }?.also {
+        updatedReport.reportTitle?.takeIf { it != reportOnForm?.reportTitle }?.also {
             reportTitleInput {
                 edit {
                     clearText()
@@ -103,17 +101,17 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
         closeSoftKeyboard()
 
-        report.xAxis.takeIf { it != reportOnForm?.xAxis }?.also {
+        updatedReport.xAxis.takeIf { it != reportOnForm?.xAxis }?.also {
             testContext.flakySafely {
                 setMessageIdOption(xAxisValue,
                         impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
             }
         }
 
-        report.fromDate.takeIf { it != reportOnForm?.fromDate }?.also {
+        updatedReport.fromDate.takeIf { it != reportOnForm?.fromDate }?.also {
             setDateField(R.id.activity_report_edit_fromDate_textinputlayout, it)
         }
-        report.toDate.takeIf { it != reportOnForm?.toDate }?.also {
+        updatedReport.toDate.takeIf { it != reportOnForm?.toDate }?.also {
             setDateField(R.id.activity_report_edit_toDate_textinputlayout, it)
         }
 
@@ -122,8 +120,10 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
             var seriesCount = 0
             children<Series> {
 
-                val series = report.reportSeriesWithFiltersList?.get(seriesCount)
-                val seriesOnForm = reportOnForm?.reportSeriesWithFiltersList?.get(seriesCount)
+                this@ReportEditScreen.nestedScroll.swipeUp()
+
+                val series = updatedReport.reportSeriesWithFiltersList?.getOrNull(seriesCount)
+                val seriesOnForm = reportOnForm?.reportSeriesWithFiltersList?.getOrNull(seriesCount)
                 seriesCount++
 
                 if (series == null) {
@@ -131,14 +131,20 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
                     return@seriesRecycler
                 }
 
+                this@seriesRecycler.scrollTo {
+                    withTag(seriesOnForm!!.reportSeriesUid)
+                }
+
                 series.reportSeriesName?.takeIf { it != seriesOnForm?.reportSeriesName }?.also {
                     seriesNameTextInput {
                         edit {
                             clearText()
                             typeText(it)
+                            hasText(it)
                         }
                     }
                 }
+                ViewActions.closeSoftKeyboard()
 
                 series.reportSeriesDataSet.takeIf { it != seriesOnForm?.reportSeriesDataSet }?.also {
 
@@ -158,6 +164,7 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
                     }
                 }
 
+
                 series.reportSeriesSubGroup.takeIf { it != seriesOnForm?.reportSeriesSubGroup }?.also {
 
                     testContext.flakySafely {
@@ -167,26 +174,29 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
                     }
                 }
 
-                filterRecycler {
+                if (series.reportSeriesFilters?.isNotEmpty() == true) {
+                    filterRecycler {
 
-                    var filterCount = 0
-                    children<Filter> {
+                        var filterCount = 0
+                        children<Filter> {
 
-                        val filters = series.reportSeriesFilters?.get(filterCount)
-                        val filtersOnForm = seriesOnForm?.reportSeriesFilters?.get(filterCount)
-                        filterCount++
+                            val filters = series.reportSeriesFilters?.getOrNull(filterCount)
+                            val filtersOnForm = seriesOnForm?.reportSeriesFilters?.getOrNull(filterCount)
+                            filterCount++
 
-                        if(filters == null){
-                            filterDeleteButton.click()
-                            return@filterRecycler
+                            if (filters == null) {
+                                filterDeleteButton.click()
+                                return@filterRecycler
+                            }
+
+                            filterName {
+                                hasText(filters.toDisplayString(context))
+                            }
+
                         }
 
                     }
-
-
                 }
-
-
 
             }
 
@@ -196,12 +206,7 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
             return
         }
 
-        /* fragmentScenario?.onFragment { fragment ->
-             fragment.takeIf { reportOnForm. != null }
-                     ?.findNavController()?.currentBackStackEntry?.savedStateHandle
-                     ?.set("ReportFilter", defaultGson().toJson(listOf(reportFilter)))
-         }
- */
+
     }
 
 
