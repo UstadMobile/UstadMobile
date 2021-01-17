@@ -99,8 +99,10 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                 .addParameter("_accessToken", String::class)
                 .addParameter(ParameterSpec.builder("_httpClient",
                         HttpClient::class.asClassName()).build())
-                .addParameter(ParameterSpec.builder("_attachmentsDir",
-                        String::class).build())
+                .addParameter(ParameterSpec.builder("attachmentsDir",
+                        String::class)
+                        .addModifiers(KModifier.OVERRIDE)
+                        .build())
                 .addParameter("_updateNotificationManager",
                         ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
                 .addParameter("_useClientSyncManager", Boolean::class)
@@ -133,8 +135,8 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                     .getter(FunSpec.getterBuilder().addCode("return _httpClient\n").build())
                     .addModifiers(KModifier.OVERRIDE)
                     .build())
-            .addProperty(PropertySpec.builder("_attachmentsDir", String::class)
-                    .initializer("_attachmentsDir")
+            .addProperty(PropertySpec.builder("attachmentsDir", String::class)
+                    .initializer("attachmentsDir")
                     .build())
             .addProperty(PropertySpec.builder("_updateNotificationManager",
                     ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
@@ -259,7 +261,7 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                             dbTypeElement.asClassNameWithSuffix("$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_REPOSITORY2"))
                         .delegate(CodeBlock.builder().beginControlFlow("lazy")
                                 .add("%T(_db, this, _syncDao, _httpClient, _clientIdFn, _endpoint," +
-                                        " ${DbProcessorRepository.DB_NAME_VAR}, _attachmentsDir," +
+                                        " ${DbProcessorRepository.DB_NAME_VAR}, attachmentsDir," +
                                         " _syncDao) ",
                                         dbTypeElement
                                                 .asClassNameWithSuffix("$SUFFIX_SYNCDAO_ABSTRACT$SUFFIX_REPOSITORY2"))
@@ -341,7 +343,7 @@ private fun TypeSpec.Builder.addRepoDbDaoAccessor(daoGetter: ExecutableElement,
                 daoTypeEl.asClassNameWithSuffix(SUFFIX_REPOSITORY2))
             .delegate(CodeBlock.builder().beginControlFlow("lazy")
                     .add("%T(_db, this, _db.%L, _httpClient, _clientIdFn, _endpoint, ${DbProcessorRepository.DB_NAME_VAR}, " +
-                            "_attachmentsDir $syncDaoParam) ",
+                            "attachmentsDir $syncDaoParam) ",
                             daoTypeEl.asClassNameWithSuffix(SUFFIX_REPOSITORY2),
                             daoGetter.makeAccessorCodeBlock())
                     .endControlFlow()

@@ -1,12 +1,12 @@
 package com.ustadmobile.door.ext
 
+import android.net.Uri
 import androidx.room.RoomDatabase
-import com.ustadmobile.door.DoorDatabase
-import com.ustadmobile.door.DoorDatabaseVersion
-import com.ustadmobile.door.DoorDbType
-import com.ustadmobile.door.asRepository
 import java.lang.RuntimeException
 import androidx.room.*
+import com.ustadmobile.door.*
+import com.ustadmobile.door.DoorDatabaseRepository.Companion.DOOR_ATTACHMENT_URI_PREFIX
+import java.io.File
 
 private val dbVersions = mutableMapOf<Class<*>, Int>()
 
@@ -33,3 +33,21 @@ actual suspend inline fun <T: DoorDatabase, R> T.doorWithTransaction(crossinline
         block(this)
     }
 }
+
+/**
+ * The DoorDatabase
+ */
+fun DoorDatabase.resolveAttachmentAndroidUri(attachmentUri: String): Uri {
+    val thisRepo = this as? DoorDatabaseRepository
+            ?: throw IllegalArgumentException("resolveAttachmentAndroidUri must be used on the repository, not the database!")
+
+    if(attachmentUri.startsWith(DOOR_ATTACHMENT_URI_PREFIX)) {
+        val attachmentFile = File(File(thisRepo.attachmentsDir),
+            attachmentUri.substringAfter(DOOR_ATTACHMENT_URI_PREFIX))
+
+        return Uri.fromFile(attachmentFile)
+    }else {
+        return Uri.parse(attachmentUri)
+    }
+}
+

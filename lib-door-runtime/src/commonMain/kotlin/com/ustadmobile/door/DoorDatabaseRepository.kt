@@ -17,6 +17,8 @@ interface DoorDatabaseRepository {
 
     val httpClient: HttpClient
 
+    val attachmentsDir: String?
+
     /**
      * This provides access to the underlying database for this repository. It must be wrapped with
      * The SyncableReadOnlyWrapper if this is a syncable database.
@@ -90,5 +92,7 @@ interface DoorDatabaseRepository {
         const val STATUS_CONNECTED = 1
 
         const val STATUS_DISCONNECTED = 2
+
+        val DOOR_ATTACHMENT_URI_PREFIX = "door:attachment/"
     }
 }
