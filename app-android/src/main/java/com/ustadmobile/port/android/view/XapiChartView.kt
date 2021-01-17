@@ -16,6 +16,9 @@ import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.port.android.util.graph.asValueFormatter
+import java.time.LocalDate
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 
 class XapiChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
@@ -69,9 +72,27 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         }
 
         val combinedData = CombinedData()
-        val distinctXAxisSet = chartData.seriesData.flatMap { it.dataList }
+        var distinctXAxisSet = chartData.seriesData.flatMap { it.dataList }
                 .mapNotNull { it.xAxis }.toSet()
-        // TODO consider sorting for calendar
+        val xAxisData = chartData.reportWithFilters.xAxis
+        if(xAxisData == Report.DAY || xAxisData == Report.WEEK){
+
+            val dateStrToLocalDate: (String) -> LocalDate = {
+                LocalDate.parse(it, DateTimeFormatter.ofPattern("dd MM yyyy"))
+            }
+            distinctXAxisSet = distinctXAxisSet.sortedBy {
+                dateStrToLocalDate(it)
+            }.toSet()
+        }
+        if(xAxisData == Report.MONTH){
+
+            val dateStrToYearMonth: (String) -> YearMonth = {
+                YearMonth.parse(it, DateTimeFormatter.ofPattern("MM yyyy"))
+            }
+            distinctXAxisSet = distinctXAxisSet.sortedBy {
+                dateStrToYearMonth(it)
+            }.toSet()
+        }
         combinedChart.xAxis.valueFormatter = IndexAxisValueFormatter(
                 chartData.xAxisValueFormatter?.formatAsList(distinctXAxisSet.toList())
                         ?: distinctXAxisSet)
