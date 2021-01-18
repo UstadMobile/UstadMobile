@@ -62,6 +62,8 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:imageForeignKey="@{person.personUid}"
+                android:src="@drawable/ic_account_circle_black_24dp"
+                app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
                 app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
                 app:imageForeignKeyAutoHide="@{true}"
                 />

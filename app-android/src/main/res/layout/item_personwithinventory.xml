@@ -4,6 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+
         <variable
             name="person"
             type="com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock" />
@@ -41,11 +43,14 @@
             android:id="@+id/view_producer_with_inventory_selection_picture"
             android:layout_width="48dp"
             android:layout_height="48dp"
+            app:imageForeignKey="@{person.personUid}"
+            app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
+            app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
             android:layout_marginStart="16dp"
             android:layout_marginTop="8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/view_producer_with_inventory_selection_name"
-            app:srcCompat="@drawable/ic_person_black_24dp" />
+            app:srcCompat="@drawable/ic_account_circle_black_24dp" />
 
         <SeekBar
             android:id="@+id/view_producer_with_inventory_selection_seekbar"

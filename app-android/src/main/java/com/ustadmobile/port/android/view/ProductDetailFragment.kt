@@ -29,6 +29,7 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
+import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -232,5 +233,14 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
         //TODO this
     }
 
+
+    companion object{
+        @JvmStatic
+        val FOREIGNKEYADAPTER_PRODUCT = object: ForeignKeyAttachmentUriAdapter {
+            override suspend fun getAttachmentUri(foreignKey: Long, dbToUse: UmAppDatabase): String? {
+                return dbToUse.productPictureDao.findByPersonUidAsync(foreignKey)?.productPictureUri
+            }
+        }
+    }
 
 }

@@ -8,6 +8,7 @@
         <import type="com.ustadmobile.port.android.view.ProductListFragment"/>
         <import type="com.ustadmobile.port.android.view.ProductListRecyclerAdapter"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
+        <import type="com.ustadmobile.port.android.view.ProductDetailFragment"/>
 
         <variable
             name="product"
@@ -135,13 +136,18 @@
             tools:text="15 in stock" />
 
 
+
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/imageView10"
             android:layout_width="@dimen/dimen_80dp"
             android:layout_height="@dimen/dimen_80dp"
             android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_marginVertical="@dimen/dimen_8dp"
-            android:contentDescription="@string/school"
+            android:contentDescription="@string/product"
+            app:imageForeignKeyPlaceholder="@{@drawable/ic_baseline_insert_photo_24}"
+            app:imageForeignKey="@{product.productUid}"
+            app:imageForeignKeyAdapter="@{ProductDetailFragment.FOREIGNKEYADAPTER_PRODUCT}"
+            app:imageForeignKeyAutoHide="@{false}"
             android:tint="?colorOnIconTint"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"

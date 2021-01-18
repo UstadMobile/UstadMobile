@@ -5,7 +5,7 @@
 
     <data>
         <import type="android.view.View"/>
-
+        <import type="com.ustadmobile.port.android.view.ProductDetailFragment"/>
         <variable
             name="product"
             type="com.ustadmobile.lib.db.entities.ProductWithInventoryCount" />
@@ -39,7 +39,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:scrollbars="horizontal"
-                android:visibility="visible"
+                android:visibility="gone"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 tools:listitem="@layout/item_product_image"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
@@ -50,6 +50,21 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/fragment_product_detail_picture_imageview"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/dimen_256dp"
+                android:scaleType="centerCrop"
+                android:src="@drawable/ic_baseline_insert_photo_24"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:imageForeignKeyPlaceholder="@{@drawable/ic_baseline_insert_photo_24}"
+                app:imageForeignKey="@{product.productUid}"
+                app:imageForeignKeyAdapter="@{ProductDetailFragment.FOREIGNKEYADAPTER_PRODUCT}"
+                app:imageForeignKeyAutoHide="@{false}"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_product_showcase_pictures_rv"
+
+                />
 
             <TextView
                 android:id="@+id/stock_text"
@@ -58,8 +73,8 @@
                 android:layout_marginHorizontal="@dimen/dimen_8dp"
                 android:text="@{@string/x_in_stock(product.stock)}"
                 tools:text="15 in stock"
-                app:layout_constraintEnd_toEndOf="@+id/fragment_product_showcase_pictures_rv"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_product_showcase_pictures_rv" />
+                app:layout_constraintEnd_toEndOf="@+id/fragment_product_detail_picture_imageview"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_product_detail_picture_imageview" />
 
 
             <View

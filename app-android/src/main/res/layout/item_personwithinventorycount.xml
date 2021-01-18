@@ -8,7 +8,7 @@
         <import type="com.ustadmobile.lib.db.entities.PersonWithInventoryCount" />
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt" />
         <import type="com.ustadmobile.port.android.view.PersonWithInventoryCountRecyclerAdapter"/>
-
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
         <variable
             name="person"
             type="PersonWithInventoryCount" />
@@ -66,10 +66,13 @@
             android:layout_height="40dp"
             android:layout_marginVertical="@dimen/dimen_8dp"
             android:layout_marginHorizontal="@dimen/dimen_8dp"
+            app:imageForeignKey="@{person.personUid}"
+            app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
+            app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_person_black_24dp" />
+            app:srcCompat="@drawable/ic_account_circle_black_24dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
