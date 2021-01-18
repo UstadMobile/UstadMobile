@@ -12,13 +12,16 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Category
 import com.ustadmobile.lib.db.entities.Product
+import com.ustadmobile.lib.db.entities.ProductPicture
 import com.ustadmobile.lib.db.entities.ProductCategoryJoin
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
-import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
+import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
+import kotlinx.serialization.builtins.list
+
 
 
 class ProductEditPresenter(context: Any,
@@ -55,6 +58,10 @@ class ProductEditPresenter(context: Any,
         val product = withTimeout(2000){
             db.productDao.findByUidAsync(entityUid)
         }?: Product()
+
+        view .productPicture = db.onDbThenRepoWithTimeout(2000) {dbToUse, _ ->
+            dbToUse.takeIf { entityUid != 0L }?.productPictureDao?.findByPersonUidAsync(entityUid)
+        } ?: ProductPicture()
 
 
         val categoryList = withTimeout(2000){
@@ -115,6 +122,17 @@ class ProductEditPresenter(context: Any,
 
             repo.productCategoryJoinDao.deactivateByCategoryAndProductUid(entity.productUid,
                     categoriesToDelete)
+
+            val productPicture = view.productPicture
+            if(productPicture != null) {
+                productPicture.productPictureProductUid = entity.productUid
+
+                if(productPicture.productPictureUid == 0L) {
+                    repo.productPictureDao.insertAsync(productPicture)
+                }else {
+                    repo.productPictureDao.updateAsync(productPicture)
+                }
+            }
 
             onFinish(ProductDetailView.VIEW_NAME, entity.productUid, entity)
         }

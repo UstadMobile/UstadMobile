@@ -160,6 +160,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
 
 
+    override var personPicture: PersonPicture?
+        get() = mBinding?.personPicture
+        set(value) {
+            mBinding?.personPicture = value
+        }
+
     /**
      * This may lead to I/O activity - do not call from the main thread!
      */

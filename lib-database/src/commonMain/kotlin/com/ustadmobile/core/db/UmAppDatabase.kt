@@ -50,11 +50,11 @@ import kotlin.jvm.Volatile
     //Goldozi:
     ,Product::class, ProductCategoryJoin::class, InventoryItem::class, InventoryTransaction::class,
     Category::class, Sale::class, SaleDelivery::class, SaleItem::class, SaleItemReminder::class,
-    SalePayment::class, Location::class
+    SalePayment::class, Location::class, ProductPicture::class
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 154)
+], version = 155)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -77,8 +77,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         Updated Clazz : added clazzFeatures and removed individual feature bits
      */
 
-
-    var attachmentsDir: String? = null
 
     override val master: Boolean
         get() = false
@@ -310,6 +308,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("categoryDao")
     abstract val categoryDao: CategoryDao
+
+    @JsName("productPictureDao")
+    abstract val productPictureDao: ProductPictureDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO
@@ -3492,6 +3493,31 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_154_155 = object: DoorMigration(154, 155) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE PersonPicture ADD COLUMN personPictureUri TEXT")
+                database.execSQL("ALTER TABLE PersonPicture ADD COLUMN personPictureMd5 TEXT")
+
+                database.execSQL("CREATE TABLE IF NOT EXISTS `ProductPicture` (`productPictureUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                        "`productPictureProductUid` INTEGER NOT NULL, `productPictureMasterCsn` INTEGER NOT NULL, `productPictureLocalCsn` INTEGER NOT NULL, " +
+                        "`productPictureLastChangedBy` INTEGER NOT NULL, `productPictureUri` TEXT, `productPictureMd5` TEXT, " +
+                        "`productPictureFileSize` INTEGER NOT NULL, `productPictureTimestamp` INTEGER NOT NULL, `productPictureMimeType` TEXT, " +
+                        "`productPictureActive` INTEGER NOT NULL)")
+
+                database.execSQL("CREATE TABLE IF NOT EXISTS ProductPicture_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                database.execSQL("""
+                      |CREATE 
+                      | INDEX index_ProductPicture_trk_clientId_epk_csn 
+                      |ON ProductPicture_trk (clientId, epk, csn)
+                      """.trimMargin())
+                database.execSQL("""
+                      |CREATE 
+                      |UNIQUE INDEX index_ProductPicture_trk_epk_clientId 
+                      |ON ProductPicture_trk (epk, clientId)
+                      """.trimMargin())
+            }
+        }
+
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
@@ -3499,7 +3525,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
-                    MIGRATION_51_52, MIGRATION_152_153, MIGRATION_153_154)
+                    MIGRATION_51_52, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155)
 
 
 

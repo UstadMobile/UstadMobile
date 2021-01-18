@@ -106,11 +106,7 @@ abstract class ViewActivityLauncherLifecycleObserver<V: View>(
             = ContextCompat.checkSelfPermission(view.context, permission) == PackageManager.PERMISSION_GRANTED
 
     fun takePicture() {
-        if(hasPermission(Manifest.permission.CAMERA)) {
-            takePictureInternal()
-        }else {
-            requestCameraPermission?.launch(Manifest.permission.CAMERA)
-        }
+        takePictureInternal()
     }
 
     protected fun takePictureInternal() {
@@ -141,11 +137,7 @@ abstract class ViewActivityLauncherLifecycleObserver<V: View>(
     }
 
     fun openPicture() {
-        if(hasPermission(Manifest.permission.READ_EXTERNAL_STORAGE)) {
-            openPictureInternal()
-        }else {
-            requestStoragePermission?.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
+        openPictureInternal()
     }
 
     abstract fun onPictureTakenOrSelected(pictureUri: Uri?)

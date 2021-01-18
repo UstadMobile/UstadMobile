@@ -1,10 +1,13 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toFile
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
@@ -23,10 +26,13 @@ import com.ustadmobile.core.view.ProductEditView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.Category
 import com.ustadmobile.lib.db.entities.Product
+import com.ustadmobile.lib.db.entities.ProductPicture
 import com.ustadmobile.lib.db.entities.Schedule
+import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
+import java.io.File
 
 
 interface ProductEditFragmentEventHandler {
@@ -104,13 +110,55 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
     override var entity: Product? = null
         get() = field
         set(value) {
-            mBinding?.product = value
             field = value
-            if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-                val productName = value?.getNameLocale(UMAndroidUtil.getCurrentLocale(requireContext()))
-                if(productName?.isNotEmpty() == true) {
-                    (activity as? AppCompatActivity)?.supportActionBar?.title = productName
+            mBinding?.product = value
+
+//            if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+//                val productName = value?.getNameLocale(UMAndroidUtil.getCurrentLocale(requireContext()))
+//                if(productName?.isNotEmpty() == true) {
+//                    (activity as? AppCompatActivity)?.supportActionBar?.title = productName
+//                }
+//            }
+        }
+    override var productPicture: ProductPicture?
+        get() = mBinding?.productPicture
+        set(value) {
+            mBinding?.productPicture = value
+        }
+
+    override var productPicturePath: String?
+        get() {
+            val boundPicUri = mBinding?.productPictureUri
+            if(boundPicUri == null) {
+                return null
+            }else{
+                val uriObj = Uri.parse(boundPicUri)
+                if(uriObj.scheme == "file") {
+                    return uriObj.toFile().absolutePath
+                }else {
+                    val tmpFile = findNavController().createTempFileForDestination(requireContext(),
+                            "personPicture-${System.currentTimeMillis()}")
+                    try {
+                        val input = (context as Context).contentResolver.openInputStream(uriObj) ?: return null
+                        val output = tmpFile.outputStream()
+                        input.copyTo(tmpFile.outputStream())
+                        output.flush()
+                        output.close()
+                        input.close()
+                        return tmpFile.absolutePath
+                    }catch(e: Exception) {
+                        e.printStackTrace()
+                    }
+                    return null
                 }
+            }
+        }
+
+        set(value) {
+            if(value != null) {
+                mBinding?.productPictureUri = Uri.fromFile(File(value)).toString()
+            }else {
+                mBinding?.productPictureUri = null
             }
         }
     override var categories: DoorMutableLiveData<List<Category>>? = null

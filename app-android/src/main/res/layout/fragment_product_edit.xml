@@ -12,12 +12,16 @@
             type="com.ustadmobile.lib.db.entities.Product" />
 
         <variable
-            name="loading"
-            type="boolean" />
+            name="productPicture"
+            type="com.ustadmobile.lib.db.entities.ProductPicture"/>
 
         <variable
-            name="personPictureUri"
+            name="productPictureUri"
             type="String" />
+
+        <variable
+            name="loading"
+            type="boolean" />
 
 
         <variable
@@ -50,7 +54,7 @@
                 android:layout_height="@dimen/dimen_48dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 app:civ_circle_background_color="?colorSecondary"
-                app:imageUri="@={personPictureUri}"
+                app:imageUri="@={productPicture.productPictureUri}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
