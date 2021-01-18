@@ -123,10 +123,6 @@ class PersonEditPresenter(context: Any,
             dbToUse.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
         } ?: PersonPicture()
 
-//        if (personPicture != null) {
-//            view.personPicturePath = repo.personPictureDao.getAttachmentPath(personPicture)
-//        }
-
         val clazzMemberWithClazzList = withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.clazzMemberDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid, getSystemTimeInMillis())
         } ?: listOf()
