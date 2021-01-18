@@ -137,7 +137,7 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
                     return uriObj.toFile().absolutePath
                 }else {
                     val tmpFile = findNavController().createTempFileForDestination(requireContext(),
-                            "personPicture-${System.currentTimeMillis()}")
+                            "productPicture-${System.currentTimeMillis()}")
                     try {
                         val input = (context as Context).contentResolver.openInputStream(uriObj) ?: return null
                         val output = tmpFile.outputStream()
