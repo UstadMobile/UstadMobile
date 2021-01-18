@@ -7,6 +7,8 @@
         <import type="com.ustadmobile.lib.db.entities.PersonWithDisplayDetails"/>
         <import type="com.ustadmobile.port.android.view.PersonListFragment"/>
         <import type="com.ustadmobile.port.android.view.PersonListFragment.PersonListRecyclerAdapter"/>
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+
         <variable
             name="person"
             type="PersonWithDisplayDetails" />
@@ -28,10 +30,12 @@
         android:background="@drawable/bg_listitem"
         >
 
-        <!-- TODO: Change or remove this icon -->
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_person_newitemicon"
-            app:personPicturePersonUid="@{person.personUid}"
+            app:imageForeignKey="@{person.personUid}"
+            app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
+            app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
+            tools:src="@drawable/ic_account_circle_black_24dp"
             android:layout_width="@dimen/dimen_40dp"
             android:layout_height="@dimen/dimen_40dp"
             android:layout_marginTop="@dimen/dimen_16dp"

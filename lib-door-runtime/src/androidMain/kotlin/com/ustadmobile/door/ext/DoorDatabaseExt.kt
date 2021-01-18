@@ -41,8 +41,11 @@ fun DoorDatabase.resolveAttachmentAndroidUri(attachmentUri: String): Uri {
     val thisRepo = this as? DoorDatabaseRepository
             ?: throw IllegalArgumentException("resolveAttachmentAndroidUri must be used on the repository, not the database!")
 
+    val attachmentsDir = thisRepo.attachmentsDir
+            ?: throw IllegalArgumentException("Repo has a null attachments directory! Cannot resolve Uris.")
+
     if(attachmentUri.startsWith(DOOR_ATTACHMENT_URI_PREFIX)) {
-        val attachmentFile = File(File(thisRepo.attachmentsDir),
+        val attachmentFile = File(File(attachmentsDir),
             attachmentUri.substringAfter(DOOR_ATTACHMENT_URI_PREFIX))
 
         return Uri.fromFile(attachmentFile)
