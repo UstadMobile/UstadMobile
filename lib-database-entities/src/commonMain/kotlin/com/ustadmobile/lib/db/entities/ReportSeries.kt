@@ -9,7 +9,7 @@ class ReportSeries{
 
     var reportSeriesName: String? = null
 
-    var reportSeriesDataSet: Int = 0
+    var reportSeriesYAxis: Int = 0
 
     var reportSeriesVisualType: Int = 0
 
@@ -30,13 +30,25 @@ class ReportSeries{
 
         const val NUMBER_SESSIONS = 202
 
-        const val ACTIVITIES_RECORDED = 203
+        const val INTERACTIONS_RECORDED = 203
 
-        const val AVERAGE_SESSION_PER_CONTENT = 204
+        const val NUMBER_ACTIVE_USERS = 204
 
-        const val PERCENT_STUDENTS_COMPLETED = 205
+        const val AVERAGE_USAGE_TIME_PER_USER = 205
 
-        const val NUMBER_STUDENTS_COMPLETED = 206
+        const val TOTAL_ATTENDANCE = 206
+
+        const val TOTAL_LATES = 207
+
+        const val TOTAL_ABSENCES = 208
+
+        const val PERCENTAGE_STUDENTS_ATTENDED = 209
+
+        const val PERCENTAGE_STUDENTS_ATTENDED_OR_LATE = 210
+
+        const val TOTAL_CLASSES = 211
+
+        const val NUMBER_UNIQUE_STUDENTS_ATTENDING = 212
 
         const val NONE = 0
 

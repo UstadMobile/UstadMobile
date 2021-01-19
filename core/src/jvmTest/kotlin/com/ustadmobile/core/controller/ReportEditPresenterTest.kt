@@ -110,7 +110,7 @@ class ReportEditPresenterTest {
         val repo: UmAppDatabase by di.activeRepoInstance()
 
         val reportSeriesList = listOf(ReportSeries().apply {
-            reportSeriesDataSet = ReportSeries.TOTAL_DURATION
+            reportSeriesYAxis = ReportSeries.TOTAL_DURATION
             reportSeriesVisualType = ReportSeries.LINE_GRAPH
             reportSeriesSubGroup = Report.CLASS
             reportSeriesUid = 4

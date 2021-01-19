@@ -16,6 +16,7 @@ import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.list
 import org.kodein.di.DI
+import kotlin.math.max
 
 
 class ReportEditPresenter(context: Any,
@@ -25,6 +26,8 @@ class ReportEditPresenter(context: Any,
     : UstadEditPresenter<ReportEditView, ReportWithSeriesWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
     val seriesCounter = atomic(0)
+
+    val filterCounter = atomic(0)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -57,6 +60,23 @@ class ReportEditPresenter(context: Any,
     class XAxisMessageIdOption(day: XAxisOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
+    enum class DateRangeOptions(val optionVal: Int, val messageId: Int) {
+        LAST_WEEK(Report.LAST_WEEK_DATE,
+                MessageID.last_week_date_range),
+        LAST_TWO_WEEKS(Report.LAST_TWO_WEEKS_DATE,
+                MessageID.last_two_week_date_range),
+        LAST_MONTH(Report.LAST_MONTH_DATE,
+                MessageID.last_month_date_range),
+        LAST_THREE_MONTHS(Report.LAST_THREE_MONTHS_DATE,
+                MessageID.last_three_months_date_range),
+        CUSTOM_RANGE(Report.NEW_CUSTOM_RANGE_DATE,
+                MessageID.new_custom_date_range),
+    }
+
+    class DateRangeMessageIdOption(day: DateRangeOptions, context: Any)
+        : MessageIdOption(day.messageId, context, day.optionVal)
+
+
     enum class SubGroupOptions(val optionVal: Int, val messageId: Int) {
         NONE(ReportSeries.NONE,
                 MessageID.None),
@@ -77,24 +97,36 @@ class ReportEditPresenter(context: Any,
     class SubGroupByMessageIdOption(day: SubGroupOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
-    enum class DataSetOptions(val optionVal: Int, val messageId: Int) {
+    enum class YAxisOptions(val optionVal: Int, val messageId: Int) {
         TOTAL_DURATION(ReportSeries.TOTAL_DURATION,
                 MessageID.total_duration),
         AVERAGE_DURATION(ReportSeries.AVERAGE_DURATION,
                 MessageID.average_duration),
         NUMBER_SESSIONS(ReportSeries.NUMBER_SESSIONS,
                 MessageID.count_session),
-        ACTIVITIES_RECORDED(ReportSeries.ACTIVITIES_RECORDED,
-                MessageID.activity_recorded),
-        AVERAGE_SESSION_PER_CONTENT(ReportSeries.AVERAGE_SESSION_PER_CONTENT,
-                MessageID.average_session_per_content),
-        PERCENT_STUDENTS_COMPLETED(ReportSeries.PERCENT_STUDENTS_COMPLETED,
-                MessageID.percent_students_completed),
-        NUMBER_STUDENTS_COMPLETED(ReportSeries.NUMBER_STUDENTS_COMPLETED,
-                MessageID.count_students_completed)
+        INTERACTIONS_RECORDED(ReportSeries.INTERACTIONS_RECORDED,
+                MessageID.interaction_recorded),
+        NUMBER_ACTIVE_USERS(ReportSeries.NUMBER_ACTIVE_USERS,
+                MessageID.number_active_users),
+        AVERAGE_USAGE_TIME_PER_USER(ReportSeries.AVERAGE_USAGE_TIME_PER_USER,
+                MessageID.average_usage_time_per_user),
+        TOTAL_ATTENDANCE(ReportSeries.TOTAL_ATTENDANCE,
+                MessageID.total_attendances),
+        TOTAL_ABSENCES(ReportSeries.TOTAL_ABSENCES,
+                MessageID.total_absences),
+        TOTAL_LATES(ReportSeries.TOTAL_LATES,
+                MessageID.total_lates),
+        PERCENT_STUDENTS_ATTENDED(ReportSeries.PERCENTAGE_STUDENTS_ATTENDED,
+                MessageID.percent_students_attended),
+        PERCENT_STUDENTS_ATTENDED_OR_LATE(ReportSeries.PERCENTAGE_STUDENTS_ATTENDED_OR_LATE,
+                MessageID.percent_students_attended_or_late),
+        TOTAL_CLASSES(ReportSeries.TOTAL_CLASSES,
+                MessageID.total_number_of_classes),
+        UNIQUE_STUDENTS_ATTENDING(ReportSeries.NUMBER_UNIQUE_STUDENTS_ATTENDING,
+                MessageID.number_unique_students_attending)
     }
 
-    class DataSetMessageIdOption(data: DataSetOptions, context: Any)
+    class YAxisMessageIdOption(data: YAxisOptions, context: Any)
         : MessageIdOption(data.messageId, context, data.optionVal)
 
 
@@ -104,7 +136,8 @@ class ReportEditPresenter(context: Any,
         view.visualTypeOptions = VisualTypeOptions.values().map { VisualTypeMessageIdOption(it, context) }
         view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context) }
         view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
-        view.dataSetOptions = DataSetOptions.values().map { DataSetMessageIdOption(it, context) }
+        view.yAxisOptions = YAxisOptions.values().map { YAxisMessageIdOption(it, context) }
+        view.dateRangeOptions = DateRangeOptions.values().map { DateRangeMessageIdOption(it, context) }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ReportWithSeriesWithFilters? {
@@ -121,8 +154,14 @@ class ReportEditPresenter(context: Any,
         if(!reportSeries.isNullOrBlank()) {
             reportSeriesList = safeParseList(di, ReportSeries.serializer().list, ReportSeries::class, reportSeries)
             // set the series counter with an existing series
-            val max = reportSeriesList.maxBy { it.reportSeriesUid }
-            seriesCounter.value = (max?.reportSeriesUid?: 0 + 1).toInt()
+            val maxSeries = reportSeriesList.maxBy { it.reportSeriesUid }
+            var currentMaxFilter = 0L
+            reportSeriesList.forEach {
+                val maxFilter = it.reportSeriesFilters?.maxBy { it.reportFilterUid }?.reportFilterUid ?: 0
+                currentMaxFilter = max(currentMaxFilter, maxFilter)
+            }
+            seriesCounter.value = (maxSeries?.reportSeriesUid?: 0 + 1).toInt()
+            filterCounter.value = currentMaxFilter.toInt() + 1
         }else{
             reportSeriesList = listOf(ReportSeries().apply {
                 val id = seriesCounter.getAndIncrement()
@@ -155,6 +194,12 @@ class ReportEditPresenter(context: Any,
             // set the series counter with an existing series
             val max = reportSeriesList.maxBy { it.reportSeriesUid }
             seriesCounter.value = ((max?.reportSeriesUid?: 0) + 1).toInt()
+            var currentMaxFilter = 0L
+            reportSeriesList.forEach {
+                val maxFilter = it.reportSeriesFilters?.maxBy { it.reportFilterUid }?.reportFilterUid ?: 0
+                currentMaxFilter = max(currentMaxFilter, maxFilter)
+            }
+            filterCounter.value = currentMaxFilter.toInt() + 1
             editEntity.reportSeriesWithFiltersList = reportSeriesList
 
         }else if(editEntity.reportSeriesWithFiltersList?.isEmpty() == true){
@@ -176,6 +221,10 @@ class ReportEditPresenter(context: Any,
         val entityVal = entity ?: return
         entityVal.reportSeries = safeStringify(di, ReportSeries.serializer().list, entityVal.reportSeriesWithFiltersList ?: listOf())
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
+    }
+
+    fun handleAddCustomRange(dateRangeMoment: DateRangeMoment) {
+        TODO("Not yet implemented")
     }
 
     fun handleRemoveSeries(series: ReportSeries){
@@ -205,19 +254,24 @@ class ReportEditPresenter(context: Any,
         val seriesToAddFilter = newSeriesList.find { it.reportSeriesUid == newFilter.reportFilterSeriesUid } ?: return
 
         newSeriesList.remove(seriesToAddFilter)
-        val newFilterList = seriesToAddFilter.reportSeriesFilters?.toMutableList()
+        val newFilterList = seriesToAddFilter.reportSeriesFilters?.toMutableList() ?: mutableListOf()
 
-        // make sure reportfilterUid is not repeated in the same series list
-        newFilter.reportFilterUid = seriesToAddFilter.reportSeriesFilters?.maxBy { it.reportFilterUid }?.reportFilterUid?: 0 + 1
-        newFilterList?.add(newFilter)
+        // new filter
+        if(newFilter.reportFilterUid == 0L){
+            newFilter.reportFilterUid = filterCounter.incrementAndGet().toLong()
+            newFilterList.add(newFilter)
+        }else{
+            val indexOfFilter = newFilterList.indexOfFirst { it.reportFilterUid == newFilter.reportFilterUid }
+            newFilterList[indexOfFilter] = newFilter
+        }
 
         newSeriesList.add(ReportSeries().apply {
             reportSeriesUid = seriesToAddFilter.reportSeriesUid
             reportSeriesVisualType = seriesToAddFilter.reportSeriesVisualType
-            reportSeriesDataSet = seriesToAddFilter.reportSeriesDataSet
+            reportSeriesYAxis = seriesToAddFilter.reportSeriesYAxis
             reportSeriesSubGroup = seriesToAddFilter.reportSeriesSubGroup
             reportSeriesName = seriesToAddFilter.reportSeriesName
-            reportSeriesFilters = newFilterList?.toList()
+            reportSeriesFilters = newFilterList.toList()
         })
 
         entityVal?.reportSeriesWithFiltersList = newSeriesList.toList()
@@ -236,7 +290,7 @@ class ReportEditPresenter(context: Any,
         newSeriesList.add(ReportSeries().apply {
             reportSeriesUid = seriesToRemoveFilter.reportSeriesUid
             reportSeriesVisualType = seriesToRemoveFilter.reportSeriesVisualType
-            reportSeriesDataSet = seriesToRemoveFilter.reportSeriesDataSet
+            reportSeriesYAxis = seriesToRemoveFilter.reportSeriesYAxis
             reportSeriesSubGroup = seriesToRemoveFilter.reportSeriesSubGroup
             reportSeriesName = seriesToRemoveFilter.reportSeriesName
             reportSeriesFilters = newFilterList?.toList()

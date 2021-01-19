@@ -2,32 +2,62 @@ package com.ustadmobile.core.util.ext
 
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.years
+import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ReportSeries.Companion.ACTIVITIES_RECORDED
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ABSENT
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
+import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_PARTIAL
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.INTERACTIONS_RECORDED
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_DURATION
-import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_SESSION_PER_CONTENT
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_SESSIONS
-import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_STUDENTS_COMPLETED
-import com.ustadmobile.lib.db.entities.ReportSeries.Companion.PERCENT_STUDENTS_COMPLETED
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_USAGE_TIME_PER_USER
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_ACTIVE_USERS
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_UNIQUE_STUDENTS_ATTENDING
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.PERCENTAGE_STUDENTS_ATTENDED
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.PERCENTAGE_STUDENTS_ATTENDED_OR_LATE
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_ABSENCES
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_ATTENDANCE
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_CLASSES
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_DURATION
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_LATES
 
 data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParams: Array<Any>)
 
-fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
+fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): QueryParts {
 
     val paramList = mutableListOf<Any>()
 
-    var sql = "SELECT " + when (reportSeriesDataSet) {
+    var sql = "SELECT " + when (reportSeriesYAxis) {
         TOTAL_DURATION -> "SUM(StatementEntity.resultDuration) AS yAxis, "
-        AVERAGE_DURATION -> "AVG(StatementEntity.resultDuration) AS yAxis, "
+        AVERAGE_DURATION -> """SUM(StatementEntity.resultDuration) / COUNT(DISTINCT 
+            StatementEntity.contextRegistration) AS yAxis, """.trimMargin()
         NUMBER_SESSIONS -> "COUNT(DISTINCT StatementEntity.contextRegistration) As yAxis, "
-        ACTIVITIES_RECORDED -> "COUNT(StatementEntity.statementId) AS yAxis, "
-        AVERAGE_SESSION_PER_CONTENT -> "COUNT(DISTINCT StatementEntity.contextRegistration) As yAxis, "
-        PERCENT_STUDENTS_COMPLETED -> """((CAST(COUNT(DISTINCT CASE WHEN 
-            StatementEntity.resultCompletion THEN StatementEntity.statementPersonUid ELSE NULL END) 
-            AS REAL) / COUNT(StatementEntity.resultCompletion)) * 100) as yAxis, """.trimMargin()
-        NUMBER_STUDENTS_COMPLETED -> """COUNT(DISTINCT CASE WHEN StatementEntity.resultCompletion 
-                THEN StatementEntity.statementPersonUid ELSE NULL END) AS yAxis, """.trimMargin()
+        INTERACTIONS_RECORDED -> "COUNT(StatementEntity.statementId) AS yAxis, "
+        NUMBER_ACTIVE_USERS -> """COUNT(DISTINCT StatementEntity.statementPersonUid) As yAxis, """
+        AVERAGE_USAGE_TIME_PER_USER -> """SUM(StatementEntity.resultDuration) / COUNT(DISTINCT 
+            StatementEntity.statementPersonUid) As yAxis, """.trimMargin()
+        TOTAL_ATTENDANCE -> """COUNT(DISTINCT CASE WHEN 
+            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
+            THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) As yAxis, """
+        TOTAL_ABSENCES -> """COUNT(DISTINCT CASE WHEN 
+            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ABSENT 
+            THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) As yAxis, """
+        TOTAL_LATES -> """COUNT(DISTINCT CASE WHEN 
+            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_PARTIAL 
+            THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) As yAxis, """
+        PERCENTAGE_STUDENTS_ATTENDED -> """((CAST(COUNT(DISTINCT CASE WHEN 
+            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
+            THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) 
+            AS REAL) / COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) as yAxis, """.trimMargin()
+        PERCENTAGE_STUDENTS_ATTENDED_OR_LATE -> """((CAST(COUNT(DISTINCT CASE WHEN 
+            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
+            OR ClazzLogAttendanceRecord.attendanceStatus = $STATUS_PARTIAL 
+            THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) 
+            AS REAL) / COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) as yAxis, """.trimMargin()
+        TOTAL_CLASSES -> """COUNT(DISTINCT ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid) As yAxis, """
+        NUMBER_UNIQUE_STUDENTS_ATTENDING -> """COUNT(DISTINCT CASE WHEN 
+            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN
+            StatementEntity.statementPersonUid ELSE NULL END) As yAxis, """.trimMargin()
         else -> ""
     }
 
@@ -45,9 +75,9 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
                 WHERE statementVerbUid = StatementEntity.statementVerbUid LIMIT 1) """
 
 
-    sql += groupBy(report.xAxis) + "AS xAxis "
+    sql += groupBy(report.xAxis, dbType) + "AS xAxis "
     if (reportSeriesSubGroup != 0) {
-        sql += " , " + groupBy(reportSeriesSubGroup) + "AS subgroup "
+        sql += " , " + groupBy(reportSeriesSubGroup, dbType) + "AS subgroup "
     }
 
     sql += personPermission
@@ -55,6 +85,14 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
     if(report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS){
         sql += "LEFT JOIN ClazzMember ON StatementEntity.statementPersonUid = ClazzMember.clazzMemberPersonUid "
         sql += "LEFT JOIN Clazz ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid "
+    }
+
+    when(reportSeriesYAxis){
+        TOTAL_ATTENDANCE, TOTAL_ABSENCES, TOTAL_LATES, TOTAL_CLASSES,
+        PERCENTAGE_STUDENTS_ATTENDED, PERCENTAGE_STUDENTS_ATTENDED_OR_LATE,
+        NUMBER_UNIQUE_STUDENTS_ATTENDING -> {
+            sql += "LEFT JOIN ClazzLogAttendanceRecord ON StatementEntity.statementPersonUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid "
+        }
     }
 
     val where = " WHERE PersonGroupMember.groupMemberPersonUid = ? "
@@ -71,59 +109,26 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
 
                 ReportFilter.FIELD_PERSON_AGE -> {
 
+                    var filterString = "Person.dateOfBirth "
                     val age = filter.reportFilterValue?.toInt() ?: 1
                     val now = DateTime.now()
                     val dateTimeAge = now - age.years
                     when(filter.reportFilterCondition){
-
-                        ReportFilter.CONDITION_GREATER_THAN ->{
-                            whereList.add("Person.dateOfBirth >= ${dateTimeAge.dateDayStart.unixMillisLong} ")
-                        }
-                        ReportFilter.CONDITION_LESS_THAN ->{
-                            whereList.add("Person.dateOfBirth <= ${dateTimeAge.dateDayStart.unixMillisLong} ")
-                        }
-
+                        ReportFilter.CONDITION_GREATER_THAN -> filterString += ">= "
+                        ReportFilter.CONDITION_LESS_THAN -> filterString += "<= "
                     }
+                    filterString += "${dateTimeAge.dateDayStart.unixMillisLong} "
+                    whereList.add(filterString)
                 }
                 ReportFilter.FIELD_PERSON_GENDER ->{
 
+                    var filterString = "Person.gender "
                     when(filter.reportFilterCondition){
-
-                        ReportFilter.CONDITION_IS -> {
-
-                            when(filter.reportFilterDropDownValue){
-                                Person.GENDER_UNSET -> {
-                                    whereList.add("Person.gender = ${Person.GENDER_UNSET} ")
-                                }
-                                Person.GENDER_MALE -> {
-                                    whereList.add("Person.gender = ${Person.GENDER_MALE} ")
-                                }
-                                Person.GENDER_FEMALE -> {
-                                    whereList.add("Person.gender = ${Person.GENDER_FEMALE} ")
-                                }
-                                Person.GENDER_OTHER ->{
-                                    whereList.add("Person.gender = ${Person.GENDER_OTHER} ")
-                                }
-                            }
-                        }
-                        ReportFilter.CONDITION_IS_NOT ->{
-                            when(filter.reportFilterDropDownValue){
-                                Person.GENDER_UNSET -> {
-                                    whereList.add("Person.gender != ${Person.GENDER_UNSET} ")
-                                }
-                                Person.GENDER_MALE -> {
-                                    whereList.add("Person.gender != ${Person.GENDER_MALE} ")
-                                }
-                                Person.GENDER_FEMALE -> {
-                                    whereList.add("Person.gender != ${Person.GENDER_FEMALE} ")
-                                }
-                                Person.GENDER_OTHER ->{
-                                    whereList.add("Person.gender != ${Person.GENDER_OTHER} ")
-                                }
-                            }
-                        }
-
+                        ReportFilter.CONDITION_IS -> filterString += "= "
+                        ReportFilter.CONDITION_IS_NOT -> filterString += "!= "
                     }
+                    filterString += "${filter.reportFilterDropDownValue} "
+                    whereList += (filterString)
                 }
             }
         }
@@ -150,11 +155,47 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long): QueryParts {
     return QueryParts(sql, sqlList, paramList.toTypedArray())
 }
 
-private fun groupBy(value: Int): String {
+private fun groupBy(value: Int, dbType: Int): String {
     return when (value) {
-        Report.DAY -> "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
-        Report.WEEK -> "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') "
-        Report.MONTH -> "strftime('%m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
+        Report.DAY -> {
+            when (dbType) {
+                DoorDbType.SQLITE -> {
+                    "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
+                }
+                DoorDbType.POSTGRES -> {
+                    "TO_CHAR(TO_TIMESTAMP(StatementEntity.timestamp/1000), 'DD MM YYYY') "
+                }
+                else -> {
+                    ""
+                }
+            }
+        }
+        Report.WEEK -> {
+            when (dbType) {
+                DoorDbType.SQLITE -> {
+                    "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-6 day') "
+                }
+                DoorDbType.POSTGRES -> {
+                    "TO_CHAR(TO_TIMESTAMP(StatementEntity.timestamp/1000), 'DD MM YYYY') "
+                }
+                else -> {
+                    ""
+                }
+            }
+        }
+        Report.MONTH -> {
+            when (dbType) {
+                DoorDbType.SQLITE -> {
+                    "strftime('%m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
+                }
+                DoorDbType.POSTGRES -> {
+                    "TO_CHAR(TO_TIMESTAMP(StatementEntity.timestamp/1000), 'MM YYYY') "
+                }
+                else -> {
+                    ""
+                }
+            }
+        }
         Report.CONTENT_ENTRY -> "StatementEntity.statementContentEntryUid "
         Report.GENDER -> "Person.gender "
         Report.CLASS -> "Clazz.clazzUid "

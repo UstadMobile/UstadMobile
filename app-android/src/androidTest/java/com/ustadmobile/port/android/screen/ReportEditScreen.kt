@@ -56,9 +56,9 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
         val deleteButton = KImageView(parent) { withId(R.id.item_report_series_delete_button) }
 
-        val dataSetTextInput = KTextInputLayout(parent) { withId(R.id.item_edit_report_dialog_data_set_textinputlayout) }
+        val dataSetTextInput = KTextInputLayout(parent) { withId(R.id.item_edit_report_dialog_yaxis_textinputlayout) }
 
-        val dataSetTextView = KTextView(parent) { withId(R.id.item_edit_report_dialog_data_set_text) }
+        val dataSetTextView = KTextView(parent) { withId(R.id.item_edit_report_dialog_yaxis_text) }
 
         val visualTypeTextInput = KTextInputLayout(parent) { withId(R.id.item_edit_report_dialog_visual_type_textinputlayout) }
 
@@ -146,11 +146,11 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
                 }
                 ViewActions.closeSoftKeyboard()
 
-                series.reportSeriesDataSet.takeIf { it != seriesOnForm?.reportSeriesDataSet }?.also {
+                series.reportSeriesYAxis.takeIf { it != seriesOnForm?.reportSeriesYAxis }?.also {
 
                     testContext.flakySafely {
                         setMessageIdOption(this@children.dataSetTextView,
-                                impl.getString(ReportEditPresenter.DataSetOptions.values()
+                                impl.getString(ReportEditPresenter.YAxisOptions.values()
                                         .find { report -> report.optionVal == it }!!.messageId, context))
                     }
                 }

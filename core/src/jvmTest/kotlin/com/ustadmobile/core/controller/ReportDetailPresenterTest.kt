@@ -19,7 +19,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.lib.db.entities.ReportFilter
 import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.util.test.ext.insertTestStatements
@@ -98,7 +97,7 @@ class ReportDetailPresenterTest {
         val db: UmAppDatabase by di.activeDbInstance()
 
         val reportSeriesList = listOf(ReportSeries().apply {
-                reportSeriesDataSet = ReportSeries.TOTAL_DURATION
+                reportSeriesYAxis = ReportSeries.TOTAL_DURATION
                 reportSeriesVisualType = ReportSeries.LINE_GRAPH
                 reportSeriesSubGroup = Report.CLASS
                 reportSeriesUid = 4

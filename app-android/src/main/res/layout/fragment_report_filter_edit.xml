@@ -57,6 +57,14 @@
             name="valuesErrorText"
             type="String" />
 
+        <variable
+            name="createNewFilter"
+            type="String" />
+
+        <variable
+            name="activityEventHandler"
+            type="com.ustadmobile.port.android.view.ReportFilterEditFragmentEventHandler" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -159,6 +167,24 @@
                 android:hint="@string/report_filter_edit_values"/>
         </com.google.android.material.textfield.TextInputLayout>
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/item_filter_rv"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:itemCount="2"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_report_filter_edit_dialog_condition_textinputlayout"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <include
+            android:id="@+id/item_filter_create_new"
+            layout="@layout/item_createnew"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:onClickNew="@{() -> activityEventHandler.onClickNewItemFilter()}"
+            app:createNewText="@{createNewFilter}"
+            app:layout_constraintTop_toBottomOf="@+id/item_filter_rv"
+            app:layout_constraintStart_toStartOf="parent"
+            />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.core.app.ApplicationProvider
-import com.example.libtestutil.MyClass
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -70,7 +69,7 @@ class ReportEditFragmentTest: TestCase() {
             reportSeriesWithFiltersList = listOf(ReportSeries().apply {
                 reportSeriesName = "Total Duration"
                 reportSeriesVisualType = ReportSeries.BAR_CHART
-                reportSeriesDataSet = ReportSeries.TOTAL_DURATION
+                reportSeriesYAxis = ReportSeries.TOTAL_DURATION
             })
         }
 
@@ -112,7 +111,7 @@ class ReportEditFragmentTest: TestCase() {
             val reportSeriesList = listOf(ReportSeries().apply {
                 reportSeriesUid = 1
                 reportSeriesName = "Series 2"
-                reportSeriesDataSet = ReportSeries.TOTAL_DURATION
+                reportSeriesYAxis = ReportSeries.TOTAL_DURATION
                 reportSeriesSubGroup = Report.GENDER
                 reportSeriesVisualType = ReportSeries.LINE_GRAPH
                 reportSeriesFilters = mutableListOf(ReportFilter().apply {
@@ -153,7 +152,7 @@ class ReportEditFragmentTest: TestCase() {
             val reportSeriesList = listOf(ReportSeries().apply {
                 reportSeriesUid = 1
                 reportSeriesName = "Series 2"
-                reportSeriesDataSet = ReportSeries.TOTAL_DURATION
+                reportSeriesYAxis = ReportSeries.TOTAL_DURATION
                 reportSeriesSubGroup = Report.GENDER
                 reportSeriesVisualType = ReportSeries.BAR_CHART
                 reportSeriesFilters = mutableListOf(ReportFilter().apply {

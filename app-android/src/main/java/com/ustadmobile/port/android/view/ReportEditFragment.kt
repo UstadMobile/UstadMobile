@@ -11,7 +11,6 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.github.aakira.napier.Napier
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentReportEditBinding
 import com.toughra.ustadmobile.databinding.ItemReportEditFilterBinding
@@ -30,6 +29,7 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 interface ReportEditFragmentEventHandler {
     fun onClickNewFilter(series: ReportSeries)
     fun onClickRemoveFilter(filter: ReportFilter)
+    fun onClickEditFilter(filter: ReportFilter)
     fun onClickNewSeries()
     fun onClickRemoveSeries(reportSeries: ReportSeries)
 }
@@ -70,7 +70,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
         : ListAdapter<ReportSeries, SeriesViewHolder>(DIFF_CALLBACK_SERIES) {
 
         var visualOptions: List<ReportEditPresenter.VisualTypeMessageIdOption>? = null
-        var dataSetOptions: List<ReportEditPresenter.DataSetMessageIdOption>? = null
+        var yAxisOptions: List<ReportEditPresenter.YAxisMessageIdOption>? = null
         var subGroupOptions: List<ReportEditPresenter.SubGroupByMessageIdOption>? = null
         var showDeleteButton: Boolean = false
         val boundSeriesViewHolder = mutableListOf<SeriesViewHolder>()
@@ -87,7 +87,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
             val series =  getItem(position)
             holder.itemBinding.series = series
             holder.itemBinding.visualTypeOptions = visualOptions
-            holder.itemBinding.dataSetOptions = dataSetOptions
+            holder.itemBinding.dataSetOptions = yAxisOptions
             holder.itemBinding.subgroupOptions = subGroupOptions
             holder.itemBinding.showDeleteButton = showDeleteButton
             holder.itemBinding.itemEditReportDialogVisualTypeText.tag = series.reportSeriesVisualType
@@ -231,11 +231,11 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
             seriesAdapter?.visualOptions = value
         }
 
-    override var dataSetOptions: List<ReportEditPresenter.DataSetMessageIdOption>? = null
+    override var yAxisOptions: List<ReportEditPresenter.YAxisMessageIdOption>? = null
         get() = field
         set(value) {
             field = value
-            seriesAdapter?.dataSetOptions = value
+            seriesAdapter?.yAxisOptions = value
         }
 
     override var xAxisOptions: List<ReportEditPresenter.XAxisMessageIdOption>? = null
@@ -293,6 +293,12 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
         navigateToEditEntity(ReportFilter().apply {
             reportFilterSeriesUid = series.reportSeriesUid
         }, R.id.report_filter_edit_dest,
+                ReportFilter::class.java)
+    }
+
+    override fun onClickEditFilter(filter: ReportFilter){
+        onSaveStateToBackStackStateHandle()
+        navigateToEditEntity(filter, R.id.report_filter_edit_dest,
                 ReportFilter::class.java)
     }
 

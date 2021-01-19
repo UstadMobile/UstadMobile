@@ -10,6 +10,7 @@ import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.graph.*
 import com.ustadmobile.door.SimpleDoorQuery
+import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
@@ -214,7 +215,7 @@ fun UmAppDatabase.insertPersonOnlyAndGroup(entity: Person): Person{
 suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                                             context: Any, impl: UstadMobileSystemImpl, loggedInPersonUid: Long): ChartData{
 
-    val queries = report.generateSql(loggedInPersonUid)
+    val queries = report.generateSql(loggedInPersonUid, dbType())
     val seriesDataList = mutableListOf<SeriesData>()
 
     var yAxisValueFormatter: LabelValueFormatter? = null
@@ -226,8 +227,8 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
         val series = it.key
 
         xAxisList.addAll(reportList.mapNotNull { it.xAxis }.toSet())
-        if(series.reportSeriesDataSet == ReportSeries.AVERAGE_DURATION
-                || series.reportSeriesDataSet == ReportSeries.TOTAL_DURATION){
+        if(series.reportSeriesYAxis == ReportSeries.AVERAGE_DURATION
+                || series.reportSeriesYAxis == ReportSeries.TOTAL_DURATION){
             yAxisValueFormatter = TimeFormatter()
         }
 
@@ -290,7 +291,7 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
 fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters, loggedInPersonUid: Long):
         List<DataSource.Factory<Int, StatementEntityWithDisplay>> {
 
-    val queries = report.generateSql(loggedInPersonUid)
+    val queries = report.generateSql(loggedInPersonUid, dbType())
     val statementDataSourceList = mutableListOf<DataSource.Factory<Int, StatementEntityWithDisplay>>()
     queries.forEach {
         statementDataSourceList.add(statementDao.getListResults(SimpleDoorQuery(it.value.sqlListStr, it.value.queryParams)))

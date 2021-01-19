@@ -4,12 +4,9 @@ import com.nhaarman.mockitokotlin2.mock
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveDbInstance
 import com.ustadmobile.core.util.directActiveRepoInstance
-import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
@@ -17,8 +14,6 @@ import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.Parameterized
 import org.kodein.di.DI
 import org.kodein.di.bind
 import org.kodein.di.singleton
@@ -75,11 +70,11 @@ class ReportWithSeriesWithFiltersExtTest {
             fromDate = DateTime(2019, 3, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
             reportSeriesWithFiltersList = listOf(ReportSeries().apply {
-                reportSeriesDataSet = ReportSeries.NUMBER_SESSIONS
+                reportSeriesYAxis = ReportSeries.NUMBER_SESSIONS
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid)
+        val queryList = report.generateSql(loggedPersonUid, dbType())
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
@@ -98,12 +93,12 @@ class ReportWithSeriesWithFiltersExtTest {
             fromDate = DateTime(2019, 3, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
             reportSeriesWithFiltersList = listOf(ReportSeries().apply {
-                reportSeriesDataSet = ReportSeries.NUMBER_STUDENTS_COMPLETED
+                reportSeriesYAxis = ReportSeries.AVERAGE_USAGE_TIME_PER_USER
                 reportSeriesSubGroup = Report.GENDER
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid)
+        val queryList = report.generateSql(loggedPersonUid, dbType())
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
@@ -142,12 +137,12 @@ class ReportWithSeriesWithFiltersExtTest {
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
             reportSeriesWithFiltersList = listOf(ReportSeries().apply {
-                reportSeriesDataSet = ReportSeries.ACTIVITIES_RECORDED
+                reportSeriesYAxis = ReportSeries.INTERACTIONS_RECORDED
                 reportSeriesSubGroup = Report.CLASS
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid)
+        val queryList = report.generateSql(loggedPersonUid, dbType())
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
@@ -166,12 +161,12 @@ class ReportWithSeriesWithFiltersExtTest {
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
             reportSeriesWithFiltersList = listOf(ReportSeries().apply {
-                reportSeriesDataSet = ReportSeries.AVERAGE_DURATION
+                reportSeriesYAxis = ReportSeries.AVERAGE_DURATION
                 reportSeriesSubGroup = Report.CONTENT_ENTRY
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid)
+        val queryList = report.generateSql(loggedPersonUid, dbType())
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
@@ -190,7 +185,7 @@ class ReportWithSeriesWithFiltersExtTest {
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
             reportSeriesWithFiltersList = listOf(ReportSeries().apply {
-                reportSeriesDataSet = ReportSeries.PERCENT_STUDENTS_COMPLETED
+                reportSeriesYAxis = ReportSeries.NUMBER_ACTIVE_USERS
                 reportSeriesFilters = listOf(ReportFilter().apply {
                     reportFilterField = ReportFilter.FIELD_PERSON_AGE
                     reportFilterCondition = ReportFilter.CONDITION_GREATER_THAN
@@ -199,7 +194,7 @@ class ReportWithSeriesWithFiltersExtTest {
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid)
+        val queryList = report.generateSql(loggedPersonUid, dbType())
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)

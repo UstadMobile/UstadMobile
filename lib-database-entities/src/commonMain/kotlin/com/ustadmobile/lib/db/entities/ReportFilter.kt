@@ -23,6 +23,14 @@ open class ReportFilter {
 
         const val FIELD_PERSON_AGE = 101
 
+        const val FIELD_CONTENT_COMPLETION = 102
+
+        const val FIELD_CONTENT_ENTRY = 103
+
+        const val FIELD_CONTENT_PROGRESS = 104
+
+        const val FIELD_ATTENDANCE_PERCENTAGE = 105
+
 
         const val CONDITION_IS = 200
 
@@ -34,10 +42,17 @@ open class ReportFilter {
 
         const val CONDITION_WITHIN_RANGE = 204
 
+        const val CONDITION_BETWEEN = 205
+
+        const val CONDITION_IN_LIST = 206
+
+        const val CONDITION_NOT_IN_LIST = 207
 
         const val VALUE_FLAG_INTEGER = 1
 
         const val VALUE_FLAG_DROPDOWN = 2
+
+        const val VALUE_FLAG_LIST = 3
 
     }
 

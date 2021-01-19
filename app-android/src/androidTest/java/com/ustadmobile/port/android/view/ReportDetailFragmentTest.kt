@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.graphics.Color
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
@@ -25,6 +24,8 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 @AdbScreenRecord("Report Detail Screen Test")
 @RunWith(Parameterized::class)
@@ -89,11 +90,11 @@ class ReportDetailFragmentTest(val report: Report) : TestCase() {
             return listOf(
                ReportWithSeriesWithFilters().apply {
                         reportUid = 3
-                        xAxis = Report.MONTH
+                        xAxis = Report.DAY
                         fromDate = DateTime(2019, 3, 10).unixMillisLong
                         toDate = DateTime(2019, 6, 11).unixMillisLong
                         reportSeriesWithFiltersList = listOf(ReportSeries().apply {
-                            reportSeriesDataSet = ReportSeries.TOTAL_DURATION
+                            reportSeriesYAxis = ReportSeries.TOTAL_DURATION
                             reportSeriesVisualType = ReportSeries.BAR_CHART
                             reportSeriesSubGroup = Report.CLASS
                             reportSeriesUid = 4
