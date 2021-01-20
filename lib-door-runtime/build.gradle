@@ -29,6 +29,10 @@ android {
         minSdkVersion 21
         targetSdkVersion 29
     }
+
+    sourceSets {
+        test.resources.srcDirs += ["src/androidTest/resources"]
+    }
 }
 
 sourceCompatibility = '1.8'
@@ -93,15 +97,9 @@ kotlin {
 //            }
 //        }
 
-//        commonTest {
-//            commonTest {
-//                dependencies {
-//                    implementation project(":lib-database-mpp")
-//                }
-//            }
-//        }
-
         commonJvmMain {
+            dependsOn commonMain
+
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 compileOnly "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
@@ -164,6 +162,10 @@ kotlin {
                 implementation "junit:junit:$version_junit"
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
+                implementation "org.robolectric:robolectric:$version_android_roboelectric"
+                implementation "androidx.test:core:$version_android_junit_runner"
+                implementation "androidx.test:runner:$version_android_junit_runner"
+                implementation "androidx.test.ext:junit:$version_androidx_test_ext_junit"
             }
         }
 

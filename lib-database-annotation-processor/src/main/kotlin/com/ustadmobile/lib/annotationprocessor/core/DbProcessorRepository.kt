@@ -92,6 +92,9 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                             "ClassName")
                     .build())
             .primaryConstructor(FunSpec.constructorBuilder()
+                .addParameter(ParameterSpec.builder("context", Any::class)
+                        .addModifiers(KModifier.OVERRIDE)
+                        .build())
                 .addParameter(ParameterSpec.builder("_db", dbTypeElement.asClassName() ).build())
                 .addParameter(ParameterSpec.builder("db", dbTypeElement.asClassName()).build())
                 .addParameter(ParameterSpec.builder("_endpoint",
@@ -107,6 +110,10 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                         ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
                 .addParameter("_useClientSyncManager", Boolean::class)
                 .build())
+            .addProperty(PropertySpec.builder("context", Any::class)
+                    .addModifiers(KModifier.OVERRIDE)
+                    .initializer("context")
+                    .build())
             .addProperty(PropertySpec.builder("_db", dbTypeElement.asClassName())
                     .initializer("_db").build())
             .addProperty(PropertySpec.builder("db",

@@ -1,0 +1,35 @@
+package com.ustadmobile.door.attachments
+
+import com.ustadmobile.door.DoorDatabaseRepository
+
+/**
+ * Store an attachment locally. This will be called by the generated update and insert implementation.
+ * The platform specific attachmentUri on the entity will be read.
+ *
+ * @param entityWithAttachment This interface is implemented by a generated adapter class. The
+ * attachmentUri must be a readable platform specific uri.
+ *
+ * The attachmentUri variable will then be set to a uri in the form of:
+ *
+ * door-attachment://tablename/md5sum
+ */
+expect suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: EntityWithAttachment)
+
+/**
+ * Get a platform specific URI for the given attachment URI.
+ */
+expect suspend fun DoorDatabaseRepository.retrieveAttachment(uri: String): String
+
+
+/**
+ * Upload the given attachment uri to the endpoint.
+ */
+expect suspend fun DoorDatabaseRepository.uploadAttachment(uri: String)
+
+/**
+ * Download the given attachment uri from the endpoint
+ */
+expect suspend fun DoorDatabaseRepository.downloadAttachment(uri: String)
+
+
+

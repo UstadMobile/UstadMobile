@@ -25,6 +25,7 @@ import java.io.BufferedOutputStream
 import java.util.zip.ZipEntry
 import kotlin.io.copyTo
 import com.ustadmobile.core.util.ext.*
+import com.ustadmobile.door.ext.*
 
 actual class ContainerManager actual constructor(container: Container,
                                                  db: UmAppDatabase,

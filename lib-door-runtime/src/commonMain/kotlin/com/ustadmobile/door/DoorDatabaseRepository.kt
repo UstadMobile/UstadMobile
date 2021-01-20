@@ -19,6 +19,8 @@ interface DoorDatabaseRepository {
 
     val attachmentsDir: String?
 
+    val context: Any
+
     /**
      * This provides access to the underlying database for this repository. It must be wrapped with
      * The SyncableReadOnlyWrapper if this is a syncable database.
