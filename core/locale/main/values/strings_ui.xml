@@ -280,13 +280,15 @@
     <string name="interaction_recorded" value="203">Content usage - number of interactions recorded</string>
     <string name="number_active_users" value="204">Content usage - number of active users</string>
     <string name="average_usage_time_per_user"  value="205">Content usage - average usage time per user</string>
-    <string name="total_attendances"  value="206">Attendance - total attendances</string>
-    <string name="total_absences"  value="207">Attendance - total absences</string>
-    <string name="total_lates"  value="208">Attendance - total lates</string>
-    <string name="percent_students_attended"  value="209">Attendance - Percentage of students who attended</string>
-    <string name="percent_students_attended_or_late"  value="210">Attendance - Percentage of students who attended or were late</string>
-    <string name="total_number_of_classes"  value="211">Attendance - Total number of classes</string>
-    <string name="number_unique_students_attending"  value="212">Attendance - Number of unique students attending</string>
+    <string name="number_students_completed" value="206">Content usage - number of students who completed content</string>
+    <string name="percen_students_completed" value="207">Content usage - percentage of students who completed content</string>
+    <string name="total_attendances"  value="208">Attendance - total attendances</string>
+    <string name="total_absences"  value="209">Attendance - total absences</string>
+    <string name="total_lates"  value="210">Attendance - total lates</string>
+    <string name="percent_students_attended"  value="211">Attendance - Percentage of students who attended</string>
+    <string name="percent_students_attended_or_late"  value="212">Attendance - Percentage of students who attended or were late</string>
+    <string name="total_number_of_classes"  value="213">Attendance - Total number of classes</string>
+    <string name="number_unique_students_attending"  value="214">Attendance - Number of unique students attending</string>
 
 
     <string name="xapi_day" value="300">Day</string>

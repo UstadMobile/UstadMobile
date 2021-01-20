@@ -36,19 +36,23 @@ class ReportSeries{
 
         const val AVERAGE_USAGE_TIME_PER_USER = 205
 
-        const val TOTAL_ATTENDANCE = 206
+        const val NUMBER_OF_STUDENTS_COMPLETED_CONTENT = 206
 
-        const val TOTAL_LATES = 207
+        const val PERCENT_OF_STUDENTS_COMPLETED_CONTENT = 207
 
-        const val TOTAL_ABSENCES = 208
+        const val TOTAL_ATTENDANCE = 208
 
-        const val PERCENTAGE_STUDENTS_ATTENDED = 209
+        const val TOTAL_ABSENCES = 209
 
-        const val PERCENTAGE_STUDENTS_ATTENDED_OR_LATE = 210
+        const val TOTAL_LATES = 210
 
-        const val TOTAL_CLASSES = 211
+        const val PERCENTAGE_STUDENTS_ATTENDED = 211
 
-        const val NUMBER_UNIQUE_STUDENTS_ATTENDING = 212
+        const val PERCENTAGE_STUDENTS_ATTENDED_OR_LATE = 212
+
+        const val TOTAL_CLASSES = 213
+
+        const val NUMBER_UNIQUE_STUDENTS_ATTENDING = 214
 
         const val NONE = 0
 
