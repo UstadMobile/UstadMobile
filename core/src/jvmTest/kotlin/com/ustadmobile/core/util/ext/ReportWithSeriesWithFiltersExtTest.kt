@@ -74,7 +74,7 @@ class ReportWithSeriesWithFiltersExtTest {
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid, dbType())
+        val queryList = report.generateSql(loggedPersonUid, db.jdbcDbType)
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
@@ -86,19 +86,19 @@ class ReportWithSeriesWithFiltersExtTest {
     }
 
     @Test
-    fun givenStatementShowingNumberOfStudentsCompletedByGenderInMonth_whenDataSetIsNumberOfStudentsCompleted_withAxisMonth_andSubGroupByGender_thenShowExpectedValues(){
+    fun givenStatementShowingNumberOfActiveUsersByGenderInMonth_whenDataSetIsNumberOfActiveUsers_withAxisMonth_andSubGroupByGender_thenShowExpectedValues(){
 
         val report = ReportWithSeriesWithFilters().apply {
             xAxis = Report.MONTH
             fromDate = DateTime(2019, 3, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
             reportSeriesWithFiltersList = listOf(ReportSeries().apply {
-                reportSeriesYAxis = ReportSeries.AVERAGE_USAGE_TIME_PER_USER
+                reportSeriesYAxis = ReportSeries.NUMBER_ACTIVE_USERS
                 reportSeriesSubGroup = Report.GENDER
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid, dbType())
+        val queryList = report.generateSql(loggedPersonUid, db.jdbcDbType)
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
@@ -106,22 +106,22 @@ class ReportWithSeriesWithFiltersExtTest {
                 groupByXAxis.forEach {
                     when(it.key){
                         "04 2019" -> {
-                            Assert.assertEquals("number of students for month 04 with gender female",
+                            Assert.assertEquals("number of active users for month 04 with gender female",
                                     0, it.value.find { it.subgroup == "1" }?.yAxis ?: 0)
-                            Assert.assertEquals("number of students for month 04 with gender male",
+                            Assert.assertEquals("number of active users for month 04 with gender male",
                                     1f, it.value.find { it.subgroup == "2" }?.yAxis ?: 0)
                         }
 
                         "05 2019" -> {
-                            Assert.assertEquals("number of students for month 05 with gender female",
+                            Assert.assertEquals("number of active users for month 05 with gender female",
                                     1f, it.value.find { it.subgroup == "1" }?.yAxis ?: 0)
-                            Assert.assertEquals("number of students for month 05 with gender male",
+                            Assert.assertEquals("number of active users for month 05 with gender male",
                                     1f, it.value.find { it.subgroup == "2" }?.yAxis ?: 0)
                         }
                         "06 2019" -> {
-                            Assert.assertEquals("number of students for month 06 with gender female",
+                            Assert.assertEquals("number of active users for month 06 with gender female",
                                     0, it.value.find { it.subgroup == "1" }?.yAxis ?: 0)
-                            Assert.assertEquals("number of students for month 06 with gender male",
+                            Assert.assertEquals("number of active users for month 06 with gender male",
                                     2f, it.value.find { it.subgroup == "2" }?.yAxis ?: 0)
                         }
                     }
@@ -142,7 +142,7 @@ class ReportWithSeriesWithFiltersExtTest {
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid, dbType())
+        val queryList = report.generateSql(loggedPersonUid, db.jdbcDbType)
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
@@ -166,26 +166,26 @@ class ReportWithSeriesWithFiltersExtTest {
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid, dbType())
+        val queryList = report.generateSql(loggedPersonUid, db.jdbcDbType)
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
                 val avgDurationForWeek09JuneByContent = reportList.find {
                     it.xAxis == "09 06 2019" && it.subgroup == "23223" }
-                Assert.assertEquals("data matches", 212307.69f, avgDurationForWeek09JuneByContent!!.yAxis)
+                Assert.assertEquals("data matches", 212307.0f, avgDurationForWeek09JuneByContent!!.yAxis)
             }
         }
 
     }
 
     @Test
-    fun givenStatementShowingPercentStudentsCompletedByGenderAbove18YearsOfAge_whenDataSetIsPercentStudentCompleted_whenXaxisIsGender_andFilterWithAgeGreaterThan18_thenShowExpectedValues(){
+    fun givenStatementShowingAverageUsageTimePerUserByGenderAbove18YearsOfAge_whenDataSetIsAverageUsageTimePerUser_whenXaxisIsGender_andFilterWithAgeGreaterThan18_thenShowExpectedValues(){
         val report = ReportWithSeriesWithFilters().apply {
             xAxis = Report.GENDER
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
             reportSeriesWithFiltersList = listOf(ReportSeries().apply {
-                reportSeriesYAxis = ReportSeries.NUMBER_ACTIVE_USERS
+                reportSeriesYAxis = ReportSeries.AVERAGE_USAGE_TIME_PER_USER
                 reportSeriesFilters = listOf(ReportFilter().apply {
                     reportFilterField = ReportFilter.FIELD_PERSON_AGE
                     reportFilterCondition = ReportFilter.CONDITION_GREATER_THAN
@@ -194,11 +194,11 @@ class ReportWithSeriesWithFiltersExtTest {
             })
         }
 
-        val queryList = report.generateSql(loggedPersonUid, dbType())
+        val queryList = report.generateSql(loggedPersonUid, db.jdbcDbType)
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
-                Assert.assertEquals("data matches", 7.6923075f, reportList[0].yAxis)
+                Assert.assertEquals("data matches", 960000f, reportList[0].yAxis)
             }
         }
     }

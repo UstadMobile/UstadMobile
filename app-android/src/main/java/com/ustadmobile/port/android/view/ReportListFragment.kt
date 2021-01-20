@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -33,7 +31,7 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 
 class ReportListFragment() : UstadListViewFragment<Report, Report>(),
-        ReportListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
+        ReportListView, View.OnClickListener {
 
     private var mPresenter: ReportListPresenter? = null
 
@@ -89,7 +87,8 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
                 this,  di, viewLifecycleOwner)
 
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
-                requireContext().getString(R.string.create_a_new_report))
+                requireContext().getString(R.string.create_a_new_report),
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         mDataRecyclerViewAdapter = ReportListRecyclerAdapter(mPresenter, dbRepo, di)
 
         return view
@@ -98,9 +97,16 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fabManager?.text = requireContext().getText(R.string.report)
+    }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
 
-
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     /**

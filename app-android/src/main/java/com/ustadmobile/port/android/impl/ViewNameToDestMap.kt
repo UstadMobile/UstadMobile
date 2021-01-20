@@ -56,6 +56,7 @@ class ViewNameToDestMap: DestinationProvider {
             XapiPackageContentView.VIEW_NAME to UstadDestination(R.id.content_xapi_dest,
                 hideBottomNavigation = true),
             ReportListView.VIEW_NAME to UstadDestination(R.id.report_list_dest),
+            ReportTemplateView.VIEW_NAME to UstadDestination(R.id.report_template_list_dest),
             ReportEditView.VIEW_NAME to UstadDestination(R.id.report_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             ReportFilterEditView.VIEW_NAME to UstadDestination(R.id.report_filter_edit_dest),

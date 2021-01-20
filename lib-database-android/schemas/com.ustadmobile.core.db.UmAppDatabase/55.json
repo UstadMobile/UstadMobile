@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 55,
-    "identityHash": "ca9624515dfa9d63a721d1003c08c3f1",
+    "identityHash": "4f3fb41382e359f5a0cfe1f27db97c3d",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -4886,7 +4886,7 @@
       },
       {
         "tableName": "Report",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `reportTitle` TEXT, `reportSeries` TEXT, `reportInactive` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `fromRelTo` INTEGER NOT NULL, `fromRelOffSet` INTEGER NOT NULL, `fromRelUnit` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `toRelTo` INTEGER NOT NULL, `toRelOffSet` INTEGER NOT NULL, `toRelUnit` INTEGER NOT NULL, `reportTitle` TEXT, `reportDescription` TEXT, `reportSeries` TEXT, `reportInactive` INTEGER NOT NULL, `isTemplate` INTEGER NOT NULL, `priority` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "reportUid",
@@ -4913,14 +4913,56 @@
             "notNull": true
           },
           {
+            "fieldPath": "fromRelTo",
+            "columnName": "fromRelTo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fromRelOffSet",
+            "columnName": "fromRelOffSet",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "fromRelUnit",
+            "columnName": "fromRelUnit",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "toDate",
             "columnName": "toDate",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
+            "fieldPath": "toRelTo",
+            "columnName": "toRelTo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "toRelOffSet",
+            "columnName": "toRelOffSet",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "toRelUnit",
+            "columnName": "toRelUnit",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "reportTitle",
             "columnName": "reportTitle",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "reportDescription",
+            "columnName": "reportDescription",
             "affinity": "TEXT",
             "notNull": false
           },
@@ -4933,6 +4975,18 @@
           {
             "fieldPath": "reportInactive",
             "columnName": "reportInactive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "isTemplate",
+            "columnName": "isTemplate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "priority",
+            "columnName": "priority",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -9600,7 +9654,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ca9624515dfa9d63a721d1003c08c3f1')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '4f3fb41382e359f5a0cfe1f27db97c3d')"
     ]
   }
 }

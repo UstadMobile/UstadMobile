@@ -85,6 +85,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
      */
     fun preload() {
         verbDao.initPreloadedVerbs()
+        reportDao.initPreloadedTemplates()
     }
 
     @JsName("networkNodeDao")
@@ -3451,10 +3452,20 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 database.execSQL("DROP TABLE IF EXISTS ReportFilter")
                 database.execSQL("DROP TABLE IF EXISTS ReportFilter_trk")
-                database.execSQL("""ALTER TABLE Report 
-                        ADD COLUMN reportSeries TEXT""".trimMargin())
+
+                database.execSQL("""ALTER TABLE Report ADD COLUMN reportSeries TEXT""".trimMargin())
+                database.execSQL("""ALTER TABLE Report ADD COLUMN fromRelTo INTEGER""".trimMargin())
+                database.execSQL("""ALTER TABLE Report ADD COLUMN fromRelOffSet INTEGER""".trimMargin())
+                database.execSQL("""ALTER TABLE Report ADD COLUMN fromRelUnit INTEGER""".trimMargin())
+                database.execSQL("""ALTER TABLE Report ADD COLUMN toRelTo INTEGER""".trimMargin())
+                database.execSQL("""ALTER TABLE Report ADD COLUMN toRelOffSet INTEGER""".trimMargin())
+                database.execSQL("""ALTER TABLE Report ADD COLUMN toRelUnit INTEGER""".trimMargin())
+                database.execSQL("""ALTER TABLE Report ADD COLUMN reportDescription TEXT""".trimMargin())
+                database.execSQL("""ALTER TABLE Report ADD COLUMN priority INTEGER""".trimMargin())
+
                 if(database.dbType() == DoorDbType.POSTGRES) {
 
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN isTemplate BOOL DEFAULT FALSE""".trimMargin())
                     database.execSQL("""ALTER TABLE Report 
                         DROP COLUMN chartType""".trimMargin())
                     database.execSQL("""ALTER TABLE Report 
@@ -3464,9 +3475,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 }else if(database.dbType() == DoorDbType.SQLITE){
 
+                    database.execSQL("""ALTER TABLE Report 
+                        ADD COLUMN isTemplate INTEGER""".trimMargin())
+
                     database.execSQL("ALTER TABLE Report RENAME to Report_OLD")
-                    database.execSQL("CREATE TABLE IF NOT EXISTS Report (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `reportTitle` TEXT, `reportSeries` TEXT, `reportInactive` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL)")
-                    database.execSQL("INSERT INTO Report (reportUid, reportOwnerUid, xAxis, fromDate, toDate, reportTitle, reportInactive, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy, reportSeries) SELECT reportUid, reportOwnerUid, xAxis, fromDate, toDate, reportTitle, reportInactive, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy, reportSeries FROM Report_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Report (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `fromRelTo` INTEGER NOT NULL, `fromRelOffSet` INTEGER NOT NULL, `fromRelUnit` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `toRelTo` INTEGER NOT NULL, `toRelOffSet` INTEGER NOT NULL, `toRelUnit` INTEGER NOT NULL, `reportTitle` TEXT, `reportDescription` TEXT, `reportSeries` TEXT, `reportInactive` INTEGER NOT NULL, `priority` INTEGER NOT NULL, `isTemplate` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL)")
+                    database.execSQL("INSERT INTO Report (reportUid, reportOwnerUid, xAxis, fromDate, fromRelTo, fromRelOffSet, fromRelUnit, toDate, toRelTo, toRelOffSet, toRelUnit, reportTitle, reportDescription, reportSeries, reportInactive, isTemplate, priority, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy) SELECT reportUid, reportOwnerUid, xAxis, fromDate, fromRelTo, fromRelOffSet, fromRelUnit, toDate, toRelTo, toRelOffSet, toRelUnit, reportTitle, reportDescription, reportSeries, reportInactive, isTemplate, priority, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy FROM Report_OLD")
                     database.execSQL("DROP TABLE Report_OLD")
                     database.execSQL("CREATE TABLE IF NOT EXISTS Report_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL( "CREATE INDEX IF NOT EXISTS `index_Report_trk_clientId_epk_csn` ON Report_trk (`clientId`, `epk`, `csn`)")

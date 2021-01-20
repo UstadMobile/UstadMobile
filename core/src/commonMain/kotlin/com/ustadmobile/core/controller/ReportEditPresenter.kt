@@ -202,7 +202,7 @@ class ReportEditPresenter(context: Any,
             filterCounter.value = currentMaxFilter.toInt() + 1
             editEntity.reportSeriesWithFiltersList = reportSeriesList
 
-        }else if(editEntity.reportSeriesWithFiltersList?.isEmpty() == true){
+        }else if(editEntity.reportSeriesWithFiltersList == null || editEntity.reportSeriesWithFiltersList?.isNullOrEmpty() == true){
             reportSeriesList = listOf(ReportSeries().apply {
                 val id = seriesCounter.getAndIncrement()
                 reportSeriesName = "Series $id"

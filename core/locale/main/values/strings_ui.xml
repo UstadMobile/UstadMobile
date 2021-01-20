@@ -69,6 +69,7 @@
     <string name='classes'>Classes</string>
     <string name='exams'>Exams</string>
     <string name='reports'>Reports</string>
+    <string name="choose_template">Choose template</string>
     <string name='contents'>Contents</string>
     <string name='students'>Students</string>
     <string name='add_a_student'>Add a student</string>
