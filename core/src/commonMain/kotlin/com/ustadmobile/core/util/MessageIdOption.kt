@@ -2,9 +2,9 @@ package com.ustadmobile.core.util
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 
-open class MessageIdOption(val messageId: Int, context: Any, val code: Int = messageId) {
+open class MessageIdOption(val messageId: Int, context: Any, val code: Int = messageId): IdOption("", code) {
 
-    val messageStr = UstadMobileSystemImpl.instance.getString(messageId, context)
+    var messageStr = UstadMobileSystemImpl.instance.getString(messageId, context)
 
     override fun toString(): String = messageStr
 }

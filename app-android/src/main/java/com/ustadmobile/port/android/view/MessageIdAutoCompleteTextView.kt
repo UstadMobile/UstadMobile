@@ -8,7 +8,7 @@ class MessageIdAutoCompleteTextView: DropDownListAutoCompleteTextView<MessageIdO
 
     private val messageIdDropdownAdapter = object: DropDownListAutoCompleteAdapter<MessageIdOption> {
         override fun getId(item: MessageIdOption) = item.code.toLong()
-        override fun getText(item: MessageIdOption) = item.messageStr
+        override fun getText(item: MessageIdOption) = item.toString()
     }
 
     constructor(context: Context) : super(context) {
