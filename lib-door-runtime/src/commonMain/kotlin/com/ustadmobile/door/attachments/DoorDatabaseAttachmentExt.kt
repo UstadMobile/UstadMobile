@@ -24,6 +24,11 @@ expect suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: 
  */
 expect suspend fun DoorDatabaseRepository.retrieveAttachment(uri: String): String
 
+/**
+ * After an update has been performed on a table that has attachments, this function is called
+ * to delete old/unused data by the generated repository code
+ */
+expect suspend fun DoorDatabaseRepository.deleteZombieAttachments(entityWithAttachment: EntityWithAttachment)
 
 /**
  * Upload the given attachment uri to the endpoint.

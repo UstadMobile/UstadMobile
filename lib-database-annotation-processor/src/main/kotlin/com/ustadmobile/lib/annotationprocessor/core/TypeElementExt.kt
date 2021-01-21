@@ -175,6 +175,15 @@ fun TypeElement.allDbEntities(processingEnv: ProcessingEnvironment): List<TypeEl
 fun TypeElement.allSyncableDbEntities(processingEnv: ProcessingEnvironment) =
         allDbEntities(processingEnv).filter { it.hasAnnotation(SyncableEntity::class.java) }
 
+/**
+ * Where this TypeElement represents a database class, get a list of all entities that have
+ * an attachment.
+ */
+fun TypeElement.allEntitiesWithAttachments(processingEnv: ProcessingEnvironment) =
+        allDbEntities(processingEnv).filter {
+            it.enclosedElementsWithAnnotation(AttachmentUri::class.java).isNotEmpty()
+        }
+
 
 fun TypeElement.asClassNameWithSuffix(suffix: String) =
         ClassName(packageName, "$simpleName$suffix")

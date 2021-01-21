@@ -12,6 +12,7 @@ import db2.AccessGrant
 import db2.ExampleDatabase2
 import db2.ExampleDatabase2_KtorRoute
 import db2.ExampleSyncableEntity
+import db2.ExampleAttachmentEntity
 import io.ktor.application.ApplicationCall
 import io.ktor.application.install
 import io.ktor.client.HttpClient
@@ -43,6 +44,10 @@ import java.io.File
 import java.lang.IllegalStateException
 import javax.sql.DataSource
 import kotlin.test.assertEquals
+import com.ustadmobile.door.ext.writeToFile
+import java.net.URI
+import java.nio.file.Paths
+import com.ustadmobile.door.attachments.retrieveAttachment
 
 
 class DbRepoTest {
@@ -773,5 +778,56 @@ class DbRepoTest {
         }
     }
 
+    @Test
+    fun givenEntityWithAttachmentUri_whenInserted_thenAttachmentIsStored() {
+        setupClientAndServerDb()
+        val clientRepo = clientDb!!.asRepository(Any(),
+                "http://localhost:8089/", "token", httpClient, tmpAttachmentsDir.absolutePath)
+                .asConnectedRepository()
+
+        val destFile = temporaryFolder.newFile()
+        this::class.java.getResourceAsStream("/testfile1.png").writeToFile(destFile)
+
+        val attachmentEntity = ExampleAttachmentEntity().apply {
+            eaAttachmentUri = destFile.toURI().toString()
+            eaUid  = clientRepo.exampleAttachmentDao().insert(this)
+        }
+
+        val storedUri = runBlocking {
+            (clientRepo as DoorDatabaseRepository).retrieveAttachment(attachmentEntity.eaAttachmentUri!!)
+        }
+        val storedFile = Paths.get(URI(storedUri)).toFile()
+
+        Assert.assertTrue("Stored entity exists", storedFile.exists())
+    }
+
+    @Test
+    fun givenEntityWithAttachmentsUri_whenInsertedThenUpdated_thenOldAttachmentIsDeleted() {
+        setupClientAndServerDb()
+        val clientRepo = clientDb!!.asRepository(Any(),
+                "http://localhost:8089/", "token", httpClient, tmpAttachmentsDir.absolutePath)
+                .asConnectedRepository()
+
+        val destFile = temporaryFolder.newFile()
+        this::class.java.getResourceAsStream("/testfile1.png").writeToFile(destFile)
+
+        val attachmentEntity = ExampleAttachmentEntity().apply {
+            eaAttachmentUri = destFile.toURI().toString()
+            eaUid  = clientRepo.exampleAttachmentDao().insert(this)
+        }
+
+        val firstStoredUri = runBlocking {
+            (clientRepo as DoorDatabaseRepository).retrieveAttachment(attachmentEntity.eaAttachmentUri!!)
+        }
+
+        val destFile2 = temporaryFolder.newFile()
+        this::class.java.getResourceAsStream("/cat-pic0.jpg").writeToFile(destFile2)
+        attachmentEntity.eaAttachmentUri = destFile2.toURI().toString()
+
+        clientRepo.exampleAttachmentDao().update(attachmentEntity)
+
+        val firstStoredFile = Paths.get(URI(firstStoredUri)).toFile()
+        Assert.assertFalse("Old file does not exist anymore", firstStoredFile.exists())
+    }
 
 }

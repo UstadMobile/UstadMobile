@@ -838,6 +838,16 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                                         DbProcessorSync.TRACKER_DESTID_FIELDNAME), unique = true)),
                             trackerEntityClassName.name!!, "_stmt.executeUpdate"))
                 }
+
+                if(entityType.entityHasAttachments) {
+                    if(dbProductType == DoorDbType.SQLITE) {
+                        codeBlock.addGenerateAttachmentTriggerSqlite(entityType, "_stmt.executeUpdate")
+                    }else {
+                        //TODO: Add postgres trigger
+                    }
+                }
+
+
                 codeBlock.add("//End: Create table ${entityType.simpleName} for $dbTypeName\n\n")
             }
 

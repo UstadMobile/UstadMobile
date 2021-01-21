@@ -798,6 +798,30 @@ fun CodeBlock.Builder.addReplaceSyncableEntitiesIntoDbCode(resultVarName: String
     return this
 }
 
+private fun CodeBlock.Builder.beginAttachmentStorageFlow(daoFunSpec: FunSpec) {
+    val entityParam = daoFunSpec.parameters.first()
+    val isList = entityParam.type.isListOrArray()
+
+    if(!daoFunSpec.isSuspended)
+        beginRunBlockingControlFlow()
+
+    if(isList)
+        beginControlFlow("${entityParam.name}.forEach")
+}
+
+private fun CodeBlock.Builder.endAttachmentStorageFlow(daoFunSpec: FunSpec) {
+    val entityParam = daoFunSpec.parameters.first()
+    val isList = entityParam.type.isListOrArray()
+
+    if(!daoFunSpec.isSuspended)
+        endControlFlow()
+
+    if(isList)
+        endControlFlow()
+}
+
+
+
 /**
  * Add a CodeBlock for a repo delegate to DAO function. This will
  *
@@ -821,11 +845,7 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
                 && entityComponentType.hasAttachments(processingEnv)) {
             val isList = entityParam.type.isListOrArray()
 
-            if(!daoFunSpec.isSuspended)
-                beginRunBlockingControlFlow()
-
-            if(isList)
-                beginControlFlow("${entityParam.name}.forEach")
+            beginAttachmentStorageFlow(daoFunSpec)
 
             val entityClassName = entityComponentType as ClassName
 
@@ -834,11 +854,7 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
                     if(isList) "it" else entityParam.name,
                     MemberName(entityClassName.packageName, "asEntityWithAttachment"))
 
-            if(isList)
-                endControlFlow()
-
-            if(!daoFunSpec.isSuspended)
-                endControlFlow()
+            endAttachmentStorageFlow(daoFunSpec)
         }
 
         if(entityComponentType.hasSyncableEntities(processingEnv)) {
@@ -901,6 +917,26 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
     add("_dao.${daoFunSpec.name}(")
             .add(daoFunSpec.parameters.joinToString { it.name })
             .add(")\n")
+
+    //if this table has attachments and an update was done, check to delete old data
+    if(daoFunSpec.hasAnnotation(Update::class.java)) {
+        val entityParam = daoFunSpec.parameters.first()
+        val entityComponentType = entityParam.type.unwrapListOrArrayComponentType()
+        if(entityComponentType.hasAttachments(processingEnv)) {
+            val entityClassName = entityComponentType as ClassName
+            val isList = entityParam.type.isListOrArray()
+
+            beginAttachmentStorageFlow(daoFunSpec)
+
+            add("_repo.%M(%L.%M())\n",
+                MemberName("com.ustadmobile.door.attachments", "deleteZombieAttachments"),
+                if(isList) "it" else entityParam.name,
+                MemberName(entityClassName.packageName, "asEntityWithAttachment"))
+
+            endAttachmentStorageFlow(daoFunSpec)
+        }
+
+    }
 
     //Check if a table is modified by this query
     val tableChanged = if(daoFunSpec.hasAnyAnnotation(Update::class.java, Insert::class.java,

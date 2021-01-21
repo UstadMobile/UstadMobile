@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 55,
-    "identityHash": "2b2799717e76443e5cd013ac95baa9f9",
+    "identityHash": "b3134b3203de2a0433a17d6ffc4f5aee",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -5637,6 +5637,44 @@
         "foreignKeys": []
       },
       {
+        "tableName": "ZombieAttachmentData",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`zaUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `zaTableName` TEXT, `zaPrimaryKey` INTEGER NOT NULL, `zaUri` TEXT)",
+        "fields": [
+          {
+            "fieldPath": "zaUid",
+            "columnName": "zaUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zaTableName",
+            "columnName": "zaTableName",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "zaPrimaryKey",
+            "columnName": "zaPrimaryKey",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "zaUri",
+            "columnName": "zaUri",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "zaUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
         "tableName": "ClazzLog_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
@@ -9744,7 +9782,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2b2799717e76443e5cd013ac95baa9f9')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'b3134b3203de2a0433a17d6ffc4f5aee')"
     ]
   }
 }

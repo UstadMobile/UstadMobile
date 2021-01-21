@@ -45,7 +45,8 @@ import kotlin.jvm.Volatile
     SqliteChangeSeqNums::class,
     UpdateNotification::class,
     TableSyncStatus::class,
-    ChangeLog::class
+    ChangeLog::class,
+    ZombieAttachmentData::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES

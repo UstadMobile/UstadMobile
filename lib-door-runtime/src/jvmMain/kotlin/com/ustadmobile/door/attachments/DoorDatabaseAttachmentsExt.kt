@@ -30,6 +30,8 @@ actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: 
         val md5HexStr = md5.toHexString()
         entityWithAttachment.attachmentMd5 = md5.toHexString()
         val finalDestFile = File(requireAttachmentDirFile(), entityWithAttachment.tableNameAndMd5Path)
+        finalDestFile.parentFile.takeIf { !it.exists() }?.mkdirs()
+
         if(!tmpDestFile.renameTo(finalDestFile)) {
             throw IOException("Could not move attachment $md5HexStr to it's final file!")
         }
@@ -59,5 +61,4 @@ actual suspend fun DoorDatabaseRepository.uploadAttachment(uri: String) {
 actual suspend fun DoorDatabaseRepository.downloadAttachment(uri: String) {
 
 }
-
 
