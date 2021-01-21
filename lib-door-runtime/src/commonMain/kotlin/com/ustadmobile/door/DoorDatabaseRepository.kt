@@ -95,6 +95,8 @@ interface DoorDatabaseRepository {
 
         const val STATUS_DISCONNECTED = 2
 
-        val DOOR_ATTACHMENT_URI_PREFIX = "door:attachment/"
+        const val DOOR_ATTACHMENT_URI_SCHEME = "door-attachment"
+
+        val DOOR_ATTACHMENT_URI_PREFIX = "$DOOR_ATTACHMENT_URI_SCHEME://"
     }
 }

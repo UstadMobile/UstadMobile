@@ -8,6 +8,7 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import androidx.room.*
 import com.ustadmobile.door.SyncableDoorDatabase
+import com.ustadmobile.door.annotation.AttachmentUri
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER
@@ -267,4 +268,12 @@ fun TypeElement.dbEnclosedDaos(processingEnv: ProcessingEnvironment) : List<Type
  */
 val TypeElement.syncableEntityFindAllHasClientIdParam: Boolean
     get() = getAnnotation(SyncableEntity::class.java).syncFindAllQuery.contains(":clientId")
+
+
+/**
+ * Shorthand to check if this is an entity that has attachments
+ */
+val TypeElement.entityHasAttachments: Boolean
+    get() = hasAnnotation(Entity::class.java) &&
+            enclosedElementsWithAnnotation(AttachmentUri::class.java, ElementKind.FIELD).isNotEmpty()
 

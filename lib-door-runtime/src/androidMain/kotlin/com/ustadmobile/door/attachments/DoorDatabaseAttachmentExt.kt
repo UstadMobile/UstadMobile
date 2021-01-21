@@ -8,19 +8,12 @@ import com.ustadmobile.door.ext.writeToFileAndGetMd5
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileOutputStream
 import java.io.IOException
-
-
-fun DoorDatabaseRepository.requireAttachmentDirFile(): File {
-    return attachmentsDir?.let { File(it) }
-            ?: throw IllegalStateException("requireAttachmentDirFile called on repository with null attachment dir")
-}
 
 
 actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: EntityWithAttachment) {
     val androidContext = context as Context
-    if(entityWithAttachment.attachmentUri?.startsWith("door-attachment://") == true)
+    if(entityWithAttachment.attachmentUri?.startsWith(DoorDatabaseRepository.DOOR_ATTACHMENT_URI_PREFIX) == true)
         return //already stored
 
     withContext(Dispatchers.IO) {
@@ -31,12 +24,14 @@ actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: 
         val inStream = androidContext.contentResolver.openInputStream(androidUri) ?: throw IOException("No input stream for $androidUri")
         val tmpDestFile = File(attachmentsDir, "${System.currentTimeMillis()}.tmp")
         val md5 = inStream.writeToFileAndGetMd5(tmpDestFile)
-
-        val finalDestFile = File(requireAttachmentDirFile(), entityWithAttachment.relativePath)
-        finalDestFile.parentFile?.takeIf { !it.exists() }?.mkdir()
-        tmpDestFile.renameTo(finalDestFile)
-
         entityWithAttachment.attachmentMd5 = md5.toHexString()
+
+        val finalDestFile = File(requireAttachmentDirFile(), entityWithAttachment.tableNameAndMd5Path)
+        finalDestFile.parentFile?.takeIf { !it.exists() }?.mkdir()
+        if(!tmpDestFile.renameTo(finalDestFile)) {
+            throw IOException("Unable to move attachment to correct destination")
+        }
+
         entityWithAttachment.attachmentUri = entityWithAttachment.makeAttachmentUriFromTableNameAndMd5()
         entityWithAttachment.attachmentSize = finalDestFile.length().toInt()
     }

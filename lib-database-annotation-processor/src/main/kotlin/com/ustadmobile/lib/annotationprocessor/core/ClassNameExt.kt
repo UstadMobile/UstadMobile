@@ -110,3 +110,7 @@ fun ClassName.asEntityTypeSpec(processingEnv: ProcessingEnvironment): TypeSpec? 
         return entityTypeEl?.asEntityTypeSpec()
     }
 }
+
+fun ClassName.asTypeElement(processingEnv: ProcessingEnvironment): TypeElement? {
+    return processingEnv.elementUtils.getTypeElement(canonicalName) as? TypeElement
+}

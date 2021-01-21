@@ -7,25 +7,29 @@ import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.IOException
 import java.net.URI
 import java.nio.file.Paths
 
 actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: EntityWithAttachment) {
     val attachmentUri = entityWithAttachment.attachmentUri ?: throw IllegalArgumentException("Attachment URI is null!")
-    val attachmentDirVal = attachmentsDir ?: throw IllegalStateException("No attachments dir!")
+    val attachmentDirVal = requireAttachmentDirFile()
 
     withContext(Dispatchers.IO) {
         val srcFile = Paths.get(URI(attachmentUri)).toFile()
-        val destFile = File(attachmentDirVal, "${systemTimeInMillis()}.tmp")
-        val md5 = srcFile.copyAndGetMd5(destFile)
+        attachmentDirVal.takeIf { !it.exists() }?.mkdirs()
 
-        val entityDir = File(attachmentDirVal, entityWithAttachment.tableName)
-        entityDir.takeIf { !it.exists() }?.mkdirs()
+        val tmpDestFile = File(attachmentDirVal, "${systemTimeInMillis()}.tmp")
+        val md5 = srcFile.copyAndGetMd5(tmpDestFile)
+
         val md5HexStr = md5.toHexString()
-        destFile.renameTo(File(entityDir, md5HexStr))
-
         entityWithAttachment.attachmentMd5 = md5.toHexString()
-        entityWithAttachment.attachmentSize = destFile.length().toInt()
+        val finalDestFile = File(requireAttachmentDirFile(), entityWithAttachment.tableNameAndMd5Path)
+        if(!tmpDestFile.renameTo(finalDestFile)) {
+            throw IOException("Could not move attachment $md5HexStr to it's final file!")
+        }
+
+        entityWithAttachment.attachmentSize = tmpDestFile.length().toInt()
         entityWithAttachment.attachmentUri = entityWithAttachment.makeAttachmentUriFromTableNameAndMd5()
     }
 }

@@ -12,11 +12,13 @@ import javax.lang.model.element.ExecutableElement
 import javax.lang.model.element.TypeElement
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.attachments.EntityWithAttachment
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_ANDROID_OUTPUT
 import com.ustadmobile.lib.annotationprocessor.core.AnnotationProcessorWrapper.Companion.OPTION_JVM_DIRS
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorJdbcKotlin.Companion.SUFFIX_JDBC_KT2
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorRepository.Companion.BOUNDARY_CALLBACK_CLASSNAME
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorRepository.Companion.DATASOURCEFACTORY_TO_BOUNDARYCALLBACK_VARNAME
+import com.ustadmobile.lib.annotationprocessor.core.DbProcessorRepository.Companion.SUFFIX_ENTITY_WITH_ATTACHMENTS_ADAPTER
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorRepository.Companion.SUFFIX_REPOSITORY2
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.CLASSNAME_SYNC_HELPERENTITIES_DAO
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_ABSTRACT
@@ -320,6 +322,67 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
 
     return this
 }
+
+/**
+ * Generate an EntityWithAttachment inline adapter class
+ */
+fun FileSpec.Builder.addEntityWithAttachmentAdapterType(entityWithAttachment: TypeElement,
+    processingEnv: ProcessingEnvironment) : FileSpec.Builder {
+    val attachmentInfo = EntityAttachmentInfo(entityWithAttachment)
+    val nullableStringClassName = String::class.asClassName().copy(nullable = true)
+    addType(TypeSpec.classBuilder("${entityWithAttachment.simpleName}${DbProcessorRepository.SUFFIX_ENTITY_WITH_ATTACHMENTS_ADAPTER}")
+            .addModifiers(KModifier.INLINE)
+            .addSuperinterface(EntityWithAttachment::class)
+            .primaryConstructor(
+                    FunSpec.constructorBuilder()
+                            .addParameter("entity", entityWithAttachment.asClassName())
+                            .build())
+            .addProperty(
+                    PropertySpec.builder("entity", entityWithAttachment.asClassName())
+                            .addModifiers(KModifier.PRIVATE)
+                            .initializer("entity")
+                            .build())
+            .addProperty(
+                    PropertySpec.builder("attachmentUri", nullableStringClassName, KModifier.OVERRIDE)
+                            .mutable(mutable = true)
+                            .delegateGetterAndSetter("entity.${attachmentInfo.uriPropertyName}")
+                            .build())
+            .addProperty(
+                    PropertySpec.builder("attachmentMd5", nullableStringClassName, KModifier.OVERRIDE)
+                            .mutable(true)
+                            .delegateGetterAndSetter("entity.${attachmentInfo.md5PropertyName}")
+                            .build())
+            .addProperty(
+                    PropertySpec.builder("attachmentSize", INT, KModifier.OVERRIDE)
+                            .mutable(true)
+                            .delegateGetterAndSetter("entity.${attachmentInfo.sizePropertyName}")
+                            .build())
+            .addProperty(
+                    PropertySpec.builder("tableName", String::class, KModifier.OVERRIDE)
+                            .getter(FunSpec.getterBuilder()
+                                    .addCode("return %S\n", entityWithAttachment.simpleName)
+                                    .build())
+                            .build()
+            )
+            .build())
+
+    return this
+}
+
+/**
+ * Generate an extension function that will return the entitywithadapter
+ * e.g. EntityName.asEntityWithAttachment()
+ */
+fun FileSpec.Builder.addAsEntityWithAttachmentAdapterExtensionFun(entityWithAttachment: TypeElement): FileSpec.Builder {
+    addFunction(FunSpec.builder("asEntityWithAttachment")
+            .receiver(entityWithAttachment.asClassName())
+            .returns(EntityWithAttachment::class)
+            .addCode("return %T(this)\n",
+                    entityWithAttachment.asClassNameWithSuffix(SUFFIX_ENTITY_WITH_ATTACHMENTS_ADAPTER))
+            .build())
+    return this
+}
+
 
 /**
  * Add an accessor function for the given dao accessor (and any related ktor helper daos if
@@ -738,8 +801,7 @@ fun CodeBlock.Builder.addReplaceSyncableEntitiesIntoDbCode(resultVarName: String
 /**
  * Add a CodeBlock for a repo delegate to DAO function. This will
  *
- * 1) Set the primary key on any entities that don't have a primary key set if running
- * on SQLite when running an insert
+ * 1) Set the primary key on any entities that don't have a primary key set
  * 2) Update the change sequence numbers when running an update
  * 3) Pass the work to the DAO and return the result
  *
@@ -754,6 +816,31 @@ fun CodeBlock.Builder.addRepoDelegateToDaoCode(daoFunSpec: FunSpec, isAlwaysSqli
     if(daoFunSpec.hasAnyAnnotation(Update::class.java, Delete::class.java, Insert::class.java)) {
         val entityParam = daoFunSpec.parameters.first()
         val entityComponentType = entityParam.type.unwrapListOrArrayComponentType()
+
+        if(daoFunSpec.hasAnyAnnotation(Update::class.java, Insert::class.java)
+                && entityComponentType.hasAttachments(processingEnv)) {
+            val isList = entityParam.type.isListOrArray()
+
+            if(!daoFunSpec.isSuspended)
+                beginRunBlockingControlFlow()
+
+            if(isList)
+                beginControlFlow("${entityParam.name}.forEach")
+
+            val entityClassName = entityComponentType as ClassName
+
+            add("_repo.%M(%L.%M())\n",
+                    MemberName("com.ustadmobile.door.attachments", "storeAttachment"),
+                    if(isList) "it" else entityParam.name,
+                    MemberName(entityClassName.packageName, "asEntityWithAttachment"))
+
+            if(isList)
+                endControlFlow()
+
+            if(!daoFunSpec.isSuspended)
+                endControlFlow()
+        }
+
         if(entityComponentType.hasSyncableEntities(processingEnv)) {
             syncableEntityInfo = SyncableEntityInfo(entityComponentType as ClassName, processingEnv)
             if(daoFunSpec.hasAnyAnnotation(Update::class.java)) {
@@ -915,6 +1002,14 @@ class DbProcessorRepository: AbstractDbProcessor() {
                         overrideKtorHelpers = true)
                     .build()
                     .writeToDirsFromArg(OPTION_ANDROID_OUTPUT)
+            dbTypeEl.allDbEntities(processingEnv).mapNotNull { it as? TypeElement }
+                    .filter { it.entityHasAttachments }.forEach { entityEl ->
+                        FileSpec.builder(entityEl.packageName, "${entityEl.simpleName}$SUFFIX_ENTITY_WITH_ATTACHMENTS_ADAPTER")
+                                .addEntityWithAttachmentAdapterType(entityEl, processingEnv)
+                                .addAsEntityWithAttachmentAdapterExtensionFun(entityEl)
+                                .build()
+                                .writeToDirsFromArg(listOf(OPTION_JVM_DIRS, OPTION_ANDROID_OUTPUT))
+            }
         }
 
         val daos = roundEnv.getElementsAnnotatedWith(Dao::class.java)
@@ -947,10 +1042,10 @@ class DbProcessorRepository: AbstractDbProcessor() {
 
 
     companion object {
-        const val SUFFIX_REPOSITORY = "Repo"
-
         //including the underscore as it should
         const val SUFFIX_REPOSITORY2 = "_Repo"
+
+        const val SUFFIX_ENTITY_WITH_ATTACHMENTS_ADAPTER = "_EwaAdapter"
 
         /**
          * When creating a repository, the Syncable DAO is constructed (JDBC). This is because

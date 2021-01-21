@@ -11,6 +11,6 @@ interface EntityWithAttachment {
 
     var attachmentSize: Int
 
-    var tableName: String
+    val tableName: String
 
 }
