@@ -8,6 +8,7 @@ import com.ustadmobile.lib.db.entities.StatementEntityWithDisplay
 
 interface ReportDetailView: UstadDetailView<ReportWithSeriesWithFilters> {
 
+    var isAdmin: Boolean
     var statementList: List<DataSource.Factory<Int, StatementEntityWithDisplay>>?
 
     var chartData: ChartData?

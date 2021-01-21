@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -23,8 +24,6 @@ class ReportFilterEditPresenter(context: Any,
                                 di: DI,
                                 lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
-
-    val reportFilterUids = atomic(1L)
 
     val fieldRequiredText = systemImpl.getString(MessageID.field_required_prompt, context)
 
@@ -121,8 +120,8 @@ class ReportFilterEditPresenter(context: Any,
     }
 
 
-    fun handleFieldOptionSelected(fieldOption: MessageIdOption) {
-        when (fieldOption.code) {
+    fun handleFieldOptionSelected(fieldOption: IdOption) {
+        when (fieldOption.optionId) {
             ReportFilter.FIELD_PERSON_GENDER -> {
 
                 view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
@@ -136,7 +135,7 @@ class ReportFilterEditPresenter(context: Any,
             ReportFilter.FIELD_PERSON_AGE -> {
 
                 view.conditionsOptions = listOf(ConditionOption.GREATER_THAN_CONDITION,
-                        ConditionOption.LESS_THAN_CONDITION).map { ConditionMessageIdOption(it, context) }
+                        ConditionOption.LESS_THAN_CONDITION, ConditionOption.BETWEEN_CONDITION).map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.INTEGER
 
             }
@@ -161,15 +160,20 @@ class ReportFilterEditPresenter(context: Any,
                 view.conditionsOptions = listOf(ConditionOption.BETWEEN_CONDITION)
                         .map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.BETWEEN
-
-
             }
         }
 
     }
 
-    fun handleConditionOptionSelected(conditionOption: MessageIdOption) {
-
+    fun handleConditionOptionSelected(conditionOption: IdOption) {
+        when(conditionOption.optionId){
+            ReportFilter.CONDITION_GREATER_THAN, ReportFilter.CONDITION_LESS_THAN ->{
+                view.valueType = FilterValueType.INTEGER
+            }
+            ReportFilter.CONDITION_BETWEEN ->{
+                view.valueType = FilterValueType.BETWEEN
+            }
+        }
     }
 
 
@@ -192,7 +196,9 @@ class ReportFilterEditPresenter(context: Any,
         } else {
             view.conditionsErrorText = null
         }
-        if (entity.reportFilterDropDownValue == 0 && entity.reportFilterValue.isNullOrBlank()) {
+        if (entity.reportFilterDropDownValue == 0 && entity.reportFilterValue.isNullOrBlank() &&
+                (entity.reportFilterValueBetweenX.isNullOrEmpty() ||
+                entity.reportFilterValueBetweenY.isNullOrEmpty())) {
 
             // if gender, value can be 0 for unset gender
             if (entity.reportFilterField == ReportFilter.FIELD_PERSON_GENDER) {
@@ -204,8 +210,6 @@ class ReportFilterEditPresenter(context: Any,
         } else {
             view.valuesErrorText = null
         }
-
-        entity.reportFilterUid = reportFilterUids.incrementAndGet()
 
         if(entity.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY){
             entity.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()

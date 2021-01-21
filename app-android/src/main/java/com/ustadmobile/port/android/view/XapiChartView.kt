@@ -28,16 +28,18 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             "#E91E63", "#9C27B0", "#795548", "#4CAF50", "#E52B50", "#FFBF00", "#9966CC", "#FBCEB1",
             "#7FFFD4", "#007FFF", "#89CFF0")
 
+    var chartView: CombinedChart? = null
+
     fun setChartData(chartData: ChartData?) {
         if (chartData == null) {
             return
         }
         removeAllViewsInLayout()
-        val chart = createChart(chartData)
-        addView(chart)
+        chartView = createChart(chartData)
+        addView(chartView)
     }
 
-    private fun createChart(chartData: ChartData): View {
+    private fun createChart(chartData: ChartData): CombinedChart {
 
         val combinedChart = CombinedChart(context).apply {
             layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,

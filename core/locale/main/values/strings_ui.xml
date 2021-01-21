@@ -70,6 +70,7 @@
     <string name='exams'>Exams</string>
     <string name='reports'>Reports</string>
     <string name="choose_template">Choose template</string>
+    <string name="save_as_template">Save as \ntemplate</string>
     <string name='contents'>Contents</string>
     <string name='students'>Students</string>
     <string name='add_a_student'>Add a student</string>
@@ -281,7 +282,7 @@
     <string name="number_active_users" value="204">Content usage - number of active users</string>
     <string name="average_usage_time_per_user"  value="205">Content usage - average usage time per user</string>
     <string name="number_students_completed" value="206">Content usage - number of students who completed content</string>
-    <string name="percen_students_completed" value="207">Content usage - percentage of students who completed content</string>
+    <string name="percent_students_completed" value="207">Content usage - percentage of students who completed content</string>
     <string name="total_attendances"  value="208">Attendance - total attendances</string>
     <string name="total_absences"  value="209">Attendance - total absences</string>
     <string name="total_lates"  value="210">Attendance - total lates</string>

@@ -6,7 +6,7 @@
     <data>
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
-        <import type="com.ustadmobile.core.util.MessageIdOption"/>
+        <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
 
@@ -25,11 +25,11 @@
 
         <variable
             name="typeSelectionListener"
-            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
         <variable
             name="typeOptions"
-            type="java.util.List&lt;MessageIdOption&gt;"/>
+            type="java.util.List&lt;IdOption&gt;"/>
 
         <variable
             name="questionsVisibility"

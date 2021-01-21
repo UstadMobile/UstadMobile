@@ -7,7 +7,7 @@
 
 
         <import type="android.view.View" />
-        <import type="com.ustadmobile.core.util.MessageIdOption" />
+        <import type="com.ustadmobile.core.util.IdOption" />
 
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView" />
 
@@ -19,27 +19,27 @@
 
         <variable
             name="fieldSelectionListener"
-            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
         <variable
             name="fieldOptions"
-            type="java.util.List&lt;MessageIdOption&gt;" />
+            type="java.util.List&lt;IdOption&gt;" />
 
         <variable
             name="conditionSelectionListener"
-            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
         <variable
             name="conditionOptions"
-            type="java.util.List&lt;MessageIdOption&gt;" />
+            type="java.util.List&lt;IdOption&gt;" />
 
         <variable
             name="valuesSelectionListener"
-            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
         <variable
             name="dropDownValueOptions"
-            type="java.util.List&lt;MessageIdOption&gt;" />
+            type="java.util.List&lt;IdOption&gt;" />
 
         <variable
             name="reportFilter"
@@ -102,10 +102,10 @@
             android:layout_height="wrap_content"
             app:errorEnabled="true"
             app:errorText="@{conditionsErrorText}"
-            app:layout_constraintWidth_percent="0.3"
             android:layout_marginHorizontal="@dimen/dimen_8dp"
             android:layout_marginTop="@dimen/dimen_8dp"
             app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintWidth_percent="0.4"
             app:layout_constraintTop_toBottomOf="@+id/fragment_report_filter_edit_dialog_field_textinputlayout">
 
             <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
@@ -144,7 +144,6 @@
 
         </com.google.android.material.textfield.TextInputLayout>
 
-
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/fragment_report_filter_edit_dialog_values_number_textinputlayout"
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
@@ -167,11 +166,60 @@
                 android:hint="@string/report_filter_edit_values"/>
         </com.google.android.material.textfield.TextInputLayout>
 
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_report_filter_edit_dialog_values_between_x_textinputlayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            app:errorEnabled="true"
+            app:errorText="@{valuesErrorText}"
+            tools:visibility="gone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_report_filter_edit_dialog_condition_textinputlayout"
+            app:layout_constraintEnd_toStartOf="@+id/fragment_report_filter_edit_dialog_values_between_y_textinputlayout">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fragment_report_filter_edit_dialog_values_between_x_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="@={reportFilter.reportFilterValueBetweenX}"
+                android:hint="@string/report_filter_edit_values"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/fragment_report_filter_edit_dialog_values_between_y_textinputlayout"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            app:errorEnabled="true"
+            app:errorText="@{valuesErrorText}"
+            tools:visibility="gone"
+            app:layout_constraintStart_toEndOf="@id/fragment_report_filter_edit_dialog_values_between_x_textinputlayout"
+            app:layout_constraintTop_toBottomOf="@+id/fragment_report_filter_edit_dialog_condition_textinputlayout"
+            app:layout_constraintEnd_toEndOf="parent">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/fragment_report_filter_edit_dialog_values_between_y_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:text="@={reportFilter.reportFilterValueBetweenY}"
+                android:hint="@string/report_filter_edit_values"/>
+        </com.google.android.material.textfield.TextInputLayout>
+
+
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/item_filter_rv"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:itemCount="2"
+            tools:visibility="gone"
             app:layout_constraintTop_toBottomOf="@+id/fragment_report_filter_edit_dialog_condition_textinputlayout"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -180,6 +228,7 @@
             layout="@layout/item_createnew"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            tools:visibility="gone"
             app:onClickNew="@{() -> activityEventHandler.onClickNewItemFilter()}"
             app:createNewText="@{createNewFilter}"
             app:layout_constraintTop_toBottomOf="@+id/item_filter_rv"

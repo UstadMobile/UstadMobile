@@ -17,6 +17,7 @@ import com.toughra.ustadmobile.databinding.ItemReportEditFilterBinding
 import com.toughra.ustadmobile.databinding.ItemReportEditSeriesBinding
 import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
@@ -36,7 +37,7 @@ interface ReportEditFragmentEventHandler {
 
 class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), ReportEditView,
         ReportEditFragmentEventHandler,
-        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption> {
+        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption> {
 
     private var mBinding: FragmentReportEditBinding? = null
 
@@ -280,8 +281,12 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
         }
     }
 
-    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: MessageIdOption) {
-        mPresenter?.handleXAxisSelected(selectedOption)
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
+        if(view?.id == mBinding?.fragmentEditReportDialogXaxisText?.id){
+            mPresenter?.handleXAxisSelected(selectedOption)
+        }else if(view?.id == mBinding?.fragmentEditReportDialogDaterangeText?.id){
+
+        }
     }
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {

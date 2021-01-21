@@ -17,17 +17,15 @@ import com.toughra.ustadmobile.databinding.FragmentReportFilterEditBinding
 import com.toughra.ustadmobile.databinding.ItemUidlabelFilterListBinding
 import com.ustadmobile.core.controller.ReportFilterEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportFilterEditView
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ReportFilter
-import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
-import com.ustadmobile.lib.db.entities.UidAndLabel
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
+import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
 
 interface ReportFilterEditFragmentEventHandler {
@@ -37,7 +35,7 @@ interface ReportFilterEditFragmentEventHandler {
     fun onClickRemoveUidAndLabel(uidAndLabel: UidAndLabel)
 }
 class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilterEditView,
-        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption>,
+        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>,
         ReportFilterEditFragmentEventHandler{
 
     private var mBinding: FragmentReportFilterEditBinding? = null
@@ -58,6 +56,8 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             mBinding?.fragmentReportFilterEditDialogConditionText?.text?.clear()
             mBinding?.fragmentReportFilterEditDialogValuesText?.text?.clear()
             mBinding?.fragmentReportFilterEditDialogValuesNumberText?.text?.clear()
+            mBinding?.fragmentReportFilterEditDialogValuesBetweenXText?.text?.clear()
+            mBinding?.fragmentReportFilterEditDialogValuesBetweenYText?.text?.clear()
         }
 
     override var dropDownValueOptions: List<MessageIdOption>? = null
@@ -81,6 +81,12 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             mBinding?.itemFilterCreateNew?.itemCreatenewLayout?.visibility =
             if(value == ReportFilterEditPresenter.FilterValueType.LIST)
                 View.VISIBLE else View.GONE
+            mBinding?.fragmentReportFilterEditDialogValuesBetweenXTextinputlayout?.visibility =
+                    if(value == ReportFilterEditPresenter.FilterValueType.BETWEEN)
+                        View.VISIBLE else View.GONE
+            mBinding?.fragmentReportFilterEditDialogValuesBetweenYTextinputlayout?.visibility =
+                    if(value == ReportFilterEditPresenter.FilterValueType.BETWEEN)
+                        View.VISIBLE else View.GONE
         }
 
     override var fieldErrorText: String? = null
@@ -219,7 +225,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
         uidAndLabelFilterItemRecyclerAdapter = null
     }
 
-    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: MessageIdOption) {
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
         mPresenter?.handleFieldOptionSelected(selectedOption)
         mPresenter?.handleConditionOptionSelected(selectedOption)
     }
@@ -231,7 +237,7 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
     override fun onClickNewItemFilter() {
         onSaveStateToBackStackStateHandle()
         if(entity?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY) {
-            navigateToEditEntity(null, R.id.content_entry_list_dest, ContentEntry::class.java)
+            navigateToPickEntityFromList(ContentEntry::class.java, R.id.home_content_dest)
         }
     }
 

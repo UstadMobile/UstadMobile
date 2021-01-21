@@ -1,9 +1,14 @@
 package com.ustadmobile.port.android.view
 
+import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
 import android.os.Bundle
+import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.FileProvider
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
@@ -31,11 +36,16 @@ import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
+import java.io.File
+import java.io.FileOutputStream
+import java.io.IOException
 import kotlin.math.abs
 
 
 interface ReportDetailFragmentEventHandler {
     fun onClickAddToDashboard(report: ReportWithSeriesWithFilters)
+    fun onClickExportButton()
+    fun onClickAddAsTemplate(report: ReportWithSeriesWithFilters)
 }
 
 class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(), ReportDetailView, ReportDetailFragmentEventHandler {
@@ -60,18 +70,39 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
     class RecyclerViewChartAdapter(val activityEventHandler: ReportDetailFragmentEventHandler,
                                    var presenter: ReportDetailPresenter?) : ListAdapter<ChartData, ChartViewHolder>(DIFFUTIL_CHART) {
 
+        var isAdmin = false
+        var chartBinding: ItemReportChartHeaderBinding? = null
+        val boundChartViewHolder = mutableListOf<ChartViewHolder>()
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChartViewHolder {
-            return ChartViewHolder(ItemReportChartHeaderBinding.inflate(
+            val mBinding = ItemReportChartHeaderBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false).apply {
                 mPresenter = presenter
                 eventHandler = activityEventHandler
-            })
+            }
+            chartBinding = mBinding
+            return ChartViewHolder(mBinding)
         }
 
         override fun onBindViewHolder(holder: ChartViewHolder, position: Int) {
             val item = getItem(position)
             holder.itemBinding.chart = item
+            holder.itemBinding.isAdmin = isAdmin
             holder.itemBinding.previewChartView.setChartData(item)
+            boundChartViewHolder += holder
+        }
+
+        override fun onViewRecycled(holder: ChartViewHolder) {
+            super.onViewRecycled(holder)
+            boundChartViewHolder -= holder
+        }
+
+
+        override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
+            super.onDetachedFromRecyclerView(recyclerView)
+            boundChartViewHolder.clear()
+            presenter = null
+            chartBinding = null
         }
 
     }
@@ -128,6 +159,16 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
 
     private var adapterSourceHolderList = mutableListOf<AdapterSourceHolder>()
 
+    override var isAdmin: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+            chartAdapter?.isAdmin = value
+            chartAdapter?.boundChartViewHolder?.forEach {
+                it.itemBinding.isAdmin = value
+            }
+        }
+
     override var statementList: List<DataSource.Factory<Int, StatementEntityWithDisplay>>? = null
         get() = field
         set(value) {
@@ -137,7 +178,8 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
 
                 repeat(sizeDiff) {
                     val statementAdapter = StatementViewRecyclerAdapter(this, mPresenter)
-                    val seriesHeaderAdapter = SimpleHeadingRecyclerAdapter(chartData?.seriesData?.get(it)?.series?.reportSeriesName ?: "Label not found")
+                    val seriesHeaderAdapter = SimpleHeadingRecyclerAdapter(chartData?.seriesData?.get(it)?.series?.reportSeriesName
+                            ?: "Label not found")
                     seriesHeaderAdapter.visible = true
                     val sourceHolder = AdapterSourceHolder(statementAdapter, seriesHeaderAdapter, dbRepo, this)
                     adapterSourceHolderList.add(sourceHolder)
@@ -238,6 +280,40 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         if (report.reportUid == 0L) {
             findNavController().popBackStack(R.id.report_edit_dest, true)
         }
+    }
+
+    override fun onClickExportButton() {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            putExtra(Intent.EXTRA_STREAM, getBitmapFromView(chartAdapter?.chartBinding?.
+            previewChartView?.chartView?.chartBitmap))
+            type = "image/png"
+        }
+        startActivity(Intent.createChooser(intent, "Export"))
+
+    }
+
+    fun getBitmapFromView(bmp: Bitmap?): Uri? {
+        var bmpUri: Uri? = null
+        try {
+
+            val file = File(context?.externalCacheDir,
+                    System.currentTimeMillis().toString() + ".png")
+            val out = FileOutputStream(file)
+            bmp?.compress(Bitmap.CompressFormat.PNG, 90, out)
+            out.close()
+            bmpUri = FileProvider.getUriForFile(requireContext(),
+                    "${context?.packageName}.provider", file)
+
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        return bmpUri
+    }
+
+    override fun onClickAddAsTemplate(report: ReportWithSeriesWithFilters) {
+        mPresenter?.handleOnClickAddAsTemplate(report)
     }
 
 

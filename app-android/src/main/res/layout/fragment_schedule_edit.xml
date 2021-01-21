@@ -20,7 +20,7 @@
 
         <variable
             name="dayOptions"
-            type="java.util.List&lt;com.ustadmobile.core.util.MessageIdOption&gt;"/>
+            type="java.util.List&lt;com.ustadmobile.core.util.IdOption&gt;"/>
 
         <variable
             name="fromTimeError"

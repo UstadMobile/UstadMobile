@@ -9,13 +9,17 @@ open class ReportFilter {
 
     var reportFilterSeriesUid: Long = 0
 
-    var reportFilterField: Int = 0
+    var reportFilterField: Int = FIELD_PERSON_GENDER
 
     var reportFilterCondition: Int = 0
 
     var reportFilterValue: String? = null
 
     var reportFilterDropDownValue: Int = 0
+
+    var reportFilterValueBetweenX: String? = null
+
+    var reportFilterValueBetweenY: String? = null
 
     companion object {
 
@@ -53,6 +57,8 @@ open class ReportFilter {
         const val VALUE_FLAG_DROPDOWN = 2
 
         const val VALUE_FLAG_LIST = 3
+
+        const val VALUE_FLAG_BETWEEN = 4
 
     }
 

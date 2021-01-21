@@ -5,7 +5,7 @@
 
     <data>
 
-        <import type="com.ustadmobile.core.util.MessageIdOption" />
+        <import type="com.ustadmobile.core.util.IdOption" />
 
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView" />
 
@@ -26,27 +26,27 @@
 
         <variable
             name="visualTypeSelectionListener"
-            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
         <variable
             name="visualTypeOptions"
-            type="java.util.List&lt;MessageIdOption&gt;" />
+            type="java.util.List&lt;IdOption&gt;" />
 
         <variable
             name="dataSetSelectionListener"
-            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
         <variable
             name="dataSetOptions"
-            type="java.util.List&lt;MessageIdOption&gt;" />
+            type="java.util.List&lt;IdOption&gt;" />
 
         <variable
             name="subgroupSelectionListener"
-            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
         <variable
             name="subgroupOptions"
-            type="java.util.List&lt;MessageIdOption&gt;" />
+            type="java.util.List&lt;IdOption&gt;" />
 
         <variable
             name="showDeleteButton"

@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.ContentEntryList2View.Companion.ARG_CONTENT_FILTER
@@ -183,7 +184,7 @@ class ContentEntryList2Presenter(context: Any, arguments: Map<String, String>, v
         view.showContentEntryAddOptions(parentEntryUid)
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
+    override fun handleClickSortOrder(sortOption: IdOption) {
         val sortOrder = (sortOption as? ContentEntryListSortOption)?.sortOrder ?: return
         if (sortOrder != currentSortOrder) {
             currentSortOrder = sortOrder

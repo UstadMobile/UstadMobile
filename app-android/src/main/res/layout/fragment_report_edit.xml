@@ -9,7 +9,7 @@
 
         <import type="android.text.InputType" />
 
-        <import type="com.ustadmobile.core.util.MessageIdOption" />
+        <import type="com.ustadmobile.core.util.IdOption" />
 
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView" />
 
@@ -41,11 +41,15 @@
 
         <variable
             name="xAxisSelectionListener"
-            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
         <variable
             name="xAxisOptions"
-            type="java.util.List&lt;MessageIdOption&gt;" />
+            type="java.util.List&lt;IdOption&gt;" />
+
+        <variable
+            name="dateRangeOptions"
+            type="java.util.List&lt;IdOption&gt;" />
 
     </data>
 

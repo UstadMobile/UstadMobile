@@ -10,10 +10,8 @@ import com.ustadmobile.core.view.ReportEditView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportSeries
-import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.list
 import org.kodein.di.DI
@@ -24,6 +22,8 @@ class ReportDetailPresenter(context: Any,
                             di: DI, lifecycleOwner: DoorLifecycleOwner)
     : UstadDetailPresenter<ReportDetailView, ReportWithSeriesWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
+    private var loggedInPerson: Person? = null
+
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
@@ -31,6 +31,9 @@ class ReportDetailPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+        GlobalScope.launch(doorMainDispatcher()) {
+
+        }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ReportWithSeriesWithFilters? {
@@ -42,10 +45,10 @@ class ReportDetailPresenter(context: Any,
         } ?: Report()
 
 
-        val series = if(!report.reportSeries.isNullOrEmpty()){
+        val series = if (!report.reportSeries.isNullOrEmpty()) {
             safeParseList(di, ReportSeries.serializer().list,
                     ReportSeries::class, report.reportSeries ?: "")
-        }else{
+        } else {
             listOf()
         }
 
@@ -71,15 +74,17 @@ class ReportDetailPresenter(context: Any,
 
     private fun setReportData(reportWithFilters: ReportWithSeriesWithFilters) {
         view.loading = true
-        GlobalScope.launch {
+        GlobalScope.launch(doorMainDispatcher()) {
             val chartData = db.generateChartData(reportWithFilters, context, systemImpl, loggedInPersonUid)
             val statementList = db.generateStatementList(reportWithFilters, loggedInPersonUid)
-            view.runOnUiThread(Runnable {
-                view.chartData = chartData
-                view.statementList = statementList
-                view.loading = false
-            })
+            view.chartData = chartData
+            view.statementList = statementList
+            view.loading = false
 
+            loggedInPerson = withTimeoutOrNull(2000){
+                db.personDao.findByUidAsync(loggedInPersonUid)
+            }
+            view.isAdmin = loggedInPerson?.admin ?: false
         }
 
     }
@@ -100,16 +105,19 @@ class ReportDetailPresenter(context: Any,
      *
      */
     fun handleOnClickAddFromDashboard(report: ReportWithSeriesWithFilters) {
-        GlobalScope.launch(){
+        GlobalScope.launch() {
             report.reportOwnerUid = loggedInPersonUid
             repo.reportDao.insert(report)
         }
     }
 
-    companion object {
-
-
+    fun handleOnClickAddAsTemplate(report: ReportWithSeriesWithFilters) {
+        GlobalScope.launch(doorMainDispatcher()) {
+            report.isTemplate = true
+            report.reportUid = 0
+            report.reportOwnerUid = 0
+            repo.reportDao.insert(report)
+        }
     }
-
 
 }

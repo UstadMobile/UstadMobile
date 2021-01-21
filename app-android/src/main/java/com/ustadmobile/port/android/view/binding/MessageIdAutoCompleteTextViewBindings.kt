@@ -4,12 +4,12 @@ import android.widget.AdapterView
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView
 import com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
 
 @BindingAdapter(value=["messageIdOptions", "selectedMessageIdOption"], requireAll =  false)
-fun MessageIdAutoCompleteTextView.setMessageIdOptions(messageIdOptions: MutableList<MessageIdOption>?, selectedMessageIdOption: Int?) {
+fun MessageIdAutoCompleteTextView.setMessageIdOptions(messageIdOptions: MutableList<IdOption>?, selectedMessageIdOption: Int?) {
     val sortOptionsToUse = messageIdOptions ?: mutableListOf()
 
     this.takeIf { sortOptionsToUse != this.dropDownOptions}?.dropDownOptions = sortOptionsToUse
@@ -30,6 +30,6 @@ fun MessageIdAutoCompleteTextView.setSelectedMessageIdListener(inverseBindingLis
 
 
 @BindingAdapter("onMessageIdOptionSelected")
-fun MessageIdAutoCompleteTextView.setOnMessageIdOptionSelected(itemSelectedListener: DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption>?) {
+fun MessageIdAutoCompleteTextView.setOnMessageIdOptionSelected(itemSelectedListener: DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>?) {
     this.onDropDownListItemSelectedListener = itemSelectedListener
 }

@@ -111,9 +111,9 @@ class ReportEditPresenter(context: Any,
         AVERAGE_USAGE_TIME_PER_USER(ReportSeries.AVERAGE_USAGE_TIME_PER_USER,
                 MessageID.average_usage_time_per_user),
         NUMBER_STUDENTS_COMPLETED(ReportSeries.NUMBER_OF_STUDENTS_COMPLETED_CONTENT,
-                MessageID.number_active_users),
+                MessageID.number_students_completed),
         PERCENT_STUDENTS_COMPLETED(ReportSeries.PERCENT_OF_STUDENTS_COMPLETED_CONTENT,
-                MessageID.number_active_users),
+                MessageID.percent_students_completed),
         TOTAL_ATTENDANCE(ReportSeries.TOTAL_ATTENDANCE,
                 MessageID.total_attendances),
         TOTAL_ABSENCES(ReportSeries.TOTAL_ABSENCES,
@@ -335,8 +335,8 @@ class ReportEditPresenter(context: Any,
         }
     }
 
-    fun handleXAxisSelected(selectedOption: MessageIdOption) {
-        if (selectedOption.code == Report.DAY || selectedOption.code == Report.MONTH || selectedOption.code == Report.WEEK) {
+    fun handleXAxisSelected(selectedOption: IdOption) {
+        if (selectedOption.optionId == Report.DAY || selectedOption.optionId == Report.MONTH || selectedOption.optionId == Report.WEEK) {
             view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
                     .filter { it.code == Report.GENDER ||
                             it.code == Report.CONTENT_ENTRY ||
