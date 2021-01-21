@@ -1,6 +1,7 @@
 package com.ustadmobile.door.attachments
 
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.DoorDatabaseRepository.Companion.DOOR_ATTACHMENT_URI_PREFIX
 import com.ustadmobile.door.ext.copyAndGetMd5
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -14,6 +15,10 @@ import java.nio.file.Paths
 actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: EntityWithAttachment) {
     val attachmentUri = entityWithAttachment.attachmentUri ?: throw IllegalArgumentException("Attachment URI is null!")
     val attachmentDirVal = requireAttachmentDirFile()
+
+    if(attachmentUri.startsWith(DOOR_ATTACHMENT_URI_PREFIX))
+        //do nothing - attachment is already stored
+        return
 
     withContext(Dispatchers.IO) {
         val srcFile = Paths.get(URI(attachmentUri)).toFile()

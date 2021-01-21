@@ -12,6 +12,10 @@ import com.ustadmobile.door.DoorDatabaseRepository
  * The attachmentUri variable will then be set to a uri in the form of:
  *
  * door-attachment://tablename/md5sum
+ *
+ * If the attachmentUri is already stored (e.g. it is prefixed with door-attachment://) then nothing
+ * will be done
+ *
  */
 expect suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: EntityWithAttachment)
 
