@@ -478,3 +478,29 @@ fun CodeBlock.Builder.addGenerateAttachmentTriggerSqlite(entity: TypeElement, ex
 
     return this
 }
+
+/**
+ * Add code that will generate triggers to catch Zombie attachment uris on Postgres
+ */
+fun CodeBlock.Builder.addGenerateAttachmentTriggerPostgres(entity: TypeElement, execSqlFn: String) : CodeBlock.Builder {
+    val attachmentInfo = EntityAttachmentInfo(entity)
+    val pkFieldName = entity.enclosedElementsWithAnnotation(PrimaryKey::class.java).first().simpleName
+    add("$execSqlFn(%S)\n", """
+        CREATE OR REPLACE FUNCTION attach_${entity.simpleName}_fn() RETURNS trigger AS ${'$'}${'$'}
+        BEGIN
+        INSERT INTO ZombieAttachmentData(zaTableName, zaPrimaryKey, zaUri) 
+        SELECT '${entity.simpleName}' AS zaTableName, OLD.${pkFieldName} AS zaPrimaryKey, OLD.${attachmentInfo.uriPropertyName} AS zaUri
+        WHERE (SELECT COUNT(*) FROM ${entity.simpleName} WHERE ${attachmentInfo.md5PropertyName} = OLD.${attachmentInfo.md5PropertyName}) = 0;
+        RETURN null;
+        END ${'$'}${'$'}
+        LANGUAGE plpgsql
+    """.trimIndent())
+    add("$execSqlFn(%S)\n", """
+        CREATE TRIGGER attach_${entity.simpleName}_trig
+        AFTER UPDATE ON ${entity.simpleName}
+        FOR EACH ROW WHEN (OLD.${attachmentInfo.uriPropertyName} IS NOT NULL)
+        EXECUTE PROCEDURE attach_${entity.simpleName}_fn();
+    """.trimIndent())
+
+    return this
+}

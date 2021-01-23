@@ -843,10 +843,9 @@ class DbProcessorJdbcKotlin: AbstractDbProcessor() {
                     if(dbProductType == DoorDbType.SQLITE) {
                         codeBlock.addGenerateAttachmentTriggerSqlite(entityType, "_stmt.executeUpdate")
                     }else {
-                        //TODO: Add postgres trigger
+                        codeBlock.addGenerateAttachmentTriggerPostgres(entityType, "_stmt.executeUpdate")
                     }
                 }
-
 
                 codeBlock.add("//End: Create table ${entityType.simpleName} for $dbTypeName\n\n")
             }
