@@ -167,7 +167,7 @@ open class Report {
                 Report().apply {
                     reportUid = TEMPLATE_CONTENT_USAGE_BY_CLASS_UID
                     reportTitle = "Content usage by class"
-                    reportDescription = "Percentage of students attending over time"
+                    reportDescription = "Total content usage duration subgroup by class"
                     xAxis = CLASS
                     isTemplate = true
                     reportSeries = """
@@ -176,7 +176,7 @@ open class Report {
                             "reportSeriesName ": " Series 1",
                             "reportSeriesYAxis": ${ReportSeries.TOTAL_DURATION},
                             "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
-                            "reportSeriesSubGroup": $CONTENT_ENTRY
+                            "reportSeriesSubGroup": $NONE
                         }]
                             """.trimIndent()
                 },
@@ -190,8 +190,8 @@ open class Report {
                             [{
                                 "reportSeriesUid": 0,
                                 "reportSeriesName": "Series 1",
-                                "reportSeriesYAxis": ${ReportSeries.NUMBER_ACTIVE_USERS },
-                                "reportSeriesVisualType": ${ReportSeries.BAR_CHART },
+                                "reportSeriesYAxis": ${ReportSeries.NUMBER_ACTIVE_USERS},
+                                "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
                                 "reportSeriesSubGroup": $NONE
                             }]
                             """.trimIndent()
