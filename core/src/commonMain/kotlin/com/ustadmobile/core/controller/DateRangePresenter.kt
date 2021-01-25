@@ -49,10 +49,6 @@ class DateRangePresenter(context: Any,
     class RelToMessageIdOption(day: RelToOption, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
-    /*
-     * TODO: Add any required one to many join helpers here - use these templates (type then hit tab)
-     * onetomanyhelper: Adds a one to many relationship using OneToManyJoinEditHelper
-     */
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 

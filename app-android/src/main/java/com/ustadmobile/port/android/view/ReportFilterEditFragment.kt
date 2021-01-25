@@ -6,7 +6,9 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
+import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
+import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -20,8 +22,11 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ReportFilterEditView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -186,6 +191,9 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
         super.onViewCreated(view, savedInstanceState)
         setEditFragmentTitle(R.string.edit_filters, R.string.edit_filters)
 
+
+        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
+
         findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 ContentEntry::class.java) {
             val entry = it.firstOrNull() ?: return@observeResult
@@ -196,8 +204,6 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             })
         }
 
-
-        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
         uidAndLabelFilterItemRecyclerAdapter?.presenter = mPresenter
 
     }
@@ -237,7 +243,10 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
     override fun onClickNewItemFilter() {
         onSaveStateToBackStackStateHandle()
         if(entity?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY) {
-            navigateToPickEntityFromList(ContentEntry::class.java, R.id.home_content_dest)
+            navigateToPickEntityFromList(ContentEntry::class.java, R.id.content_entry_list_dest,
+                    bundleOf(ContentEntryList2View.ARG_CONTENT_FILTER to
+                                    ContentEntryList2View.ARG_LIBRARIES_CONTENT,
+                            UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()))
         }
     }
 

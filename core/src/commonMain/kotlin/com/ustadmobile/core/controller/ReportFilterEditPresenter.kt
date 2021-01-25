@@ -12,6 +12,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.atomicfu.atomic
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -26,6 +27,8 @@ class ReportFilterEditPresenter(context: Any,
     : UstadEditPresenter<ReportFilterEditView, ReportFilter>(context, arguments, view, di, lifecycleOwner) {
 
     val fieldRequiredText = systemImpl.getString(MessageID.field_required_prompt, context)
+
+    val uidhelperDeferred = CompletableDeferred<Boolean>()
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.JSON
@@ -47,8 +50,6 @@ class ReportFilterEditPresenter(context: Any,
         IS_NOT_CONDITION(ReportFilter.CONDITION_IS_NOT, MessageID.condition_is_not),
         GREATER_THAN_CONDITION(ReportFilter.CONDITION_GREATER_THAN, MessageID.condition_greater_than),
         LESS_THAN_CONDITION(ReportFilter.CONDITION_LESS_THAN, MessageID.condition_less_than),
-
-        //WITHIN_RANGE_CONDITION(ReportFilter.CONDITION_WITHIN_RANGE, MessageID.class_id),
         BETWEEN_CONDITION(ReportFilter.CONDITION_BETWEEN, MessageID.condition_between),
         IN_LIST_CONDITION(ReportFilter.CONDITION_IN_LIST, MessageID.condition_in_list),
         NOT_IN_LIST_CONDITION(ReportFilter.CONDITION_NOT_IN_LIST, MessageID.condition_not_in_list)
@@ -57,11 +58,13 @@ class ReportFilterEditPresenter(context: Any,
     class ConditionMessageIdOption(day: ConditionOption, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
-    enum class ValueOption(val optionVal: Int, val messageId: Int) {
-
+    enum class ContentCompletionStatusOption(val optionVal: Int, val messageId: Int) {
+        COMPLETED(ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED, MessageID.completed),
+        PASSED(ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED, MessageID.passed),
+        FAILED(ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED, MessageID.failed)
     }
 
-    class ValueMessageIdOption(day: ValueOption, context: Any)
+    class ContentCompletionStatusMessageIdOption(day: ContentCompletionStatusOption, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
 
@@ -77,7 +80,10 @@ class ReportFilterEditPresenter(context: Any,
             UidAndLabel.serializer().list, this, UidAndLabel::class) { uid = it }
 
     fun handleAddOrEditUidAndLabel(entry: UidAndLabel) {
-        uidAndLabelOneToManyHelper.onEditResult(entry)
+        GlobalScope.launch(doorMainDispatcher()){
+            uidhelperDeferred.await()
+            uidAndLabelOneToManyHelper.onEditResult(entry)
+        }
     }
 
     fun handleRemoveUidAndLabel(entry: UidAndLabel) {
@@ -88,12 +94,12 @@ class ReportFilterEditPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         view.fieldOptions = FieldOption.values().map { FieldMessageIdOption(it, context) }
-        view.conditionsOptions = ConditionOption.values().map { ConditionMessageIdOption(it, context) }
         view.uidAndLabelList = uidAndLabelOneToManyHelper.liveList
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ReportFilter? {
-        val entityJsonStr = arguments[ARG_ENTITY_JSON] ?: ""
+        super.onLoadFromJson(bundle)
+        val entityJsonStr = bundle[ARG_ENTITY_JSON] ?: ""
 
         val entity = safeParse(di, ReportFilter.serializer(), entityJsonStr)
 
@@ -103,17 +109,23 @@ class ReportFilterEditPresenter(context: Any,
         if (entity.reportFilterCondition != 0) {
             handleConditionOptionSelected(ConditionOption.values().map { ConditionMessageIdOption(it, context) }.find { it.code == entity.reportFilterCondition } as MessageIdOption)
         }
+        uidAndLabelOneToManyHelper.onLoadFromJsonSavedState(bundle)
 
         GlobalScope.launch(doorMainDispatcher()) {
 
             if (entity.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY) {
-                val entries = withTimeoutOrNull(2000) {
-                    db.takeIf { entity.reportFilterValue != null }?.contentEntryDao?.getContentEntryFromUids(
-                            entity.reportFilterValue?.split(", ")?.map { it.toLong() }
-                                    ?: listOf())
-                } ?: listOf()
-                uidAndLabelOneToManyHelper.liveList.sendValue(entries)
+                if (entity.reportFilterValue != null && entity.reportFilterValue?.isNotEmpty() == true) {
+                    val entries = withTimeoutOrNull(2000) {
+                        db.contentEntryDao.getContentEntryFromUids(
+                                entity.reportFilterValue?.split(", ")
+                                        ?.map { it.toLong() }
+                                        ?: listOf())
+                    } ?: listOf()
+                    uidAndLabelOneToManyHelper.liveList.sendValue(entries)
+
+                }
             }
+            uidhelperDeferred.complete(true)
         }
 
         return entity
@@ -144,13 +156,13 @@ class ReportFilterEditPresenter(context: Any,
                 view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
                         ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.DROPDOWN
-                // TODO map of (passed, failed, completed)
+                view.dropDownValueOptions = ContentCompletionStatusOption.values()
+                        .map { ContentCompletionStatusMessageIdOption(it, context) }
             }
             ReportFilter.FIELD_CONTENT_ENTRY -> {
 
                 view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
                         ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context) }
-
                 view.valueType = FilterValueType.LIST
                 view.createNewFilter = systemImpl.getString(MessageID.add_content_filter, context)
 
@@ -196,6 +208,10 @@ class ReportFilterEditPresenter(context: Any,
         } else {
             view.conditionsErrorText = null
         }
+        if(entity.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY){
+            entity.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
+                    ?.joinToString { it.uid.toString() }
+        }
         if (entity.reportFilterDropDownValue == 0 && entity.reportFilterValue.isNullOrBlank() &&
                 (entity.reportFilterValueBetweenX.isNullOrEmpty() ||
                 entity.reportFilterValueBetweenY.isNullOrEmpty())) {
@@ -210,12 +226,6 @@ class ReportFilterEditPresenter(context: Any,
         } else {
             view.valuesErrorText = null
         }
-
-        if(entity.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY){
-            entity.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
-                    ?.joinToString { it.uid.toString() }
-        }
-
         view.finishWithResult(listOf(entity))
     }
 

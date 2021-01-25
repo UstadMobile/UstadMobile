@@ -63,6 +63,7 @@
             android:gravity="center"
             android:textAllCaps="true"
             android:padding="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
             android:background="?attr/selectableItemBackground"
             android:onClick="@{() -> eventHandler.onClickExportButton()}"
             app:drawableTopCompat="@drawable/ic_baseline_share_24"
@@ -85,6 +86,7 @@
             android:gravity="center"
             android:textAllCaps="true"
             android:padding="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
             android:background="?attr/selectableItemBackground"
             android:onClick="@{() -> eventHandler.onClickAddToDashboard(chart.reportWithFilters)}"
             android:visibility="@{chart.reportWithFilters.reportUid == 0 ?  View.VISIBLE : View.GONE}"
@@ -107,6 +109,7 @@
             android:gravity="center"
             android:textAllCaps="true"
             android:padding="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
             android:background="?attr/selectableItemBackground"
             android:visibility="@{isAdmin ? View.VISIBLE : View.GONE}"
             android:onClick="@{() -> eventHandler.onClickAddAsTemplate(chart.reportWithFilters)}"
@@ -115,6 +118,15 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintTop_toBottomOf="@id/preview_chart_view"
+            />
+
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/button_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="bottom"
+            app:constraint_referenced_ids="template_button,preview_add_to_dashboard_button,export_button"
             />
 
 
@@ -135,7 +147,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="@dimen/dimen_16dp"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/preview_add_to_dashboard_button" />
+            app:layout_constraintTop_toBottomOf="@id/button_barrier" />
 
 
         <TextView

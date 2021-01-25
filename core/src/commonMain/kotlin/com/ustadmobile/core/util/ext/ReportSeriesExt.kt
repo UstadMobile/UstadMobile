@@ -12,9 +12,11 @@ import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_DURATION
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_SESSIONS
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_USAGE_TIME_PER_USER
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_ACTIVE_USERS
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_OF_STUDENTS_COMPLETED_CONTENT
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_UNIQUE_STUDENTS_ATTENDING
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.PERCENTAGE_STUDENTS_ATTENDED
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.PERCENTAGE_STUDENTS_ATTENDED_OR_LATE
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.PERCENT_OF_STUDENTS_COMPLETED_CONTENT
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_ABSENCES
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_ATTENDANCE
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_CLASSES
@@ -58,6 +60,8 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> """COUNT(DISTINCT CASE WHEN 
             ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN
             StatementEntity.statementPersonUid ELSE NULL END) As yAxis, """.trimMargin()
+        NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """"""
+        PERCENT_OF_STUDENTS_COMPLETED_CONTENT -> """"""
         else -> ""
     }
 
@@ -110,14 +114,20 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                 ReportFilter.FIELD_PERSON_AGE -> {
 
                     var filterString = "Person.dateOfBirth "
-                    val age = filter.reportFilterValue?.toInt() ?: 1
+                    val age = filter.reportFilterValue?.toInt() ?: 13
+                    val betweenAgeX = filter.reportFilterValueBetweenX?.toInt() ?: 13
+                    val betweenAgeY = filter.reportFilterValueBetweenY?.toInt() ?: 18
                     val now = DateTime.now()
-                    val dateTimeAge = now - age.years
+                    val dateTimeAgeNow = now - age.years
+                    val dateTimeAgeX = now - betweenAgeX.years
+                    val dateTimeAgeY = now - betweenAgeY.years
                     when(filter.reportFilterCondition){
-                        ReportFilter.CONDITION_GREATER_THAN -> filterString += ">= "
-                        ReportFilter.CONDITION_LESS_THAN -> filterString += "<= "
+                        ReportFilter.CONDITION_GREATER_THAN -> filterString += ">= ${dateTimeAgeNow.dateDayStart.unixMillisLong}"
+                        ReportFilter.CONDITION_LESS_THAN -> filterString += "<= ${dateTimeAgeNow.dateDayStart.unixMillisLong}"
+                        ReportFilter.CONDITION_BETWEEN -> {
+                            filterString += """BETWEEN ${dateTimeAgeX.dateDayStart.unixMillisLong} 
+                                AND ${dateTimeAgeY.dateDayStart.unixMillisDouble} """ }
                     }
-                    filterString += "${dateTimeAge.dateDayStart.unixMillisLong} "
                     whereList.add(filterString)
                 }
                 ReportFilter.FIELD_PERSON_GENDER ->{
@@ -129,6 +139,31 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                     }
                     filterString += "${filter.reportFilterDropDownValue} "
                     whereList += (filterString)
+                }
+                ReportFilter.FIELD_CONTENT_COMPLETION ->{
+
+                    var filterString = ""
+
+
+                }
+                ReportFilter.FIELD_CONTENT_ENTRY ->{
+
+                    var filterString = "StatementEntity.statementContentEntryUid "
+                    when(filter.reportFilterCondition){
+                        ReportFilter.CONDITION_IN_LIST -> filterString += "IN "
+                        ReportFilter.CONDITION_NOT_IN_LIST -> filterString += "NOT IN "
+                    }
+                    filterString += "(${filter.reportFilterValue}) "
+                    whereList += (filterString)
+
+                }
+                ReportFilter.FIELD_ATTENDANCE_PERCENTAGE ->{
+
+
+                }
+                ReportFilter.FIELD_CONTENT_PROGRESS -> {
+
+
                 }
             }
         }

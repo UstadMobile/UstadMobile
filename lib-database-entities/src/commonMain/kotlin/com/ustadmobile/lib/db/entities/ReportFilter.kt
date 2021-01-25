@@ -44,21 +44,11 @@ open class ReportFilter {
 
         const val CONDITION_LESS_THAN = 203
 
-        const val CONDITION_WITHIN_RANGE = 204
-
         const val CONDITION_BETWEEN = 205
 
         const val CONDITION_IN_LIST = 206
 
         const val CONDITION_NOT_IN_LIST = 207
-
-        const val VALUE_FLAG_INTEGER = 1
-
-        const val VALUE_FLAG_DROPDOWN = 2
-
-        const val VALUE_FLAG_LIST = 3
-
-        const val VALUE_FLAG_BETWEEN = 4
 
     }
 

@@ -84,8 +84,31 @@
                     android:id="@+id/fragment_report_edit_title"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:inputType="text"
                     android:text="@={report.reportTitle}" />
             </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/fragment_report_edit_description_layout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginVertical="@dimen/dimen_8dp"
+                android:hint="@string/description"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_report_edit_title_layout">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/fragment_report_edit_description_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textMultiLine"
+                    android:text="@={report.reportDescription}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/fragment_edit_report_dialog_xaxis_textinputlayout"
@@ -95,7 +118,8 @@
                 android:layout_marginHorizontal="@dimen/dimen_8dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_report_edit_title_layout">
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_report_edit_description_layout">
 
                 <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
                     android:id="@+id/fragment_edit_report_dialog_xaxis_text"
@@ -109,50 +133,23 @@
 
 
             <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/activity_report_edit_fromDate_textinputlayout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="0dp"
+                android:id="@+id/fragment_edit_report_dialog_daterange_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_8dp"
-                android:layout_marginVertical="@dimen/dimen_8dp"
-                app:layout_constraintEnd_toStartOf="@+id/activity_report_edit_toDate_textinputlayout"
+                android:layout_marginTop="@dimen/dimen_8dp"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_xaxis_textinputlayout">
-
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/activity_report_edit_fromDate_text"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:cursorVisible="false"
-                    android:hint="@string/from"
-                    android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={report.fromDate}"
-                    app:runOnClickWhenFocused="@{true}" />
-
-            </com.google.android.material.textfield.TextInputLayout>
-
-
-            <com.google.android.material.textfield.TextInputLayout
-                android:id="@+id/activity_report_edit_toDate_textinputlayout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                android:layout_width="@dimen/dimen_0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginHorizontal="@dimen/dimen_8dp"
-                android:layout_marginVertical="@dimen/dimen_8dp"
-                android:hint="@string/to"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/activity_report_edit_fromDate_textinputlayout"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_xaxis_textinputlayout">
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/activity_report_edit_toDate_text"
+                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                    android:id="@+id/fragment_edit_report_dialog_daterange_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:cursorVisible="false"
-                    android:inputType="@{InputType.TYPE_NULL}"
-                    app:dateLong="@={report.toDate}"
-                    app:runOnClickWhenFocused="@{true}" />
-
+                    android:hint="@string/time_range"
+                    app:messageIdOptions="@{dateRangeOptions}"
+                    app:onMessageIdOptionSelected="@{xAxisSelectionListener}" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <androidx.recyclerview.widget.RecyclerView
@@ -160,7 +157,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/dimen_8dp"
-                app:layout_constraintTop_toBottomOf="@id/activity_report_edit_toDate_textinputlayout"
+                app:layout_constraintTop_toBottomOf="@id/fragment_edit_report_dialog_daterange_textinputlayout"
                 />
 
             <include
