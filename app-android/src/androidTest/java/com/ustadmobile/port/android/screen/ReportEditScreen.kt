@@ -37,9 +37,7 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
     val xAxisValue = KTextView { withId(R.id.fragment_edit_report_dialog_xaxis_text) }
 
-    val fromDateTextInput = KTextInputLayout { withId(R.id.activity_report_edit_fromDate_textinputlayout) }
-
-    val toDateTextInput = KTextInputLayout { withId(R.id.activity_report_edit_toDate_textinputlayout) }
+    val dateRangeTextInput = KTextInputLayout { withId(R.id.fragment_edit_report_dialog_daterange_textinputlayout) }
 
     val seriesRecycler: KRecyclerView = KRecyclerView({
         withId(R.id.activity_report_edit_series_list)
@@ -108,13 +106,13 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
             }
         }
 
-        updatedReport.fromDate.takeIf { it != reportOnForm?.fromDate }?.also {
+        /*updatedReport.fromDate.takeIf { it != reportOnForm?.fromDate }?.also {
             setDateField(R.id.activity_report_edit_fromDate_textinputlayout, it)
         }
         updatedReport.toDate.takeIf { it != reportOnForm?.toDate }?.also {
             setDateField(R.id.activity_report_edit_toDate_textinputlayout, it)
         }
-
+*/
         seriesRecycler {
 
             var seriesCount = 0
