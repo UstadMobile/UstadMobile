@@ -18,7 +18,6 @@ import com.toughra.ustadmobile.databinding.ItemReportEditSeriesBinding
 import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportEditView
@@ -170,6 +169,12 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
             mPresenter?.handleAddFilter(filter)
         }
 
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                DateRangeMoment::class.java) {
+            val dateRangeMoment = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddCustomRange(dateRangeMoment)
+        }
+
     }
 
 
@@ -246,6 +251,13 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
             mBinding?.xAxisOptions = value
         }
 
+    override var dateRangeOptions: List<IdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.dateRangeOptions = value
+        }
+
     override var subGroupOptions: List<ReportEditPresenter.SubGroupByMessageIdOption>? = null
         get() = field
         set(value) {
@@ -282,11 +294,11 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
     }
 
     override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
-        if(view?.id == mBinding?.fragmentEditReportDialogXaxisText?.id){
-            mPresenter?.handleXAxisSelected(selectedOption)
-        }else if(view?.id == mBinding?.fragmentEditReportDialogDaterangeText?.id){
-
+        if(selectedOption.optionId == ReportEditPresenter.DateRangeOptions.NEW_CUSTOM_RANGE.code) {
+                navigateToEditEntity(null, R.id.date_range_dest,
+                        DateRangeMoment::class.java)
         }
+        mPresenter?.handleXAxisSelected(selectedOption)
     }
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {

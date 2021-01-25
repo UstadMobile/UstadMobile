@@ -86,6 +86,7 @@
     <string name="waiting">Waiting</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
+    <string name="passed">Passed</string>
     <string name="success">Success</string>
     <string name="completed">Completed</string>
     <string name="select_subtitle_video">Select Subtitle Language</string>

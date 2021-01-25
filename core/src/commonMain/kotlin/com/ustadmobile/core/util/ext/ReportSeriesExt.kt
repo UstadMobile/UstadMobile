@@ -60,7 +60,12 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> """COUNT(DISTINCT CASE WHEN 
             ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN
             StatementEntity.statementPersonUid ELSE NULL END) As yAxis, """.trimMargin()
-        NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """"""
+        NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """SELECT COUNT(CASE WHEN resultCompletion 
+            AND (SELECT ContentEntryProgress.contentEntryProgressStatusFlag FROM contentEntryProgress 
+            LEFT JOIN StatementEntity ON 
+            StatementEntity.statementContentEntryUid = ContentEntryProgress.contentEntryProgressContentEntryUid
+             WHERE contentEntryProgressStatusFlag = ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED}) 
+             = ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED} THEN 1 ELSE NULL END) as yAxis, """.trimMargin()
         PERCENT_OF_STUDENTS_COMPLETED_CONTENT -> """"""
         else -> ""
     }
@@ -121,48 +126,59 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                     val dateTimeAgeNow = now - age.years
                     val dateTimeAgeX = now - betweenAgeX.years
                     val dateTimeAgeY = now - betweenAgeY.years
+                    filterString += handleCondition(filter.reportFilterCondition)
                     when(filter.reportFilterCondition){
-                        ReportFilter.CONDITION_GREATER_THAN -> filterString += ">= ${dateTimeAgeNow.dateDayStart.unixMillisLong}"
-                        ReportFilter.CONDITION_LESS_THAN -> filterString += "<= ${dateTimeAgeNow.dateDayStart.unixMillisLong}"
+                        ReportFilter.CONDITION_GREATER_THAN -> filterString += "${dateTimeAgeNow.dateDayStart.unixMillisLong} "
+                        ReportFilter.CONDITION_LESS_THAN -> filterString += "${dateTimeAgeNow.dateDayStart.unixMillisLong} "
                         ReportFilter.CONDITION_BETWEEN -> {
-                            filterString += """BETWEEN ${dateTimeAgeX.dateDayStart.unixMillisLong} 
-                                AND ${dateTimeAgeY.dateDayStart.unixMillisDouble} """ }
+                            filterString += """ ${dateTimeAgeX.dateDayStart.unixMillisLong} 
+                                AND ${dateTimeAgeY.dateDayStart.unixMillisDouble} """
+                        }
                     }
                     whereList.add(filterString)
                 }
                 ReportFilter.FIELD_PERSON_GENDER ->{
 
                     var filterString = "Person.gender "
-                    when(filter.reportFilterCondition){
-                        ReportFilter.CONDITION_IS -> filterString += "= "
-                        ReportFilter.CONDITION_IS_NOT -> filterString += "!= "
-                    }
+                    filterString += handleCondition(filter.reportFilterCondition)
                     filterString += "${filter.reportFilterDropDownValue} "
                     whereList += (filterString)
                 }
                 ReportFilter.FIELD_CONTENT_COMPLETION ->{
 
-                    var filterString = ""
-
+                    var filterString = "StatementEntity.statementContentEntryUid "
+                    filterString += handleCondition(filter.reportFilterCondition)
+                    filterString += "(${filter.reportFilterValue}) "
+                    whereList += (filterString)
 
                 }
                 ReportFilter.FIELD_CONTENT_ENTRY ->{
 
                     var filterString = "StatementEntity.statementContentEntryUid "
-                    when(filter.reportFilterCondition){
-                        ReportFilter.CONDITION_IN_LIST -> filterString += "IN "
-                        ReportFilter.CONDITION_NOT_IN_LIST -> filterString += "NOT IN "
-                    }
+                    filterString += handleCondition(filter.reportFilterCondition)
                     filterString += "(${filter.reportFilterValue}) "
                     whereList += (filterString)
 
                 }
                 ReportFilter.FIELD_ATTENDANCE_PERCENTAGE ->{
 
+                    var filterString = """(SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
+            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
+            THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) 
+            AS REAL) / COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) as attendance FROM ClazzLogAttendanceRecord) """
+                    filterString += handleCondition(filter.reportFilterCondition)
+                    filterString += """ ${filter.reportFilterValueBetweenX} 
+                        AND ${filter.reportFilterValueBetweenY} """
+                    whereList += (filterString)
 
                 }
                 ReportFilter.FIELD_CONTENT_PROGRESS -> {
 
+                    var filterString = "StatementEntity.extensionProgress "
+                    filterString += handleCondition(filter.reportFilterCondition)
+                    filterString += """ ${filter.reportFilterValueBetweenX} 
+                        AND ${filter.reportFilterValueBetweenY} """
+                    whereList += (filterString)
 
                 }
             }
@@ -189,6 +205,20 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
 
     return QueryParts(sql, sqlList, paramList.toTypedArray())
 }
+
+private fun handleCondition(conditionOption: Int): String{
+    return when(conditionOption){
+        ReportFilter.CONDITION_IN_LIST -> "IN "
+        ReportFilter.CONDITION_NOT_IN_LIST -> "NOT IN "
+        ReportFilter.CONDITION_IS -> "= "
+        ReportFilter.CONDITION_IS_NOT -> "!= "
+        ReportFilter.CONDITION_GREATER_THAN -> ">= "
+        ReportFilter.CONDITION_LESS_THAN -> "<= "
+        ReportFilter.CONDITION_BETWEEN -> "BETWEEN "
+        else -> ""
+    }
+}
+
 
 private fun groupBy(value: Int, dbType: Int): String {
     return when (value) {

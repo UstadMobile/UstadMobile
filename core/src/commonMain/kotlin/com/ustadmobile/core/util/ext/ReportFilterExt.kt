@@ -1,16 +1,11 @@
 package com.ustadmobile.core.util.ext
 
-import com.ustadmobile.core.controller.PersonConstants
 import com.ustadmobile.core.controller.ReportFilterEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.ReportFilter
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 
-fun ReportFilter.toDisplayString(context: Any, db: UmAppDatabase): String {
+fun ReportFilter.toDisplayString(context: Any): String {
     val fieldOption = ReportFilterEditPresenter.FieldOption.values()
             .find { it.optionVal == reportFilterField } ?: return ""
     val conditionOption = ReportFilterEditPresenter.ConditionOption.values()
@@ -39,12 +34,7 @@ fun ReportFilter.toDisplayString(context: Any, db: UmAppDatabase): String {
             valueString = """$reportFilterValueBetweenX and $reportFilterValueBetweenY"""
         }
         reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY -> {
-            val list = valueString?.split(", ")?.map { it.toLong() } ?: listOf()
-            GlobalScope.async(Dispatchers.Main) {
-                val labels = db.contentEntryDao.getContentEntryFromUids(list)
-                valueString = labels.map { it.labelName }.joinToString()
-                return@async
-            }
+           valueString = "..."
         }
     }
 

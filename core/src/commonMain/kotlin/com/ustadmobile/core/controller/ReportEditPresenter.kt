@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.toDisplayString
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -12,6 +13,9 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Moment.Companion.MONTHS_REL_UNIT
+import com.ustadmobile.lib.db.entities.Moment.Companion.TYPE_FLAG_RELATIVE
+import com.ustadmobile.lib.db.entities.Moment.Companion.WEEKS_REL_UNIT
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.serialization.builtins.list
@@ -60,22 +64,61 @@ class ReportEditPresenter(context: Any,
     class XAxisMessageIdOption(day: XAxisOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
-    enum class DateRangeOptions(val optionVal: Int, val messageId: Int) {
+    enum class DateRangeOptions(val code: Int, val messageId: Int,
+                                var dateRange: DateRangeMoment?) {
+
         LAST_WEEK(Report.LAST_WEEK_DATE,
-                MessageID.last_week_date_range),
+                MessageID.last_week_date_range,
+                DateRangeMoment(
+                        Moment().apply {
+                            typeFlag = TYPE_FLAG_RELATIVE
+                            relUnit = WEEKS_REL_UNIT
+                            relOffSet = -1
+                        }, Moment().apply {
+                    typeFlag = TYPE_FLAG_RELATIVE
+                })),
         LAST_TWO_WEEKS(Report.LAST_TWO_WEEKS_DATE,
-                MessageID.last_two_week_date_range),
+                MessageID.last_two_week_date_range,
+                DateRangeMoment(
+                        Moment().apply {
+                            typeFlag = TYPE_FLAG_RELATIVE
+                            relUnit = WEEKS_REL_UNIT
+                            relOffSet = -2
+                        }, Moment().apply {
+                    typeFlag = TYPE_FLAG_RELATIVE
+                })),
         LAST_MONTH(Report.LAST_MONTH_DATE,
-                MessageID.last_month_date_range),
+                MessageID.last_month_date_range,
+                DateRangeMoment(
+                        Moment().apply {
+                            typeFlag = TYPE_FLAG_RELATIVE
+                            relUnit = MONTHS_REL_UNIT
+                            relOffSet = -1
+                        }, Moment().apply {
+                    typeFlag = TYPE_FLAG_RELATIVE
+                })),
         LAST_THREE_MONTHS(Report.LAST_THREE_MONTHS_DATE,
-                MessageID.last_three_months_date_range),
-        CUSTOM_RANGE(Report.NEW_CUSTOM_RANGE_DATE,
-                MessageID.new_custom_date_range),
+                MessageID.last_three_months_date_range,
+                DateRangeMoment(
+                        Moment().apply {
+                            typeFlag = TYPE_FLAG_RELATIVE
+                            relUnit = MONTHS_REL_UNIT
+                            relOffSet = -3
+                        }, Moment().apply {
+                    typeFlag = TYPE_FLAG_RELATIVE
+                })),
+        CUSTOM_RANGE(Report.CUSTOM_RANGE,
+                MessageID.selected_custom_range, null),
+        NEW_CUSTOM_RANGE(Report.NEW_CUSTOM_RANGE_DATE,
+                MessageID.new_custom_date_range,
+                DateRangeMoment(
+                        Moment().apply {
+                            typeFlag = TYPE_FLAG_RELATIVE
+                            relUnit = WEEKS_REL_UNIT
+                        }, Moment().apply {
+                    typeFlag = TYPE_FLAG_RELATIVE
+                })),
     }
-
-    class DateRangeMessageIdOption(day: DateRangeOptions, context: Any)
-        : MessageIdOption(day.messageId, context, day.optionVal)
-
 
     enum class SubGroupOptions(val optionVal: Int, val messageId: Int) {
         NONE(ReportSeries.NONE,
@@ -141,7 +184,8 @@ class ReportEditPresenter(context: Any,
         view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context) }
         view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
         view.yAxisOptions = YAxisOptions.values().map { YAxisMessageIdOption(it, context) }
-        view.dateRangeOptions = DateRangeOptions.values().map { DateRangeMessageIdOption(it, context) }
+        view.dateRangeOptions = DateRangeOptions.values().filter { it.dateRange != null }
+                .map { MessageIdOption(it.messageId, context, it.code) }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ReportWithSeriesWithFilters? {
@@ -155,18 +199,19 @@ class ReportEditPresenter(context: Any,
 
         val reportSeries = report.reportSeries
         var reportSeriesList = listOf<ReportSeries>()
-        if(!reportSeries.isNullOrBlank()) {
+        if (!reportSeries.isNullOrBlank()) {
             reportSeriesList = safeParseList(di, ReportSeries.serializer().list, ReportSeries::class, reportSeries)
             // set the series counter with an existing series
             val maxSeries = reportSeriesList.maxBy { it.reportSeriesUid }
             var currentMaxFilter = 0L
             reportSeriesList.forEach {
-                val maxFilter = it.reportSeriesFilters?.maxBy { it.reportFilterUid }?.reportFilterUid ?: 0
+                val maxFilter = it.reportSeriesFilters?.maxBy { it.reportFilterUid }?.reportFilterUid
+                        ?: 0
                 currentMaxFilter = max(currentMaxFilter, maxFilter)
             }
-            seriesCounter.value = (maxSeries?.reportSeriesUid?: 0 + 1).toInt()
+            seriesCounter.value = (maxSeries?.reportSeriesUid ?: 0 + 1).toInt()
             filterCounter.value = currentMaxFilter.toInt() + 1
-        }else{
+        } else {
             reportSeriesList = listOf(ReportSeries().apply {
                 val id = seriesCounter.getAndIncrement()
                 reportSeriesName = "Series $id"
@@ -192,21 +237,22 @@ class ReportEditPresenter(context: Any,
 
         val reportSeries = editEntity.reportSeries
         val reportSeriesList: List<ReportSeries>
-        if(!reportSeries.isNullOrBlank()) {
+        if (!reportSeries.isNullOrBlank()) {
 
             reportSeriesList = safeParseList(di, ReportSeries.serializer().list, ReportSeries::class, reportSeries)
             // set the series counter with an existing series
             val max = reportSeriesList.maxBy { it.reportSeriesUid }
-            seriesCounter.value = ((max?.reportSeriesUid?: 0) + 1).toInt()
+            seriesCounter.value = ((max?.reportSeriesUid ?: 0) + 1).toInt()
             var currentMaxFilter = 0L
             reportSeriesList.forEach {
-                val maxFilter = it.reportSeriesFilters?.maxBy { it.reportFilterUid }?.reportFilterUid ?: 0
+                val maxFilter = it.reportSeriesFilters?.maxBy { it.reportFilterUid }?.reportFilterUid
+                        ?: 0
                 currentMaxFilter = max(currentMaxFilter, maxFilter)
             }
             filterCounter.value = currentMaxFilter.toInt() + 1
             editEntity.reportSeriesWithFiltersList = reportSeriesList
 
-        }else if(editEntity.reportSeriesWithFiltersList == null || editEntity.reportSeriesWithFiltersList?.isNullOrEmpty() == true){
+        } else if (editEntity.reportSeriesWithFiltersList == null || editEntity.reportSeriesWithFiltersList?.isNullOrEmpty() == true) {
             reportSeriesList = listOf(ReportSeries().apply {
                 val id = seriesCounter.getAndIncrement()
                 reportSeriesName = "Series $id"
@@ -223,15 +269,20 @@ class ReportEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity ?: return
-        entityVal.reportSeries = safeStringify(di, ReportSeries.serializer().list, entityVal.reportSeriesWithFiltersList ?: listOf())
+        entityVal.reportSeries = safeStringify(di, ReportSeries.serializer().list, entityVal.reportSeriesWithFiltersList
+                ?: listOf())
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
     fun handleAddCustomRange(dateRangeMoment: DateRangeMoment) {
-        TODO("Not yet implemented")
+        view.dateRangeOptions = DateRangeOptions.values().map {
+            if(it.dateRange != null) {
+            MessageIdOption(it.messageId, context, it.code) }
+            else IdOption(dateRangeMoment.toDisplayString(), it.code )
+        }
     }
 
-    fun handleRemoveSeries(series: ReportSeries){
+    fun handleRemoveSeries(series: ReportSeries) {
         val entityVal = entity
         val newList = entityVal?.reportSeriesWithFiltersList?.toMutableList() ?: mutableListOf()
         newList.remove(series)
@@ -239,7 +290,7 @@ class ReportEditPresenter(context: Any,
         view.entity = entityVal
     }
 
-    fun handleClickAddSeries(){
+    fun handleClickAddSeries() {
         val series = ReportSeries().apply {
             val id = seriesCounter.getAndIncrement()
             reportSeriesName = "Series $id"
@@ -252,19 +303,22 @@ class ReportEditPresenter(context: Any,
         view.entity = entityVal
     }
 
-    fun handleAddFilter(newFilter: ReportFilter){
+    fun handleAddFilter(newFilter: ReportFilter) {
         val entityVal = entity
-        val newSeriesList = entityVal?.reportSeriesWithFiltersList?.toMutableList() ?: mutableListOf()
-        val seriesToAddFilter = newSeriesList.find { it.reportSeriesUid == newFilter.reportFilterSeriesUid } ?: return
+        val newSeriesList = entityVal?.reportSeriesWithFiltersList?.toMutableList()
+                ?: mutableListOf()
+        val seriesToAddFilter = newSeriesList.find { it.reportSeriesUid == newFilter.reportFilterSeriesUid }
+                ?: return
 
         newSeriesList.remove(seriesToAddFilter)
-        val newFilterList = seriesToAddFilter.reportSeriesFilters?.toMutableList() ?: mutableListOf()
+        val newFilterList = seriesToAddFilter.reportSeriesFilters?.toMutableList()
+                ?: mutableListOf()
 
         // new filter
-        if(newFilter.reportFilterUid == 0L){
+        if (newFilter.reportFilterUid == 0L) {
             newFilter.reportFilterUid = filterCounter.incrementAndGet().toLong()
             newFilterList.add(newFilter)
-        }else{
+        } else {
             val indexOfFilter = newFilterList.indexOfFirst { it.reportFilterUid == newFilter.reportFilterUid }
             newFilterList[indexOfFilter] = newFilter
         }
@@ -284,8 +338,10 @@ class ReportEditPresenter(context: Any,
 
     fun handleRemoveFilter(filter: ReportFilter) {
         val entityVal = entity
-        val newSeriesList = entityVal?.reportSeriesWithFiltersList?.toMutableList() ?: mutableListOf()
-        val seriesToRemoveFilter = newSeriesList.find { it.reportSeriesUid == filter.reportFilterSeriesUid } ?: return
+        val newSeriesList = entityVal?.reportSeriesWithFiltersList?.toMutableList()
+                ?: mutableListOf()
+        val seriesToRemoveFilter = newSeriesList.find { it.reportSeriesUid == filter.reportFilterSeriesUid }
+                ?: return
 
         newSeriesList.remove(seriesToRemoveFilter)
         val newFilterList = seriesToRemoveFilter.reportSeriesFilters?.toMutableList()
@@ -313,7 +369,8 @@ class ReportEditPresenter(context: Any,
             view.titleErrorText = null
         }
 
-        entity.reportSeries = safeStringify(di, ReportSeries.serializer().list, entity.reportSeriesWithFiltersList?: listOf())
+        entity.reportSeries = safeStringify(di, ReportSeries.serializer().list, entity.reportSeriesWithFiltersList
+                ?: listOf())
 
         GlobalScope.launch(doorMainDispatcher()) {
 
@@ -338,10 +395,14 @@ class ReportEditPresenter(context: Any,
     fun handleXAxisSelected(selectedOption: IdOption) {
         if (selectedOption.optionId == Report.DAY || selectedOption.optionId == Report.MONTH || selectedOption.optionId == Report.WEEK) {
             view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
-                    .filter { it.code == Report.GENDER ||
-                            it.code == Report.CONTENT_ENTRY ||
-                            it.code == Report.CLASS || it.code == ReportSeries.NONE}
-        } else {
+                    .filter {
+                        it.code == Report.GENDER ||
+                                it.code == Report.CONTENT_ENTRY ||
+                                it.code == Report.CLASS || it.code == ReportSeries.NONE
+                    }
+        } else if (selectedOption.optionId == Report.CLASS ||
+                selectedOption.optionId == Report.CONTENT_ENTRY ||
+                selectedOption.optionId == Report.GENDER) {
             view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
         }
     }
