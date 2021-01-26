@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.toDateRangeMoment
 import com.ustadmobile.core.util.ext.toDisplayString
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
@@ -66,7 +67,8 @@ class ReportEditPresenter(context: Any,
 
     enum class DateRangeOptions(val code: Int, val messageId: Int,
                                 var dateRange: DateRangeMoment?) {
-
+        EVERYTHING(Report.EVERYTHING, MessageID.unset,
+                DateRangeMoment(Moment(), Moment())),
         LAST_WEEK(Report.LAST_WEEK_DATE,
                 MessageID.last_week_date_range,
                 DateRangeMoment(
@@ -185,7 +187,7 @@ class ReportEditPresenter(context: Any,
         view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
         view.yAxisOptions = YAxisOptions.values().map { YAxisMessageIdOption(it, context) }
         view.dateRangeOptions = DateRangeOptions.values().filter { it.dateRange != null }
-                .map { MessageIdOption(it.messageId, context, it.code) }
+                .map {  ObjectMessageIdOption(it.messageId, context, it.code, it.dateRange) }
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ReportWithSeriesWithFilters? {
@@ -196,6 +198,9 @@ class ReportEditPresenter(context: Any,
         } ?: Report()
 
         handleXAxisSelected(XAxisOptions.values().map { XAxisMessageIdOption(it, context) }.find { it.code == report.xAxis } as MessageIdOption)
+        if(report.reportDateRangeSelection == Report.CUSTOM_RANGE){
+            handleAddCustomRange(report.toDateRangeMoment())
+        }
 
         val reportSeries = report.reportSeries
         var reportSeriesList = listOf<ReportSeries>()
@@ -234,6 +239,9 @@ class ReportEditPresenter(context: Any,
         }
 
         handleXAxisSelected(XAxisOptions.values().map { XAxisMessageIdOption(it, context) }.find { it.code == editEntity.xAxis } as MessageIdOption)
+        if(editEntity.reportDateRangeSelection == Report.CUSTOM_RANGE){
+            handleAddCustomRange(editEntity.toDateRangeMoment())
+        }
 
         val reportSeries = editEntity.reportSeries
         val reportSeriesList: List<ReportSeries>
@@ -276,10 +284,13 @@ class ReportEditPresenter(context: Any,
 
     fun handleAddCustomRange(dateRangeMoment: DateRangeMoment) {
         view.dateRangeOptions = DateRangeOptions.values().map {
-            if(it.dateRange != null) {
-            MessageIdOption(it.messageId, context, it.code) }
-            else IdOption(dateRangeMoment.toDisplayString(), it.code )
+            ObjectMessageIdOption(it.messageId, context, it.code, it.dateRange ?: dateRangeMoment,
+                    if(it.dateRange != null) null else dateRangeMoment.toDisplayString())
         }
+        view.selectedDateRangeMoment = dateRangeMoment
+        val entityVal = entity ?: return
+        entityVal.reportDateRangeSelection = Report.CUSTOM_RANGE
+        view.entity = entityVal
     }
 
     fun handleRemoveSeries(series: ReportSeries) {
@@ -405,6 +416,14 @@ class ReportEditPresenter(context: Any,
                 selectedOption.optionId == Report.GENDER) {
             view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
         }
+    }
+
+    fun handleDateRangeSelected(selectedOption: IdOption) {
+        if(selectedOption.optionId == DateRangeOptions.NEW_CUSTOM_RANGE.code){
+            return
+        }
+        val dateRangeFound = view.dateRangeOptions?.find { it.code == selectedOption.optionId } ?: return
+        view.selectedDateRangeMoment = dateRangeFound.obj
     }
 
 }

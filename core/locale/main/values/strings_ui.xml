@@ -329,11 +329,11 @@
     <string name="xapi_options_what">What</string>
     <string name="xapi_options_when">When</string>
     <string name="xapi_options_where">Where</string>>
+    <string name="time_range_all">Everything</string>
 
     <string name="report_filter_edit_field">Field</string>
     <string name="report_filter_edit_condition">Condition</string>
     <string name="report_filter_edit_values">Value(s)</string>
-
 
     <string name="xapi_content_usage">Content usage - %1$s%</string>
 

@@ -33,6 +33,8 @@ open class Report {
 
     var xAxis: Int = DAY
 
+    var reportDateRangeSelection: Int = EVERYTHING
+
     var fromDate: Long = 0
 
     var fromRelTo: Int = 0
@@ -85,6 +87,8 @@ open class Report {
         const val GENDER = 306
 
         const val CLASS = 307
+
+        const val EVERYTHING = 0
 
         const val LAST_WEEK_DATE = 800
 
