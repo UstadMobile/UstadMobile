@@ -100,6 +100,11 @@ open class StatementEntity {
     var extensionProgress: Int = 0
 
     /**
+     *  indicates whether or not the statement is about the root contentEntry or child entries
+     */
+    var contentEntryRoot: Boolean = false
+
+    /**
      * Though technically the XObject is what really links to ContentEntry, the ContentEntryUid is
      * here to simplify queries used to check on student progress and avoid an extra join
      */

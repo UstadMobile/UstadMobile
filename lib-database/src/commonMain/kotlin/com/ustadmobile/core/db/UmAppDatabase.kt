@@ -3474,6 +3474,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("""ALTER TABLE Report 
                         DROP COLUMN subGroup""".trimMargin())
 
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN contentEntryRoot BOOL DEFAULT FALSE")
+
                 }else if(database.dbType() == DoorDbType.SQLITE){
 
                     database.execSQL("""ALTER TABLE Report 
@@ -3487,6 +3489,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL( "CREATE INDEX IF NOT EXISTS `index_Report_trk_clientId_epk_csn` ON Report_trk (`clientId`, `epk`, `csn`)")
                     database.execSQL( "CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_verbLangMapUid` ON XLangMapEntry (`verbLangMapUid`)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_StatementEntity_statementPersonUid` ON StatementEntity (`statementPersonUid`)")
+
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN contentEntryRoot INTEGER DEFAULT 0 NOT NULL")
+
                 }
 
             }
