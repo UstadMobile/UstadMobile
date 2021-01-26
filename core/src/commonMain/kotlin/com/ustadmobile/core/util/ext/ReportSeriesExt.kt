@@ -129,7 +129,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
     sqlList += where
     paramList.add(accountPersonUid)
 
-    if((report.toDate > 0 || report.fromDate > 0) || reportSeriesFilters?.isNotEmpty() == true){
+    if(report.reportDateRangeSelection != 0 || reportSeriesFilters?.isNotEmpty() == true){
 
         val whereList = mutableListOf<String>()
         reportSeriesFilters?.forEach { filter ->
@@ -203,10 +203,13 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                 }
             }
         }
-        if (report.toDate > 0L && report.fromDate > 0L) {
+        if (report.reportDateRangeSelection != 0) {
+
+            val dateRangeMoment = report.toDateRangeMoment().toFixedDatePair()
+
             whereList.add("(StatementEntity.timestamp >= ? AND StatementEntity.timestamp <= ?) ")
-            paramList.add(report.fromDate)
-            paramList.add(report.toDate)
+            paramList.add(dateRangeMoment.first)
+            paramList.add(dateRangeMoment.second)
         }
         val whereListStr = " AND " + whereList.joinToString(" AND ")
         sql += whereListStr
