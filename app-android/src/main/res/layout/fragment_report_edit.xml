@@ -10,7 +10,6 @@
         <import type="android.text.InputType" />
 
         <import type="com.ustadmobile.core.util.IdOption" />
-
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView" />
 
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener" />
@@ -49,7 +48,11 @@
 
         <variable
             name="dateRangeOptions"
-            type="java.util.List&lt;IdOption&gt;" />
+            type="java.util.List&lt;IdOption>" />
+
+        <variable
+            name="dateRangeMomentSelected"
+            type="com.ustadmobile.lib.db.entities.DateRangeMoment" />
 
     </data>
 
@@ -149,6 +152,9 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/time_range"
                     app:messageIdOptions="@{dateRangeOptions}"
+                    app:selectedMessageIdOption="@={report.reportDateRangeSelection}"
+                    app:selectedDateRangeMoment="@{dateRangeMomentSelected}"
+                    app:report="@{report}"
                     app:onMessageIdOptionSelected="@{xAxisSelectionListener}" />
             </com.google.android.material.textfield.TextInputLayout>
 

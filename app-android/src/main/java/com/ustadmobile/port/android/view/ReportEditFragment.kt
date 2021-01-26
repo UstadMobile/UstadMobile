@@ -18,6 +18,7 @@ import com.toughra.ustadmobile.databinding.ItemReportEditSeriesBinding
 import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
+import com.ustadmobile.core.util.ObjectMessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportEditView
@@ -251,11 +252,17 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
             mBinding?.xAxisOptions = value
         }
 
-    override var dateRangeOptions: List<IdOption>? = null
+    override var dateRangeOptions: List<ObjectMessageIdOption<DateRangeMoment>>? = null
         get() = field
         set(value) {
             field = value
             mBinding?.dateRangeOptions = value
+        }
+    override var selectedDateRangeMoment: DateRangeMoment? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.dateRangeMomentSelected = field
         }
 
     override var subGroupOptions: List<ReportEditPresenter.SubGroupByMessageIdOption>? = null
@@ -298,6 +305,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
                 navigateToEditEntity(null, R.id.date_range_dest,
                         DateRangeMoment::class.java)
         }
+        mPresenter?.handleDateRangeSelected(selectedOption)
         mPresenter?.handleXAxisSelected(selectedOption)
     }
 

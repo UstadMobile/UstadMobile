@@ -5,6 +5,8 @@ import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
 import com.ustadmobile.core.util.IdOption
+import com.ustadmobile.lib.db.entities.DateRangeMoment
+import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView
 import com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
 
@@ -32,4 +34,20 @@ fun MessageIdAutoCompleteTextView.setSelectedMessageIdListener(inverseBindingLis
 @BindingAdapter("onMessageIdOptionSelected")
 fun MessageIdAutoCompleteTextView.setOnMessageIdOptionSelected(itemSelectedListener: DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>?) {
     this.onDropDownListItemSelectedListener = itemSelectedListener
+}
+
+@BindingAdapter(value=["selectedDateRangeMoment", "report"])
+fun MessageIdAutoCompleteTextView.setDateRangeMoment(dateRangeMoment: DateRangeMoment?, report: Report?) {
+    if(dateRangeMoment == null || report == null){
+        return
+    }
+    report.fromDate = dateRangeMoment.fromMoment.fixedTime
+    report.fromRelTo = dateRangeMoment.fromMoment.relTo
+    report.fromRelOffSet = dateRangeMoment.fromMoment.relOffSet
+    report.fromRelUnit = dateRangeMoment.fromMoment.relUnit
+
+    report.toDate = dateRangeMoment.toMoment.fixedTime
+    report.toRelTo = dateRangeMoment.toMoment.relTo
+    report.toRelOffSet = dateRangeMoment.toMoment.relOffSet
+    report.toRelUnit = dateRangeMoment.toMoment.relUnit
 }

@@ -66,7 +66,7 @@
             android:layout_marginTop="@dimen/dimen_8dp"
             android:background="?attr/selectableItemBackground"
             android:onClick="@{() -> eventHandler.onClickExportButton()}"
-            app:drawableTopCompat="@drawable/ic_baseline_share_24"
+            app:drawableTopCompat="@drawable/ic_export"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/preview_add_to_dashboard_button"
             app:layout_constraintHorizontal_chainStyle="spread"
