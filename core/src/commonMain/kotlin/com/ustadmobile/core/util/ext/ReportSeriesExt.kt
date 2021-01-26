@@ -60,12 +60,9 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> """COUNT(DISTINCT CASE WHEN 
             ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN
             StatementEntity.statementPersonUid ELSE NULL END) As yAxis, """.trimMargin()
-        NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """SELECT COUNT(CASE WHEN resultCompletion 
-            AND (SELECT ContentEntryProgress.contentEntryProgressStatusFlag FROM contentEntryProgress 
-            LEFT JOIN StatementEntity ON 
-            StatementEntity.statementContentEntryUid = ContentEntryProgress.contentEntryProgressContentEntryUid
-             WHERE contentEntryProgressStatusFlag = ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED}) 
-             = ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED} THEN 1 ELSE NULL END) as yAxis, """.trimMargin()
+        NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """SELECT COUNT(DISTINCT CASE WHEN StatementEntity.resultCompletion 
+            AND  = ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED} 
+            THEN ContentEntryProgress.contentEntryProgressPersonUid ELSE NULL END) as yAxis, """.trimMargin()
         PERCENT_OF_STUDENTS_COMPLETED_CONTENT -> """"""
         else -> ""
     }
@@ -102,7 +99,30 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> {
             sql += "LEFT JOIN ClazzLogAttendanceRecord ON StatementEntity.statementPersonUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid "
         }
+        NUMBER_OF_STUDENTS_COMPLETED_CONTENT, PERCENT_OF_STUDENTS_COMPLETED_CONTENT -> {
+            sql += " LEFT JOIN ContentEntryProgress ON ContentEntryProgress.contentEntryProgressContentEntryUid = StatementEntity.statementContentEntryUid "
+        }
     }
+
+    reportSeriesFilters?.forEach {
+
+        when(it.reportFilterField){
+            ReportFilter.FIELD_CONTENT_COMPLETION -> {
+                // since the join is added because of filter, it gets added to both sql and sqlList query
+                val joinProgress =  " LEFT JOIN ContentEntryProgress ON ContentEntryProgress.contentEntryProgressContentEntryUid = StatementEntity.statementContentEntryUid "
+                when(reportSeriesYAxis){
+                    NUMBER_OF_STUDENTS_COMPLETED_CONTENT, PERCENT_OF_STUDENTS_COMPLETED_CONTENT ->{
+                        // already added to sql
+                    }else -> {
+                        sql += joinProgress
+                    }
+                }
+                sqlList += joinProgress
+            }
+        }
+
+    }
+
 
     val where = " WHERE PersonGroupMember.groupMemberPersonUid = ? "
     sql += where
@@ -146,9 +166,9 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                 }
                 ReportFilter.FIELD_CONTENT_COMPLETION ->{
 
-                    var filterString = "StatementEntity.statementContentEntryUid "
+                    var filterString = "ContentEntryProgress.contentEntryProgressStatusFlag "
                     filterString += handleCondition(filter.reportFilterCondition)
-                    filterString += "(${filter.reportFilterValue}) "
+                    filterString += "${filter.reportFilterDropDownValue} "
                     whereList += (filterString)
 
                 }
