@@ -375,6 +375,7 @@ fun FileSpec.Builder.addEntityWithAttachmentAdapterType(entityWithAttachment: Ty
  */
 fun FileSpec.Builder.addAsEntityWithAttachmentAdapterExtensionFun(entityWithAttachment: TypeElement): FileSpec.Builder {
     addFunction(FunSpec.builder("asEntityWithAttachment")
+            .addModifiers(KModifier.INLINE)
             .receiver(entityWithAttachment.asClassName())
             .returns(EntityWithAttachment::class)
             .addCode("return %T(this)\n",
@@ -737,6 +738,7 @@ fun CodeBlock.Builder.addReplaceSyncableEntitiesIntoDbCode(resultVarName: String
 
         val accessorVarName = "_se${sEntityInfo.syncableEntity.simpleName}"
         add("val $accessorVarName = $resultVarName")
+        val entityTypeEl = it.value.asTypeElement(processingEnv)
 
         if(resultType.isListOrArray()) {
             it.key.forEach {embedVarName ->
@@ -750,6 +752,21 @@ fun CodeBlock.Builder.addReplaceSyncableEntitiesIntoDbCode(resultVarName: String
             }
 
             add("\n")
+
+            //download attachments if this entity type has attachments
+            if(entityTypeEl != null && entityTypeEl.entityHasAttachments == true) {
+                if(!isInSuspendContext)
+                    beginRunBlockingControlFlow()
+
+                add("_repo.%M($accessorVarName}.map·{·it.%M()·})\n",
+                    MemberName("com.ustadmobile.door.attachments", "downloadAttachments"),
+                    MemberName(entityTypeEl.packageName, "asEntityWithAttachment"))
+
+                if(!isInSuspendContext)
+                    endControlFlow()
+            }
+
+
             transactionCodeBlock.add("${syncHelperDaoVarName}.$replaceEntityFnName($accessorVarName)\n")
         }else {
             if(it.key.isNotEmpty())
@@ -757,6 +774,21 @@ fun CodeBlock.Builder.addReplaceSyncableEntitiesIntoDbCode(resultVarName: String
 
             add(it.key.joinToString (prefix = "", separator = "?.", postfix = ""))
             add("\n")
+
+            if(entityTypeEl != null && entityTypeEl.entityHasAttachments) {
+                if(!isInSuspendContext)
+                    beginRunBlockingControlFlow()
+
+                beginControlFlow("if($accessorVarName != null)")
+                add("_repo.%M(listOf($accessorVarName.%M()))\n",
+                        MemberName("com.ustadmobile.door.attachments", "downloadAttachments"),
+                        MemberName(entityTypeEl.packageName, "asEntityWithAttachment"))
+                endControlFlow()
+
+                if(!isInSuspendContext)
+                    endControlFlow()
+            }
+
             transactionCodeBlock.
                 beginControlFlow("if($accessorVarName != null)")
                     .add("${syncHelperDaoVarName}.$replaceEntityFnName(listOf($accessorVarName))\n")

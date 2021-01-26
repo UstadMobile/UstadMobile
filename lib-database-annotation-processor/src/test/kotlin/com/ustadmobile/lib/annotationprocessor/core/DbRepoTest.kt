@@ -66,6 +66,8 @@ class DbRepoTest {
 
     lateinit var tmpAttachmentsDir: File
 
+    lateinit var tmpServerAttachmentsDir: File
+
     lateinit var mockUpdateNotificationManager: ServerUpdateNotificationManager
 
     lateinit var serverDi: DI
@@ -76,7 +78,8 @@ class DbRepoTest {
 
     @Before
     fun setup() {
-        tmpAttachmentsDir = temporaryFolder.newFolder("testdbrepoattachments")
+        tmpAttachmentsDir = temporaryFolder.newFolder("testclientattachments")
+        tmpServerAttachmentsDir = temporaryFolder.newFolder("testserverattachments")
         mockUpdateNotificationManager = mock {}
 
         if(!Napier.isEnable(Napier.Level.DEBUG, null)) {
@@ -103,7 +106,7 @@ class DbRepoTest {
             ExampleDatabase2_KtorRoute(true)
         }
 
-        install(CallLogging)
+        //install(CallLogging)
     }
 
     fun setupClientAndServerDb(updateNotificationManager: ServerUpdateNotificationManager = mockUpdateNotificationManager) {
@@ -120,7 +123,7 @@ class DbRepoTest {
                 bind<ExampleDatabase2>(tag = DoorTag.TAG_REPO) with scoped(virtualHostScope).singleton {
                     val db: ExampleDatabase2 = instance(tag = DoorTag.TAG_DB)
                     val repo = db.asRepository(Any(), "http://localhost/", "", httpClient,
-                            tmpAttachmentsDir?.absolutePath, updateNotificationManager)
+                            tmpServerAttachmentsDir.absolutePath, updateNotificationManager)
                     ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
                     repo
                 }
@@ -128,7 +131,7 @@ class DbRepoTest {
                 bind<Gson>() with singleton { Gson() }
 
                 bind<String>(tag = DoorTag.TAG_ATTACHMENT_DIR) with scoped(virtualHostScope).singleton {
-                    tmpAttachmentsDir.absolutePath
+                    tmpServerAttachmentsDir.absolutePath
                 }
 
                 bind<DataSource>() with factory { dbName: String ->
@@ -828,6 +831,41 @@ class DbRepoTest {
 
         val firstStoredFile = Paths.get(URI(firstStoredUri)).toFile()
         Assert.assertFalse("Old file does not exist anymore", firstStoredFile.exists())
+    }
+
+    @Test
+    fun givenEntityWithAttachmentUri_whenInserted_thenShouldUpload() {
+        mockUpdateNotificationManager = spy(ServerUpdateNotificationManagerImpl())
+        setupClientAndServerDb(mockUpdateNotificationManager)
+
+
+        val destFile = temporaryFolder.newFile()
+        this::class.java.getResourceAsStream("/testfile1.png").writeToFile(destFile)
+
+        val clientRepo = clientDb.asRepository(Any(), "http://localhost:8089/",
+                "token", httpClient, attachmentsDir = tmpAttachmentsDir.absolutePath,
+                useClientSyncManager = true)
+                .asConnectedRepository()
+
+
+        val attachmentEntity = ExampleAttachmentEntity().apply {
+            eaAttachmentUri = destFile.toURI().toString()
+            eaUid  = clientRepo.exampleAttachmentDao().insert(this)
+        }
+
+        runBlocking {
+            serverDb!!.waitUntil(10000, listOf("ExampleAttachmentEntity")) {
+                serverDb!!.exampleAttachmentDao().findByUid(attachmentEntity.eaUid) != null
+            }
+        }
+
+        val entityOnServer = serverDb!!.exampleAttachmentDao().findByUid(attachmentEntity.eaUid)
+        val serverAttachmentUri = runBlocking {
+            (serverRepo as DoorDatabaseRepository).retrieveAttachment(entityOnServer!!.eaAttachmentUri!!)
+        }
+
+        val serverFile = Paths.get(URI(serverAttachmentUri)).toFile()
+        Assert.assertTrue("Attachment file exists on server", serverFile.exists())
     }
 
 }

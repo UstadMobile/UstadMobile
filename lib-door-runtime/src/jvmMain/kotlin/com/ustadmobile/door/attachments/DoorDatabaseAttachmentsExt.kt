@@ -1,15 +1,25 @@
 package com.ustadmobile.door.attachments
 
+import com.github.aakira.napier.Napier
+import com.ustadmobile.door.DoorConstants
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDatabaseRepository.Companion.DOOR_ATTACHMENT_URI_PREFIX
-import com.ustadmobile.door.ext.copyAndGetMd5
-import com.ustadmobile.door.ext.toHexString
+import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.util.systemTimeInMillis
+import io.ktor.client.request.*
+import io.ktor.client.request.forms.*
+import io.ktor.http.*
+import io.ktor.http.content.*
+import io.ktor.utils.io.streams.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileInputStream
 import java.io.IOException
+import java.net.HttpURLConnection
 import java.net.URI
+import java.net.URL
+import java.net.URLEncoder
 import java.nio.file.Paths
 
 actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: EntityWithAttachment) {
@@ -48,17 +58,24 @@ actual suspend fun DoorDatabaseRepository.retrieveAttachment(uri: String): Strin
 }
 
 
-/**
- * Upload the given attachment uri to the endpoint.
- */
-actual suspend fun DoorDatabaseRepository.uploadAttachment(uri: String) {
 
+actual suspend fun DoorDatabaseRepository.downloadAttachments(entityList: List<EntityWithAttachment>) {
+    entityList.mapNotNull { it.attachmentUri }.forEach { attachmentUri ->
+        withContext(Dispatchers.IO) {
+            val destPath = attachmentUri.substringAfter(DOOR_ATTACHMENT_URI_PREFIX)
+            val destFile = File(requireAttachmentDirFile(), destPath)
+
+            if(!destFile.exists()) {
+                val url = URL(URL(endpoint),
+                        "attachments/download?uri=${URLEncoder.encode(attachmentUri, "UTF-8")}")
+
+                val urlConnection = url.openConnection() as HttpURLConnection
+                urlConnection.setRequestProperty(DoorConstants.HEADER_DBVERSION,
+                        db.dbSchemaVersion().toString())
+                urlConnection.inputStream.writeToFile(destFile)
+            }
+        }
+    }
 }
 
-/**
- * Download the given attachment uri from the endpoint
- */
-actual suspend fun DoorDatabaseRepository.downloadAttachment(uri: String) {
-
-}
 

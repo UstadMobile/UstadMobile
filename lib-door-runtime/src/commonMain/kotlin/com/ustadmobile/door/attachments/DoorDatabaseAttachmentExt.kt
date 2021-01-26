@@ -33,12 +33,7 @@ expect suspend fun DoorDatabaseRepository.deleteZombieAttachments(entityWithAtta
 /**
  * Upload the given attachment uri to the endpoint.
  */
-expect suspend fun DoorDatabaseRepository.uploadAttachment(uri: String)
+expect suspend fun DoorDatabaseRepository.uploadAttachment(entityWithAttachment: EntityWithAttachment)
 
-/**
- * Download the given attachment uri from the endpoint
- */
-expect suspend fun DoorDatabaseRepository.downloadAttachment(uri: String)
-
-
+expect suspend fun DoorDatabaseRepository.downloadAttachments(entityList: List<EntityWithAttachment>)
 
