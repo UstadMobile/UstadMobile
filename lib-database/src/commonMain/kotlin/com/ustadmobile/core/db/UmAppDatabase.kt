@@ -3467,26 +3467,26 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 // update statementVerb
                 database.execSQL("""UPDATE StatementEntity SET statementVerbUid = 
                     ${VerbEntity.VERB_PASSED_UID} WHERE statementVerbUid IN (SELECT verbUid 
-                    FROM VerbEntity WHERE urlId = ${VerbEntity.VERB_PASSED_URL})""".trimMargin())
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_PASSED_URL}')""".trimMargin())
                 database.execSQL("""UPDATE StatementEntity SET statementVerbUid = 
                     ${VerbEntity.VERB_FAILED_UID} WHERE statementVerbUid IN (SELECT verbUid 
-                    FROM VerbEntity WHERE urlId = ${VerbEntity.VERB_FAILED_URL})""".trimMargin())
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_FAILED_URL}')""".trimMargin())
 
                 // update subStatementVerb
                 database.execSQL("""UPDATE StatementEntity SET substatementVerbUid = 
                     ${VerbEntity.VERB_PASSED_UID} WHERE substatementVerbUid IN (SELECT verbUid 
-                    FROM VerbEntity WHERE urlId = ${VerbEntity.VERB_PASSED_URL})""".trimMargin())
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_PASSED_URL}')""".trimMargin())
                 database.execSQL("""UPDATE StatementEntity SET substatementVerbUid = 
                     ${VerbEntity.VERB_FAILED_UID} WHERE substatementVerbUid IN (SELECT verbUid 
-                    FROM VerbEntity WHERE urlId = ${VerbEntity.VERB_FAILED_URL})""".trimMargin())
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_FAILED_URL}')""".trimMargin())
 
                 // update langmap
                 database.execSQL("""UPDATE XLangMapEntry SET verbLangMapUid = 
                     ${VerbEntity.VERB_PASSED_UID} WHERE verbLangMapUid IN (SELECT verbUid 
-                    FROM VerbEntity WHERE urlId = ${VerbEntity.VERB_PASSED_URL})""".trimMargin())
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_PASSED_URL}')""".trimMargin())
                 database.execSQL("""UPDATE XLangMapEntry SET verbLangMapUid = 
                     ${VerbEntity.VERB_FAILED_UID} WHERE verbLangMapUid IN (SELECT verbUid 
-                    FROM VerbEntity WHERE urlId = ${VerbEntity.VERB_FAILED_URL})""".trimMargin())
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_FAILED_URL}')""".trimMargin())
                 
 
                 if(database.dbType() == DoorDbType.POSTGRES) {
@@ -3508,9 +3508,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                     database.execSQL("""ALTER VerbEntity TABLE ADD COLUMN verbInActive BOOL DEFAULT FALSE""")
                     database.execSQL("""UPDATE VerbEntity SET verbInActive = TRUE WHERE 
-                        urlId = ${VerbEntity.VERB_PASSED_URL} AND verbUid != ${VerbEntity.VERB_PASSED_UID}""".trimMargin())
+                        urlId = '${VerbEntity.VERB_PASSED_URL}' AND verbUid != ${VerbEntity.VERB_PASSED_UID}""".trimMargin())
                     database.execSQL("""UPDATE VerbEntity SET verbInActive = TRUE WHERE 
-                        urlId = ${VerbEntity.VERB_FAILED_URL} AND verbUid != ${VerbEntity.VERB_FAILED_UID}""".trimMargin())
+                        urlId = '${VerbEntity.VERB_FAILED_URL}' AND verbUid != ${VerbEntity.VERB_FAILED_UID}""".trimMargin())
 
                 }else if(database.dbType() == DoorDbType.SQLITE){
 
@@ -3535,9 +3535,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                     database.execSQL("""ALTER TABLE VerbEntity ADD COLUMN verbInActive INTEGER DEFAULT 0 NOT NULL""")
                     database.execSQL("""UPDATE VerbEntity SET verbInActive = 1 WHERE 
-                        urlId = ${VerbEntity.VERB_PASSED_URL} AND verbUid != ${VerbEntity.VERB_PASSED_UID}""".trimMargin())
+                        urlId = '${VerbEntity.VERB_PASSED_URL}' AND verbUid != ${VerbEntity.VERB_PASSED_UID}""".trimMargin())
                     database.execSQL("""UPDATE VerbEntity SET verbInActive = 1 WHERE 
-                        urlId = ${VerbEntity.VERB_FAILED_URL} AND verbUid != ${VerbEntity.VERB_FAILED_UID}""".trimMargin())
+                        urlId = '${VerbEntity.VERB_FAILED_URL}' AND verbUid != ${VerbEntity.VERB_FAILED_UID}""".trimMargin())
 
                 }
 
