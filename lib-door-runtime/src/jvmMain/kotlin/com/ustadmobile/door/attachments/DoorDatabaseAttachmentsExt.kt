@@ -57,25 +57,3 @@ actual suspend fun DoorDatabaseRepository.retrieveAttachment(uri: String): Strin
     return file.toURI().toString()
 }
 
-
-
-actual suspend fun DoorDatabaseRepository.downloadAttachments(entityList: List<EntityWithAttachment>) {
-    entityList.mapNotNull { it.attachmentUri }.forEach { attachmentUri ->
-        withContext(Dispatchers.IO) {
-            val destPath = attachmentUri.substringAfter(DOOR_ATTACHMENT_URI_PREFIX)
-            val destFile = File(requireAttachmentDirFile(), destPath)
-
-            if(!destFile.exists()) {
-                val url = URL(URL(endpoint),
-                        "attachments/download?uri=${URLEncoder.encode(attachmentUri, "UTF-8")}")
-
-                val urlConnection = url.openConnection() as HttpURLConnection
-                urlConnection.setRequestProperty(DoorConstants.HEADER_DBVERSION,
-                        db.dbSchemaVersion().toString())
-                urlConnection.inputStream.writeToFile(destFile)
-            }
-        }
-    }
-}
-
-

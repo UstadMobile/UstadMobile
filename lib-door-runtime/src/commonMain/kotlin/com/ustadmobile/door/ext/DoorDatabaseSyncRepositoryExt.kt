@@ -6,6 +6,7 @@ package com.ustadmobile.door.ext
 import com.github.aakira.napier.Napier
 import com.ustadmobile.door.*
 import com.ustadmobile.door.attachments.EntityWithAttachment
+import com.ustadmobile.door.attachments.downloadAttachments
 import com.ustadmobile.door.attachments.uploadAttachment
 import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.entities.UpdateNotificationSummary
@@ -106,6 +107,8 @@ suspend inline fun <reified T:Any, reified K: Any> DoorDatabaseSyncRepository.sy
     val newEntities = receiveRemoteEntitiesFn()
 
     if(newEntities.isNotEmpty()) {
+        downloadAttachments(newEntities.mapNotNull { entityToEntityWithAttachmentFn(it) })
+
         storeEntitiesFn(newEntities)
 
         val entityAcks = entityToAckFn(newEntities, true)

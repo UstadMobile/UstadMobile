@@ -48,6 +48,7 @@ import com.ustadmobile.door.ext.writeToFile
 import java.net.URI
 import java.nio.file.Paths
 import com.ustadmobile.door.attachments.retrieveAttachment
+import com.ustadmobile.door.ext.md5Sum
 
 
 class DbRepoTest {
@@ -834,7 +835,7 @@ class DbRepoTest {
     }
 
     @Test
-    fun givenEntityWithAttachmentUri_whenInserted_thenShouldUpload() {
+    fun givenEntityWithAttachmentUri_whenInsertedOnClient_thenDataShouldUploadToServer() {
         mockUpdateNotificationManager = spy(ServerUpdateNotificationManagerImpl())
         setupClientAndServerDb(mockUpdateNotificationManager)
 
@@ -866,6 +867,47 @@ class DbRepoTest {
 
         val serverFile = Paths.get(URI(serverAttachmentUri)).toFile()
         Assert.assertTrue("Attachment file exists on server", serverFile.exists())
+        Assert.assertArrayEquals("Attachment data is equal on server and client",
+            destFile.md5Sum, serverFile.md5Sum)
+    }
+
+
+    @Test
+    fun givenEntityWithAttachmentUri_whenInsertedOnServer_thenDataShouldDownloadToClient() {
+        mockUpdateNotificationManager = spy(ServerUpdateNotificationManagerImpl())
+        setupClientAndServerDb(mockUpdateNotificationManager)
+
+        val destFile = temporaryFolder.newFile()
+        this::class.java.getResourceAsStream("/testfile1.png").writeToFile(destFile)
+
+        val attachmentEntity = ExampleAttachmentEntity().apply {
+            eaAttachmentUri = destFile.toURI().toString()
+            eaUid  = serverRepo.exampleAttachmentDao().insert(this)
+        }
+
+        val clientRepo = clientDb.asRepository(Any(), "http://localhost:8089/",
+                "token", httpClient, attachmentsDir = tmpAttachmentsDir.absolutePath,
+                useClientSyncManager = true)
+                .asConnectedRepository()
+
+        runBlocking {
+            clientDb.waitUntil(10000, listOf("ExampleAttachmentEntity")) {
+                clientDb.exampleAttachmentDao().findByUid(attachmentEntity.eaUid) != null
+            }
+        }
+
+        val entityOnClient = clientDb.exampleAttachmentDao().findByUid(attachmentEntity.eaUid)
+        val clientAttachmentUri = runBlocking {
+            (clientRepo as DoorDatabaseRepository).retrieveAttachment(entityOnClient!!.eaAttachmentUri!!)
+        }
+
+        val clientFile = Paths.get(URI(clientAttachmentUri)).toFile()
+
+        Assert.assertTrue("Attachment data was downloaded to file on client",
+                clientFile.exists())
+        Assert.assertArrayEquals("Client data is the same as the original file",
+                destFile.md5Sum, clientFile.md5Sum)
+
     }
 
 }

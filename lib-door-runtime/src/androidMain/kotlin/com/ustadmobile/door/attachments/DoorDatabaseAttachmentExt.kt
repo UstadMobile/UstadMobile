@@ -42,7 +42,3 @@ actual suspend fun DoorDatabaseRepository.retrieveAttachment(uri: String): Strin
     return Uri.fromFile(file).toString()
 }
 
-actual suspend fun DoorDatabaseRepository.downloadAttachments(entityList: List<EntityWithAttachment>) {
-
-}
-

@@ -1,13 +1,21 @@
 package com.ustadmobile.door.attachments
 
+import com.ustadmobile.door.DoorConstants
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDatabaseSyncRepository
+import com.ustadmobile.door.ext.dbSchemaVersion
 import com.ustadmobile.door.ext.dbVersionHeader
+import com.ustadmobile.door.ext.writeToFile
 import io.ktor.client.request.*
 import io.ktor.http.*
 import java.io.File
 import java.net.URL
 import io.ktor.client.content.LocalFileContent
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import java.net.URLEncoder
+import java.net.HttpURLConnection
+
 
 fun DoorDatabaseRepository.requireAttachmentDirFile(): File {
     return attachmentsDir?.let { File(it) }
@@ -36,6 +44,30 @@ actual suspend fun DoorDatabaseRepository.uploadAttachment(entityWithAttachment:
     }
 }
 
+actual suspend fun DoorDatabaseRepository.downloadAttachments(entityList: List<EntityWithAttachment>) {
+    val entitiesWithAttachmentData = entityList.mapNotNull { it.attachmentUri }
+    if(entitiesWithAttachmentData.isEmpty())
+        return
+
+    withContext(Dispatchers.IO) {
+        entitiesWithAttachmentData.forEach { attachmentUri ->
+            val destPath = attachmentUri.substringAfter(DoorDatabaseRepository.DOOR_ATTACHMENT_URI_PREFIX)
+            val destFile = File(requireAttachmentDirFile(), destPath)
+
+            if(!destFile.exists()) {
+                val url = URL(URL(endpoint),
+                        "$dbPath/attachments/download?uri=${URLEncoder.encode(attachmentUri, "UTF-8")}")
+
+                destFile.parentFile.takeIf { !it.exists() }?.mkdirs()
+
+                val urlConnection = url.openConnection() as HttpURLConnection
+                urlConnection.setRequestProperty(DoorConstants.HEADER_DBVERSION,
+                        db.dbSchemaVersion().toString())
+                urlConnection.inputStream.writeToFile(destFile)
+            }
+        }
+    }
+}
 
 actual suspend fun DoorDatabaseRepository.deleteZombieAttachments(entityWithAttachment: EntityWithAttachment) {
     //TODO: transaction support for this
