@@ -819,6 +819,9 @@ fun FileSpec.Builder.addDbKtorRouteFunction(dbTypeEl: TypeElement,
                                     hasKtorAndSyncHelper, hasKtorAndSyncHelper)
 
                         }
+                    }.applyIf(dbTypeEl.allDbEntities(processingEnv).any { it.entityHasAttachments }) {
+                        add("%M(%S, _typeToken)\n", MemberName("com.ustadmobile.door.attachments",
+                                "doorAttachmentsRoute"), "attachments")
                     }
                     .endControlFlow()
                     .build())

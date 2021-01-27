@@ -4,6 +4,7 @@ import androidx.room.Insert
 import com.ustadmobile.door.SyncResult
 import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
+import com.ustadmobile.door.entities.ZombieAttachmentData
 
 /**
  * Interface to describe queries available in SyncHelperEntitiesDao.
@@ -76,5 +77,19 @@ interface ISyncHelperEntitiesDao {
      * for the same device id and table id, then the existing one will be replaced/updated
      */
     fun replaceUpdateNotifications(entities: List<UpdateNotification>)
+
+    /**
+     * Find Zombie Attachment data (e.g. where an entity has been updated and the old attachment
+     * data is no longer required). This is a list of attachment uris that should be deleted from the
+     * disk.
+     */
+    suspend fun findZombieAttachments(tableName: String, primaryKey: Long) : List<ZombieAttachmentData>
+
+    /**
+     * Delete from the Zombie Attachment table. This should be called once the attachment file has
+     * been deleted from the disk. This will remove it from the table.
+     */
+    suspend fun deleteZombieAttachments(zombieList: List<ZombieAttachmentData>)
+
 
 }

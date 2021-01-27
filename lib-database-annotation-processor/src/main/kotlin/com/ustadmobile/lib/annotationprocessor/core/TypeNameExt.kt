@@ -9,6 +9,8 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.DoorDbType
 import javax.annotation.processing.ProcessingEnvironment
+import com.ustadmobile.door.annotation.AttachmentUri
+import javax.lang.model.element.ElementKind
 
 /**
  * Provides the appropriate SQL type name as a string for this type name
@@ -152,6 +154,15 @@ fun TypeName.syncableEntities(processingEnv: ProcessingEnvironment) : List<Class
  * embedded syncable entities
  */
 fun TypeName.hasSyncableEntities(processingEnv: ProcessingEnvironment) = syncableEntities(processingEnv).isNotEmpty()
+
+fun TypeName.hasAttachments(processingEnv: ProcessingEnvironment): Boolean {
+    if(this is ClassName){
+        return processingEnv.elementUtils.getTypeElement(canonicalName)?.entityHasAttachments == true
+    }else {
+        return false
+    }
+}
+
 
 /**
  * Check if this TypeName should be sent as query parameters when passed over http. This is true

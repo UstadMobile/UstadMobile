@@ -342,6 +342,18 @@ fun TypeSpec.Builder.addRepoSyncEntityFunction(entityType: TypeElement, syncRepo
                         endControlFlow()
                         add(",")
                         add("storeTrkFn = _syncDao::_replace${entityType.simpleName}_trk")
+                        .apply {
+                            add(",\n")
+                            beginControlFlow("entityToEntityWithAttachmentFn = ")
+                            if(entityType.entityHasAttachments) {
+                                add("entity : %T -> entity.%M()\n", entityType,
+                                        MemberName(entityType.packageName, "asEntityWithAttachment"))
+                            }else {
+                                add("_ -> null\n")
+                            }
+
+                            endControlFlow()
+                        }
                         add(")\n")
                     }
                     .build()

@@ -22,10 +22,7 @@ import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.*
-import org.kodein.di.DIAware
-import org.kodein.di.direct
-import org.kodein.di.instance
-import org.kodein.di.on
+import org.kodein.di.*
 
 class ImageViewLifecycleObserver2(view: ImageView, registry: ActivityResultRegistry, inverseBindingListener: InverseBindingListener)
     : ViewActivityLauncherLifecycleObserver<ImageView>(view, registry, inverseBindingListener) {
@@ -38,10 +35,14 @@ class ImageViewLifecycleObserver2(view: ImageView, registry: ActivityResultRegis
 
 @BindingAdapter(value=["imageUri", "fallbackDrawable"], requireAll = false)
 fun ImageView.setImageFilePath(imageFilePath: String?, fallbackDrawable: Drawable?) {
-    //start observing
     setTag(R.id.tag_imagefilepath, imageFilePath)
+    val di: DI = (context.applicationContext as DIAware).di
+    val accountManager: UstadAccountManager = di.direct.instance()
+    val repo: UmAppDatabase = di.direct.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
+    val uriResolved = imageFilePath?.let { repo.resolveAttachmentAndroidUri(it) }
+
     val drawable = fallbackDrawable?: ContextCompat.getDrawable(context,android.R.color.transparent)
-    val picasso = Picasso.get().load(if(imageFilePath != null) Uri.parse(imageFilePath) else null)
+    val picasso = Picasso.get().load(uriResolved)
     if(drawable != null){
         picasso.placeholder(drawable).error(drawable)
     }

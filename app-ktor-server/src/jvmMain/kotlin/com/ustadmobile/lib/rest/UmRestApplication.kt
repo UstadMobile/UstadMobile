@@ -12,6 +12,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
@@ -47,7 +48,8 @@ const val CONF_DBMODE_SINGLETON = "singleton"
 const val CONF_GOOGLE_API = "secret"
 
 /**
- *
+ * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
+ * containers, etc).
  */
 private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBMODE_SINGLETON) = if(dbMode == CONF_DBMODE_SINGLETON) {
     singletonName
@@ -92,8 +94,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     println("auto create = $autoCreateDb")
     val dbMode = dbModeOverride ?:
         environment.config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
-    val storageRoot = File(environment.config.propertyOrNull("ktor.ustad.storagedir")?.getString() ?: "build/storage")
-    storageRoot.takeIf { !it.exists() }?.mkdirs()
+    val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
+    dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
@@ -104,8 +106,13 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             }
         }
 
+        bind<File>(tag = TAG_CONTEXT_DATA_ROOT) with scoped(EndpointScope.Default).singleton {
+            File(dataDirPath, context.identifier(dbMode))
+        }
+
+
         bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
-            File(File(storageRoot, context.identifier(dbMode)), "container").also {
+            File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "container").also {
                 it.takeIf { !it.exists() }?.mkdirs()
             }
         }
@@ -121,7 +128,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
             if(autoCreateDb) {
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName,
-                        isPrimary = true, sqliteDir = File(storageRoot, context.identifier(dbMode)))
+                        isPrimary = true, sqliteDir = instance(tag = TAG_CONTEXT_DATA_ROOT))
             }
 
             UmAppDatabase.getInstance(Any(), dbName)
@@ -133,12 +140,13 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+            val attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "attachments")
             val repo = db.asRepository(Any(), "http://localhost/",
-                "", defaultHttpClient(), File(".").absolutePath,
+                "", defaultHttpClient(), attachmentsDir.absolutePath,
                 instance(), false)
             ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
             repo.preload()
-            db.ktorInitDbWithRepo(repo, File(storageRoot, context.identifier(dbMode)).absolutePath)
+            db.ktorInitDbWithRepo(repo, instance<File>(tag = TAG_CONTEXT_DATA_ROOT).absolutePath)
             repo
         }
 
@@ -153,7 +161,13 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     Any(), context, di)
         }
 
-        registerContextTranslator { call: ApplicationCall -> Endpoint(call.request.header("Host") ?: "nohost") }
+        registerContextTranslator { call: ApplicationCall ->
+            if(dbMode == CONF_DBMODE_SINGLETON) {
+                Endpoint("localhost")
+            }else {
+                Endpoint(call.request.header("Host") ?: "localhost")
+            }
+        }
     }
 
     install(Routing) {

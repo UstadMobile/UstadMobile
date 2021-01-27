@@ -5,6 +5,9 @@ package com.ustadmobile.door.ext
 
 import com.github.aakira.napier.Napier
 import com.ustadmobile.door.*
+import com.ustadmobile.door.attachments.EntityWithAttachment
+import com.ustadmobile.door.attachments.downloadAttachments
+import com.ustadmobile.door.attachments.uploadAttachment
 import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.entities.UpdateNotificationSummary
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -84,6 +87,8 @@ suspend fun DoorDatabaseSyncRepository.recordSyncRunResult(allResults: List<Sync
  * @param entityToAckFn a function that wil turn a List of the given entity into a list of EntityAck
  * @param entityToTrkFn a function that will convert a list of the entity itself into the tracker entity (_trk)
  * @param storeTrkFn a function that will insert / replace the trk entity locally
+ * @param entityToEntityWithAttachmentFn a function that will convert a given entity into an
+ * an EntityWithAttachment if the entity has attachments, or null otherwise
  */
 suspend inline fun <reified T:Any, reified K: Any> DoorDatabaseSyncRepository.syncEntity(tableId: Int,
     receiveRemoteEntitiesFn: suspend () -> List<T>,
@@ -91,7 +96,8 @@ suspend inline fun <reified T:Any, reified K: Any> DoorDatabaseSyncRepository.sy
     findLocalUnsentEntitiesFn: suspend () -> List<T>,
     entityToAckFn: (entities: List<T>, primary: Boolean) -> List<EntityAck>,
     entityToTrkFn: (entities: List<T>, primary: Boolean) -> List<K>,
-    storeTrkFn: suspend (List<K>) -> Unit): SyncResult {
+    storeTrkFn: suspend (List<K>) -> Unit,
+    entityToEntityWithAttachmentFn: (T) -> EntityWithAttachment?): SyncResult {
 
     val dbName = this::class.simpleName?.removeSuffix("_Repo")
     val daoName = dbName + "SyncDao"
@@ -101,6 +107,8 @@ suspend inline fun <reified T:Any, reified K: Any> DoorDatabaseSyncRepository.sy
     val newEntities = receiveRemoteEntitiesFn()
 
     if(newEntities.isNotEmpty()) {
+        downloadAttachments(newEntities.mapNotNull { entityToEntityWithAttachmentFn(it) })
+
         storeEntitiesFn(newEntities)
 
         val entityAcks = entityToAckFn(newEntities, true)
@@ -113,6 +121,12 @@ suspend inline fun <reified T:Any, reified K: Any> DoorDatabaseSyncRepository.sy
     val localUnsentEntities = findLocalUnsentEntitiesFn()
 
     if(localUnsentEntities.isNotEmpty()) {
+        //if the entity has attachments, upload those before sending the actual entity data
+        val attachmentsToUpload = localUnsentEntities.mapNotNull { entityToEntityWithAttachmentFn(it) }
+        attachmentsToUpload.forEach {
+            uploadAttachment(it)
+        }
+
         httpClient.post<Unit> {
             url {
                 takeFrom(endpoint)
