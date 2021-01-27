@@ -87,12 +87,6 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
 
     private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
 
-    override var editButtonMode: EditButtonMode = EditButtonMode.GONE
-        get() = field
-        set(value) {
-            mBinding?.editButtonMode = value
-            field = value
-        }
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
