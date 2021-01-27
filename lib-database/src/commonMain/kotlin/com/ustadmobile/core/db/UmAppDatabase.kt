@@ -3464,12 +3464,30 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 database.execSQL("""ALTER TABLE Report ADD COLUMN priority INTEGER""".trimMargin())
                 database.execSQL("""ALTER TABLE Report ADD COLUMN reportDateRangeSelection INTEGER""")
 
+                // update statementVerb
                 database.execSQL("""UPDATE StatementEntity SET statementVerbUid = 
                     ${VerbEntity.VERB_PASSED_UID} WHERE statementVerbUid IN (SELECT verbUid 
                     FROM VerbEntity WHERE urlId = ${VerbEntity.VERB_PASSED_URL})""".trimMargin())
                 database.execSQL("""UPDATE StatementEntity SET statementVerbUid = 
                     ${VerbEntity.VERB_FAILED_UID} WHERE statementVerbUid IN (SELECT verbUid 
                     FROM VerbEntity WHERE urlId = ${VerbEntity.VERB_FAILED_URL})""".trimMargin())
+
+                // update subStatementVerb
+                database.execSQL("""UPDATE StatementEntity SET substatementVerbUid = 
+                    ${VerbEntity.VERB_PASSED_UID} WHERE substatementVerbUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = ${VerbEntity.VERB_PASSED_URL})""".trimMargin())
+                database.execSQL("""UPDATE StatementEntity SET substatementVerbUid = 
+                    ${VerbEntity.VERB_FAILED_UID} WHERE substatementVerbUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = ${VerbEntity.VERB_FAILED_URL})""".trimMargin())
+
+                // update langmap
+                database.execSQL("""UPDATE XLangMapEntry SET verbLangMapUid = 
+                    ${VerbEntity.VERB_PASSED_UID} WHERE verbLangMapUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = ${VerbEntity.VERB_PASSED_URL})""".trimMargin())
+                database.execSQL("""UPDATE XLangMapEntry SET verbLangMapUid = 
+                    ${VerbEntity.VERB_FAILED_UID} WHERE verbLangMapUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = ${VerbEntity.VERB_FAILED_URL})""".trimMargin())
+                
 
                 if(database.dbType() == DoorDbType.POSTGRES) {
 
