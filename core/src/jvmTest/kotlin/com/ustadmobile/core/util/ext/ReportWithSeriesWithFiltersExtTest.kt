@@ -78,9 +78,9 @@ class ReportWithSeriesWithFiltersExtTest {
         runBlocking {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
-                Assert.assertEquals("number of sessions for month 04", 1f, reportList[0].yAxis)
-                Assert.assertEquals("number of sessions for month 05", 2f, reportList[1].yAxis)
-                Assert.assertEquals("number of sessions for month 06", 13f, reportList[2].yAxis)
+                Assert.assertEquals("number of sessions for month 04", 0f, reportList[0].yAxis)
+                Assert.assertEquals("number of sessions for month 05", 1f, reportList[1].yAxis)
+                Assert.assertEquals("number of sessions for month 06", 2f, reportList[2].yAxis)
             }
         }
     }
@@ -120,7 +120,7 @@ class ReportWithSeriesWithFiltersExtTest {
                         }
                         "06 2019" -> {
                             Assert.assertEquals("number of active users for month 06 with gender female",
-                                    0, it.value.find { it.subgroup == "1" }?.yAxis ?: 0)
+                                    1f, it.value.find { it.subgroup == "1" }?.yAxis ?: 0)
                             Assert.assertEquals("number of active users for month 06 with gender male",
                                     2f, it.value.find { it.subgroup == "2" }?.yAxis ?: 0)
                         }
