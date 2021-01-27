@@ -1,17 +1,20 @@
+/*
 package com.ustadmobile.port.android.view
 
 import android.app.Application
+import android.content.Context
+import android.content.Intent
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
-import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.view.ReportListView
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.port.android.screen.*
 import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -61,7 +64,7 @@ class ReportEndToEndTests : TestCase() {
                 reportSeriesName = "Series X"
                 reportSeriesVisualType = ReportSeries.BAR_CHART
                 reportSeriesSubGroup = ReportSeries.NONE
-                reportSeriesDataSet = ReportSeries.NUMBER_STUDENTS_COMPLETED
+                reportSeriesYAxis = ReportSeries.AVERAGE_USAGE_TIME_PER_USER
                 reportSeriesFilters = listOf(ReportFilter().apply {
                     reportFilterField = ReportFilter.FIELD_PERSON_GENDER
                     reportFilterCondition = ReportFilter.CONDITION_IS
@@ -77,17 +80,17 @@ class ReportEndToEndTests : TestCase() {
                 admin = true
                 firstNames = "Bob"
                 lastName = "Jones"
-                username = "admin"
             })
-            activityScenario = launchActivity()
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val launchIntent = Intent(context, MainActivity::class.java).also {
+                it.putExtra(UstadView.ARG_NEXT,
+                        "${ReportListView.VIEW_NAME}")
+            }
+            activityScenario = launchActivity(launchIntent)
 
         }.run {
 
             MainScreen {
-
-                bottomNav {
-                    setSelectedItem(R.id.report_list_dest)
-                }
 
                 fab.click()
             }
@@ -138,3 +141,4 @@ class ReportEndToEndTests : TestCase() {
         }
 
 }
+*/

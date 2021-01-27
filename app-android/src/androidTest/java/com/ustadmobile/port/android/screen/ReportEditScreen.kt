@@ -19,7 +19,6 @@ import com.ustadmobile.core.util.ext.toDisplayString
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.port.android.view.ReportEditFragment
 import com.ustadmobile.test.port.android.KNestedScrollView
-import com.ustadmobile.test.port.android.util.setDateField
 import com.ustadmobile.test.port.android.util.setMessageIdOption
 import org.hamcrest.Matcher
 
