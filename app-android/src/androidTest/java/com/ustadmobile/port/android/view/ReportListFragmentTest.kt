@@ -7,7 +7,9 @@ import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.port.android.screen.ReportListScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -38,6 +40,12 @@ class ReportListFragmentTest : TestCase() {
     @Before
     fun setup() {
         runBlocking {
+            dbRule.insertPersonForActiveUser(Person().apply {
+                firstNames = "Bob"
+                lastName = "Jones"
+                admin = true
+                personUid = 42
+            })
             dbRule.repo.insertTestStatements()
         }
     }
@@ -48,10 +56,21 @@ class ReportListFragmentTest : TestCase() {
         val testEntity = Report().apply {
             reportTitle = "Test Name"
             xAxis = Report.MONTH
+            reportOwnerUid = 42
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
+            reportSeries = """                
+                        [{
+                         "reportSeriesUid": 0,
+                         "reportSeriesName": "Series 1",
+                         "reportSeriesYAxis": ${ReportSeries.TOTAL_DURATION},
+                         "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
+                         "reportSeriesSubGroup": ${ReportSeries.NONE}
+                        }]
+                    """.trimIndent()
             reportUid = dbRule.repo.reportDao.insert(this)
         }
+
 
         init {
 
