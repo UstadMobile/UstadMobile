@@ -142,8 +142,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
             val attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "attachments")
             val repo = db.asRepository(Any(), "http://localhost/",
-                "", defaultHttpClient(), attachmentsDir.absolutePath,
-                instance(), false)
+                    "", defaultHttpClient(), attachmentsDir.absolutePath,
+                    instance(), false)
             ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
             repo.preload()
             db.ktorInitDbWithRepo(repo, instance<File>(tag = TAG_CONTEXT_DATA_ROOT).absolutePath)

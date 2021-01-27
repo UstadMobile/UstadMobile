@@ -3,6 +3,7 @@ package com.ustadmobile.door
 import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.room.RoomDatabase
+import com.ustadmobile.door.attachments.AttachmentFilter
 import io.ktor.client.HttpClient
 import java.io.File
 import kotlin.reflect.KClass
@@ -13,7 +14,8 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
                                                                     httpClient: HttpClient,
                                                                     attachmentsDir: String?,
                                                                     updateNotificationManager: ServerUpdateNotificationManager?,
-                                                                    useClientSyncManager: Boolean): T {
+                                                                    useClientSyncManager: Boolean,
+                                                                    attachmentFilters: List<AttachmentFilter>): T {
     val dbUnwrapped = if(this is DoorDatabaseSyncableReadOnlyWrapper) {
         this.unwrap(T::class)
     }else {
@@ -35,9 +37,9 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
             .getConstructor(Any::class.java, dbClass.java, dbClass.java, String::class.java,
                     String::class.java, HttpClient::class.java,
                     String::class.java, ServerUpdateNotificationManager::class.java,
-                    Boolean::class.javaPrimitiveType)
+                    Boolean::class.javaPrimitiveType, List::class.java)
             .newInstance(androidContext, dbUnwrapped, this, endpoint, accessToken, httpClient, attachmentsDirToUse,
-                    updateNotificationManager, useClientSyncManager)
+                    updateNotificationManager, useClientSyncManager, attachmentFilters)
     return repo
 }
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.door
 
+import com.ustadmobile.door.attachments.AttachmentFilter
 import io.ktor.client.HttpClient
 import kotlin.reflect.KClass
 
@@ -26,6 +27,11 @@ interface DoorDatabaseRepository {
      * The SyncableReadOnlyWrapper if this is a syncable database.
      */
     val db: DoorDatabase
+
+    /**
+     * A list of filters that will be applied to attachments.
+     */
+    val attachmentFilters: List<AttachmentFilter>
 
     suspend fun addMirror(mirrorEndpoint: String, initialPriority: Int): Int
 
