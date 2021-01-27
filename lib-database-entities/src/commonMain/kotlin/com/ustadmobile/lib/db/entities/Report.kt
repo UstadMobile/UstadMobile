@@ -126,7 +126,7 @@ open class Report {
                     reportUid = TEMPLATE_CONTENT_USAGE_OVER_TIME_UID
                     reportTitle = "Content usage over time"
                     reportDescription = "Total content usage duration over time (disaggregated by gender)"
-                    xAxis = MONTH
+                    xAxis = GENDER
                     isTemplate = true
                     reportSeries = """                
                         [{
@@ -134,7 +134,7 @@ open class Report {
                           "reportSeriesName": "Series 1",
                           "reportSeriesYAxis": ${ReportSeries.TOTAL_DURATION},
                           "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
-                          "reportSeriesSubGroup": $GENDER
+                          "reportSeriesSubGroup": $NONE
                         }]
                     """.trimIndent()
                 },
@@ -196,7 +196,7 @@ open class Report {
                             [{
                                 "reportSeriesUid": 0,
                                 "reportSeriesName": "Series 1",
-                                "reportSeriesYAxis": ${ReportSeries.NUMBER_ACTIVE_USERS},
+                                "reportSeriesYAxis": ${ReportSeries.NUMBER_OF_STUDENTS_COMPLETED_CONTENT},
                                 "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
                                 "reportSeriesSubGroup": $NONE
                             }]
