@@ -36,6 +36,8 @@ class VerbEntity() {
 
     var urlId: String? = null
 
+    var verbInActive: Boolean = false
+
     @MasterChangeSeqNum
     var verbMasterChangeSeqNum: Long = 0
 
