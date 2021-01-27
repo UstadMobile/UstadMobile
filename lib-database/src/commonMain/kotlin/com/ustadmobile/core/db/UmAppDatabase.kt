@@ -3499,23 +3499,164 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 database.execSQL("ALTER TABLE PersonPicture ADD COLUMN personPictureUri TEXT")
                 database.execSQL("ALTER TABLE PersonPicture ADD COLUMN personPictureMd5 TEXT")
 
-                database.execSQL("CREATE TABLE IF NOT EXISTS `ProductPicture` (`productPictureUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
-                        "`productPictureProductUid` INTEGER NOT NULL, `productPictureMasterCsn` INTEGER NOT NULL, `productPictureLocalCsn` INTEGER NOT NULL, " +
-                        "`productPictureLastChangedBy` INTEGER NOT NULL, `productPictureUri` TEXT, `productPictureMd5` TEXT, " +
-                        "`productPictureFileSize` INTEGER NOT NULL, `productPictureTimestamp` INTEGER NOT NULL, `productPictureMimeType` TEXT, " +
-                        "`productPictureActive` INTEGER NOT NULL)")
 
-                database.execSQL("CREATE TABLE IF NOT EXISTS ProductPicture_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
-                database.execSQL("""
+                if(database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ProductPicture (  productPictureProductUid  INTEGER  NOT NULL , productPictureMasterCsn  INTEGER  NOT NULL , productPictureLocalCsn  INTEGER  NOT NULL , productPictureLastChangedBy  INTEGER  NOT NULL , productPictureUri  TEXT , productPictureMd5  TEXT , productPictureFileSize  INTEGER  NOT NULL , productPictureTimestamp  INTEGER  NOT NULL , productPictureMimeType  TEXT , productPictureActive  INTEGER  NOT NULL , productPictureUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+
+                    database.execSQL("""
+                      |CREATE TRIGGER INS_LOC_214
+                      |AFTER INSERT ON ProductPicture
+                      |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                      |    NEW.productPictureLocalCsn = 0)
+                      |BEGIN
+                      |    UPDATE ProductPicture
+                      |    SET productPictureMasterCsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 214)
+                      |    WHERE productPictureUid = NEW.productPictureUid;
+                      |    
+                      |    UPDATE SqliteChangeSeqNums
+                      |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+                      |    WHERE sCsnTableId = 214;
+                      |END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |            CREATE TRIGGER INS_PRI_214
+                      |            AFTER INSERT ON ProductPicture
+                      |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                      |                NEW.productPictureMasterCsn = 0)
+                      |            BEGIN
+                      |                UPDATE ProductPicture
+                      |                SET productPictureMasterCsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 214)
+                      |                WHERE productPictureUid = NEW.productPictureUid;
+                      |                
+                      |                UPDATE SqliteChangeSeqNums
+                      |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                      |                WHERE sCsnTableId = 214;
+                      |                
+                      |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      |SELECT 214, NEW.productPictureUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                      |            END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER UPD_LOC_214
+                      |AFTER UPDATE ON ProductPicture
+                      |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                      |    AND (NEW.productPictureLocalCsn == OLD.productPictureLocalCsn OR
+                      |        NEW.productPictureLocalCsn == 0))
+                      |BEGIN
+                      |    UPDATE ProductPicture
+                      |    SET productPictureLocalCsn = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 214) 
+                      |    WHERE productPictureUid = NEW.productPictureUid;
+                      |    
+                      |    UPDATE SqliteChangeSeqNums 
+                      |    SET sCsnNextLocal = sCsnNextLocal + 1
+                      |    WHERE sCsnTableId = 214;
+                      |END
+                      """.trimMargin())
+                    database.execSQL("""
+                      |            CREATE TRIGGER UPD_PRI_214
+                      |            AFTER UPDATE ON ProductPicture
+                      |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                      |                AND (NEW.productPictureMasterCsn == OLD.productPictureMasterCsn OR
+                      |                    NEW.productPictureMasterCsn == 0))
+                      |            BEGIN
+                      |                UPDATE ProductPicture
+                      |                SET productPictureMasterCsn = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 214)
+                      |                WHERE productPictureUid = NEW.productPictureUid;
+                      |                
+                      |                UPDATE SqliteChangeSeqNums
+                      |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                      |                WHERE sCsnTableId = 214;
+                      |                
+                      |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      |SELECT 214, NEW.productPictureUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                      |            END
+                      """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ProductPicture_trk (  epk  INTEGER NOT NULL , " +
+                            " clientId  INTEGER NOT NULL, " +
+                            " csn  INTEGER NOT NULL, rx  INTEGER NOT NULL,  reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL, " +
+                            " pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
                       |CREATE 
                       | INDEX index_ProductPicture_trk_clientId_epk_csn 
                       |ON ProductPicture_trk (clientId, epk, csn)
                       """.trimMargin())
-                database.execSQL("""
+                    database.execSQL("""
                       |CREATE 
                       |UNIQUE INDEX index_ProductPicture_trk_epk_clientId 
                       |ON ProductPicture_trk (epk, clientId)
                       """.trimMargin())
+                    database.execSQL("""
+                      |
+                      |        CREATE TRIGGER ATTUPD_ProductPicture
+                      |        AFTER UPDATE ON ProductPicture FOR EACH ROW WHEN
+                      |        OLD.productPictureMd5 IS NOT NULL AND (SELECT COUNT(*) FROM ProductPicture WHERE productPictureMd5 = OLD.productPictureMd5) = 0
+                      |        BEGIN
+                      |        INSERT INTO ZombieAttachmentData(zaTableName, zaPrimaryKey, zaUri) VALUES('ProductPicture', OLD.productPictureUid, OLD.productPictureUri);
+                      |        END
+                      |    
+                      """.trimMargin())
+
+
+                }else {
+
+                    //Begin: Create table ProductPicture for PostgreSQL
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ProductPicture (  productPictureProductUid  BIGINT  NOT NULL , productPictureMasterCsn  BIGINT  NOT NULL , productPictureLocalCsn  BIGINT  NOT NULL , productPictureLastChangedBy  INTEGER  NOT NULL , productPictureUri  TEXT , productPictureMd5  TEXT , productPictureFileSize  INTEGER  NOT NULL , productPictureTimestamp  BIGINT  NOT NULL , productPictureMimeType  TEXT , productPictureActive  BOOL  NOT NULL , productPictureUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ProductPicture_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS ProductPicture_lcsn_seq")
+                    database.execSQL("""
+                      |CREATE OR REPLACE FUNCTION 
+                      | inccsn_214_fn() RETURNS trigger AS ${'$'}${'$'}
+                      | BEGIN  
+                      | UPDATE ProductPicture SET productPictureLocalCsn =
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.productPictureLocalCsn 
+                      | ELSE NEXTVAL('ProductPicture_lcsn_seq') END),
+                      | productPictureMasterCsn = 
+                      | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                      | THEN NEXTVAL('ProductPicture_mcsn_seq') 
+                      | ELSE NEW.productPictureMasterCsn END)
+                      | WHERE productPictureUid = NEW.productPictureUid;
+                      | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                      | SELECT 214, NEW.productPictureUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+                      | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+                      | RETURN null;
+                      | END ${'$'}${'$'}
+                      | LANGUAGE plpgsql
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER inccsn_214_trig 
+                      |AFTER UPDATE OR INSERT ON ProductPicture 
+                      |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                      |EXECUTE PROCEDURE inccsn_214_fn()
+                      """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ProductPicture_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE 
+                      | INDEX index_ProductPicture_trk_clientId_epk_csn 
+                      |ON ProductPicture_trk (clientId, epk, csn)
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE 
+                      |UNIQUE INDEX index_ProductPicture_trk_epk_clientId 
+                      |ON ProductPicture_trk (epk, clientId)
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE OR REPLACE FUNCTION attach_ProductPicture_fn() RETURNS trigger AS ${'$'}${'$'}
+                      |BEGIN
+                      |INSERT INTO ZombieAttachmentData(zaTableName, zaPrimaryKey, zaUri) 
+                      |SELECT 'ProductPicture' AS zaTableName, OLD.productPictureUid AS zaPrimaryKey, OLD.productPictureUri AS zaUri
+                      |WHERE (SELECT COUNT(*) FROM ProductPicture WHERE productPictureMd5 = OLD.productPictureMd5) = 0;
+                      |RETURN null;
+                      |END ${'$'}${'$'}
+                      |LANGUAGE plpgsql
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER attach_ProductPicture_trig
+                      |AFTER UPDATE ON ProductPicture
+                      |FOR EACH ROW WHEN (OLD.productPictureUri IS NOT NULL)
+                      |EXECUTE PROCEDURE attach_ProductPicture_fn();
+                      """.trimMargin())
+                }
             }
         }
 

@@ -229,42 +229,42 @@ class TestRoomMigration {
 
     @Test
     fun migrate52to53() {
-        helper.createDatabase(TEST_DB, 52).apply {
+        helper.createDatabase(TEST_DB, 152).apply {
             close()
         }
 
-        helper.runMigrationsAndValidate(TEST_DB, 53, true,
-                UmAppDatabase.MIGRATION_52_53)
+        helper.runMigrationsAndValidate(TEST_DB, 153, true,
+                UmAppDatabase.MIGRATION_152_153)
     }
 
     @Test
     fun migrate53to54() {
-        helper.createDatabase(TEST_DB, 53).apply {
+        helper.createDatabase(TEST_DB, 153).apply {
             close()
         }
 
-        helper.runMigrationsAndValidate(TEST_DB, 54, true,
-                UmAppDatabase.MIGRATION_53_54)
+        helper.runMigrationsAndValidate(TEST_DB, 154, true,
+                UmAppDatabase.MIGRATION_153_154)
     }
 
     @Test
     fun migrate54to55() {
-        helper.createDatabase(TEST_DB, 54).apply {
+        helper.createDatabase(TEST_DB, 154).apply {
             close()
         }
 
-        helper.runMigrationsAndValidate(TEST_DB, 55, true,
-                UmAppDatabase.MIGRATION_54_55)
+        helper.runMigrationsAndValidate(TEST_DB, 155, true,
+                UmAppDatabase.MIGRATION_154_155)
     }
 
     @Test
     fun migrate55to56() {
-        helper.createDatabase(TEST_DB, 55).apply {
+        helper.createDatabase(TEST_DB, 155).apply {
             close()
         }
 
-        helper.runMigrationsAndValidate(TEST_DB, 56, true,
-                UmAppDatabase.MIGRATION_55_56)
+        helper.runMigrationsAndValidate(TEST_DB, 156, true,
+                UmAppDatabase.MIGRATION_155_156)
     }
 
 
