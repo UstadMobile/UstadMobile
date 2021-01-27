@@ -247,8 +247,8 @@ private fun groupBy(value: Int, dbType: Int): String {
         Report.WEEK -> {
             when (dbType) {
                 DoorDbType.SQLITE -> {
-                    // starts on monday because postgres starts on monday
-                    "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 1') "
+                    // -5 days to get the date on monday
+                    "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-5 day') "
                 }
                 DoorDbType.POSTGRES -> {
                     "SELECT TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP('601543800'))), 'dd mm yyyy') "

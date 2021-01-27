@@ -171,7 +171,7 @@ class ReportWithSeriesWithFiltersExtTest {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
                 val avgDurationForWeek09JuneByContent = reportList.find {
-                    it.xAxis == "09 06 2019" && it.subgroup == "23223" }
+                    it.xAxis == "10 06 2019" && it.subgroup == "23223" }
                 Assert.assertEquals("data matches", 212307.0f, avgDurationForWeek09JuneByContent!!.yAxis)
             }
         }
