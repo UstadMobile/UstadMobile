@@ -3475,6 +3475,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         DROP COLUMN subGroup""".trimMargin())
 
                     database.execSQL("ALTER TABLE StatementEntity ADD COLUMN contentEntryRoot BOOL DEFAULT FALSE")
+                    database.execSQL("""UPDATE StatementEntity SET rootContentEntry = true 
+                        WHERE statementUid IN (select statementUid from StatementEntity 
+                        LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = StatementEntity.statementContentEntryUid 
+                        LEFT JOIN XObjectEntity ON XObjectEntity.xObjectUid = StatementEntity.xObjectUid 
+                        WHERE XObjectEntity.objectId = ContentEntry.entryId)""".trimMargin())
 
                 }else if(database.dbType() == DoorDbType.SQLITE){
 
@@ -3491,6 +3496,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_StatementEntity_statementPersonUid` ON StatementEntity (`statementPersonUid`)")
 
                     database.execSQL("ALTER TABLE StatementEntity ADD COLUMN contentEntryRoot INTEGER DEFAULT 0 NOT NULL")
+                    database.execSQL("""UPDATE StatementEntity SET contentEntryRoot = 1 WHERE 
+                        statementUid IN (select statementUid from StatementEntity LEFT JOIN 
+                        ContentEntry ON ContentEntry.contentEntryUid = StatementEntity.statementContentEntryUid 
+                        LEFT JOIN XObjectEntity ON XObjectEntity.xObjectUid = StatementEntity.xObjectUid 
+                        WHERE XObjectEntity.objectId = ContentEntry.entryId)""".trimMargin())
 
                 }
 

@@ -36,7 +36,6 @@ class VerbEntity() {
 
     var urlId: String? = null
 
-
     @MasterChangeSeqNum
     var verbMasterChangeSeqNum: Long = 0
 
@@ -58,8 +57,18 @@ class VerbEntity() {
 
         const val VERB_COMPLETED_UID = 10001L
 
+        const val VERB_PASSED_URL = "http://adlnet.gov/expapi/verbs/passed"
+
+        const val VERB_PASSED_UID = 10002L
+
+        const val VERB_FAILED_URL = "http://adlnet.gov/expapi/verbs/failed"
+
+        const val VERB_FAILED_UID = 10003L
+
         val FIXED_UIDS = mapOf(VERB_PROGRESSED_URL to VERB_PROGRESSED_UID,
-                VERB_COMPLETED_URL to VERB_COMPLETED_UID)
+                VERB_COMPLETED_URL to VERB_COMPLETED_UID,
+                VERB_PASSED_URL to VERB_PASSED_UID,
+                VERB_FAILED_URL to VERB_FAILED_UID)
 
     }
 

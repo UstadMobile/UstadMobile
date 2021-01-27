@@ -60,10 +60,14 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> """COUNT(DISTINCT CASE WHEN 
             ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN
             StatementEntity.statementPersonUid ELSE NULL END) As yAxis, """.trimMargin()
-        NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """SELECT COUNT(DISTINCT CASE WHEN StatementEntity.resultCompletion 
-            AND  = ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED} 
-            THEN ContentEntryProgress.contentEntryProgressPersonUid ELSE NULL END) as yAxis, """.trimMargin()
-        PERCENT_OF_STUDENTS_COMPLETED_CONTENT -> """"""
+        NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """COUNT(DISTINCT CASE WHEN (StatementEntity.resultCompletion 
+            AND StatementEntity.contentEntryRoot AND StatementEntity.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
+            THEN StatementEntry.statementPersonUid ELSE NULL END) as yAxis, """.trimMargin()
+        PERCENT_OF_STUDENTS_COMPLETED_CONTENT -> """((CAST(COUNT(DISTINCT CASE WHEN 
+            (StatementEntity.resultCompletion AND StatementEntity.contentEntryRoot 
+            AND StatementEntity.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
+            THEN StatementEntry.statementUid ELSE NULL END) 
+            AS REAL) / COUNT(DISTINCT StatementEntry.statementPersonUid)) * 100) as yAxis, """
         else -> ""
     }
 
@@ -99,30 +103,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> {
             sql += "LEFT JOIN ClazzLogAttendanceRecord ON StatementEntity.statementPersonUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid "
         }
-        NUMBER_OF_STUDENTS_COMPLETED_CONTENT, PERCENT_OF_STUDENTS_COMPLETED_CONTENT -> {
-            sql += " LEFT JOIN ContentEntryProgress ON ContentEntryProgress.contentEntryProgressContentEntryUid = StatementEntity.statementContentEntryUid "
-        }
     }
-
-    reportSeriesFilters?.forEach {
-
-        when(it.reportFilterField){
-            ReportFilter.FIELD_CONTENT_COMPLETION -> {
-                // since the join is added because of filter, it gets added to both sql and sqlList query
-                val joinProgress =  " LEFT JOIN ContentEntryProgress ON ContentEntryProgress.contentEntryProgressContentEntryUid = StatementEntity.statementContentEntryUid "
-                when(reportSeriesYAxis){
-                    NUMBER_OF_STUDENTS_COMPLETED_CONTENT, PERCENT_OF_STUDENTS_COMPLETED_CONTENT ->{
-                        // already added to sql
-                    }else -> {
-                        sql += joinProgress
-                    }
-                }
-                sqlList += joinProgress
-            }
-        }
-
-    }
-
 
     val where = " WHERE PersonGroupMember.groupMemberPersonUid = ? "
     sql += where
@@ -166,9 +147,14 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                 }
                 ReportFilter.FIELD_CONTENT_COMPLETION ->{
 
-                    var filterString = "ContentEntryProgress.contentEntryProgressStatusFlag "
+                    var filterString = "(StatementEntity.contentEntryRoot AND StatementEntity.resultCompletion AND StatementEntity.statementVerbUid "
                     filterString += handleCondition(filter.reportFilterCondition)
-                    filterString += "${filter.reportFilterDropDownValue} "
+                    filterString += when(filter.reportFilterDropDownValue){
+                        ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED -> "${VerbEntity.VERB_COMPLETED_UID}) "
+                        ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED -> "${VerbEntity.VERB_PASSED_UID} AND StatementEntity.resultSuccess = ${StatementEntity.RESULT_SUCCESS}) "
+                        ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED -> "${VerbEntity.VERB_FAILED_UID} AND StatementEntity.resultSuccess = ${StatementEntity.RESULT_FAILURE}) "
+                        else -> ""
+                    }
                     whereList += (filterString)
 
                 }

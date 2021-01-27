@@ -277,7 +277,7 @@ object XapiUtil {
                                       instructorUid: Long, agentUid: Long, authorityUid: Long, teamUid: Long,
                                       subActorUid: Long, subVerbUid: Long, subObjectUid: Long,
                                       contentEntryUid: Long = 0L,
-                                      learnerGroupUid: Long): StatementEntity {
+                                      learnerGroupUid: Long, masterRoot: Boolean = false): StatementEntity {
 
         val statementId = statement.id
                 ?: throw IllegalArgumentException("Statement $statement to be stored has no id!")
@@ -301,6 +301,7 @@ object XapiUtil {
                 it.stored = UMCalendarUtil.parse8601TimestampOrDefault(statement.stored)
                 it.statementContentEntryUid = contentEntryUid
                 it.statementLearnerGroupUid = learnerGroupUid
+                it.contentEntryRoot = masterRoot
                 it.fullStatement = gson.toJson(statement)
             }
 
