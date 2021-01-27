@@ -26,6 +26,7 @@ import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SU
 import kotlinx.coroutines.GlobalScope
 import java.util.*
 import javax.annotation.processing.ProcessingEnvironment
+import com.ustadmobile.door.attachments.AttachmentFilter
 
 /**
  * Where this TypeElement represents a Database class, this is the property name which should be
@@ -111,6 +112,10 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
                 .addParameter("_updateNotificationManager",
                         ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
                 .addParameter("_useClientSyncManager", Boolean::class)
+                .addParameter(ParameterSpec.builder("attachmentFilters",
+                            List::class.parameterizedBy(AttachmentFilter::class))
+                        .addModifiers(KModifier.OVERRIDE)
+                        .build())
                 .build())
             .addProperty(PropertySpec.builder("context", Any::class)
                     .addModifiers(KModifier.OVERRIDE)
@@ -150,6 +155,12 @@ fun FileSpec.Builder.addDbRepoType(dbTypeElement: TypeElement,
             .addProperty(PropertySpec.builder("_updateNotificationManager",
                     ServerUpdateNotificationManager::class.asClassName().copy(nullable = true))
                     .initializer("_updateNotificationManager")
+                    .build())
+            .addProperty(PropertySpec.builder("attachmentFilters",
+                        List::class.parameterizedBy(AttachmentFilter::class))
+                    .mutable(false)
+                    .addModifiers(KModifier.OVERRIDE)
+                    .initializer("attachmentFilters")
                     .build())
             .addProperty(PropertySpec.builder("_repositoryHelper", RepositoryHelper::class)
                     .initializer("%T(%M(%S))", RepositoryHelper::class,

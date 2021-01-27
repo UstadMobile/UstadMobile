@@ -54,6 +54,7 @@ import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
 import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.networkmanager.*
+import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import io.ktor.client.*
 import io.ktor.client.features.json.*
 import okhttp3.Dispatcher
@@ -88,8 +89,11 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
+            val attachmentFilters = listOf(
+                    ImageResizeAttachmentFilter("PersonPicture", 1280, 1280))
             instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
-                    context.url, "", defaultHttpClient(), useClientSyncManager = true).also {
+                    context.url, "", defaultHttpClient(), useClientSyncManager = true,
+                    attachmentFilters = attachmentFilters).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
             }
         }

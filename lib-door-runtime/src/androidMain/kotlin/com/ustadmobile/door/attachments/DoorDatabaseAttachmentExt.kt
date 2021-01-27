@@ -5,11 +5,22 @@ import android.net.Uri
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.ext.writeToFileAndGetMd5
+import com.ustadmobile.door.util.systemTimeInMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.IOException
 
+suspend fun DoorDatabaseRepository.filterAttachment(entityWithAttachment: EntityWithAttachment): EntityWithAttachment {
+    val tmpDir = File.createTempFile("attachmentfilter", systemTimeInMillis().toString()).also {
+        it.delete()
+        it.mkdirs()
+    }
+
+    return attachmentFilters.fold(entityWithAttachment) {lastVal : EntityWithAttachment, filter->
+        filter.filter(lastVal, tmpDir.absolutePath, context)
+    }
+}
 
 actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: EntityWithAttachment) {
     val androidContext = context as Context
@@ -20,20 +31,22 @@ actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: 
         val attachmentsDir = requireAttachmentDirFile()
         attachmentsDir.takeIf { !it.exists() }?.mkdirs()
 
-        val androidUri = Uri.parse(entityWithAttachment.attachmentUri)
+        val filteredEntity = filterAttachment(entityWithAttachment)
+
+        val androidUri = Uri.parse(filteredEntity.attachmentUri)
         val inStream = androidContext.contentResolver.openInputStream(androidUri) ?: throw IOException("No input stream for $androidUri")
         val tmpDestFile = File(attachmentsDir, "${System.currentTimeMillis()}.tmp")
         val md5 = inStream.writeToFileAndGetMd5(tmpDestFile)
-        entityWithAttachment.attachmentMd5 = md5.toHexString()
+        filteredEntity.attachmentMd5 = md5.toHexString()
 
-        val finalDestFile = File(requireAttachmentDirFile(), entityWithAttachment.tableNameAndMd5Path)
+        val finalDestFile = File(requireAttachmentDirFile(), filteredEntity.tableNameAndMd5Path)
         finalDestFile.parentFile?.takeIf { !it.exists() }?.mkdir()
         if(!tmpDestFile.renameTo(finalDestFile)) {
             throw IOException("Unable to move attachment to correct destination")
         }
 
-        entityWithAttachment.attachmentUri = entityWithAttachment.makeAttachmentUriFromTableNameAndMd5()
-        entityWithAttachment.attachmentSize = finalDestFile.length().toInt()
+        filteredEntity.attachmentUri = entityWithAttachment.makeAttachmentUriFromTableNameAndMd5()
+        filteredEntity.attachmentSize = finalDestFile.length().toInt()
     }
 }
 
