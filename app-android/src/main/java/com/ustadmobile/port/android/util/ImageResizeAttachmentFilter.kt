@@ -22,8 +22,9 @@ class ImageResizeAttachmentFilter(val tableName: String, val width: Int, val hei
         if(entityWithAttachment.tableName != tableName)
             return entityWithAttachment
 
+        val attachmentUri = entityWithAttachment.attachmentUri ?: return entityWithAttachment
         val tmpOut = File(tmpDir, "${System.currentTimeMillis()}.tmp")
-        val androidUri = Uri.parse(entityWithAttachment.attachmentUri)
+        val androidUri = Uri.parse(attachmentUri)
         val androidContext = context as Context
 
         val fileToCompress = if(androidUri.scheme == "file") {
