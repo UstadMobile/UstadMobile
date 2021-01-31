@@ -251,7 +251,7 @@ private fun groupBy(value: Int, dbType: Int): String {
                     "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-5 day') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "SELECT TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP('601543800'))), 'dd mm yyyy') "
+                    "TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP(StatementEntity.timestamp/1000))), 'DD MM YYYY') "
                 }
                 else -> {
                     ""
