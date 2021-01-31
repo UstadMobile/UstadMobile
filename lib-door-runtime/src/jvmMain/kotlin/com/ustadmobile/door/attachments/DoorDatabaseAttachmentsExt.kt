@@ -23,12 +23,19 @@ import java.net.URLEncoder
 import java.nio.file.Paths
 
 actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: EntityWithAttachment) {
-    val attachmentUri = entityWithAttachment.attachmentUri ?: throw IllegalArgumentException("Attachment URI is null!")
+    val attachmentUri = entityWithAttachment.attachmentUri
     val attachmentDirVal = requireAttachmentDirFile()
 
-    if(attachmentUri.startsWith(DOOR_ATTACHMENT_URI_PREFIX))
+    if(attachmentUri?.startsWith(DOOR_ATTACHMENT_URI_PREFIX) == true)
         //do nothing - attachment is already stored
         return
+
+    if(attachmentUri == null) {
+        entityWithAttachment.attachmentMd5 = null
+        entityWithAttachment.attachmentSize = 0
+        return
+    }
+
 
     withContext(Dispatchers.IO) {
         val srcFile = Paths.get(URI(attachmentUri)).toFile()
