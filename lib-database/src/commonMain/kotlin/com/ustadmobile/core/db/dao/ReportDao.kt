@@ -17,12 +17,6 @@ abstract class ReportDao : BaseDao<Report> {
     @RawQuery
     abstract fun getResults(query: DoorQuery): List<Report>
 
-    @Query("SELECT * FROM REPORT WHERE NOT reportInactive AND reportOwnerUid = :loggedInPersonUid  ORDER BY reportTitle ASC")
-    abstract fun findAllActiveReportByUserAsc(loggedInPersonUid: Long): DataSource.Factory<Int, Report>
-
-    @Query("SELECT * FROM REPORT WHERE NOT reportInactive AND reportOwnerUid = :loggedInPersonUid ORDER BY reportTitle DESC")
-    abstract fun findAllActiveReportByUserDesc(loggedInPersonUid: Long): DataSource.Factory<Int, Report>
-
     @Query("""SELECT * FROM REPORT WHERE NOT reportInactive 
         AND reportOwnerUid = :personUid
         AND isTemplate = :isTemplate
@@ -49,8 +43,22 @@ abstract class ReportDao : BaseDao<Report> {
     @Query("SELECT * From Report WHERE  reportUid = :uid")
     abstract fun findByUidLive(uid: Long): DoorLiveData<Report?>
 
-    @Query("Select * From Report")
-    abstract fun findAllLive(): DoorLiveData<List<Report>>
+    @Query("""SELECT * FROM REPORT WHERE NOT reportInactive 
+        AND reportOwnerUid = :personUid
+        AND isTemplate = :isTemplate
+        AND reportTitle LIKE :searchBit
+        ORDER BY priority, CASE(:sortOrder)
+            WHEN $SORT_TITLE_ASC THEN Report.reportTitle
+            ELSE ''
+        END ASC,
+        CASE(:sortOrder)
+            WHEN $SORT_TITLE_DESC THEN Report.reportTitle
+            ELSE ''
+        END DESC
+            """)
+    abstract fun findAllActiveReportLive(searchBit: String, personUid: Long, sortOrder: Int,
+                                     isTemplate: Boolean)
+            : DoorLiveData<List<Report>>
 
     @Query("""UPDATE Report SET reportInactive = :inactive,
                 reportLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 

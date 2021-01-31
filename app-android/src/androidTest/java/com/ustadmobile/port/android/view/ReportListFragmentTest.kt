@@ -86,9 +86,12 @@ class ReportListFragmentTest : TestCase() {
             ReportListScreen {
 
                 recycler {
-                    emptyChildWith {
+                    childWith<ReportListScreen.Report> {
                         withTag(testEntity.reportUid)
                     } perform {
+
+                        reportTitle.hasText(testEntity.reportTitle!!)
+
                         click()
                     }
                 }

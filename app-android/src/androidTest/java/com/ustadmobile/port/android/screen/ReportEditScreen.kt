@@ -3,8 +3,10 @@ package com.ustadmobile.port.android.screen
 import android.content.Context
 import android.view.View
 import androidx.fragment.app.testing.FragmentScenario
+import androidx.test.espresso.Espresso
 import androidx.test.espresso.action.ViewActions
 import com.agoda.kakao.common.views.KSwipeView
+import com.agoda.kakao.common.views.KView
 import com.agoda.kakao.edit.KTextInputLayout
 import com.agoda.kakao.image.KImageView
 import com.agoda.kakao.recycler.KRecyclerItem
@@ -67,6 +69,8 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
         val filterRecycler = KRecyclerView(parent, { withId(R.id.item_report_edit_filter_list) }, { itemType(::Filter) })
 
+        val addFilterButton = KView(parent) { withId(R.id.item_edit_report_filter_add_layout)}
+
     }
 
     class Filter(parent: Matcher<View>) : KRecyclerItem<Filter>(parent) {
@@ -105,13 +109,8 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
             }
         }
 
-        /*updatedReport.fromDate.takeIf { it != reportOnForm?.fromDate }?.also {
-            setDateField(R.id.activity_report_edit_fromDate_textinputlayout, it)
-        }
-        updatedReport.toDate.takeIf { it != reportOnForm?.toDate }?.also {
-            setDateField(R.id.activity_report_edit_toDate_textinputlayout, it)
-        }
-*/
+
+
         seriesRecycler {
 
             var seriesCount = 0
@@ -141,7 +140,7 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
                         }
                     }
                 }
-                ViewActions.closeSoftKeyboard()
+                Espresso.closeSoftKeyboard()
 
                 series.reportSeriesYAxis.takeIf { it != seriesOnForm?.reportSeriesYAxis }?.also {
 
@@ -171,10 +170,19 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
                     }
                 }
 
+                val sizeOfFilters = seriesOnForm?.reportSeriesFilters?.size ?: 0
+
                 if (series.reportSeriesFilters?.isNotEmpty() == true) {
+
                     filterRecycler {
 
                         var filterCount = 0
+
+                        hasSize(sizeOfFilters)
+                        if(sizeOfFilters == 0){
+                            return@filterRecycler
+                        }
+
                         children<Filter> {
 
                             val filters = series.reportSeriesFilters?.getOrNull(filterCount)

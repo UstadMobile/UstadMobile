@@ -1,4 +1,3 @@
-/*
 package com.ustadmobile.port.android.view
 
 import android.app.Application
@@ -12,15 +11,24 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.controller.ReportFilterEditPresenter
+import com.ustadmobile.core.db.dao.ReportDao
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.ext.toDisplayString
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.*
+import com.ustadmobile.test.port.android.util.setMessageIdOption
 import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -38,15 +46,20 @@ class ReportEndToEndTests : TestCase() {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    @JvmField
-    @Rule
-    var systemImplNavRule = SystemImplTestNavHostRule()
+    val impl = UstadMobileSystemImpl.instance
 
     private val context = ApplicationProvider.getApplicationContext<Application>()
 
     @Before
     fun setup() {
         runBlocking {
+            dbRule.insertPersonForActiveUser(Person().apply {
+                admin = true
+                firstNames = "Bob"
+                lastName = "Jones"
+                personUid = 42
+            })
+            dbRule.repo.reportDao.initPreloadedTemplates()
             dbRule.repo.insertTestStatements()
         }
     }
@@ -64,7 +77,7 @@ class ReportEndToEndTests : TestCase() {
                 reportSeriesName = "Series X"
                 reportSeriesVisualType = ReportSeries.BAR_CHART
                 reportSeriesSubGroup = ReportSeries.NONE
-                reportSeriesYAxis = ReportSeries.AVERAGE_USAGE_TIME_PER_USER
+                reportSeriesYAxis = ReportSeries.INTERACTIONS_RECORDED
                 reportSeriesFilters = listOf(ReportFilter().apply {
                     reportFilterField = ReportFilter.FIELD_PERSON_GENDER
                     reportFilterCondition = ReportFilter.CONDITION_IS
@@ -76,11 +89,6 @@ class ReportEndToEndTests : TestCase() {
         var activityScenario: ActivityScenario<MainActivity>? = null
         init {
 
-            dbRule.insertPersonForActiveUser(Person().apply {
-                admin = true
-                firstNames = "Bob"
-                lastName = "Jones"
-            })
             val context = ApplicationProvider.getApplicationContext<Context>()
             val launchIntent = Intent(context, MainActivity::class.java).also {
                 it.putExtra(UstadView.ARG_NEXT,
@@ -91,14 +99,67 @@ class ReportEndToEndTests : TestCase() {
         }.run {
 
             MainScreen {
-
                 fab.click()
+            }
+
+            ReportTemplateScreen{
+
+                recycler.firstChild<ReportTemplateScreen.ReportTemplate> {
+                    title.click()
+                }
+
             }
 
             ReportEditScreen {
 
-                fillFields(updatedReport = reportToCreate, setFieldsRequiringNavigation = false,
-                        impl = systemImplNavRule.impl, context = context, testContext = this@run)
+                val reportOnForm = Report.FIXED_TEMPLATES[0]
+                val listOfSeries = Json.parse(ReportSeries.serializer().list, reportOnForm.reportSeries!!)
+
+                fillFields(updatedReport = reportToCreate, reportOnForm = ReportWithSeriesWithFilters(reportOnForm, listOfSeries), setFieldsRequiringNavigation = false,
+                        impl = impl, context = context, testContext = this@run)
+
+                seriesRecycler{
+                    firstChild<ReportEditScreen.Series> {
+                        addFilterButton.click()
+
+                        ReportFilterEditScreen{
+
+                            setMessageIdOption(fieldTextValue,
+                                    impl.getString(
+                                            ReportFilterEditPresenter.FieldOption.PERSON_GENDER.messageId,
+                                            ApplicationProvider.getApplicationContext()))
+
+                            setMessageIdOption(conditionTextValue,
+                                    impl.getString(
+                                            ReportFilterEditPresenter.ConditionOption.IS_CONDITION.messageId,
+                                            ApplicationProvider.getApplicationContext()))
+
+                            setMessageIdOption(valueDropDownTextValue,
+                                    impl.getString(MessageID.female,
+                                            ApplicationProvider.getApplicationContext()))
+
+                            MainScreen {
+                                menuDone.click()
+                            }
+                        }
+
+                        filterRecycler{
+
+                            hasSize(1)
+                            firstChild<ReportEditScreen.Filter> {
+                                filterName{
+                                    hasText(ReportFilter().apply {
+                                        reportFilterField = ReportFilter.FIELD_PERSON_GENDER
+                                        reportFilterCondition = ReportFilter.CONDITION_IS
+                                        reportFilterDropDownValue = Person.GENDER_FEMALE
+                                    }.toDisplayString(ApplicationProvider.getApplicationContext()))
+                                }
+                            }
+
+                        }
+
+                    }
+                }
 
             }
 
@@ -115,19 +176,17 @@ class ReportEndToEndTests : TestCase() {
             }
 
             val createdReport = runBlocking {
-                dbRule.db.reportDao.findAllLive().waitUntilWithActivityScenario(activityScenario!!) { it.size == 1 }
+                dbRule.db.reportDao.findAllActiveReportLive("".toQueryLikeParam(), 42, ReportDao.SORT_TITLE_ASC, false)
+                        .waitUntilWithActivityScenario(activityScenario!!) { it.size == 1 }
             }!!.first()
 
             ReportListScreen {
 
                 recycler {
 
-                    firstChild<ReportListScreen.Report> {
-                        reportLayout {
-                            hasTag("${createdReport.reportUid}")
-                            isDisplayed()
-
-                        }
+                    childWith<ReportListScreen.Report> {
+                        withTag(createdReport.reportUid)
+                    } perform {
                         reportTitle{
                             hasText(reportToCreate.reportTitle!!)
                         }
@@ -141,4 +200,3 @@ class ReportEndToEndTests : TestCase() {
         }
 
 }
-*/

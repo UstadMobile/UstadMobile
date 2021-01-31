@@ -37,7 +37,7 @@
             type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
         <variable
-            name="dataSetOptions"
+            name="yAxisOptions"
             type="java.util.List&lt;IdOption&gt;" />
 
         <variable
@@ -106,7 +106,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="@string/xapi_options_y_axes"
-                app:messageIdOptions="@{dataSetOptions}"
+                app:messageIdOptions="@{yAxisOptions}"
                 app:onMessageIdOptionSelected="@{dataSetSelectionListener}"
                 app:selectedMessageIdOption="@={series.reportSeriesYAxis}" />
         </com.google.android.material.textfield.TextInputLayout>

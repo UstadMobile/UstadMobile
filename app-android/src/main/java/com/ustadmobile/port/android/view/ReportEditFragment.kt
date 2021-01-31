@@ -88,7 +88,7 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
             val series =  getItem(position)
             holder.itemBinding.series = series
             holder.itemBinding.visualTypeOptions = visualOptions
-            holder.itemBinding.dataSetOptions = yAxisOptions
+            holder.itemBinding.yAxisOptions = yAxisOptions
             holder.itemBinding.subgroupOptions = subGroupOptions
             holder.itemBinding.showDeleteButton = showDeleteButton
             holder.itemBinding.itemEditReportDialogVisualTypeText.tag = series.reportSeriesVisualType

@@ -10,7 +10,9 @@ import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.networkmanager.defaultGson
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.ReportEditScreen
@@ -85,7 +87,10 @@ class ReportEditFragmentTest: TestCase() {
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-                val reportList = dbRule.repo.reportDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
+                val reportList = dbRule.repo.reportDao
+                        .findAllActiveReportLive("".toQueryLikeParam(), 42,
+                                ReportDao.SORT_TITLE_ASC, false)
+                        .waitUntilWithFragmentScenario(fragmentScenario) {
                     it.isNotEmpty()
                 }
 

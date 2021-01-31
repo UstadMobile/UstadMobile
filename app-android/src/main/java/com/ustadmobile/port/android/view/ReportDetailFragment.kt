@@ -279,6 +279,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         mPresenter?.handleOnClickAddFromDashboard(report)
         if (report.reportUid == 0L) {
             findNavController().popBackStack(R.id.report_edit_dest, true)
+            findNavController().popBackStack(R.id.report_template_list_dest, true)
         }
     }
 

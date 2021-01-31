@@ -121,6 +121,15 @@ open class Report {
                     reportDescription = "Start from scratch"
                     isTemplate = true
                     priority = 0
+                    reportSeries = """                
+                        [{
+                          "reportSeriesUid": 0,
+                          "reportSeriesName": "Series 1",
+                          "reportSeriesYAxis": ${ReportSeries.TOTAL_DURATION},
+                          "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
+                          "reportSeriesSubGroup": $NONE
+                        }]
+                    """.trimIndent()
                 },
                 Report().apply {
                     reportUid = TEMPLATE_CONTENT_USAGE_OVER_TIME_UID
