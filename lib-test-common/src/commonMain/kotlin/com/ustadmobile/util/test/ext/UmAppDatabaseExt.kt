@@ -558,6 +558,12 @@ suspend fun UmAppDatabase.insertTestStatements() {
     secondEntry.contentEntryUid = 530
     contentEntryDao.insert(secondEntry)
 
+    ContentEntryParentChildJoin().apply {
+        cepcjParentContentEntryUid = -4103245208651563007L
+        cepcjChildContentEntryUid = firstEntry.contentEntryUid
+        contentEntryParentChildJoinDao.insert(this)
+    }
+
     var firstsecondJoin = ContentEntryParentChildJoin()
     firstsecondJoin.cepcjParentContentEntryUid = firstEntry.contentEntryUid
     firstsecondJoin.cepcjChildContentEntryUid = secondEntry.contentEntryUid
@@ -588,6 +594,11 @@ suspend fun UmAppDatabase.insertTestStatements() {
     khanclass1.contentEntryUid = 23223
     contentEntryDao.insert(khanclass1)
 
+    ContentEntryParentChildJoin().apply {
+        cepcjParentContentEntryUid = -4103245208651563007L
+        cepcjChildContentEntryUid = secondEntry.contentEntryUid
+        contentEntryParentChildJoinDao.insert(this)
+    }
 
     var khanclassJoin = ContentEntryParentChildJoin()
     khanclassJoin.cepcjParentContentEntryUid = secondEntry.contentEntryUid
