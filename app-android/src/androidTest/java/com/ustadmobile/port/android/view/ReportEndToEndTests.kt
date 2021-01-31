@@ -11,6 +11,7 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.controller.ReportFilterEditPresenter
 import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.generated.locale.MessageID
@@ -76,7 +77,7 @@ class ReportEndToEndTests : TestCase() {
             reportSeriesWithFiltersList = listOf(ReportSeries().apply {
                 reportSeriesName = "Series X"
                 reportSeriesVisualType = ReportSeries.BAR_CHART
-                reportSeriesSubGroup = ReportSeries.NONE
+                reportSeriesSubGroup = Report.GENDER
                 reportSeriesYAxis = ReportSeries.INTERACTIONS_RECORDED
                 reportSeriesFilters = listOf(ReportFilter().apply {
                     reportFilterField = ReportFilter.FIELD_PERSON_GENDER
@@ -121,11 +122,11 @@ class ReportEndToEndTests : TestCase() {
                         impl = impl, context = context, testContext = this@run)
 
                 nestedScroll.swipeUp()
-                nestedScroll.swipeUp()
 
                 seriesRecycler{
 
                     firstChild<ReportEditScreen.Series> {
+
                         addFilterButton.click()
 
                         ReportFilterEditScreen{
