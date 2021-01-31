@@ -450,7 +450,6 @@ suspend fun UmAppDatabase.insertTestStatements() {
         personUid = personDao.insert(this)
     }
 
-
     val secondPerson = Person().apply {
         firstNames = "Calvin"
         lastName = "Neat"
@@ -466,7 +465,6 @@ suspend fun UmAppDatabase.insertTestStatements() {
         dateOfBirth = Date(1992, 4,12).dateTimeDayStart.unixMillisLong
         personUid = personDao.insert(this)
     }
-
 
     val fourthPerson = Person().apply {
         firstNames = "Jen"
@@ -519,32 +517,31 @@ suspend fun UmAppDatabase.insertTestStatements() {
     }
 
 
-
-    var firstVerb = VerbEntity().apply {
-        urlId = "Did"
-        verbUid = verbDao.insert(this)
+    val completedVerb = VerbEntity().apply {
+        urlId = VerbEntity.VERB_COMPLETED_URL
+        verbUid = VerbEntity.VERB_COMPLETED_UID
+        verbDao.insert(this)
     }
 
-    var firstVerbLangMap = XLangMapEntry(firstVerb.verbUid, 0, 0, 0, "Attempted question 3 from Entry 1")
+    val firstVerbLangMap = XLangMapEntry(completedVerb.verbUid, 0, 0, 0, "completed Entry 1")
     firstVerbLangMap.languageLangMapUid = xLangMapEntryDao.insert(firstVerbLangMap)
 
-    var secondVerb = VerbEntity().apply {
-        urlId = "This"
-        verbUid =  verbDao.insert(this)
-
+    val passedVerb = VerbEntity().apply {
+        urlId = VerbEntity.VERB_PASSED_URL
+        verbUid = VerbEntity.VERB_PASSED_UID
+        verbDao.insert(this)
     }
 
-    var secondVerbLangMap = XLangMapEntry(secondVerb.verbUid, 0, 0, 0, "Attempted question 1 from Entry 1")
+    val secondVerbLangMap = XLangMapEntry(passedVerb.verbUid, 0, 0, 0, "Passed Entry 1")
     secondVerbLangMap.languageLangMapUid = xLangMapEntryDao.insert(secondVerbLangMap)
 
-    var thirdVerb = VerbEntity().apply {
-        urlId = "Thing"
-        verbUid = verbDao.insert(this)
+    val failedVerb = VerbEntity().apply {
+        urlId = VerbEntity.VERB_FAILED_URL
+        verbUid = VerbEntity.VERB_FAILED_UID
+        verbDao.insert(this)
     }
 
-
-
-    var thirdVerbLangMap = XLangMapEntry(thirdVerb.verbUid, 0, 0, 0, "Attempted question 5 from Entry 3")
+    val thirdVerbLangMap = XLangMapEntry(failedVerb.verbUid, 0, 0, 0, "Failed Entry 1")
     thirdVerbLangMap.languageLangMapUid = xLangMapEntryDao.insert(thirdVerbLangMap)
 
     val firstEntry = ContentEntry()
@@ -645,119 +642,124 @@ suspend fun UmAppDatabase.insertTestStatements() {
     var thirdObjectLangMap = XLangMapEntry(0, thirdObject.xObjectUid, 0, 0, khanclass1.title!!)
     thirdObjectLangMap.languageLangMapUid = xLangMapEntryDao.insert(thirdObjectLangMap)
     
-    val firstStatement = StatementEntity().apply {
+    StatementEntity().apply {
         statementPersonUid = firstPerson.personUid
         resultDuration = 2400000
         resultCompletion = true
         resultScoreScaled = 50f
         contextRegistration = KmpUuid.randomUUID().toString()
-        statementVerbUid = firstVerb.verbUid
+        statementVerbUid = completedVerb.verbUid
         xObjectUid = firstObject.xObjectUid
         statementContentEntryUid = khanclass1.contentEntryUid
         resultSuccess = StatementEntity.RESULT_FAILURE
         timestamp = DateTime(2019, 6, 11).unixMillisLong
         statementId = KmpUuid.randomUUID().toString()
+        contentEntryRoot = true
         statementUid = statementDao.insert(this)
     }
   
-
-
-    val secondStaement = StatementEntity().apply {
+    StatementEntity().apply {
         statementPersonUid = firstPerson.personUid
         resultDuration = 7200000
         resultScoreScaled = 100f
         resultCompletion = true
         contextRegistration = KmpUuid.randomUUID().toString()
-        statementVerbUid = secondVerb.verbUid
+        statementVerbUid = passedVerb.verbUid
         xObjectUid = firstObject.xObjectUid
         statementContentEntryUid = khanclass1.contentEntryUid
         resultSuccess = StatementEntity.RESULT_SUCCESS
         statementId = KmpUuid.randomUUID().toString()
         timestamp = DateTime(2019, 5, 1).unixMillisLong
+        contentEntryRoot = false
         statementUid = statementDao.insert(this)
     }
 
     val commonSessionForSecondPerson = KmpUuid.randomUUID().toString()
-    val thirdStatement = StatementEntity().apply {
+
+    StatementEntity().apply {
         statementPersonUid = secondPerson.personUid
         resultDuration = 600000
         resultScoreScaled = 50f
         resultCompletion = true
         contextRegistration = commonSessionForSecondPerson
-        statementVerbUid = firstVerb.verbUid
+        statementVerbUid = completedVerb.verbUid
         xObjectUid = secondObject.xObjectUid
         statementContentEntryUid = khanclass2.contentEntryUid
         resultSuccess = StatementEntity.RESULT_FAILURE
         statementId = KmpUuid.randomUUID().toString()
         timestamp = DateTime(2019, 4, 10).unixMillisLong
+        contentEntryRoot = true
         statementUid = statementDao.insert(this)
     }
     
 
     val commonSession = KmpUuid.randomUUID().toString()
-    val fourthStatement = StatementEntity().apply {
+    StatementEntity().apply {
         statementPersonUid = thirdPerson.personUid
         resultDuration = 120000
         resultScoreScaled = 20f
         resultCompletion = true
         contextRegistration = commonSession
-        statementVerbUid = firstVerb.verbUid
+        statementVerbUid = completedVerb.verbUid
         xObjectUid = secondObject.xObjectUid
         statementContentEntryUid = khanclass2.contentEntryUid
         statementId = KmpUuid.randomUUID().toString()
         resultSuccess = StatementEntity.RESULT_SUCCESS
         timestamp = DateTime(2019, 6, 30).unixMillisLong
+        contentEntryRoot = true
         statementUid = statementDao.insert(this)
     }
     
 
 
-    var fifthStatement = StatementEntity().apply {
+    StatementEntity().apply {
         statementPersonUid = fourthPerson.personUid
         resultDuration = 100000
         resultScoreScaled = 85f
         resultCompletion = true
         contextRegistration = KmpUuid.randomUUID().toString()
-        statementVerbUid = thirdVerb.verbUid
+        statementVerbUid = failedVerb.verbUid
         xObjectUid = firstObject.xObjectUid
         statementContentEntryUid = khanclass1.contentEntryUid
         statementId = KmpUuid.randomUUID().toString()
         resultSuccess = StatementEntity.RESULT_SUCCESS
         timestamp = DateTime(2019, 7, 10).unixMillisLong
+        contentEntryRoot = true
         statementUid = statementDao.insert(this)
     }
   
 
 
-    val sixthStatement = StatementEntity().apply {
+    StatementEntity().apply {
         statementPersonUid = thirdPerson.personUid
         resultDuration = 60000
         resultScoreScaled = 25f
         resultCompletion = true
         contextRegistration = commonSession
-        statementVerbUid = firstVerb.verbUid
+        statementVerbUid = completedVerb.verbUid
         statementId = KmpUuid.randomUUID().toString()
         resultSuccess = StatementEntity.RESULT_FAILURE
         xObjectUid = secondObject.xObjectUid
         statementContentEntryUid = khanclass2.contentEntryUid
         timestamp = DateTime(2019, 5, 25).unixMillisLong
+        contentEntryRoot = true
         statementUid = statementDao.insert(this)
     }
-   
 
 
-    val seventhStatement = StatementEntity().apply {
+    StatementEntity().apply {
         statementPersonUid = secondPerson.personUid
         resultDuration = 30000
         resultScoreScaled = 5f
         resultCompletion = true
         contextRegistration = commonSessionForSecondPerson
-        statementVerbUid = firstVerb.verbUid
+        statementVerbUid = completedVerb.verbUid
         xObjectUid = firstObject.xObjectUid
         statementContentEntryUid = khanclass1.contentEntryUid
         statementId = KmpUuid.randomUUID().toString()
         resultSuccess = StatementEntity.RESULT_FAILURE
         timestamp = DateTime(2019, 6, 11).unixMillisLong
+        contentEntryRoot = true
         statementUid = statementDao.insert(this)
     }
 
@@ -768,7 +770,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
             resultScoreScaled = 5f
             resultCompletion = false
             contextRegistration = KmpUuid.randomUUID().toString()
-            statementVerbUid = firstVerb.verbUid
+            statementVerbUid = completedVerb.verbUid
             xObjectUid = thirdObject.xObjectUid
             statementContentEntryUid = khanclass1.contentEntryUid
             statementId = KmpUuid.randomUUID().toString()
