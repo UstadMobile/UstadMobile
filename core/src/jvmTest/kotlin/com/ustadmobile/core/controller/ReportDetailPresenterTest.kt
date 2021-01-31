@@ -121,7 +121,7 @@ class ReportDetailPresenterTest {
 
         presenter.handleOnClickAddFromDashboard(testEntity)
 
-        val existingEntitiesLive = db.reportDao.findAllLive()
+        val existingEntitiesLive = db.reportDao.findAllActiveReportLive(false)
         val entitySaved = runBlocking {
             existingEntitiesLive.waitUntil { it.size == 1 }
         }.getValue()!!.first()

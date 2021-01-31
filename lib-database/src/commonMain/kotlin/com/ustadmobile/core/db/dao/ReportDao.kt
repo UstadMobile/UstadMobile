@@ -44,20 +44,10 @@ abstract class ReportDao : BaseDao<Report> {
     abstract fun findByUidLive(uid: Long): DoorLiveData<Report?>
 
     @Query("""SELECT * FROM REPORT WHERE NOT reportInactive 
-        AND reportOwnerUid = :personUid
         AND isTemplate = :isTemplate
-        AND reportTitle LIKE :searchBit
-        ORDER BY priority, CASE(:sortOrder)
-            WHEN $SORT_TITLE_ASC THEN Report.reportTitle
-            ELSE ''
-        END ASC,
-        CASE(:sortOrder)
-            WHEN $SORT_TITLE_DESC THEN Report.reportTitle
-            ELSE ''
-        END DESC
+        ORDER BY priority ASC
             """)
-    abstract fun findAllActiveReportLive(searchBit: String, personUid: Long, sortOrder: Int,
-                                     isTemplate: Boolean)
+    abstract fun findAllActiveReportLive(isTemplate: Boolean)
             : DoorLiveData<List<Report>>
 
     @Query("""UPDATE Report SET reportInactive = :inactive,

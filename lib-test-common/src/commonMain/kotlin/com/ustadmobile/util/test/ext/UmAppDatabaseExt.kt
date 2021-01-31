@@ -534,7 +534,6 @@ suspend fun UmAppDatabase.insertTestStatements() {
 
     }
 
-
     var secondVerbLangMap = XLangMapEntry(secondVerb.verbUid, 0, 0, 0, "Attempted question 1 from Entry 1")
     secondVerbLangMap.languageLangMapUid = xLangMapEntryDao.insert(secondVerbLangMap)
 
@@ -591,7 +590,9 @@ suspend fun UmAppDatabase.insertTestStatements() {
 
     var khanclass1 = ContentEntry()
     khanclass1.title = "Content 1"
+    khanclass1.entryId = "hello"
     khanclass1.contentEntryUid = 23223
+    khanclass1.leaf = true
     contentEntryDao.insert(khanclass1)
 
     ContentEntryParentChildJoin().apply {
@@ -607,7 +608,9 @@ suspend fun UmAppDatabase.insertTestStatements() {
 
     var khanclass2 = ContentEntry()
     khanclass2.title = "Content 2"
+    khanclass2.entryId = "world"
     khanclass2.contentEntryUid = 2422
+    khanclass2.leaf = true
     contentEntryDao.insert(khanclass2)
 
     var khanclass2Join = ContentEntryParentChildJoin()
@@ -766,7 +769,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
             resultCompletion = false
             contextRegistration = KmpUuid.randomUUID().toString()
             statementVerbUid = firstVerb.verbUid
-            xObjectUid = firstObject.xObjectUid
+            xObjectUid = thirdObject.xObjectUid
             statementContentEntryUid = khanclass1.contentEntryUid
             statementId = KmpUuid.randomUUID().toString()
             resultSuccess = StatementEntity.RESULT_SUCCESS

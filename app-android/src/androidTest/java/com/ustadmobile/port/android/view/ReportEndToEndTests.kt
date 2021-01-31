@@ -176,7 +176,7 @@ class ReportEndToEndTests : TestCase() {
             }
 
             val createdReport = runBlocking {
-                dbRule.db.reportDao.findAllActiveReportLive("".toQueryLikeParam(), 42, ReportDao.SORT_TITLE_ASC, false)
+                dbRule.db.reportDao.findAllActiveReportLive(false)
                         .waitUntilWithActivityScenario(activityScenario!!) { it.size == 1 }
             }!!.first()
 

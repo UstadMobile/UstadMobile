@@ -88,8 +88,7 @@ class ReportEditFragmentTest: TestCase() {
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
                 val reportList = dbRule.repo.reportDao
-                        .findAllActiveReportLive("".toQueryLikeParam(), 42,
-                                ReportDao.SORT_TITLE_ASC, false)
+                        .findAllActiveReportLive(false)
                         .waitUntilWithFragmentScenario(fragmentScenario) {
                     it.isNotEmpty()
                 }
