@@ -115,9 +115,12 @@ class ReportEndToEndTests : TestCase() {
                 val reportOnForm = Report.FIXED_TEMPLATES[0]
                 val listOfSeries = Json.parse(ReportSeries.serializer().list, reportOnForm.reportSeries!!)
 
-                fillFields(updatedReport = reportToCreate, reportOnForm = ReportWithSeriesWithFilters(reportOnForm, listOfSeries), setFieldsRequiringNavigation = false,
+                fillFields(updatedReport = reportToCreate,
+                        reportOnForm = ReportWithSeriesWithFilters(reportOnForm, listOfSeries),
+                        setFieldsRequiringNavigation = false,
                         impl = impl, context = context, testContext = this@run)
 
+                nestedScroll.swipeUp()
                 nestedScroll.swipeUp()
 
                 seriesRecycler{
