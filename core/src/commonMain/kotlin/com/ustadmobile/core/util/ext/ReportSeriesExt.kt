@@ -62,12 +62,12 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
             StatementEntity.statementPersonUid ELSE NULL END) As yAxis, """.trimMargin()
         NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """COUNT(DISTINCT CASE WHEN (StatementEntity.resultCompletion 
             AND StatementEntity.contentEntryRoot AND StatementEntity.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
-            THEN StatementEntry.statementPersonUid ELSE NULL END) as yAxis, """.trimMargin()
+            THEN StatementEntity.statementPersonUid ELSE NULL END) as yAxis, """.trimMargin()
         PERCENT_OF_STUDENTS_COMPLETED_CONTENT -> """((CAST(COUNT(DISTINCT CASE WHEN 
             (StatementEntity.resultCompletion AND StatementEntity.contentEntryRoot 
             AND StatementEntity.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
-            THEN StatementEntry.statementUid ELSE NULL END) 
-            AS REAL) / COUNT(DISTINCT StatementEntry.statementPersonUid)) * 100) as yAxis, """
+            THEN StatementEntity.statementUid ELSE NULL END) 
+            AS REAL) / COUNT(DISTINCT StatementEntity.statementPersonUid)) * 100) as yAxis, """
         else -> ""
     }
 

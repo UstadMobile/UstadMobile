@@ -118,7 +118,10 @@ class ReportEndToEndTests : TestCase() {
                 fillFields(updatedReport = reportToCreate, reportOnForm = ReportWithSeriesWithFilters(reportOnForm, listOfSeries), setFieldsRequiringNavigation = false,
                         impl = impl, context = context, testContext = this@run)
 
+                nestedScroll.swipeUp()
+
                 seriesRecycler{
+
                     firstChild<ReportEditScreen.Series> {
                         addFilterButton.click()
 
@@ -142,6 +145,7 @@ class ReportEndToEndTests : TestCase() {
                                 menuDone.click()
                             }
                         }
+
 
                         filterRecycler{
 
