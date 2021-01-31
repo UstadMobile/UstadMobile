@@ -147,12 +147,10 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                 }
                 ReportFilter.FIELD_CONTENT_COMPLETION ->{
 
-                    var filterString = "(StatementEntity.contentEntryRoot AND StatementEntity.resultCompletion AND StatementEntity.statementVerbUid "
-                    filterString += handleCondition(filter.reportFilterCondition)
+                    var filterString = "(StatementEntity.contentEntryRoot AND StatementEntity.resultCompletion "
                     filterString += when(filter.reportFilterDropDownValue){
-                        ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED -> "${VerbEntity.VERB_COMPLETED_UID}) "
-                        ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED -> "${VerbEntity.VERB_PASSED_UID} AND StatementEntity.resultSuccess = ${StatementEntity.RESULT_SUCCESS}) "
-                        ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED -> "${VerbEntity.VERB_FAILED_UID} AND StatementEntity.resultSuccess = ${StatementEntity.RESULT_FAILURE}) "
+                        ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED -> "AND StatementEntity.resultSuccess ${handleCondition(filter.reportFilterCondition)} ${StatementEntity.RESULT_SUCCESS}) "
+                        ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED -> "AND StatementEntity.resultSuccess ${handleCondition(filter.reportFilterCondition)} ${StatementEntity.RESULT_FAILURE}) "
                         else -> ""
                     }
                     whereList += (filterString)

@@ -153,8 +153,7 @@ class ReportFilterEditPresenter(context: Any,
             }
             ReportFilter.FIELD_CONTENT_COMPLETION -> {
 
-                view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
-                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
+                view.conditionsOptions = listOf(ConditionOption.IS_CONDITION).map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.DROPDOWN
                 view.dropDownValueOptions = ContentCompletionStatusOption.values()
                         .map { ContentCompletionStatusMessageIdOption(it, context) }
