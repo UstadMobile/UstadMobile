@@ -33,7 +33,10 @@ actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: 
 
         val filteredEntity = filterAttachment(entityWithAttachment)
 
-        val androidUri = Uri.parse(filteredEntity.attachmentUri)
+        //If there is no attachment data, leave it.
+        val entityAttachmentUri = filteredEntity.attachmentUri ?: return@withContext
+
+        val androidUri = Uri.parse(entityAttachmentUri)
         val inStream = androidContext.contentResolver.openInputStream(androidUri) ?: throw IOException("No input stream for $androidUri")
         val tmpDestFile = File(attachmentsDir, "${System.currentTimeMillis()}.tmp")
         val md5 = inStream.writeToFileAndGetMd5(tmpDestFile)
