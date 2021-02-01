@@ -118,61 +118,6 @@ class ReportEndToEndTests : TestCase() {
                         setFieldsRequiringNavigation = false,
                         impl = impl, context = context, testContext = this@run)
 
-                nestedScroll.swipeUp()
-
-                seriesRecycler{
-
-                    scrollTo {
-                        withDescendant { withText("Filter") }
-                    }
-                    scrollTo {
-                        withDescendant { withId(R.id.item_edit_report_filter_add_layout) }
-                    }
-
-                    firstChild<ReportEditScreen.Series> {
-
-                        addFilterButton.click()
-
-                        ReportFilterEditScreen{
-
-                            setMessageIdOption(fieldTextValue,
-                                    impl.getString(
-                                            ReportFilterEditPresenter.FieldOption.PERSON_GENDER.messageId,
-                                            ApplicationProvider.getApplicationContext()))
-
-                            setMessageIdOption(conditionTextValue,
-                                    impl.getString(
-                                            ReportFilterEditPresenter.ConditionOption.IS_CONDITION.messageId,
-                                            ApplicationProvider.getApplicationContext()))
-
-                            setMessageIdOption(valueDropDownTextValue,
-                                    impl.getString(MessageID.female,
-                                            ApplicationProvider.getApplicationContext()))
-
-                            MainScreen {
-                                menuDone.click()
-                            }
-                        }
-
-
-                        filterRecycler{
-
-                            hasSize(1)
-                            firstChild<ReportEditScreen.Filter> {
-                                filterName{
-                                    hasText(ReportFilter().apply {
-                                        reportFilterField = ReportFilter.FIELD_PERSON_GENDER
-                                        reportFilterCondition = ReportFilter.CONDITION_IS
-                                        reportFilterDropDownValue = Person.GENDER_FEMALE
-                                    }.toDisplayString(ApplicationProvider.getApplicationContext()))
-                                }
-                            }
-
-                        }
-
-                    }
-                }
-
             }
 
             MainScreen {
