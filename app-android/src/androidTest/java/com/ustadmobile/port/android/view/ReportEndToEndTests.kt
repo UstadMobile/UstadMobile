@@ -125,6 +125,10 @@ class ReportEndToEndTests : TestCase() {
 
                 seriesRecycler{
 
+                    scrollTo {
+                        withDescendant { withText("Filter") }
+                    }
+
                     firstChild<ReportEditScreen.Series> {
 
                         addFilterButton.click()

@@ -59,13 +59,15 @@ class DateRangeFragmentTest : TestCase() {
     @AdbScreenRecord("given Moment not present when filled then should save to database")
     @Test
     fun givenNoMomentPresentYet_whenFilledInAndSaveClicked_thenShouldFinishResult() {
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
-            DateRangeFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
+        var fragmentScenario: FragmentScenario<DateRangeFragment>? = null
 
         init {
+
+            fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
+                DateRangeFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }
 
         }.run {
 
@@ -96,9 +98,9 @@ class DateRangeFragmentTest : TestCase() {
                 setDateField(R.id.fragment_date_range_fixed_date_toDate_textInputLayout,
                         DateTime.nowLocal().utc.unixMillisLong)
 
-                fragmentScenario.clickOptionMenu(R.id.menu_done)
+                fragmentScenario?.clickOptionMenu(R.id.menu_done)
 
-                val entity = fragmentScenario.letOnFragment { it.entity }!!
+                val entity = fragmentScenario?.letOnFragment { it.entity }!!
 
                 Assert.assertEquals("fromMoment matches",
                         Moment().apply {
