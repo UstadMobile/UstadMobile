@@ -9,22 +9,19 @@ import androidx.test.core.app.launchActivity
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
+import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.controller.ReportEditPresenter
 import com.ustadmobile.core.controller.ReportFilterEditPresenter
-import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toDisplayString
-import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.*
 import com.ustadmobile.test.port.android.util.setMessageIdOption
 import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
-import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
@@ -127,6 +124,9 @@ class ReportEndToEndTests : TestCase() {
 
                     scrollTo {
                         withDescendant { withText("Filter") }
+                    }
+                    scrollTo {
+                        withDescendant { withId(R.id.item_edit_report_filter_add_layout) }
                     }
 
                     firstChild<ReportEditScreen.Series> {

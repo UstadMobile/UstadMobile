@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.View
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.test.espresso.Espresso
-import androidx.test.espresso.action.ViewActions
 import com.agoda.kakao.common.views.KSwipeView
 import com.agoda.kakao.common.views.KView
 import com.agoda.kakao.edit.KTextInputLayout

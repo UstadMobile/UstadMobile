@@ -107,7 +107,7 @@ class ReportDetailPresenter(context: Any,
     fun handleOnClickAddFromDashboard(report: ReportWithSeriesWithFilters) {
         GlobalScope.launch(doorMainDispatcher()) {
             report.reportOwnerUid = loggedInPersonUid
-            repo.reportDao.insert(report)
+            repo.reportDao.insertAsync(report)
         }
     }
 
@@ -116,7 +116,7 @@ class ReportDetailPresenter(context: Any,
             report.isTemplate = true
             report.reportUid = 0
             report.reportOwnerUid = 0
-            repo.reportDao.insert(report)
+            repo.reportDao.insertAsync(report)
         }
     }
 
