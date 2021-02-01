@@ -105,7 +105,7 @@ class ReportDetailPresenter(context: Any,
      *
      */
     fun handleOnClickAddFromDashboard(report: ReportWithSeriesWithFilters) {
-        GlobalScope.launch() {
+        GlobalScope.launch(doorMainDispatcher()) {
             report.reportOwnerUid = loggedInPersonUid
             repo.reportDao.insert(report)
         }

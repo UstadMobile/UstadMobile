@@ -122,12 +122,15 @@ class ReportDetailPresenterTest {
 
         presenter.handleOnClickAddFromDashboard(testEntity)
 
-        val existingEntitiesLive = db.reportDao.findAllActiveReportLive(false)
-        val entitySaved = runBlocking {
-            existingEntitiesLive.waitUntil(10000) { it.size == 1 }
-        }.getValue()!!.first()
+        runBlocking {
+            db.waitUntil(5000, listOf("Report")){
+                db.reportDao.findAllActiveReportList(false).size == 1
+            }
+        }
+
+        val existingEntitiesLive = db.reportDao.findAllActiveReportList(false)[0]
         Assert.assertEquals("Entity was saved to database", "New Report Title",
-                entitySaved.reportTitle)
+                existingEntitiesLive.reportTitle)
 
 
 

@@ -50,6 +50,12 @@ abstract class ReportDao : BaseDao<Report> {
     abstract fun findAllActiveReportLive(isTemplate: Boolean)
             : DoorLiveData<List<Report>>
 
+    @Query("""SELECT * FROM REPORT WHERE NOT reportInactive 
+        AND isTemplate = :isTemplate
+        ORDER BY priority ASC
+            """)
+    abstract fun findAllActiveReportList(isTemplate: Boolean): List<Report>
+
     @Query("""UPDATE Report SET reportInactive = :inactive,
                 reportLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
                 WHERE reportUid = :uid""")
