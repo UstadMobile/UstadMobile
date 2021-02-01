@@ -18,6 +18,7 @@ import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
@@ -77,7 +78,7 @@ class ReportDetailPresenterTest {
         val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
             xAxis = Report.MONTH
-            fromDate =  DateTime(2019, 4, 10).unixMillisLong
+            fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
             reportUid = repo.reportDao.insert(this)
         }
@@ -93,22 +94,22 @@ class ReportDetailPresenterTest {
     }
 
     @Test
-    fun givenNewReport_whenUserClicksOnAddToDashboard_thenDatabaseIsCreated(){
+    fun givenNewReport_whenUserClicksOnAddToDashboard_thenDatabaseIsCreated() {
         val db: UmAppDatabase by di.activeDbInstance()
 
         val reportSeriesList = listOf(ReportSeries().apply {
-                reportSeriesYAxis = ReportSeries.TOTAL_DURATION
-                reportSeriesVisualType = ReportSeries.LINE_GRAPH
-                reportSeriesSubGroup = Report.CLASS
-                reportSeriesUid = 4
-                reportSeriesName = "total duration"
+            reportSeriesYAxis = ReportSeries.TOTAL_DURATION
+            reportSeriesVisualType = ReportSeries.LINE_GRAPH
+            reportSeriesSubGroup = Report.CLASS
+            reportSeriesUid = 4
+            reportSeriesName = "total duration"
         })
 
         val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
             reportTitle = "New Report Title"
             xAxis = Report.MONTH
-            fromDate =  DateTime(2019, 4, 10).unixMillisLong
+            fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
             reportSeries = Json.stringify(ReportSeries.serializer().list, reportSeriesList)
         }
@@ -123,7 +124,7 @@ class ReportDetailPresenterTest {
 
         val existingEntitiesLive = db.reportDao.findAllActiveReportLive(false)
         val entitySaved = runBlocking {
-            existingEntitiesLive.waitUntil { it.size == 1 }
+            existingEntitiesLive.waitUntil(10000) { it.size == 1 }
         }.getValue()!!.first()
         Assert.assertEquals("Entity was saved to database", "New Report Title",
                 entitySaved.reportTitle)
@@ -141,7 +142,7 @@ class ReportDetailPresenterTest {
         val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
             xAxis = Report.MONTH
-            fromDate =  DateTime(2019, 4, 10).unixMillisLong
+            fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
             reportUid = repo.reportDao.insert(this)
         }
