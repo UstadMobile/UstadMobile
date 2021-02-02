@@ -86,9 +86,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     }
 
     val tmpRootDir = Files.createTempDirectory("upload").toFile()
-    val iContext = InitialContext()
-    val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as? String
-            ?: "./build/container"
 
     val autoCreateDb = environment.config.propertyOrNull("ktor.ustad.autocreatedb")?.getString()?.toBoolean() ?: false
     println("auto create = $autoCreateDb")
@@ -107,14 +104,26 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
 
         bind<File>(tag = TAG_CONTEXT_DATA_ROOT) with scoped(EndpointScope.Default).singleton {
-            File(dataDirPath, context.identifier(dbMode))
+            File(dataDirPath, context.identifier(dbMode)).also {
+                it.takeIf { !it.exists() }?.mkdirs()
+            }
         }
 
 
         bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
-            File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "container").also {
-                it.takeIf { !it.exists() }?.mkdirs()
+            val containerDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "container")
+
+            //Move any old container directory to the new path (e.g. pre database v57)
+            if(context == Endpoint("localhost")){
+                val oldContainerDir = File("build/storage/singleton/container")
+                if(oldContainerDir.exists() && !oldContainerDir.renameTo(containerDir)) {
+                    throw IllegalStateException("Old singleton container dir present but cannot " +
+                            "rename from ${oldContainerDir.absolutePath} to ${containerDir.absolutePath}")
+                }
             }
+
+            containerDir.takeIf { !it.exists() }?.mkdirs()
+            containerDir
         }
 
         bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
@@ -166,6 +175,13 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 Endpoint("localhost")
             }else {
                 Endpoint(call.request.header("Host") ?: "localhost")
+            }
+        }
+
+        onReady {
+            if(dbMode == CONF_DBMODE_SINGLETON) {
+                //Get the container dir so that any old directories (build/storage etc) are moved if required
+                di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_CONTAINER_DIR)
             }
         }
     }
