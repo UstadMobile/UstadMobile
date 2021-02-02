@@ -58,20 +58,21 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
             (holder.itemBinding.listReportChart.getTag(R.id.tag_graphlookup_key) as? Job)?.cancel()
             val graphJob = GlobalScope.async(Dispatchers.Main) {
-                val series = if (!item.reportSeries.isNullOrEmpty()) {
-                    safeParseList(di, ReportSeries.serializer().list,
-                            ReportSeries::class, item.reportSeries ?: "")
-                } else {
-                    listOf()
-                }
-                val accountManager: UstadAccountManager = di.direct.instance()
-                val reportWithSeriesWithFilters = ReportWithSeriesWithFilters(item, series)
                 try {
+                    val series = if (!item.reportSeries.isNullOrEmpty()) {
+                        safeParseList(di, ReportSeries.serializer().list,
+                                ReportSeries::class, item.reportSeries ?: "")
+                    } else {
+                        listOf()
+                    }
+                    val accountManager: UstadAccountManager = di.direct.instance()
+                    val reportWithSeriesWithFilters = ReportWithSeriesWithFilters(item, series)
+
                     val chartData = dbRepo?.generateChartData(reportWithSeriesWithFilters,
                             holder.itemView.context, di.direct.instance(), accountManager.activeAccount.personUid)
                     holder.itemBinding.listReportChart.setChartData(chartData)
-                }catch (e: Exception){
-
+                } catch (e: Exception) {
+                    return@async
                 }
             }
             holder.itemBinding.listReportChart.setTag(R.id.tag_graphlookup_key, graphJob)
