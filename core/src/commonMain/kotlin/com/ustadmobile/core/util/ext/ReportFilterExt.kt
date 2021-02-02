@@ -2,6 +2,7 @@ package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.controller.ReportFilterEditPresenter
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.ReportFilter
 
@@ -31,7 +32,9 @@ fun ReportFilter.toDisplayString(context: Any): String {
                     selectedOption?.messageId ?: 0, context)
         }
         reportFilterCondition == ReportFilter.CONDITION_BETWEEN -> {
-            valueString = """$reportFilterValueBetweenX and $reportFilterValueBetweenY"""
+            valueString = """$reportFilterValueBetweenX 
+                ${UstadMobileSystemImpl.instance.getString(MessageID.and, context)} 
+                $reportFilterValueBetweenY"""
         }
         reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY -> {
            valueString = "..."

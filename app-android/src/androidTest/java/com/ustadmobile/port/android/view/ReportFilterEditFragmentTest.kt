@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
+import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.fragment.findNavController
 import androidx.test.core.app.ApplicationProvider
@@ -15,17 +16,13 @@ import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ReportFilter
-import com.ustadmobile.lib.db.entities.ReportFilter.Companion.FIELD_CONTENT_ENTRY
-import com.ustadmobile.lib.db.entities.UidAndLabel
 import com.ustadmobile.port.android.screen.ReportFilterEditScreen
 import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.port.android.util.setMessageIdOption
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.util.test.ext.insertContentEntryWithTranslations
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
@@ -45,36 +42,39 @@ class ReportFilterEditFragmentTest: TestCase()  {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    lateinit var fragmentScenario: FragmentScenario<ReportFilterEditFragment>
+
     @AdbScreenRecord("with no report present, fill all the fields and navigate to detail")
     @Test
     fun givenNoReportFilterPresentYet_whenPersonGenderFilledIn_thenShouldNavigateBackToReportEditScreen() {
-        val defaultFilter = ReportFilter().apply {
-            reportFilterUid = 1
-        }
-        val jsonStr = Gson().toJson(defaultFilter)
-
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)) {
-            ReportFilterEditFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
 
         init{
+
+            val defaultFilter = ReportFilter().apply {
+                reportFilterUid = 1
+            }
+            val jsonStr = Gson().toJson(defaultFilter)
+
+            fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)) {
+                ReportFilterEditFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }
 
         }.run{
 
             ReportFilterEditScreen{
 
-                setMessageIdOption(fieldTextValue,
+                fieldTextValue.setMessageIdOption(
                         systemImplNavRule.impl.getString(MessageID.field_person_gender,
                                 ApplicationProvider.getApplicationContext()))
 
-                setMessageIdOption(conditionTextValue,
+                conditionTextValue.setMessageIdOption(
                         systemImplNavRule.impl.getString(MessageID.condition_is_not,
                                 ApplicationProvider.getApplicationContext()))
 
-                setMessageIdOption(valueDropDownTextValue,
+                valueDropDownTextValue.setMessageIdOption(
                         systemImplNavRule.impl.getString(MessageID.unset,
                                 ApplicationProvider.getApplicationContext()))
 
@@ -82,8 +82,6 @@ class ReportFilterEditFragmentTest: TestCase()  {
             }
 
             fragmentScenario.clickOptionMenu(R.id.menu_done)
-
-
 
         }
 
@@ -93,6 +91,7 @@ class ReportFilterEditFragmentTest: TestCase()  {
     @AdbScreenRecord("given existing report filter, update the age value and navigate to report edit screen")
     @Test
     fun givenExistingReportFilter_whenPersonAgeUpdated_thenReturnUpdatedValueAndNavigateBackToReportEditScreen() {
+
         val existingReportFilter = ReportFilter().apply{
             reportFilterUid = 1
             reportFilterField = ReportFilter.FIELD_PERSON_AGE
@@ -100,16 +99,16 @@ class ReportFilterEditFragmentTest: TestCase()  {
             reportFilterValue = 13.toString()
         }
 
-        val jsonStr = Gson().toJson(existingReportFilter)
-
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)) {
-            ReportFilterEditFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
-
         init{
+
+            val jsonStr = Gson().toJson(existingReportFilter)
+
+            fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)) {
+                ReportFilterEditFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }
 
         }.run{
 
@@ -150,23 +149,25 @@ class ReportFilterEditFragmentTest: TestCase()  {
     @AdbScreenRecord("given existing report filter when field option changes then other fields are cleared")
     @Test
     fun givenExistingReportFilter_whenFieldOptionsChanges_thenOtherFieldsAreCleared() {
-        val existingReportFilter = ReportFilter().apply{
-            reportFilterUid = 1
-            reportFilterField = ReportFilter.FIELD_PERSON_AGE
-            reportFilterCondition = ReportFilter.CONDITION_GREATER_THAN
-            reportFilterValue = 13.toString()
-        }
-
-        val jsonStr = Gson().toJson(existingReportFilter)
-
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)) {
-            ReportFilterEditFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
 
         init{
+
+            val existingReportFilter = ReportFilter().apply{
+                reportFilterUid = 1
+                reportFilterField = ReportFilter.FIELD_PERSON_AGE
+                reportFilterCondition = ReportFilter.CONDITION_GREATER_THAN
+                reportFilterValue = 13.toString()
+            }
+
+
+            val jsonStr = Gson().toJson(existingReportFilter)
+
+            fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)) {
+                ReportFilterEditFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }
 
         }.run{
 
@@ -190,7 +191,7 @@ class ReportFilterEditFragmentTest: TestCase()  {
                 }
 
                 // make the change
-                setMessageIdOption(fieldTextValue,
+                fieldTextValue.setMessageIdOption(
                         systemImplNavRule.impl.getString(
                                 ReportFilterEditPresenter.FieldOption.PERSON_GENDER.messageId,
                                 ApplicationProvider.getApplicationContext()))
@@ -226,41 +227,41 @@ class ReportFilterEditFragmentTest: TestCase()  {
     @Test
     fun givenExistingReportFilterWithListOfEntries_whenChanged_thenCheckChanges() {
 
-        runBlocking{
-
-            dbRule.repo.contentEntryDao.insertListAsync(listOf(
-                    ContentEntry().apply{
-                        contentEntryUid = 1
-                        title = "Khan Academy"
-                    },
-                    ContentEntry().apply{
-                        contentEntryUid = 2
-                        title = "Ustad Mobile"
-                    },
-                    ContentEntry().apply{
-                        contentEntryUid = 3
-                        title = "Phet Slides"
-                    }
-            ))
-
-        }
-        val existingReportFilter = ReportFilter().apply{
-            reportFilterUid = 1
-            reportFilterField = ReportFilter.FIELD_CONTENT_ENTRY
-            reportFilterCondition = ReportFilter.CONDITION_IN_LIST
-            reportFilterValue = "1, 3"
-        }
-
-        val jsonStr = Gson().toJson(existingReportFilter)
-
-        val scenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)) {
-            ReportFilterEditFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
-
         init{
+
+            runBlocking{
+
+                dbRule.repo.contentEntryDao.insertListAsync(listOf(
+                        ContentEntry().apply{
+                            contentEntryUid = 1
+                            title = "Khan Academy"
+                        },
+                        ContentEntry().apply{
+                            contentEntryUid = 2
+                            title = "Ustad Mobile"
+                        },
+                        ContentEntry().apply{
+                            contentEntryUid = 3
+                            title = "Phet Slides"
+                        }
+                ))
+
+            }
+            val existingReportFilter = ReportFilter().apply{
+                reportFilterUid = 1
+                reportFilterField = ReportFilter.FIELD_CONTENT_ENTRY
+                reportFilterCondition = ReportFilter.CONDITION_IN_LIST
+                reportFilterValue = "1, 3"
+            }
+
+            val jsonStr = Gson().toJson(existingReportFilter)
+
+            fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)) {
+                ReportFilterEditFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }
 
         }.run{
 
@@ -293,7 +294,7 @@ class ReportFilterEditFragmentTest: TestCase()  {
 
                     hasSize(1)
 
-                    scenario.onFragment {
+                    fragmentScenario.onFragment {
                         it.findNavController().currentBackStackEntry?.savedStateHandle
                                 ?.set("ContentEntry", defaultGson().toJson(listOf(ContentEntry().apply{
                                     contentEntryUid = 2
@@ -314,8 +315,5 @@ class ReportFilterEditFragmentTest: TestCase()  {
         }
 
     }
-
-
-
 
 }

@@ -103,7 +103,7 @@ class ClazzEndToEndTests : TestCase() {
 
                 val cal = Calendar.getInstance()
                 cal.set(2020,5,31)
-                setDateField(R.id.start_date_text, cal.timeInMillis)
+                startDateTextInput.setDateField(cal.timeInMillis)
 
                 KView{
                     withId(R.id.menu_done)

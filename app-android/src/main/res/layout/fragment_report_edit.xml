@@ -124,7 +124,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_report_edit_description_layout">
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:id="@+id/fragment_edit_report_dialog_xaxis_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -146,7 +146,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_edit_report_dialog_xaxis_textinputlayout">
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:id="@+id/fragment_edit_report_dialog_daterange_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

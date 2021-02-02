@@ -8,7 +8,6 @@ import androidx.room.RawQuery
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.SimpleDoorQuery
-import com.ustadmobile.door.annotation.ParamName
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.Serializable
@@ -39,7 +38,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     }
 
     @RawQuery(observedEntities = [StatementEntity::class, Person::class, XLangMapEntry::class])
-    abstract fun getListResults(query: DoorQuery): DataSource.Factory<Int, StatementEntityWithDisplay>
+    abstract fun getListResults(query: DoorQuery): DataSource.Factory<Int, StatementEntityWithDisplayDetails>
 
 
     // This is required because of above raw query

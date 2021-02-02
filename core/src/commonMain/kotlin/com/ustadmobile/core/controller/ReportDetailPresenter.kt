@@ -78,13 +78,13 @@ class ReportDetailPresenter(context: Any,
             val chartData = db.generateChartData(reportWithFilters, context, systemImpl, loggedInPersonUid)
             val statementList = db.generateStatementList(reportWithFilters, loggedInPersonUid)
             view.chartData = chartData
-            view.statementList = statementList
+            view.statementListDetails = statementList
             view.loading = false
 
             loggedInPerson = withTimeoutOrNull(2000){
                 db.personDao.findByUidAsync(loggedInPersonUid)
             }
-            view.isAdmin = loggedInPerson?.admin ?: false
+            view.saveAsTemplateVisible = loggedInPerson?.admin ?: false
         }
 
     }

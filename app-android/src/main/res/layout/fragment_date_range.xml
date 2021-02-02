@@ -142,7 +142,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/date_range_fromRadio_relativeDate">
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:id="@+id/fragment_date_range_relative_date_fromDateRel_TextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -197,7 +197,7 @@
                 app:layout_constraintStart_toEndOf="@id/fragment_date_range_fromDateRange_InputLayout"
                 app:layout_constraintTop_toBottomOf="@id/date_range_fromRadio_relativeDate">
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:id="@+id/fragment_date_range_relative_date_fromDateRelUnit_TextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -287,7 +287,7 @@
                 app:layout_constraintTop_toBottomOf="@id/date_range_toRadio_relativeDate">
 
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:id="@+id/fragment_date_range_relative_date_toDateRel_TextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -341,7 +341,7 @@
                 app:layout_constraintStart_toEndOf="@id/fragment_date_range_toDateRange_InputLayout"
                 app:layout_constraintTop_toBottomOf="@id/date_range_toRadio_relativeDate">
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:id="@+id/fragment_date_range_relative_date_toDateRelUnit_TextView"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

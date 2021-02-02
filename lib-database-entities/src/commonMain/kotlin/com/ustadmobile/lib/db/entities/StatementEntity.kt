@@ -101,6 +101,8 @@ open class StatementEntity {
 
     /**
      *  indicates whether or not the statement is about the root contentEntry or child entries
+     *  This is used by queries (e.g. for reports) e.g. to see if a "completed" verb applies
+     *  to the contententry itself, or only a subsection (child) of the content
      */
     var contentEntryRoot: Boolean = false
 

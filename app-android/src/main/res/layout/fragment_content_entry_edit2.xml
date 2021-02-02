@@ -277,7 +277,7 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintTop_toBottomOf="@+id/entry_publisher">
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:enabled="@{fieldsEnabled}"

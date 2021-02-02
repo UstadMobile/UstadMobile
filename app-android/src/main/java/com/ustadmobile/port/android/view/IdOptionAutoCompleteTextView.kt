@@ -4,9 +4,9 @@ import android.content.Context
 import android.util.AttributeSet
 import com.ustadmobile.core.util.IdOption
 
-class MessageIdAutoCompleteTextView: DropDownListAutoCompleteTextView<IdOption> {
+class IdOptionAutoCompleteTextView: DropDownListAutoCompleteTextView<IdOption> {
 
-    private val messageIdDropdownAdapter = object: DropDownListAutoCompleteAdapter<IdOption> {
+    private val idOptionDropdownAdapter = object: DropDownListAutoCompleteAdapter<IdOption> {
         override fun getId(item: IdOption) = item.optionId.toLong()
         override fun getText(item: IdOption) = item.toString()
     }
@@ -24,7 +24,7 @@ class MessageIdAutoCompleteTextView: DropDownListAutoCompleteTextView<IdOption> 
     }
 
     private fun init() {
-        dropDownListAdapter = messageIdDropdownAdapter
+        dropDownListAdapter = idOptionDropdownAdapter
     }
 
 }

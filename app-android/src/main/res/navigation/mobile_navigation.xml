@@ -89,7 +89,7 @@
 
     <fragment
         android:id="@+id/report_template_list_dest"
-        android:name="com.ustadmobile.port.android.view.ReportTemplateFragment" />
+        android:name="com.ustadmobile.port.android.view.ReportTemplateListFragment" />
 
     <fragment
         android:id="@+id/report_filter_edit_dest"

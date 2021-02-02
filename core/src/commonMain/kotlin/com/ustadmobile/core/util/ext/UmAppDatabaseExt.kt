@@ -289,10 +289,10 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
 }
 
 fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters, loggedInPersonUid: Long):
-        List<DataSource.Factory<Int, StatementEntityWithDisplay>> {
+        List<DataSource.Factory<Int, StatementEntityWithDisplayDetails>> {
 
     val queries = report.generateSql(loggedInPersonUid, dbType())
-    val statementDataSourceList = mutableListOf<DataSource.Factory<Int, StatementEntityWithDisplay>>()
+    val statementDataSourceList = mutableListOf<DataSource.Factory<Int, StatementEntityWithDisplayDetails>>()
     queries.forEach {
         statementDataSourceList.add(statementDao.getListResults(SimpleDoorQuery(it.value.sqlListStr, it.value.queryParams)))
     }

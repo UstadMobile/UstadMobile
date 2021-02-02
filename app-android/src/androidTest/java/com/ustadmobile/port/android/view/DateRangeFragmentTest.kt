@@ -51,6 +51,8 @@ class DateRangeFragmentTest : TestCase() {
 
     lateinit var context: Context
 
+    lateinit var fragmentScenario: FragmentScenario<DateRangeFragment>
+
     @Before
     fun setup() {
         context = ApplicationProvider.getApplicationContext()
@@ -59,8 +61,6 @@ class DateRangeFragmentTest : TestCase() {
     @AdbScreenRecord("given Moment not present when filled then should save to database")
     @Test
     fun givenNoMomentPresentYet_whenFilledInAndSaveClicked_thenShouldFinishResult() {
-        var fragmentScenario: FragmentScenario<DateRangeFragment>? = null
-
         init {
 
             fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
@@ -86,7 +86,7 @@ class DateRangeFragmentTest : TestCase() {
                     }
                 }
 
-                setMessageIdOption(fromRelDateRelUnitTextView,
+                fromRelDateRelUnitTextView.setMessageIdOption(
                         systemImplNavRule.impl.getString(
                                 DateRangePresenter.RelUnitOption.MONTH.messageId, context))
 
@@ -95,12 +95,11 @@ class DateRangeFragmentTest : TestCase() {
                 toRelDateRelOffSetInput.isGone()
                 toRelDateRelUnitInput.isGone()
 
-                setDateField(R.id.fragment_date_range_fixed_date_toDate_textInputLayout,
-                        DateTime.nowLocal().utc.unixMillisLong)
+                toFixedDateTextInput.setDateField(DateTime.nowLocal().utc.unixMillisLong)
 
-                fragmentScenario?.clickOptionMenu(R.id.menu_done)
+                fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-                val entity = fragmentScenario?.letOnFragment { it.entity }!!
+                val entity = fragmentScenario.letOnFragment { it.entity }!!
 
                 Assert.assertEquals("fromMoment matches",
                         Moment().apply {
@@ -126,14 +125,13 @@ class DateRangeFragmentTest : TestCase() {
     @AdbScreenRecord("given Moment exists when updated then should be updated on database")
     @Test
     fun givenMomentNotPresentYet_whenValuesForFixedDateNotSet_showErrors() {
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
-            DateRangeFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
 
         init {
-
+             fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
+                 DateRangeFragment().also {
+                     it.installNavController(systemImplNavRule.navController)
+                 }
+             }
         }.run {
 
             DateRangeScreen {

@@ -10,7 +10,7 @@ import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ReportEditView
-import com.ustadmobile.core.view.ReportTemplateView
+import com.ustadmobile.core.view.ReportTemplateListView
 import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -27,13 +27,13 @@ import org.kodein.di.instance
  * Note:
  */
 
-class ReportTemplatePresenterTest {
+class ReportTemplateListPresenterTest {
 
     @JvmField
     @Rule
     var ustadTestRule = UstadTestRule()
 
-    private lateinit var mockView: ReportTemplateView
+    private lateinit var mockView: ReportTemplateListView
 
     private lateinit var context: Any
 
@@ -72,7 +72,7 @@ class ReportTemplatePresenterTest {
         }
 
         val presenterArgs = mapOf<String,String>()
-        val presenter = ReportTemplatePresenter(context,
+        val presenter = ReportTemplateListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
@@ -91,7 +91,7 @@ class ReportTemplatePresenterTest {
             isTemplate = true
             reportUid = 1000
         }
-        val presenter = ReportTemplatePresenter(context,
+        val presenter = ReportTemplateListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()

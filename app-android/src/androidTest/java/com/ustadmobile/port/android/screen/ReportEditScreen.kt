@@ -103,8 +103,9 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
 
         updatedReport.xAxis.takeIf { it != reportOnForm?.xAxis }?.also {
             testContext.flakySafely {
-                setMessageIdOption(xAxisValue,
-                        impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
+                xAxisValue.setMessageIdOption(
+                        impl.getString(ReportEditPresenter.XAxisOptions.values()
+                                .find { report -> report.optionVal == it }!!.messageId, context))
             }
         }
 
@@ -144,7 +145,7 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
                 series.reportSeriesYAxis.takeIf { it != seriesOnForm?.reportSeriesYAxis }?.also {
 
                     testContext.flakySafely {
-                        setMessageIdOption(this@children.dataSetTextView,
+                        this@children.dataSetTextView.setMessageIdOption(
                                 impl.getString(ReportEditPresenter.YAxisOptions.values()
                                         .find { report -> report.optionVal == it }!!.messageId, context))
                     }
@@ -153,7 +154,7 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
                 series.reportSeriesVisualType.takeIf { it != seriesOnForm?.reportSeriesVisualType }?.also {
 
                     testContext.flakySafely {
-                        setMessageIdOption(this@children.visualTypeTextView,
+                        this@children.visualTypeTextView.setMessageIdOption(
                                 impl.getString(ReportEditPresenter.VisualTypeOptions.values()
                                         .find { report -> report.optionVal == it }!!.messageId, context))
                     }
@@ -163,7 +164,7 @@ object ReportEditScreen : KScreen<ReportEditScreen>() {
                 series.reportSeriesSubGroup.takeIf { it != seriesOnForm?.reportSeriesSubGroup }?.also {
 
                     testContext.flakySafely {
-                        setMessageIdOption(this@children.subgroupTextView,
+                        this@children.subgroupTextView.setMessageIdOption(
                                 impl.getString(ReportEditPresenter.SubGroupOptions.values()
                                         .find { report -> report.optionVal == it }!!.messageId, context))
                     }

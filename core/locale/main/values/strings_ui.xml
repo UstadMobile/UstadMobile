@@ -70,7 +70,7 @@
     <string name='exams'>Exams</string>
     <string name='reports'>Reports</string>
     <string name="choose_template">Choose template</string>
-    <string name="save_as_template">Save as \ntemplate</string>
+    <string name="save_as_template">Save as template</string>
     <string name='contents'>Contents</string>
     <string name='students'>Students</string>
     <string name='add_a_student'>Add a student</string>
@@ -113,6 +113,7 @@
     <string name="hide">Hide</string>
     <string name="unhide">Unhide</string>
     <string name="compress">Compress</string>
+    <string name="and">and</string>
 
     <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
 

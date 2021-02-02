@@ -4,7 +4,7 @@ import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 
 
-interface ReportTemplateView: UstadListView<Report, Report> {
+interface ReportTemplateListView: UstadListView<Report, Report> {
 
 
 

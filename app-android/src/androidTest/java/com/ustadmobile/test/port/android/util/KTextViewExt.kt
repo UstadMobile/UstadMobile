@@ -3,14 +3,12 @@ package com.ustadmobile.test.port.android.util
 import com.agoda.kakao.common.views.KView
 import com.agoda.kakao.text.KTextView
 
-fun setMessageIdOption(view: KTextView, message: String){
+fun KTextView.setMessageIdOption(message: String) {
 
-    view{
-        isClickable()
-        click()
-    }
+    isClickable()
+    click()
 
-    KView{
+    KView {
         withText(message)
     } perform {
         inRoot { isPlatformPopup() }
@@ -18,6 +16,6 @@ fun setMessageIdOption(view: KTextView, message: String){
         click()
     }
 
-    view.hasText(message)
+    hasText(message)
 
 }

@@ -7,7 +7,7 @@
 
         <import type="com.ustadmobile.core.controller.StatementConstants"/>
         <import type="com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters" />
-        <import type="com.ustadmobile.lib.db.entities.StatementEntityWithDisplay" />
+        <import type="com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails" />
 
         <variable
             name="mPresenter"
@@ -15,7 +15,7 @@
 
         <variable
             name="report"
-            type="StatementEntityWithDisplay" />
+            type="StatementEntityWithDisplayDetails" />
     </data>
 
 

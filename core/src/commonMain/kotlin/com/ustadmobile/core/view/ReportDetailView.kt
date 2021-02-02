@@ -3,13 +3,13 @@ package com.ustadmobile.core.view
 import androidx.paging.DataSource
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
-import com.ustadmobile.lib.db.entities.StatementEntityWithDisplay
+import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
 
 
 interface ReportDetailView: UstadDetailView<ReportWithSeriesWithFilters> {
 
-    var isAdmin: Boolean
-    var statementList: List<DataSource.Factory<Int, StatementEntityWithDisplay>>?
+    var saveAsTemplateVisible: Boolean
+    var statementListDetails: List<DataSource.Factory<Int, StatementEntityWithDisplayDetails>>?
 
     var chartData: ChartData?
 

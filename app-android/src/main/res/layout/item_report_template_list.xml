@@ -5,7 +5,7 @@
 
     <data>
         <import type="com.ustadmobile.lib.db.entities.Report"/>
-        <import type="com.ustadmobile.port.android.view.ReportTemplateFragment"/>
+        <import type="com.ustadmobile.port.android.view.ReportTemplateListFragment"/>
 
         <variable
             name="reportTemplate"
@@ -13,7 +13,7 @@
 
         <variable
             name="presenter"
-            type="com.ustadmobile.core.controller.ReportTemplatePresenter" />
+            type="com.ustadmobile.core.controller.ReportTemplateListPresenter" />
 
     </data>
 

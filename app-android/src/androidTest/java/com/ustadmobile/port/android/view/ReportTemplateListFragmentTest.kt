@@ -1,13 +1,13 @@
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
+import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.port.android.screen.ReportTemplateScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
@@ -17,7 +17,7 @@ import org.junit.Rule
 import org.junit.Test
 
 @AdbScreenRecord("ReportTemplate screen tests")
-class ReportTemplateFragmentTest : TestCase()  {
+class ReportTemplateListFragmentTest : TestCase()  {
 
     @JvmField
     @Rule
@@ -31,6 +31,7 @@ class ReportTemplateFragmentTest : TestCase()  {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
+    lateinit var fragmentScenario: FragmentScenario<ReportTemplateListFragment>
 
     @AdbScreenRecord("Given list when ReportTemplate clicked then navigate to ReportEditScreen")
     @Test
@@ -42,14 +43,14 @@ class ReportTemplateFragmentTest : TestCase()  {
             reportUid = dbRule.repo.reportDao.insert(this)
         }
 
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf()) {
-            ReportTemplateFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
-
         init{
+
+            fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf()) {
+                ReportTemplateListFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }
 
         }.run{
 

@@ -4,7 +4,6 @@ import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
-import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -31,7 +30,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
-import com.ustadmobile.lib.db.entities.StatementEntityWithDisplay
+import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -70,7 +69,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
     class RecyclerViewChartAdapter(val activityEventHandler: ReportDetailFragmentEventHandler,
                                    var presenter: ReportDetailPresenter?) : ListAdapter<ChartData, ChartViewHolder>(DIFFUTIL_CHART) {
 
-        var isAdmin = false
+        var saveAsTemplateVisible = false
         var chartBinding: ItemReportChartHeaderBinding? = null
         val boundChartViewHolder = mutableListOf<ChartViewHolder>()
 
@@ -87,7 +86,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         override fun onBindViewHolder(holder: ChartViewHolder, position: Int) {
             val item = getItem(position)
             holder.itemBinding.chart = item
-            holder.itemBinding.isAdmin = isAdmin
+            holder.itemBinding.saveAsTemplateVisible = saveAsTemplateVisible
             holder.itemBinding.previewChartView.setChartData(item)
             boundChartViewHolder += holder
         }
@@ -110,7 +109,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
     class StatementViewRecyclerAdapter(
             val activityEventHandler: ReportDetailFragmentEventHandler,
             var presenter: ReportDetailPresenter?) :
-            PagedListAdapter<StatementEntityWithDisplay,
+            PagedListAdapter<StatementEntityWithDisplayDetails,
                     StatementViewRecyclerAdapter.StatementViewHolder>(DIFFUTIL_STATEMENT) {
 
         class StatementViewHolder(val binding: ItemReportStatementListBinding) :
@@ -133,16 +132,19 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         }
     }
 
+    /**
+     * a holder that contains a list of data sources where each has its own header and listData
+     */
     class AdapterSourceHolder(val statementAdapter: StatementViewRecyclerAdapter,
                               val seriesHeaderAdapter: SimpleHeadingRecyclerAdapter,
                               val dbRepo: UmAppDatabase?,
-                              val lifecycleOwner: LifecycleOwner): Observer<PagedList<StatementEntityWithDisplay>> {
+                              val lifecycleOwner: LifecycleOwner): Observer<PagedList<StatementEntityWithDisplayDetails>> {
 
         val adapter = MergeAdapter(seriesHeaderAdapter, statementAdapter)
 
-        private var currentLiveData: LiveData<PagedList<StatementEntityWithDisplay>>? = null
+        private var currentLiveData: LiveData<PagedList<StatementEntityWithDisplayDetails>>? = null
 
-        var source: DataSource.Factory<Int, StatementEntityWithDisplay>? = null
+        var source: DataSource.Factory<Int, StatementEntityWithDisplayDetails>? = null
             set(value) {
                 currentLiveData?.removeObserver(this)
                 val displayTypeRepoVal = dbRepo?.statementDao ?: return
@@ -151,7 +153,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
                 field = value
             }
 
-        override fun onChanged(t: PagedList<StatementEntityWithDisplay>?) {
+        override fun onChanged(t: PagedList<StatementEntityWithDisplayDetails>?) {
             statementAdapter.submitList(t)
         }
 
@@ -159,17 +161,17 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
 
     private var adapterSourceHolderList = mutableListOf<AdapterSourceHolder>()
 
-    override var isAdmin: Boolean = false
+    override var saveAsTemplateVisible: Boolean = false
         get() = field
         set(value) {
             field = value
-            chartAdapter?.isAdmin = value
+            chartAdapter?.saveAsTemplateVisible = value
             chartAdapter?.boundChartViewHolder?.forEach {
-                it.itemBinding.isAdmin = value
+                it.itemBinding.saveAsTemplateVisible = value
             }
         }
 
-    override var statementList: List<DataSource.Factory<Int, StatementEntityWithDisplay>>? = null
+    override var statementListDetails: List<DataSource.Factory<Int, StatementEntityWithDisplayDetails>>? = null
         get() = field
         set(value) {
 
@@ -320,12 +322,12 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
 
     companion object {
 
-        val DIFFUTIL_STATEMENT = object : DiffUtil.ItemCallback<StatementEntityWithDisplay>() {
-            override fun areItemsTheSame(oldItem: StatementEntityWithDisplay, newItem: StatementEntityWithDisplay): Boolean {
+        val DIFFUTIL_STATEMENT = object : DiffUtil.ItemCallback<StatementEntityWithDisplayDetails>() {
+            override fun areItemsTheSame(oldItem: StatementEntityWithDisplayDetails, newItem: StatementEntityWithDisplayDetails): Boolean {
                 return oldItem.statementUid == newItem.statementUid
             }
 
-            override fun areContentsTheSame(oldItem: StatementEntityWithDisplay, newItem: StatementEntityWithDisplay): Boolean {
+            override fun areContentsTheSame(oldItem: StatementEntityWithDisplayDetails, newItem: StatementEntityWithDisplayDetails): Boolean {
                 return oldItem == newItem
             }
         }

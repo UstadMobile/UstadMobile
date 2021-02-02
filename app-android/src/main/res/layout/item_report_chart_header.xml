@@ -17,7 +17,7 @@
             type="ChartData" />
 
         <variable
-            name="isAdmin"
+            name="saveAsTemplateVisible"
             type="Boolean" />
 
         <variable
@@ -111,7 +111,7 @@
             android:padding="@dimen/dimen_8dp"
             android:layout_marginTop="@dimen/dimen_8dp"
             android:background="?attr/selectableItemBackground"
-            android:visibility="@{isAdmin ? View.VISIBLE : View.GONE}"
+            android:visibility="@{saveAsTemplateVisible ? View.VISIBLE : View.GONE}"
             android:onClick="@{() -> eventHandler.onClickAddAsTemplate(chart.reportWithFilters)}"
             app:drawableTopCompat="@drawable/ic_baseline_post_add_24"
             app:layout_constraintStart_toEndOf="@id/preview_add_to_dashboard_button"

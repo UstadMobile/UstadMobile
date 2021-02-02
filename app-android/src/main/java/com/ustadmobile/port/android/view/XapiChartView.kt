@@ -213,6 +213,10 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
 
         val barData = combinedData.barData ?: BarData()
+        /**
+         *  if bar data has multiple series or the series has a subgroup
+         *  then redraw the bars using barData.groupBars to fit all the bars into 1 chart
+         */
         if (barData.dataSetCount > 1) {
             val numberOfDataSets = barData.dataSetCount.toFloat()
             val barSpace = 0.01f
