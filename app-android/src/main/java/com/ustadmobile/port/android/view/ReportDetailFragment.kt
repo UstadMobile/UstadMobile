@@ -25,6 +25,7 @@ import com.ustadmobile.core.controller.ReportDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ReportDetailView
@@ -32,6 +33,10 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.lib.db.entities.StatementEntityWithDisplayDetails
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -70,8 +75,10 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
                                    var presenter: ReportDetailPresenter?) : ListAdapter<ChartData, ChartViewHolder>(DIFFUTIL_CHART) {
 
         var saveAsTemplateVisible = false
+        /**
+         * saved to update the ui when changes to ui are made
+         */
         var chartBinding: ItemReportChartHeaderBinding? = null
-        val boundChartViewHolder = mutableListOf<ChartViewHolder>()
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ChartViewHolder {
             val mBinding = ItemReportChartHeaderBinding.inflate(
@@ -79,7 +86,6 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
                 mPresenter = presenter
                 eventHandler = activityEventHandler
             }
-            chartBinding = mBinding
             return ChartViewHolder(mBinding)
         }
 
@@ -87,19 +93,13 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
             val item = getItem(position)
             holder.itemBinding.chart = item
             holder.itemBinding.saveAsTemplateVisible = saveAsTemplateVisible
-            holder.itemBinding.previewChartView.setChartData(item)
-            boundChartViewHolder += holder
+            holder.itemBinding.chartView.setChartData(item)
+            chartBinding = holder.itemBinding
         }
-
-        override fun onViewRecycled(holder: ChartViewHolder) {
-            super.onViewRecycled(holder)
-            boundChartViewHolder -= holder
-        }
-
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
             super.onDetachedFromRecyclerView(recyclerView)
-            boundChartViewHolder.clear()
+            chartBinding = null
             presenter = null
             chartBinding = null
         }
@@ -166,9 +166,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         set(value) {
             field = value
             chartAdapter?.saveAsTemplateVisible = value
-            chartAdapter?.boundChartViewHolder?.forEach {
-                it.itemBinding.saveAsTemplateVisible = value
-            }
+            chartAdapter?.chartBinding?.saveAsTemplateVisible = value
         }
 
     override var statementListDetails: List<DataSource.Factory<Int, StatementEntityWithDisplayDetails>>? = null
@@ -286,18 +284,19 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
     }
 
     override fun onClickExportButton() {
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            putExtra(Intent.EXTRA_STREAM, getBitmapFromView(chartAdapter?.chartBinding?.
-            previewChartView?.chartView?.chartBitmap))
-            type = "image/png"
+        GlobalScope.launch(Dispatchers.IO) {
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                putExtra(Intent.EXTRA_STREAM, saveBitmapAndGetUriFromFile(chartAdapter?.chartBinding?.
+                chartView?.chartView?.chartBitmap))
+                type = "image/png"
+            }
+            startActivity(Intent.createChooser(intent, requireContext().getString(R.string.export)))
         }
-        startActivity(Intent.createChooser(intent, "Export"))
-
     }
 
-    fun getBitmapFromView(bmp: Bitmap?): Uri? {
+    fun saveBitmapAndGetUriFromFile(bmp: Bitmap?): Uri? {
         var bmpUri: Uri? = null
         try {
 
@@ -310,6 +309,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
                     "${context?.packageName}.provider", file)
 
         } catch (e: IOException) {
+            showSnackBar(requireContext().getString(R.string.error))
             e.printStackTrace()
         }
         return bmpUri

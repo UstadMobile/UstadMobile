@@ -21,7 +21,7 @@ class ReportTemplateListPresenter(context: Any, arguments: Map<String, String>, 
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return true
+        return false
     }
 
     private fun updateListOnView() {

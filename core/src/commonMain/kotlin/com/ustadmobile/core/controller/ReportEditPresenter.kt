@@ -67,7 +67,7 @@ class ReportEditPresenter(context: Any,
 
     enum class DateRangeOptions(val code: Int, val messageId: Int,
                                 var dateRange: DateRangeMoment?) {
-        EVERYTHING(Report.EVERYTHING, MessageID.unset,
+        EVERYTHING(Report.EVERYTHING, MessageID.time_range_all,
                 DateRangeMoment(Moment(), Moment())),
         LAST_WEEK(Report.LAST_WEEK_DATE,
                 MessageID.last_week_date_range,

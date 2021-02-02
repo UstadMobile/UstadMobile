@@ -14,10 +14,6 @@
             type="Report" />
 
         <variable
-            name="chart"
-            type="ChartData" />
-
-        <variable
             name="presenter"
             type="com.ustadmobile.core.controller.ReportListPresenter" />
 

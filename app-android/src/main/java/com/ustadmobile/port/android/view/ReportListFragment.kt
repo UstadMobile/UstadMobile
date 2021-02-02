@@ -58,18 +58,21 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
             (holder.itemBinding.listReportChart.getTag(R.id.tag_graphlookup_key) as? Job)?.cancel()
             val graphJob = GlobalScope.async(Dispatchers.Main) {
-                val series = if(!item.reportSeries.isNullOrEmpty()){
+                val series = if (!item.reportSeries.isNullOrEmpty()) {
                     safeParseList(di, ReportSeries.serializer().list,
                             ReportSeries::class, item.reportSeries ?: "")
-                }else{
+                } else {
                     listOf()
                 }
                 val accountManager: UstadAccountManager = di.direct.instance()
                 val reportWithSeriesWithFilters = ReportWithSeriesWithFilters(item, series)
-                val chartData = dbRepo?.generateChartData(reportWithSeriesWithFilters,
-                        holder.itemView.context, di.direct.instance(), accountManager.activeAccount.personUid)
-                holder.itemBinding.listReportChart.setChartData(chartData)
-                holder.itemBinding.chart = chartData
+                try {
+                    val chartData = dbRepo?.generateChartData(reportWithSeriesWithFilters,
+                            holder.itemView.context, di.direct.instance(), accountManager.activeAccount.personUid)
+                    holder.itemBinding.listReportChart.setChartData(chartData)
+                }catch (e: Exception){
+
+                }
             }
             holder.itemBinding.listReportChart.setTag(R.id.tag_graphlookup_key, graphJob)
 
@@ -84,7 +87,7 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = ReportListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this,  di, viewLifecycleOwner)
+                this, di, viewLifecycleOwner)
 
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 requireContext().getString(R.string.create_a_new_report),
@@ -115,7 +118,7 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
     override fun onClick(v: View?) {
         if (v?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.report_edit_dest, Report::class.java)
-        else{
+        else {
             super.onClick(v)
         }
     }
