@@ -317,6 +317,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
 
     override fun onClickAddAsTemplate(report: ReportWithSeriesWithFilters) {
         mPresenter?.handleOnClickAddAsTemplate(report)
+        showSnackBar(requireContext().getString(R.string.added))
     }
 
 

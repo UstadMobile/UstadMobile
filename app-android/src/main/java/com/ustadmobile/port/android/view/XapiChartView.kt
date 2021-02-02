@@ -212,12 +212,12 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         }
 
 
-        val barData = combinedData.barData ?: BarData()
+        val barData = combinedData.barData
         /**
          *  if bar data has multiple series or the series has a subgroup
          *  then redraw the bars using barData.groupBars to fit all the bars into 1 chart
          */
-        if (barData.dataSetCount > 1) {
+        if (barData != null && barData.dataSetCount > 1) {
             val numberOfDataSets = barData.dataSetCount.toFloat()
             val barSpace = 0.01f
             val groupSpace = 0.05f
@@ -241,8 +241,10 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         }
 
 
+        if(combinedData.barData != null || combinedData.lineData != null){
+            combinedChart.data = combinedData
+        }
 
-        combinedChart.data = combinedData
         combinedChart.invalidate()
         return combinedChart
     }

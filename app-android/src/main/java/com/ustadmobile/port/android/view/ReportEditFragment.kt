@@ -275,31 +275,6 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
             }
         }
 
-    companion object {
-
-        val DIFF_CALLBACK_SERIES = object : DiffUtil.ItemCallback<ReportSeries>() {
-            override fun areItemsTheSame(oldItem: ReportSeries, newItem: ReportSeries): Boolean {
-                return oldItem.reportSeriesUid == newItem.reportSeriesUid
-            }
-
-            override fun areContentsTheSame(oldItem: ReportSeries,
-                                            newItem: ReportSeries): Boolean {
-                return oldItem === newItem
-            }
-        }
-
-        val DIFF_CALLBACK_FILTER = object : DiffUtil.ItemCallback<ReportFilter>() {
-            override fun areItemsTheSame(oldItem: ReportFilter, newItem: ReportFilter): Boolean {
-                return oldItem.reportFilterUid == newItem.reportFilterUid
-            }
-
-            override fun areContentsTheSame(oldItem: ReportFilter,
-                                            newItem: ReportFilter): Boolean {
-                return oldItem === newItem
-            }
-        }
-    }
-
     override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
         if(selectedOption.optionId == ReportEditPresenter.DateRangeOptions.NEW_CUSTOM_RANGE.code) {
                 navigateToEditEntity(null, R.id.date_range_dest,
@@ -336,7 +311,44 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
     }
 
     override fun onClickRemoveSeries(reportSeries: ReportSeries) {
+        /**
+         *  when removing a series, recyclerview doesn't like if
+         *  any of the views are in focus(editText or idOptionAutoComplete)
+         *  so go through each view and clear the focus
+         */
+        seriesAdapter?.boundSeriesViewHolder?.forEach {
+            it.itemBinding.itemEditReportDialogSubgroupTextinputlayout.clearFocus()
+            it.itemBinding.itemEditReportDialogYaxisTextinputlayout.clearFocus()
+            it.itemBinding.itemEditReportDialogVisualTypeTextinputlayout.clearFocus()
+            it.itemBinding.itemReportSeriesTitleTextInputlayout.clearFocus()
+            it.itemBinding.itemReportSeriesDeleteButton.clearFocus()
+        }
         mPresenter?.handleRemoveSeries(reportSeries)
+    }
+
+    companion object {
+
+        val DIFF_CALLBACK_SERIES = object : DiffUtil.ItemCallback<ReportSeries>() {
+            override fun areItemsTheSame(oldItem: ReportSeries, newItem: ReportSeries): Boolean {
+                return oldItem.reportSeriesUid == newItem.reportSeriesUid
+            }
+
+            override fun areContentsTheSame(oldItem: ReportSeries,
+                                            newItem: ReportSeries): Boolean {
+                return oldItem === newItem
+            }
+        }
+
+        val DIFF_CALLBACK_FILTER = object : DiffUtil.ItemCallback<ReportFilter>() {
+            override fun areItemsTheSame(oldItem: ReportFilter, newItem: ReportFilter): Boolean {
+                return oldItem.reportFilterUid == newItem.reportFilterUid
+            }
+
+            override fun areContentsTheSame(oldItem: ReportFilter,
+                                            newItem: ReportFilter): Boolean {
+                return oldItem === newItem
+            }
+        }
     }
 
 }

@@ -114,6 +114,7 @@
     <string name="unhide">Unhide</string>
     <string name="compress">Compress</string>
     <string name="and">and</string>
+    <string name="added">Added</string>
 
     <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
 
