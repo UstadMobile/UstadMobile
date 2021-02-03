@@ -27,7 +27,7 @@
         android:layout_height="wrap_content"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, reportTemplate)}"
-        android:onClick="@{() -> presenter.handleClickEntry(reportTemplate)}"
+        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(reportTemplate)}"
         android:background="@drawable/bg_listitem">
 
         <!-- Line 1-->

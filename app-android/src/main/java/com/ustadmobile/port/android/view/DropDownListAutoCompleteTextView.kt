@@ -120,9 +120,9 @@ open class DropDownListAutoCompleteTextView<T: Any>: androidx.appcompat.widget.A
 
     var dropDownOptions = listOf<T>()
         set(value) {
-            mListBaseAdapter = ListBaseAdapter(context, value, R.layout.autocomplete_list_item,
+            mListBaseAdapter = ListBaseAdapter(context, value, R.layout.multiline_list_item,
                     dropDownListAdapter).also {
-                it.dropDownLayoutResourceId = android.R.layout.simple_spinner_dropdown_item
+                it.dropDownLayoutResourceId = R.layout.multiline_list_item
             }
             field = value
             setAdapter(mListBaseAdapter)
