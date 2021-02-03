@@ -74,6 +74,8 @@ class ViewNameToDestMap: DestinationProvider {
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             ProductListView.VIEW_NAME to UstadDestination(R.id.product_list_dest),
             ProductDetailView.VIEW_NAME to UstadDestination(R.id.product_detail_dest),
+            CategoryListView.VIEW_NAME to UstadDestination(R.id.category_list_dest,
+                    actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             CategoryEditView.VIEW_NAME to UstadDestination(R.id.category_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             SaleItemEditView.VIEW_NAME to UstadDestination(R.id.saleitem_edit_dest,

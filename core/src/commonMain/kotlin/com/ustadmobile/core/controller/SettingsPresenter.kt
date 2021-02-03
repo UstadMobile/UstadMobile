@@ -15,6 +15,14 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>, view: Sett
         impl.go(HolidayCalendarListView.VIEW_NAME, mapOf(), context)
     }
 
+    fun goToCategoryList() {
+        impl.go(CategoryListView.VIEW_NAME, mapOf(), context)
+    }
+
+    fun goToLocationList() {
+        impl.go(LocationListView.VIEW_NAME, mapOf(), context)
+    }
+
     fun goToRolesList() {
         impl.go(RoleListView.VIEW_NAME, mapOf(), context)
     }

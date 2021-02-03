@@ -92,4 +92,7 @@
     <string name="onboarding_goldozi_4">Review your courses.</string>
     <string name="onboarding_empty"> </string>
     <string name="deliver">Deliver</string>
+
+    <string name="categories_desc">Add and edit categories</string>
+    <string name="location_desc">Add and edit locations</string>
 </resources>

@@ -168,6 +168,104 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+            <!-- Categories-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/fragment_settings_categories"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="?android:selectableItemBackground"
+                android:onClick="@{() -> presenter.goToCategoryList()}">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/fragment_settings_categories_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:tint="?colorOnIconTint"
+                    app:layout_constraintBottom_toTopOf="@+id/fragment_settings_categories_title"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    app:srcCompat="@drawable/ic_label_24dp" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/fragment_settings_categories_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:text="@string/categories"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_settings_categories_icon"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    android:id="@+id/fragment_settings_categories_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:text="@string/categories_desc"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_settings_categories_icon"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_settings_categories_title" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <!-- Categories-->
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/fragment_settings_locations"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="?android:selectableItemBackground"
+                android:onClick="@{() -> presenter.goToLocationList()}">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/fragment_settings_locations_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:tint="?colorOnIconTint"
+                    app:layout_constraintBottom_toTopOf="@+id/fragment_settings_locations_title"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    app:srcCompat="@drawable/ic_pin_drop_black_24dp" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/fragment_settings_locations_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:text="@string/locations"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_settings_locations_icon"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    android:id="@+id/fragment_settings_locations_subtitle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:text="@string/location_desc"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_settings_locations_icon"
+                    app:layout_constraintTop_toBottomOf="@+id/fragment_settings_locations_title" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/activity_settings2_groups_cl"
                 android:layout_width="match_parent"
