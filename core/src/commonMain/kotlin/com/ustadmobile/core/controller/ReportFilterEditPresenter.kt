@@ -80,7 +80,7 @@ class ReportFilterEditPresenter(context: Any,
             UidAndLabel.serializer().list, this, UidAndLabel::class) { uid = it }
 
     fun handleAddOrEditUidAndLabel(entry: UidAndLabel) {
-        GlobalScope.launch(doorMainDispatcher()){
+        GlobalScope.launch(doorMainDispatcher()) {
             uidhelperDeferred.await()
             uidAndLabelOneToManyHelper.onEditResult(entry)
         }
@@ -166,7 +166,7 @@ class ReportFilterEditPresenter(context: Any,
                 view.createNewFilter = systemImpl.getString(MessageID.add_content_filter, context)
 
             }
-            ReportFilter.FIELD_ATTENDANCE_PERCENTAGE, ReportFilter.FIELD_CONTENT_PROGRESS ->{
+            ReportFilter.FIELD_ATTENDANCE_PERCENTAGE, ReportFilter.FIELD_CONTENT_PROGRESS -> {
 
                 view.conditionsOptions = listOf(ConditionOption.BETWEEN_CONDITION)
                         .map { ConditionMessageIdOption(it, context) }
@@ -177,11 +177,11 @@ class ReportFilterEditPresenter(context: Any,
     }
 
     fun handleConditionOptionSelected(conditionOption: IdOption) {
-        when(conditionOption.optionId){
-            ReportFilter.CONDITION_GREATER_THAN, ReportFilter.CONDITION_LESS_THAN ->{
+        when (conditionOption.optionId) {
+            ReportFilter.CONDITION_GREATER_THAN, ReportFilter.CONDITION_LESS_THAN -> {
                 view.valueType = FilterValueType.INTEGER
             }
-            ReportFilter.CONDITION_BETWEEN ->{
+            ReportFilter.CONDITION_BETWEEN -> {
                 view.valueType = FilterValueType.BETWEEN
             }
         }
@@ -191,7 +191,7 @@ class ReportFilterEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        if(entityVal?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY){
+        if (entityVal?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY) {
             entityVal.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
                     ?.joinToString { it.uid.toString() }
         }
@@ -211,21 +211,15 @@ class ReportFilterEditPresenter(context: Any,
         } else {
             view.conditionsErrorText = null
         }
-        if(entity.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY){
+        if (entity.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY) {
             entity.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
                     ?.joinToString { it.uid.toString() }
         }
         if (entity.reportFilterDropDownValue == 0 && entity.reportFilterValue.isNullOrBlank() &&
                 (entity.reportFilterValueBetweenX.isNullOrEmpty() ||
-                entity.reportFilterValueBetweenY.isNullOrEmpty())) {
-
-            // if gender, value can be 0 for unset gender
-            if (entity.reportFilterField == ReportFilter.FIELD_PERSON_GENDER) {
-                view.valuesErrorText = null
-            } else {
-                view.valuesErrorText = fieldRequiredText
-                return
-            }
+                        entity.reportFilterValueBetweenY.isNullOrEmpty())) {
+            view.valuesErrorText = fieldRequiredText
+            return
         } else {
             view.valuesErrorText = null
         }
@@ -234,8 +228,7 @@ class ReportFilterEditPresenter(context: Any,
 
     companion object {
 
-        val genderMap = mapOf(Person.GENDER_UNSET to MessageID.unset)
-                .plus(PersonConstants.GENDER_MESSAGE_ID_MAP)
+        val genderMap = PersonConstants.GENDER_MESSAGE_ID_MAP
 
     }
 

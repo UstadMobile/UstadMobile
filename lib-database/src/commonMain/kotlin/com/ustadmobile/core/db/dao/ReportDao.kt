@@ -65,6 +65,13 @@ abstract class ReportDao : BaseDao<Report> {
     @Query("SELECT reportUid FROM Report WHERE reportUid IN (:uidList)")
     abstract fun findByUidList(uidList: List<Long>): List<Long>
 
+
+    @Query("""UPDATE Report SET reportInactive = :toggleVisibility, 
+                reportLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                WHERE reportUid IN (:selectedItem)""")
+    abstract suspend fun toggleVisibilityReportItems(toggleVisibility: Boolean, selectedItem: List<Long>)
+
+
     @JsName("replaceList")
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entityList: List<Report>)

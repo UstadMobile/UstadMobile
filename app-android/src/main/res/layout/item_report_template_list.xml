@@ -6,6 +6,7 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.Report"/>
         <import type="com.ustadmobile.port.android.view.ReportTemplateListFragment"/>
+        <import type="com.ustadmobile.port.android.view.ReportTemplateListFragment.ReportTemplateRecyclerAdapter"/>
 
         <variable
             name="reportTemplate"
@@ -15,14 +16,19 @@
             name="presenter"
             type="com.ustadmobile.core.controller.ReportTemplateListPresenter" />
 
+        <variable
+            name="selectablePagedListAdapter"
+            type="ReportTemplateRecyclerAdapter" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:selectableViewHelper="@{selectablePagedListAdapter}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, reportTemplate)}"
         android:onClick="@{() -> presenter.handleClickEntry(reportTemplate)}"
-        android:background="?attr/selectableItemBackground"
-        >
+        android:background="@drawable/bg_listitem">
 
         <!-- Line 1-->
         <TextView

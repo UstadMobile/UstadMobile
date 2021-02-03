@@ -102,7 +102,7 @@ open class Report {
 
         const val CUSTOM_RANGE = 805
 
-        private const val TEMPLATE_BLANK_REPORT_UID = 100000L
+        const val TEMPLATE_BLANK_REPORT_UID = 100000L
 
         private const val TEMPLATE_CONTENT_USAGE_OVER_TIME_UID = 100001L
 

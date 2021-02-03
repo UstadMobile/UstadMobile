@@ -6,8 +6,12 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class ReportListPresenter(context: Any, arguments: Map<String, String>, view: ReportListView,
@@ -58,6 +62,28 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
 
     override fun handleClickCreateNewFab() {
         systemImpl.go(ReportTemplateListView.VIEW_NAME, mapOf(), context)
+    }
+    override suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
+        return listOf(SelectionOption.HIDE)
+    }
+
+    override fun handleClickSelectionOption(selectedItem: List<Report>, option: SelectionOption) {
+        GlobalScope.launch(doorMainDispatcher()) {
+            when (option) {
+                SelectionOption.HIDE -> {
+                    repo.reportDao.toggleVisibilityReportItems(true,
+                            selectedItem.map { it.reportUid })
+                    view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context), {
+
+                        GlobalScope.launch(doorMainDispatcher()){
+                            repo.reportDao.toggleVisibilityReportItems(false,
+                                    selectedItem.map { it.reportUid })
+                        }
+
+                    }, MessageID.content_editor_menu_undo)
+                }
+            }
+        }
     }
 
     companion object {

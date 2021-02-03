@@ -41,7 +41,7 @@ class ReportEditPresenter(context: Any,
         BAR_CHART(ReportSeries.BAR_CHART,
                 MessageID.bar_chart),
         LINE_GRAPH(ReportSeries.LINE_GRAPH,
-                MessageID.line_graph)
+                MessageID.line_chart)
     }
 
     class VisualTypeMessageIdOption(day: VisualTypeOptions, context: Any)
@@ -144,9 +144,9 @@ class ReportEditPresenter(context: Any,
 
     enum class YAxisOptions(val optionVal: Int, val messageId: Int) {
         TOTAL_DURATION(ReportSeries.TOTAL_DURATION,
-                MessageID.total_duration),
+                MessageID.content_total_duration),
         AVERAGE_DURATION(ReportSeries.AVERAGE_DURATION,
-                MessageID.average_duration),
+                MessageID.content_average_duration),
         NUMBER_SESSIONS(ReportSeries.NUMBER_SESSIONS,
                 MessageID.count_session),
         INTERACTIONS_RECORDED(ReportSeries.INTERACTIONS_RECORDED,

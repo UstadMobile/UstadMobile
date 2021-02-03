@@ -33,6 +33,7 @@ class ReportTemplateListFragment(): UstadListViewFragment<Report, Report>(),
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReportTemplateListViewHolder {
             val itemBinding = ItemReportTemplateListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
+            itemBinding.selectablePagedListAdapter = this
             return ReportTemplateListViewHolder(itemBinding)
         }
 

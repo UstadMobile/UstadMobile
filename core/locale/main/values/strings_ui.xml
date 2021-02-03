@@ -270,16 +270,17 @@
     <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
     <string name="show_hidden_items">Show hidden items</string>
     <string name="open_folder">Open Folder</string>
+    <string name="action_hidden">Hidden</string>
 
     <string name="invalid_register_code">Invalid Registration Code</string>
     <string name="enter_register_code">Enter Registration Code</string>
 
     <string name="bar_chart" value="100">Bar Chart</string>
-    <string name="line_graph" value="101">Line Graph</string>
+    <string name="line_chart" value="101">Line Chart</string>
 
     <string name="score" value="200">Average Score</string>
-    <string name="total_duration" value="200">Content usage - total duration</string>
-    <string name="average_duration" value="201">Content usage - average duration per session</string>
+    <string name="content_total_duration" value="200">Content usage - total duration</string>
+    <string name="content_average_duration" value="201">Content usage - average duration per session</string>
     <string name="count_session" value="202">Content usage - number of sessions</string>
     <string name="interaction_recorded" value="203">Content usage - number of interactions recorded</string>
     <string name="number_active_users" value="204">Content usage - number of active users</string>
@@ -336,8 +337,6 @@
     <string name="report_filter_edit_field">Field</string>
     <string name="report_filter_edit_condition">Condition</string>
     <string name="report_filter_edit_values">Value(s)</string>
-
-    <string name="xapi_content_usage">Content usage - %1$s%</string>
 
     <string name="report">Report</string>
     <string name="create_a_new_report">Create a new report</string>
