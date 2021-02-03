@@ -138,6 +138,16 @@ class ReportFilterEditFragmentTest: TestCase()  {
                     }
                 }
 
+                fragmentScenario.clickOptionMenu(R.id.menu_done)
+
+                conditionTextInputLayout{
+                    isErrorDisabled()
+                }
+
+                valueIntegerTextInputLayout{
+                    isErrorDisabled()
+                }
+
             }
 
 

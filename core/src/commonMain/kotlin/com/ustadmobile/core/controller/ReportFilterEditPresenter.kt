@@ -191,9 +191,11 @@ class ReportFilterEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        entityVal?.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
-                ?.joinToString { it.uid.toString() }
-        savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
+        if(entityVal?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY){
+            entityVal.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
+                    ?.joinToString { it.uid.toString() }
+        }
+        savedState.putEntityAsJson(ARG_ENTITY_JSON, ReportFilter.serializer(), entityVal)
     }
 
     override fun handleClickSave(entity: ReportFilter) {

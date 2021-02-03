@@ -99,18 +99,31 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
         set(value) {
             field = value
             mBinding?.fieldErrorText = value
+            mBinding?.fragmentReportFilterEditDialogFieldTextinputlayout
+                    ?.isErrorEnabled = value != null
         }
     override var conditionsErrorText: String? = null
         get() = field
         set(value) {
             field = value
             mBinding?.conditionsErrorText = value
+            mBinding?.fragmentReportFilterEditDialogConditionTextinputlayout
+                    ?.isErrorEnabled = value != null
         }
     override var valuesErrorText: String? = null
         get() = field
         set(value) {
             field = value
             mBinding?.valuesErrorText = value
+            val errorEnabled = value != null
+            mBinding?.fragmentReportFilterEditDialogValuesBetweenXTextinputlayout
+                    ?.isErrorEnabled = errorEnabled
+            mBinding?.fragmentReportFilterEditDialogValuesBetweenYTextinputlayout
+                    ?.isErrorEnabled = errorEnabled
+            mBinding?.fragmentReportFilterEditDialogValuesNumberTextinputlayout
+                    ?.isErrorEnabled = errorEnabled
+            mBinding?.fragmentReportFilterEditDialogValuesDropdownTextinputlayout
+                    ?.isErrorEnabled = errorEnabled
         }
 
     override var uidAndLabelList: DoorLiveData<List<UidAndLabel>>? = null
