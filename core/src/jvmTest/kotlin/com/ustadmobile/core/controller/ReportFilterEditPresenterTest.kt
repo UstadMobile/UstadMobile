@@ -95,7 +95,7 @@ class ReportFilterEditPresenterTest {
         val initialEntity: ReportFilter = mockView.captureLastEntityValue()!!
         initialEntity.reportFilterField = ReportFilter.FIELD_PERSON_GENDER
         initialEntity.reportFilterCondition = ReportFilter.CONDITION_IS_NOT
-        initialEntity.reportFilterDropDownValue = Person.GENDER_UNSET
+        initialEntity.reportFilterDropDownValue = Person.GENDER_MALE
         initialEntity.reportFilterUid = 1L
 
         presenter.handleClickSave(initialEntity)
