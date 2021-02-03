@@ -16,6 +16,7 @@ import com.ustadmobile.core.util.ext.ChartData
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.port.android.util.graph.asValueFormatter
+import java.lang.IllegalArgumentException
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -24,9 +25,11 @@ import java.time.format.DateTimeFormatter
 class XapiChartView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null, defStyleAttr: Int = 0)
     : LinearLayout(context, attrs, defStyleAttr) {
 
-    var colorList = listOf("#009688", "#FF9800", "#2196F3", "#f44336", "#673AB7", "#607D8B",
-            "#E91E63", "#9C27B0", "#795548", "#4CAF50", "#E52B50", "#FFBF00", "#9966CC", "#FBCEB1",
-            "#7FFFD4", "#007FFF", "#89CFF0")
+    var colorList = listOf("#009999", "#FF9900", "#0099FF", "#FF3333", "#663399", "#669999",
+            "#FF3366", "#990099", "#996666", "#339933", "#FFCC00", "#9966CC", "#FFCC99",
+            "#99FFCC", "#0066CC", "#66CCFF", "#FF66FF", "#4D4D4D", "#0066FF", "#FF6600", "#33FFFF",
+            "#669933","#808080", "#AF4CAB", "#0040FF","#99CC66","#B1DEFB","#FF7FAA", "#FF8000",
+            "#F0AA89", "#6AFF6A", "#339999", "#CCCCCC")
 
     var chartView: CombinedChart? = null
 
@@ -121,7 +124,11 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
                     val barDataSet = BarDataSet(barEntryList, it.series.reportSeriesName)
                     barDataSet.setDrawValues(false)
-                    barDataSet.color = Color.parseColor(colorList[colorCount++])
+                    try {
+                        barDataSet.color = Color.parseColor(colorList[colorCount++])
+                    }catch (e: IllegalArgumentException){
+                        e.printStackTrace()
+                    }
 
                     val barData = combinedData.barData ?: BarData()
                     barData.addDataSet(barDataSet)
@@ -145,7 +152,11 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
 
                         val barDataSet = BarDataSet(barEntryList, """${it.series.reportSeriesName} - ${it.subGroupFormatter?.format(subGroup) ?: subGroup}""".trimMargin())
-                        barDataSet.color = Color.parseColor(colorList[colorCount++])
+                        try {
+                            barDataSet.color = Color.parseColor(colorList[colorCount++])
+                        }catch (e: IllegalArgumentException){
+                            e.printStackTrace()
+                        }
                         barDataSet.setDrawValues(false)
                         barData.addDataSet(barDataSet)
                     }
@@ -169,7 +180,11 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
                     val lineDataSet = LineDataSet(xAxisList, it.series.reportSeriesName)
                     lineDataSet.setDrawValues(false)
-                    lineDataSet.color = Color.parseColor(colorList[colorCount++])
+                    try {
+                        lineDataSet.color = Color.parseColor(colorList[colorCount++])
+                    }catch (e: IllegalArgumentException){
+                        e.printStackTrace()
+                    }
 
                     val lineData = combinedData.lineData ?: LineData()
                     lineData.addDataSet(lineDataSet)
@@ -193,9 +208,13 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
                         val lineDataSet = LineDataSet(lineEntryList, """${it.series.reportSeriesName} - ${it.subGroupFormatter?.format(subGroup) ?: subGroup}""".trimMargin()).apply {
                             axisDependency = YAxis.AxisDependency.LEFT
-                            val colorSelected = Color.parseColor(colorList[colorCount++])
-                            color = colorSelected
-                            setCircleColor(colorSelected)
+                            try {
+                                val colorSelected = Color.parseColor(colorList[colorCount++])
+                                color = colorSelected
+                                setCircleColor(colorSelected)
+                            }catch (e: IllegalArgumentException){
+                                e.printStackTrace()
+                            }
                             setDrawValues(false)
                             lineWidth = 2.5f
 
