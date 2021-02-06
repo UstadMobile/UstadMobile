@@ -4,6 +4,7 @@ import com.github.aakira.napier.Napier
 import com.ustadmobile.door.DoorConstants.HEADER_DBVERSION
 import com.ustadmobile.door.DoorDatabaseRepository.Companion.STATUS_CONNECTED
 import com.ustadmobile.door.ext.DoorTag.Companion.LOG_TAG
+import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.sse.DoorEventListener
 import com.ustadmobile.door.sse.DoorEventSource
@@ -40,10 +41,9 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
                          */
                         private val endpointSuffixAck: String = "${repo.dbPath}/$ENDPOINT_SUFFIX_ACK"): TableChangeListener {
 
-    val updateCheckJob: AtomicRef<Job?> = atomic(null)
+    private val updateCheckJob: AtomicRef<Job?> = atomic(null)
 
-    //TOOD: replace this with copyonWriteListOf
-    val pendingJobs: MutableList<Int> = mutableListOf()
+    private val pendingJobs: MutableList<Int> = concurrentSafeListOf()
 
     val channel = Channel<Int>(Channel.UNLIMITED)
 
