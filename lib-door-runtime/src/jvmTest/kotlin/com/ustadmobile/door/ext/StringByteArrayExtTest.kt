@@ -9,7 +9,7 @@ class StringByteArrayExtTest  {
     @Test
     fun givenByteArray_whenConvertedToStringAndBackToByteArray_thenShouldBeTheSame() {
         val testFileBytes = this::class.java
-                .getResourceAsStream("/com/ustadmobile/core/container/testfile1.png" )
+                .getResourceAsStream("/test-resources/cat-pic0.jpg" )
                 .readBytes()
         val messageDigest = MessageDigest.getInstance("MD5")
         messageDigest.update(testFileBytes)
