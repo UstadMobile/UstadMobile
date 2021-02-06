@@ -17,7 +17,10 @@ android {
     }
 
     packagingOptions {
-        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module",
+                     "licenses/**.TXT", "org/apache/maven/project/pom-4.0.0.xml",
+                     "org/cyberneko/**", "META-INF/plexus/**", 'META-INF/DEPENDENCIES',
+                    'org/codehaus/plexus/**']
     }
 
     compileOptions {
