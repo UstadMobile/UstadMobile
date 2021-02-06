@@ -92,11 +92,12 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
                 Napier.d("tableSyncedOk = $tableSyncedOk")
                 repo.takeIf { tableSyncedOk }
                         ?.syncHelperEntitiesDao?.updateTableSyncStatusLastSynced(tableId, startTime)
-                pendingJobs -= tableId
                 checkQueue()
             }catch(e: Exception) {
                 Napier.e("$logPrefix Exception syncing tableid $tableId processor #$id", e,
                         tag = LOG_TAG)
+            }finally {
+                pendingJobs -= tableId
             }
         }
     }
@@ -190,7 +191,7 @@ class ClientSyncManager(val repo: DoorDatabaseSyncRepository, val dbVersion: Int
         val newJobs = repo.syncHelperEntitiesDao.findTablesToSync()
                 .filter { it.tsTableId !in pendingJobs }
 
-        Napier.v("$logPrefix checkQueue found ${newJobs.size} tables to sync", tag = LOG_TAG)
+        Napier.v("$logPrefix checkQueue found ${newJobs.size} tables to sync (pendingJobs=${pendingJobs.joinToString()}_", tag = LOG_TAG)
         newJobs.subList(0, min(maxProcessors, newJobs.size)).forEach {
             Napier.d("$logPrefix send table id #${it.tsTableId} to sync fan-out", tag = LOG_TAG)
             pendingJobs += it.tsTableId

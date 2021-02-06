@@ -134,7 +134,7 @@ suspend inline fun <reified T:Any, reified K: Any> DoorDatabaseSyncRepository.sy
         if(localUnsentEntities.isNotEmpty()) {
             //if the entity has attachments, upload those before sending the actual entity data
             val attachmentsToUpload = localUnsentEntities.mapNotNull { entityToEntityWithAttachmentFn(it) }
-            attachmentsToUpload.forEach {
+            attachmentsToUpload.filter { it.attachmentUri != null }.forEach {
                 uploadAttachment(it)
             }
 
