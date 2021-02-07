@@ -95,7 +95,7 @@ class DateRangeFragmentTest : TestCase() {
                 toRelDateRelOffSetInput.isGone()
                 toRelDateRelUnitInput.isGone()
 
-                toFixedDateTextInput.setDateField(DateTime.nowLocal().utc.unixMillisLong)
+                toFixedDateTextInput.edit.setDateWithDialog(DateTime.nowLocal().utc.unixMillisLong)
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 

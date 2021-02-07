@@ -175,7 +175,11 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
 
             if (!leftOutDateOfBirth) {
                 person.dateOfBirth.takeIf { it != personOnForm?.dateOfBirth }?.also {
-                    birthdayTextInput.setDateField(it)
+                    birthdayTextInput{
+                        edit{
+                            setDateWithDialog(it)
+                        }
+                    }
                 }
             }
 
