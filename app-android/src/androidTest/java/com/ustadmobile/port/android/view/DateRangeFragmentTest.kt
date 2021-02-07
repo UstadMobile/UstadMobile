@@ -143,11 +143,6 @@ class DateRangeFragmentTest : TestCase() {
                     hasError(systemImplNavRule.impl.getString(MessageID.field_required_prompt, context))
                 }
 
-                toFixedDateTextInput{
-                    isErrorEnabled()
-                    hasError(systemImplNavRule.impl.getString(MessageID.field_required_prompt, context))
-                }
-
             }
 
         }
