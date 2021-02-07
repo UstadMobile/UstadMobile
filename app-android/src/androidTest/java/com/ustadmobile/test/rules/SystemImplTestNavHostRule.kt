@@ -1,5 +1,6 @@
 package com.ustadmobile.test.rules
 
+import android.content.Context
 import androidx.lifecycle.ViewModelStore
 import androidx.navigation.NavController
 import androidx.navigation.testing.TestNavHostController
@@ -7,8 +8,12 @@ import androidx.test.core.app.ApplicationProvider
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.port.android.generated.MessageIDMap
+import com.ustadmobile.test.port.android.util.getApplicationDi
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
+import org.kodein.di.DIAware
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 /**
  * Sets the navController on UstadMobileSystemImpl for the test. This should be used on
@@ -26,13 +31,14 @@ class SystemImplTestNavHostRule  : TestWatcher() {
         navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         (navController as TestNavHostController).setViewModelStore(ViewModelStore())
         navController.setGraph(R.navigation.mobile_navigation)
-        impl = UstadMobileSystemImpl.instance
-        UstadMobileSystemImpl.instance.navController = navController
-        UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
+        val di = getApplicationDi()
+        impl = di.direct.instance()
+        impl.navController = navController
+        impl.messageIdMap = MessageIDMap.ID_MAP
     }
 
     override fun finished(description: Description?) {
-        UstadMobileSystemImpl.instance.navController = null
+        impl.navController = null
     }
 
 }

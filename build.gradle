@@ -166,7 +166,7 @@ ext {
     version_android_espresso_recyclerviewchildactions = "1.0"
     version_androidx_databinding = "3.5.0"
     version_android_mockito = "3.3.3"
-    version_android_roboelectric = "4.3.1"
+    version_android_roboelectric = "4.5.1"
     version_android_uiautomator = "2.2.0"
     version_android_maven_publish = "3.6.2"
     version_android_firebase_auth = "16.0.4"
