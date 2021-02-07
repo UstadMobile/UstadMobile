@@ -165,7 +165,20 @@ kotlin {
                 implementation "junit:junit:$version_junit"
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-                implementation "org.robolectric:robolectric:$version_android_roboelectric"
+                implementation("org.robolectric:robolectric:$version_android_roboelectric") {
+                    //Exclusions as per https://github.com/robolectric/robolectric/issues/5485
+                    exclude group: 'org.apache.maven', module: 'maven-artifact'
+                    exclude group: 'org.apache.maven', module: 'maven-artifact-manager'
+                    exclude group: 'org.apache.maven', module: 'maven-model'
+                    exclude group: 'org.apache.maven', module: 'maven-plugin-registry'
+                    exclude group: 'org.apache.maven', module: 'maven-profile'
+                    exclude group: 'org.apache.maven', module: 'maven-project'
+                    exclude group: 'org.apache.maven', module: 'maven-settings'
+                    exclude group: 'org.apache.maven', module: 'maven-error-diagnostics'
+                    exclude group: 'org.apache.maven', module: 'maven-ant-tasks'
+                    exclude group: "org.apache.maven.wagon"
+                    exclude group: "org.codehaus.plexus"
+                }
                 implementation "androidx.test:core:$version_android_junit_runner"
                 implementation "androidx.test:runner:$version_android_junit_runner"
                 implementation "androidx.test.ext:junit:$version_androidx_test_ext_junit"
