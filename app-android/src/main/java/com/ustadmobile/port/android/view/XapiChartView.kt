@@ -13,6 +13,7 @@ import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.ustadmobile.core.util.ext.ChartData
+import com.ustadmobile.core.util.ext.dpAspx
 import com.ustadmobile.core.util.ext.pxAsDp
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportSeries
@@ -157,6 +158,8 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                             barDataSet.color = Color.parseColor(colorList[colorCount++])
                         }catch (e: IllegalArgumentException){
                             e.printStackTrace()
+                        }catch (e: ArrayIndexOutOfBoundsException){
+                            e.printStackTrace()
                         }
                         barDataSet.setDrawValues(false)
                         barData.addDataSet(barDataSet)
@@ -264,7 +267,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
 
         if(combinedData.barData != null || combinedData.lineData != null){
             combinedChart.data = combinedData
-            val height = (250.pxAsDp + (colorCount * 15).pxAsDp).toInt()
+            val height = (250.dpAspx + (colorCount * 15).dpAspx).toInt()
             val linearParams = super.getLayoutParams()
             linearParams.height = height
             super.setLayoutParams(linearParams)

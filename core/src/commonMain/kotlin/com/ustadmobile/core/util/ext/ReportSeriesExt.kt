@@ -101,7 +101,10 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         TOTAL_ATTENDANCE, TOTAL_ABSENCES, TOTAL_LATES, TOTAL_CLASSES,
         PERCENTAGE_STUDENTS_ATTENDED, PERCENTAGE_STUDENTS_ATTENDED_OR_LATE,
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> {
-            sql += "LEFT JOIN ClazzLogAttendanceRecord ON StatementEntity.statementPersonUid = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid "
+            if(report.xAxis != Report.CLASS && reportSeriesSubGroup != Report.CLASS){
+                sql += "LEFT JOIN ClazzMember ON StatementEntity.statementPersonUid = ClazzMember.clazzMemberPersonUid "
+            }
+            sql += "LEFT JOIN ClazzLogAttendanceRecord ON ClazzMember.clazzMemberUid  = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid "
         }
     }
 
