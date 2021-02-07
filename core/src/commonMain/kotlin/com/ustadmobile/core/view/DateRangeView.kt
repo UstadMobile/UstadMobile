@@ -17,6 +17,8 @@ interface DateRangeView: UstadEditView<DateRangeMoment> {
 
     var toFixedDateMissing: String?
 
+    var toRelativeDateInvalid: String?
+
     companion object {
 
         const val VIEW_NAME = "DateRangeEditView"

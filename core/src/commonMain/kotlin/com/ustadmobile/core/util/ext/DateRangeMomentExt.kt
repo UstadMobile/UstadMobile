@@ -19,7 +19,7 @@ fun Moment.toFixedDate(): Long{
     }else{
 
         if(relUnit == Moment.DAYS_REL_UNIT && relOffSet == -0){
-            return DateTime.nowUnixLong()
+            return DateTime.now().startOfDay.unixMillisLong
         }
 
         val timeNow = DateTime.now().startOfDay

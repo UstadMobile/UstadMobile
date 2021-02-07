@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.ext.toFixedDatePair
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.DateRangeView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
@@ -77,16 +78,44 @@ class DateRangePresenter(context: Any,
     override fun handleClickSave(entity: DateRangeMoment) {
         when(entity.fromMoment.typeFlag){
             Moment.TYPE_FLAG_FIXED -> {
-                view.fromFixedDateMissing = if(entity.fromMoment.fixedTime == 0L)
-                    systemImpl.getString(MessageID.field_required_prompt, context) else null
+                if(entity.fromMoment.fixedTime == 0L){
+                    view.fromFixedDateMissing =  systemImpl.getString(MessageID.field_required_prompt, context)
+                    return
+                }else{
+                    view.fromFixedDateMissing = null
+                }
             }
         }
+        val datePair = entity.toFixedDatePair()
         when(entity.toMoment.typeFlag){
             Moment.TYPE_FLAG_FIXED -> {
-                view.toFixedDateMissing = if(entity.toMoment.fixedTime == 0L)
-                    systemImpl.getString(MessageID.field_required_prompt, context) else null
+                when {
+                    entity.toMoment.fixedTime == 0L -> {
+                        view.toFixedDateMissing =  systemImpl.getString(MessageID.field_required_prompt,
+                                context)
+                        return
+                    }
+                    datePair.second <= datePair.first -> {
+                        view.toFixedDateMissing = systemImpl.getString(MessageID.end_is_before_start_error,
+                                context)
+                        return
+                    }
+                    else -> {
+                        view.toFixedDateMissing = null
+                    }
+                }
+            }
+            Moment.TYPE_FLAG_RELATIVE ->{
+                if(datePair.second <= datePair.first){
+                    view.toRelativeDateInvalid = systemImpl.getString(MessageID.end_is_before_start_error,
+                            context)
+                    return
+                }else{
+                    view.toRelativeDateInvalid = null
+                }
             }
         }
+
         GlobalScope.launch(doorMainDispatcher()) {
             withContext(doorMainDispatcher()) {
                 view.finishWithResult(listOf(entity))

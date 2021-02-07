@@ -79,6 +79,12 @@ class DateRangeFragment: UstadEditFragment<DateRangeMoment>(), DateRangeView,
             field = value
             mBinding?.toFixedDateMissing = value
         }
+    override var toRelativeDateInvalid: String? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.toRelativeDateInvalid = value
+        }
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
