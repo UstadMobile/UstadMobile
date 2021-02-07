@@ -130,6 +130,9 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                         barDataSet.color = Color.parseColor(colorList[colorCount++])
                     }catch (e: IllegalArgumentException){
                         e.printStackTrace()
+                    }catch (e: ArrayIndexOutOfBoundsException){
+                        colorCount = 0
+                        e.printStackTrace()
                     }
 
                     val barData = combinedData.barData ?: BarData()
@@ -159,6 +162,7 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                         }catch (e: IllegalArgumentException){
                             e.printStackTrace()
                         }catch (e: ArrayIndexOutOfBoundsException){
+                            colorCount = 0
                             e.printStackTrace()
                         }
                         barDataSet.setDrawValues(false)
@@ -187,6 +191,9 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                     try {
                         lineDataSet.color = Color.parseColor(colorList[colorCount++])
                     }catch (e: IllegalArgumentException){
+                        e.printStackTrace()
+                    }catch (e: ArrayIndexOutOfBoundsException){
+                        colorCount = 0
                         e.printStackTrace()
                     }
 
@@ -217,6 +224,9 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
                                 color = colorSelected
                                 setCircleColor(colorSelected)
                             }catch (e: IllegalArgumentException){
+                                e.printStackTrace()
+                            }catch (e: ArrayIndexOutOfBoundsException){
+                                colorCount = 0
                                 e.printStackTrace()
                             }
                             setDrawValues(false)
