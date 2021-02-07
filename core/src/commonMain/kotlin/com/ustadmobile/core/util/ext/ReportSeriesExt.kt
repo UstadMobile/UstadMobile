@@ -66,7 +66,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         PERCENT_OF_STUDENTS_COMPLETED_CONTENT -> """((CAST(COUNT(DISTINCT CASE WHEN 
             (StatementEntity.resultCompletion AND StatementEntity.contentEntryRoot 
             AND StatementEntity.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
-            THEN StatementEntity.statementUid ELSE NULL END) 
+            THEN StatementEntity.statementPersonUid ELSE NULL END) 
             AS REAL) / COUNT(DISTINCT StatementEntity.statementPersonUid)) * 100) as yAxis, """
         else -> ""
     }
