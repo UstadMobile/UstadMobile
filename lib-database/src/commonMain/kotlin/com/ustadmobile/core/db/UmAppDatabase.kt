@@ -45,12 +45,13 @@ import kotlin.jvm.Volatile
     SqliteChangeSeqNums::class,
     UpdateNotification::class,
     TableSyncStatus::class,
-    ChangeLog::class
+    ChangeLog::class,
+    ZombieAttachmentData::class
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 55)
+], version = 58)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -73,8 +74,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         Updated Clazz : added clazzFeatures and removed individual feature bits
      */
 
-
-    var attachmentsDir: String? = null
 
     override val master: Boolean
         get() = false
@@ -3461,6 +3460,58 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         val MIGRATION_54_55 = object: DoorMigration(54, 55) {
             override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE PersonPicture ADD COLUMN personPictureUri TEXT")
+                database.execSQL("ALTER TABLE PersonPicture ADD COLUMN personPictureMd5 TEXT")
+            }
+        }
+
+        //Add triggers that check for Zombie attachments
+        val MIGRATION_55_56 = object: DoorMigration(55, 56) {
+            override fun migrate(database: DoorSqlDatabase) {
+                if(database.dbType() == DoorDbType.SQLITE) {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ZombieAttachmentData (  zaTableName  TEXT , zaPrimaryKey  INTEGER  NOT NULL , zaUri  TEXT , zaUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                    database.execSQL("""
+                        CREATE TRIGGER ATTUPD_PersonPicture
+                        AFTER UPDATE ON PersonPicture FOR EACH ROW WHEN
+                        OLD.personPictureMd5 IS NOT NULL AND (SELECT COUNT(*) FROM PersonPicture WHERE personPictureMd5 = OLD.personPictureMd5) = 0
+                        BEGIN
+                        INSERT INTO ZombieAttachmentData(zaTableName, zaPrimaryKey, zaUri) VALUES('PersonPicture', OLD.personPictureUid, OLD.personPictureUri);
+                        END""")
+                }else {
+                    database.execSQL("CREATE TABLE IF NOT EXISTS ZombieAttachmentData (  zaTableName  TEXT , zaPrimaryKey  BIGINT  NOT NULL , zaUri  TEXT , zaUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                      |CREATE OR REPLACE FUNCTION attach_PersonPicture_fn() RETURNS trigger AS ${'$'}${'$'}
+                      |BEGIN
+                      |INSERT INTO ZombieAttachmentData(zaTableName, zaPrimaryKey, zaUri) 
+                      |SELECT 'PersonPicture' AS zaTableName, OLD.personPictureUid AS zaPrimaryKey, OLD.personPictureUri AS zaUri
+                      |WHERE (SELECT COUNT(*) FROM PersonPicture WHERE personPictureMd5 = OLD.personPictureMd5) = 0;
+                      |RETURN null;
+                      |END ${'$'}${'$'}
+                      |LANGUAGE plpgsql
+                      """.trimMargin())
+                    database.execSQL("""
+                      |CREATE TRIGGER attach_PersonPicture_trig
+                      |AFTER UPDATE ON PersonPicture
+                      |FOR EACH ROW WHEN (OLD.personPictureUri IS NOT NULL)
+                      |EXECUTE PROCEDURE attach_PersonPicture_fn();
+                      """.trimMargin())
+                }
+            }
+        }
+
+        val MIGRATION_56_57 = object: DoorMigration(56, 57) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("""
+                    UPDATE ContainerEntryFile SET 
+                    cefPath = REPLACE(cefPath, '/build/storage/singleton/container/', '/data/singleton/container/')
+                    WHERE cefPath LIKE '%/build/storage/singleton/container/%'
+                """.trimIndent())
+            }
+        }
+
+
+        val MIGRATION_57_58 = object: DoorMigration(57, 58) {
+            override fun migrate(database: DoorSqlDatabase) {
 
                 database.execSQL("DROP TABLE IF EXISTS ReportFilter")
                 database.execSQL("DROP TABLE IF EXISTS ReportFilter_trk")
@@ -3488,7 +3539,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 database.execSQL("""UPDATE XLangMapEntry SET verbLangMapUid = 
                     ${VerbEntity.VERB_FAILED_UID} WHERE verbLangMapUid IN (SELECT verbUid 
                     FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_FAILED_URL}')""".trimMargin())
-                
+
 
                 if(database.dbType() == DoorDbType.POSTGRES) {
 
@@ -3565,7 +3616,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_39_40, MIGRATION_40_41, MIGRATION_41_42, MIGRATION_42_43,
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
-                    MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55)
+                    MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
+                    MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58)
 
 
 

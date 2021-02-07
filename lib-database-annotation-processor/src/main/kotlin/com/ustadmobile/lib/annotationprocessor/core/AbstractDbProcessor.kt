@@ -24,7 +24,6 @@ import com.squareup.kotlinpoet.ParameterizedTypeName.Companion.parameterizedBy
 import com.ustadmobile.door.*
 import io.ktor.client.request.forms.MultiPartFormDataContent
 import kotlinx.coroutines.Runnable
-import java.io.IOException
 import kotlin.reflect.KClass
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.Headers
@@ -211,12 +210,26 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
                           processingEnv: ProcessingEnvironment,
                           changeSeqNumType: KClass<out Annotation>,
                           clientIdParamName: String = "clientId",
-                          addOffsetAndLimitParam: Boolean = false): String {
+                          addOffsetAndLimitParam: Boolean = false,
+                          moveLimitParam: String? = null): String {
     val syncableEntities = findSyncableEntities(resultComponentClassName, processingEnv)
     if(syncableEntities.isEmpty())
         return sql
 
-    var newSql = "SELECT * FROM ($sql) AS ${resultComponentClassName.simpleName} WHERE "
+    val subQuery = if(moveLimitParam == null){
+        sql
+    }else {
+        val regex = Regex("LIMIT :$moveLimitParam")
+        val match = regex.find(sql)
+        if(match != null) {
+            sql.substring(0, match.range.first) + " " + sql.substring(match.range.last + 1)
+        }else {
+            sql
+        }
+    }
+
+
+    var newSql = "SELECT * FROM ($subQuery) AS ${resultComponentClassName.simpleName} WHERE "
     val whereClauses = syncableEntities.values.map {
         val syncableEntityInfo = SyncableEntityInfo(it, processingEnv)
         val entityCsnField = if(changeSeqNumType == MasterChangeSeqNum::class) {
@@ -238,6 +251,10 @@ fun refactorSyncSelectSql(sql: String, resultComponentClassName: ClassName,
 
     if(addOffsetAndLimitParam) {
         newSql += " LIMIT :$PARAM_NAME_LIMIT OFFSET :$PARAM_NAME_OFFSET"
+    }
+
+    if(moveLimitParam != null) {
+        newSql += " LIMIT :$moveLimitParam"
     }
 
     return newSql

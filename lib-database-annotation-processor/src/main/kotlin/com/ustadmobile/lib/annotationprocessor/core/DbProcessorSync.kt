@@ -20,6 +20,7 @@ import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SU
 import javax.annotation.processing.ProcessingEnvironment
 import javax.annotation.processing.RoundEnvironment
 import javax.lang.model.element.TypeElement
+import com.ustadmobile.door.SyncSettings
 
 /**
  * Generate a Tracker Entity for a Syncable Entity
@@ -207,7 +208,7 @@ fun TypeSpec.Builder.addSyncDaoFunsForEntity(entityType: TypeElement, isOverride
     val findAllRemoteSql = if(syncFindAllSql?.isNotEmpty() == true) {
         syncFindAllSql
     }else {
-        "SELECT * FROM ${entityType.simpleName}"
+        "SELECT * FROM ${entityType.simpleName} LIMIT :maxResults"
     }
 
     val findLocalUnsentSql = "SELECT * FROM " +
@@ -224,6 +225,11 @@ fun TypeSpec.Builder.addSyncDaoFunsForEntity(entityType: TypeElement, isOverride
             .addModifiers(KModifier.ABSTRACT, KModifier.SUSPEND)
             .applyIf(isOverride) {
                 addModifiers(KModifier.OVERRIDE)
+            }
+            .applyIf(findAllRemoteSql.contains(":maxResults")) {
+                addParameter(ParameterSpec.builder("maxResults", INT)
+                        .addAnnotation(SyncableLimitParam::class)
+                        .build())
             }.applyIf(findAllRemoteSql.contains(":clientId")) {
                 addParameter("clientId", INT)
             }
@@ -311,12 +317,28 @@ fun TypeSpec.Builder.addRepoSyncEntityFunction(entityType: TypeElement, syncRepo
             .returns(SyncResult::class)
             .addCode(CodeBlock.builder()
                     .apply {
-                        val tableId = entityType.getAnnotation(SyncableEntity::class.java).tableId
-                        add("return %M<%T, %T>($tableId,", MemberName("com.ustadmobile.door.ext",
-                                "syncEntity"), entityType, entityType.asClassNameWithSuffix("_trk"))
+                        val syncableEntity = entityType.getAnnotation(SyncableEntity::class.java)
+                        val tableId = syncableEntity.tableId
+                        add("return %M<%T, %T>($tableId, %T(receiveBatchSize·=·%L,·sendBatchSize·=·%L), ",
+                                MemberName("com.ustadmobile.door.ext", "syncEntity"),
+                                entityType, entityType.asClassNameWithSuffix("_trk"),
+                                SyncSettings::class, syncableEntity.receiveBatchSize,
+                                syncableEntity.sendBatchSize)
                                 .applyIf(entityType.syncableEntityFindAllHasClientIdParam) {
                                     beginControlFlow("receiveRemoteEntitiesFn = ")
-                                    add("$syncRepoVarName._findMasterUnsent${entityType.simpleName}(clientId)\n")
+                                    val hasMaxResults = entityType.syncableEntityFindAllHasMaxResultsParam
+                                    if(hasMaxResults) {
+                                        add("maxResults")
+                                    }else {
+                                        add("_")
+                                    }
+                                    add(" -> \n")
+
+                                    add("$syncRepoVarName._findMasterUnsent${entityType.simpleName}(")
+                                    if(hasMaxResults)
+                                        add("maxResults,")
+
+                                    add("clientId)\n")
                                     endControlFlow()
                                     add(",")
                                 }
@@ -326,7 +348,8 @@ fun TypeSpec.Builder.addRepoSyncEntityFunction(entityType: TypeElement, syncRepo
                                 }
                         add("storeEntitiesFn = _syncDao::_replace${entityType.simpleName},\n")
                         beginControlFlow("findLocalUnsentEntitiesFn =")
-                        add("_syncDao._findLocalUnsent${entityType.simpleName}(0, 100)\n")
+                        add("maxResults -> ")
+                        add("_syncDao._findLocalUnsent${entityType.simpleName}(0, maxResults)\n")
                         endControlFlow()
                         add(",")
                         beginControlFlow("entityToAckFn = ")
@@ -342,6 +365,18 @@ fun TypeSpec.Builder.addRepoSyncEntityFunction(entityType: TypeElement, syncRepo
                         endControlFlow()
                         add(",")
                         add("storeTrkFn = _syncDao::_replace${entityType.simpleName}_trk")
+                        .apply {
+                            add(",\n")
+                            beginControlFlow("entityToEntityWithAttachmentFn = ")
+                            if(entityType.entityHasAttachments) {
+                                add("entity : %T -> entity.%M()\n", entityType,
+                                        MemberName(entityType.packageName, "asEntityWithAttachment"))
+                            }else {
+                                add("_ -> null\n")
+                            }
+
+                            endControlFlow()
+                        }
                         add(")\n")
                     }
                     .build()

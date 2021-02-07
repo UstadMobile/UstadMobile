@@ -13,7 +13,6 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.putEntityAsJson
-import com.ustadmobile.core.util.ext.setAttachmentDataFromUri
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ContentEntryListTabsView
 import com.ustadmobile.core.view.PersonDetailView
@@ -21,10 +20,9 @@ import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.client.features.json.*
@@ -117,13 +115,9 @@ class PersonEditPresenter(context: Any,
             db.takeIf { entityUid != 0L }?.personDao?.findPersonAccountByUid(entityUid)
         } ?: PersonWithAccount()
 
-        val personPicture = withTimeoutOrNull(2000) {
-            db.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
-        }
-
-        if (personPicture != null) {
-            view.personPicturePath = repo.personPictureDao.getAttachmentPath(personPicture)
-        }
+        view.personPicture = db.onDbThenRepoWithTimeout(2000) { dbToUse, _ ->
+            dbToUse.takeIf { entityUid != 0L }?.personPictureDao?.findByPersonUidAsync(entityUid)
+        } ?: PersonPicture()
 
         val clazzMemberWithClazzList = withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.clazzMemberDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid, getSystemTimeInMillis())
@@ -278,25 +272,16 @@ class PersonEditPresenter(context: Any,
                 repo.clazzMemberDao.updateDateLeft(clazzMemberJoinEditHelper.primaryKeysToDeactivate,
                         getSystemTimeInMillis())
 
-                var personPicture = db.personPictureDao.findByPersonUidAsync(entity.personUid)
-                val viewPicturePath = view.personPicturePath
-                val currentPath = if(personPicture != null)
-                    repo.personPictureDao.getAttachmentPath(personPicture) else null
 
-                if (personPicture != null && viewPicturePath != null && currentPath != viewPicturePath) {
-                    repo.personPictureDao.setAttachment(personPicture, viewPicturePath)
-                    repo.personPictureDao.updateAsync(personPicture)
-                } else if (viewPicturePath != null && currentPath != viewPicturePath) {
-                    personPicture = PersonPicture().apply {
-                        personPicturePersonUid = entity.personUid
+                val personPictureVal = view.personPicture
+                if(personPictureVal != null) {
+                    personPictureVal.personPicturePersonUid = entity.personUid
+
+                    if(personPictureVal.personPictureUid == 0L) {
+                        repo.personPictureDao.insertAsync(personPictureVal)
+                    }else {
+                        repo.personPictureDao.updateAsync(personPictureVal)
                     }
-                    personPicture.personPictureUid = repo.personPictureDao.insertAsync(personPicture)
-                    repo.personPictureDao.setAttachment(personPicture, viewPicturePath)
-                } else if (personPicture != null && currentPath != null && viewPicturePath == null) {
-                    //picture has been removed
-                    personPicture.personPictureActive = false
-                    repo.personPictureDao.setAttachmentDataFromUri(personPicture, null, context)
-                    repo.personPictureDao.updateAsync(personPicture)
                 }
 
                 onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)

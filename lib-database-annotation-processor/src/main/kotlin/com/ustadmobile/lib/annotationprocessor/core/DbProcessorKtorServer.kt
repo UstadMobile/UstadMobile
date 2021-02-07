@@ -45,6 +45,7 @@ import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Compan
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_ABSTRACT
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorSync.Companion.SUFFIX_SYNCDAO_IMPL
 import javax.annotation.processing.RoundEnvironment
+import com.ustadmobile.door.annotation.SyncableLimitParam
 
 fun CodeBlock.Builder.addNanoHttpdResponse(varName: String, addNonNullOperator: Boolean = false,
                                            applyToResponseCodeBlock: CodeBlock? = null)
@@ -628,16 +629,18 @@ fun FunSpec.toKtorHelperFunSpec(overrides: Boolean = false,
  * @param csnAnnotationClass MasterChangeSeqNum::class or LocalChangeSeqNum::class
  */
 fun FunSpec.filterAnnotationSpecsAndRefactorToSyncableSql(processingEnv: ProcessingEnvironment,
-    csnAnnotationClass: KClass<out Annotation>) : List<AnnotationSpec>{
+    csnAnnotationClass: KClass<out Annotation>, addLimitAndOffset: Boolean = this.returnType?.isDataSourceFactory() == true) : List<AnnotationSpec>{
     val resultEntityClassName = returnType?.unwrapQueryResultComponentType()
             as? ClassName
             ?: throw IllegalArgumentException("${name} return type is null")
-    val isDataSource = returnType?.isDataSourceFactory() ?: false
 
     return annotations.mapNotNull {annotationSpec ->
         if(annotationSpec.className == Query::class.asClassName()) {
+            val moveLimitParam = this.parameters
+                    .firstOrNull() { it.hasAnnotation(SyncableLimitParam::class.java) }?.name
             val sql = refactorSyncSelectSql(daoQuerySql(), resultEntityClassName, processingEnv,
-                    csnAnnotationClass, addOffsetAndLimitParam = isDataSource)
+                    csnAnnotationClass, addOffsetAndLimitParam = addLimitAndOffset,
+                    moveLimitParam = moveLimitParam)
             AnnotationSpec.builder(Query::class.asClassName())
                     .addMember("%S", sql).build()
         }else {
@@ -819,6 +822,9 @@ fun FileSpec.Builder.addDbKtorRouteFunction(dbTypeEl: TypeElement,
                                     hasKtorAndSyncHelper, hasKtorAndSyncHelper)
 
                         }
+                    }.applyIf(dbTypeEl.allDbEntities(processingEnv).any { it.entityHasAttachments }) {
+                        add("%M(%S, _typeToken)\n", MemberName("com.ustadmobile.door.attachments",
+                                "doorAttachmentsRoute"), "attachments")
                     }
                     .endControlFlow()
                     .build())

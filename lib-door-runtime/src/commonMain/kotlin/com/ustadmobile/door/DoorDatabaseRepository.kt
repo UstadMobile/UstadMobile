@@ -1,5 +1,6 @@
 package com.ustadmobile.door
 
+import com.ustadmobile.door.attachments.AttachmentFilter
 import io.ktor.client.HttpClient
 import kotlin.reflect.KClass
 
@@ -17,11 +18,20 @@ interface DoorDatabaseRepository {
 
     val httpClient: HttpClient
 
+    val attachmentsDir: String?
+
+    val context: Any
+
     /**
      * This provides access to the underlying database for this repository. It must be wrapped with
      * The SyncableReadOnlyWrapper if this is a syncable database.
      */
     val db: DoorDatabase
+
+    /**
+     * A list of filters that will be applied to attachments.
+     */
+    val attachmentFilters: List<AttachmentFilter>
 
     suspend fun addMirror(mirrorEndpoint: String, initialPriority: Int): Int
 
@@ -90,5 +100,9 @@ interface DoorDatabaseRepository {
         const val STATUS_CONNECTED = 1
 
         const val STATUS_DISCONNECTED = 2
+
+        const val DOOR_ATTACHMENT_URI_SCHEME = "door-attachment"
+
+        val DOOR_ATTACHMENT_URI_PREFIX = "$DOOR_ATTACHMENT_URI_SCHEME://"
     }
 }

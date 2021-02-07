@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 55,
-    "identityHash": "f98580006c830ff8780fa00692f8feb8",
+    "identityHash": "2b2799717e76443e5cd013ac95baa9f9",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -2635,7 +2635,7 @@
       },
       {
         "tableName": "PersonPicture",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPictureUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `personPicturePersonUid` INTEGER NOT NULL, `personPictureMasterCsn` INTEGER NOT NULL, `personPictureLocalCsn` INTEGER NOT NULL, `personPictureLastChangedBy` INTEGER NOT NULL, `fileSize` INTEGER NOT NULL, `picTimestamp` INTEGER NOT NULL, `mimeType` TEXT, `personPictureActive` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`personPictureUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `personPicturePersonUid` INTEGER NOT NULL, `personPictureMasterCsn` INTEGER NOT NULL, `personPictureLocalCsn` INTEGER NOT NULL, `personPictureLastChangedBy` INTEGER NOT NULL, `personPictureUri` TEXT, `personPictureMd5` TEXT, `fileSize` INTEGER NOT NULL, `picTimestamp` INTEGER NOT NULL, `mimeType` TEXT, `personPictureActive` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "personPictureUid",
@@ -2666,6 +2666,18 @@
             "columnName": "personPictureLastChangedBy",
             "affinity": "INTEGER",
             "notNull": true
+          },
+          {
+            "fieldPath": "personPictureUri",
+            "columnName": "personPictureUri",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "personPictureMd5",
+            "columnName": "personPictureMd5",
+            "affinity": "TEXT",
+            "notNull": false
           },
           {
             "fieldPath": "fileSize",
@@ -3165,7 +3177,7 @@
       },
       {
         "tableName": "VerbEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`verbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `urlId` TEXT, `verbInActive` INTEGER NOT NULL, `verbMasterChangeSeqNum` INTEGER NOT NULL, `verbLocalChangeSeqNum` INTEGER NOT NULL, `verbLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`verbUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `urlId` TEXT, `verbMasterChangeSeqNum` INTEGER NOT NULL, `verbLocalChangeSeqNum` INTEGER NOT NULL, `verbLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "verbUid",
@@ -3178,12 +3190,6 @@
             "columnName": "urlId",
             "affinity": "TEXT",
             "notNull": false
-          },
-          {
-            "fieldPath": "verbInActive",
-            "columnName": "verbInActive",
-            "affinity": "INTEGER",
-            "notNull": true
           },
           {
             "fieldPath": "verbMasterChangeSeqNum",
@@ -3289,7 +3295,7 @@
       },
       {
         "tableName": "StatementEntity",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `statementId` TEXT, `statementPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `xObjectUid` INTEGER NOT NULL, `subStatementActorUid` INTEGER NOT NULL, `substatementVerbUid` INTEGER NOT NULL, `subStatementObjectUid` INTEGER NOT NULL, `agentUid` INTEGER NOT NULL, `instructorUid` INTEGER NOT NULL, `authorityUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER NOT NULL, `resultSuccess` INTEGER NOT NULL, `resultScoreScaled` REAL NOT NULL, `resultScoreRaw` INTEGER NOT NULL, `resultScoreMin` INTEGER NOT NULL, `resultScoreMax` INTEGER NOT NULL, `resultDuration` INTEGER NOT NULL, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistration` TEXT, `contextPlatform` TEXT, `contextStatementId` TEXT, `fullStatement` TEXT, `statementMasterChangeSeqNum` INTEGER NOT NULL, `statementLocalChangeSeqNum` INTEGER NOT NULL, `statementLastChangedBy` INTEGER NOT NULL, `extensionProgress` INTEGER NOT NULL, `contentEntryRoot` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `statementLearnerGroupUid` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`statementUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `statementId` TEXT, `statementPersonUid` INTEGER NOT NULL, `statementVerbUid` INTEGER NOT NULL, `xObjectUid` INTEGER NOT NULL, `subStatementActorUid` INTEGER NOT NULL, `substatementVerbUid` INTEGER NOT NULL, `subStatementObjectUid` INTEGER NOT NULL, `agentUid` INTEGER NOT NULL, `instructorUid` INTEGER NOT NULL, `authorityUid` INTEGER NOT NULL, `teamUid` INTEGER NOT NULL, `resultCompletion` INTEGER NOT NULL, `resultSuccess` INTEGER NOT NULL, `resultScoreScaled` REAL NOT NULL, `resultScoreRaw` INTEGER NOT NULL, `resultScoreMin` INTEGER NOT NULL, `resultScoreMax` INTEGER NOT NULL, `resultDuration` INTEGER NOT NULL, `resultResponse` TEXT, `timestamp` INTEGER NOT NULL, `stored` INTEGER NOT NULL, `contextRegistration` TEXT, `contextPlatform` TEXT, `contextStatementId` TEXT, `fullStatement` TEXT, `statementMasterChangeSeqNum` INTEGER NOT NULL, `statementLocalChangeSeqNum` INTEGER NOT NULL, `statementLastChangedBy` INTEGER NOT NULL, `extensionProgress` INTEGER NOT NULL, `statementContentEntryUid` INTEGER NOT NULL, `statementLearnerGroupUid` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "statementUid",
@@ -3472,12 +3478,6 @@
             "notNull": true
           },
           {
-            "fieldPath": "contentEntryRoot",
-            "columnName": "contentEntryRoot",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "statementContentEntryUid",
             "columnName": "statementContentEntryUid",
             "affinity": "INTEGER",
@@ -3496,16 +3496,7 @@
           ],
           "autoGenerate": true
         },
-        "indices": [
-          {
-            "name": "index_StatementEntity_statementPersonUid",
-            "unique": false,
-            "columnNames": [
-              "statementPersonUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_StatementEntity_statementPersonUid` ON `${TABLE_NAME}` (`statementPersonUid`)"
-          }
-        ],
+        "indices": [],
         "foreignKeys": []
       },
       {
@@ -3839,16 +3830,7 @@
           ],
           "autoGenerate": true
         },
-        "indices": [
-          {
-            "name": "index_XLangMapEntry_verbLangMapUid",
-            "unique": false,
-            "columnNames": [
-              "verbLangMapUid"
-            ],
-            "createSql": "CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_verbLangMapUid` ON `${TABLE_NAME}` (`verbLangMapUid`)"
-          }
-        ],
+        "indices": [],
         "foreignKeys": []
       },
       {
@@ -4898,7 +4880,7 @@
       },
       {
         "tableName": "Report",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `reportDateRangeSelection` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `fromRelTo` INTEGER NOT NULL, `fromRelOffSet` INTEGER NOT NULL, `fromRelUnit` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `toRelTo` INTEGER NOT NULL, `toRelOffSet` INTEGER NOT NULL, `toRelUnit` INTEGER NOT NULL, `reportTitle` TEXT, `reportDescription` TEXT, `reportSeries` TEXT, `reportInactive` INTEGER NOT NULL, `isTemplate` INTEGER NOT NULL, `priority` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `chartType` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `yAxis` INTEGER NOT NULL, `subGroup` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `reportTitle` TEXT, `reportInactive` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "reportUid",
@@ -4913,14 +4895,26 @@
             "notNull": true
           },
           {
+            "fieldPath": "chartType",
+            "columnName": "chartType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
             "fieldPath": "xAxis",
             "columnName": "xAxis",
             "affinity": "INTEGER",
             "notNull": true
           },
           {
-            "fieldPath": "reportDateRangeSelection",
-            "columnName": "reportDateRangeSelection",
+            "fieldPath": "yAxis",
+            "columnName": "yAxis",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "subGroup",
+            "columnName": "subGroup",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -4931,44 +4925,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "fromRelTo",
-            "columnName": "fromRelTo",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fromRelOffSet",
-            "columnName": "fromRelOffSet",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "fromRelUnit",
-            "columnName": "fromRelUnit",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
             "fieldPath": "toDate",
             "columnName": "toDate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "toRelTo",
-            "columnName": "toRelTo",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "toRelOffSet",
-            "columnName": "toRelOffSet",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "toRelUnit",
-            "columnName": "toRelUnit",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -4979,32 +4937,8 @@
             "notNull": false
           },
           {
-            "fieldPath": "reportDescription",
-            "columnName": "reportDescription",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
-            "fieldPath": "reportSeries",
-            "columnName": "reportSeries",
-            "affinity": "TEXT",
-            "notNull": false
-          },
-          {
             "fieldPath": "reportInactive",
             "columnName": "reportInactive",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "isTemplate",
-            "columnName": "isTemplate",
-            "affinity": "INTEGER",
-            "notNull": true
-          },
-          {
-            "fieldPath": "priority",
-            "columnName": "priority",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -5030,6 +4964,68 @@
         "primaryKey": {
           "columnNames": [
             "reportUid"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "ReportFilter",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`reportFilterUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportFilterReportUid` INTEGER NOT NULL, `entityUid` INTEGER NOT NULL, `entityType` INTEGER NOT NULL, `filterInactive` INTEGER NOT NULL, `reportFilterMasterChangeSeqNum` INTEGER NOT NULL, `reportFilterLocalChangeSeqNum` INTEGER NOT NULL, `reportFilterLastChangedBy` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "reportFilterUid",
+            "columnName": "reportFilterUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportFilterReportUid",
+            "columnName": "reportFilterReportUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "entityUid",
+            "columnName": "entityUid",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "entityType",
+            "columnName": "entityType",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "filterInactive",
+            "columnName": "filterInactive",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportFilterMasterChangeSeqNum",
+            "columnName": "reportFilterMasterChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportFilterLocalChangeSeqNum",
+            "columnName": "reportFilterLocalChangeSeqNum",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reportFilterLastChangedBy",
+            "columnName": "reportFilterLastChangedBy",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "reportFilterUid"
           ],
           "autoGenerate": true
         },
@@ -9289,6 +9285,82 @@
         "foreignKeys": []
       },
       {
+        "tableName": "ReportFilter_trk",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "pk",
+            "columnName": "pk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "epk",
+            "columnName": "epk",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "clientId",
+            "columnName": "clientId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "csn",
+            "columnName": "csn",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "rx",
+            "columnName": "rx",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "reqId",
+            "columnName": "reqId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "ts",
+            "columnName": "ts",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "pk"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [
+          {
+            "name": "index_ReportFilter_trk_clientId_epk_csn",
+            "unique": false,
+            "columnNames": [
+              "clientId",
+              "epk",
+              "csn"
+            ],
+            "createSql": "CREATE INDEX IF NOT EXISTS `index_ReportFilter_trk_clientId_epk_csn` ON `${TABLE_NAME}` (`clientId`, `epk`, `csn`)"
+          },
+          {
+            "name": "index_ReportFilter_trk_epk_clientId",
+            "unique": true,
+            "columnNames": [
+              "epk",
+              "clientId"
+            ],
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_ReportFilter_trk_epk_clientId` ON `${TABLE_NAME}` (`epk`, `clientId`)"
+          }
+        ],
+        "foreignKeys": []
+      },
+      {
         "tableName": "Site_trk",
         "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)",
         "fields": [
@@ -9672,7 +9744,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'f98580006c830ff8780fa00692f8feb8')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '2b2799717e76443e5cd013ac95baa9f9')"
     ]
   }
 }

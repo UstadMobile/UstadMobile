@@ -1,5 +1,6 @@
 package com.ustadmobile.door
 
+import com.ustadmobile.door.attachments.AttachmentFilter
 import io.ktor.client.HttpClient
 import kotlin.reflect.KClass
 
@@ -27,7 +28,8 @@ expect inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
                                                                  httpClient: HttpClient,
                                                                  attachmentsDir: String? = null,
                                                                  updateNotificationManager: ServerUpdateNotificationManager? = null,
-                                                                 useClientSyncManager: Boolean  = false): T
+                                                                 useClientSyncManager: Boolean  = false,
+                                                                 attachmentFilters: List<AttachmentFilter> = listOf()): T
 
 expect fun <T: SyncableDoorDatabase> T.wrap(dbClass: KClass<T>): T
 

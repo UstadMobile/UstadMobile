@@ -1,14 +1,12 @@
 package com.ustadmobile.door.daos
 
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.OnConflictStrategy
-import androidx.room.Query
+import androidx.room.*
 import com.ustadmobile.door.ClientSyncManager
 import com.ustadmobile.door.SyncResult
 import com.ustadmobile.door.annotation.PgOnConflict
 import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
+import com.ustadmobile.door.entities.ZombieAttachmentData
 
 /**
  * This DAO contains various queries that are needed for sync related code to work. They are used
@@ -95,4 +93,11 @@ abstract class SyncHelperEntitiesDao : ISyncHelperEntitiesDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     @PgOnConflict("ON CONFLICT (pnDeviceId, pnTableId) DO UPDATE SET pnTimestamp = excluded.pnTimestamp")
     abstract override fun replaceUpdateNotifications(entities: List<UpdateNotification>)
+
+    @Query("SELECT * FROM ZombieAttachmentData WHERE zaTableName = :tableName AND :primaryKey = :primaryKey")
+    abstract override suspend fun findZombieAttachments(tableName: String, primaryKey: Long) : List<ZombieAttachmentData>
+
+    @Delete
+    abstract override suspend fun deleteZombieAttachments(zombieList: List<ZombieAttachmentData>)
+
 }

@@ -8,6 +8,7 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import androidx.room.*
 import com.ustadmobile.door.SyncableDoorDatabase
+import com.ustadmobile.door.annotation.AttachmentUri
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER
@@ -174,6 +175,15 @@ fun TypeElement.allDbEntities(processingEnv: ProcessingEnvironment): List<TypeEl
 fun TypeElement.allSyncableDbEntities(processingEnv: ProcessingEnvironment) =
         allDbEntities(processingEnv).filter { it.hasAnnotation(SyncableEntity::class.java) }
 
+/**
+ * Where this TypeElement represents a database class, get a list of all entities that have
+ * an attachment.
+ */
+fun TypeElement.allEntitiesWithAttachments(processingEnv: ProcessingEnvironment) =
+        allDbEntities(processingEnv).filter {
+            it.enclosedElementsWithAnnotation(AttachmentUri::class.java).isNotEmpty()
+        }
+
 
 fun TypeElement.asClassNameWithSuffix(suffix: String) =
         ClassName(packageName, "$simpleName$suffix")
@@ -267,4 +277,18 @@ fun TypeElement.dbEnclosedDaos(processingEnv: ProcessingEnvironment) : List<Type
  */
 val TypeElement.syncableEntityFindAllHasClientIdParam: Boolean
     get() = getAnnotation(SyncableEntity::class.java).syncFindAllQuery.contains(":clientId")
+
+
+val TypeElement.syncableEntityFindAllHasMaxResultsParam: Boolean
+    get() = getAnnotation(SyncableEntity::class.java).syncFindAllQuery.let {
+        it.contains(":maxResults") || it == "" //A blank query would automatically have maxResults added
+    }
+
+
+/**
+ * Shorthand to check if this is an entity that has attachments
+ */
+val TypeElement.entityHasAttachments: Boolean
+    get() = hasAnnotation(Entity::class.java) &&
+            enclosedElementsWithAnnotation(AttachmentUri::class.java, ElementKind.FIELD).isNotEmpty()
 
