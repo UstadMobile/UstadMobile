@@ -5,6 +5,9 @@ package com.ustadmobile.door.ext
 
 import com.github.aakira.napier.Napier
 import com.ustadmobile.door.*
+import com.ustadmobile.door.attachments.EntityWithAttachment
+import com.ustadmobile.door.attachments.downloadAttachments
+import com.ustadmobile.door.attachments.uploadAttachment
 import com.ustadmobile.door.entities.UpdateNotification
 import com.ustadmobile.door.entities.UpdateNotificationSummary
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -77,6 +80,7 @@ suspend fun DoorDatabaseSyncRepository.recordSyncRunResult(allResults: List<Sync
  * entities received, and then send entities that have been changed locally to the remote server.
  *
  * @param tableId the SyncableEntity tableId that the sync is running for
+ * @param syncSettings SyncSettings object that provides a few params on running the sync
  * @param receiveRemoteEntitiesFn a function that will retrieve new entities from the server (this
  * will be a function on the generated SyncDao)
  * @param findLocalUnsentEntitiesFn a function that will find entities that have been changed locally
@@ -84,53 +88,76 @@ suspend fun DoorDatabaseSyncRepository.recordSyncRunResult(allResults: List<Sync
  * @param entityToAckFn a function that wil turn a List of the given entity into a list of EntityAck
  * @param entityToTrkFn a function that will convert a list of the entity itself into the tracker entity (_trk)
  * @param storeTrkFn a function that will insert / replace the trk entity locally
+ * @param entityToEntityWithAttachmentFn a function that will convert a given entity into an
+ * an EntityWithAttachment if the entity has attachments, or null otherwise
  */
 suspend inline fun <reified T:Any, reified K: Any> DoorDatabaseSyncRepository.syncEntity(tableId: Int,
-    receiveRemoteEntitiesFn: suspend () -> List<T>,
+    syncSettings: SyncSettings,
+    receiveRemoteEntitiesFn: suspend (maxResults: Int) -> List<T>,
     storeEntitiesFn: suspend (List<T>) -> Unit,
-    findLocalUnsentEntitiesFn: suspend () -> List<T>,
+    findLocalUnsentEntitiesFn: suspend (maxResults: Int) -> List<T>,
     entityToAckFn: (entities: List<T>, primary: Boolean) -> List<EntityAck>,
     entityToTrkFn: (entities: List<T>, primary: Boolean) -> List<K>,
-    storeTrkFn: suspend (List<K>) -> Unit): SyncResult {
+    storeTrkFn: suspend (List<K>) -> Unit,
+    entityToEntityWithAttachmentFn: (T) -> EntityWithAttachment?): SyncResult {
 
     val dbName = this::class.simpleName?.removeSuffix("_Repo")
     val daoName = dbName + "SyncDao"
     val entityName =  T::class.simpleName
 
     Napier.d("SyncRepo: start sync of ${T::class.simpleName} ")
-    val newEntities = receiveRemoteEntitiesFn()
 
-    if(newEntities.isNotEmpty()) {
-        storeEntitiesFn(newEntities)
+    var newEntities: List<T>
+    var entitiesReceived = 0
+    do {
+        newEntities = receiveRemoteEntitiesFn(syncSettings.receiveBatchSize)
 
-        val entityAcks = entityToAckFn(newEntities, true)
+        if(newEntities.isNotEmpty()) {
+            downloadAttachments(newEntities.mapNotNull { entityToEntityWithAttachmentFn(it) })
 
-        Napier.d("DAONAME=$daoName / ${this::class.simpleName}")
-        httpClient.postEntityAck(entityAcks, endpoint,
-                "$dbPath/${daoName}/_ack${T::class.simpleName}Received", this)
-    }
+            storeEntitiesFn(newEntities)
+            val entityAcks = entityToAckFn(newEntities, true)
 
-    val localUnsentEntities = findLocalUnsentEntitiesFn()
+            Napier.d("DAONAME=$daoName / ${this::class.simpleName}")
+            httpClient.postEntityAck(entityAcks, endpoint,
+                    "$dbPath/${daoName}/_ack${T::class.simpleName}Received", this)
+            entitiesReceived += newEntities.size
+        }
+    }while(newEntities.size == syncSettings.receiveBatchSize)
 
-    if(localUnsentEntities.isNotEmpty()) {
-        httpClient.post<Unit> {
-            url {
-                takeFrom(endpoint)
-                encodedPath = "$encodedPath$dbPath/$daoName/_replace${entityName}"
+
+    var entitiesSent = 0
+    var localUnsentEntities: List<T>
+    do {
+        localUnsentEntities = findLocalUnsentEntitiesFn(syncSettings.sendBatchSize)
+
+        if(localUnsentEntities.isNotEmpty()) {
+            //if the entity has attachments, upload those before sending the actual entity data
+            val attachmentsToUpload = localUnsentEntities.mapNotNull { entityToEntityWithAttachmentFn(it) }
+            attachmentsToUpload.filter { it.attachmentUri != null }.forEach {
+                uploadAttachment(it)
             }
 
-            dbVersionHeader(db)
-            body = defaultSerializer().write(localUnsentEntities,
-                    ContentType.Application.Json.withUtf8Charset())
-        }
+            httpClient.post<Unit> {
+                url {
+                    takeFrom(endpoint)
+                    encodedPath = "$encodedPath$dbPath/$daoName/_replace${entityName}"
+                }
 
-        storeTrkFn(entityToTrkFn(localUnsentEntities, false))
-    }
+                dbVersionHeader(db)
+                body = defaultSerializer().write(localUnsentEntities,
+                        ContentType.Application.Json.withUtf8Charset())
+            }
+
+            storeTrkFn(entityToTrkFn(localUnsentEntities, false))
+            entitiesSent += localUnsentEntities.size
+        }
+    }while(localUnsentEntities.size == syncSettings.sendBatchSize)
 
     val result = SyncResult(tableId = tableId, received = newEntities.size,
             sent = localUnsentEntities.size, status = SyncResult.STATUS_SUCCESS)
 
-    Napier.d("SyncRepo: ${T::class.simpleName} DONE - Received ${result.received} / Sent ${result.sent}")
+    Napier.d("SyncRepo: ${T::class.simpleName} DONE - Received $entitiesReceived / Sent ${result.sent}")
     syncHelperEntitiesDao.insertSyncResult(result)
 
     return result

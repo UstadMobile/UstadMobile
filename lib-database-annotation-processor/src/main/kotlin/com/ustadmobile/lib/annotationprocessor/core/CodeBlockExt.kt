@@ -8,7 +8,7 @@ import io.ktor.content.*
 import io.ktor.http.*
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
-
+import androidx.room.PrimaryKey
 /**
  * Generate a delegation style function call, e.g.
  * varName.callMethod(param1, param2, param3)
@@ -461,3 +461,46 @@ fun CodeBlock.Builder.beginRunBlockingControlFlow() =
         add("%M·{\n", MemberName("kotlinx.coroutines", "runBlocking"))
                 .indent()
 
+/**
+ * Add code that will generate triggers to catch Zombie attachment uris on SQLite
+ */
+fun CodeBlock.Builder.addGenerateAttachmentTriggerSqlite(entity: TypeElement, execSqlFn: String) : CodeBlock.Builder{
+    val attachmentInfo = EntityAttachmentInfo(entity)
+    val pkFieldName = entity.enclosedElementsWithAnnotation(PrimaryKey::class.java).first().simpleName
+    add("$execSqlFn(%S)\n", """
+        CREATE TRIGGER ATTUPD_${entity.simpleName}
+        AFTER UPDATE ON ${entity.simpleName} FOR EACH ROW WHEN
+        OLD.${attachmentInfo.md5PropertyName} IS NOT NULL AND (SELECT COUNT(*) FROM ${entity.simpleName} WHERE ${attachmentInfo.md5PropertyName} = OLD.${attachmentInfo.md5PropertyName}) = 0
+        BEGIN
+        INSERT INTO ZombieAttachmentData(zaTableName, zaPrimaryKey, zaUri) VALUES('${entity.simpleName}', OLD.$pkFieldName, OLD.${attachmentInfo.uriPropertyName});
+        END
+    """)
+
+    return this
+}
+
+/**
+ * Add code that will generate triggers to catch Zombie attachment uris on Postgres
+ */
+fun CodeBlock.Builder.addGenerateAttachmentTriggerPostgres(entity: TypeElement, execSqlFn: String) : CodeBlock.Builder {
+    val attachmentInfo = EntityAttachmentInfo(entity)
+    val pkFieldName = entity.enclosedElementsWithAnnotation(PrimaryKey::class.java).first().simpleName
+    add("$execSqlFn(%S)\n", """
+        CREATE OR REPLACE FUNCTION attach_${entity.simpleName}_fn() RETURNS trigger AS ${'$'}${'$'}
+        BEGIN
+        INSERT INTO ZombieAttachmentData(zaTableName, zaPrimaryKey, zaUri) 
+        SELECT '${entity.simpleName}' AS zaTableName, OLD.${pkFieldName} AS zaPrimaryKey, OLD.${attachmentInfo.uriPropertyName} AS zaUri
+        WHERE (SELECT COUNT(*) FROM ${entity.simpleName} WHERE ${attachmentInfo.md5PropertyName} = OLD.${attachmentInfo.md5PropertyName}) = 0;
+        RETURN null;
+        END ${'$'}${'$'}
+        LANGUAGE plpgsql
+    """.trimIndent())
+    add("$execSqlFn(%S)\n", """
+        CREATE TRIGGER attach_${entity.simpleName}_trig
+        AFTER UPDATE ON ${entity.simpleName}
+        FOR EACH ROW WHEN (OLD.${attachmentInfo.uriPropertyName} IS NOT NULL)
+        EXECUTE PROCEDURE attach_${entity.simpleName}_fn();
+    """.trimIndent())
+
+    return this
+}

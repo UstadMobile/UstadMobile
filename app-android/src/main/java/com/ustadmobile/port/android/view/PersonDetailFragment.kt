@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -28,7 +29,9 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -134,6 +137,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             it.classesRecyclerview.adapter = clazzMemberWithClazzRecyclerAdapter
             it.rolesAndPermissionsRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.rolesAndPermissionsRecyclerview.adapter = rolesAndPermissionsRecyclerAdapter
+
         }
 
         val accountManager: UstadAccountManager by instance()
@@ -190,6 +194,13 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             override fun areContentsTheSame(oldItem: ClazzMemberWithClazz,
                                             newItem: ClazzMemberWithClazz): Boolean {
                 return oldItem == newItem
+            }
+        }
+
+        @JvmStatic
+        val FOREIGNKEYADAPTER_PERSON = object: ForeignKeyAttachmentUriAdapter {
+            override suspend fun getAttachmentUri(foreignKey: Long, dbToUse: UmAppDatabase): String? {
+                return dbToUse.personPictureDao.findByPersonUidAsync(foreignKey)?.personPictureUri
             }
         }
 

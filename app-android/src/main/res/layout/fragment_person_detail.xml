@@ -8,10 +8,15 @@
         <import type="com.ustadmobile.core.controller.PersonConstants"/>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="com.ustadmobile.core.controller.PersonDetailPresenter"/>
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
 
         <variable
             name="person"
             type="com.ustadmobile.lib.db.entities.Person" />
+
+        <variable
+            name="personImageAdapter"
+            type="com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter" />
 
         <variable
             name="loading"
@@ -56,8 +61,10 @@
                 android:scaleType="centerCrop"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                app:personPicturePersonUid="@{person.personUid}"
-                app:personPictureVisibilityGoneIfNoPicture="@{true}"/>
+                app:imageForeignKey="@{person.personUid}"
+                app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
+                app:imageForeignKeyAutoHide="@{true}"
+                />
 
             <androidx.constraintlayout.widget.Barrier
                 android:id="@+id/fragment_person_detail_picture_image_barrier"
