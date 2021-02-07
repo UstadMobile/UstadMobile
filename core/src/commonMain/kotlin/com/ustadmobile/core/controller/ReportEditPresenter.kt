@@ -184,7 +184,6 @@ class ReportEditPresenter(context: Any,
 
         view.visualTypeOptions = VisualTypeOptions.values().map { VisualTypeMessageIdOption(it, context) }
         view.xAxisOptions = XAxisOptions.values().map { XAxisMessageIdOption(it, context) }
-        view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
         view.yAxisOptions = YAxisOptions.values().map { YAxisMessageIdOption(it, context) }
         view.dateRangeOptions = DateRangeOptions.values().filter { it.dateRange != null }
                 .map {  ObjectMessageIdOption(it.messageId, context, it.code, it.dateRange) }

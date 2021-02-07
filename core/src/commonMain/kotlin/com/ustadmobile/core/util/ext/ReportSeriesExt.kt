@@ -149,6 +149,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
 
                     var filterString = "(StatementEntity.contentEntryRoot AND StatementEntity.resultCompletion "
                     filterString += when(filter.reportFilterDropDownValue){
+                        ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED -> ")"
                         ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED -> "AND StatementEntity.resultSuccess ${handleCondition(filter.reportFilterCondition)} ${StatementEntity.RESULT_SUCCESS}) "
                         ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_FAILED -> "AND StatementEntity.resultSuccess ${handleCondition(filter.reportFilterCondition)} ${StatementEntity.RESULT_FAILURE}) "
                         else -> ""
