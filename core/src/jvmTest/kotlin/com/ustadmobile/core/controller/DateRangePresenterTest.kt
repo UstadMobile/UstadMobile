@@ -62,8 +62,10 @@ class DateRangePresenterTest {
 
         val initialEntity = mockView.captureLastEntityValue()!!
 
-        initialEntity.fromMoment.fixedTime = DateTime.nowUnixLong()
-        initialEntity.fromMoment.typeFlag = Moment.TYPE_FLAG_FIXED
+        initialEntity.fromMoment.typeFlag = Moment.TYPE_FLAG_RELATIVE
+        initialEntity.fromMoment.relUnit = Moment.WEEKS_REL_UNIT
+        initialEntity.fromMoment.relOffSet = -10
+        initialEntity.fromMoment.relTo = Moment.TODAY_REL_TO
 
         initialEntity.toMoment.typeFlag = Moment.TYPE_FLAG_RELATIVE
         initialEntity.toMoment.relUnit = Moment.WEEKS_REL_UNIT
@@ -91,9 +93,6 @@ class DateRangePresenterTest {
         presenter.handleClickSave(initialEntity)
 
         verify(mockView, timeout(5000)).fromFixedDateMissing = eq(impl.getString(
-                MessageID.field_required_prompt, context))
-
-        verify(mockView, timeout(5000)).toFixedDateMissing = eq(impl.getString(
                 MessageID.field_required_prompt, context))
 
     }
