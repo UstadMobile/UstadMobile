@@ -54,15 +54,18 @@ class ReportTemplateListPresenter(context: Any, arguments: Map<String, String>, 
         GlobalScope.launch(doorMainDispatcher()) {
             when (option) {
                 SelectionOption.HIDE -> {
-                    repo.reportDao.toggleVisibilityReportItems(true,
-                            selectedItem.map { it.reportUid }
-                                    .filter { it != Report.TEMPLATE_BLANK_REPORT_UID })
-                    view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context),
-                            { GlobalScope.launch(doorMainDispatcher()){
-                                repo.reportDao.toggleVisibilityReportItems(false,
-                                        selectedItem.map { it.reportUid })
-                            }
-                            }, MessageID.content_editor_menu_undo)
+                    val listToHide =  selectedItem.map { it.reportUid }
+                            .filter { it != Report.TEMPLATE_BLANK_REPORT_UID }
+                    if(listToHide.isNotEmpty()) {
+                        repo.reportDao.toggleVisibilityReportItems(true, listToHide)
+                        view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context),
+                                {
+                                    GlobalScope.launch(doorMainDispatcher()) {
+                                        repo.reportDao.toggleVisibilityReportItems(false,
+                                                listToHide)
+                                    }
+                                }, MessageID.content_editor_menu_undo)
+                    }
                 }
             }
         }

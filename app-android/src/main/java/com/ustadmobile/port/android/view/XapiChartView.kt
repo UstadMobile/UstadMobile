@@ -13,6 +13,7 @@ import com.github.mikephil.charting.components.YAxis
 import com.github.mikephil.charting.data.*
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.ustadmobile.core.util.ext.ChartData
+import com.ustadmobile.core.util.ext.pxAsDp
 import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.port.android.util.graph.asValueFormatter
@@ -66,10 +67,10 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
             }
 
             legend.apply {
-                horizontalAlignment = Legend.LegendHorizontalAlignment.RIGHT
-                verticalAlignment = Legend.LegendVerticalAlignment.TOP
+                horizontalAlignment = Legend.LegendHorizontalAlignment.LEFT
+                verticalAlignment = Legend.LegendVerticalAlignment.BOTTOM
                 isWordWrapEnabled = true
-                setDrawInside(true)
+                setDrawInside(false)
                 isEnabled = true
             }
             description.isEnabled = false
@@ -260,8 +261,14 @@ class XapiChartView @JvmOverloads constructor(context: Context, attrs: Attribute
         }
 
 
+
         if(combinedData.barData != null || combinedData.lineData != null){
             combinedChart.data = combinedData
+            val height = (250.pxAsDp + (colorCount * 15).pxAsDp).toInt()
+            val linearParams = super.getLayoutParams()
+            linearParams.height = height
+            super.setLayoutParams(linearParams)
+            super.invalidate()
         }
 
         combinedChart.invalidate()

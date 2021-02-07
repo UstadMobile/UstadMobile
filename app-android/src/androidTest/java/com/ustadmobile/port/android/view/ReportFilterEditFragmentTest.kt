@@ -75,7 +75,7 @@ class ReportFilterEditFragmentTest: TestCase()  {
                                 ApplicationProvider.getApplicationContext()))
 
                 valueDropDownTextValue.setMessageIdOption(
-                        systemImplNavRule.impl.getString(MessageID.unset,
+                        systemImplNavRule.impl.getString(MessageID.male,
                                 ApplicationProvider.getApplicationContext()))
 
 
