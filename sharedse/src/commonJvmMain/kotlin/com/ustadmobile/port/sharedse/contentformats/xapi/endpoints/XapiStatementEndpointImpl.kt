@@ -316,6 +316,9 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
             contextStatementId = statementContext.statement?.id ?: ""
         }
 
+        val entry = db.contentEntryDao.findByUid(contentEntryUid)
+        val contentEntryRoot = xObjectEntity?.objectId == entry?.entryId
+
         val statementEntity = insertOrUpdateStatementEntity(repo.statementDao, statement, gson,
                 person?.personUid ?: 0,
                 verbEntity.verbUid,
@@ -324,11 +327,10 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
                 agentUid, authorityUid, teamUid,
                 subActorUid, subVerbUid, subObjectUid,
                 contentEntryUid = contentEntryUid,
-                learnerGroupUid = learnerGroupUid)
+                learnerGroupUid = learnerGroupUid, contentEntryRoot = contentEntryRoot)
 
         //ContentEntry should be available locally
-        val entry = db.contentEntryDao.findByUid(contentEntryUid)
-        if (xObjectEntity?.objectId == entry?.entryId) {
+        if (contentEntryRoot) {
             XapiUtil.insertOrUpdateEntryProgress(statementEntity, repo.contentEntryProgressDao,
                     verbEntity)
         }

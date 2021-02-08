@@ -5,7 +5,7 @@
     <data>
         <import type="android.view.View"/>
         <import type="java.util.List"/>
-        <import type="com.ustadmobile.core.util.MessageIdOption"/>
+        <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="android.text.InputType"/>
 
         <variable
@@ -36,7 +36,7 @@
 
         <variable
             name="genderOptions"
-            type="List&lt;MessageIdOption&gt;" />
+            type="List&lt;IdOption&gt;" />
 
         <variable
             name="registrationMode"
@@ -144,7 +144,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/lastname_textInputLayout">
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:id="@+id/gender_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

@@ -23,6 +23,7 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
@@ -290,7 +291,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     }
 
     override fun onMessageIdOptionSelected(view: AdapterView<*>?,
-                                           messageIdOption: MessageIdOption) {
+                                           messageIdOption: IdOption) {
         listPresenter?.handleClickSortOrder(messageIdOption)
     }
 

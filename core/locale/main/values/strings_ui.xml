@@ -69,6 +69,8 @@
     <string name='classes'>Classes</string>
     <string name='exams'>Exams</string>
     <string name='reports'>Reports</string>
+    <string name="choose_template">Choose template</string>
+    <string name="save_as_template">Save as template</string>
     <string name='contents'>Contents</string>
     <string name='students'>Students</string>
     <string name='add_a_student'>Add a student</string>
@@ -84,6 +86,7 @@
     <string name="waiting">Waiting</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
+    <string name="passed">Passed</string>
     <string name="success">Success</string>
     <string name="completed">Completed</string>
     <string name="select_subtitle_video">Select Subtitle Language</string>
@@ -110,6 +113,8 @@
     <string name="hide">Hide</string>
     <string name="unhide">Unhide</string>
     <string name="compress">Compress</string>
+    <string name="and">and</string>
+    <string name="added">Added</string>
 
     <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
 
@@ -123,6 +128,9 @@
         \n2. Make sure that the device is visible.</string>
     <string name="preparing">Preparing</string>
 
+
+    <string name="fixed_date">Fixed Date</string>
+    <string name="relative_date">Relative Date</string>
 
 
     <!-- Registration dialog feedback -->
@@ -262,17 +270,31 @@
     <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
     <string name="show_hidden_items">Show hidden items</string>
     <string name="open_folder">Open Folder</string>
+    <string name="action_hidden">Hidden</string>
 
     <string name="invalid_register_code">Invalid Registration Code</string>
     <string name="enter_register_code">Enter Registration Code</string>
 
     <string name="bar_chart" value="100">Bar Chart</string>
-    <string name="line_graph" value="101">Line Graph</string>
+    <string name="line_chart" value="101">Line Chart</string>
 
     <string name="score" value="200">Average Score</string>
-    <string name="total_duration" value="201">Total Duration</string>
-    <string name="average_duration" value="202">Average Duration</string>
-    <string name="count_activity" value="203"># of activities</string>
+    <string name="content_total_duration" value="200">Content usage - total duration</string>
+    <string name="content_average_duration" value="201">Content usage - average duration per session</string>
+    <string name="count_session" value="202">Content usage - number of sessions</string>
+    <string name="interaction_recorded" value="203">Content usage - number of interactions recorded</string>
+    <string name="number_active_users" value="204">Content usage - number of active users</string>
+    <string name="average_usage_time_per_user"  value="205">Content usage - average usage time per user</string>
+    <string name="number_students_completed" value="206">Content usage - number of students who completed content</string>
+    <string name="percent_students_completed" value="207">Content usage - percentage of students who completed content</string>
+    <string name="total_attendances"  value="208">Attendance - total attendances</string>
+    <string name="total_absences"  value="209">Attendance - total absences</string>
+    <string name="total_lates"  value="210">Attendance - total lates</string>
+    <string name="percent_students_attended"  value="211">Attendance - Percentage of students who attended</string>
+    <string name="percent_students_attended_or_late"  value="212">Attendance - Percentage of students who attended or were late</string>
+    <string name="total_number_of_classes"  value="213">Attendance - Total number of classes</string>
+    <string name="number_unique_students_attending"  value="214">Attendance - Number of unique students attending</string>
+
 
     <string name="xapi_day" value="300">Day</string>
     <string name="xapi_week" value="301">Week</string>
@@ -281,6 +303,15 @@
     <string name="xapi_content_entry" value="304">Content Entry</string>
     <string name="xapi_clear" >Clear</string>
 
+    <string name="last_week_date_range" value="800">Last week</string>
+    <string name="last_two_week_date_range" value="801">Last two weeks</string>
+    <string name="last_month_date_range" value="802">Last month</string>
+    <string name="last_three_months_date_range" value="803">Last three months</string>
+    <string name="new_custom_date_range" value="804">New custom date range…</string>
+    <string name="selected_custom_range">Custom range:  %1$s%</string>
+
+    <string name="time_range">Time Range</string>
+    <string name="year">Year</string>
 
     <string name="from">From</string>
 
@@ -289,6 +320,8 @@
     <string name="xapi_options_general">General</string>
     <string name="xapi_options_report_title">Report Title</string>
     <string name="xapi_options_visual_type">Visualization Type</string>
+    <string name="xapi_options_data_set">Data set</string>
+    <string name="xapi_options_series">Series</string>
     <string name="xapi_options_axes">Axes</string>
     <string name="xapi_options_y_axes">Y-Axis</string>
     <string name="xapi_options_x_axes">X-Axis</string>
@@ -299,6 +332,11 @@
     <string name="xapi_options_what">What</string>
     <string name="xapi_options_when">When</string>
     <string name="xapi_options_where">Where</string>>
+    <string name="time_range_all">Everything</string>
+
+    <string name="report_filter_edit_field">Field</string>
+    <string name="report_filter_edit_condition">Condition</string>
+    <string name="report_filter_edit_values">Value(s)</string>
 
     <string name="report">Report</string>
     <string name="create_a_new_report">Create a new report</string>
@@ -306,6 +344,21 @@
     <string name="verb">Verb</string>
     <string name="add_a_new_verb">Add a new verb</string>
     <string name="id_verbentity_urlid">ID: %s</string>
+    <string name="edit_filters">Edit filters</string>
+
+    <string name="field_person_gender">Person gender</string>
+    <string name="field_person_age">Person age</string>
+    <string name="field_content_completion">Content completion status</string>
+    <string name="field_content_entry">Content entry</string>
+    <string name="field_content_progress">Content progress</string>
+    <string name="field_attendance_percentage">Attendance percentage</string>
+    <string name="condition_is">is</string>
+    <string name="condition_is_not">is not</string>
+    <string name="condition_greater_than">greater than</string>
+    <string name="condition_less_than">less than</string>
+    <string name="condition_in_list">in list</string>
+    <string name="condition_not_in_list">not in list</string>
+    <string name="condition_between">between</string>
 
     <!-- Report filter option - filter report results by person -->
     <string name="add_person_filter">Add person filter</string>

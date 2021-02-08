@@ -1,11 +1,16 @@
 package com.ustadmobile.core.util.ext
 
+import androidx.paging.DataSource
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.core.util.graph.*
+import com.ustadmobile.door.SimpleDoorQuery
+import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.randomString
@@ -206,6 +211,104 @@ fun UmAppDatabase.insertPersonOnlyAndGroup(entity: Person): Person{
     return entity
 
 }
+
+suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
+                                            context: Any, impl: UstadMobileSystemImpl, loggedInPersonUid: Long): ChartData{
+
+    val queries = report.generateSql(loggedInPersonUid, dbType())
+    val seriesDataList = mutableListOf<SeriesData>()
+
+    var yAxisValueFormatter: LabelValueFormatter? = null
+
+    val xAxisList = mutableSetOf<String>()
+    queries.forEach {
+
+        val reportList = statementDao.getResults(it.value.sqlStr, it.value.queryParams)
+        val series = it.key
+
+        xAxisList.addAll(reportList.mapNotNull { it.xAxis }.toSet())
+        if(series.reportSeriesYAxis == ReportSeries.AVERAGE_DURATION
+                || series.reportSeriesYAxis == ReportSeries.TOTAL_DURATION){
+            yAxisValueFormatter = TimeFormatter()
+        }
+
+        val subGroupFormatter = when(series.reportSeriesSubGroup){
+            Report.CLASS -> {
+                val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
+                val clazzLabelList = clazzDao.getClassNamesFromListOfIds(listOfUids)
+                        .map { it.uid to it.labelName }.toMap()
+                UidAndLabelFormatter(clazzLabelList)
+            }
+            Report.GENDER -> {
+                MessageIdFormatter(
+                        mapOf(Person.GENDER_MALE.toString() to MessageID.male,
+                                Person.GENDER_FEMALE.toString() to MessageID.female,
+                                Person.GENDER_OTHER.toString() to MessageID.other,
+                                Person.GENDER_UNSET.toString() to MessageID.unset),
+                        impl, context)
+            }
+            Report.CONTENT_ENTRY ->{
+                val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
+                val entryLabelList = contentEntryDao.getContentEntryFromUids(listOfUids)
+                        .map { it.uid to it.labelName }.toMap()
+                UidAndLabelFormatter(entryLabelList)
+            }
+            else ->{
+                null
+            }
+        }
+
+        seriesDataList.add(SeriesData(reportList, subGroupFormatter, series))
+    }
+
+    val xAxisFormatter = when(report.xAxis){
+        Report.CLASS -> {
+            val clazzLabelList = clazzDao.getClassNamesFromListOfIds(xAxisList
+                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+            UidAndLabelFormatter(clazzLabelList)
+        }
+        Report.GENDER -> {
+            MessageIdFormatter(
+                    mapOf(Person.GENDER_MALE.toString() to MessageID.male,
+                            Person.GENDER_FEMALE.toString() to MessageID.female,
+                            Person.GENDER_OTHER.toString() to MessageID.other,
+                            Person.GENDER_UNSET.toString() to MessageID.unset),
+                    impl, context)
+        }
+        Report.CONTENT_ENTRY ->{
+            val entryLabelList = contentEntryDao.getContentEntryFromUids(xAxisList
+                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+            UidAndLabelFormatter(entryLabelList)
+        }
+        else ->{
+            null
+        }
+    }
+
+    return ChartData(seriesDataList.toList(), report, yAxisValueFormatter, xAxisFormatter)
+}
+
+fun UmAppDatabase.generateStatementList(report: ReportWithSeriesWithFilters, loggedInPersonUid: Long):
+        List<DataSource.Factory<Int, StatementEntityWithDisplayDetails>> {
+
+    val queries = report.generateSql(loggedInPersonUid, dbType())
+    val statementDataSourceList = mutableListOf<DataSource.Factory<Int, StatementEntityWithDisplayDetails>>()
+    queries.forEach {
+        statementDataSourceList.add(statementDao.getListResults(SimpleDoorQuery(it.value.sqlListStr, it.value.queryParams)))
+    }
+    return statementDataSourceList.toList()
+}
+
+
+data class ChartData(val seriesData: List<SeriesData>,
+                     val reportWithFilters: ReportWithSeriesWithFilters,
+                     val yAxisValueFormatter: LabelValueFormatter?,
+                     val xAxisValueFormatter: LabelValueFormatter?)
+
+data class SeriesData(val dataList: List<StatementDao.ReportData>,
+                      val subGroupFormatter: LabelValueFormatter?,
+                      val series: ReportSeries)
+
 
 /**
  * Insert a new school

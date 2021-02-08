@@ -129,7 +129,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     override fun onResume() {
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
-                getString(R.string.content_editor_create_new_title)
+                getString(R.string.content)
     }
 
     override fun showContentEntryAddOptions(parentEntryUid: Long) {

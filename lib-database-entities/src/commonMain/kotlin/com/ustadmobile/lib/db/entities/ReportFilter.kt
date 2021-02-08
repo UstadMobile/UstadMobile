@@ -1,68 +1,54 @@
 package com.ustadmobile.lib.db.entities
 
-import androidx.room.Entity
-import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
-@Entity
-@SyncableEntity(tableId = ReportFilter.TABLE_ID,
-    notifyOnUpdate = ["""
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ReportFilter.TABLE_ID} AS tableId FROM 
-        ChangeLog
-        JOIN ReportFilter ON ChangeLog.chTableId = ${ReportFilter.TABLE_ID} AND ChangeLog.chEntityPk = ReportFilter.reportFilterUid
-        JOIN Report ON ReportFilter.reportFilterReportUid = Report.reportUid
-        JOIN DeviceSession ON Report.reportOwnerUid = DeviceSession.dsPersonUid"""],
-    syncFindAllQuery = """
-        SELECT ReportFilter.* FROM
-        ReportFilter
-        JOIN Report ON ReportFilter.reportFilterReportUid = Report.reportUid
-        JOIN DeviceSession ON Report.reportOwnerUid = DeviceSession.dsPersonUid
-        WHERE DeviceSession.dsDeviceId = :clientId
-    """)
 @Serializable
 open class ReportFilter {
 
-    constructor()
-
-    /*constructor(entityUid: Long, entityType: Int){
-        this.entityUid = entityUid
-        this.entityType = entityType
-    }*/
-
-    @PrimaryKey(autoGenerate = true)
     var reportFilterUid: Long = 0
 
-    var reportFilterReportUid: Long = 0
+    var reportFilterSeriesUid: Long = 0
 
-    var entityUid: Long = 0
+    var reportFilterField: Int = FIELD_PERSON_GENDER
 
-    var entityType: Int = 0
+    var reportFilterCondition: Int = 0
 
-    var filterInactive: Boolean = false
+    var reportFilterValue: String? = null
 
-    @MasterChangeSeqNum
-    var reportFilterMasterChangeSeqNum: Long = 0
+    var reportFilterDropDownValue: Int = 0
 
-    @LocalChangeSeqNum
-    var reportFilterLocalChangeSeqNum: Long = 0
+    var reportFilterValueBetweenX: String? = null
 
-    @LastChangedBy
-    var reportFilterLastChangedBy: Int = 0
-
+    var reportFilterValueBetweenY: String? = null
 
     companion object {
 
-        const val TABLE_ID = 102
+        const val FIELD_PERSON_GENDER = 100
 
-        const val PERSON_FILTER = 50
+        const val FIELD_PERSON_AGE = 101
 
-        const val CONTENT_FILTER = 80
+        const val FIELD_CONTENT_COMPLETION = 102
 
-        const val VERB_FILTER = 70
+        const val FIELD_CONTENT_ENTRY = 103
+
+        const val FIELD_CONTENT_PROGRESS = 104
+
+        const val FIELD_ATTENDANCE_PERCENTAGE = 105
+
+
+        const val CONDITION_IS = 200
+
+        const val CONDITION_IS_NOT = 201
+
+        const val CONDITION_GREATER_THAN = 202
+
+        const val CONDITION_LESS_THAN = 203
+
+        const val CONDITION_BETWEEN = 205
+
+        const val CONDITION_IN_LIST = 206
+
+        const val CONDITION_NOT_IN_LIST = 207
 
     }
 

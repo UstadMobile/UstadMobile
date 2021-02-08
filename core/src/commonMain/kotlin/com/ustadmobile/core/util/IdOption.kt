@@ -6,6 +6,10 @@ package com.ustadmobile.core.util
  */
 open class IdOption(val description: String, val optionId: Int){
 
+    override fun toString(): String {
+        return description
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is IdOption) return false
