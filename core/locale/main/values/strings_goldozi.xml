@@ -95,4 +95,8 @@
 
     <string name="categories_desc">Add and edit categories</string>
     <string name="location_desc">Add and edit locations</string>
+    <string name="product_title">Product title</string>
+    <string name="product_description">Product description</string>
+    <string name="product_price">Product price (AFN)</string>
+
 </resources>

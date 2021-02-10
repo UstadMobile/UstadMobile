@@ -61,9 +61,20 @@ class PersonDetailPresenter(context: Any,
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
-        return repo.personDao.personHasPermissionAsync(account?.personUid ?: 0,
+        val updatePermission =  repo.personDao.personHasPermissionAsync(account?.personUid ?: 0,
                 arguments[ARG_ENTITY_UID]?.toLong() ?: 0L,
                     Role.PERMISSION_PERSON_UPDATE)
+
+        val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        val person = withTimeoutOrNull(2000) {
+            db.takeIf { entityUid != 0L }?.personDao?.findByUid(entityUid)
+        } ?: PersonWithDisplayDetails()
+
+        if(person.personCreatedBy == account?.personUid){
+            return true
+        }else{
+            return updatePermission
+        }
     }
 
     override fun handleClickEdit() {

@@ -67,7 +67,7 @@ abstract class SaleDao : BaseDao<Sale> {
 
         const val QUERY_ALL_LIST = """
             SELECT 
-                SUM((SaleItem.saleItemPricePerPiece)) - coalesce(SaleItem.saleItemDiscount, 0) AS totalSale, 
+                coalesce(SUM((SaleItem.saleItemPricePerPiece) * SaleItem.saleItemQuantity) - SUM(SaleItem.saleItemDiscount), 0) AS totalSale,
                 '' AS topProducts, 
                 0 as personPictureUid ,
                 Person.* 
@@ -79,10 +79,10 @@ abstract class SaleDao : BaseDao<Sale> {
                 LEFT JOIN InventoryTransaction ON 
                     InventoryTransaction.InventoryTransactionInventoryItemUid = InventoryItem.InventoryItemUid 
                     AND InventoryTransaction.inventoryTransactionFromLeUid = LE.personUid AND CAST(InventoryTransaction.inventoryTransactionActive AS INTEGER) = 1
-                LEFT JOIN SaleItem ON 
-                    SaleItem.saleItemUid = InventoryTransaction.inventoryTransactionSaleItemUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1
-                LEFT JOIN Sale ON 
-                    Sale.saleUid = SaleItem.saleItemSaleUid AND CAST(Sale.saleActive AS INTEGER) = 1 
+                LEFT JOIN Sale ON Sale.salePersonUid = Person.personUid
+                    AND CAST(Sale.saleActive AS INTEGER) = 1
+                 LEFT JOIN SaleItem ON    SaleItem.saleItemSaleUid = Sale.saleUid 
+                    AND CAST(SaleItem.saleItemActive AS INTEGER) = 1               
                 LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid 
                     AND CAST(Product.productActive AS INTEGER) = 1
             WHERE CAST(Person.active AS INTEGER) = 1  
@@ -97,7 +97,7 @@ abstract class SaleDao : BaseDao<Sale> {
             AND CASE :filter WHEN $FILTER_CUSTOMER_ONLY THEN Person.personGoldoziType = 0  
                 ELSE Person.personGoldoziType > -1 END
             AND Person.firstNames ||' '|| Person.lastName LIKE :searchText
-            GROUP BY Person.personUid, SaleItem.saleItemUid  
+            GROUP BY Person.personUid
         """
 
         const val QUERY_WE_LIST = """
@@ -137,7 +137,7 @@ abstract class SaleDao : BaseDao<Sale> {
                   ORDER BY stg.saleCreationDate ASC LIMIT 1 
                   )  
                   || 'x ' || 
-                  (SELECT Product.productName 
+                  (SELECT case when Product.productName != '' then Product.productName else case when Product.productNameDari != '' then Product.productNameDari else case when Product.productNamePashto != '' then Product.productNamePashto else '' end  end end 
                   FROM SaleItem sitg 
                   LEFT JOIN Product ON Product.productUid = sitg.saleItemProductUid 
                   WHERE sitg.saleItemSaleUid = sl.saleUid AND CAST(sitg.saleItemActive AS INTEGER) = 1  
@@ -262,7 +262,7 @@ abstract class SaleDao : BaseDao<Sale> {
                   ORDER BY stg.saleCreationDate ASC LIMIT 1 
                   )  
                   || 'x ' || 
-                  (SELECT Product.productName 
+                  (SELECT case when Product.productName != '' then Product.productName else case when Product.productNameDari != '' then Product.productNameDari else case when Product.productNamePashto != '' then Product.productNamePashto else '' end  end end  	
                   FROM SaleItem sitg 
                   LEFT JOIN Product ON Product.productUid = sitg.saleItemProductUid 
                   WHERE sitg.saleItemSaleUid = sl.saleUid AND CAST(sitg.saleItemActive AS INTEGER) = 1  

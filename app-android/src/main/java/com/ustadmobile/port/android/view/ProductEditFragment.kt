@@ -113,12 +113,13 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
             field = value
             mBinding?.product = value
 
-//            if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
-//                val productName = value?.getNameLocale(UMAndroidUtil.getCurrentLocale(requireContext()))
-//                if(productName?.isNotEmpty() == true) {
-//                    (activity as? AppCompatActivity)?.supportActionBar?.title = productName
-//                }
-//            }
+
+            if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)) {
+                val productName = value?.getNameLocale(UMAndroidUtil.getCurrentLocale(requireContext()))
+                if(productName?.isNotEmpty() == true) {
+                    (activity as? AppCompatActivity)?.supportActionBar?.title = productName
+                }
+            }
         }
     override var productPicture: ProductPicture?
         get() = mBinding?.productPicture

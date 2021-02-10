@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+        <import type="com.ustadmobile.port.android.view.ProductDetailFragment"/>
         <variable
             name="saleItem"
             type="com.ustadmobile.lib.db.entities.SaleItemWithProduct" />
@@ -40,13 +41,28 @@
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
-                android:id="@+id/item_sale_item_image"
+                android:id="@+id/item_sale_item_image2"
                 android:layout_width="52dp"
+                android:visibility="gone"
                 android:layout_height="52dp"
                 android:layout_weight="1"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:srcCompat="@drawable/ic_baseline_insert_photo_24" />
+
+
+            <de.hdodenhof.circleimageview.CircleImageView
+                android:id="@+id/item_sale_item_image"
+                android:layout_weight="1"
+                android:layout_width="52dp"
+                android:layout_height="@dimen/dimen_52dp"
+                app:imageForeignKey="@{saleItem.saleItemProduct.productUid}"
+                app:imageForeignKeyAdapter="@{ProductDetailFragment.FOREIGNKEYADAPTER_PRODUCT}"
+                app:imageForeignKeyPlaceholder="@{@drawable/ic_baseline_insert_photo_24}"
+                tools:src="@drawable/ic_baseline_insert_photo_24"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                />
 
             <LinearLayout
                 android:layout_width="wrap_content"

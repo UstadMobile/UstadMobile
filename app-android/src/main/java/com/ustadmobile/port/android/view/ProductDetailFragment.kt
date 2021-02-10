@@ -223,9 +223,9 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
         set(value) {
             field = value
             mBinding?.product = value
-//            if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
-//                (activity as? AppCompatActivity)?.supportActionBar?.title =
-//                        value?.getNameLocale(UMAndroidUtil.getCurrentLocale(requireContext()))
+            if(viewLifecycleOwner.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED))
+                (activity as? AppCompatActivity)?.supportActionBar?.title =
+                        value?.getNameLocale(UMAndroidUtil.getCurrentLocale(requireContext()))
 
         }
 

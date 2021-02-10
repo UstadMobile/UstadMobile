@@ -312,14 +312,23 @@ class PersonEditPresenter(context: Any,
                             weOneAssign.groupMemberUid = repo.personGroupMemberDao.insertAsync(weOneAssign)
                         }
 
-                        //Create EntityRole
-                        val entityRole = EntityRole().apply{
-                            erTableId = Person.TABLE_ID
-                            erEntityUid = entity.personUid
-                            erGroupUid = loggedInPerson?.personGroupUid?:0L
-                            erRoleUid = Role.ROLE_LE_UID.toLong()?:0L
-                            erUid = repo.entityRoleDao.insertAsync(this)
-                        }
+//                        //Create EntityRole
+//                        val entityRole = EntityRole().apply{
+//                            erTableId = Person.TABLE_ID
+//                            erEntityUid = entity.personUid
+//                            erGroupUid = loggedInPerson?.personGroupUid?:0L
+//                            erRoleUid = Role.ROLE_LE_UID.toLong()?:0L
+//                            erUid = repo.entityRoleDao.insertAsync(this)
+//                        }
+                    }
+
+                    //Create EntityRole
+                    val entityRole = EntityRole().apply{
+                        erTableId = Person.TABLE_ID
+                        erEntityUid = entity.personUid
+                        erGroupUid = loggedInPerson?.personGroupUid?:0L
+                        erRoleUid = Role.ROLE_LE_UID.toLong()?:0L
+                        erUid = repo.entityRoleDao.insertAsync(this)
                     }
 
 
