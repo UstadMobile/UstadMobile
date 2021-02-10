@@ -236,6 +236,10 @@ open class ClazzEnrollment()  {
 
     var clazzEnrollmentActive: Boolean = false
 
+    var clazzEnrollmentLeavingReasonUid: Long = 0
+
+    var clazzEnrollmentStatus: Long = 0
+
     @LocalChangeSeqNum
     var clazzEnrollmentLocalChangeSeqNum: Long = 0
 
