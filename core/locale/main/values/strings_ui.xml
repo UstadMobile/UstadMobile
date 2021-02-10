@@ -496,6 +496,27 @@
     <string name="sort_by_name_desc">name (descending)</string>
     <string name="date_enroll">Date enrolled</string>
     <string name="date_left">Date left</string>
+    <string name="enrolled">Enrolled</string>
+    <string name="class_enrollment">Class enrollment</string>
+    <string name="graduated">Graduated</string>
+    <string name="dropped_out">Dropped out</string>
+    <string name="moved">Moved</string>
+    <string name="leaving_reason_medical">Medical</string>
+    <string name="leaving_reason_transport">Transportation problem</string>
+    <string name="leaving_reason_family">Family economic problem</string>
+    <string name="leaving_reason_passed_test">Passed test</string>
+    <string name="leaving_reason_failed_test">Failed test</string>
+    <string name="new_leaving_reason">New enrollment result reason</string>
+    <string name="current_status">Current status</string>
+    <string name="leaving_reason">Reason for leaving</string>
+    <string name="reason">reason</string>
+    <string name="view">View %1$s</string>
+    <string name="currently_enrolled">Currently enrolled</string>
+    <string name="class_enrollment_status">Class enrollment status</string>
+    <string name="class_enrollment_leaving">Class enrollment reason for leaving</string>
+    <!-- used to show the enrollments in 1 class by person: e.g Ahmed's enrollment in Class A -->
+    <string name="person_enrollment_in_class">%1$s enrollments in %2$s</string>
+
 
     <!--Ascending: used in the context of a sort order -->
     <string name="ascending">Ascending</string>
