@@ -75,12 +75,12 @@ class UmAppDatabaseExtTest {
         repo.createNewClazzAndGroups(testClazz, mockSystemImpl, context)
         repo.personDao.insert(testPerson)
 
-        repo.enrolPersonIntoClazzAtLocalTimezone(testPerson, testClazz.clazzUid, ClazzMember.ROLE_TEACHER)
+        repo.enrolPersonIntoClazzAtLocalTimezone(testPerson, testClazz.clazzUid, ClazzEnrollment.ROLE_TEACHER)
 
-        val personClazzes = db.clazzMemberDao.findAllClazzesByPersonWithClazzAsListAsync(
+        val personClazzes = db.clazzEnrollmentDao.findAllClazzesByPersonWithClazzAsListAsync(
                 testPerson.personUid, systemTimeInMillis())
 
-        Assert.assertTrue("PersonMember was created", personClazzes.any { it.clazzMemberClazzUid == testClazz.clazzUid })
+        Assert.assertTrue("PersonMember was created", personClazzes.any { it.clazzEnrollmentClazzUid == testClazz.clazzUid })
 
         val personGroups = db.personGroupMemberDao.findAllGroupWherePersonIsIn(testPerson.personUid)
         Assert.assertEquals("Person is now teacher group",

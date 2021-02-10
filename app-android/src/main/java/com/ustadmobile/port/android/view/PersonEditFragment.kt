@@ -18,11 +18,10 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
-import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzEditBinding
+import com.toughra.ustadmobile.databinding.ItemClazzEnrollmentWithClazzEditBinding
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.DestinationProvider
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
@@ -64,29 +63,29 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
     private data class ClassRoleOption(val roleId: Int, val resultKey: String, val stringId: Int)
 
-    class ClazzMemberWithClazzRecyclerAdapter(val eventHandler: PersonEditFragmentEventHandler,
-        var presenter: PersonEditPresenter?): ListAdapter<ClazzMemberWithClazz,
-            ClazzMemberWithClazzRecyclerAdapter.ClazzMemberWithClazzViewHolder>(
+    class ClazzEnrollmentWithClazzRecyclerAdapter(val eventHandler: PersonEditFragmentEventHandler,
+                                                  var presenter: PersonEditPresenter?): ListAdapter<ClazzEnrollmentWithClazz,
+            ClazzEnrollmentWithClazzRecyclerAdapter.ClazzEnrollmentWithClazzViewHolder>(
             DIFFUTIL_CLAZZMEMBER_WITH_CLAZZ) {
 
-        class ClazzMemberWithClazzViewHolder(val binding: ItemClazzMemberWithClazzEditBinding)
+        class ClazzEnrollmentWithClazzViewHolder(val binding: ItemClazzEnrollmentWithClazzEditBinding)
             : RecyclerView.ViewHolder(binding.root)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzMemberWithClazzViewHolder {
-            val viewHolder = ClazzMemberWithClazzViewHolder(ItemClazzMemberWithClazzEditBinding.inflate(
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzEnrollmentWithClazzViewHolder {
+            val viewHolder = ClazzEnrollmentWithClazzViewHolder(ItemClazzEnrollmentWithClazzEditBinding.inflate(
                     LayoutInflater.from(parent.context), parent, false))
             viewHolder.binding.mPresenter = presenter
             viewHolder.binding.mFragment = eventHandler
             return viewHolder
         }
 
-        override fun onBindViewHolder(holder: ClazzMemberWithClazzViewHolder, position: Int) {
-            holder.binding.clazzMemberWithClazz = getItem(position)
+        override fun onBindViewHolder(holder: ClazzEnrollmentWithClazzViewHolder, position: Int) {
+            holder.binding.clazzEnrollmentWithClazz = getItem(position)
         }
     }
 
 
-    override var clazzList: DoorLiveData<List<ClazzMemberWithClazz>>? = null
+    override var clazzList: DoorLiveData<List<ClazzEnrollmentWithClazz>>? = null
         get() = field
         set(value) {
             field?.removeObserver(clazzMemberWithClazzObserver)
@@ -101,14 +100,14 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             value?.observe(this, rolesAndPermissionObserver)
         }
 
-    private var clazzMemberWithClazzRecyclerAdapter: ClazzMemberWithClazzRecyclerAdapter? = null
+    private var clazzEnrollmentWithClazzRecyclerAdapter: ClazzEnrollmentWithClazzRecyclerAdapter? = null
 
     private var clazzMemberUstadListHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
 
     private var rolesAndPermissionUstadListHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
     
-    private val clazzMemberWithClazzObserver = Observer<List<ClazzMemberWithClazz>?> {
-        t -> clazzMemberWithClazzRecyclerAdapter?.submitList(t)
+    private val clazzMemberWithClazzObserver = Observer<List<ClazzEnrollmentWithClazz>?> {
+        t -> clazzEnrollmentWithClazzRecyclerAdapter?.submitList(t)
     }
 
     private var rolesAndPermissionRecyclerAdapter: EntityRoleRecyclerAdapter? = null
@@ -289,7 +288,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
-        clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(this, mPresenter)
+        clazzEnrollmentWithClazzRecyclerAdapter = ClazzEnrollmentWithClazzRecyclerAdapter(this, mPresenter)
         rolesAndPermissionRecyclerAdapter = EntityRoleRecyclerAdapter(true, this)
         clazzMemberUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
                 View.OnClickListener { onClickNewClazzMemberWithClazz() },
@@ -301,7 +300,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 requireContext().getString(R.string.add_role_permission)).apply {
             newItemVisible = true
         }
-        mBinding?.clazzlistRecyclerview?.adapter = MergeAdapter(clazzMemberWithClazzRecyclerAdapter,
+        mBinding?.clazzlistRecyclerview?.adapter = MergeAdapter(clazzEnrollmentWithClazzRecyclerAdapter,
                 clazzMemberUstadListHeaderRecyclerViewAdapter)
 
         mBinding?.rolesAndPermissionsRv?.adapter = MergeAdapter(rolesAndPermissionRecyclerAdapter,
@@ -359,12 +358,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
                     Clazz::class.java, roleOption.resultKey) {
                 val clazzSelected = it.firstOrNull() ?: return@observeResult
-                mPresenter?.handleAddOrEditClazzMemberWithClazz(ClazzMemberWithClazz().apply {
-                    clazzMemberPersonUid = arguments?.getString(UstadView.ARG_ENTITY_UID)?.toLong() ?: 0L
-                    clazzMemberClazzUid =  clazzSelected.clazzUid
-                    clazzMemberRole = roleOption.roleId
+                mPresenter?.handleAddOrEditClazzMemberWithClazz(ClazzEnrollmentWithClazz().apply {
+                    clazzEnrollmentPersonUid = arguments?.getString(UstadView.ARG_ENTITY_UID)?.toLong() ?: 0L
+                    clazzEnrollmentClazzUid =  clazzSelected.clazzUid
+                    clazzEnrollmentRole = roleOption.roleId
                     clazz = clazzSelected
-                    clazzMemberActive = true
+                    clazzEnrollmentActive = true
                 })
             }
         }
@@ -395,15 +394,15 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
     companion object {
 
         private val CLAZZ_ROLE_KEY_MAP = listOf(
-                ClassRoleOption(ClazzMember.ROLE_STUDENT, "Person_Student", R.string.student),
-                ClassRoleOption(ClazzMember.ROLE_TEACHER, "Person_Teacher", R.string.teacher))
+                ClassRoleOption(ClazzEnrollment.ROLE_STUDENT, "Person_Student", R.string.student),
+                ClassRoleOption(ClazzEnrollment.ROLE_TEACHER, "Person_Teacher", R.string.teacher))
 
-        val DIFFUTIL_CLAZZMEMBER_WITH_CLAZZ = object: DiffUtil.ItemCallback<ClazzMemberWithClazz>() {
-            override fun areItemsTheSame(oldItem: ClazzMemberWithClazz, newItem: ClazzMemberWithClazz): Boolean {
-                return oldItem.clazzMemberUid == newItem.clazzMemberUid
+        val DIFFUTIL_CLAZZMEMBER_WITH_CLAZZ = object: DiffUtil.ItemCallback<ClazzEnrollmentWithClazz>() {
+            override fun areItemsTheSame(oldItem: ClazzEnrollmentWithClazz, newItem: ClazzEnrollmentWithClazz): Boolean {
+                return oldItem.clazzEnrollmentUid == newItem.clazzEnrollmentUid
             }
 
-            override fun areContentsTheSame(oldItem: ClazzMemberWithClazz, newItem: ClazzMemberWithClazz): Boolean {
+            override fun areContentsTheSame(oldItem: ClazzEnrollmentWithClazz, newItem: ClazzEnrollmentWithClazz): Boolean {
                 return oldItem == newItem
             }
         }

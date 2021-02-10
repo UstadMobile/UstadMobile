@@ -11,7 +11,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.core.db.dao.ClazzMemberDao
+import com.ustadmobile.core.db.dao.ClazzEnrollmentDao
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
@@ -33,7 +33,7 @@ import org.kodein.di.on
  *
  * Note:
  */
-class ClazzMemberListPresenterTest {
+class ClazzEnrollmentListPresenterTest {
 
     @JvmField
     @Rule
@@ -45,7 +45,7 @@ class ClazzMemberListPresenterTest {
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
-    private lateinit var repoClazzMemberDaoSpy: ClazzMemberDao
+    private lateinit var repoClazzEnrollmentDaoSpy: ClazzEnrollmentDao
 
     private lateinit var di: DI
 
@@ -72,8 +72,8 @@ class ClazzMemberListPresenterTest {
         db = di.on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
         repo = di.on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
 
-        repoClazzMemberDaoSpy = spy(repo.clazzMemberDao)
-        whenever(repo.clazzMemberDao).thenReturn(repoClazzMemberDaoSpy)
+        repoClazzEnrollmentDaoSpy = spy(repo.clazzEnrollmentDao)
+        whenever(repo.clazzEnrollmentDao).thenReturn(repoClazzEnrollmentDaoSpy)
 
         //TODO: insert any entities required for all tests
     }
@@ -81,9 +81,9 @@ class ClazzMemberListPresenterTest {
     @Test
     fun givenActiveUserDoesNotHaveAddPermissions_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnViewAndSetAddVisibleToFalse() {
         //TODO: insert any entities that are used only in this test
-        val testEntity = ClazzMember().apply {
+        val testEntity = ClazzEnrollment().apply {
             //set variables here
-            clazzMemberUid = repo.clazzMemberDao.insert(this)
+            clazzEnrollmentUid = repo.clazzEnrollmentDao.insert(this)
         }
 
         val presenterArgs = mapOf<String,String>(ARG_FILTER_BY_CLAZZUID to "42")
@@ -92,10 +92,10 @@ class ClazzMemberListPresenterTest {
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
-        verify(repoClazzMemberDaoSpy, timeout(5000)).findByClazzUidAndRole(42L,
-            ClazzMember.ROLE_STUDENT,1, "%")
-        verify(repoClazzMemberDaoSpy, timeout(5000)).findByClazzUidAndRole(42L,
-                ClazzMember.ROLE_TEACHER,1,"%")
+        verify(repoClazzEnrollmentDaoSpy, timeout(5000)).findByClazzUidAndRole(42L,
+            ClazzEnrollment.ROLE_STUDENT,1, "%")
+        verify(repoClazzEnrollmentDaoSpy, timeout(5000)).findByClazzUidAndRole(42L,
+                ClazzEnrollment.ROLE_TEACHER,1,"%")
 
         verify(mockView, timeout(5000)).list = any()
         verify(mockView, timeout(5000)).studentList = any()
@@ -159,10 +159,10 @@ class ClazzMemberListPresenterTest {
             personUid = repo.insertPersonOnlyAndGroup(this).personUid
         }
 
-        var pendingMember: ClazzMember? = null
+        var pendingEnrollment: ClazzEnrollment? = null
         runBlocking {
-            pendingMember = repo.enrolPersonIntoClazzAtLocalTimezone(pendingPerson, testClazz.clazzUid,
-                    ClazzMember.ROLE_STUDENT_PENDING)
+            pendingEnrollment = repo.enrolPersonIntoClazzAtLocalTimezone(pendingPerson, testClazz.clazzUid,
+                    ClazzEnrollment.ROLE_STUDENT_PENDING)
 
             repo.insertPersonWithRole(activePerson,
                     Role().apply {
@@ -185,27 +185,27 @@ class ClazzMemberListPresenterTest {
         //wait for it to load
         verify(mockView, timeout(5000)).addStudentVisible = true
 
-        presenter.handleClickPendingRequest(pendingMember!!, true)
+        presenter.handleClickPendingRequest(pendingEnrollment!!, true)
 
         runBlocking {
-            db.waitUntil(5000, listOf("ClazzMember", "PersonGroupMember")) {
-                runBlocking { db.clazzMemberDao.findByPersonUidAndClazzUidAsync(pendingMember!!.clazzMemberPersonUid,
-                    testClazz.clazzUid)?.clazzMemberRole == ClazzMember.ROLE_STUDENT }
+            db.waitUntil(5000, listOf("ClazzEnrollment", "PersonGroupMember")) {
+                runBlocking { db.clazzEnrollmentDao.findByPersonUidAndClazzUidAsync(pendingEnrollment!!.clazzEnrollmentPersonUid,
+                    testClazz.clazzUid)?.clazzEnrollmentRole == ClazzEnrollment.ROLE_STUDENT }
                 && runBlocking {
-                    db.personGroupMemberDao.findAllGroupWherePersonIsIn(pendingMember!!.clazzMemberPersonUid).any {
+                    db.personGroupMemberDao.findAllGroupWherePersonIsIn(pendingEnrollment!!.clazzEnrollmentPersonUid).any {
                         it.groupMemberGroupUid == testClazz.clazzStudentsPersonGroupUid
                     }
                 }
             }
         }
 
-        val clazzMember = runBlocking { repo.clazzMemberDao.findByPersonUidAndClazzUidAsync(pendingMember!!.clazzMemberPersonUid,
+        val clazzEnrollment = runBlocking { repo.clazzEnrollmentDao.findByPersonUidAndClazzUidAsync(pendingEnrollment!!.clazzEnrollmentPersonUid,
                 testClazz.clazzUid) }
-        Assert.assertEquals("Clazz member approved is now a student", ClazzMember.ROLE_STUDENT,
-            clazzMember?.clazzMemberRole)
+        Assert.assertEquals("Clazz member approved is now a student", ClazzEnrollment.ROLE_STUDENT,
+                clazzEnrollment?.clazzEnrollmentRole)
 
         runBlocking {
-            val personInStudentGroup = db.personGroupMemberDao.findAllGroupWherePersonIsIn(pendingMember!!.clazzMemberPersonUid).any {
+            val personInStudentGroup = db.personGroupMemberDao.findAllGroupWherePersonIsIn(pendingEnrollment!!.clazzEnrollmentPersonUid).any {
                 it.groupMemberGroupUid == testClazz.clazzStudentsPersonGroupUid
             }
             Assert.assertTrue("Pending member is now in student group", personInStudentGroup)

@@ -4,7 +4,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
 
-interface ClazzWorkSubmissionMarkingView: UstadEditView<ClazzMemberAndClazzWorkWithSubmission> {
+interface ClazzWorkSubmissionMarkingView: UstadEditView<ClazzEnrollmentAndClazzWorkWithSubmission> {
 
     var privateComments: DataSource.Factory<Int, CommentsWithPerson>?
 

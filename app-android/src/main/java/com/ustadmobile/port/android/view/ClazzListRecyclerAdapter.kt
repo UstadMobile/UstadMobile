@@ -47,7 +47,7 @@ class ClazzListRecyclerAdapter(var itemListener: ClazzListItemListener?)
                         oldItem.numStudents == newItem.numStudents &&
                         oldItem.numTeachers == newItem.numTeachers &&
                         oldItem.clazzDesc == newItem.clazzDesc &&
-                        oldItem.clazzActiveMember?.clazzMemberRole == newItem.clazzActiveMember?.clazzMemberRole &&
+                        oldItem.clazzActiveEnrollment?.clazzEnrollmentRole == newItem.clazzActiveEnrollment?.clazzEnrollmentRole &&
                         oldItem.attendanceAverage == newItem.attendanceAverage
             }
         }

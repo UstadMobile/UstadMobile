@@ -53,26 +53,26 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(clazz: Clazz, impl: UstadMobil
  */
 suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Person, clazzUid: Long,
                                                               role: Int,
-                                                              clazzWithSchool: ClazzWithSchool? = null): ClazzMemberWithPerson {
+                                                              clazzWithSchool: ClazzWithSchool? = null): ClazzEnrollmentWithPerson {
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(clazzUid)
         ?: throw IllegalArgumentException("Class does not exist")
 
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
     val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
-    val clazzMember = ClazzMemberWithPerson().apply {
-        clazzMemberPersonUid = personToEnrol.personUid
-        clazzMemberClazzUid = clazzUid
-        clazzMemberRole = role
-        clazzMemberActive = true
-        clazzMemberDateJoined = joinTime
+    val clazzMember = ClazzEnrollmentWithPerson().apply {
+        clazzEnrollmentPersonUid = personToEnrol.personUid
+        clazzEnrollmentClazzUid = clazzUid
+        clazzEnrollmentRole = role
+        clazzEnrollmentActive = true
+        clazzEnrollmentDateJoined = joinTime
         person = personToEnrol
-        clazzMemberUid = clazzMemberDao.insertAsync(this)
+        clazzEnrollmentUid = clazzEnrollmentDao.insertAsync(this)
     }
 
     val personGroupUid = when(role) {
-        ClazzMember.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
-        ClazzMember.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
-        ClazzMember.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
+        ClazzEnrollment.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
+        ClazzEnrollment.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
+        ClazzEnrollment.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
         else -> null
     }
 
@@ -128,12 +128,12 @@ suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Pe
     return schoolMember
 }
 
-suspend fun UmAppDatabase.approvePendingClazzMember(member: ClazzMember, clazz: Clazz? = null) {
-    val effectiveClazz = clazz ?: clazzDao.findByUidAsync(member.clazzMemberClazzUid)
+suspend fun UmAppDatabase.approvePendingClazzEnrollment(enrollment: ClazzEnrollment, clazz: Clazz? = null) {
+    val effectiveClazz = clazz ?: clazzDao.findByUidAsync(enrollment.clazzEnrollmentClazzUid)
         ?: throw IllegalStateException("Class does not exist")
 
     //find the group member and update that
-    val numGroupUpdates = personGroupMemberDao.moveGroupAsync(member.clazzMemberPersonUid,
+    val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrollment.clazzEnrollmentPersonUid,
             effectiveClazz.clazzStudentsPersonGroupUid,
             effectiveClazz.clazzPendingStudentsPersonGroupUid)
 
@@ -142,8 +142,8 @@ suspend fun UmAppDatabase.approvePendingClazzMember(member: ClazzMember, clazz: 
     }
 
     //change the role
-    member.clazzMemberRole = ClazzMember.ROLE_STUDENT
-    clazzMemberDao.updateAsync(member)
+    enrollment.clazzEnrollmentRole = ClazzEnrollment.ROLE_STUDENT
+    clazzEnrollmentDao.updateAsync(enrollment)
 
 }
 
@@ -385,12 +385,12 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
 
 
 suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzWorkWithSubmission,
-                                                 clazzMemberUid: Long, responsePersonUid : Long)
+                                                 clazzEnrollmentUid: Long, responsePersonUid : Long)
         : List<ClazzWorkQuestionAndOptionWithResponse>{
 
     val questionsAndOptionsWithResponses :List<ClazzWorkQuestionAndOptionWithResponseRow> = withTimeoutOrNull(2000){
         clazzWorkQuestionDao.findAllQuestionsAndOptionsWithResponse(clazzWorkWithSubmission.clazzWorkUid?:0L,
-                clazzMemberUid)
+                clazzEnrollmentUid)
     } ?: listOf()
 
     val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
@@ -409,7 +409,7 @@ suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzW
                                 }.first()?: ClazzWorkQuestionResponse().apply {
                                     clazzWorkQuestionResponseQuestionUid = questionUid?:0L
                                     clazzWorkQuestionResponsePersonUid = responsePersonUid
-                                    clazzWorkQuestionResponseClazzMemberUid = clazzMemberUid
+                                    clazzWorkQuestionResponseClazzEnrollmentUid = clazzEnrollmentUid
                                             ?: 0L
                                     clazzWorkQuestionResponseClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
                                             ?: 0L

@@ -32,7 +32,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 
-class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzWorkWithSubmission>(),
+class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzEnrollmentAndClazzWorkWithSubmission>(),
         ClazzWorkSubmissionMarkingView, NewCommentHandler, SimpleButtonHandler,
         SimpleTwoButtonHandler{
 
@@ -40,7 +40,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
     private var mPresenter: ClazzWorkSubmissionMarkingPresenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzMemberAndClazzWorkWithSubmission>?
+    override val mEditPresenter: UstadEditPresenter<*, ClazzEnrollmentAndClazzWorkWithSubmission>?
         get() = mPresenter
 
     private lateinit var dbRepo : UmAppDatabase
@@ -147,7 +147,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWork?.clazzWorkUid?:0L, entity?.clazzMemberPersonUid?:0L
+                entity?.clazzWork?.clazzWorkUid?:0L, entity?.clazzEnrollmentPersonUid?:0L
         )
         newPrivateCommentRecyclerAdapter?.visible = true
 
@@ -248,12 +248,12 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             shortTextSubmissionRecyclerAdapter?.visible = value
         }
 
-    override var entity: ClazzMemberAndClazzWorkWithSubmission? = null
+    override var entity: ClazzEnrollmentAndClazzWorkWithSubmission? = null
         set(value) {
             field = value
 
             newPrivateCommentRecyclerAdapter?.entityUid = value?.clazzWork?.clazzWorkUid?:0L
-            newPrivateCommentRecyclerAdapter?.commentTo = value?.clazzMemberPersonUid?:0L
+            newPrivateCommentRecyclerAdapter?.commentTo = value?.clazzEnrollmentPersonUid?:0L
             newPrivateCommentRecyclerAdapter?.commentFrom = 0L
             newPrivateCommentRecyclerAdapter?.visible = true
 

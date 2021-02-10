@@ -12,7 +12,7 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var personPicture: PersonPicture?
 
-    var clazzList: DoorLiveData<List<ClazzMemberWithClazz>>?
+    var clazzList: DoorLiveData<List<ClazzEnrollmentWithClazz>>?
 
     var rolesAndPermissionsList: DoorLiveData<List<EntityRoleWithNameAndRole>>?
 

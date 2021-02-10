@@ -101,14 +101,14 @@ class ClazzWorkSubmissionMarkingPresenterTest {
 
         val accountManager: UstadAccountManager by di.instance<UstadAccountManager>()
         val teacherMember = testClazzWork.clazzAndMembers.teacherList.get(0)
-        accountManager.activeAccount.personUid = teacherMember.clazzMemberPersonUid
+        accountManager.activeAccount.personUid = teacherMember.clazzEnrollmentPersonUid
     }
 
     @Test
     fun givenSubmissionExists_whenLoaded_shouldLoadAllOk() {
 
         val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
-        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
+        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzEnrollmentUid
 
         val presenterArgs = mapOf(ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
                                 ARG_CLAZZMEMBER_UID to clazzMemberUid.toString())
@@ -117,7 +117,7 @@ class ClazzWorkSubmissionMarkingPresenterTest {
         presenter.onCreate(null)
 
         GlobalScope.launch {
-            verify(repoClazzWorkDaoSpy, timeout(5000)).findClazzMemberWithAndSubmissionWithPerson(
+            verify(repoClazzWorkDaoSpy, timeout(5000)).findClazzEnrollmentWithAndSubmissionWithPerson(
                     clazzWorkUid, clazzMemberUid)
             verify(mockView, timeout(5000)).entity = any()
         }
@@ -129,7 +129,7 @@ class ClazzWorkSubmissionMarkingPresenterTest {
     @Test
     fun givenSubmissionExistsAndLoaded_whenMarked_shouldSave() {
         val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
-        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzMemberUid
+        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzEnrollmentUid
 
         val presenterArgs = mapOf(ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
                 ARG_CLAZZMEMBER_UID to clazzMemberUid.toString())
@@ -138,7 +138,7 @@ class ClazzWorkSubmissionMarkingPresenterTest {
         presenter.onCreate(null)
 
         val member = runBlocking {
-            db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid, clazzMemberUid)
+            db.clazzWorkDao.findClazzEnrollmentWithAndSubmissionWithPerson(clazzWorkUid, clazzMemberUid)
         }
 
         member?.submission?.clazzWorkSubmissionScore = 42
@@ -147,7 +147,7 @@ class ClazzWorkSubmissionMarkingPresenterTest {
         presenter.handleClickSaveAndMarkNext(false)
         Thread.sleep(1000)
         val memberPost = runBlocking {
-            db.clazzWorkDao.findClazzMemberWithAndSubmissionWithPerson(clazzWorkUid, clazzMemberUid)
+            db.clazzWorkDao.findClazzEnrollmentWithAndSubmissionWithPerson(clazzWorkUid, clazzMemberUid)
         }
 
         Assert.assertEquals("Saving marking OK", memberPost?.submission?.clazzWorkSubmissionScore, 42)

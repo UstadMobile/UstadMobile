@@ -3,8 +3,6 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
-import android.view.View
-import android.widget.Button
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
@@ -200,11 +198,11 @@ fun TextView.setFileSize(fileSize: Long) {
 }
 
 @BindingAdapter(value=["clazzMemberWithClazzWorkAndProgress"])
-fun TextView.setClazzWorkMarking(clazzMemberWithClazzWorkAndProgress: ClazzMemberWithClazzWorkProgress){
-    var line = clazzMemberWithClazzWorkAndProgress.mClazzWorkSubmission.statusString(context)
-    if(clazzMemberWithClazzWorkAndProgress.clazzWorkHasContent && clazzMemberWithClazzWorkAndProgress.mProgress >= 0) {
+fun TextView.setClazzWorkMarking(clazzEnrollmentWithClazzWorkAndProgress: ClazzEnrollmentWithClazzWorkProgress){
+    var line = clazzEnrollmentWithClazzWorkAndProgress.mClazzWorkSubmission.statusString(context)
+    if(clazzEnrollmentWithClazzWorkAndProgress.clazzWorkHasContent && clazzEnrollmentWithClazzWorkAndProgress.mProgress >= 0) {
         line += " ${context.getString(R.string.completed)} " +
-                "${clazzMemberWithClazzWorkAndProgress.mProgress.toInt()}% " +
+                "${clazzEnrollmentWithClazzWorkAndProgress.mProgress.toInt()}% " +
                 context.getString(R.string.of_content)
     }
     text = line
@@ -238,8 +236,8 @@ fun TextView.setResponseTextFilled(responseText: String?){
 }
 
 @BindingAdapter("memberRoleName")
-fun TextView.setMemberRoleName(clazzMember: ClazzMember?) {
-    text = clazzMember?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
+fun TextView.setMemberRoleName(clazzEnrollment: ClazzEnrollment?) {
+    text = clazzEnrollment?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
 }
 
 

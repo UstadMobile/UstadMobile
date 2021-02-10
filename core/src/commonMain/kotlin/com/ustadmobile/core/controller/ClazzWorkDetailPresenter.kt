@@ -6,7 +6,7 @@ import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.ClazzEnrollment
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -45,8 +45,8 @@ class ClazzWorkDetailPresenter(context: Any,
             val clazzWork = withTimeoutOrNull(2000) {
                 db.clazzWorkDao.findByUidAsync(clazzWorkUid)
             } ?: ClazzWork()
-            val clazzMember: ClazzMember? =
-                    db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
+            val clazzEnrollment: ClazzEnrollment? =
+                    db.clazzEnrollmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                             clazzWork.clazzWorkClazzUid)
             val loggedInPerson: Person? = withTimeoutOrNull(2000){
                 db.personDao.findByUid(loggedInPersonUid)
@@ -55,11 +55,11 @@ class ClazzWorkDetailPresenter(context: Any,
                 loggedInPerson?.admin == true -> {
                     view.isStudent = false
                 }
-                clazzMember == null -> {
+                clazzEnrollment == null -> {
                     view.isStudent = false
                 }
                 else -> {
-                    view.isStudent = clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER
+                    view.isStudent = clazzEnrollment.clazzEnrollmentRole != ClazzEnrollment.ROLE_TEACHER
                 }
             }
         }
@@ -81,15 +81,15 @@ class ClazzWorkDetailPresenter(context: Any,
             return true
         }
 
-        val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
-            db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
+        val clazzEnrollment: ClazzEnrollment? = withTimeoutOrNull(2000) {
+            db.clazzEnrollmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                     entity?.clazzWorkClazzUid?: 0L)
         }
 
-        return if(clazzMember == null){
+        return if(clazzEnrollment == null){
             false
         }else{
-            clazzMember.clazzMemberRole == ClazzMember.ROLE_TEACHER
+            clazzEnrollment.clazzEnrollmentRole == ClazzEnrollment.ROLE_TEACHER
         }
 
 

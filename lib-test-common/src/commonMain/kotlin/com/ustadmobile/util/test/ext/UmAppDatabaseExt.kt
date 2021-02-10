@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.RE
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlin.random.Random
 
-data class TestClazzAndMembers (val clazz: Clazz, val teacherList: List<ClazzMember>, val studentList: List<ClazzMember>)
+data class TestClazzAndMembers (val clazz: Clazz, val teacherList: List<ClazzEnrollment>, val studentList: List<ClazzEnrollment>)
 data class TestClazzWork(val clazzAndMembers: TestClazzAndMembers, val clazzWork: ClazzWork,
             val quizQuestionsAndOptions: TestClazzWorkWithQuestionAndOptionsAndResponse? = null,
                          val submissions: List<ClazzWorkSubmission>? = mutableListOf())
@@ -19,9 +19,9 @@ data class TestContentAndJoin(val contentList : List<ContentEntry> ,
                                val joinList: List<ClazzWorkContentJoin>)
 
 
-private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime: Long): ClazzMember {
-    return ClazzMember(clazzUid, this.personUid, clazzMemberRole).apply {
-        clazzMemberDateJoined = joinTime
+private fun Person.asClazzMember(clazzUid: Long, clazzMemberRole: Int, joinTime: Long): ClazzEnrollment {
+    return ClazzEnrollment(clazzUid, this.personUid, clazzMemberRole).apply {
+        clazzEnrollmentDateJoined = joinTime
     }
 }
 
@@ -50,7 +50,7 @@ suspend fun UmAppDatabase.insertPublicAndPrivateComments(dateNow: Long, clazzWor
             }else{
                 commentsText = "Private comment $index"
             }
-            commentsPersonUid = student.clazzMemberPersonUid
+            commentsPersonUid = student.clazzEnrollmentPersonUid
             commentsInActive = false
             commentsDateTimeAdded = dateNow
             commentsUid = commentsDao.insertAsync(this)
@@ -144,7 +144,7 @@ suspend fun UmAppDatabase.insertQuizQuestionsAndOptions(
                                 }
                             }
                             clazzWorkQuestionResponsePersonUid = personUid
-                            clazzWorkQuestionResponseClazzMemberUid = clazzMemberUid
+                            clazzWorkQuestionResponseClazzEnrollmentUid = clazzMemberUid
                             clazzWorkQuestionResponseInactive = false
                             //TODO: Dates
                             clazzWorkQuestionResponseDateResponded = 0
@@ -170,7 +170,7 @@ suspend fun UmAppDatabase.insertQuizQuestionsAndOptions(
                                     }
                                 }
                                 clazzWorkQuestionResponsePersonUid = person2Uid
-                                clazzWorkQuestionResponseClazzMemberUid = clazzMember2Uid
+                                clazzWorkQuestionResponseClazzEnrollmentUid = clazzMember2Uid
                                 clazzWorkQuestionResponseInactive = false
                                 //TODO: Dates
                                 clazzWorkQuestionResponseDateResponded = 0
@@ -244,27 +244,27 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
     }
 
     //Getting member
-    val clazzMember: ClazzMember
+    val clazzEnrollment: ClazzEnrollment
 
     val studentClazzMember = clazzAndMembers.studentList.get(1)
     val student2ClazzMember = clazzAndMembers.studentList.get(3)
     val teacherClazzMember = clazzAndMembers.teacherList.get(0)
 
     if(isStudentToClazz){
-        clazzMember = clazzAndMembers.studentList.get(0)
+        clazzEnrollment = clazzAndMembers.studentList.get(0)
     }else{
-        clazzMember = clazzAndMembers.teacherList.get(0)
+        clazzEnrollment = clazzAndMembers.teacherList.get(0)
     }
 
     var quizQuestionsAndOptions: TestClazzWorkWithQuestionAndOptionsAndResponse? = null
     if(clazzWork.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
         if(multipleSubmissions){
-            quizQuestionsAndOptions = insertQuizQuestionsAndOptions(clazzWork, responded, studentClazzMember.clazzMemberUid,
-                    studentClazzMember.clazzMemberPersonUid, quizQuestionType, quizQuestionTypeMixed, partialFilled,
-            student2ClazzMember.clazzMemberUid, student2ClazzMember.clazzMemberPersonUid)
+            quizQuestionsAndOptions = insertQuizQuestionsAndOptions(clazzWork, responded, studentClazzMember.clazzEnrollmentUid,
+                    studentClazzMember.clazzEnrollmentPersonUid, quizQuestionType, quizQuestionTypeMixed, partialFilled,
+            student2ClazzMember.clazzEnrollmentUid, student2ClazzMember.clazzEnrollmentPersonUid)
         }else {
-            quizQuestionsAndOptions = insertQuizQuestionsAndOptions(clazzWork, responded, studentClazzMember.clazzMemberUid,
-                    studentClazzMember.clazzMemberPersonUid, quizQuestionType, quizQuestionTypeMixed, partialFilled)
+            quizQuestionsAndOptions = insertQuizQuestionsAndOptions(clazzWork, responded, studentClazzMember.clazzEnrollmentUid,
+                    studentClazzMember.clazzEnrollmentPersonUid, quizQuestionType, quizQuestionTypeMixed, partialFilled)
 
         }
 
@@ -275,11 +275,11 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
     if(submitted ){
         ClazzWorkSubmission().apply {
             clazzWorkSubmissionClazzWorkUid = clazzWork.clazzWorkUid
-            clazzWorkSubmissionClazzMemberUid = studentClazzMember.clazzMemberUid
-            clazzWorkSubmissionPersonUid = studentClazzMember.clazzMemberPersonUid
+            clazzWorkSubmissionClazzEnrollmentUid = studentClazzMember.clazzEnrollmentUid
+            clazzWorkSubmissionPersonUid = studentClazzMember.clazzEnrollmentPersonUid
             if(marked) {
-                clazzWorkSubmissionMarkerPersonUid = teacherClazzMember.clazzMemberPersonUid
-                clazzWorkSubmissionMarkerClazzMemberUid = teacherClazzMember.clazzMemberUid
+                clazzWorkSubmissionMarkerPersonUid = teacherClazzMember.clazzEnrollmentPersonUid
+                clazzWorkSubmissionMarkerClazzEnrollmentUid = teacherClazzMember.clazzEnrollmentUid
                 clazzWorkSubmissionScore = 89
                 clazzWorkSubmissionDateTimeMarked = dateNow
             }
@@ -298,11 +298,11 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
         if(multipleSubmissions){
             ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWork.clazzWorkUid
-                clazzWorkSubmissionClazzMemberUid = student2ClazzMember.clazzMemberUid
-                clazzWorkSubmissionPersonUid = student2ClazzMember.clazzMemberPersonUid
+                clazzWorkSubmissionClazzEnrollmentUid = student2ClazzMember.clazzEnrollmentUid
+                clazzWorkSubmissionPersonUid = student2ClazzMember.clazzEnrollmentPersonUid
                 if(marked) {
-                    clazzWorkSubmissionMarkerPersonUid = teacherClazzMember.clazzMemberPersonUid
-                    clazzWorkSubmissionMarkerClazzMemberUid = teacherClazzMember.clazzMemberUid
+                    clazzWorkSubmissionMarkerPersonUid = teacherClazzMember.clazzEnrollmentPersonUid
+                    clazzWorkSubmissionMarkerClazzEnrollmentUid = teacherClazzMember.clazzEnrollmentUid
                     clazzWorkSubmissionDateTimeMarked = dateNow
                 }
                 clazzWorkSubmissionInactive = false
@@ -347,14 +347,14 @@ suspend fun UmAppDatabase.insertTestClazzAndMembers(numClazzStudents: Int, numCl
     }
 
     val testStudentClazzMembers = testStudents.map {
-        it.asClazzMember(mockClazz.clazzUid, ClazzMember.ROLE_STUDENT, clazzJoinTime).apply {
-            clazzMemberUid = clazzMemberDao.insertAsync(this)
+        it.asClazzMember(mockClazz.clazzUid, ClazzEnrollment.ROLE_STUDENT, clazzJoinTime).apply {
+            clazzEnrollmentUid = clazzEnrollmentDao.insertAsync(this)
         }
     }
 
     val testTeacherClazzMembers = testTeachers.map {
-        it.asClazzMember(mockClazz.clazzUid, ClazzMember.ROLE_TEACHER, clazzJoinTime).apply {
-            clazzMemberUid = clazzMemberDao.insertAsync(this)
+        it.asClazzMember(mockClazz.clazzUid, ClazzEnrollment.ROLE_TEACHER, clazzJoinTime).apply {
+            clazzEnrollmentUid = clazzEnrollmentDao.insertAsync(this)
         }
     }
 
@@ -486,34 +486,34 @@ suspend fun UmAppDatabase.insertTestStatements() {
         clazzDao.insert(this)
     }
 
-     ClazzMember().apply {
-        clazzMemberPersonUid = firstPerson.personUid
-        clazzMemberClazzUid = arabicClazz.clazzUid
-         clazzMemberUid = clazzMemberDao.insert(this)
+     ClazzEnrollment().apply {
+        clazzEnrollmentPersonUid = firstPerson.personUid
+        clazzEnrollmentClazzUid = arabicClazz.clazzUid
+         clazzEnrollmentUid = clazzEnrollmentDao.insert(this)
     }
 
-    ClazzMember().apply {
-        clazzMemberPersonUid = firstPerson.personUid
-        clazzMemberClazzUid = scienceClazz.clazzUid
-        clazzMemberUid = clazzMemberDao.insert(this)
+    ClazzEnrollment().apply {
+        clazzEnrollmentPersonUid = firstPerson.personUid
+        clazzEnrollmentClazzUid = scienceClazz.clazzUid
+        clazzEnrollmentUid = clazzEnrollmentDao.insert(this)
     }
 
-    ClazzMember().apply {
-        clazzMemberPersonUid = secondPerson.personUid
-        clazzMemberClazzUid = arabicClazz.clazzUid
-        clazzMemberUid = clazzMemberDao.insert(this)
+    ClazzEnrollment().apply {
+        clazzEnrollmentPersonUid = secondPerson.personUid
+        clazzEnrollmentClazzUid = arabicClazz.clazzUid
+        clazzEnrollmentUid = clazzEnrollmentDao.insert(this)
     }
 
-    ClazzMember().apply {
-        clazzMemberPersonUid = thirdPerson.personUid
-        clazzMemberClazzUid = arabicClazz.clazzUid
-        clazzMemberUid = clazzMemberDao.insert(this)
+    ClazzEnrollment().apply {
+        clazzEnrollmentPersonUid = thirdPerson.personUid
+        clazzEnrollmentClazzUid = arabicClazz.clazzUid
+        clazzEnrollmentUid = clazzEnrollmentDao.insert(this)
     }
 
-    ClazzMember().apply {
-        clazzMemberPersonUid = fourthPerson.personUid
-        clazzMemberClazzUid = scienceClazz.clazzUid
-        clazzMemberUid = clazzMemberDao.insert(this)
+    ClazzEnrollment().apply {
+        clazzEnrollmentPersonUid = fourthPerson.personUid
+        clazzEnrollmentClazzUid = scienceClazz.clazzUid
+        clazzEnrollmentUid = clazzEnrollmentDao.insert(this)
     }
 
 

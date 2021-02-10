@@ -648,7 +648,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/classes_heading_textview"
                 tools:itemCount="2"
-                tools:listitem="@layout/item_clazz_member_with_clazz_detail"
+                tools:listitem="@layout/item_clazz_enrollment_with_clazz_detail"
                 tools:visibility="visible" />
 
             <TextView

@@ -4,11 +4,11 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionScoreEditBinding
-import com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission
+import com.ustadmobile.lib.db.entities.ClazzEnrollmentAndClazzWorkWithSubmission
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
-class ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWork: ClazzMemberAndClazzWorkWithSubmission?)
+class ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWork: ClazzEnrollmentAndClazzWorkWithSubmission?)
     : SingleItemRecyclerViewAdapter<ClazzWorkSubmissionScoreEditRecyclerAdapter.ScoreEditViewHolder>() {
 
     class ScoreEditViewHolder(var itemBinding: ItemClazzworkSubmissionScoreEditBinding)
@@ -16,7 +16,7 @@ class ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWork: ClazzMemberAndClazz
 
     private var viewHolder: ScoreEditViewHolder? = null
 
-    var clazzWorkVal : ClazzMemberAndClazzWorkWithSubmission? = clazzWork
+    var clazzWorkVal : ClazzEnrollmentAndClazzWorkWithSubmission? = clazzWork
         set(value){
             if(field == value)
                 return

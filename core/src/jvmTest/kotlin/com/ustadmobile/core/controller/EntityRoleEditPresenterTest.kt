@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzMemberDao
+import com.ustadmobile.core.db.dao.ClazzEnrollmentDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
@@ -35,7 +35,7 @@ class EntityRoleEditPresenterTest {
 
     private lateinit var clazzToEnrolInto: Clazz
 
-    private lateinit var clazzMemberRepoDaoSpy: ClazzMemberDao
+    private lateinit var clazzEnrollmentRepoDaoSpy: ClazzEnrollmentDao
 
     private lateinit var accountManager: UstadAccountManager
 
@@ -63,8 +63,8 @@ class EntityRoleEditPresenterTest {
         accountManager.activeAccount = UmAccount(42L, "testuser", endpointUrl = currentEndpoint)
 
         val repo: UmAppDatabase by di.activeRepoInstance()
-        clazzMemberRepoDaoSpy = spy(repo.clazzMemberDao)
-        whenever(repo.clazzMemberDao).thenReturn(clazzMemberRepoDaoSpy)
+        clazzEnrollmentRepoDaoSpy = spy(repo.clazzEnrollmentDao)
+        whenever(repo.clazzEnrollmentDao).thenReturn(clazzEnrollmentRepoDaoSpy)
 
         repo.personDao.insert(Person().apply {
             firstNames = "Test"

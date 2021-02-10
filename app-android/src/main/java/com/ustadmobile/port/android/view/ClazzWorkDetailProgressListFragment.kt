@@ -16,13 +16,13 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
+import com.ustadmobile.lib.db.entities.ClazzEnrollmentWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
-class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWithClazzWorkProgress,
-        ClazzMemberWithClazzWorkProgress>(), ClazzWorkDetailProgressListView {
+class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzEnrollmentWithClazzWorkProgress,
+        ClazzEnrollmentWithClazzWorkProgress>(), ClazzWorkDetailProgressListView {
 
     private var mPresenter: ClazzWorkDetailProgressListPresenter? = null
 
@@ -36,7 +36,7 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWit
         metricsRecyclerAdapter?.submitList(t)
     }
 
-    override val listPresenter: UstadListPresenter<*, in ClazzMemberWithClazzWorkProgress>?
+    override val listPresenter: UstadListPresenter<*, in ClazzEnrollmentWithClazzWorkProgress>?
         get() = mPresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,

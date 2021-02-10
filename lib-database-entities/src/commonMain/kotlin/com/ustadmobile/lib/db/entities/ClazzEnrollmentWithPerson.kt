@@ -4,10 +4,10 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 /**
- * POJO representing Person and ClazzMember
+ * POJO representing Person and ClazzEnrollment
  */
 @Serializable
-class ClazzMemberWithPerson : ClazzMember() {
+class ClazzEnrollmentWithPerson : ClazzEnrollment() {
 
     @Embedded
     var person: Person? = null

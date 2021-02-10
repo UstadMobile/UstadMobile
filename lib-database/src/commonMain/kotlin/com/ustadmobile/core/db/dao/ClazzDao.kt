@@ -2,15 +2,14 @@ package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.Dao
-import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLog.Companion.STATUS_RECORDED
-import com.ustadmobile.lib.db.entities.ClazzMember.Companion.ROLE_STUDENT
-import com.ustadmobile.lib.db.entities.ClazzMember.Companion.ROLE_TEACHER
+import com.ustadmobile.lib.db.entities.ClazzEnrollment.Companion.ROLE_STUDENT
+import com.ustadmobile.lib.db.entities.ClazzEnrollment.Companion.ROLE_TEACHER
 
 @Repository
 @Dao
@@ -70,9 +69,9 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     }
 
     @Query("""
-        SELECT Clazz.*, ClazzMember.*,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = ${ClazzMember.ROLE_STUDENT}) AS numStudents,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = ${ClazzMember.ROLE_TEACHER}) AS numTeachers,
+        SELECT Clazz.*, ClazzEnrollment.*,
+        (SELECT COUNT(*) FROM ClazzEnrollment WHERE ClazzEnrollment.clazzEnrollmentClazzUid = Clazz.clazzUid AND clazzEnrollmentRole = ${ROLE_STUDENT}) AS numStudents,
+        (SELECT COUNT(*) FROM ClazzEnrollment WHERE ClazzEnrollment.clazzEnrollmentClazzUid = Clazz.clazzUid AND clazzEnrollmentRole = ${ROLE_TEACHER}) AS numTeachers,
         '' AS teacherNames,
         0 AS lastRecorded
         FROM 
@@ -83,11 +82,11 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
             CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = :personUid) AS INTEGER) = 1
             OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) 
             OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
-        LEFT JOIN ClazzMember ON ClazzMember.clazzMemberUid =
-            COALESCE((SELECT ClazzMember.clazzMemberUid FROM ClazzMember
+        LEFT JOIN ClazzEnrollment ON ClazzEnrollment.clazzEnrollmentUid =
+            COALESCE((SELECT ClazzEnrollment.clazzEnrollmentUid FROM ClazzEnrollment
              WHERE
-             ClazzMember.clazzMemberPersonUid = :personUid
-             AND ClazzMember.clazzMemberClazzUid = Clazz.clazzUid LIMIT 1), 0)
+             ClazzEnrollment.clazzEnrollmentPersonUid = :personUid
+             AND ClazzEnrollment.clazzEnrollmentClazzUid = Clazz.clazzUid LIMIT 1), 0)
         WHERE
         PersonGroupMember.groupMemberPersonUid = :personUid
         AND CAST(Clazz.isClazzActive AS INTEGER) = 1
@@ -95,7 +94,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
         AND ( :filter != $FILTER_ACTIVE_ONLY OR (:currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime))
-        GROUP BY Clazz.clazzUid, ClazzMember.clazzMemberUid
+        GROUP BY Clazz.clazzUid, ClazzEnrollment.clazzEnrollmentUid
         ORDER BY CASE :sortOrder
             WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
             ELSE 0
@@ -142,8 +141,8 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                                                       permission: Long) : Boolean
 
     @Query("""SELECT Clazz.*, HolidayCalendar.*, School.*,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = $ROLE_STUDENT) AS numStudents,
-        (SELECT COUNT(*) FROM ClazzMember WHERE ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND clazzMemberRole = $ROLE_TEACHER) AS numTeachers
+        (SELECT COUNT(*) FROM ClazzEnrollment WHERE ClazzEnrollment.clazzEnrollmentClazzUid = Clazz.clazzUid AND clazzEnrollmentRole = $ROLE_STUDENT) AS numStudents,
+        (SELECT COUNT(*) FROM ClazzEnrollment WHERE ClazzEnrollment.clazzEnrollmentClazzUid = Clazz.clazzUid AND clazzEnrollmentRole = $ROLE_TEACHER) AS numTeachers
         FROM Clazz 
         LEFT JOIN HolidayCalendar ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
         LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid

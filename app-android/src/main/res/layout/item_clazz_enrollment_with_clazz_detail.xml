@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <import type="com.ustadmobile.core.controller.ClazzMemberConstants"/>
+        <import type="com.ustadmobile.core.controller.ClazzEnrollmentConstants"/>
 
-        <variable name="clazzMemberWithClazz"
-            type="com.ustadmobile.lib.db.entities.ClazzMemberWithClazz" />
+        <variable name="clazzEnrollmentWithClazz"
+            type="com.ustadmobile.lib.db.entities.ClazzEnrollmentWithClazz" />
 
         <variable name="mPresenter" type="com.ustadmobile.core.controller.PersonDetailPresenter" />
 
@@ -17,7 +17,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="@{() -> mPresenter.handleClickClazz(clazzMemberWithClazz)}"
+        android:onClick="@{() -> mPresenter.handleClickClazz(clazzEnrollmentWithClazz)}"
         android:background="?attr/selectableItemBackground">
 
         <!-- TODO: Make this show the class picture when it is available -->
@@ -37,7 +37,7 @@
             android:id="@+id/item_clazzmemberwithclazz_line1_text"
             android:layout_width="@dimen/dimen_0dp"
             android:layout_height="wrap_content"
-            android:text="@{clazzMemberWithClazz.clazz.clazzName}"
+            android:text="@{clazzEnrollmentWithClazz.clazz.clazzName}"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -50,8 +50,8 @@
         <TextView android:id="@+id/item_clazzmemberwithclazz_line2_text"
             android:layout_width="@dimen/dimen_0dp"
             android:layout_height="wrap_content"
-            app:textMessageIdLookupKey="@{clazzMemberWithClazz.clazzMemberRole}"
-            app:textMessageIdLookupMap="@{ClazzMemberConstants.ROLE_MESSAGE_ID_OTIONS}"
+            app:textMessageIdLookupKey="@{clazzEnrollmentWithClazz.clazzEnrollmentRole}"
+            app:textMessageIdLookupMap="@{ClazzEnrollmentConstants.ROLE_MESSAGE_ID_OPTIONS}"
             app:layout_constraintStart_toStartOf="@+id/item_clazzmemberwithclazz_line1_text"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzmemberwithclazz_line1_text"
             app:layout_constraintEnd_toEndOf="parent"

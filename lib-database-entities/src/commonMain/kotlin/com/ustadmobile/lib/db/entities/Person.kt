@@ -34,12 +34,12 @@ import kotlinx.serialization.Serializable
          LEFT JOIN Person ON CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = DeviceSession.dsPersonUid) AS INTEGER) = 1
              OR (Person.personUid = DeviceSession.dsPersonUid)
              OR ((EntityRole.erTableId= ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid)
-             OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))
+             OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrollmentClazzUid FROM ClazzEnrollment WHERE clazzEnrollmentPersonUid = Person.personUid))
              OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid)) OR
              (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
              SELECT DISTINCT Clazz.clazzSchoolUid 
              FROM Clazz
-             JOIN ClazzMember ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberPersonUid = Person.personUid
+             JOIN ClazzEnrollment ON ClazzEnrollment.clazzEnrollmentClazzUid = Clazz.clazzUid AND ClazzEnrollment.clazzEnrollmentPersonUid = Person.personUid
              )))
          WHERE
          DeviceSession.dsDeviceId = :clientId
@@ -200,12 +200,12 @@ open class Person() {
             OR
             (
             ((EntityRole.erTableId = ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid) OR 
-            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid)) OR
+            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrollmentClazzUid FROM ClazzEnrollment WHERE clazzEnrollmentPersonUid = Person.personUid)) OR
             (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.PersonUid)) OR
             (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
                 SELECT DISTINCT Clazz.clazzSchoolUid 
                 FROM Clazz
-                JOIN ClazzMember ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberPersonUid = Person.personUid
+                JOIN ClazzEnrollment ON ClazzEnrollment.clazzEnrollmentClazzUid = Clazz.clazzUid AND ClazzEnrollment.clazzEnrollmentPersonUid = Person.personUid
             ))
             ) 
             AND (Role.rolePermissions & 
@@ -224,12 +224,12 @@ open class Person() {
              CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = :accountPersonUid) AS INTEGER) = 1
                  OR (Person.personUid = :accountPersonUid)
                  OR ((EntityRole.erTableId= ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid)
-                 OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid))
+                 OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrollmentClazzUid FROM ClazzEnrollment WHERE clazzEnrollmentPersonUid = Person.personUid))
                  OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid)) OR
                  (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
                  SELECT DISTINCT Clazz.clazzSchoolUid 
                  FROM Clazz
-                 JOIN ClazzMember ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberPersonUid = Person.personUid
+                 JOIN ClazzEnrollment ON ClazzEnrollment.clazzEnrollmentClazzUid = Clazz.clazzUid AND ClazzEnrollment.clazzEnrollmentPersonUid = Person.personUid
                  )))"""
 
 
