@@ -15,6 +15,7 @@ import java.util.*
 /**
  * Utility function to set a datefield that uses our two-way data binding
  */
+@Deprecated("Use KEditTextExt.setDateWithDialog instead")
 fun setDateField(viewId: Int, timeInMillis: Long, timeZoneId: String = "UTC") {
     KView {
         withId(viewId)

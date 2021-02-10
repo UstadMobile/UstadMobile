@@ -31,4 +31,16 @@ annotation class SyncableEntity(
         val notifyOnUpdate: Array<String> = [],
 
 
-        val syncFindAllQuery: String = "")
+        val syncFindAllQuery: String = "",
+
+        /**
+         * The number of entities to receive at a time when syncing. If the entity has
+         * attachments it might be sensible to reduce this.
+         */
+        val receiveBatchSize: Int = 1000,
+
+        /**
+         * The number of entities to send at a time when syncing. If the entity has
+         * attachments it might be sensible to reduce this.
+         */
+        val sendBatchSize: Int = 1000)

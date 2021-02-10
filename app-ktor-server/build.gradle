@@ -67,6 +67,7 @@ kotlin {
                   implementation project(":lib-database-mpp")
                   implementation project(":lib-door-runtime")
                   implementation project(":lib-room-annotations")
+                  implementation project(":lib-database-annotations")
                   implementation project(":lib-database-entities")
                   implementation project(":lib-util")
                   implementation project(":lib-content-scrapers")

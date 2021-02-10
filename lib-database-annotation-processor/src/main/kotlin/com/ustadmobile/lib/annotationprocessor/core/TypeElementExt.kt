@@ -279,6 +279,12 @@ val TypeElement.syncableEntityFindAllHasClientIdParam: Boolean
     get() = getAnnotation(SyncableEntity::class.java).syncFindAllQuery.contains(":clientId")
 
 
+val TypeElement.syncableEntityFindAllHasMaxResultsParam: Boolean
+    get() = getAnnotation(SyncableEntity::class.java).syncFindAllQuery.let {
+        it.contains(":maxResults") || it == "" //A blank query would automatically have maxResults added
+    }
+
+
 /**
  * Shorthand to check if this is an entity that has attachments
  */

@@ -83,17 +83,17 @@ class RoleEditFragmentTest : TestCase() {
 
                 fillFields(fragmentScenario, formVals, currentEntity)
 
-
                 val repo = dbRule.repo as DoorDatabaseSyncRepository
                 repo.clientId
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-                val roles = dbRule.db.roleDao.findAllActiveRolesLive().waitUntilWithFragmentScenario(fragmentScenario) {
-                    it.isNotEmpty()
+                flakySafely(timeoutMs = 10000, intervalMs = 1000) {
+                    val roles = dbRule.db.roleDao.findAllActiveRolesLive().waitUntilWithFragmentScenario(fragmentScenario) {
+                        it.isNotEmpty()
+                    }
+
+                    Assert.assertEquals("Role data set", "Role C", roles!!.first().roleName)
                 }
-
-                Assert.assertEquals("Role data set", "Role C", roles!!.first().roleName)
-
             }
 
         }

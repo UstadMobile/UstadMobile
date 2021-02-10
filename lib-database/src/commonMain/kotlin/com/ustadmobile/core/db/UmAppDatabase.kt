@@ -55,7 +55,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 156)
+], version = 157)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -3694,6 +3694,16 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_156_157 = object: DoorMigration(156, 157) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("""
+                    UPDATE ContainerEntryFile SET 
+                    cefPath = REPLACE(cefPath, '/build/storage/singleton/container/', '/data/singleton/container/')
+                    WHERE cefPath LIKE '%/build/storage/singleton/container/%'
+                """.trimIndent())
+            }
+        }
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
@@ -3703,9 +3713,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
                     MIGRATION_51_52, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
-                    MIGRATION_155_156)
-
-
+                    MIGRATION_155_156, MIGRATION_156_157)
 
 
             return builder

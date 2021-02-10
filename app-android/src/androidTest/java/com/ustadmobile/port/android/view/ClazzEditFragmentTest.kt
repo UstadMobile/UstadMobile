@@ -1,7 +1,11 @@
 package com.ustadmobile.port.android.view
 
+import android.widget.DatePicker
 import androidx.core.os.bundleOf
+import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
+import androidx.navigation.fragment.findNavController
+import com.agoda.kakao.picker.date.KDatePicker
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
@@ -25,9 +29,12 @@ import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
+import org.hamcrest.CoreMatchers
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
+import java.text.DateFormat
+import java.util.*
 
 @AdbScreenRecord("Class edit screen tests")
 class ClazzEditFragmentTest : TestCase() {
@@ -58,45 +65,64 @@ class ClazzEditFragmentTest : TestCase() {
     @AdbScreenRecord("")
     @Test
     fun givenNoClazzPresentYet_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
+        val existingHolidayCal = HolidayCalendar().apply {
+            umCalendarName = "Demo Calendar"
+            umCalendarUid = dbRule.repo.holidayCalendarDao.insert(this)
+        }
+
+        lateinit  var fragmentScenario: FragmentScenario<ClazzEditFragment>
         init {
-
-        }.run {
-
-            val existingHolidayCal = HolidayCalendar().apply {
-                umCalendarName = "Demo Calendar"
-                umCalendarUid = dbRule.repo.holidayCalendarDao.insert(this)
-            }
-
-            val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
+            fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
                 ClazzEditFragment().also {
                     it.installNavController(systemImplNavRule.navController)
                     it.arguments = bundleOf()
                 }
             }
-
-
-            val currentEntity = fragmentScenario.waitUntilLetOnFragment { it.entity }
-
-            val formVals = ClazzWithHolidayCalendarAndSchool().apply {
-                clazzName = "New Clazz"
-                clazzDesc = "Description"
-                clazzStartTime = (DateTime.now().toOffsetByTimezone("Asia/Dubai").localMidnight - 7.days).utc.unixMillisLong
-                clazzEndTime = (DateTime.now().toOffsetByTimezone("Asia/Dubai").localMidnight - 30.days).utc.unixMillisLong
-                holidayCalendar = existingHolidayCal
-            }
-
-            val schedules = listOf(Schedule().apply {
-                scheduleDay = Schedule.DAY_MONDAY
-                sceduleStartTime = 8.hours.millisecondsLong
-                scheduleEndTime = 10.hours.millisecondsLong
-                scheduleFrequency = Schedule.SCHEDULE_FREQUENCY_WEEKLY
-                scheduleActive = true
-            })
-
+        }.run {
             ClazzEditScreen {
+                editNameLayout {
+                    edit {
+                        typeText("New Clazz")
+                    }
+                }
 
-                fillFields(fragmentScenario, formVals, currentEntity, schedules)
+                editDescTextInput {
+                    edit {
+                        typeText("Description")
+                    }
+                }
 
+                clazzStartTextInput {
+                    edit {
+                        setDateWithDialog(System.currentTimeMillis() - (30 * MS_PER_DAY),
+                                TimeZone.getDefault().id)
+                    }
+                }
+
+                clazzEndTextInput {
+                    edit {
+                        setDateWithDialog(System.currentTimeMillis() - (7 * MS_PER_DAY),
+                                TimeZone.getDefault().id)
+                    }
+                }
+
+                fragmentScenario.onFragment {
+                    val schedule = Schedule().apply {
+                        scheduleDay = Schedule.DAY_MONDAY
+                        sceduleStartTime = 8.hours.millisecondsLong
+                        scheduleEndTime = 10.hours.millisecondsLong
+                        scheduleFrequency = Schedule.SCHEDULE_FREQUENCY_WEEKLY
+                        scheduleActive = true
+                    }
+
+                    it.findNavController().currentBackStackEntry?.savedStateHandle
+                            ?.set("Schedule", defaultGson().toJson(listOf(schedule)))
+                }
+
+                fragmentScenario.onFragment {fragment ->
+                    fragment.findNavController().currentBackStackEntry?.savedStateHandle
+                            ?.set("HolidayCalendar", defaultGson().toJson(listOf(existingHolidayCal)))
+                }
 
                 val repo = dbRule.repo as DoorDatabaseSyncRepository
                 repo.clientId
@@ -108,7 +134,7 @@ class ClazzEditFragmentTest : TestCase() {
 
                 Assert.assertEquals("Clazz data set", "New Clazz", clazzes!!.first().clazzName)
 
-                Assert.assertEquals("Schedules in database are set for class", schedules.size,
+                Assert.assertEquals("Schedules in database are set for class", 1,
                         dbRule.db.scheduleDao.findAllSchedulesByClazzUidAsLiveList(clazzes.first().clazzUid)
                                 .waitUntilWithFragmentScenario(fragmentScenario) { it.isNotEmpty() }?.size)
             }
@@ -170,6 +196,10 @@ class ClazzEditFragmentTest : TestCase() {
 
             }
         }
+    }
+
+    companion object {
+        const val MS_PER_DAY : Long = (1000 * 60 * 60 * 24)
     }
 
 }

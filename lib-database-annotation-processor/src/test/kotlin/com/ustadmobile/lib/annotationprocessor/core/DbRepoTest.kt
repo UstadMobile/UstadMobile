@@ -910,4 +910,79 @@ class DbRepoTest {
 
     }
 
+    @Test
+    fun givenMoreEntitiesOnServerThanBatchSize_whenConnected_thenShouldSyncAllEntities() {
+        mockUpdateNotificationManager = spy(ServerUpdateNotificationManagerImpl())
+        setupClientAndServerDb(mockUpdateNotificationManager)
+
+        val syncableEntityList = (0 .. 3000).map {
+            ExampleSyncableEntity().apply {
+                esNumber = it
+                esName = "entity $it"
+                publik = true
+            }
+        }
+        serverRepo.exampleSyncableDao().insertList(syncableEntityList)
+        val allEntitiesOnServer = serverDb!!.exampleSyncableDao().findAll()
+
+        val clientRepo = clientDb.asRepository(Any(), "http://localhost:8089/",
+                "token", httpClient, attachmentsDir = tmpAttachmentsDir.absolutePath,
+                useClientSyncManager = true)
+                .asConnectedRepository()
+
+        runBlocking {
+            clientDb.waitUntil(10000, listOf("ExampleSyncableEntity")) {
+                clientDb.exampleSyncableDao().findAll().size == syncableEntityList.size
+            }
+        }
+
+        val entitiesInClientDb = clientDb.exampleSyncableDao().findAll()
+        Assert.assertEquals("Same number of entities in client db locally as server db",
+            syncableEntityList.size, entitiesInClientDb.size)
+
+        Assert.assertTrue("All entities from server are in client",
+                allEntitiesOnServer.all { serverEntity ->
+                    entitiesInClientDb.any { it.esUid == serverEntity.esUid  }
+                })
+    }
+
+    @Test
+    fun givenMoreEntitiesOnClientThanBatchSize_whenConnected_thenShouldSyncAll() {
+        mockUpdateNotificationManager = spy(ServerUpdateNotificationManagerImpl())
+        setupClientAndServerDb(mockUpdateNotificationManager)
+
+        val syncableEntityList = (0 .. 3000).map {
+            ExampleSyncableEntity().apply {
+                esNumber = it
+                esName = "entity $it"
+                publik = true
+            }
+        }
+
+
+        val clientRepo = clientDb.asRepository(Any(), "http://localhost:8089/",
+                "token", httpClient, attachmentsDir = tmpAttachmentsDir.absolutePath,
+                useClientSyncManager = true)
+                .asConnectedRepository()
+
+        clientRepo.exampleSyncableDao().insertList(syncableEntityList)
+
+        val entitiesInClientDb = clientDb.exampleSyncableDao().findAll()
+
+
+        runBlocking {
+            serverDb!!.waitUntil(10000, listOf("ExampleSyncableEntity")){
+                serverDb!!.exampleSyncableDao().findAll().size == syncableEntityList.size
+            }
+        }
+
+        val entitiesInServerDb = serverDb!!.exampleSyncableDao().findAll()
+        Assert.assertEquals("Number of entities on server is the same as client",
+                syncableEntityList.size, entitiesInServerDb.size)
+        Assert.assertTrue("All entities from client db are in server db",
+                entitiesInClientDb.all { clientEntity ->
+            entitiesInServerDb.any { it.esUid == clientEntity.esUid }
+        })
+    }
+
 }

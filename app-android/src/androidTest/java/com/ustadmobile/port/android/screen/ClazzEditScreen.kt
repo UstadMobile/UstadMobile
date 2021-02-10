@@ -24,6 +24,10 @@ object ClazzEditScreen : KScreen<ClazzEditScreen>() {
 
     val holidayCalendarTextInput = KTextInputLayout { withId(R.id.activity_clazz_edit_holiday_calendar_selected)}
 
+    val clazzStartTextInput = KTextInputLayout { withId(R.id.activity_clazz_edit_start_date_edittext) }
+
+    val clazzEndTextInput = KTextInputLayout { withId(R.id.activity_clazz_edit_end_date_edittext) }
+
     fun fillFields(fragmentScenario: FragmentScenario<ClazzEditFragment>,
                    clazz: ClazzWithHolidayCalendarAndSchool,
                    clazzOnForm: ClazzWithHolidayCalendarAndSchool?,
@@ -46,14 +50,6 @@ object ClazzEditScreen : KScreen<ClazzEditScreen>() {
                 }
             }
         }
-
-        clazz.clazzStartTime.takeIf { it != clazzOnForm?.clazzStartTime }?.also {
-            setDateField(R.id.activity_clazz_edit_start_date_edittext, it)
-        }
-        clazz.clazzEndTime.takeIf { it != clazzOnForm?.clazzEndTime}?.also {
-            setDateField(R.id.activity_clazz_edit_end_date_edittext, it)
-        }
-
 
         if(!setFieldsRequiringNavigation) {
             return
