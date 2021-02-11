@@ -9,6 +9,8 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.DoorDbType
 import javax.annotation.processing.ProcessingEnvironment
+import com.ustadmobile.door.annotation.AttachmentUri
+import javax.lang.model.element.ElementKind
 
 /**
  * Provides the appropriate SQL type name as a string for this type name
@@ -38,6 +40,9 @@ internal fun TypeName.toSqlType(dbType: Int = 0) = when {
 internal fun TypeName.isDataSourceFactory(paramTypeFilter: (List<TypeName>) -> Boolean = {true}) = this is ParameterizedTypeName
         && this.rawType == DataSource.Factory::class.asClassName() && paramTypeFilter(this.typeArguments)
 
+
+internal fun TypeName.isDataSourceFactoryOrLiveData() = this is ParameterizedTypeName
+        && (this.rawType == DataSource.Factory::class.asClassName() || this.rawType == DoorLiveData::class.asClassName())
 
 fun TypeName.isListOrArray() = (this is ClassName && this.canonicalName =="kotlin.Array")
         || (this is ParameterizedTypeName && this.rawType == List::class.asClassName())
@@ -112,7 +117,12 @@ fun TypeName.unwrapLiveDataOrDataSourceFactory()  =
 fun TypeName.unwrapListOrArrayComponentType() =
         if(this is ParameterizedTypeName &&
                 (this.rawType == List::class.asClassName() || this.rawType == ClassName("kotlin.Array"))) {
-            typeArguments[0]
+            val typeArg = typeArguments[0]
+            if(typeArg is WildcardTypeName) {
+                typeArg.outTypes[0]
+            }else {
+                typeArg
+            }
         }else {
             this
         }
@@ -144,6 +154,15 @@ fun TypeName.syncableEntities(processingEnv: ProcessingEnvironment) : List<Class
  * embedded syncable entities
  */
 fun TypeName.hasSyncableEntities(processingEnv: ProcessingEnvironment) = syncableEntities(processingEnv).isNotEmpty()
+
+fun TypeName.hasAttachments(processingEnv: ProcessingEnvironment): Boolean {
+    if(this is ClassName){
+        return processingEnv.elementUtils.getTypeElement(canonicalName)?.entityHasAttachments == true
+    }else {
+        return false
+    }
+}
+
 
 /**
  * Check if this TypeName should be sent as query parameters when passed over http. This is true

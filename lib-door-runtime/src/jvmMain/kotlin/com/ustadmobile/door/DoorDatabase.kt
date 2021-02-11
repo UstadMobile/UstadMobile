@@ -42,8 +42,6 @@ actual abstract class DoorDatabase actual constructor(){
         get() = sourceDatabase?.arraySupported ?: field
         private set
 
-    var context: Any? = null
-
     val jdbcArraySupported: Boolean by lazy {
         val delegatedDatabaseVal = sourceDatabase
         if(delegatedDatabaseVal != null) {
@@ -100,26 +98,6 @@ actual abstract class DoorDatabase actual constructor(){
         }
 
     }
-
-
-
-
-//    actual constructor() {
-//
-//    }
-
-//    constructor(dataSource: DataSource) {
-//        this.dataSource = dataSource
-//        setupFromDataSource()
-//    }
-//
-//    constructor(context: Any, dbName: String) {
-//        this.context = context
-//        val iContext = InitialContext()
-//        dataSource = iContext.lookup("java:/comp/env/jdbc/${dbName}") as DataSource
-//        setupFromDataSource()
-//    }
-
 
     inner class DoorSqlDatabaseImpl : DoorSqlDatabase {
         override fun execSQL(sql: String) {

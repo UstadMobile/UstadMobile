@@ -1,5 +1,6 @@
 package com.ustadmobile.door
 
+import com.ustadmobile.door.attachments.AttachmentFilter
 import io.ktor.client.HttpClient
 import java.io.File
 import kotlin.reflect.KClass
@@ -10,7 +11,8 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
                                                                     httpClient: HttpClient,
                                                                     attachmentsDir: String?,
                                                                     updateNotificationManager: ServerUpdateNotificationManager?,
-                                                                    useClientSyncManager: Boolean): T {
+                                                                    useClientSyncManager: Boolean,
+                                                                    attachmentFilters: List<AttachmentFilter>): T {
     val dbClass = T::class
     val repoImplClass = Class.forName("${dbClass.qualifiedName}_Repo") as Class<T>
     val attachmentsDirToUse = if(attachmentsDir != null){
@@ -19,17 +21,19 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
         File("attachments").absolutePath //TODO: look this up from JNDI
     }
 
-    val db = if(this is DoorDatabaseSyncableReadOnlyWrapper) {
+    val dbUnwrapped = if(this is DoorDatabaseSyncableReadOnlyWrapper) {
         this.unwrap(dbClass)
     }else {
         this
     }
 
     val repo = repoImplClass
-            .getConstructor(dbClass.java, String::class.java,String::class.java, HttpClient::class.java,
-                    String::class.java, ServerUpdateNotificationManager::class.java, Boolean::class.javaPrimitiveType)
-            .newInstance(db, endpoint, accessToken, httpClient, attachmentsDirToUse,
-                    updateNotificationManager, useClientSyncManager)
+            .getConstructor(Any::class.java, dbClass.java, dbClass.java, String::class.java,
+                    String::class.java, HttpClient::class.java,
+                    String::class.java, ServerUpdateNotificationManager::class.java,
+                    Boolean::class.javaPrimitiveType, List::class.java)
+            .newInstance(context, dbUnwrapped, this, endpoint, accessToken, httpClient, attachmentsDirToUse,
+                    updateNotificationManager, useClientSyncManager, attachmentFilters)
     return repo
 }
 

@@ -1,5 +1,6 @@
 package com.ustadmobile.core.contentformats
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.catalog.contenttype.ContentTypePlugin
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
@@ -104,8 +105,11 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
             it.mimeTypes.find { pluginMimeType -> pluginMimeType == mimeType }
                     ?: return@forEach
 
+            Napier.v("Importing $filePath for ContentEntry UID# $contentEntryUid using plugin: $it", tag = LOG_TAG)
             return it.importToContainer(filePath, conversionParams, contentEntryUid, mimeType,
-                    containerBaseDir, context, db, repo, progressListener)
+                    containerBaseDir, context, db, repo, progressListener).also {
+                        Napier.v("Importing $filePath for ContentEntry UID# $contentEntryUid completed")
+            }
         }
         return null
     }
@@ -117,4 +121,10 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
     override fun getExtSupported(): List<String> {
         return extSupported
     }
+
+    companion object {
+
+        const val LOG_TAG = "ContentImportMgr"
+    }
+
 }

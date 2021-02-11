@@ -41,7 +41,7 @@ object ShrinkUtils {
         }
     }
 
-    fun getVideoResolutionMetadata(srcFile: File): Triple<Int, Int, String> {
+    fun getVideoResolutionMetadata(srcFile: File): Triple<Int, Int, String?> {
 
         val ffprobePath = findInPath("ffprobe")
 
@@ -57,7 +57,11 @@ object ShrinkUtils {
             val stream = BufferedReader(InputStreamReader(process.inputStream))
             val width = stream.readLine()
             val height = stream.readLine()
-            val ratio = stream.readLine()
+
+            //ffmpeg might return N/A if a ratio is not specified by the file. We need to validate
+            //the input here so we don't give an invalid parameter to ffmpeg.
+            val ratio = VideoTypePlugin.validateRatio(stream.readLine())
+
             stream.close()
             process.waitFor()
             val exitValue = process.exitValue()
@@ -77,19 +81,24 @@ object ShrinkUtils {
 
 
     fun optimiseVideo(srcVideo: File, destFile: File,
-                      resolution: Pair<Int, Int>, aspectRatio: String) {
+                      resolution: Pair<Int, Int>, aspectRatio: String?) {
 
         val ffmpegPath = findInPath("ffmpeg")
 
-        val builder = ProcessBuilder(ffmpegPath, "-i",
-                srcVideo.path, "-vf", "scale=${resolution.first}x${resolution.second}",
-                "-aspect", aspectRatio,
-                "-framerate", VideoTypePlugin.VIDEO_FRAME_RATE.toString(),
+        val ffmpegCommand = mutableListOf(ffmpegPath, "-i",
+                srcVideo.path, "-vf", "scale=${resolution.first}x${resolution.second}")
+
+        if(aspectRatio != null) {
+            ffmpegCommand +=  listOf("-aspect", aspectRatio)
+        }
+
+        ffmpegCommand += listOf("-framerate", VideoTypePlugin.VIDEO_FRAME_RATE.toString(),
                 "-c:v", "libx264", "-b:v", VideoTypePlugin.VIDEO_BIT_RATE.toString(),
                 "-c:a", "aac", "-b:a", VideoTypePlugin.AUDIO_BIT_RATE.toString(),
-                "-ar", VideoTypePlugin.AUDIO_SAMPLE_RATE.toString(),
-                "-ac", VideoTypePlugin.AUDIO_CHANNEL_COUNT.toString(),
                 "-vbr", "on", "-y", destFile.path)
+
+        val builder = ProcessBuilder(ffmpegCommand)
+
         builder.redirectErrorStream(true)
         var process: Process? = null
         try {
@@ -98,8 +107,11 @@ object ShrinkUtils {
             process.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
-                Napier.e("Error Stream for src " + srcVideo.path + String(UMIOUtils.readStreamToByteArray(process.errorStream)))
-                throw IOException()
+                val errorStreamStr = String(UMIOUtils.readStreamToByteArray(process.errorStream))
+                val errorMsg = "Non-zero exit value: $exitValue running " +
+                        "'${ffmpegCommand.joinToString(separator = " ")}'. ErrorStream=$errorStreamStr"
+                Napier.e(errorMsg)
+                throw IOException(errorMsg)
             }
             process.destroy()
         } catch (e: IOException) {

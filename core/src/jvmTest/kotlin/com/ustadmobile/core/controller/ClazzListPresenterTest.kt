@@ -78,7 +78,7 @@ class ClazzListPresenterTest {
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
                 eq("%"), eq(accountManager.activeAccount.personUid), eq(0), any(),
-                any())
+                any(),any(), any())
         verify(mockView, timeout(5000)).list = any()
 
     }
@@ -97,7 +97,7 @@ class ClazzListPresenterTest {
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
                 eq("%"), eq(accountManager.activeAccount.personUid), eq(excludeFromSchool),
-                any(), any())
+                any(), any(), any(), any())
         verify(mockView, timeout(5000)).list = any()
     }
 

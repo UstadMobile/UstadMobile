@@ -20,10 +20,8 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.ClazzMemberListView
-import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_NAME
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Clazz
@@ -32,7 +30,7 @@ import com.ustadmobile.lib.db.entities.ClazzMemberWithPerson
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
@@ -80,7 +78,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
         }
 
 
-    private var mNewStudentListRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+    private var mNewStudentListRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
 
     private var mStudentListRecyclerViewAdapter: ClazzMemberListRecyclerAdapter? = null
 
@@ -88,7 +86,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
 
     private var mCurrentStudentListLiveData: LiveData<PagedList<ClazzMemberWithPerson>>? = null
 
-    private var mPendingStudentsHeaderRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+    private var mPendingStudentsHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
 
     private var mPendingStudentListRecyclerViewAdapter: PendingClazzMemberListRecyclerAdapter? = null
 
@@ -109,7 +107,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
     override var addTeacherVisible: Boolean = false
         set(value) {
             field = value
-            mNewItemRecyclerViewAdapter?.newItemVisible = value
+            mUstadListHeaderRecyclerViewAdapter?.newItemVisible = value
         }
 
     override var addStudentVisible: Boolean = false
@@ -173,20 +171,20 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzMember, ClazzMember
         mStudentListRecyclerViewAdapter = ClazzMemberListRecyclerAdapter(mPresenter).also {
             mStudentListObserver = PagedListSubmitObserver(it)
         }
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(mOnClickAddTeacher, createNewText,
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(mOnClickAddTeacher, createNewText,
                 headerStringId = R.string.teachers_literal,
                 headerLayoutId = R.layout.item_simple_list_header,
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         val addStudentText = requireContext().getString(R.string.add_a_student)
-        mNewStudentListRecyclerViewAdapter = NewItemRecyclerViewAdapter(mOnClickAddStudent,
+        mNewStudentListRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(mOnClickAddStudent,
                 addStudentText, headerStringId = R.string.students,
                 headerLayoutId = R.layout.item_simple_list_header)
 
         mPendingStudentListRecyclerViewAdapter = PendingClazzMemberListRecyclerAdapter(mPresenter)
-        mPendingStudentsHeaderRecyclerViewAdapter = NewItemRecyclerViewAdapter(null,
+        mPendingStudentsHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(null,
                 "", R.string.pending_requests, headerLayoutId = 0)
 
-        mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
+        mMergeRecyclerViewAdapter = MergeAdapter(mUstadListHeaderRecyclerViewAdapter,
                 mDataRecyclerViewAdapter, mNewStudentListRecyclerViewAdapter,
                 mStudentListRecyclerViewAdapter, mPendingStudentsHeaderRecyclerViewAdapter,
                 mPendingStudentListRecyclerViewAdapter)

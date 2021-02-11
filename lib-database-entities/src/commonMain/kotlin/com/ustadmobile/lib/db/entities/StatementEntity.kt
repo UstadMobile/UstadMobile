@@ -1,5 +1,6 @@
 package com.ustadmobile.lib.db.entities
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.annotation.LastChangedBy
@@ -38,6 +39,7 @@ open class StatementEntity {
 
     var statementId: String? = null
 
+    @ColumnInfo(index = true)
     var statementPersonUid: Long = 0
 
     var statementVerbUid: Long = 0
@@ -96,6 +98,13 @@ open class StatementEntity {
     var statementLastChangedBy: Int = 0
 
     var extensionProgress: Int = 0
+
+    /**
+     *  indicates whether or not the statement is about the root contentEntry or child entries
+     *  This is used by queries (e.g. for reports) e.g. to see if a "completed" verb applies
+     *  to the contententry itself, or only a subsection (child) of the content
+     */
+    var contentEntryRoot: Boolean = false
 
     /**
      * Though technically the XObject is what really links to ContentEntry, the ContentEntryUid is

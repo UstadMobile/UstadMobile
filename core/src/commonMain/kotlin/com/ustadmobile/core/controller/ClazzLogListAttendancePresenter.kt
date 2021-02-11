@@ -5,6 +5,7 @@ import com.soywiz.klock.days
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.schedule.toOffsetByTimezone
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.attendancePercentage
 import com.ustadmobile.core.util.ext.effectiveTimeZone
@@ -177,7 +178,7 @@ class ClazzLogListAttendancePresenter(context: Any, arguments: Map<String, Strin
         graphDbData?.observe(lifecycleOwner, graphObserver)
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
+    override fun handleClickSortOrder(sortOption: IdOption) {
         val sortOrder = (sortOption as? ClazzLogListSortOption)?.sortOrder ?: return
         if(sortOrder != currentSortOrder) {
             currentSortOrder = sortOrder

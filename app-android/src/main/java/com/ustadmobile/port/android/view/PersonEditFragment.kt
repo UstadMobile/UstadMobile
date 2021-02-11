@@ -16,12 +16,12 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.*
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
-import com.google.gson.Gson
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
 import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzEditBinding
 import com.ustadmobile.core.controller.PersonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
+import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
@@ -31,10 +31,10 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
-import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
+import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.File
 
@@ -103,9 +103,9 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
     private var clazzMemberWithClazzRecyclerAdapter: ClazzMemberWithClazzRecyclerAdapter? = null
 
-    private var clazzMemberNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+    private var clazzMemberUstadListHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
 
-    private var rolesAndPermissionNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+    private var rolesAndPermissionUstadListHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
     
     private val clazzMemberWithClazzObserver = Observer<List<ClazzMemberWithClazz>?> {
         t -> clazzMemberWithClazzRecyclerAdapter?.submitList(t)
@@ -159,6 +159,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             loading = false
         }
 
+
+    override var personPicture: PersonPicture?
+        get() = mBinding?.personPicture
+        set(value) {
+            mBinding?.personPicture = value
+        }
 
     /**
      * This may lead to I/O activity - do not call from the main thread!
@@ -246,9 +252,10 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
 
     override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
-        val impl: UstadMobileSystemImpl by instance()
         val navController = findNavController()
-        val umNextDestination = impl.destinationProvider.lookupDestinationName(nextDestination)
+        val destinationProvider: DestinationProvider = di.direct.instance()
+
+        val umNextDestination = destinationProvider.lookupDestinationName(nextDestination)
         navController.currentBackStackEntry?.savedStateHandle?.set(UstadView.ARG_SNACK_MESSAGE,
                 String.format(getString(R.string.logged_in_as),account?.username,account?.endpointUrl))
         if(umNextDestination != null){
@@ -284,21 +291,21 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 di, viewLifecycleOwner)
         clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(this, mPresenter)
         rolesAndPermissionRecyclerAdapter = EntityRoleRecyclerAdapter(true, this)
-        clazzMemberNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(
+        clazzMemberUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
                 View.OnClickListener { onClickNewClazzMemberWithClazz() },
                 requireContext().getString(R.string.add_person_to_class)).apply {
             newItemVisible = true
         }
-        rolesAndPermissionNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(
+        rolesAndPermissionUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
                 View.OnClickListener { onClickNewRoleAndAssignment() },
                 requireContext().getString(R.string.add_role_permission)).apply {
             newItemVisible = true
         }
         mBinding?.clazzlistRecyclerview?.adapter = MergeAdapter(clazzMemberWithClazzRecyclerAdapter,
-                clazzMemberNewItemRecyclerViewAdapter)
+                clazzMemberUstadListHeaderRecyclerViewAdapter)
 
         mBinding?.rolesAndPermissionsRv?.adapter = MergeAdapter(rolesAndPermissionRecyclerAdapter,
-                rolesAndPermissionNewItemRecyclerViewAdapter)
+                rolesAndPermissionUstadListHeaderRecyclerViewAdapter)
 
         mBinding?.usernameText?.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}
@@ -346,8 +353,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.add_a_new_person, R.string.edit_person)
-        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
+        mPresenter?.onCreate(backStackSavedState)
 
         CLAZZ_ROLE_KEY_MAP.forEach {roleOption ->
             findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
@@ -369,6 +375,11 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             mPresenter?.handleAddOrEditRoleAndPermission(entityRole)
         }
 
+        if(registrationMode == true) {
+            ustadFragmentTitle = requireContext().getString(R.string.register)
+        }else {
+            setEditFragmentTitle(R.string.add_a_new_person, R.string.edit_person)
+        }
 
     }
 

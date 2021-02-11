@@ -8,9 +8,10 @@ import javax.lang.model.type.DeclaredType
 import javax.lang.model.type.ExecutableType
 import androidx.room.*
 import com.ustadmobile.door.SyncableDoorDatabase
+import com.ustadmobile.door.annotation.AttachmentUri
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.door.annotation.SyncableEntity
 import com.ustadmobile.lib.annotationprocessor.core.DbProcessorKtorServer.Companion.SUFFIX_KTOR_HELPER
-import java.util.*
 import javax.lang.model.type.TypeMirror
 
 val ALL_QUERY_ANNOTATIONS = listOf(Query::class.java, Update::class.java, Delete::class.java,
@@ -68,7 +69,7 @@ fun TypeElement.allOverridableMethods(processingEnv: ProcessingEnvironment,
     }.distinctBy {
         val signatureParamTypes = (processingEnv.typeUtils.asMemberOf(enclosing, it) as ExecutableType)
                 .parameterTypes.filter { ! isContinuationParam(it.asTypeName()) }
-        MethodToImplement(it.simpleName.toString(), signatureParamTypes)
+        MethodToImplement(it.simpleName.toString(), signatureParamTypes.map { it.asTypeName() })
     }.map {
         it as ExecutableElement
     }
@@ -167,6 +168,22 @@ fun TypeElement.allDbEntities(processingEnv: ProcessingEnvironment): List<TypeEl
     return entityTypeElements.toList()
 }
 
+/**
+ * Where this TypeElement represents a database class, get a list of all the entities
+ * that are syncable (e.g. annotated with @SyncableEntity).
+ */
+fun TypeElement.allSyncableDbEntities(processingEnv: ProcessingEnvironment) =
+        allDbEntities(processingEnv).filter { it.hasAnnotation(SyncableEntity::class.java) }
+
+/**
+ * Where this TypeElement represents a database class, get a list of all entities that have
+ * an attachment.
+ */
+fun TypeElement.allEntitiesWithAttachments(processingEnv: ProcessingEnvironment) =
+        allDbEntities(processingEnv).filter {
+            it.enclosedElementsWithAnnotation(AttachmentUri::class.java).isNotEmpty()
+        }
+
 
 fun TypeElement.asClassNameWithSuffix(suffix: String) =
         ClassName(packageName, "$simpleName$suffix")
@@ -197,8 +214,9 @@ fun TypeElement.allDaoQueryMethods() = allMethodsWithAnnotation(ALL_QUERY_ANNOTA
  * TypeSpecs are often used as the basis for generation logic because we can generate it (eg. for
  * SyncDaos etc). This extension function converts a TypeElement from the annotation processor
  * environment into an equivalent TypeSpec.
+ *
  */
-fun TypeElement.asImplementableTypeSpec(processingEnv: ProcessingEnvironment): TypeSpec {
+fun TypeElement.asTypeSpecStub(processingEnv: ProcessingEnvironment): TypeSpec {
     val declaredType = this.asType() as DeclaredType
     val thisTypeEl = this
     return TypeSpec.classBuilder(asClassName())
@@ -239,9 +257,38 @@ val TypeElement.isDaoThatRequiresKtorHelper: Boolean
 
 
 fun TypeElement.daoSyncableEntitiesInSelectResults(processingEnv: ProcessingEnvironment) : List<ClassName> {
-    return asImplementableTypeSpec(processingEnv).daoSyncableEntitiesInSelectResults(processingEnv)
+    return asTypeSpecStub(processingEnv).daoSyncableEntitiesInSelectResults(processingEnv)
 }
 
 fun TypeElement.isDaoThatRequiresSyncHelper(processingEnv: ProcessingEnvironment): Boolean {
     return daoSyncableEntitiesInSelectResults(processingEnv).isNotEmpty()
 }
+
+fun TypeElement.dbEnclosedDaos(processingEnv: ProcessingEnvironment) : List<TypeElement> {
+    return enclosedElements
+            .filter { it.kind == ElementKind.METHOD && Modifier.ABSTRACT in it.modifiers}
+            .mapNotNull { (it as ExecutableElement).returnType.asTypeElement(processingEnv) }
+            .filter { it.hasAnnotation(Dao::class.java) }
+}
+
+/**
+ * The SyncableEntity find all for a specific client may (or may not) have a clientId as a
+ * parameter in the query itself.
+ */
+val TypeElement.syncableEntityFindAllHasClientIdParam: Boolean
+    get() = getAnnotation(SyncableEntity::class.java).syncFindAllQuery.contains(":clientId")
+
+
+val TypeElement.syncableEntityFindAllHasMaxResultsParam: Boolean
+    get() = getAnnotation(SyncableEntity::class.java).syncFindAllQuery.let {
+        it.contains(":maxResults") || it == "" //A blank query would automatically have maxResults added
+    }
+
+
+/**
+ * Shorthand to check if this is an entity that has attachments
+ */
+val TypeElement.entityHasAttachments: Boolean
+    get() = hasAnnotation(Entity::class.java) &&
+            enclosedElementsWithAnnotation(AttachmentUri::class.java, ElementKind.FIELD).isNotEmpty()
+

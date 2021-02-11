@@ -65,6 +65,6 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
         outState.putAll(mutableMapOf<String, String>().apply { mEditPresenter?.onSaveInstanceState(this) }.toBundle())
     }
 
-    protected fun onSaveStateToBackStackStateHandle() = mEditPresenter?.saveStateToCurrentBackStackStateHandle(findNavController())
+    protected open fun onSaveStateToBackStackStateHandle() = mEditPresenter?.saveStateToCurrentBackStackStateHandle(findNavController())
 
 }

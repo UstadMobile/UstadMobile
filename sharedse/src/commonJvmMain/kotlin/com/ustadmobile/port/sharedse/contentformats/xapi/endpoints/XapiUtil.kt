@@ -55,10 +55,20 @@ object XapiUtil {
                 val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
                 val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
 
-                XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid
-                        ?: 0, it.value)
+                val existingMap = dao.getXLangMapFromVerb(verbEntity.verbUid, lang.langUid)
+
+                if(existingMap == null){
+                    XLangMapEntry(verbEntity.verbUid, 0, lang.langUid, variant?.langVariantUid
+                            ?: 0, it.value)
+                }else{
+                    null
+                }
+
+            }?.filterNotNull()
+
+            if (listToInsert != null && listToInsert.isNotEmpty()) {
+                dao.insertList(listToInsert)
             }
-            dao.insertList(listToInsert)
         }
     }
 
@@ -70,10 +80,16 @@ object XapiUtil {
             val lang = insertOrUpdateLanguageByTwoCode(languageDao, split[0])
             val variant = insertOrUpdateLanguageVariant(languageVariantDao, split[1], lang)
 
-            XLangMapEntry(0, xObjectEntity.xObjectUid, lang.langUid, variant?.langVariantUid
-                    ?: 0, it.value)
-        }
-        if (listToInsert != null) {
+            val existingMap = dao.getXLangMapFromObject(xObjectEntity.xObjectUid, lang.langUid)
+
+            if(existingMap == null){
+                XLangMapEntry(0, xObjectEntity.xObjectUid, lang.langUid, variant?.langVariantUid
+                        ?: 0, it.value)
+            }else{
+                null
+            }
+        }?.filterNotNull()
+        if (listToInsert != null && listToInsert.isNotEmpty()) {
             dao.insertList(listToInsert)
         }
     }
@@ -261,7 +277,7 @@ object XapiUtil {
                                       instructorUid: Long, agentUid: Long, authorityUid: Long, teamUid: Long,
                                       subActorUid: Long, subVerbUid: Long, subObjectUid: Long,
                                       contentEntryUid: Long = 0L,
-                                      learnerGroupUid: Long): StatementEntity {
+                                      learnerGroupUid: Long, contentEntryRoot: Boolean = false): StatementEntity {
 
         val statementId = statement.id
                 ?: throw IllegalArgumentException("Statement $statement to be stored has no id!")
@@ -285,6 +301,7 @@ object XapiUtil {
                 it.stored = UMCalendarUtil.parse8601TimestampOrDefault(statement.stored)
                 it.statementContentEntryUid = contentEntryUid
                 it.statementLearnerGroupUid = learnerGroupUid
+                it.contentEntryRoot = contentEntryRoot
                 it.fullStatement = gson.toJson(statement)
             }
 
@@ -294,7 +311,7 @@ object XapiUtil {
                 statementEntity.resultCompletion = statementResult.completion
                 statementEntity.resultDuration = statementResult.duration?.let { parse8601Duration(it) } ?: 0L
                 statementEntity.resultResponse = statementResult.response
-                statementEntity.resultSuccess = statementResult.success.toInt().toByte()
+                statementEntity.resultSuccess = if(statementResult.success) StatementEntity.RESULT_SUCCESS else StatementEntity.RESULT_FAILURE
 
                 val resultScore = statementResult.score
                 if (resultScore != null) {

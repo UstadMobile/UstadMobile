@@ -115,7 +115,9 @@ class ContentEntryEdit2FragmentTest : TestCase() {
 
                 val entry = createEntryFromFile("video.mp4", "Dummy Title",
                         systemImplNavRule = systemImplNavRule, dbRule = dbRule)
-                Assert.assertEquals("Entry's data set", "Dummy Title",entry.title)
+                flakySafely {
+                    Assert.assertEquals("Entry's data set", "Dummy Title",entry.title)
+                }
             }
 
         }

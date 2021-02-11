@@ -13,6 +13,7 @@ import com.ustadmobile.core.controller.PersonGroupListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonGroupListView
@@ -81,7 +82,7 @@ class PersonGroupListFragment(): UstadListViewFragment<PersonGroup, PersonGroupW
     }
 
 
-    override fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: MessageIdOption) {
+    override fun onMessageIdOptionSelected(view: AdapterView<*>?, messageIdOption: IdOption) {
         mPresenter?.handleClickSortOrder(messageIdOption)
     }
 

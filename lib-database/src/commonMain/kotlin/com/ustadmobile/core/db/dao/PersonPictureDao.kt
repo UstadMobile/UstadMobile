@@ -2,6 +2,7 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.GetAttachmentData
 import com.ustadmobile.door.annotation.Repository
@@ -15,7 +16,7 @@ abstract class PersonPictureDao : BaseDao<PersonPicture> {
 
     @SetAttachmentData
     open fun setAttachment(entity: PersonPicture, filePath: String) {
-        throw Exception(Exception("Shouldn't call the Dao, call the repo instead "))
+
     }
 
     @GetAttachmentData
@@ -32,6 +33,9 @@ abstract class PersonPictureDao : BaseDao<PersonPicture> {
     @Query("SELECT * FROM PersonPicture where personPicturePersonUid = :personUid ORDER BY " + " picTimestamp DESC LIMIT 1")
     abstract fun findByPersonUidLive(personUid: Long): DoorLiveData<PersonPicture?>
 
+
+    @Update
+    abstract suspend fun updateAsync(personPicture: PersonPicture)
 
     companion object {
 

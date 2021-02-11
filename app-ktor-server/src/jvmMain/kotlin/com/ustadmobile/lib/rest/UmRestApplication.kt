@@ -12,12 +12,12 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
-import com.ustadmobile.lib.rest.ext.ktorInitDb
 import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
@@ -48,7 +48,8 @@ const val CONF_DBMODE_SINGLETON = "singleton"
 const val CONF_GOOGLE_API = "secret"
 
 /**
- *
+ * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
+ * containers, etc).
  */
 private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBMODE_SINGLETON) = if(dbMode == CONF_DBMODE_SINGLETON) {
     singletonName
@@ -74,6 +75,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     install(CallLogging)
 
     //TODO: Put in a proper log filter here
+    Napier.takeLogarithm()
     Napier.base(DebugAntilog())
 
     install(ContentNegotiation) {
@@ -84,16 +86,13 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     }
 
     val tmpRootDir = Files.createTempDirectory("upload").toFile()
-    val iContext = InitialContext()
-    val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as? String
-            ?: "./build/container"
 
     val autoCreateDb = environment.config.propertyOrNull("ktor.ustad.autocreatedb")?.getString()?.toBoolean() ?: false
     println("auto create = $autoCreateDb")
     val dbMode = dbModeOverride ?:
         environment.config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
-    val storageRoot = File(environment.config.propertyOrNull("ktor.ustad.storagedir")?.getString() ?: "build/storage")
-    storageRoot.takeIf { !it.exists() }?.mkdirs()
+    val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
+    dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
 
@@ -104,10 +103,27 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             }
         }
 
-        bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
-            File(File(storageRoot, context.identifier(dbMode)), "container").also {
+        bind<File>(tag = TAG_CONTEXT_DATA_ROOT) with scoped(EndpointScope.Default).singleton {
+            File(dataDirPath, context.identifier(dbMode)).also {
                 it.takeIf { !it.exists() }?.mkdirs()
             }
+        }
+
+
+        bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+            val containerDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "container")
+
+            //Move any old container directory to the new path (e.g. pre database v57)
+            if(context == Endpoint("localhost")){
+                val oldContainerDir = File("build/storage/singleton/container")
+                if(oldContainerDir.exists() && !oldContainerDir.renameTo(containerDir)) {
+                    throw IllegalStateException("Old singleton container dir present but cannot " +
+                            "rename from ${oldContainerDir.absolutePath} to ${containerDir.absolutePath}")
+                }
+            }
+
+            containerDir.takeIf { !it.exists() }?.mkdirs()
+            containerDir
         }
 
         bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
@@ -121,12 +137,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
             if(autoCreateDb) {
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName,
-                        isPrimary = true, sqliteDir = File(storageRoot, context.identifier(dbMode)))
+                        isPrimary = true, sqliteDir = instance(tag = TAG_CONTEXT_DATA_ROOT))
             }
 
-            UmAppDatabase.getInstance(Any(), dbName).also {
-                it.ktorInitDb()
-            }
+            UmAppDatabase.getInstance(Any(), dbName)
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
@@ -135,12 +149,13 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
+            val attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "attachments")
             val repo = db.asRepository(Any(), "http://localhost/",
-                "", defaultHttpClient(), File(".").absolutePath,
-                instance(), false)
+                    "", defaultHttpClient(), attachmentsDir.absolutePath,
+                    instance(), false)
             ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
             repo.preload()
-            db.ktorInitDbWithRepo(repo, File(storageRoot, context.identifier(dbMode)).absolutePath)
+            db.ktorInitDbWithRepo(repo, instance<File>(tag = TAG_CONTEXT_DATA_ROOT).absolutePath)
             repo
         }
 
@@ -155,7 +170,20 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     Any(), context, di)
         }
 
-        registerContextTranslator { call: ApplicationCall -> Endpoint(call.request.header("Host") ?: "nohost") }
+        registerContextTranslator { call: ApplicationCall ->
+            if(dbMode == CONF_DBMODE_SINGLETON) {
+                Endpoint("localhost")
+            }else {
+                Endpoint(call.request.header("Host") ?: "localhost")
+            }
+        }
+
+        onReady {
+            if(dbMode == CONF_DBMODE_SINGLETON) {
+                //Get the container dir so that any old directories (build/storage etc) are moved if required
+                di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_CONTAINER_DIR)
+            }
+        }
     }
 
     install(Routing) {
@@ -165,7 +193,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ResumableUploadRoute()
         ContainerUpload()
         UmAppDatabase_KtorRoute(true)
-        WorkSpaceRoute()
+        SiteRoute()
         ContentEntryLinkImporter()
         if (devMode) {
             DevModeRoute()

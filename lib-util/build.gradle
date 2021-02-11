@@ -19,9 +19,15 @@ android {
     buildToolsVersion rootProject.ext.version_android_buildtools
 
     defaultConfig {
-        minSdkVersion 18
+        minSdkVersion 21
         targetSdkVersion 29
     }
+
+    packagingOptions {
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+    }
+
+
     compileOptions {
         sourceCompatibility = '1.8'
         targetCompatibility = '1.8'
@@ -55,6 +61,7 @@ kotlin {
 
     android()
 
+    /* JS is disabled until after kotlin 1.4 upgrade
     js("js") {
 
         nodejs()
@@ -66,7 +73,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
-
+    */
 
     sourceSets {
         commonMain {
@@ -89,7 +96,7 @@ kotlin {
 
         commonTest {
             dependencies {
-                implementation project(":lib-database-mpp")
+
             }
         }
 
@@ -111,6 +118,7 @@ kotlin {
             }
         }
 
+        /*
         jsMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
@@ -120,12 +128,15 @@ kotlin {
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-js:$version_kmp"
             }
         }
+        */
 
+        /*
         jsTest {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-test-js:$version_kotlin"
             }
         }
+        */
 
         androidMain {
             dependencies {

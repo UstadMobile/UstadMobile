@@ -101,14 +101,14 @@ fun Route.ContainerMountRoute() {
             val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
             val pathInContainer = call.parameters.getAll("paths")?.joinToString("/") ?: ""
 
-            val iContext = InitialContext()
-            val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
-            val containerDir = File(containerDirPath)
-            containerDir.mkdirs()
+//            val iContext = InitialContext()
+//            val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
+//            val containerDir = File(containerDirPath)
+//            containerDir.mkdirs()
 
             val container = db.containerDao.findByUid(containerUid)
             if(container != null){
-                val containerManager = ContainerManager(container, db, db, containerDir.absolutePath)
+                val containerManager = ContainerManager(container, db, db)
                 val entryWithContainerEntryFile  = containerManager.getEntry(pathInContainer)
 
                 if(entryWithContainerEntryFile!= null){
@@ -141,15 +141,15 @@ fun Route.ContainerMountRoute() {
             val containerUid = call.parameters["containerUid"]?.toLong() ?: 0L
             val pathInContainer = call.parameters.getAll("paths")?.joinToString("/") ?: ""
 
-            val iContext = InitialContext()
-            val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
-            val containerDir = File(containerDirPath)
-            containerDir.mkdirs()
+//            val iContext = InitialContext()
+//            val containerDirPath = iContext.lookup("java:/comp/env/ustadmobile/app-ktor-server/containerDirPath") as String
+//            val containerDir = File(containerDirPath)
+//            containerDir.mkdirs()
 
             val container = db.containerDao.findByUid(containerUid)
             if(container != null){
 
-                val containerManager = ContainerManager(container, db, db, containerDir.absolutePath)
+                val containerManager = ContainerManager(container, db, db)
 
                 val entryWithContainerEntryFile  = containerManager.getEntry(pathInContainer)
 

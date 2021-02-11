@@ -1,5 +1,6 @@
 package com.ustadmobile.sharedse.io
 
+import com.ustadmobile.core.io.KioInputStream
 import com.ustadmobile.sharedse.io.ConcatenatingInputStream.Companion.LEN_CHUNK_ID
 import com.ustadmobile.sharedse.io.ConcatenatingInputStream.Companion.LEN_CHUNK_LENGTH
 import com.ustadmobile.sharedse.io.ConcatenatingInputStream.Companion.LEN_NUM_CHUNKS

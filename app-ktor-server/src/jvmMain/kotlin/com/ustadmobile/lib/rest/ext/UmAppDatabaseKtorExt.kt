@@ -1,28 +1,44 @@
 package com.ustadmobile.lib.rest.ext
 
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonAuth
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.encryptPassword
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomStringUtils
+import java.io.BufferedReader
 import java.io.File
-
-fun UmAppDatabase.ktorInitDb() {
-    if(workSpaceDao.getWorkSpace() == null) {
-        workSpaceDao.insert(WorkSpace().apply {
-            uid = 1L
-            name = "UstadmobileWorkspace"
-            guestLogin = true
-            registrationAllowed = true
-        })
-    }
-}
+import java.io.InputStreamReader
+import java.util.ArrayList
 
 fun UmAppDatabase.ktorInitDbWithRepo(repo: UmAppDatabase, passwordFilePath: String) {
+    if(siteDao.getSite() == null) {
+        repo.siteDao.insert(Site().apply {
+            siteUid = 1L
+            siteName = "My Site"
+            guestLogin = false
+            registrationAllowed = false
+        })
+    }
+
+    if(languageDao.totalLanguageCount() < 1) {
+        //insert all languages
+        val gson = GsonBuilder().disableHtmlEscaping().create()
+        val langListStr = BufferedReader(InputStreamReader(
+                this::class.java.getResourceAsStream("/languagedata/iso_639_3.json"))).use {
+                    it.readText()
+        }
+
+        val langList = gson.fromJson<ArrayList<Language>>(langListStr,
+                object : TypeToken<List<Language>>() {}.type)
+
+        repo.languageDao.insertList(langList)
+    }
+
+
     val adminuser = personDao.findByUsername("admin")
 
     if (adminuser == null) {

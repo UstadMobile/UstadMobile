@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ReportDao
@@ -14,8 +15,9 @@ import com.ustadmobile.core.view.UstadEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.list
 import kotlinx.serialization.json.Json
 import org.junit.Assert
 import org.junit.Before
@@ -74,7 +76,7 @@ class ReportEditPresenterTest {
 
         presenter.handleClickSave(initialEntity)
 
-        val jsonStr = Json.stringify(ReportWithFilters.serializer(), initialEntity)
+        val jsonStr = Gson().toJson(initialEntity)
 
         verify(systemImpl, timeout(5000)).go(eq(ReportDetailView.VIEW_NAME),
               eq(mapOf(UstadEditView.ARG_ENTITY_JSON to jsonStr)), eq(context))
@@ -97,11 +99,7 @@ class ReportEditPresenterTest {
 
         // verify its never called because view would show as error
         verify(systemImpl, never()).go(eq(ReportDetailView.VIEW_NAME),
-                eq(mapOf(UstadEditView.ARG_ENTITY_JSON to """{"reportUid":0,"reportOwnerUid":0,
-                    |"chartType":100,"xAxis":300,"yAxis":201,"subGroup":0,"fromDate":0,"toDate":0,
-                    |"reportTitle":"New Report Title","reportInactive":false,
-                    |"reportMasterChangeSeqNum":0,"reportLocalChangeSeqNum":0,
-                    |"reportLastChangedBy":0,"reportFilterList":[]}"}""".trimMargin())), any())
+                eq(mapOf(UstadEditView.ARG_ENTITY_JSON to "".trimMargin())), any())
 
     }
 
@@ -110,8 +108,21 @@ class ReportEditPresenterTest {
     fun givenExistingReport_whenOnCreateAndHandleClickSaveCalled_thenValuesShouldBeSetOnViewAndDatabaseShouldBeUpdated() {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()
-        val testEntity = ReportWithFilters().apply {
+
+        val reportSeriesList = listOf(ReportSeries().apply {
+            reportSeriesYAxis = ReportSeries.TOTAL_DURATION
+            reportSeriesVisualType = ReportSeries.LINE_GRAPH
+            reportSeriesSubGroup = Report.CLASS
+            reportSeriesUid = 4
+            reportSeriesName = "total duration"
+        })
+
+
+        val testEntity = ReportWithSeriesWithFilters().apply {
             reportTitle = "Old Title"
+            xAxis = Report.MONTH
+            reportSeries = Json.stringify(ReportSeries.serializer().list, reportSeriesList)
+            reportSeriesWithFiltersList = reportSeriesList
             reportUid = repo.reportDao.insert(this)
         }
 

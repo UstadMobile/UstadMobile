@@ -9,12 +9,13 @@ import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentRedirectBinding
 import com.ustadmobile.core.controller.RedirectPresenter
+import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toBundle
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.RedirectView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.port.android.util.ext.getActivityContext
+import org.kodein.di.direct
 import org.kodein.di.instance
 
 
@@ -51,7 +52,8 @@ class RedirectFragment : UstadBaseFragment(), RedirectView {
     }
 
     override fun showNextScreen(viewName: String, args: Map<String, String>) {
-        val navDestinationId = impl.destinationProvider.lookupDestinationName(viewName)?.destinationId
+        val destinationProvider: DestinationProvider = direct.instance()
+        val navDestinationId = destinationProvider.lookupDestinationName(viewName)?.destinationId
                 ?: throw IllegalArgumentException("No destination for viewname: $viewName")
         val navOptions = NavOptions.Builder().setPopUpTo(R.id.redirect_dest, true).build()
         findNavController().navigate(navDestinationId, args.toBundle(), navOptions)

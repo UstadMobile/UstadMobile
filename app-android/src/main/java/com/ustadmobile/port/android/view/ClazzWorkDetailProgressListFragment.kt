@@ -19,7 +19,7 @@ import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
 class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWithClazzWorkProgress,
         ClazzMemberWithClazzWorkProgress>(), ClazzWorkDetailProgressListView {
@@ -48,9 +48,9 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWit
 
         metricsRecyclerAdapter = ClazzWorkMetricsRecyclerAdapter(null, false)
         mDataRecyclerViewAdapter = ClazzWorkProgressListRecyclerAdapter(mPresenter)
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
 
-        mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
+        mMergeRecyclerViewAdapter = MergeAdapter(mUstadListHeaderRecyclerViewAdapter,
                 metricsRecyclerAdapter, mDataRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
 

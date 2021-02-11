@@ -100,6 +100,7 @@ class EpubContentActivityTest : TestCase() {
                             withTag("1.xhtml")
                             withId(R.id.epub_contentview)
                         }.invoke {
+                            reset()
                             ViewMatchers.isDisplayed()
                             ViewMatchers.isJavascriptEnabled()
                             withElement(Locator.CLASS_NAME, "authors") {

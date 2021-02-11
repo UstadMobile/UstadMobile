@@ -5,14 +5,10 @@ import android.view.*
 import androidx.core.os.bundleOf
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.ItemAccountListBinding
-import com.toughra.ustadmobile.databinding.ItemClazzWorkListBinding
 import com.toughra.ustadmobile.databinding.ItemLearnerGroupMemberListBinding
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.controller.AccountListPresenter
 import com.ustadmobile.core.controller.LearnerGroupMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
@@ -20,10 +16,9 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.PersonListView
-import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -69,7 +64,7 @@ class LearnerGroupMemberListFragment : UstadListViewFragment<LearnerGroupMember,
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = UmAppDatabase.TAG_REPO)
         mPresenter = LearnerGroupMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter()
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter()
         mDataRecyclerViewAdapter = LearnerGroupMemberListRecyclerAdapter()
 
         return view

@@ -1,10 +1,12 @@
 package com.ustadmobile.door.daos
 
-import androidx.room.Dao
-import androidx.room.Query
+import androidx.room.*
 import com.ustadmobile.door.ClientSyncManager
+import com.ustadmobile.door.SyncResult
+import com.ustadmobile.door.annotation.PgOnConflict
 import com.ustadmobile.door.entities.TableSyncStatus
 import com.ustadmobile.door.entities.UpdateNotification
+import com.ustadmobile.door.entities.ZombieAttachmentData
 
 /**
  * This DAO contains various queries that are needed for sync related code to work. They are used
@@ -17,6 +19,9 @@ import com.ustadmobile.door.entities.UpdateNotification
  */
 @Dao
 abstract class SyncHelperEntitiesDao : ISyncHelperEntitiesDao {
+
+    @Insert
+    override abstract suspend fun insertSyncResult(syncResult: SyncResult)
 
     /**
      * This will be implemented by generated code to run the query. It will find a list of all
@@ -82,10 +87,17 @@ abstract class SyncHelperEntitiesDao : ISyncHelperEntitiesDao {
     @Query(value = "UPDATE TableSyncStatus SET tsLastSynced = :lastSynced WHERE tsTableId = :tableId")
     override abstract suspend fun updateTableSyncStatusLastSynced(tableId: Int, lastSynced: Long)
 
-    @Query("SELECT COALESCE((SELECT sspNextPrimaryKey FROM SqliteSyncablePk WHERE sspTableId = :tableId), 1)")
-    override abstract suspend fun selectNextSqliteSyncablePk(tableId: Int): Long
+    @Query("SELECT nodeClientId FROM SyncNode LIMIT 1")
+    override abstract fun findSyncNodeClientId(): Int
 
-    @Query("UPDATE SqliteSyncablePk SET sspNextPrimaryKey = sspNextPrimaryKey + :increment WHERE sspTableId = :tableId")
-    override abstract suspend fun incrementNextSqliteSyncablePk(tableId: Int, increment: Int)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @PgOnConflict("ON CONFLICT (pnDeviceId, pnTableId) DO UPDATE SET pnTimestamp = excluded.pnTimestamp")
+    abstract override fun replaceUpdateNotifications(entities: List<UpdateNotification>)
+
+    @Query("SELECT * FROM ZombieAttachmentData WHERE zaTableName = :tableName AND :primaryKey = :primaryKey")
+    abstract override suspend fun findZombieAttachments(tableName: String, primaryKey: Long) : List<ZombieAttachmentData>
+
+    @Delete
+    abstract override suspend fun deleteZombieAttachments(zombieList: List<ZombieAttachmentData>)
 
 }

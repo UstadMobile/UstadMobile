@@ -20,11 +20,20 @@ abstract class LanguageDao : BaseDao<Language> {
     @Insert
     abstract suspend fun insertListAsync(languageList: List<Language>)
 
-    @Query("SELECT * FROM Language ORDER BY name ASC")
-    abstract fun publicLanguagesOrderByNameAsc(): DataSource.Factory<Int, Language>
-
-    @Query("SELECT * FROM Language ORDER BY name DESC")
-    abstract fun publicLanguagesOrderByNameDesc(): DataSource.Factory<Int, Language>
+    @Query("""
+        SELECT Language.* 
+        FROM Language
+        WHERE :searchText IS NULL OR name LIKE :searchText
+        ORDER BY CASE(:sortOrder)
+            WHEN $SORT_LANGNAME_ASC THEN Language.name
+            ELSE ''
+        END ASC,
+        CASE(:sortOrder)
+            WHEN $SORT_LANGNAME_DESC THEN Language.name
+            ELSE ''
+        END DESC
+    """)
+    abstract fun findLanguagesAsSource(sortOrder: Int, searchText: String?): DataSource.Factory<Int, Language>
 
     @Query("SELECT * FROM Language WHERE name = :name LIMIT 1")
     abstract fun findByName(name: String): Language?
@@ -46,4 +55,12 @@ abstract class LanguageDao : BaseDao<Language> {
 
     @Query("SELECT *  FROM LANGUAGE where langUid = :primaryLanguageUid LIMIT 1")
     abstract fun findByUid(primaryLanguageUid: Long): Language?
+
+    companion object  {
+
+        const val SORT_LANGNAME_ASC = 1
+
+        const val SORT_LANGNAME_DESC = 2
+
+    }
 }

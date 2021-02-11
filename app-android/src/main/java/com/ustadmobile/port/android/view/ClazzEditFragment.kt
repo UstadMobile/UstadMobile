@@ -168,7 +168,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
 
         val navController = findNavController()
 
-        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+        mPresenter?.onCreate(backStackSavedState)
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 Schedule::class.java) {
             val schedule = it.firstOrNull() ?: return@observeResult

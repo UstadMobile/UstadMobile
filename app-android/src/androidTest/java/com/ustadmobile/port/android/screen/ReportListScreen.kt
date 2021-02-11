@@ -24,7 +24,7 @@ object ReportListScreen : KScreen<ReportListScreen>() {
 
     class Report(parent: Matcher<View>) : KRecyclerItem<Report>(parent) {
         val reportLayout = KView(parent) { withId(R.id.item_reportlist_report_cl) }
-        val reportTitle = KTextView { withId(R.id.report_title)}
+        val reportTitle = KTextView(parent) { withId(R.id.report_title)}
     }
 
 }

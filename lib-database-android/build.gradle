@@ -29,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 18
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -45,25 +45,6 @@ android {
         }
     }
 
-    //We only have an additional flaovr so that the test variant can target the higher api required to run Room testing
-    flavorDimensions "api"
-
-    productFlavors {
-        /**
-         * This dimension if the default that should be used by all dependencies
-         */
-        api18 {
-            dimension "api"
-        }
-
-        /**
-         * This dimension is only here because of Room's migration tester requirements
-         */
-        api21 {
-            dimension "api"
-            minSdkVersion 21
-        }
-    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
