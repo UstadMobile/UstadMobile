@@ -77,7 +77,7 @@ class ConcatenatedOutputStream2(outputStream: OutputStream,
         //now write the header
         out.write(entry.toBytes())
         currentEntry = entry
-        inflateMessageDigest.reset(inflateEnabled = entry.compression == 1)
+        inflateMessageDigest.reset(inflateEnabled = entry.isCompressed)
     }
 
     override fun close(){

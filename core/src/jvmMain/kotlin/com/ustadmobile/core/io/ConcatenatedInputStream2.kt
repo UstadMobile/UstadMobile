@@ -55,9 +55,9 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
         val bytesRead = super.`in`.readFully(entryBuf, 0, entryBuf.size)
         if(bytesRead == entryBuf.size) {
             val nextEntry = entryBuf.toConcatenatedEntry()
-            entryRemaining = nextEntry.length
+            entryRemaining = nextEntry.compressedSize
 
-            inflateMessageDigest.reset(inflateEnabled = nextEntry.compression == 1)
+            inflateMessageDigest.reset(inflateEnabled = nextEntry.isCompressed)
 
             currentEntry = nextEntry
             return nextEntry

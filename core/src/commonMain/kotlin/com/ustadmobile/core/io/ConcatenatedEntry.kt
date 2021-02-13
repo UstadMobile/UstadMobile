@@ -15,13 +15,26 @@ class ConcatenatedEntry(
         /**
          * 0 for no compression, 1 for gzip
          */
-        val compression: Int,
+        val compression: Byte,
 
         /**
-         * The length of the data (after compression, if any)
+         * The length of the data (after compression, if any). If the data is uncompressed,
+         * then compressedSize should equal totalSize
          */
-        val length: Long) {
+        val compressedSize: Long,
 
+        /**
+         * The total size of the data (after uncompression, if applicable).
+         */
+        val totalSize: Long,
+
+        /**
+         * The last modified time
+         */
+        val lastModified: Long) {
+
+    val isCompressed: Boolean
+        get() = compression == COMPRESSION_GZIP
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -29,7 +42,9 @@ class ConcatenatedEntry(
 
         if (!md5.contentEquals(other.md5)) return false
         if (compression != other.compression) return false
-        if (length != other.length) return false
+        if (compressedSize != other.compressedSize) return false
+        if (totalSize != other.totalSize) return false
+        if (lastModified != other.lastModified) return false
 
         return true
     }
@@ -37,17 +52,21 @@ class ConcatenatedEntry(
     override fun hashCode(): Int {
         var result = md5.contentHashCode()
         result = 31 * result + compression
-        result = 31 * result + length.hashCode()
+        result = 31 * result + compressedSize.hashCode()
+        result = 31 * result + totalSize.hashCode()
+        result = 31 * result + lastModified.hashCode()
         return result
     }
 
     companion object {
-        //16 bytes md5, 1 byte compression flag, 8 byte length
-        const val SIZE = 16 + 1 + 8
 
-        const val COMPRESSION_NONE = 0
 
-        const val COMPRESSION_GZIP = 1
+        //compressed size (8 bytes), total size (8 bytes), compression (1 byte), last modified (8 bytes), md5sum (16 bytes)
+        const val SIZE = 8 + 8 + 1 + 8 + 16
+
+        const val COMPRESSION_NONE = 0.toByte()
+
+        const val COMPRESSION_GZIP = 1.toByte()
 
     }
 

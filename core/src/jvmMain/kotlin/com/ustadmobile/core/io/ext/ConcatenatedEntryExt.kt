@@ -10,10 +10,12 @@ import java.nio.ByteOrder
  */
 fun ConcatenatedEntry.toBytes(): ByteArray {
     val byteBuffer = ByteBuffer.allocate(ConcatenatedEntry.SIZE)
-        .order(ByteOrder.LITTLE_ENDIAN)
-        .putLong(length)
-        .put(compression.toByte())
-        .put(md5)
+            .order(ByteOrder.LITTLE_ENDIAN)
+            .putLong(compressedSize)
+            .putLong(totalSize)
+            .put(compression)
+            .putLong(lastModified)
+            .put(md5)
 
     byteBuffer.rewind()
     return ByteArray(ConcatenatedEntry.SIZE).also {
@@ -28,10 +30,13 @@ fun ConcatenatedEntry.toBytes(): ByteArray {
 fun ByteArray.toConcatenatedEntry(): ConcatenatedEntry {
     val byteBuffer = ByteBuffer.wrap(this)
         .order(ByteOrder.LITTLE_ENDIAN)
-    val length = byteBuffer.getLong()
+    val compressedSize = byteBuffer.getLong()
+    val totalSize = byteBuffer.getLong()
     val compression = byteBuffer.get()
+    val lastModified = byteBuffer.getLong()
+
     val md5 = ByteArray(16)
     byteBuffer.get(md5)
 
-    return ConcatenatedEntry(md5, compression.toInt(), length)
+    return ConcatenatedEntry(md5, compression, compressedSize, totalSize, lastModified)
 }

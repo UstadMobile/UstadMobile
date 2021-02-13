@@ -1,7 +1,9 @@
 package com.ustadmobile.core.io
 
+import com.ustadmobile.core.io.ext.putFile
 import com.ustadmobile.door.ext.md5Sum
 import com.ustadmobile.door.ext.writeToFile
+import com.ustadmobile.door.util.systemTimeInMillis
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -37,15 +39,9 @@ class ConcatenatedStreamIntegrationTest {
         this::class.java.getResourceAsStream("/com/ustadmobile/core/controller/cat-pic1.jpg")
                 .writeToFile(tmpFile2)
 
-        concatOut.putNextEntry(ConcatenatedEntry(tmpFile1.md5Sum, 0, tmpFile1.length()))
-        FileInputStream(tmpFile1).use {
-            it.copyTo(concatOut)
-        }
+        concatOut.putFile(tmpFile1, 0.toByte())
+        concatOut.putFile(tmpFile2, 0.toByte())
 
-        concatOut.putNextEntry(ConcatenatedEntry(tmpFile2.md5Sum,0, tmpFile2.length()))
-        FileInputStream(tmpFile2).use {
-            it.copyTo(concatOut)
-        }
 
         concatOut.flush()
         concatOut.close()
@@ -80,12 +76,14 @@ class ConcatenatedStreamIntegrationTest {
         this::class.java.getResourceAsStream("/com/ustadmobile/core/controller/cat-pic1.jpg").writeToFile(tmpFile2)
         tmpFile2.copyAndGzipTo(tmpFile2Gzip)
 
-        concatOut.putNextEntry(ConcatenatedEntry(tmpFile1.md5Sum, 1, tmpFile1Gzip.length()))
+        concatOut.putNextEntry(ConcatenatedEntry(tmpFile1.md5Sum, 1, tmpFile1Gzip.length(),
+            tmpFile1.length(), systemTimeInMillis()))
         FileInputStream(tmpFile1Gzip).use {
             it.copyTo(concatOut)
         }
 
-        concatOut.putNextEntry(ConcatenatedEntry(tmpFile2.md5Sum,1, tmpFile2Gzip.length()))
+        concatOut.putNextEntry(ConcatenatedEntry(tmpFile2.md5Sum,1, tmpFile2Gzip.length(),
+            tmpFile2.length(), systemTimeInMillis()))
         FileInputStream(tmpFile2Gzip).use {
             it.copyTo(concatOut)
         }

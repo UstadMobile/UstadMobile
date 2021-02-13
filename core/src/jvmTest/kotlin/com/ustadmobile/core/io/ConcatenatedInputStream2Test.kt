@@ -12,7 +12,7 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.FileOutputStream
 
-class ConcatenatedInputStreamTest {
+class ConcatenatedInputStream2Test {
 
     @JvmField
     @Rule

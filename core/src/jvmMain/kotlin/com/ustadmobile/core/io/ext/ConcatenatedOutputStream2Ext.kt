@@ -7,11 +7,11 @@ import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 
-fun ConcatenatedOutputStream2.putFile(file: File, compression: Int) {
-    if(compression != 0)
+fun ConcatenatedOutputStream2.putFile(file: File, compression: Byte) {
+    if(compression != 0.toByte())
         throw IOException("putFile doesn't support compression (yet)")
 
-    putNextEntry(ConcatenatedEntry(file.md5Sum, compression, file.length()))
+    putNextEntry(ConcatenatedEntry(file.md5Sum, compression, file.length(), file.length(), 0L))
     FileInputStream(file).use { fileIn ->
         fileIn.copyTo(this)
         this.flush()
