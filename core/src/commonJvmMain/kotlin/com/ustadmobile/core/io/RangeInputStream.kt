@@ -1,9 +1,10 @@
 package com.ustadmobile.core.io
 
-import kotlinx.io.InputStream
-import kotlin.math.min
 
-class RangeInputStream(var input: InputStream, start: Long, private val end: Long) : KioInputStream() {
+import kotlin.math.min
+import java.io.InputStream
+
+class RangeInputStream(var input: InputStream, start: Long, private val end: Long) : InputStream() {
 
     private var pos: Long = 0
 
