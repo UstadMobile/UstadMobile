@@ -336,4 +336,6 @@
     <string name="custom_fields">ساحات دلخواه</string>
     <string name="new_person">شخص جدید</string>
     <string name="sub_locations">موقعیتهای فرعی</string>
+    <string name="group_activity">فعالیت</string>
+    <string name="select_group_members">انتخاب اعضای جدید گروپ</string>
 </resources>
