@@ -7,12 +7,17 @@ import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.core.util.ext.encodeBase64
 import java.io.FileInputStream
 import java.io.InputStream
+import java.io.OutputStream
 import java.security.MessageDigest
 import java.io.ByteArrayInputStream
 import com.github.aakira.napier.Napier
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import kotlinx.serialization.toUtf8Bytes
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 import com.ustadmobile.lib.util.parseRangeRequestHeader
+import com.ustadmobile.core.io.ConcatenatedOutputStream2
+import com.ustadmobile.core.io.ext.putContainerEntryFile
 
 data class ConcatenatedHttpResponse(val status: Int, val contentLength: Long, val etag: String?,
                                     val lastModifiedTime: Long,
@@ -21,6 +26,34 @@ data class ConcatenatedHttpResponse(val status: Int, val contentLength: Long, va
 
 val ERROR_PART_NOT_FOUND = 503
 
+class ConcatenatedHttpResponse2(val status: Int, val contentLength: Long, val etag: String?,
+                                     val lastModifiedTime: Long,
+                                     val responseHeaders: Map<String, String> = mapOf(),
+                                     private val containerEntryFiles: List<ContainerEntryFile>) {
+
+    fun writeTo(dest: OutputStream) {
+        val concatOut = ConcatenatedOutputStream2(dest)
+        containerEntryFiles.forEach {
+            concatOut.putContainerEntryFile(it)
+        }
+        concatOut.flush()
+    }
+
+}
+
+fun ContainerEntryFileDao.generateConcatenatedFilesResponse2(md5ListQueryParam: String,
+        method: String = "GET",
+        requestHeaders: Map<String, List<String>> = mapOf(),
+        db: UmAppDatabase) : ConcatenatedHttpResponse {
+
+    val md5List = md5ListQueryParam.split(";")
+
+    val containerEntryFiles = findEntriesByMd5SumsSafe(md5List, db)
+
+    TODO("Not yet")
+}
+
+@Deprecated("Use generateConcatenatedFilesResponse2.")
 fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String,
                                                             method: String = "GET",
                                                             requestHeaders: Map<String, List<String>> = mapOf()): ConcatenatedHttpResponse {

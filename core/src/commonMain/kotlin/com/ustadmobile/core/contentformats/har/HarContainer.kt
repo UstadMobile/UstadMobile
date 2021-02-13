@@ -4,7 +4,6 @@ package com.ustadmobile.core.contentformats.har
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.har.HarInterceptor.Companion.interceptorMap
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.RangeInputStream
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -151,7 +150,8 @@ class HarContainer(val containerManager: ContainerManager, val entry: ContentEnt
         }
         if (range != null && range.statusCode == 206) {
             if (!isHEADRequest) {
-                data = RangeInputStream(data, range.fromByte, range.toByte)
+                TODO("this needs refactored so it does not use RangeInputStream here in common")
+                //data = RangeInputStream(data, range.fromByte, range.toByte)
             }
 
             range.responseHeaders.forEach { mutMap[it.key] = it.value }
