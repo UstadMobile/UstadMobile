@@ -8,6 +8,7 @@ import java.io.InputStream
 import java.lang.Integer.min
 import java.security.MessageDigest
 import com.ustadmobile.core.io.ext.readFully
+import com.ustadmobile.door.util.NullOutputStream
 
 /**
  * Reads concatenated data that was written using ConcatenatedOutputStream2. It is used similarly
@@ -33,11 +34,18 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
                     "Expected MD5: ${entryVal.md5.toHexString()} / Actual ${dataMd5.toHexString()}")
     }
 
+    //Read the remainder of the current entry. This is required to ensure that md5sums will match
+    //when verified
+    private fun readCurrentEntryRemaining() {
+        if(entryRemaining > 0)
+            copyTo(NullOutputStream())
+    }
+
     /**
      * Get the next entry
      */
     fun getNextEntry() : ConcatenatedEntry? {
-        //todo: skip any remaining bytes in the current entry
+        readCurrentEntryRemaining()
 
         if(currentEntry != null)
             assertDataReadMatchesMd5()
@@ -84,6 +92,7 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
     }
 
     override fun close(){
+        readCurrentEntryRemaining()
         assertDataReadMatchesMd5()
         super.close()
     }
