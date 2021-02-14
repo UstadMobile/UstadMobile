@@ -198,11 +198,11 @@ fun TextView.setFileSize(fileSize: Long) {
 }
 
 @BindingAdapter(value=["clazzMemberWithClazzWorkAndProgress"])
-fun TextView.setClazzWorkMarking(clazzEnrollmentWithClazzWorkAndProgress: ClazzEnrollmentWithClazzWorkProgress){
-    var line = clazzEnrollmentWithClazzWorkAndProgress.mClazzWorkSubmission.statusString(context)
-    if(clazzEnrollmentWithClazzWorkAndProgress.clazzWorkHasContent && clazzEnrollmentWithClazzWorkAndProgress.mProgress >= 0) {
+fun TextView.setClazzWorkMarking(clazzEnrolmentWithClazzWorkAndProgress: ClazzEnrolmentWithClazzWorkProgress){
+    var line = clazzEnrolmentWithClazzWorkAndProgress.mClazzWorkSubmission.statusString(context)
+    if(clazzEnrolmentWithClazzWorkAndProgress.clazzWorkHasContent && clazzEnrolmentWithClazzWorkAndProgress.mProgress >= 0) {
         line += " ${context.getString(R.string.completed)} " +
-                "${clazzEnrollmentWithClazzWorkAndProgress.mProgress.toInt()}% " +
+                "${clazzEnrolmentWithClazzWorkAndProgress.mProgress.toInt()}% " +
                 context.getString(R.string.of_content)
     }
     text = line
@@ -236,8 +236,8 @@ fun TextView.setResponseTextFilled(responseText: String?){
 }
 
 @BindingAdapter("memberRoleName")
-fun TextView.setMemberRoleName(clazzEnrollment: ClazzEnrollment?) {
-    text = clazzEnrollment?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
+fun TextView.setMemberRoleName(clazzEnrolment: ClazzEnrolment?) {
+    text = clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
 }
 
 

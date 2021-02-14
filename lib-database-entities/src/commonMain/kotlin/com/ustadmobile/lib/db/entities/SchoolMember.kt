@@ -161,7 +161,7 @@ import kotlinx.serialization.Serializable
         """,
         //ClazzMember
         """ 
-        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzEnrollment.TABLE_ID} AS tableId FROM
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzEnrolment.TABLE_ID} AS tableId FROM
         ChangeLog
             JOIN SchoolMember ON ChangeLog.chTableId = ${SchoolMember.TABLE_ID} AND ChangeLog.chEntityPk = SchoolMember.schoolMemberUid
             JOIN Person ON Person.personUid = SchoolMember.schoolMemberPersonUid

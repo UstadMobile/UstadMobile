@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.ClazzEnrollmentWithPerson"/>
+        <import type="com.ustadmobile.lib.db.entities.ClazzEnrolmentWithPerson"/>
 
         <variable
-            name="clazzEnrollment"
-            type="ClazzEnrollmentWithPerson" />
+            name="clazzEnrolment"
+            type="ClazzEnrolmentWithPerson" />
 
         <variable
             name="presenter"
@@ -23,7 +23,7 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/studentpicture"
-            app:personPicturePersonUid="@{clazzEnrollment.clazzEnrollmentPersonUid}"
+            app:personPicturePersonUid="@{clazzEnrolment.clazzEnrolmentPersonUid}"
             android:layout_width="@dimen/dimen_48dp"
             android:layout_height="@dimen/dimen_48dp"
             android:layout_margin="@dimen/dimen_16dp"
@@ -35,7 +35,7 @@
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/item_clazzmember_text"
-            android:text='@{clazzEnrollment.person.firstNames + " " + clazzEnrollment.person.lastName}'
+            android:text='@{clazzEnrolment.person.firstNames + " " + clazzEnrolment.person.lastName}'
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
@@ -57,7 +57,7 @@
             app:icon="@drawable/ic_done_white_24dp"
             app:iconTint="?colorOnBackground"
             style="@style/UmTheme.Widget.TextButton.IconOnly"
-            android:onClick="@{() -> presenter.handleClickPendingRequest(clazzEnrollment, true)}"
+            android:onClick="@{() -> presenter.handleClickPendingRequest(clazzEnrolment, true)}"
             app:layout_constraintEnd_toStartOf="@+id/reject_icon"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -72,7 +72,7 @@
             app:iconTint="?colorOnBackground"
             style="@style/UmTheme.Widget.TextButton.IconOnly"
             android:contentDescription="@string/reject"
-            android:onClick="@{() -> presenter.handleClickPendingRequest(clazzEnrollment, false)}"
+            android:onClick="@{() -> presenter.handleClickPendingRequest(clazzEnrolment, false)}"
             />
 
 

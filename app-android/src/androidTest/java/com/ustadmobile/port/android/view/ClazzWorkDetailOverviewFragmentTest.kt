@@ -87,7 +87,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
             //Log in as student
             val studentMember = testClazzWork!!.clazzAndMembers.studentList.get(0)
-            dbRule.account.personUid = studentMember.clazzEnrollmentPersonUid
+            dbRule.account.personUid = studentMember.clazzEnrolmentPersonUid
 
             //Insert public and private comments
             runBlocking {
@@ -143,7 +143,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
             //Log in as student
             val studentMember = testClazzWork!!.clazzAndMembers.studentList.get(0)
-            dbRule.account.personUid = studentMember.clazzEnrollmentPersonUid
+            dbRule.account.personUid = studentMember.clazzEnrolmentPersonUid
 
             //Insert public and private comments
             runBlocking {
@@ -207,7 +207,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
             //Log in as student
             val studentMember = testClazzWork!!.clazzAndMembers.studentList.get(0)
-            dbRule.account.personUid = studentMember.clazzEnrollmentPersonUid
+            dbRule.account.personUid = studentMember.clazzEnrolmentPersonUid
 
             //Insert public and private comments
             runBlocking {
@@ -280,7 +280,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
             contentList = contentEntriesWithJoin.contentList
 
             val teacherMember = testClazzWork!!.clazzAndMembers.teacherList.get(0)
-            dbRule.account.personUid = teacherMember.clazzEnrollmentPersonUid
+            dbRule.account.personUid = teacherMember.clazzEnrolmentPersonUid
 
             reloadFragment(testClazzWork!!.clazzWork)
 
@@ -329,7 +329,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
             contentList = contentEntriesWithJoin.contentList
 
             val teacherMember = testClazzWork!!.clazzAndMembers.teacherList.get(0)
-            dbRule.account.personUid = teacherMember.clazzEnrollmentPersonUid
+            dbRule.account.personUid = teacherMember.clazzEnrolmentPersonUid
 
 
 
@@ -448,7 +448,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
             contentList = contentEntriesWithJoin.contentList
 
             val studentMember = testClazzWork!!.clazzAndMembers.studentList.get(0)
-            dbRule.account.personUid = studentMember.clazzEnrollmentPersonUid
+            dbRule.account.personUid = studentMember.clazzEnrolmentPersonUid
 
             reloadFragment(testClazzWork!!.clazzWork)
 
@@ -610,7 +610,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
         //Login as student who has submitted
         val studentMember = testClazzWork.clazzAndMembers.studentList.get(1)
-        dbRule.account.personUid = studentMember.clazzEnrollmentPersonUid
+        dbRule.account.personUid = studentMember.clazzEnrolmentPersonUid
 
         reloadFragment(testClazzWork.clazzWork)
 
@@ -666,7 +666,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
                 commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
-                commentsPersonUid = studentMember1.clazzEnrollmentPersonUid
+                commentsPersonUid = studentMember1.clazzEnrolmentPersonUid
                 commentsUid = dbRule.repo.commentsDao.insertAsync(this)
             }
             Comments().apply {
@@ -675,7 +675,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
                 commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
-                commentsPersonUid = studentMember2.clazzEnrollmentPersonUid
+                commentsPersonUid = studentMember2.clazzEnrolmentPersonUid
                 commentsUid = dbRule.repo.commentsDao.insertAsync(this)
             }
 
@@ -685,7 +685,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
         }.run {
 
-            dbRule.account.personUid = studentMember1.clazzEnrollmentPersonUid
+            dbRule.account.personUid = studentMember1.clazzEnrolmentPersonUid
 
             reloadFragment(testClazzWork.clazzWork)
 
@@ -744,7 +744,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
                 commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
-                commentsPersonUid = studentMember1.clazzEnrollmentPersonUid
+                commentsPersonUid = studentMember1.clazzEnrolmentPersonUid
                 commentsUid = dbRule.repo.commentsDao.insertAsync(this)
             }
             Comments().apply {
@@ -753,7 +753,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
                 commentsEntityType = ClazzWork.CLAZZ_WORK_TABLE_ID
                 commentsEntityUid = testClazzWork.clazzWork.clazzWorkUid
                 commentsPublic = false
-                commentsPersonUid = studentMember2.clazzEnrollmentPersonUid
+                commentsPersonUid = studentMember2.clazzEnrolmentPersonUid
                 commentsUid = dbRule.repo.commentsDao.insertAsync(this)
             }
 
@@ -763,7 +763,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
         }.run {
 
-            dbRule.account.personUid = studentMember1.clazzEnrollmentPersonUid
+            dbRule.account.personUid = studentMember1.clazzEnrolmentPersonUid
 
 
             ClazzWorkDetailOverviewScreen{
@@ -772,7 +772,7 @@ class ClazzWorkDetailOverviewFragmentTest : TestCase() {
 
 
                     //Student 2 logged in user. Cannot see private comment.
-                    dbRule.account.personUid = studentMember2.clazzEnrollmentPersonUid
+                    dbRule.account.personUid = studentMember2.clazzEnrolmentPersonUid
 
                     reloadFragment(testClazzWork.clazzWork)
 

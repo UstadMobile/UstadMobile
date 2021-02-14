@@ -3,7 +3,7 @@ package com.ustadmobile.lib.db.entities
 import kotlinx.serialization.Serializable
 
 @Serializable
-class PersonWithClazzEnrollmentDetails: Person() {
+class PersonWithClazzEnrolmentDetails: Person() {
 
     var attendance: Float = 0f
 

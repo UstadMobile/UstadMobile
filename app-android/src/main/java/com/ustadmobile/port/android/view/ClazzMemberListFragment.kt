@@ -13,8 +13,8 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.ItemClazzenrollmentListItemBinding
-import com.toughra.ustadmobile.databinding.ItemClazzenrollmentPendingListItemBinding
+import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentListItemBinding
+import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentPendingListItemBinding
 import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -24,10 +24,7 @@ import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEM
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzEnrollment
-import com.ustadmobile.lib.db.entities.ClazzEnrollmentWithPerson
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
@@ -35,17 +32,17 @@ import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
-class ClazzMemberListFragment() : UstadListViewFragment<ClazzEnrollment, ClazzEnrollmentWithPerson>(),
+class ClazzMemberListFragment() : UstadListViewFragment<Person, PersonWithClazzEnrolmentDetails>(),
         ClazzMemberListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
 
     private var mPresenter: ClazzMemberListPresenter? = null
 
-    override val listPresenter: UstadListPresenter<*, in ClazzEnrollmentWithPerson>?
+    override val listPresenter: UstadListPresenter<*, in PersonWithClazzEnrolmentDetails>?
         get() = mPresenter
 
     override var autoMergeRecyclerViewAdapter: Boolean = false
 
-    override var studentList: DataSource.Factory<Int, ClazzEnrollmentWithPerson>? = null
+    override var studentList: DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>? = null
         get() = field
         set(value) {
             val studentObserverVal = mStudentListObserver ?: return
@@ -55,8 +52,8 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzEnrollment, ClazzEn
             mCurrentStudentListLiveData?.observe(viewLifecycleOwner, studentObserverVal)
         }
 
-    private val pendingStudentsObserver = object : Observer<PagedList<ClazzEnrollmentWithPerson>> {
-        override fun onChanged(t: PagedList<ClazzEnrollmentWithPerson>?) {
+    private val pendingStudentsObserver = object : Observer<PagedList<PersonWithClazzEnrolmentDetails>> {
+        override fun onChanged(t: PagedList<PersonWithClazzEnrolmentDetails>?) {
             mPendingStudentListRecyclerViewAdapter?.submitList(t)
             mPendingStudentsHeaderRecyclerViewAdapter?.headerLayoutId = if (t != null && !t.isEmpty()) {
                 R.layout.item_simple_list_header
@@ -66,7 +63,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzEnrollment, ClazzEn
         }
     }
 
-    override var pendingStudentList: DataSource.Factory<Int, ClazzEnrollmentWithPerson>? = null
+    override var pendingStudentList: DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>? = null
         get() = field
         set(value) {
             val repoDao = displayTypeRepo ?: return
@@ -80,19 +77,19 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzEnrollment, ClazzEn
 
     private var mNewStudentListRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
 
-    private var mStudentListRecyclerViewAdapter: ClazzEnrollmentListRecyclerAdapter? = null
+    private var mStudentListRecyclerViewAdapter: ClazzEnrolmentListRecyclerAdapter? = null
 
-    private var mStudentListObserver: Observer<PagedList<ClazzEnrollmentWithPerson>>? = null
+    private var mStudentListObserver: Observer<PagedList<PersonWithClazzEnrolmentDetails>>? = null
 
-    private var mCurrentStudentListLiveData: LiveData<PagedList<ClazzEnrollmentWithPerson>>? = null
+    private var mCurrentStudentListLiveData: LiveData<PagedList<PersonWithClazzEnrolmentDetails>>? = null
 
     private var mPendingStudentsHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
 
-    private var mPendingStudentListRecyclerViewAdapter: PendingClazzEnrollmentListRecyclerAdapter? = null
+    private var mPendingStudentListRecyclerViewAdapter: PendingClazzEnrolmentListRecyclerAdapter? = null
 
     //private var mPendingStudentListObserver: Observer<PagedList<ClazzMemberWithPerson>>? = null
 
-    private var mCurrentPendingStudentListLiveData: LiveData<PagedList<ClazzEnrollmentWithPerson>>? = null
+    private var mCurrentPendingStudentListLiveData: LiveData<PagedList<PersonWithClazzEnrolmentDetails>>? = null
 
     private var filterByClazzUid: Long = 0
 
@@ -116,21 +113,21 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzEnrollment, ClazzEn
             mNewStudentListRecyclerViewAdapter?.newItemVisible = value
         }
 
-    class ClazzEnrollmentListViewHolder(val itemBinding: ItemClazzenrollmentListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
+    class ClazzEnrolmentListViewHolder(val itemBinding: ItemClazzEnrolmentListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
-    class ClazzEnrollmentListRecyclerAdapter(var presenter: ClazzMemberListPresenter?)
-        : SelectablePagedListAdapter<ClazzEnrollmentWithPerson, ClazzEnrollmentListViewHolder>(DIFF_CALLBACK) {
+    class ClazzEnrolmentListRecyclerAdapter(var presenter: ClazzMemberListPresenter?)
+        : SelectablePagedListAdapter<PersonWithClazzEnrolmentDetails, ClazzEnrolmentListViewHolder>(DIFF_CALLBACK) {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzEnrollmentListViewHolder {
-            val itemBinding = ItemClazzenrollmentListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzEnrolmentListViewHolder {
+            val itemBinding = ItemClazzEnrolmentListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
             itemBinding.selectablePagedListAdapter = this
-            return ClazzEnrollmentListViewHolder(itemBinding)
+            return ClazzEnrolmentListViewHolder(itemBinding)
         }
 
-        override fun onBindViewHolder(holder: ClazzEnrollmentListViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: ClazzEnrolmentListViewHolder, position: Int) {
             val item = getItem(position)
-            holder.itemBinding.clazzEnrollment = item
+            holder.itemBinding.clazzEnrolment = item
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
@@ -140,18 +137,18 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzEnrollment, ClazzEn
         }
     }
 
-    class PendingClazzEnrollmentListViewHolder(val itemBinding: ItemClazzenrollmentPendingListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
+    class PendingClazzEnrolmentListViewHolder(val itemBinding: ItemClazzEnrolmentPendingListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
-    class PendingClazzEnrollmentListRecyclerAdapter(var presenter: ClazzMemberListPresenter?) : PagedListAdapter<ClazzEnrollmentWithPerson, PendingClazzEnrollmentListViewHolder>(DIFF_CALLBACK) {
+    class PendingClazzEnrolmentListRecyclerAdapter(var presenter: ClazzMemberListPresenter?) : PagedListAdapter<PersonWithClazzEnrolmentDetails, PendingClazzEnrolmentListViewHolder>(DIFF_CALLBACK) {
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PendingClazzEnrollmentListViewHolder {
-            val itemBinding = ItemClazzenrollmentPendingListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PendingClazzEnrolmentListViewHolder {
+            val itemBinding = ItemClazzEnrolmentPendingListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
-            return PendingClazzEnrollmentListViewHolder(itemBinding)
+            return PendingClazzEnrolmentListViewHolder(itemBinding)
         }
 
-        override fun onBindViewHolder(holder: PendingClazzEnrollmentListViewHolder, position: Int) {
-            holder.itemBinding.clazzEnrollment = getItem(position)
+        override fun onBindViewHolder(holder: PendingClazzEnrolmentListViewHolder, position: Int) {
+            holder.itemBinding.clazzEnrolment = getItem(position)
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -166,9 +163,9 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzEnrollment, ClazzEn
         mPresenter = ClazzMemberListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
 
-        mDataRecyclerViewAdapter = ClazzEnrollmentListRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = ClazzEnrolmentListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_a_teacher)
-        mStudentListRecyclerViewAdapter = ClazzEnrollmentListRecyclerAdapter(mPresenter).also {
+        mStudentListRecyclerViewAdapter = ClazzEnrolmentListRecyclerAdapter(mPresenter).also {
             mStudentListObserver = PagedListSubmitObserver(it)
         }
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(mOnClickAddTeacher, createNewText,
@@ -181,7 +178,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzEnrollment, ClazzEn
                 addStudentText, headerStringId = R.string.students,
                 headerLayoutId = R.layout.item_simple_list_header)
 
-        mPendingStudentListRecyclerViewAdapter = PendingClazzEnrollmentListRecyclerAdapter(mPresenter)
+        mPendingStudentListRecyclerViewAdapter = PendingClazzEnrolmentListRecyclerAdapter(mPresenter)
         mPendingStudentsHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(null,
                 "", R.string.pending_requests, headerLayoutId = 0)
 
@@ -203,13 +200,13 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzEnrollment, ClazzEn
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 Person::class.java, KEY_TEACHER_SELECTED) {
             val teacherAdded = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleEnrolMember(teacherAdded, ClazzEnrollment.ROLE_TEACHER)
+            mPresenter?.handleEnrolMember(teacherAdded, ClazzEnrolment.ROLE_TEACHER)
         }
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 Person::class.java, KEY_STUDENT_SELECTED) {
             val studentAdded = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleEnrolMember(studentAdded, ClazzEnrollment.ROLE_STUDENT)
+            mPresenter?.handleEnrolMember(studentAdded, ClazzEnrolment.ROLE_STUDENT)
         }
 
         super.onViewCreated(view, savedInstanceState)
@@ -260,22 +257,22 @@ class ClazzMemberListFragment() : UstadListViewFragment<ClazzEnrollment, ClazzEn
     }
 
     override val displayTypeRepo: Any?
-        get() = dbRepo?.clazzEnrollmentDao
+        get() = dbRepo?.personDao
 
     companion object {
         const val KEY_TEACHER_SELECTED = "Person_Teacher"
 
         const val KEY_STUDENT_SELECTED = "Person_Student"
 
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzEnrollmentWithPerson> = object
-            : DiffUtil.ItemCallback<ClazzEnrollmentWithPerson>() {
-            override fun areItemsTheSame(oldItem: ClazzEnrollmentWithPerson,
-                                         newItem: ClazzEnrollmentWithPerson): Boolean {
-                return oldItem.clazzEnrollmentUid == newItem.clazzEnrollmentUid
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<PersonWithClazzEnrolmentDetails> = object
+            : DiffUtil.ItemCallback<PersonWithClazzEnrolmentDetails>() {
+            override fun areItemsTheSame(oldItem: PersonWithClazzEnrolmentDetails,
+                                         newItem: PersonWithClazzEnrolmentDetails): Boolean {
+                return oldItem.personUid == newItem.personUid
             }
 
-            override fun areContentsTheSame(oldItem: ClazzEnrollmentWithPerson,
-                                            newItem: ClazzEnrollmentWithPerson): Boolean {
+            override fun areContentsTheSame(oldItem: PersonWithClazzEnrolmentDetails,
+                                            newItem: PersonWithClazzEnrolmentDetails): Boolean {
                 return oldItem == newItem
             }
         }

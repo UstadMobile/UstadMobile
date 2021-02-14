@@ -140,7 +140,7 @@ class ClazzWorkDetailProgressListPresenterTest {
 
         verify(systemImpl, timeout(5000)).go(eq(ClazzWorkSubmissionMarkingView.VIEW_NAME),
                 eq(mapOf(ARG_CLAZZWORK_UID to testClazzWork.clazzWork.clazzWorkUid.toString(), ARG_CLAZZMEMBER_UID to
-                list.get(0).mClazzEnrollment?.clazzEnrollmentUid.toString())), any())
+                list.get(0).mClazzEnrolment?.clazzEnrolmentUid.toString())), any())
     }
 
 

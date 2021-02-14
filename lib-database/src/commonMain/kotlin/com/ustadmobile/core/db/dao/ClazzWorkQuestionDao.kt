@@ -47,13 +47,13 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
         LEFT JOIN ClazzWorkQuestionResponse ON 
             ClazzWorkQuestionResponse.clazzWorkQuestionResponseQuestionUid = ClazzWorkQuestion.clazzWorkQuestionUid
             AND CAST(clazzWorkQuestionResponseInactive AS INTEGER) = 0
-            AND clazzWorkQuestionResponseClazzEnrollmentUid = :ClazzEnrollmentUid
+            AND clazzWorkQuestionResponseClazzEnrolmentUid = :ClazzEnrolmentUid
         WHERE 
         ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid = :clazzWorkUid 
         AND CAST(ClazzWorkQuestion.clazzWorkQuestionActive AS INTEGER) = 1	
     """)
     abstract suspend fun findAllQuestionsAndOptionsWithResponse(clazzWorkUid: Long,
-                                                                ClazzEnrollmentUid: Long)
+                                                                ClazzEnrolmentUid: Long)
             :List<ClazzWorkQuestionAndOptionWithResponseRow>
 
 

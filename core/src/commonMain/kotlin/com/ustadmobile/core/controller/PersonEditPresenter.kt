@@ -54,16 +54,16 @@ class PersonEditPresenter(context: Any,
     private var regViaLink: Boolean = false
 
     private val clazzMemberJoinEditHelper =
-            DefaultOneToManyJoinEditHelper(ClazzEnrollmentWithClazz::clazzEnrollmentUid,
-            "state_ClazzMemberWithClazz_list", ClazzEnrollmentWithClazz.serializer().list,
-            ClazzEnrollmentWithClazz.serializer().list, this, ClazzEnrollmentWithClazz::class) { clazzEnrollmentUid = it }
+            DefaultOneToManyJoinEditHelper(ClazzEnrolmentWithClazz::clazzEnrolmentUid,
+            "state_ClazzMemberWithClazz_list", ClazzEnrolmentWithClazz.serializer().list,
+            ClazzEnrolmentWithClazz.serializer().list, this, ClazzEnrolmentWithClazz::class) { clazzEnrolmentUid = it }
 
-    fun handleAddOrEditClazzMemberWithClazz(clazzEnrollmentWithClazz: ClazzEnrollmentWithClazz) {
-        clazzMemberJoinEditHelper.onEditResult(clazzEnrollmentWithClazz)
+    fun handleAddOrEditClazzMemberWithClazz(clazzEnrolmentWithClazz: ClazzEnrolmentWithClazz) {
+        clazzMemberJoinEditHelper.onEditResult(clazzEnrolmentWithClazz)
     }
 
-    fun handleClickRemovePersonFromClazz(clazzEnrollmentWithClazz: ClazzEnrollmentWithClazz) {
-        clazzMemberJoinEditHelper.onDeactivateEntity(clazzEnrollmentWithClazz)
+    fun handleClickRemovePersonFromClazz(clazzEnrolmentWithClazz: ClazzEnrolmentWithClazz) {
+        clazzMemberJoinEditHelper.onDeactivateEntity(clazzEnrolmentWithClazz)
     }
 
     private val rolesAndPermissionEditHelper = DefaultOneToManyJoinEditHelper<EntityRoleWithNameAndRole>(
@@ -118,7 +118,7 @@ class PersonEditPresenter(context: Any,
         } ?: PersonPicture()
 
         val clazzMemberWithClazzList = withTimeoutOrNull(2000) {
-            db.takeIf { entityUid != 0L }?.clazzEnrollmentDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid, getSystemTimeInMillis())
+            db.takeIf { entityUid != 0L }?.clazzEnrolmentDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid, getSystemTimeInMillis())
         } ?: listOf()
         clazzMemberJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
 
@@ -261,13 +261,13 @@ class PersonEditPresenter(context: Any,
                 repo.entityRoleDao.deactivateByUids(
                         rolesAndPermissionEditHelper.primaryKeysToDeactivate)
 
-                //Insert any Clazz enrollments
+                //Insert any Clazz Enrolments
                 clazzMemberJoinEditHelper.entitiesToInsert.forEach {
-                    repo.enrolPersonIntoClazzAtLocalTimezone(entity, it.clazzEnrollmentClazzUid,
-                            it.clazzEnrollmentRole)
+                    repo.enrolPersonIntoClazzAtLocalTimezone(entity, it.clazzEnrolmentClazzUid,
+                            it.clazzEnrolmentRole)
                 }
-                //Update any clazz enrollments
-                repo.clazzEnrollmentDao.updateDateLeft(clazzMemberJoinEditHelper.primaryKeysToDeactivate,
+                //Update any clazz Enrolments
+                repo.clazzEnrolmentDao.updateDateLeft(clazzMemberJoinEditHelper.primaryKeysToDeactivate,
                         getSystemTimeInMillis())
 
 

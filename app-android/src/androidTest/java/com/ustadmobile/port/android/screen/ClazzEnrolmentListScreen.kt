@@ -8,21 +8,21 @@ import com.agoda.kakao.recycler.KRecyclerView
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
-import com.ustadmobile.port.android.view.ClazzEnrollmentListFragment
+import com.ustadmobile.port.android.view.ClazzEnrolmentListFragment
 import org.hamcrest.Matcher
 
-object ClazzEnrollmentScreen : KScreen<ClazzEnrollmentScreen>() {
+object ClazzEnrolmentListScreen : KScreen<ClazzEnrolmentListScreen>() {
 
 
     override val layoutId: Int?
         get() = R.layout.fragment_list
     override val viewClass: Class<*>?
-        get() = ClazzEnrollmentListFragment::class.java
+        get() = ClazzEnrolmentListFragment::class.java
 
     val recycler: KRecyclerView = KRecyclerView({
         withId(R.id.fragment_list_recyclerview)
     }, itemTypeBuilder = {
-        itemType(::ClazzEnrollment)
+        itemType(::ClazzEnrolment)
         itemType(::SortOption)
     })
 
@@ -34,7 +34,7 @@ object ClazzEnrollmentScreen : KScreen<ClazzEnrollmentScreen>() {
     })
 
 
-    class ClazzEnrollment(parent: Matcher<View>) : KRecyclerItem<ClazzEnrollment>(parent) {
+    class ClazzEnrolment(parent: Matcher<View>) : KRecyclerItem<ClazzEnrolment>(parent) {
         val title: KTextView = KTextView(parent) { withId(R.id.line1_text) }
     }
 

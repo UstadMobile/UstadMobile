@@ -27,7 +27,7 @@ class PersonDetailPresenter(context: Any,
 
     override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<PersonWithDisplayDetails?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        view.clazzes = repo.clazzEnrollmentDao.findAllClazzesByPersonWithClazz(entityUid,
+        view.clazzes = repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazz(entityUid,
                 getSystemTimeInMillis())
 
         GlobalScope.launch(doorMainDispatcher()) {
@@ -55,9 +55,9 @@ class PersonDetailPresenter(context: Any,
         return repo.personDao.findByUidWithDisplayDetailsLive(entityUid)
     }
 
-    fun handleClickClazz(clazz: ClazzEnrollmentWithClazz) {
+    fun handleClickClazz(clazz: ClazzEnrolmentWithClazz) {
         systemImpl.go(ClazzDetailView.VIEW_NAME,
-                mapOf(ARG_ENTITY_UID to clazz.clazzEnrollmentClazzUid.toString()), context)
+                mapOf(ARG_ENTITY_UID to clazz.clazzEnrolmentClazzUid.toString()), context)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {

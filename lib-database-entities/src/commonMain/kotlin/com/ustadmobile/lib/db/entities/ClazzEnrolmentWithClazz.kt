@@ -4,7 +4,7 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ClazzEnrollmentWithClazz : ClazzEnrollment() {
+class ClazzEnrolmentWithClazz : ClazzEnrolment() {
 
     @Embedded
     var clazz: Clazz? = null

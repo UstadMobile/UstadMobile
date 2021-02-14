@@ -2,14 +2,14 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ClazzEnrollment
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
-class ClazzEnrollmentListPresenter(context: Any, arguments: Map<String, String>, view: ClazzEnrollmentListView,
+class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, view: ClazzEnrolmentListView,
                                    di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<ClazzEnrollmentListView, ClazzEnrollment>(context, arguments, view, di, lifecycleOwner) {
+    : UstadListPresenter<ClazzEnrolmentListView, ClazzEnrolment>(context, arguments, view, di, lifecycleOwner) {
 
 
     override fun onCreate(savedState: Map<String, String>?) {
@@ -36,11 +36,11 @@ class ClazzEnrollmentListPresenter(context: Any, arguments: Map<String, String>,
         /* TODO: Add code to go to the edit view when the user clicks the new item FAB. This is only
          * called when the fab is clicked, not if the first item is create new item (e.g. picker mode).
          * That has to be handled at a platform level to use prepareCall etc.
-        systemImpl.go(ClazzEnrollmentEditView.VIEW_NAME, mapOf(), context)
+        systemImpl.go(ClazzEnrolmentEditView.VIEW_NAME, mapOf(), context)
          */
     }
 
-    fun handleClickClazzEnrollment(enrollment: ClazzEnrollment){
+    fun handleClickClazzEnrolment(enrolment: ClazzEnrolment){
 
     }
 

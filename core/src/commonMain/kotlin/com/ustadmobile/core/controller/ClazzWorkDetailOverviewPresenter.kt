@@ -48,18 +48,18 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         val loggedInPerson = withTimeoutOrNull(2000){
             db.personDao.findByUidAsync(loggedInPersonUid)
         }
-        val clazzEnrollment: ClazzEnrollment? = withTimeoutOrNull(2000){
-            db.clazzEnrollmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
+        val clazzEnrolment: ClazzEnrolment? = withTimeoutOrNull(2000){
+            db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                     clazzWorkWithSubmission.clazzWorkClazzUid)
         }
 
         if(loggedInPerson?.admin == true){
             view.isStudent = false
         }else{
-            if(clazzEnrollment == null){
+            if(clazzEnrolment == null){
                 view.isStudent = false
             }else {
-                view.isStudent = (clazzEnrollment.clazzEnrollmentRole != ClazzEnrollment.ROLE_TEACHER)
+                view.isStudent = (clazzEnrolment.clazzEnrolmentRole != ClazzEnrolment.ROLE_TEACHER)
             }
         }
 
@@ -67,7 +67,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         if(clazzWorkWithSubmission.clazzWorkSubmission == null && view.isStudent){
             clazzWorkWithSubmission.clazzWorkSubmission = ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
-                clazzWorkSubmissionClazzEnrollmentUid = clazzEnrollment?.clazzEnrollmentUid?:0L
+                clazzWorkSubmissionClazzEnrolmentUid = clazzEnrolment?.clazzEnrolmentUid?:0L
                 clazzWorkSubmissionPersonUid = loggedInPersonUid
                 clazzWorkSubmissionInactive = false
                 clazzWorkSubmissionDateTimeStarted = getSystemTimeInMillis()
@@ -77,7 +77,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         if(clazzWorkWithSubmission.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
 
             val questionsAndOptionsWithResponseList = db.getQuestionListForView(clazzWorkWithSubmission,
-                    clazzEnrollment?.clazzEnrollmentUid?:0L,loggedInPersonUid )
+                    clazzEnrolment?.clazzEnrolmentUid?:0L,loggedInPersonUid )
 
             if(view.isStudent && clazzWorkWithSubmission.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L ) {
                 view.editableQuizQuestions =
@@ -186,14 +186,14 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
             }
 
             val loggedInPersonUid = accountManager.activeAccount.personUid
-            val clazzEnrollment: ClazzEnrollment? = withTimeoutOrNull(2000){
-                repo.clazzEnrollmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
+            val clazzEnrolment: ClazzEnrolment? = withTimeoutOrNull(2000){
+                repo.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                         entity?.clazzWorkClazzUid?:0L)
             }
 
             val submission = entity?.clazzWorkSubmission ?: ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWorkUid ?: 0L
-                clazzWorkSubmissionClazzEnrollmentUid = clazzEnrollment?.clazzEnrollmentUid ?: 0L
+                clazzWorkSubmissionClazzEnrolmentUid = clazzEnrolment?.clazzEnrolmentUid ?: 0L
                 clazzWorkSubmissionInactive = false
                 clazzWorkSubmissionPersonUid = loggedInPersonUid
             }

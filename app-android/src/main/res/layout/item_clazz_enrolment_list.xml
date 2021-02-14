@@ -3,35 +3,35 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.ClazzEnrollment"/>
-        <import type="com.ustadmobile.port.android.view.ClazzEnrollmentListFragment"/>
-        <import type="com.ustadmobile.port.android.view.ClazzEnrollmentListFragment.ClazzEnrollmentRecyclerAdapter"/>
+        <import type="com.ustadmobile.lib.db.entities.ClazzEnrolment"/>
+        <import type="com.ustadmobile.port.android.view.ClazzEnrolmentListFragment"/>
+        <import type="com.ustadmobile.port.android.view.ClazzEnrolmentListFragment.ClazzEnrolmentRecyclerAdapter"/>
 
         <variable
-            name="clazzEnrollment"
-            type="ClazzEnrollment" />
+            name="clazzEnrolment"
+            type="ClazzEnrolment" />
 
         <variable
             name="presenter"
-            type="com.ustadmobile.core.controller.ClazzEnrollmentListPresenter" />
+            type="com.ustadmobile.core.controller.ClazzEnrolmentListPresenter" />
 
         <variable
             name="selectablePagedListAdapter"
-            type="ClazzEnrollmentRecyclerAdapter" />
+            type="ClazzEnrolmentRecyclerAdapter" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, clazzEnrollment)}"
-        app:onSelectableItemClicked="@{() -> presenter.handleClickClazzEnrollment(clazzEnrollment)}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, clazzEnrolment)}"
+        app:onSelectableItemClicked="@{() -> presenter.handleClickClazzEnrolment(clazzEnrolment)}"
         android:background="@drawable/bg_listitem"
         >
 
         <!-- TODO: Change or remove this icon -->
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/item_clazzenrollment_newitemicon"
+            android:id="@+id/item_clazzEnrolment_newitemicon"
             app:srcCompat="@drawable/ic_add_black_24dp"
             android:layout_width="@dimen/list_twoline1_imagesize"
             android:layout_height="@dimen/list_twoline1_imagesize"

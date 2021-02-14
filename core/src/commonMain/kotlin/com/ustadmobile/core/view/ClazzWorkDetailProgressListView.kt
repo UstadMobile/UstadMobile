@@ -1,12 +1,12 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.lib.db.entities.ClazzEnrollmentWithClazzWorkProgress
+import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 
 
-interface ClazzWorkDetailProgressListView: UstadListView<ClazzEnrollmentWithClazzWorkProgress,
-        ClazzEnrollmentWithClazzWorkProgress> {
+interface ClazzWorkDetailProgressListView: UstadListView<ClazzEnrolmentWithClazzWorkProgress,
+        ClazzEnrolmentWithClazzWorkProgress> {
 
     var clazzWorkWithMetrics : DataSource.Factory<Int, ClazzWorkWithMetrics>?
 

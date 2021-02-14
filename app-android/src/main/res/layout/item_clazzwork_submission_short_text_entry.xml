@@ -9,7 +9,7 @@
 
         <variable
             name="clazzWorkWithSubmission"
-            type="com.ustadmobile.lib.db.entities.ClazzEnrollmentAndClazzWorkWithSubmission" />
+            type="com.ustadmobile.lib.db.entities.ClazzEnrolmentAndClazzWorkWithSubmission" />
 
         <variable
             name="showEdit"

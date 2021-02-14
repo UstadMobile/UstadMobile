@@ -3,14 +3,14 @@ package com.ustadmobile.util.test.ext
 import com.ustadmobile.core.db.dao.ClazzLogAttendanceRecordDao
 import com.ustadmobile.lib.db.entities.ClazzLog
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord
-import com.ustadmobile.lib.db.entities.ClazzEnrollment
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 
 suspend fun ClazzLogAttendanceRecordDao.insertTestRecordsForClazzLog(clazzLog: ClazzLog,
-                                                                     enrollmentList: List<ClazzEnrollment>): List<ClazzLogAttendanceRecord> {
-    return enrollmentList.map { clazzMember ->
+                                                                     enrolmentList: List<ClazzEnrolment>): List<ClazzLogAttendanceRecord> {
+    return enrolmentList.map { clazzMember ->
         ClazzLogAttendanceRecord().apply {
             clazzLogAttendanceRecordClazzLogUid = clazzLog.clazzLogUid
-            clazzLogAttendanceRecordPersonUid = clazzMember.clazzEnrollmentPersonUid
+            clazzLogAttendanceRecordPersonUid = clazzMember.clazzEnrolmentPersonUid
             clazzLogAttendanceRecordUid = insertAsync(this)
         }
     }

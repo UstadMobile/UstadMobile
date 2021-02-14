@@ -32,7 +32,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 
-class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzEnrollmentAndClazzWorkWithSubmission>(),
+class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzEnrolmentAndClazzWorkWithSubmission>(),
         ClazzWorkSubmissionMarkingView, NewCommentHandler, SimpleButtonHandler,
         SimpleTwoButtonHandler{
 
@@ -40,7 +40,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzEnrollmentAndCl
 
     private var mPresenter: ClazzWorkSubmissionMarkingPresenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzEnrollmentAndClazzWorkWithSubmission>?
+    override val mEditPresenter: UstadEditPresenter<*, ClazzEnrolmentAndClazzWorkWithSubmission>?
         get() = mPresenter
 
     private lateinit var dbRepo : UmAppDatabase
@@ -147,7 +147,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzEnrollmentAndCl
 
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWork?.clazzWorkUid?:0L, entity?.clazzEnrollmentPersonUid?:0L
+                entity?.clazzWork?.clazzWorkUid?:0L, entity?.clazzEnrolmentPersonUid?:0L
         )
         newPrivateCommentRecyclerAdapter?.visible = true
 
@@ -248,12 +248,12 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzEnrollmentAndCl
             shortTextSubmissionRecyclerAdapter?.visible = value
         }
 
-    override var entity: ClazzEnrollmentAndClazzWorkWithSubmission? = null
+    override var entity: ClazzEnrolmentAndClazzWorkWithSubmission? = null
         set(value) {
             field = value
 
             newPrivateCommentRecyclerAdapter?.entityUid = value?.clazzWork?.clazzWorkUid?:0L
-            newPrivateCommentRecyclerAdapter?.commentTo = value?.clazzEnrollmentPersonUid?:0L
+            newPrivateCommentRecyclerAdapter?.commentTo = value?.clazzEnrolmentPersonUid?:0L
             newPrivateCommentRecyclerAdapter?.commentFrom = 0L
             newPrivateCommentRecyclerAdapter?.visible = true
 

@@ -8,7 +8,7 @@ import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ClazzEnrollmentWithClazzWorkProgress
+import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
@@ -16,7 +16,7 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
                                            view: ClazzWorkDetailProgressListView, di: DI,
                                            lifecycleOwner: DoorLifecycleOwner)
     : UstadListPresenter<ClazzWorkDetailProgressListView,
-        ClazzEnrollmentWithClazzWorkProgress>(context, arguments, view, di, lifecycleOwner),
+        ClazzEnrolmentWithClazzWorkProgress>(context, arguments, view, di, lifecycleOwner),
         OnSortOptionSelected, OnSearchSubmitted {
 
     private var filterByClazzWorkUid: Long = -1
@@ -54,9 +54,9 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
                 searchText.toQueryLikeParam())
     }
 
-    override fun handleClickEntry(entry: ClazzEnrollmentWithClazzWorkProgress) {
+    override fun handleClickEntry(entry: ClazzEnrolmentWithClazzWorkProgress) {
 
-        val clazzMemberUid = entry.mClazzEnrollment?.clazzEnrollmentUid ?: 0L
+        val clazzMemberUid = entry.mClazzEnrolment?.clazzEnrolmentUid ?: 0L
         val clazzWorkUid = filterByClazzWorkUid
 
         systemImpl.go(ClazzWorkSubmissionMarkingView.VIEW_NAME,

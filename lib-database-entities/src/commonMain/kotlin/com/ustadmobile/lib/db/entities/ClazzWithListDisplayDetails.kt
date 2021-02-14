@@ -15,7 +15,7 @@ class ClazzWithListDisplayDetails() : Clazz() {
     var lastRecorded: Long = 0
 
     @Embedded
-    var clazzActiveEnrollment: ClazzEnrollment? = null
+    var clazzActiveEnrolment: ClazzEnrolment? = null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

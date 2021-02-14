@@ -20,11 +20,11 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
     @Query("""
         SELECT ClazzWork.*, ClazzWorkSubmission.* FROM ClazzWork 
-        LEFT JOIN ClazzEnrollment ON ClazzEnrollment.clazzEnrollmentPersonUid = :personUid
-			AND ClazzEnrollment.clazzEnrollmentClazzUid = ClazzWork.clazzWorkClazzUid 
-			AND CAST(ClazzEnrollment.clazzEnrollmentActive AS INTEGER) = 1
+        LEFT JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
+			AND ClazzEnrolment.clazzEnrolmentClazzUid = ClazzWork.clazzWorkClazzUid 
+			AND CAST(ClazzEnrolment.clazzEnrolmentActive AS INTEGER) = 1
         LEFT JOIN ClazzWorkSubmission ON 
-            ClazzWorkSubmission.clazzWorkSubmissionClazzEnrollmentUid = ClazzEnrollment.clazzEnrollmentUid
+            ClazzWorkSubmission.clazzWorkSubmissionClazzEnrolmentUid = ClazzEnrolment.clazzEnrolmentUid
              AND ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
 		WHERE ClazzWork.clazzWorkUid = :uid 
         ORDER BY ClazzWorkSubmission.clazzWorkSubmissionDateTimeStarted DESC LIMIT 1
@@ -35,9 +35,9 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             SELECT ClazzWork.*, 
             
             (
-                SELECT COUNT(*) FROM ClazzEnrollment WHERE ClazzEnrollment.clazzEnrollmentClazzUid = Clazz.clazzUid 
-                AND CAST(ClazzEnrollment.clazzEnrollmentActive AS INTEGER) = 1 
-                AND ClazzEnrollment.clazzEnrollmentRole = ${ClazzEnrollment.ROLE_STUDENT} 
+                SELECT COUNT(*) FROM ClazzEnrolment WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+                AND CAST(ClazzEnrolment.clazzEnrolmentActive AS INTEGER) = 1 
+                AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
             ) as totalStudents, 
             (
                 SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
@@ -55,7 +55,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
              FROM ClazzWork 
              LEFT JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
              WHERE clazzWorkClazzUid = :clazzUid
-             AND (:role = ${ClazzEnrollment.ROLE_TEACHER} OR clazzWorkStartDateTime < :today)
+             AND (:role = ${ClazzEnrolment.ROLE_TEACHER} OR clazzWorkStartDateTime < :today)
             AND CAST(clazzWorkActive as INTEGER) = 1 
             AND ClazzWork.clazzWorkTitle LIKE :searchText 
             ORDER BY CASE(:sortOrder)
@@ -92,14 +92,14 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
     @Query(STUDENT_PROGRESS_QUERY)
     abstract fun findStudentProgressByClazzWork(clazzWorkUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int,
-            ClazzEnrollmentWithClazzWorkProgress>
+            ClazzEnrolmentWithClazzWorkProgress>
 
     @Query(STUDENT_PROGRESS_QUERY)
-    abstract suspend fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long, sortOrder: Int, searchText: String? = "%"): List<ClazzEnrollmentWithClazzWorkProgress>
+    abstract suspend fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long, sortOrder: Int, searchText: String? = "%"): List<ClazzEnrolmentWithClazzWorkProgress>
 
-    @Query(FIND_CLAZZENROLLMENT_AND_SUBMISSION_WITH_PERSON)
-    abstract suspend fun findClazzEnrollmentWithAndSubmissionWithPerson(clazzWorkUid: Long,
-                                                                        clazzEnrollmentUid: Long): ClazzEnrollmentAndClazzWorkWithSubmission?
+    @Query(FIND_CLAZZEnrolment_AND_SUBMISSION_WITH_PERSON)
+    abstract suspend fun findClazzEnrolmentWithAndSubmissionWithPerson(clazzWorkUid: Long,
+                                                                        clazzEnrolmentUid: Long): ClazzEnrolmentAndClazzWorkWithSubmission?
 
     @Query("SELECT * FROM ClazzWork")
     abstract suspend fun findAllTesting(): List<ClazzWork>
@@ -138,19 +138,19 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
         const val FIND_CLAZZWORKWITHMETRICS_QUERY = """
             SELECT ClazzWork.*, 
             (
-                SELECT COUNT(*) FROM ClazzEnrollment WHERE 
-                ClazzEnrollment.clazzEnrollmentClazzUid = Clazz.clazzUid 
-                AND CAST(ClazzEnrollment.clazzEnrollmentActive AS INTEGER) = 1 
-                AND ClazzEnrollment.clazzEnrollmentRole = ${ClazzEnrollment.ROLE_STUDENT} 
+                SELECT COUNT(*) FROM ClazzEnrolment WHERE 
+                ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+                AND CAST(ClazzEnrolment.clazzEnrolmentActive AS INTEGER) = 1 
+                AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
             ) as totalStudents, 
             (
-                SELECT COUNT(DISTINCT clazzWorkSubmissionClazzEnrollmentUid) FROM ClazzWorkSubmission WHERE
+                SELECT COUNT(DISTINCT clazzWorkSubmissionPersonUid) FROM ClazzWorkSubmission WHERE
                 clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
             ) as submittedStudents, 
             0 as notSubmittedStudents,
             0 as completedStudents, 
             (
-                SELECT COUNT(DISTINCT clazzWorkSubmissionClazzEnrollmentUid) FROM ClazzWorkSubmission WHERE 
+                SELECT COUNT(DISTINCT clazzWorkSubmissionPersonUid) FROM ClazzWorkSubmission WHERE 
                 ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
                 AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
             ) as markedStudents,
@@ -163,16 +163,16 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
         """
 
 
-        const val FIND_CLAZZENROLLMENT_AND_SUBMISSION_WITH_PERSON =
+        const val FIND_CLAZZEnrolment_AND_SUBMISSION_WITH_PERSON =
                 """
-            SELECT ClazzWork.*, ClazzWorkSubmission.*, ClazzEnrollment.*, Person.*
+            SELECT ClazzWork.*, ClazzWorkSubmission.*, ClazzEnrolment.*, Person.*
              FROM ClazzWork
-            LEFT JOIN ClazzEnrollment ON ClazzEnrollment.clazzEnrollmentUid = :clazzEnrollmentUid
-            LEFT JOIN Person ON Person.personUid = ClazzEnrollment.clazzEnrollmentPersonUid 
+            LEFT JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentUid = :clazzEnrolmentUid
+            LEFT JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
             LEFT JOIN ClazzWorkSubmission ON ClazzWorkSubmission.clazzWorkSubmissionUid = 
                 (
                 SELECT ClazzWorkSubmission.clazzWorkSubmissionUid FROM ClazzWorkSubmission 
-                WHERE ClazzWorkSubmission.clazzWorkSubmissionClazzEnrollmentUid = ClazzEnrollment.clazzEnrollmentUid
+                WHERE ClazzWorkSubmission.clazzWorkSubmissionClazzEnrolmentUid = ClazzEnrolment.clazzEnrolmentUid
                 AND CAST(ClazzWorkSubmission.clazzWorkSubmissionInactive AS INTEGER) = 0
                 AND ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
                 ORDER BY ClazzWorkSubmission.clazzWorkSubmissionDateTimeStarted DESC LIMIT 1
@@ -186,7 +186,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
         //AND ContentEntryProgress.contentEntryProgressStatusFlag = ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED}
         const val STUDENT_PROGRESS_QUERY = """
             SELECT 
-                Person.*, ClazzEnrollment.*, cws.*,
+                Person.*, ClazzEnrolment.*, cws.*,
                 (
                     (
                         SELECT SUM(ContentEntryProgress.contentEntryProgressProgress) 
@@ -217,8 +217,8 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
             THEN 1 ELSE 0 END) as clazzWorkHasContent
 
             
-            FROM ClazzEnrollment
-                LEFT JOIN Person ON ClazzEnrollment.clazzEnrollmentPersonUid = Person.personUid
+            FROM ClazzEnrolment
+                LEFT JOIN Person ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
                 LEFT JOIN ClazzWork ON ClazzWork.clazzWorkUid = :clazzWorkUid
                 LEFT JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
                 LEFT JOIN Comments AS cm ON cm.commentsUid = (
@@ -232,11 +232,11 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                 LEFT JOIN ClazzWorkSubmission AS cws ON cws.clazzWorkSubmissionUid = 
                     (SELECT ClazzWorkSubmission.clazzWorkSubmissionUid FROM ClazzWorkSubmission WHERE
                     ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid 
-                    AND ClazzWorkSubmission.clazzWorkSubmissionClazzEnrollmentUid = ClazzEnrollment.clazzEnrollmentUid
+                    AND ClazzWorkSubmission.clazzWorkSubmissionPersonUid = Person.personUid
                     LIMIT 1)
             WHERE 
-                    ClazzEnrollment.clazzEnrollmentClazzUid = Clazz.clazzUid
-                    AND ClazzEnrollment.clazzEnrollmentRole = ${ClazzEnrollment.ROLE_STUDENT} 
+                    ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
+                    AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
                     AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
                     ORDER BY CASE(:sortOrder)
                         WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames

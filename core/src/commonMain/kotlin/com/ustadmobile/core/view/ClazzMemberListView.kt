@@ -1,14 +1,16 @@
 package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
-import com.ustadmobile.lib.db.entities.ClazzEnrollment
-import com.ustadmobile.lib.db.entities.ClazzEnrollmentWithPerson
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithPerson
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 
-interface ClazzMemberListView: UstadListView<ClazzEnrollment, ClazzEnrollmentWithPerson> {
+interface ClazzMemberListView: UstadListView<Person, PersonWithClazzEnrolmentDetails> {
 
-    var studentList: DataSource.Factory<Int, ClazzEnrollmentWithPerson>?
+    var studentList: DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>?
 
-    var pendingStudentList: DataSource.Factory<Int, ClazzEnrollmentWithPerson>?
+    var pendingStudentList: DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>?
 
     var addTeacherVisible: Boolean
 

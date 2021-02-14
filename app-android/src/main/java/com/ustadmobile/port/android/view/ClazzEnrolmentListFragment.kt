@@ -7,12 +7,12 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.ItemClazzEnrollmentListBinding
-import com.ustadmobile.core.controller.ClazzEnrollmentListPresenter
+import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentListBinding
+import com.ustadmobile.core.controller.ClazzEnrolmentListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.ClazzEnrollmentListView
-import com.ustadmobile.lib.db.entities.ClazzEnrollment
+import com.ustadmobile.core.view.ClazzEnrolmentListView
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
@@ -20,29 +20,29 @@ import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
-class ClazzEnrollmentListFragment(): UstadListViewFragment<ClazzEnrollment, ClazzEnrollment>(),
-        ClazzEnrollmentListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzEnrolment>(),
+        ClazzEnrolmentListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
-    private var mPresenter: ClazzEnrollmentListPresenter? = null
+    private var mPresenter: ClazzEnrolmentListPresenter? = null
 
-    override val listPresenter: UstadListPresenter<*, in ClazzEnrollment>?
+    override val listPresenter: UstadListPresenter<*, in ClazzEnrolment>?
         get() = mPresenter
 
 
-    class ClazzEnrollmentRecyclerAdapter(var presenter: ClazzEnrollmentListPresenter?): SelectablePagedListAdapter<ClazzEnrollment, ClazzEnrollmentRecyclerAdapter.ClazzEnrollmentListViewHolder>(DIFF_CALLBACK) {
+    class ClazzEnrolmentRecyclerAdapter(var presenter: ClazzEnrolmentListPresenter?): SelectablePagedListAdapter<ClazzEnrolment, ClazzEnrolmentRecyclerAdapter.ClazzEnrolmentListViewHolder>(DIFF_CALLBACK) {
 
-        class ClazzEnrollmentListViewHolder(val itemBinding: ItemClazzEnrollmentListBinding): RecyclerView.ViewHolder(itemBinding.root)
+        class ClazzEnrolmentListViewHolder(val itemBinding: ItemClazzEnrolmentListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzEnrollmentListViewHolder {
-            val itemBinding = ItemClazzEnrollmentListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzEnrolmentListViewHolder {
+            val itemBinding = ItemClazzEnrolmentListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
             itemBinding.selectablePagedListAdapter = this
-            return ClazzEnrollmentListViewHolder(itemBinding)
+            return ClazzEnrolmentListViewHolder(itemBinding)
         }
 
-        override fun onBindViewHolder(holder: ClazzEnrollmentListViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: ClazzEnrolmentListViewHolder, position: Int) {
             val item = getItem(position)
-            holder.itemBinding.clazzEnrollment = item
+            holder.itemBinding.clazzEnrolment = item
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
@@ -57,13 +57,13 @@ class ClazzEnrollmentListFragment(): UstadListViewFragment<ClazzEnrollment, Claz
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
 
-        mPresenter = ClazzEnrollmentListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
+        mPresenter = ClazzEnrolmentListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
 
-        mDataRecyclerViewAdapter = ClazzEnrollmentRecyclerAdapter(mPresenter)
+        mDataRecyclerViewAdapter = ClazzEnrolmentRecyclerAdapter(mPresenter)
 
         val createNewText = requireContext().getString(R.string.create_new,
-                requireContext().getString(R.string.clazzenrollment))
+                requireContext().getString(R.string.clazzEnrolment))
 
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
                 this, createNewText)
@@ -73,7 +73,7 @@ class ClazzEnrollmentListFragment(): UstadListViewFragment<ClazzEnrollment, Claz
     override fun onResume() {
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
-                requireContext().getString(R.string.clazzenrollment)
+                requireContext().getString(R.string.clazzEnrolment)
     }
 
     /**
@@ -81,7 +81,7 @@ class ClazzEnrollmentListFragment(): UstadListViewFragment<ClazzEnrollment, Claz
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.clazzenrollment_edit_dest, ClazzEnrollment::class.java)
+            navigateToEditEntity(null, R.id.clazzEnrolment_edit_dest, ClazzEnrolment::class.java)
     }
 
     override fun onDestroyView() {
@@ -91,7 +91,7 @@ class ClazzEnrollmentListFragment(): UstadListViewFragment<ClazzEnrollment, Claz
     }
 
     override val displayTypeRepo: Any?
-        get() = dbRepo.clazzEnrollmentDao
+        get() = dbRepo.clazzEnrolmentDao
 
     override var person: Person? = null
         get() = field
@@ -103,15 +103,15 @@ class ClazzEnrollmentListFragment(): UstadListViewFragment<ClazzEnrollment, Claz
 
     companion object {
 
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzEnrollment> = object
-            : DiffUtil.ItemCallback<ClazzEnrollment>() {
-            override fun areItemsTheSame(oldItem: ClazzEnrollment,
-                                         newItem: ClazzEnrollment): Boolean {
-                return oldItem.clazzEnrollmentUid == newItem.clazzEnrollmentUid
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzEnrolment> = object
+            : DiffUtil.ItemCallback<ClazzEnrolment>() {
+            override fun areItemsTheSame(oldItem: ClazzEnrolment,
+                                         newItem: ClazzEnrolment): Boolean {
+                return oldItem.clazzEnrolmentUid == newItem.clazzEnrolmentUid
             }
 
-            override fun areContentsTheSame(oldItem: ClazzEnrollment,
-                                            newItem: ClazzEnrollment): Boolean {
+            override fun areContentsTheSame(oldItem: ClazzEnrolment,
+                                            newItem: ClazzEnrolment): Boolean {
                 return oldItem == newItem
             }
         }

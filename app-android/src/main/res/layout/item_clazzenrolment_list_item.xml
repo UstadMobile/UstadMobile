@@ -4,36 +4,36 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.ClazzEnrollmentWithPerson"/>
-        <import type="com.ustadmobile.lib.db.entities.ClazzEnrollment"/>
+        <import type="com.ustadmobile.lib.db.entities.ClazzEnrolmentWithPerson"/>
+        <import type="com.ustadmobile.lib.db.entities.ClazzEnrolment"/>
         <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.ClazzMemberListFragment"/>
-        <import type="com.ustadmobile.port.android.view.ClazzMemberListFragment.ClazzEnrollmentListRecyclerAdapter"/>
+        <import type="com.ustadmobile.port.android.view.ClazzMemberListFragment.ClazzEnrolmentListRecyclerAdapter"/>
 
         <variable
-            name="clazzEnrollment"
-            type="ClazzEnrollmentWithPerson" />
+            name="clazzEnrolment"
+            type="ClazzEnrolmentWithPerson" />
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.ClazzMemberListPresenter" />
 
         <variable
             name="selectablePagedListAdapter"
-            type="ClazzEnrollmentListRecyclerAdapter" />
+            type="ClazzEnrolmentListRecyclerAdapter" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, clazzEnrollment)}"
-        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(clazzEnrollment)}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, clazzEnrolment)}"
+        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(clazzEnrolment)}"
         android:background="@drawable/bg_listitem"
         >
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_clazzmember_newitemicon"
-            app:personPicturePersonUid="@{clazzEnrollment.clazzEnrollmentPersonUid}"
+            app:personPicturePersonUid="@{clazzEnrolment.clazzEnrolmentPersonUid}"
             android:layout_width="@dimen/dimen_48dp"
             android:layout_height="@dimen/dimen_48dp"
             android:layout_margin="@dimen/dimen_16dp"
@@ -45,7 +45,7 @@
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/item_clazzmember_text"
-            android:text='@{clazzEnrollment.person.firstNames + " " + clazzEnrollment.person.lastName}'
+            android:text='@{clazzEnrolment.person.firstNames + " " + clazzEnrolment.person.lastName}'
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
@@ -60,13 +60,13 @@
 
         <!-- Line 2-->
         <androidx.appcompat.widget.AppCompatImageView
-            android:visibility="@{clazzEnrollment.clazzEnrollmentRole == ClazzEnrollment.ROLE_STUDENT ? View.VISIBLE : View.GONE}"
+            android:visibility="@{clazzEnrolment.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT ? View.VISIBLE : View.GONE}"
             android:id="@+id/item_clazzmember_line2_attendance_trafficlight"
             android:layout_width="12dp"
             android:layout_height="12dp"
             android:layout_marginTop="@dimen/dimen_8dp"
             android:contentDescription="@string/attendance"
-            app:attendanceTint="@{clazzEnrollment.clazzEnrollmentAttendancePercentage}"
+            app:attendanceTint="@{clazzEnrolment.clazzEnrolmentAttendancePercentage}"
             app:layout_constraintStart_toEndOf="@id/item_clazzmember_newitemicon"
             app:layout_constraintTop_toBottomOf="@id/item_clazzmember_text"
             app:srcCompat="@drawable/ic_lens_black_24dp" />
@@ -81,8 +81,8 @@
             android:paddingStart="@dimen/dimen_8dp"
             android:paddingEnd="@dimen/dimen_8dp"
             android:gravity="center|start"
-            android:visibility="@{clazzEnrollment.clazzEnrollmentRole == ClazzEnrollment.ROLE_STUDENT ? View.VISIBLE : View.GONE}"
-            android:text="@{@string/x_percent_attended(clazzEnrollment.clazzEnrollmentAttendancePercentage * 100)}"
+            android:visibility="@{clazzEnrolment.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT ? View.VISIBLE : View.GONE}"
+            android:text="@{@string/x_percent_attended(clazzEnrolment.clazzEnrolmentAttendancePercentage * 100)}"
             app:layout_constraintStart_toEndOf="@+id/item_clazzmember_line2_attendance_trafficlight"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzmember_text"
             app:layout_constraintEnd_toEndOf="parent"

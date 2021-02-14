@@ -85,8 +85,8 @@ class ClazzLogEditAttendancePresenter(context: Any,
         view.clazzLogTimezone = clazzWithSchool.effectiveTimeZone()
 
         //Find all those who are members of the class at the corresponding class schedule.
-        val clazzMembersAtTime = db.clazzEnrollmentDao.getAllClazzEnrolledAtTimeAsync(
-                clazzLog.clazzLogClazzUid, clazzLog.logDate, ClazzEnrollment.ROLE_STUDENT)
+        val clazzMembersAtTime = db.clazzEnrolmentDao.getAllClazzEnrolledAtTimeAsync(
+                clazzLog.clazzLogClazzUid, clazzLog.logDate, ClazzEnrolment.ROLE_STUDENT)
 
 
         var clazzAttendanceLogsInDb = db.clazzLogAttendanceRecordDao.findByClazzLogUid(currentClazzLogUid)
@@ -105,15 +105,15 @@ class ClazzLogEditAttendancePresenter(context: Any,
          */
         val allMembers = clazzMembersAtTime.map { clazzMember ->
             clazzAttendanceRecords.firstOrNull {
-                it.clazzLogAttendanceRecordPersonUid == clazzMember.clazzEnrollmentPersonUid &&
+                it.clazzLogAttendanceRecordPersonUid == clazzMember.clazzEnrolmentPersonUid &&
                         it.clazzLogAttendanceRecordClazzLogUid == currentClazzLogUid
             } ?: clazzAttendanceLogsInDb.firstOrNull {
-                it.clazzLogAttendanceRecordPersonUid == clazzMember.clazzEnrollmentPersonUid &&
+                it.clazzLogAttendanceRecordPersonUid == clazzMember.clazzEnrolmentPersonUid &&
                         it.clazzLogAttendanceRecordClazzLogUid == currentClazzLogUid
             } ?:ClazzLogAttendanceRecordWithPerson().apply {
                 person = clazzMember.person
                 clazzLogAttendanceRecordClazzLogUid = currentClazzLogUid
-                clazzLogAttendanceRecordPersonUid = clazzMember.clazzEnrollmentPersonUid
+                clazzLogAttendanceRecordPersonUid = clazzMember.clazzEnrolmentPersonUid
             }
         }.sortedBy { "${it.person?.firstNames} ${it.person?.lastName}" }
 

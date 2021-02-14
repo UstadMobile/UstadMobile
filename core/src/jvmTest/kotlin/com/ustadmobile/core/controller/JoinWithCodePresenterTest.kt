@@ -3,7 +3,7 @@ package com.ustadmobile.core.controller
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ClazzEnrollmentDao
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
@@ -15,7 +15,7 @@ import com.ustadmobile.core.view.Login2View
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzEnrollment
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.runBlocking
@@ -38,7 +38,7 @@ class JoinWithCodePresenterTest {
 
     private lateinit var clazzToEnrolInto: Clazz
 
-    private lateinit var clazzEnrollmentRepoDaoSpy: ClazzEnrollmentDao
+    private lateinit var clazzEnrolmentRepoDaoSpy: ClazzEnrolmentDao
 
     private lateinit var accountManager: UstadAccountManager
 
@@ -62,8 +62,8 @@ class JoinWithCodePresenterTest {
 
         val repo: UmAppDatabase by di.activeRepoInstance()
 
-        clazzEnrollmentRepoDaoSpy = spy(repo.clazzEnrollmentDao)
-        whenever(repo.clazzEnrollmentDao).thenReturn(clazzEnrollmentRepoDaoSpy)
+        clazzEnrolmentRepoDaoSpy = spy(repo.clazzEnrolmentDao)
+        whenever(repo.clazzEnrolmentDao).thenReturn(clazzEnrolmentRepoDaoSpy)
 
         repo.personDao.insert(Person().apply {
             firstNames = "Test"
@@ -92,10 +92,10 @@ class JoinWithCodePresenterTest {
         presenter.handleClickDone(clazzToEnrolInto.clazzCode!!)
 
 
-        verifyBlocking(clazzEnrollmentRepoDaoSpy, timeout(5000 * 5000)) {
+        verifyBlocking(clazzEnrolmentRepoDaoSpy, timeout(5000 * 5000)) {
             insertAsync(argWhere {
-                it.clazzEnrollmentPersonUid == accountManager.activeAccount.personUid &&
-                        it.clazzEnrollmentRole == ClazzEnrollment.ROLE_STUDENT_PENDING
+                it.clazzEnrolmentPersonUid == accountManager.activeAccount.personUid &&
+                        it.clazzEnrolmentRole == ClazzEnrolment.ROLE_STUDENT_PENDING
             })
         }
 

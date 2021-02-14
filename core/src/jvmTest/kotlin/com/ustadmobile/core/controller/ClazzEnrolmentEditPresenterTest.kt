@@ -4,15 +4,15 @@ package com.ustadmobile.core.controller
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.ustadmobile.core.view.ClazzEnrollmentListView
-import com.ustadmobile.core.view.ClazzEnrollmentDetailView
+import com.ustadmobile.core.view.ClazzEnrolmentListView
+import com.ustadmobile.core.view.ClazzEnrolmentDetailView
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.util.SystemImplRule
 import com.ustadmobile.core.util.UmAppDatabaseClientRule
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.core.db.dao.ClazzEnrollmentDao
+import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.door.DoorLifecycleObserver
-import com.ustadmobile.lib.db.entities.ClazzEnrollment
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 
@@ -21,7 +21,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
  *
  * Note:
  */
-class ClazzEnrollmentEditPresenterTest {
+class ClazzEnrolmentEditPresenterTest {
 
     @JvmField
     @Rule
@@ -31,13 +31,13 @@ class ClazzEnrollmentEditPresenterTest {
     @Rule
     var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
 
-    private lateinit var mockView: ClazzEnrollmentListView
+    private lateinit var mockView: ClazzEnrolmentListView
 
     private lateinit var context: Any
 
     private lateinit var mockLifecycleOwner: DoorLifecycleOwner
 
-    private lateinit var repoClazzEnrollmentDaoSpy: ClazzEnrollmentDao
+    private lateinit var repoClazzEnrolmentDaoSpy: ClazzEnrolmentDao
 
     @Before
     fun setup() {
@@ -46,8 +46,8 @@ class ClazzEnrollmentEditPresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repoClazzEnrollmentDaoSpy = spy(clientDbRule.db.clazzEnrollmentDao)
-        whenever(clientDbRule.db.clazzEnrollmentDao).thenReturn(repoClazzEnrollmentDaoSpy)
+        repoClazzEnrolmentDaoSpy = spy(clientDbRule.db.clazzEnrolmentDao)
+        whenever(clientDbRule.db.clazzEnrolmentDao).thenReturn(repoClazzEnrolmentDaoSpy)
 
         //TODO: insert any entities required for all tests
     }
@@ -55,22 +55,22 @@ class ClazzEnrollmentEditPresenterTest {
     @Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         //TODO: insert any entities that are used only in this test
-        val testEntity = ClazzEnrollment().apply {
+        val testEntity = ClazzEnrolment().apply {
             //set variables here
-            clazzEnrollmentUid = clientDbRule.db.clazzEnrollmentDao.insert(this)
+            clazzEnrolmentUid = clientDbRule.db.clazzEnrolmentDao.insert(this)
         }
 
         //TODO: add any arguments required for the presenter here e.g.
-        // ClazzEnrollmentView.ARG_SOME_FILTER to "filterValue"
+        // ClazzEnrolmentView.ARG_SOME_FILTER to "filterValue"
         val presenterArgs = mapOf<String,String>()
-        val presenter = ClazzEnrollmentListPresenter(context,
+        val presenter = ClazzEnrolmentListPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner,
                 systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
                 clientDbRule.accountLiveData)
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
-        verify(repoClazzEnrollmentDaoSpy, timeout(5000)).findByClazzEnrollmentUidAsFactory()
+        verify(repoClazzEnrolmentDaoSpy, timeout(5000)).findByClazzEnrolmentUidAsFactory()
         verify(mockView, timeout(5000)).list = any()
 
         //TODO: verify any other properties that the presenter should set on the view
@@ -79,11 +79,11 @@ class ClazzEnrollmentEditPresenterTest {
     @Test
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
         val presenterArgs = mapOf<String,String>()
-        val testEntity = ClazzEnrollment().apply {
+        val testEntity = ClazzEnrolment().apply {
             //set variables here
-            clazzEnrollmentUid = clientDbRule.db.clazzEnrollmentDao.insert(this)
+            clazzEnrolmentUid = clientDbRule.db.clazzEnrolmentDao.insert(this)
         }
-        val presenter = ClazzEnrollmentListPresenter(context,
+        val presenter = ClazzEnrolmentListPresenter(context,
                 presenterArgs, mockView, mockLifecycleOwner,
                 systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
                 clientDbRule.accountLiveData)
@@ -94,8 +94,8 @@ class ClazzEnrollmentEditPresenterTest {
         presenter.handleClickEntry(testEntity)
 
 
-        verify(systemImplRule.systemImpl, timeout(5000)).go(eq(ClazzEnrollmentDetailView.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to testEntity.clazzEnrollmentUid.toString())), any())
+        verify(systemImplRule.systemImpl, timeout(5000)).go(eq(ClazzEnrolmentDetailView.VIEW_NAME),
+                eq(mapOf(ARG_ENTITY_UID to testEntity.clazzEnrolmentUid.toString())), any())
     }
 
     //TODO: Add tests for other scenarios the presenter is expected to handle - e.g. different filters, etc.

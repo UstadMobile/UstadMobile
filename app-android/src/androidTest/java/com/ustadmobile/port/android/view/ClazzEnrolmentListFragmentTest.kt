@@ -3,19 +3,20 @@ package com.ustadmobile.port.android.view
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
-import com.ustadmobile.port.android.screen.ClazzEnrollmentScreen
+import com.ustadmobile.port.android.screen.ClazzEnrolmentScreen
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.toughra.ustadmobile.R
-import com.ustadmobile.lib.db.entities.ClazzEnrollment
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.port.android.screen.ClazzEnrolmentListScreen
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
-@AdbScreenRecord("ClazzEnrollment screen tests")
-class ClazzEnrollmentFragmentTest : TestCase()  {
+@AdbScreenRecord("ClazzEnrolment screen tests")
+class ClazzEnrolmentListFragmentTest : TestCase()  {
 
     @JvmField
     @Rule
@@ -30,17 +31,17 @@ class ClazzEnrollmentFragmentTest : TestCase()  {
     val screenRecordRule = AdbScreenRecordRule()
 
 
-    @AdbScreenRecord("Given list when ClazzEnrollment clicked then navigate to ClazzEnrollmentDetail")
+    @AdbScreenRecord("Given list when ClazzEnrolment clicked then navigate to ClazzEnrolmentDetail")
     @Test
-    fun givenClazzEnrollmentListPresent_whenClickOnClazzEnrollment_thenShouldNavigateToClazzEnrollmentDetail() {
-        val testEntity = ClazzEnrollment().apply {
-            clazzEnrollmentName = "Test Name"
-            clazzEnrollmentUid = dbRule.db.clazzDao.insert(this)
+    fun givenClazzEnrolmentListPresent_whenClickOnClazzEnrolment_thenShouldNavigateToClazzEnrolmentDetail() {
+        val testEntity = ClazzEnrolment().apply {
+            clazzEnrolmentName = "Test Name"
+            clazzEnrolmentUid = dbRule.db.clazzDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf()) {
-            ClazzEnrollmentListFragment().also {
+            ClazzEnrolmentListFragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
         }
@@ -49,12 +50,12 @@ class ClazzEnrollmentFragmentTest : TestCase()  {
 
         }.run{
 
-            ClazzEnrollmentScreen{
+            ClazzEnrolmentListScreen{
 
                 recycler{
 
-                    childWith<ClazzEnrollmentScreen.ClazzEnrollment>{
-                        withDescendant { withTag(testEntity.clazzEnrollmentUid) }
+                    childWith<ClazzEnrolmentListScreen.ClazzEnrolment>{
+                        withDescendant { withTag(testEntity.clazzEnrolmentUid) }
                     }perform {
                         title {
                             click()
@@ -65,7 +66,7 @@ class ClazzEnrollmentFragmentTest : TestCase()  {
 
                 flakySafely {
                     Assert.assertEquals("After clicking on item, it navigates to detail view",
-                            R.id.clazz_enrollment_detail_dest, systemImplNavRule.navController.currentDestination?.id)
+                            R.id.clazz_Enrolment_detail_dest, systemImplNavRule.navController.currentDestination?.id)
                 }
 
 

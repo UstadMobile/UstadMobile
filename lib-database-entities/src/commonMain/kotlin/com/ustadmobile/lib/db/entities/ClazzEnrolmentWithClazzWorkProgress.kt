@@ -4,10 +4,10 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ClazzEnrollmentWithClazzWorkProgress : Person() {
+class ClazzEnrolmentWithClazzWorkProgress : Person() {
 
     @Embedded
-    var mClazzEnrollment: ClazzEnrollment? = null
+    var mClazzEnrolment: ClazzEnrolment? = null
 
     @Embedded
     var mLatestPrivateComment: Comments? = null

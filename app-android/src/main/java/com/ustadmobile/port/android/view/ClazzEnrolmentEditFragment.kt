@@ -3,37 +3,37 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.view.*
 import androidx.navigation.fragment.findNavController
-import com.toughra.ustadmobile.databinding.FragmentClazzEnrollmentBinding
-import com.ustadmobile.core.controller.ClazzEnrollmentEditPresenter
+import com.toughra.ustadmobile.databinding.FragmentClazzEnrolmentBinding
+import com.ustadmobile.core.controller.ClazzEnrolmentEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.ClazzEnrollmentEditView
-import com.ustadmobile.lib.db.entities.ClazzEnrollment
+import com.ustadmobile.core.view.ClazzEnrolmentEditView
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
 
-interface ClazzEnrollmentFragmentEventHandler {
+interface ClazzEnrolmentFragmentEventHandler {
     fun handleReasonLeavingClicked()
 }
 
-class ClazzEnrollmentEditFragment: UstadEditFragment<ClazzEnrollment>(), ClazzEnrollmentEditView, ClazzEnrollmentFragmentEventHandler {
+class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolment>(), ClazzEnrolmentEditView, ClazzEnrolmentFragmentEventHandler {
 
-    private var mBinding: FragmentClazzEnrollmentBinding? = null
+    private var mBinding: FragmentClazzEnrolmentBinding? = null
 
-    private var mPresenter: ClazzEnrollmentEditPresenter? = null
+    private var mPresenter: ClazzEnrolmentEditPresenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzEnrollment>?
+    override val mEditPresenter: UstadEditPresenter<*, ClazzEnrolment>?
         get() = mPresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentClazzEnrollmentBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentClazzEnrolmentBinding.inflate(inflater, container, false).also {
             rootView = it.root
         }
 
-        mPresenter = ClazzEnrollmentEditPresenter(requireContext(), arguments.toStringMap(), this,
+        mPresenter = ClazzEnrolmentEditPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)
 
         return rootView
@@ -64,19 +64,19 @@ class ClazzEnrollmentEditFragment: UstadEditFragment<ClazzEnrollment>(), ClazzEn
         entity = null
     }
 
-    override var entity: ClazzEnrollment? = null
+    override var entity: ClazzEnrolment? = null
         get() = field
         set(value) {
             field = value
-            mBinding?.clazzEnrollment = value
+            mBinding?.clazzEnrolment = value
         }
 
-    override var roleList: List<ClazzEnrollmentEditPresenter.RoleMessageIdOption>? = null
+    override var roleList: List<ClazzEnrolmentEditPresenter.RoleMessageIdOption>? = null
         get() = field
         set(value) {
             field = value
         }
-    override var statusList: List<ClazzEnrollmentEditPresenter.StatusMessageIdOption>? = null
+    override var statusList: List<ClazzEnrolmentEditPresenter.StatusMessageIdOption>? = null
         get() = field
         set(value) {
             field = value
