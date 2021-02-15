@@ -93,18 +93,15 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
     sql += personPermission
 
     if(report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS){
-        sql += "LEFT JOIN ClazzMember ON StatementEntity.statementPersonUid = ClazzMember.clazzMemberPersonUid "
-        sql += "LEFT JOIN Clazz ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid "
+        sql += "LEFT JOIN ClazzEnrolment ON StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid "
+        sql += "LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid "
     }
 
     when(reportSeriesYAxis){
         TOTAL_ATTENDANCE, TOTAL_ABSENCES, TOTAL_LATES, TOTAL_CLASSES,
         PERCENTAGE_STUDENTS_ATTENDED, PERCENTAGE_STUDENTS_ATTENDED_OR_LATE,
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> {
-            if(report.xAxis != Report.CLASS && reportSeriesSubGroup != Report.CLASS){
-                sql += "LEFT JOIN ClazzMember ON StatementEntity.statementPersonUid = ClazzMember.clazzMemberPersonUid "
-            }
-            sql += "LEFT JOIN ClazzLogAttendanceRecord ON ClazzMember.clazzMemberUid  = ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid "
+            sql += "LEFT JOIN ClazzLogAttendanceRecord ON StatementEntity.statementPersonUid  = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid "
         }
     }
 
