@@ -52,7 +52,7 @@ import kotlin.jvm.Volatile
     //#DOORDB_TRACKER_ENTITIES
 
 ], version = 59)
-@MinSyncVersion(28)
+@MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     /*
@@ -3618,13 +3618,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                     database.execSQL("""ALTER TABLE ClazzLogAttendanceRecord 
                         ADD COLUMN clazzLogAttendanceRecordPersonUid INTEGER DEFAULT 0 NOT NULL""".trimMargin())
-
-                    database.execSQL("""UPDATE ClazzLogAttendanceRecord SET 
-                        clazzLogAttendanceRecordPersonUid = (SELECT clazzMemberPersonUid 
-                        FROM ClazzMember LEFT JOIN ClazzLogAttendanceRecord ON 
-                        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = 
-                        ClazzMember.clazzMemberUid WHERE ClazzMember.clazzMemberUid = 
-                        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid LIMIT 1)""".trimMargin())
 
                     database.execSQL("""ALTER TABLE ClazzLogAttendanceRecord 
                         RENAME to ClazzLogAttendanceRecord_OLD""".trimMargin())
