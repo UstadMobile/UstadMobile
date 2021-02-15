@@ -85,20 +85,20 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
                 mapOf(UstadView.ARG_ENTITY_UID to entry.personUid.toString()), context)
     }
 
-    fun handleClickPendingRequest(Enrolment: PersonWithClazzEnrolmentDetails, approved: Boolean) {
+    fun handleClickPendingRequest(enrolmentDetails: PersonWithClazzEnrolmentDetails, approved: Boolean) {
         GlobalScope.launch(doorMainDispatcher()) {
-            //TODO fix this
-            /*  if (approved) {
-                  try {
-                      repo.approvePendingClazzEnrolment(Enrolment)
-                  }catch(e: IllegalStateException) {
-                      //did not have all entities present yet (e.g. sync race condition)
-                      view.showSnackBar(systemImpl.getString(MessageID.content_editor_save_error, context))
-                  }
-              } else {
-                  repo.clazzEnrolmentDao.updateAsync(Enrolment.also {
-                      it.clazzEnrolmentActive = false
-                  })*/
+            if (approved) {
+                try {
+                    repo.approvePendingClazzEnrolment(enrolmentDetails, filterByClazzUid)
+                } catch (e: IllegalStateException) {
+                    //did not have all entities present yet (e.g. sync race condition)
+                    view.showSnackBar(systemImpl.getString(MessageID.content_editor_save_error, context))
+                }
+            } else {
+                repo.clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(
+                        enrolmentDetails.personUid,
+                        filterByClazzUid,false)
+            }
         }
     }
 

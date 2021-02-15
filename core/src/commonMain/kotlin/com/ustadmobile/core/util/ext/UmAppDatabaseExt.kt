@@ -128,12 +128,12 @@ suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Pe
     return schoolMember
 }
 
-suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: ClazzEnrolment, clazz: Clazz? = null) {
-    val effectiveClazz = clazz ?: clazzDao.findByUidAsync(enrolment.clazzEnrolmentClazzUid)
+suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClazzEnrolmentDetails, clazzUid: Long) {
+    val effectiveClazz = clazzDao.findByUidAsync(clazzUid)
         ?: throw IllegalStateException("Class does not exist")
 
     //find the group member and update that
-    val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrolment.clazzEnrolmentPersonUid,
+    val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrolment.personUid,
             effectiveClazz.clazzStudentsPersonGroupUid,
             effectiveClazz.clazzPendingStudentsPersonGroupUid)
 
@@ -142,9 +142,7 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: ClazzEnrolment
     }
 
     //change the role
-    enrolment.clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
-    clazzEnrolmentDao.updateAsync(enrolment)
-
+    clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.personUid, clazzUid, ClazzEnrolment.ROLE_STUDENT)
 }
 
 suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, school: School? = null) {
