@@ -19,7 +19,7 @@ import kotlin.jvm.Volatile
     ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
     Person::class, DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class,
-    Clazz::class, ClazzEnrolment::class, PersonCustomFieldValue::class,
+    Clazz::class, ClazzEnrolment::class, LeavingReason::class, PersonCustomFieldValue::class,
     ContentEntry::class, ContentEntryContentCategoryJoin::class, ContentEntryParentChildJoin::class,
     ContentEntryRelatedEntryJoin::class, ContentCategorySchema::class, ContentCategory::class,
     Language::class, LanguageVariant::class, AccessToken::class, PersonAuth::class, Role::class,
@@ -110,6 +110,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("clazzEnrolmentDao")
     abstract val clazzEnrolmentDao: ClazzEnrolmentDao
+
+    @JsName("leavingReasonDao")
+    abstract val leavingReasonDao: LeavingReasonDao
 
     @JsName("contentEntryDao")
     abstract val contentEntryDao: ContentEntryDao

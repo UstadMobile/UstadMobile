@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.ext.approvePendingClazzEnrolment
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView
@@ -81,7 +82,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
     override fun handleClickEntry(entry: Person) {
         //Just go to PersonDetail - this view is not used as a picker
-        systemImpl.go(PersonDetailView.VIEW_NAME,
+        systemImpl.go(ClazzEnrolmentListView.VIEW_NAME,
                 mapOf(UstadView.ARG_ENTITY_UID to entry.personUid.toString()), context)
     }
 

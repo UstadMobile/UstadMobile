@@ -41,10 +41,12 @@ class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, 
     }
 
     fun handleClickClazzEnrolment(enrolment: ClazzEnrolment){
-
+        systemImpl.go(ClazzEnrolmentEditView.VIEW_NAME,
+                mapOf(UstadView.ARG_ENTITY_UID to enrolment.clazzEnrolmentUid.toString()), context)
     }
 
-    fun handleClickProfile(person: Person){
-
+    fun handleClickProfile(personUid: Long){
+        systemImpl.go(PersonDetailView.VIEW_NAME,
+                mapOf(UstadView.ARG_ENTITY_UID to personUid.toString()), context)
     }
 }

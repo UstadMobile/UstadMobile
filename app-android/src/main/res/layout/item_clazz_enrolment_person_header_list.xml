@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <import type="com.ustadmobile.lib.db.entities.Person"/>
+
+        <variable
+            name="presenter"
+            type="com.ustadmobile.core.controller.ClazzEnrolmentListPresenter" />
+
+        <variable
+            name="personUid"
+            type="Long" />
+
+    </data>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <ImageView
+            android:id="@+id/item_clazz_enrolment_person_picture"
+            app:personPicturePersonUid="@{personUid}"
+            app:personPictureVisibilityGoneIfNoPicture="@{true}"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+
+        <TextView
+            android:id='@+id/item_clazz_enrolment_view_profile_button'
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/view_profile"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            android:textColor="?colorPrimary"
+            android:tint="?colorPrimary"
+            app:drawableTint="?colorPrimary"
+            android:gravity="center"
+            android:textAllCaps="true"
+            android:padding="@dimen/dimen_8dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            android:background="?attr/selectableItemBackground"
+            android:onClick="@{() -> presenter.handleClickProfile(personUid)}"
+            app:drawableTopCompat="@drawable/ic_baseline_addchart_24"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_clazz_enrolment_person_picture" />
+
+        <View
+            android:background="?android:listDivider"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/dimen_1dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/item_clazz_enrolment_view_profile_button"/>
+
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+</layout>

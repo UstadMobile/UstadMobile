@@ -31,7 +31,7 @@ class LeavingReasonEditFragmentTest : TestCase(){
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -71,9 +71,8 @@ class LeavingReasonEditFragmentTest : TestCase(){
 
             LeavingReasonEditScreen{
 
-                fillFields(fragmentScenario, formVals, currentEntity,
-                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
-                        testContext = this@run)
+
+                //TODO: if required, use the savedstatehandle to add link entities
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 

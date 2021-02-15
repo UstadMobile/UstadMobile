@@ -11,6 +11,7 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.lib.db.entities.LeavingReason
+import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import org.hamcrest.Matchers.equalTo
@@ -23,7 +24,7 @@ class LeavingReasonListFragmentTest : TestCase()  {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -38,8 +39,8 @@ class LeavingReasonListFragmentTest : TestCase()  {
     @Test
     fun givenLeavingReasonListPresent_whenClickOnLeavingReason_thenShouldNavigateToLeavingReasonDetail() {
         val testEntity = LeavingReason().apply {
-            leavingReasonName = "Test Name"
-            leavingReasonUid = dbRule.db.clazzDao.insert(this)
+            leavingReasonTitle = "Test Name"
+            leavingReasonUid = dbRule.db.leavingReasonDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
@@ -69,7 +70,7 @@ class LeavingReasonListFragmentTest : TestCase()  {
 
                 flakySafely {
                     Assert.assertEquals("After clicking on item, it navigates to detail view",
-                            R.id.leaving_reason_detail_dest, systemImplNavRule.navController.currentDestination?.id)
+                            R.id.clazz_enrolment_edit, systemImplNavRule.navController.currentDestination?.id)
                 }
 
 

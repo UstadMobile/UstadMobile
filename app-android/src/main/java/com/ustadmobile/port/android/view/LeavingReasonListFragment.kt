@@ -74,7 +74,7 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.language_list_dest, LeavingReason::class.java)
+            navigateToEditEntity(null, R.id.leaving_reason_edit, LeavingReason::class.java)
     }
 
     override fun onDestroyView() {
