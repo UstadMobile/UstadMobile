@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 
@@ -54,7 +55,7 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolment>(), ClazzEnro
     }
 
     override fun handleReasonLeavingClicked() {
-        navigateToPickEntityFromList()
+        //navigateToPickEntityFromList()
     }
 
     override fun onDestroyView() {

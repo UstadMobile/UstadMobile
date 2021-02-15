@@ -77,9 +77,9 @@ class LeavingReasonEditPresenter(context: Any,
         //TODO: Only save to the database when the persistence mode is PERSISTENCE_MODE.DB
         GlobalScope.launch(doorMainDispatcher()) {
             if(entity.leavingReasonUid == 0L) {
-                entity.leavingReasonUid = repo.leavingReasonDao.insertAsync(entity)
+                //entity.leavingReasonUid = repo.leavingReasonDao.insertAsync(entity)
             }else {
-                repo.leavingReasonDao.updateAsync(entity)
+                //repo.leavingReasonDao.updateAsync(entity)
             }
 
             //TODO: Call commitToDatabase on any onetomany join helpers
