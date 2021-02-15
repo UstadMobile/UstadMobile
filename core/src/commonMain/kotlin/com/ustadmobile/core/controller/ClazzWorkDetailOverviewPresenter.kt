@@ -67,7 +67,6 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
         if(clazzWorkWithSubmission.clazzWorkSubmission == null && view.isStudent){
             clazzWorkWithSubmission.clazzWorkSubmission = ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
-                clazzWorkSubmissionClazzEnrolmentUid = clazzEnrolment?.clazzEnrolmentUid?:0L
                 clazzWorkSubmissionPersonUid = loggedInPersonUid
                 clazzWorkSubmissionInactive = false
                 clazzWorkSubmissionDateTimeStarted = getSystemTimeInMillis()
@@ -76,8 +75,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
         if(clazzWorkWithSubmission.clazzWorkSubmissionType == ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) {
 
-            val questionsAndOptionsWithResponseList = db.getQuestionListForView(clazzWorkWithSubmission,
-                    clazzEnrolment?.clazzEnrolmentUid?:0L,loggedInPersonUid )
+            val questionsAndOptionsWithResponseList = db.getQuestionListForView(clazzWorkWithSubmission, loggedInPersonUid )
 
             if(view.isStudent && clazzWorkWithSubmission.clazzWorkSubmission?.clazzWorkSubmissionUid == 0L ) {
                 view.editableQuizQuestions =
@@ -193,7 +191,6 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
 
             val submission = entity?.clazzWorkSubmission ?: ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWorkWithSubmission?.clazzWorkUid ?: 0L
-                clazzWorkSubmissionClazzEnrolmentUid = clazzEnrolment?.clazzEnrolmentUid ?: 0L
                 clazzWorkSubmissionInactive = false
                 clazzWorkSubmissionPersonUid = loggedInPersonUid
             }
