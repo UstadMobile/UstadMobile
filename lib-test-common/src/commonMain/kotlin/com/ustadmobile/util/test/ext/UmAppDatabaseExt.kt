@@ -273,11 +273,9 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
     if(submitted ){
         ClazzWorkSubmission().apply {
             clazzWorkSubmissionClazzWorkUid = clazzWork.clazzWorkUid
-            clazzWorkSubmissionClazzEnrolmentUid = studentClazzMember.clazzEnrolmentUid
             clazzWorkSubmissionPersonUid = studentClazzMember.clazzEnrolmentPersonUid
             if(marked) {
                 clazzWorkSubmissionMarkerPersonUid = teacherClazzMember.clazzEnrolmentPersonUid
-                clazzWorkSubmissionMarkerClazzEnrolmentUid = teacherClazzMember.clazzEnrolmentUid
                 clazzWorkSubmissionScore = 89
                 clazzWorkSubmissionDateTimeMarked = dateNow
             }
@@ -296,11 +294,9 @@ suspend fun UmAppDatabase.insertTestClazzWorkAndQuestionsAndOptionsWithResponse(
         if(multipleSubmissions){
             ClazzWorkSubmission().apply {
                 clazzWorkSubmissionClazzWorkUid = clazzWork.clazzWorkUid
-                clazzWorkSubmissionClazzEnrolmentUid = student2ClazzMember.clazzEnrolmentUid
                 clazzWorkSubmissionPersonUid = student2ClazzMember.clazzEnrolmentPersonUid
                 if(marked) {
                     clazzWorkSubmissionMarkerPersonUid = teacherClazzMember.clazzEnrolmentPersonUid
-                    clazzWorkSubmissionMarkerClazzEnrolmentUid = teacherClazzMember.clazzEnrolmentUid
                     clazzWorkSubmissionDateTimeMarked = dateNow
                 }
                 clazzWorkSubmissionInactive = false

@@ -113,7 +113,7 @@ interface UstadView {
 
         const val ARG_CLAZZWORK_UID = "clazzworkUid"
 
-        const val ARG_CLAZZMEMBER_UID = "clazzMemberUid"
+        const val ARG_PERSON_UID = "personUid"
 
         const val ARG_NEXT = "next"
 

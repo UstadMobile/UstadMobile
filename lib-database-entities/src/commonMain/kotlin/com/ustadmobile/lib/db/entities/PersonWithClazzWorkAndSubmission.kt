@@ -7,15 +7,12 @@ import kotlinx.serialization.Serializable
  * POJO representing ClazzWorkSubmission and Person
  */
 @Serializable
-class ClazzEnrolmentAndClazzWorkWithSubmission : ClazzEnrolment() {
+class PersonWithClazzWorkAndSubmission : Person() {
 
     @Embedded
     var clazzWork: ClazzWork? = null
 
     @Embedded
     var submission: ClazzWorkSubmission? = null
-
-    @Embedded
-    var person: Person ? = null
 
 }

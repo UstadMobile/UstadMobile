@@ -18,16 +18,11 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
     @Update
     abstract suspend fun updateAsync(entity: ClazzWork): Int
 
-    @Query("""
-        SELECT ClazzWork.*, ClazzWorkSubmission.* FROM ClazzWork 
-        LEFT JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
-			AND ClazzEnrolment.clazzEnrolmentClazzUid = ClazzWork.clazzWorkClazzUid 
-			AND CAST(ClazzEnrolment.clazzEnrolmentActive AS INTEGER) = 1
-        LEFT JOIN ClazzWorkSubmission ON 
-            ClazzWorkSubmission.clazzWorkSubmissionClazzEnrolmentUid = ClazzEnrolment.clazzEnrolmentUid
-             AND ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-		WHERE ClazzWork.clazzWorkUid = :uid 
-        ORDER BY ClazzWorkSubmission.clazzWorkSubmissionDateTimeStarted DESC LIMIT 1
+    @Query("""SELECT ClazzWork.*, ClazzWorkSubmission.* FROM ClazzWork LEFT JOIN 
+        ClazzWorkSubmission ON ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = 
+        ClazzWork.clazzWorkUid AND ClazzWorkSubmission.clazzWorkSubmissionPersonUid = :personUid 
+        WHERE ClazzWork.clazzWorkUid = :uid ORDER BY 
+        ClazzWorkSubmission.clazzWorkSubmissionDateTimeStarted DESC LIMIT 1
     """)
     abstract suspend fun findWithSubmissionByUidAndPerson(uid: Long, personUid: Long): ClazzWorkWithSubmission?
 
@@ -99,7 +94,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
     @Query(FIND_CLAZZEnrolment_AND_SUBMISSION_WITH_PERSON)
     abstract suspend fun findClazzEnrolmentWithAndSubmissionWithPerson(clazzWorkUid: Long,
-                                                                        clazzEnrolmentUid: Long): ClazzEnrolmentAndClazzWorkWithSubmission?
+                                                                        personUid: Long): PersonWithClazzWorkAndSubmission?
 
     @Query("SELECT * FROM ClazzWork")
     abstract suspend fun findAllTesting(): List<ClazzWork>
@@ -165,14 +160,13 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
         const val FIND_CLAZZEnrolment_AND_SUBMISSION_WITH_PERSON =
                 """
-            SELECT ClazzWork.*, ClazzWorkSubmission.*, ClazzEnrolment.*, Person.*
+            SELECT ClazzWork.*, ClazzWorkSubmission.*, Person.*
              FROM ClazzWork
-            LEFT JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentUid = :clazzEnrolmentUid
-            LEFT JOIN Person ON Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid 
+            LEFT JOIN Person ON Person.personUid = :personUid
             LEFT JOIN ClazzWorkSubmission ON ClazzWorkSubmission.clazzWorkSubmissionUid = 
                 (
                 SELECT ClazzWorkSubmission.clazzWorkSubmissionUid FROM ClazzWorkSubmission 
-                WHERE ClazzWorkSubmission.clazzWorkSubmissionClazzEnrolmentUid = ClazzEnrolment.clazzEnrolmentUid
+                WHERE ClazzWorkSubmission.clazzWorkSubmissionPersonUid = Person.personUid
                 AND CAST(ClazzWorkSubmission.clazzWorkSubmissionInactive AS INTEGER) = 0
                 AND ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
                 ORDER BY ClazzWorkSubmission.clazzWorkSubmissionDateTimeStarted DESC LIMIT 1

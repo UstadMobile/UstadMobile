@@ -82,7 +82,10 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     	(SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) FROM ClazzEnrolment WHERE 
         Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) as earliestJoinDate, 
     	(SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) FROM ClazzEnrolment WHERE 
-        Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) as latestDateLeft
+        Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) as latestDateLeft, 
+        (SELECT clazzEnrolmentRole FROM clazzEnrolment WHERE Person.personUid = 
+        ClazzEnrolment.clazzEnrolmentPersonUid AND 
+        ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid) as enrolmentRole
         FROM PERSON 
         LEFT JOIN ClazzLogAttendanceRecord ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid
         WHERE Person.personUid IN (SELECT clazzEnrolmentPersonUid FROM ClazzEnrolment 

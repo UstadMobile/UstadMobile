@@ -46,8 +46,6 @@ open class ClazzWorkQuestionResponse {
 
     var clazzWorkQuestionResponsePersonUid: Long = 0
 
-    var clazzWorkQuestionResponseClazzEnrollmentUid: Long = 0
-
     var clazzWorkQuestionResponseInactive: Boolean = false
 
     var clazzWorkQuestionResponseDateResponded: Long = 0

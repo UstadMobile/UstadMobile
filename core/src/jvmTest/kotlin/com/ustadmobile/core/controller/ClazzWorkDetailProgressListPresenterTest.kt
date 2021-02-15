@@ -13,7 +13,7 @@ import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZMEMBER_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZWORK_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -139,8 +139,8 @@ class ClazzWorkDetailProgressListPresenterTest {
         presenter.handleClickEntry(list.get(0))
 
         verify(systemImpl, timeout(5000)).go(eq(ClazzWorkSubmissionMarkingView.VIEW_NAME),
-                eq(mapOf(ARG_CLAZZWORK_UID to testClazzWork.clazzWork.clazzWorkUid.toString(), ARG_CLAZZMEMBER_UID to
-                list.get(0).mClazzEnrolment?.clazzEnrolmentUid.toString())), any())
+                eq(mapOf(ARG_CLAZZWORK_UID to testClazzWork.clazzWork.clazzWorkUid.toString(), ARG_PERSON_UID to
+                list.get(0).personUid.toString())), any())
     }
 
 

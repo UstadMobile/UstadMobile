@@ -35,10 +35,6 @@ open class ClazzWorkSubmission() {
 
     var clazzWorkSubmissionClazzWorkUid : Long = 0
 
-    var clazzWorkSubmissionClazzEnrolmentUid : Long = 0
-
-    var clazzWorkSubmissionMarkerClazzEnrolmentUid: Long = 0
-
     var clazzWorkSubmissionMarkerPersonUid: Long = 0
 
     var clazzWorkSubmissionPersonUid: Long = 0

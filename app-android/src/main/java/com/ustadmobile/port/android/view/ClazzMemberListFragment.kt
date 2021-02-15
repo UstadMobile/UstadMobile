@@ -13,12 +13,12 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentListItemBinding
-import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentPendingListItemBinding
+import com.toughra.ustadmobile.databinding.*
 import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.observeResult
+import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
@@ -113,13 +113,13 @@ class ClazzMemberListFragment() : UstadListViewFragment<Person, PersonWithClazzE
             mNewStudentListRecyclerViewAdapter?.newItemVisible = value
         }
 
-    class ClazzEnrolmentListViewHolder(val itemBinding: ItemClazzEnrolmentListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
+    class ClazzEnrolmentListViewHolder(val itemBinding: ItemClazzmemberListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
     class ClazzEnrolmentListRecyclerAdapter(var presenter: ClazzMemberListPresenter?)
         : SelectablePagedListAdapter<PersonWithClazzEnrolmentDetails, ClazzEnrolmentListViewHolder>(DIFF_CALLBACK) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzEnrolmentListViewHolder {
-            val itemBinding = ItemClazzEnrolmentListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            val itemBinding = ItemClazzmemberListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
             itemBinding.selectablePagedListAdapter = this
             return ClazzEnrolmentListViewHolder(itemBinding)
@@ -127,7 +127,7 @@ class ClazzMemberListFragment() : UstadListViewFragment<Person, PersonWithClazzE
 
         override fun onBindViewHolder(holder: ClazzEnrolmentListViewHolder, position: Int) {
             val item = getItem(position)
-            holder.itemBinding.clazzEnrolment = item
+            holder.itemBinding.personWithEnrolmentDetails = item
             holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
         }
 
@@ -137,12 +137,12 @@ class ClazzMemberListFragment() : UstadListViewFragment<Person, PersonWithClazzE
         }
     }
 
-    class PendingClazzEnrolmentListViewHolder(val itemBinding: ItemClazzEnrolmentPendingListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
+    class PendingClazzEnrolmentListViewHolder(val itemBinding: ItemClazzmemberPendingListItemBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
     class PendingClazzEnrolmentListRecyclerAdapter(var presenter: ClazzMemberListPresenter?) : PagedListAdapter<PersonWithClazzEnrolmentDetails, PendingClazzEnrolmentListViewHolder>(DIFF_CALLBACK) {
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PendingClazzEnrolmentListViewHolder {
-            val itemBinding = ItemClazzEnrolmentPendingListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
+            val itemBinding = ItemClazzmemberPendingListItemBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
             return PendingClazzEnrolmentListViewHolder(itemBinding)
         }

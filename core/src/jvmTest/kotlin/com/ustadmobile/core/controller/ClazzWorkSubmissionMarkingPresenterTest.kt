@@ -8,7 +8,7 @@ import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.db.dao.ClazzWorkSubmissionDao
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZMEMBER_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZWORK_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -108,10 +108,10 @@ class ClazzWorkSubmissionMarkingPresenterTest {
     fun givenSubmissionExists_whenLoaded_shouldLoadAllOk() {
 
         val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
-        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzEnrolmentUid
+        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionPersonUid
 
         val presenterArgs = mapOf(ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
-                                ARG_CLAZZMEMBER_UID to clazzMemberUid.toString())
+                                ARG_PERSON_UID to clazzMemberUid.toString())
         val presenter = ClazzWorkSubmissionMarkingPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
@@ -129,10 +129,10 @@ class ClazzWorkSubmissionMarkingPresenterTest {
     @Test
     fun givenSubmissionExistsAndLoaded_whenMarked_shouldSave() {
         val clazzWorkUid: Long = testClazzWork.clazzWork.clazzWorkUid
-        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionClazzEnrolmentUid
+        val clazzMemberUid: Long = testClazzWork.submissions!!.get(0).clazzWorkSubmissionPersonUid
 
         val presenterArgs = mapOf(ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
-                ARG_CLAZZMEMBER_UID to clazzMemberUid.toString())
+                ARG_PERSON_UID to clazzMemberUid.toString())
         val presenter = ClazzWorkSubmissionMarkingPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)

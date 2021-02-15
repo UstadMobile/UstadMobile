@@ -4,11 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.ClazzEnrolmentWithPerson"/>
+        <import type="com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails"/>
 
         <variable
             name="clazzEnrolment"
-            type="ClazzEnrolmentWithPerson" />
+            type="PersonWithClazzEnrolmentDetails" />
 
         <variable
             name="presenter"
@@ -23,7 +23,7 @@
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/studentpicture"
-            app:personPicturePersonUid="@{clazzEnrolment.clazzEnrolmentPersonUid}"
+            app:personPicturePersonUid="@{clazzEnrolment.personUid}"
             android:layout_width="@dimen/dimen_48dp"
             android:layout_height="@dimen/dimen_48dp"
             android:layout_margin="@dimen/dimen_16dp"
@@ -35,7 +35,7 @@
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/item_clazzmember_text"
-            android:text='@{clazzEnrolment.person.firstNames + " " + clazzEnrolment.person.lastName}'
+            android:text='@{clazzEnrolment.firstNames + " " + clazzEnrolment.lastName}'
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"

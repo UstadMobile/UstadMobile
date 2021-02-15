@@ -56,12 +56,12 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
 
     override fun handleClickEntry(entry: ClazzEnrolmentWithClazzWorkProgress) {
 
-        val clazzMemberUid = entry.mClazzEnrolment?.clazzEnrolmentUid ?: 0L
+        val personUid = entry.personUid
         val clazzWorkUid = filterByClazzWorkUid
 
         systemImpl.go(ClazzWorkSubmissionMarkingView.VIEW_NAME,
                 mapOf(UstadView.ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
-                        UstadView.ARG_CLAZZMEMBER_UID to clazzMemberUid.toString()),
+                        UstadView.ARG_PERSON_UID to personUid.toString()),
                 context)
 
     }

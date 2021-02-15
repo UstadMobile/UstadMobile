@@ -11,4 +11,6 @@ class PersonWithClazzEnrolmentDetails: Person() {
 
     var latestDateLeft: Long = 0L
 
+    var enrolmentRole: Int = 0
+
 }

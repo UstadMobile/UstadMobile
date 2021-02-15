@@ -32,7 +32,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 
-class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzEnrolmentAndClazzWorkWithSubmission>(),
+class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<PersonWithClazzWorkAndSubmission>(),
         ClazzWorkSubmissionMarkingView, NewCommentHandler, SimpleButtonHandler,
         SimpleTwoButtonHandler{
 
@@ -40,7 +40,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzEnrolmentAndCla
 
     private var mPresenter: ClazzWorkSubmissionMarkingPresenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzEnrolmentAndClazzWorkWithSubmission>?
+    override val mEditPresenter: UstadEditPresenter<*, PersonWithClazzWorkAndSubmission>?
         get() = mPresenter
 
     private lateinit var dbRepo : UmAppDatabase
@@ -147,7 +147,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzEnrolmentAndCla
 
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWork?.clazzWorkUid?:0L, entity?.clazzEnrolmentPersonUid?:0L
+                entity?.clazzWork?.clazzWorkUid?:0L, entity?.personUid?:0L
         )
         newPrivateCommentRecyclerAdapter?.visible = true
 
@@ -248,16 +248,16 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzEnrolmentAndCla
             shortTextSubmissionRecyclerAdapter?.visible = value
         }
 
-    override var entity: ClazzEnrolmentAndClazzWorkWithSubmission? = null
+    override var entity: PersonWithClazzWorkAndSubmission? = null
         set(value) {
             field = value
 
             newPrivateCommentRecyclerAdapter?.entityUid = value?.clazzWork?.clazzWorkUid?:0L
-            newPrivateCommentRecyclerAdapter?.commentTo = value?.clazzEnrolmentPersonUid?:0L
+            newPrivateCommentRecyclerAdapter?.commentTo = value?.personUid ?:0L
             newPrivateCommentRecyclerAdapter?.commentFrom = 0L
             newPrivateCommentRecyclerAdapter?.visible = true
 
-            ustadFragmentTitle = value?.person?.fullName()?:""
+            ustadFragmentTitle = value?.fullName()?:""
 
             //Don't show the button if submission exists or submission is not required.
             markingEditRecyclerAdapter?.clazzWorkVal = value

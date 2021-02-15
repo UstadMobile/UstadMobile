@@ -384,13 +384,12 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
 }
 
 
-suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzWorkWithSubmission,
-                                                 clazzEnrolmentUid: Long, responsePersonUid : Long)
+suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzWorkWithSubmission, responsePersonUid : Long)
         : List<ClazzWorkQuestionAndOptionWithResponse>{
 
     val questionsAndOptionsWithResponses :List<ClazzWorkQuestionAndOptionWithResponseRow> = withTimeoutOrNull(2000){
-        clazzWorkQuestionDao.findAllQuestionsAndOptionsWithResponse(clazzWorkWithSubmission.clazzWorkUid?:0L,
-                clazzEnrolmentUid)
+        clazzWorkQuestionDao.findAllQuestionsAndOptionsWithResponse(clazzWorkWithSubmission.clazzWorkUid,
+                responsePersonUid)
     } ?: listOf()
 
     val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
