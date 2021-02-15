@@ -1,3 +1,4 @@
+/*
 
 package com.ustadmobile.core.controller
 
@@ -17,11 +18,13 @@ import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 
+*/
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
  *
  * Note:
- */
+ *//*
+
 class LeavingReasonListPresenterTest {
 
     @JvmField
@@ -101,4 +104,4 @@ class LeavingReasonListPresenterTest {
 
     //TODO: Add tests for other scenarios the presenter is expected to handle - e.g. different filters, etc.
 
-}
+}*/

@@ -1,3 +1,4 @@
+/*
 
 package com.ustadmobile.core.controller
 
@@ -25,11 +26,13 @@ import com.ustadmobile.core.util.test.waitUntil
 import org.kodein.di.DI
 
 
+*/
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
  *
  * Note:
- */
+ *//*
+
 class LeavingReasonEditPresenterTest {
 
     @JvmField
@@ -84,7 +87,8 @@ class LeavingReasonEditPresenterTest {
         val existingEntitiesLive = clientDbRule.db.leavingReasonDao.findAllLive()
 
         //TODO: wait until the presenter has saved the entity e.g.
-        /*
+        */
+/*
         runBlocking {
             db.waitUntil(5000, listOf("@Entity")) {
                 db.leavingReasonDao.findBySomeCondition()?.someField == initialEntity.someField
@@ -94,7 +98,8 @@ class LeavingReasonEditPresenterTest {
         val entitySaved = db.leavingReasonDao.findBySomeCondition()
         Assert.assertEquals("Entity was saved to database", "Bob",
                 entitySaved.someNameField)
-        */
+        *//*
+
     }
 
     @Test
@@ -129,4 +134,4 @@ class LeavingReasonEditPresenterTest {
     }
 
 
-}
+}*/

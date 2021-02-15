@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.approvePendingClazzEnrolment
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
+import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonDetailView
@@ -13,10 +14,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.Role
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -66,16 +64,16 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     private fun updateListOnView() {
         view.list = repo.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
                 ClazzEnrolment.ROLE_TEACHER, selectedSortOption?.flag ?: 0,
-                searchText.toQueryLikeParam(),view.checkedFilterOptionChip?.optionId ?: 0,
+                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: 0,
                 systemTimeInMillis())
         view.studentList = repo.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
                 ClazzEnrolment.ROLE_STUDENT, selectedSortOption?.flag ?: 0,
-                searchText.toQueryLikeParam(),view.checkedFilterOptionChip?.optionId ?: 0,
+                searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: 0,
                 systemTimeInMillis())
         if (view.addStudentVisible) {
             view.pendingStudentList = db.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
                     ClazzEnrolment.ROLE_STUDENT_PENDING, selectedSortOption?.flag ?: 0,
-                    searchText.toQueryLikeParam(),view.checkedFilterOptionChip?.optionId ?: 0,
+                    searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: 0,
                     systemTimeInMillis())
         }
     }
@@ -87,23 +85,23 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
                 mapOf(UstadView.ARG_ENTITY_UID to entry.personUid.toString()), context)
     }
 
-    fun handleClickPendingRequest(Enrolment: ClazzEnrolment, approved: Boolean) {
+    fun handleClickPendingRequest(Enrolment: PersonWithClazzEnrolmentDetails, approved: Boolean) {
         GlobalScope.launch(doorMainDispatcher()) {
-            if (approved) {
-                try {
-                    repo.approvePendingClazzEnrolment(Enrolment)
-                }catch(e: IllegalStateException) {
-                    //did not have all entities present yet (e.g. sync race condition)
-                    view.showSnackBar(systemImpl.getString(MessageID.content_editor_save_error, context))
-                }
-            } else {
-                repo.clazzEnrolmentDao.updateAsync(Enrolment.also {
-                    it.clazzEnrolmentActive = false
-                })
-            }
+            //TODO fix this
+            /*  if (approved) {
+                  try {
+                      repo.approvePendingClazzEnrolment(Enrolment)
+                  }catch(e: IllegalStateException) {
+                      //did not have all entities present yet (e.g. sync race condition)
+                      view.showSnackBar(systemImpl.getString(MessageID.content_editor_save_error, context))
+                  }
+              } else {
+                  repo.clazzEnrolmentDao.updateAsync(Enrolment.also {
+                      it.clazzEnrolmentActive = false
+                  })*/
         }
-
     }
+
 
     override fun handleClickCreateNewFab() {
         //there really isn't a fab here. There are buttons for add teacher and add student in the list itself

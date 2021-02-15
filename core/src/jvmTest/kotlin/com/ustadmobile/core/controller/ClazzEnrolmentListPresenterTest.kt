@@ -1,3 +1,4 @@
+/*
 
 package com.ustadmobile.core.controller
 
@@ -28,11 +29,12 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
-/**
+*
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
  *
  * Note:
- */
+
+
 class ClazzEnrolmentListPresenterTest {
 
     @JvmField
@@ -213,3 +215,4 @@ class ClazzEnrolmentListPresenterTest {
     }
 
 }
+*/

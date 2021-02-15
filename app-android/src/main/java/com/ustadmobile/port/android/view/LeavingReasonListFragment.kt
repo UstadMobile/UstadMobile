@@ -4,28 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AdapterView
-import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemLeavingReasonListBinding
 import com.ustadmobile.core.controller.LeavingReasonListPresenter
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.lib.db.entities.LeavingReason
-
-import com.ustadmobile.core.view.GetResultMode
+import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
-import com.ustadmobile.core.controller.UstadListPresenter
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.toughra.ustadmobile.R
-import com.ustadmobile.core.controller.LeavingReasonListItemListener
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
 
 class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingReason>(),
@@ -63,20 +54,19 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        mPresenter = LeavingReasonListPresenter(requireContext(), arguments.toStringMap(), this,
-                viewLifecycleOwner, di)
+
+        mPresenter = LeavingReasonListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
+                this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = LeavingReasonListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.create_new,
+       /* val createNewText = requireContext().getString(R.string.create_new,
                 requireContext().getString(R.string.leavingreason))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)
+        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)*/
         return view
     }
 
     override fun onResume() {
         super.onResume()
-        mActivityWithFab?.activityFloatingActionButton?.text =
-                requireContext().getString(R.string.leavingreason)
     }
 
     /**
@@ -84,7 +74,7 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.leavingreason_edit_dest, LeavingReason::class.java)
+            navigateToEditEntity(null, R.id.language_list_dest, LeavingReason::class.java)
     }
 
     override fun onDestroyView() {
@@ -94,7 +84,7 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
     }
 
     override val displayTypeRepo: Any?
-        get() = TODO("Provide repo e.g. dbRepo.LeavingReasonDao")
+        get() = dbRepo?.personDao //TODO("Provide repo e.g. dbRepo.LeavingReasonDao")
 
 
     companion object {
@@ -102,7 +92,7 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
             : DiffUtil.ItemCallback<LeavingReason>() {
             override fun areItemsTheSame(oldItem: LeavingReason,
                                          newItem: LeavingReason): Boolean {
-                oldItem.leavingReasonUid == newItem.leavingReasonUid
+                return oldItem.leavingReasonUid == newItem.leavingReasonUid
             }
 
             override fun areContentsTheSame(oldItem: LeavingReason,

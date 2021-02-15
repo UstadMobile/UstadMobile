@@ -61,19 +61,13 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = ClazzEnrolmentRecyclerAdapter(mPresenter)
-
-        val createNewText = requireContext().getString(R.string.create_new,
-                requireContext().getString(R.string.clazzEnrolment))
-
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
-                this, createNewText)
         return view
     }
 
     override fun onResume() {
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
-                requireContext().getString(R.string.clazzEnrolment)
+                requireContext().getString(R.string.unset)
     }
 
     /**
@@ -81,7 +75,7 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
      */
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.clazzEnrolment_edit_dest, ClazzEnrolment::class.java)
+            navigateToEditEntity(null, R.id.clazz_list_dest, ClazzEnrolment::class.java)
     }
 
     override fun onDestroyView() {
@@ -91,7 +85,7 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
     }
 
     override val displayTypeRepo: Any?
-        get() = dbRepo.clazzEnrolmentDao
+        get() = dbRepo?.clazzEnrolmentDao
 
     override var person: Person? = null
         get() = field
