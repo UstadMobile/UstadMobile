@@ -90,4 +90,10 @@
     <string name="onboarding_goldozi_2">نمایش محصولات به مشتریان.</string>
     <string name="onboarding_goldozi_4">دوره های آموزشی خودرا مرور نماید.</string>
     <string name="add_we">علاوه نمودن خانم گلدوز</string>
+    <string name="categories_desc">علاوه کردن و تصحیح کتگوری</string>
+    <string name="location_desc">علاوه کردن و تصحیح موقعیت</string>
+    <string name="product_title">نام محصول</string>
+    <string name="product_description">توضیحات محصول</string>
+    <string name="product_price">قیمت محصول (افغانی)</string>
+    <string name="deliver">تحویل</string>
 </resources>
