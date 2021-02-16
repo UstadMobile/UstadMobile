@@ -31,6 +31,7 @@
         <item name="colorOnSecondaryText">?colorOnSurface</item>
         <item name="colorOnError">@color/navigationBarColor</item>
         <item name="colorOnIconTint">?colorOnSurface</item>
+        <item name="colorOnLogoTint">?colorOnSurface</item>
         <item name="colorOnTintPrimary">?colorOnSurface</item>
         <item name="android:windowLightStatusBar" tools:targetApi="m">false</item>
         <item name="android:statusBarColor" tools:ignore="NewApi">@color/navigationBarColor</item>

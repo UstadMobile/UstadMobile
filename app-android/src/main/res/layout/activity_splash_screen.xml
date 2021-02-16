@@ -14,6 +14,7 @@
        android:minHeight="@dimen/dimen_100dp"
        android:layout_height="0dp"
        android:scaleType="fitCenter"
+       app:tint="?colorOnLogoTint"
        app:layout_constraintHeight_max="@dimen/dimen_100dp"
        app:layout_constraintHeight_min="@dimen/dimen_100dp"
        app:layout_constraintBottom_toTopOf="@+id/expo_logo"

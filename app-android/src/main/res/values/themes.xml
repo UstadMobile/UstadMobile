@@ -36,6 +36,7 @@
         <item name="colorOnError">@color/onErrorColor</item>
         <item name="colorOnSecondaryText">@color/iconTintColor</item>
         <item name="colorOnIconTint">@color/iconTintColor</item>
+        <item name="colorOnLogoTint">@color/onSurfaceColor</item>
         <item name="colorOnTintPrimary">?colorPrimary</item>
         <item name="colorTabIndicator">@color/onPrimaryColor</item>
         <item name="colorTabText" >@color/primaryLightVariantColor</item>

@@ -18,6 +18,7 @@
     <attr name="colorSelectedTabText" format="color"/>
     <attr name="colorPrimaryBackground" format="color"/>
     <attr name="colorOnIconTint" format="color"/>
+    <attr name="colorOnLogoTint" format="color"/>
     <attr name="colorOnSecondaryText" format="color"/>
     <attr name="colorOnTintPrimary" format="color"/>
 
