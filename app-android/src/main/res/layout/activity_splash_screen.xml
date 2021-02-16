@@ -13,14 +13,15 @@
        android:layout_width="@dimen/dimen_300dp"
        android:minHeight="@dimen/dimen_100dp"
        android:layout_height="0dp"
-       app:layout_constraintHeight_max="@dimen/dimen_300dp"
+       android:scaleType="fitCenter"
+       app:layout_constraintHeight_max="@dimen/dimen_100dp"
        app:layout_constraintHeight_min="@dimen/dimen_100dp"
        app:layout_constraintBottom_toTopOf="@+id/expo_logo"
        app:layout_constraintHorizontal_bias="0.5"
        app:layout_constraintLeft_toLeftOf="parent"
        app:layout_constraintRight_toRightOf="parent"
        app:layout_constraintTop_toTopOf="parent"
-       app:srcCompat="@drawable/ic_ustad_logo"
+       app:srcCompat="@drawable/ic_launcher_icon"
        tools:ignore="ContentDescription" />
 
 
