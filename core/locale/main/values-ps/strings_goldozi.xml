@@ -90,4 +90,10 @@
     <string name="desc_dari">شرح (دري)</string>
     <string name="desc_pashto">شرح (پښتو)</string>
     <string name="swipe_to_learn_more">د لا معلوماتو لپاره یې کیکاږۍ</string>
+    <string name="product_title">د محصول نوم</string>
+    <string name="product_description">د محصول تشریح</string>
+    <string name="product_price">د محصول بیه (افغانۍ)</string>
+    <string name="deliver">تحویلول</string>
+    <string name="categories_desc">د برخو اضافه کول سمون</string>
+    <string name="location_desc">د موقعیتونو اضافه کول او سمون</string>
 </resources>
