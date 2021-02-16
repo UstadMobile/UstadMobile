@@ -19,8 +19,8 @@
         <item name="colorPrimary">@color/primaryColor</item>
         <item name="colorPrimaryVariant">@color/primaryVariantColor</item>
         <item name="colorPrimaryDark">@color/primaryVariantColor</item>
-        <item name="colorSecondary">@color/secondaryColor</item>
-        <item name="colorSecondaryVariant">@color/secondaryDarkColor</item>
+        <item name="colorSecondary">@color/primaryColor</item>
+        <item name="colorSecondaryVariant">@color/primaryVariantColor</item>
         <item name="android:colorBackground">@color/navigationBarColor</item>
         <item name="colorSurface">@color/onBackgroundColor</item>
         <item name="colorError">@color/errorLightColor</item>
