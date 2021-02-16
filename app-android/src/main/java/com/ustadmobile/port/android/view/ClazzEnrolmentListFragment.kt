@@ -17,6 +17,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
@@ -92,7 +93,7 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
                 this, di, viewLifecycleOwner)
 
         profileHeaderAdapter = ClazzEnrolmentProfileHeaderAdapter(
-                arguments?.get(ARG_ENTITY_UID) as Long? ?: 0L, mPresenter)
+                arguments?.get(ARG_PERSON_UID) as Long? ?: 0L, mPresenter)
         mDataRecyclerViewAdapter = ClazzEnrolmentRecyclerAdapter(mPresenter)
 
         mMergeRecyclerViewAdapter = MergeAdapter(profileHeaderAdapter, mDataRecyclerViewAdapter)

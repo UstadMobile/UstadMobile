@@ -51,7 +51,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 59)
+], version = 60)
 @MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -4036,6 +4036,148 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_59_60 = object: DoorMigration(59, 60) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("""ALTER TABLE ClazzEnrolment 
+                        ADD COLUMN clazzEnrolmentStatus INTEGER DEFAULT 0 NOT NULL""".trimMargin())
+
+                if (database.dbType() == DoorDbType.SQLITE) {
+
+                    database.execSQL("""ALTER TABLE ClazzEnrolment 
+                        ADD COLUMN clazzEnrolmentLeavingReasonUid INTEGER DEFAULT 0 NOT NULL""".trimMargin())
+
+                    database.execSQL("""CREATE TABLE IF NOT EXISTS LeavingReason (`leavingReasonUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `leavingReasonTitle` TEXT, `leavingReasonMCSN` INTEGER NOT NULL, `leavingReasonCSN` INTEGER NOT NULL, `leavingReasonLCB` INTEGER NOT NULL)""")
+                    database.execSQL("""
+                          |CREATE TRIGGER INS_LOC_410
+                          |AFTER INSERT ON LeavingReason
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
+                          |    NEW.leavingReasonCSN = 0)
+                          |BEGIN
+                          |    UPDATE LeavingReason
+                          |    SET leavingReasonMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 410)
+                          |    WHERE leavingReasonUid = NEW.leavingReasonUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums
+                          |    SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |    WHERE sCsnTableId = 410;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER INS_PRI_410
+                          |            AFTER INSERT ON LeavingReason
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
+                          |                NEW.leavingReasonMCSN = 0)
+                          |            BEGIN
+                          |                UPDATE LeavingReason
+                          |                SET leavingReasonMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 410)
+                          |                WHERE leavingReasonUid = NEW.leavingReasonUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 410;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 410, NEW.leavingReasonUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE TRIGGER UPD_LOC_410
+                          |AFTER UPDATE ON LeavingReason
+                          |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
+                          |    AND (NEW.leavingReasonCSN == OLD.leavingReasonCSN OR
+                          |        NEW.leavingReasonCSN == 0))
+                          |BEGIN
+                          |    UPDATE LeavingReason
+                          |    SET leavingReasonCSN = (SELECT sCsnNextLocal FROM SqliteChangeSeqNums WHERE sCsnTableId = 410) 
+                          |    WHERE leavingReasonUid = NEW.leavingReasonUid;
+                          |    
+                          |    UPDATE SqliteChangeSeqNums 
+                          |    SET sCsnNextLocal = sCsnNextLocal + 1
+                          |    WHERE sCsnTableId = 410;
+                          |END
+                          """.trimMargin())
+                    database.execSQL("""
+                          |            CREATE TRIGGER UPD_PRI_410
+                          |            AFTER UPDATE ON LeavingReason
+                          |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
+                          |                AND (NEW.leavingReasonMCSN == OLD.leavingReasonMCSN OR
+                          |                    NEW.leavingReasonMCSN == 0))
+                          |            BEGIN
+                          |                UPDATE LeavingReason
+                          |                SET leavingReasonMCSN = (SELECT sCsnNextPrimary FROM SqliteChangeSeqNums WHERE sCsnTableId = 410)
+                          |                WHERE leavingReasonUid = NEW.leavingReasonUid;
+                          |                
+                          |                UPDATE SqliteChangeSeqNums
+                          |                SET sCsnNextPrimary = sCsnNextPrimary + 1
+                          |                WHERE sCsnTableId = 410;
+                          |                
+                          |                INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          |SELECT 410, NEW.leavingReasonUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
+                          |            END
+                          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LeavingReason_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                            database.execSQL("CREATE INDEX IF NOT EXISTS `index_LeavingReason_trk_clientId_epk_csn` ON LeavingReason_trk (`clientId`, `epk`, `csn`)")
+                    database.execSQL("""
+                        CREATE UNIQUE INDEX IF NOT EXISTS 
+                       `index_LeavingReason_trk_epk_clientId` ON 
+                       LeavingReason_trk (`epk`, `clientId`)
+                       """)
+
+
+                }else if(database.dbType() == DoorDbType.POSTGRES){
+
+                    database.execSQL("""ALTER TABLE ClazzEnrolment 
+                        ADD COLUMN clazzEnrolmentLeavingReasonUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())
+
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LeavingReason (  leavingReasonTitle  TEXT , leavingReasonMCSN  BIGINT  NOT NULL , leavingReasonCSN  BIGINT  NOT NULL , leavingReasonLCB  INTEGER  NOT NULL , leavingReasonUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS LeavingReason_mcsn_seq")
+                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS LeavingReason_lcsn_seq")
+                    database.execSQL("""
+                          |CREATE OR REPLACE FUNCTION 
+                          | inccsn_410_fn() RETURNS trigger AS ${'$'}${'$'}
+                          | BEGIN  
+                          | UPDATE LeavingReason SET leavingReasonCSN =
+                          | (SELECT CASE WHEN (SELECT master FROM SyncNode) THEN NEW.leavingReasonCSN 
+                          | ELSE NEXTVAL('LeavingReason_lcsn_seq') END),
+                          | leavingReasonMCSN = 
+                          | (SELECT CASE WHEN (SELECT master FROM SyncNode) 
+                          | THEN NEXTVAL('LeavingReason_mcsn_seq') 
+                          | ELSE NEW.leavingReasonMCSN END)
+                          | WHERE leavingReasonUid = NEW.leavingReasonUid;
+                          | INSERT INTO ChangeLog(chTableId, chEntityPk, dispatched, chTime) 
+                          | SELECT 410, NEW.leavingReasonUid, false, cast(extract(epoch from now()) * 1000 AS BIGINT)
+                          | WHERE COALESCE((SELECT master From SyncNode LIMIT 1), false);
+                          | RETURN null;
+                          | END ${'$'}${'$'}
+                          | LANGUAGE plpgsql
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE TRIGGER inccsn_410_trig 
+                          |AFTER UPDATE OR INSERT ON LeavingReason 
+                          |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
+                          |EXECUTE PROCEDURE inccsn_410_fn()
+                          """.trimMargin())
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LeavingReason_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                    database.execSQL("""
+                          |CREATE 
+                          | INDEX index_LeavingReason_trk_clientId_epk_csn 
+                          |ON LeavingReason_trk (clientId, epk, csn)
+                          """.trimMargin())
+                    database.execSQL("""
+                          |CREATE 
+                          |UNIQUE INDEX index_LeavingReason_trk_epk_clientId 
+                          |ON LeavingReason_trk (epk, clientId)
+                          """.trimMargin())
+
+                }
+
+            }
+        }
+
+
+
+
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
@@ -4044,7 +4186,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
                     MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
-                    MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59)
+                    MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
+                    MIGRATION_59_60)
 
 
 

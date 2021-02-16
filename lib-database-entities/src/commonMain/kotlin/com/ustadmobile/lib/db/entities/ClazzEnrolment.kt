@@ -238,7 +238,7 @@ open class ClazzEnrolment()  {
 
     var clazzEnrolmentLeavingReasonUid: Long = 0
 
-    var clazzEnrolmentStatus: Long = 0
+    var clazzEnrolmentStatus: Int = 0
 
     @LocalChangeSeqNum
     var clazzEnrolmentLocalChangeSeqNum: Long = 0

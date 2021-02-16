@@ -31,6 +31,11 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = :personUid " + "AND clazzEnrolmentClazzUid = :clazzUid")
     abstract suspend fun findByPersonUidAndClazzUidAsync(personUid: Long, clazzUid: Long): ClazzEnrolment?
 
+    @Query("""SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = :personUid 
+        AND clazzEnrolmentClazzUid = :clazzUid ORDER BY clazzEnrolmentDateLeft DESC""")
+    abstract fun findAllEnrolmentsByPersonAndClazzUid(personUid: Long, clazzUid: Long):
+            DataSource.Factory<Int, ClazzEnrolment>
+
     @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentDateLeft = :endDate,
             clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
             WHERE clazzEnrolmentUid = :clazzEnrolmentUid""")
