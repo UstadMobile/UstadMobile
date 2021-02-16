@@ -35,6 +35,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     override fun onCreate(savedState: Map<String, String>?) {
         filterByClazzUid = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: -1
         super.onCreate(savedState)
+
     }
 
     override fun onPause() {
@@ -81,7 +82,6 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
 
     override fun handleClickEntry(entry: Person) {
-        //Just go to PersonDetail - this view is not used as a picker
         systemImpl.go(ClazzEnrolmentListView.VIEW_NAME,
                 mapOf(UstadView.ARG_PERSON_UID to entry.personUid.toString(),
                         ARG_FILTER_BY_CLAZZUID to filterByClazzUid.toString()), context)
