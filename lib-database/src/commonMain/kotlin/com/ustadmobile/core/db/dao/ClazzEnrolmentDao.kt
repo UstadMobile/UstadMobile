@@ -80,10 +80,12 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract suspend fun findByUid(uid: Long): ClazzEnrolment?
 
-    @Query("""SELECT Person.*, ((CAST(COUNT(DISTINCT CASE WHEN 
+    @Query("""SELECT Person.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
         ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
         ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
-        COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) as attendance, 
+        COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) 
+        FROM ClazzLogAttendanceRecord LEFT JOIN PERSON ON Person.personUid = 
+        ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid)  as attendance, 
     	(SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) FROM ClazzEnrolment WHERE 
         Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) as earliestJoinDate, 
     	(SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) FROM ClazzEnrolment WHERE 
