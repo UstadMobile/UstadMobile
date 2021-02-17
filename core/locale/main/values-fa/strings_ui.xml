@@ -338,4 +338,13 @@
     <string name="sub_locations">موقعیتهای فرعی</string>
     <string name="group_activity">فعالیت</string>
     <string name="select_group_members">انتخاب اعضای جدید گروپ</string>
+    <string name="register_now">همین اکنون ثبت نام نمایید</string>
+    <string name="choose_template">انتخاب نمونه</string>
+    <string name="description">تفصیل</string>
+    <string name="select_language">انتخاب لسان</string>
+    <string name="add_a_new_language">علاوه نمودن لسان جدید</string>
+    <string name="confirm_delete_message">آیا واقعاً میخواهید این ورودی را از دستگاه خود حذف نمائید؟</string>
+    <string name="processing">در حال پروسس</string>
+    <string name="uploading">در حال آپلود</string>
+    <string name="save_as_template">حفظ به حیث نمونه</string>
 </resources>
