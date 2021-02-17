@@ -501,12 +501,11 @@
     <string name="graduated">Graduated</string>
     <string name="dropped_out">Dropped out</string>
     <string name="moved">Moved</string>
-    <string name="medical">Medical</string>
-    <string name="transport">Transportation problem</string>
-    <string name="family">Family economic problem</string>
-    <string name="passed_test">Passed test</string>
-    <string name="failed_test">Failed test</string>
     <string name="new_leaving_reason">New enrolment result reason</string>
+    <string name="edit_leaving_reason">Edit enrolment result reason</string>
+    <string name="edit_enrolment">Edit enrolment</string>
+    <string name="new_enrolment">New enrolment</string>
+    <string name="select_reason">Select reason</string>
     <string name="current_status">Current status</string>
     <string name="leaving_reason">Reason for leaving</string>
     <string name="reason">reason</string>
