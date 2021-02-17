@@ -516,6 +516,7 @@
     <string name="class_enrolment_leaving">Class enrolment reason for leaving</string>
     <!-- used to show the enrolments in 1 class by person: e.g Ahmed's enrolment in Class A -->
     <string name="person_enrolment_in_class">%1$s enrolments in %2$s</string>
+    <string name="enrolment">Enrolment</string>
 
 
     <!--Ascending: used in the context of a sort order -->
