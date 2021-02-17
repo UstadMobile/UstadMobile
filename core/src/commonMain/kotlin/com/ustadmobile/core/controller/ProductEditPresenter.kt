@@ -60,7 +60,7 @@ class ProductEditPresenter(context: Any,
         }?: Product()
 
         view .productPicture = db.onDbThenRepoWithTimeout(2000) {dbToUse, _ ->
-            dbToUse.takeIf { entityUid != 0L }?.productPictureDao?.findByPersonUidAsync(entityUid)
+            dbToUse.takeIf { entityUid != 0L }?.productPictureDao?.findByProductUidAsync(entityUid)
         } ?: ProductPicture()
 
 
