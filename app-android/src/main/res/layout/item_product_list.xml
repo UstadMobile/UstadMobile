@@ -143,7 +143,7 @@
             app:imageForeignKey="@{product.productUid}"
             app:imageForeignKeyAdapter="@{ProductDetailFragment.FOREIGNKEYADAPTER_PRODUCT}"
             app:imageForeignKeyPlaceholder="@{@drawable/ic_baseline_insert_photo_24}"
-            tools:src="@drawable/ic_baseline_insert_photo_24"
+            android:src="@drawable/ic_baseline_insert_photo_24"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginBottom="@dimen/dimen_16dp"
             android:layout_marginStart="@dimen/dimen_8dp"

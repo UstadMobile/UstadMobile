@@ -128,6 +128,7 @@ abstract class SaleDao : BaseDao<Sale> {
             
         """
 
+        //TODO: Check this on postgres
         const val FIND_ALL_SALE_LIST_SALES = """
             SELECT sl.*, Customer.*,
                 (SELECT SaleItem.saleItemQuantity 
