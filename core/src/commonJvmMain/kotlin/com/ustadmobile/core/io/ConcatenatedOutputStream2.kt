@@ -23,7 +23,8 @@ import java.security.MessageDigest
  *
  */
 class ConcatenatedOutputStream2(outputStream: OutputStream,
-                                messageDigest: MessageDigest = MessageDigest.getInstance("MD5")) : FilterOutputStream(outputStream) {
+                                messageDigest: MessageDigest = MessageDigest.getInstance("MD5"),
+                                internal val verifyMd5: Boolean = true) : FilterOutputStream(outputStream) {
 
     private var currentEntry: ConcatenatedEntry? = null
 
@@ -39,9 +40,13 @@ class ConcatenatedOutputStream2(outputStream: OutputStream,
     private fun assertMd5MatchesCurrentEntry() {
         val entryVal = currentEntry ?: throw IOException("No current entry to verify against.")
         val currentMd5 = inflateMessageDigest.digest()
+        if(!verifyMd5)
+            return
+
         if(!currentMd5.contentEquals(entryVal.md5))
-            throw IOException("ConcatenatedOutputStream: Corrupt data: MD5 provided for entry " +
-                    "${entryVal.md5.toHexString()} does not match the MD5 of the data written ${currentMd5.toHexString()}!")
+            throw ConcatenatedDataIntegrityException("MD5 provided for entry " +
+                    "${entryVal.md5.toHexString()} does not match the MD5 of the data written " +
+                    "${currentMd5.toHexString()}!")
 
     }
 

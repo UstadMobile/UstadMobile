@@ -26,33 +26,6 @@ data class ConcatenatedHttpResponse(val status: Int, val contentLength: Long, va
 
 val ERROR_PART_NOT_FOUND = 503
 
-class ConcatenatedHttpResponse2(val status: Int, val contentLength: Long, val etag: String?,
-                                     val lastModifiedTime: Long,
-                                     val responseHeaders: Map<String, String> = mapOf(),
-                                     private val containerEntryFiles: List<ContainerEntryFile>) {
-
-    fun writeTo(dest: OutputStream) {
-        val concatOut = ConcatenatedOutputStream2(dest)
-        containerEntryFiles.forEach {
-            concatOut.putContainerEntryFile(it)
-        }
-        concatOut.flush()
-    }
-
-}
-
-fun ContainerEntryFileDao.generateConcatenatedFilesResponse2(md5ListQueryParam: String,
-        method: String = "GET",
-        requestHeaders: Map<String, List<String>> = mapOf(),
-        db: UmAppDatabase) : ConcatenatedHttpResponse {
-
-    val md5List = md5ListQueryParam.split(";")
-
-    val containerEntryFiles = findEntriesByMd5SumsSafe(md5List, db)
-
-    TODO("Not yet")
-}
-
 @Deprecated("Use generateConcatenatedFilesResponse2.")
 fun ContainerEntryFileDao.generateConcatenatedFilesResponse(fileList: String,
                                                             method: String = "GET",

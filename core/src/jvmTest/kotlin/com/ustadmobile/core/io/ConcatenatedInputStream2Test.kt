@@ -74,5 +74,32 @@ class ConcatenatedInputStream2Test {
     }
 
 
+    @Test(expected = ConcatenatedDataIntegrityException::class)
+    fun givenInputThatDoesNotMatchMd5Proivded_whenGetNextEntryCalled_thenShouldThrowDataIntegrityException() {
+        val concatOut = ConcatenatedOutputStream2(FileOutputStream(tmpConcatenateDataFile),
+                verifyMd5 = false)
+
+        //Put the wrong data ... the md5sum from file2 is used here for file1's data
+        concatOut.putNextEntry(ConcatenatedEntry(tmpFile2.md5Sum, 0, tmpFile1.length(), tmpFile1.length(), 0L))
+        FileInputStream(tmpFile1).use { fileIn ->
+            fileIn.copyTo(concatOut)
+            concatOut.flush()
+        }
+
+        concatOut.putNextEntry(ConcatenatedEntry(tmpFile1.md5Sum, 0, tmpFile2.length(), tmpFile2.length(), 0L))
+        FileInputStream(tmpFile2).use { fileIn ->
+            fileIn.copyTo(concatOut)
+            concatOut.flush()
+        }
+
+        concatOut.close()
+
+        val concatIn = ConcatenatedInputStream2(FileInputStream(tmpConcatenateDataFile))
+        concatIn.getNextEntry()
+
+        val secondEntry = concatIn.getNextEntry()
+    }
+
+
 
 }

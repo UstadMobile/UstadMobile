@@ -61,6 +61,9 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
     @Delete
     abstract fun deleteListOfEntryFiles(entriesToDelete: List<ContainerEntryFile>)
 
+    @Query("SELECT ContainerEntryFile.* FROM ContainerEntryFile WHERE cefMd5 = :md5Sum")
+    abstract suspend fun findEntryByMd5Sum(md5Sum: String): ContainerEntryFile?
+
     companion object {
 
         const val ENDPOINT_CONCATENATEDFILES = "ConcatenatedContainerFiles"

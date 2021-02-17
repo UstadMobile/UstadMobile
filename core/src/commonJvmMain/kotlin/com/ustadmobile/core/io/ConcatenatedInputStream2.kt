@@ -30,7 +30,7 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
         val entryVal = currentEntry ?: throw IOException("No current entry: cannot verify data")
         val dataMd5 = inflateMessageDigest.digest()
         if(!dataMd5.contentEquals(entryVal.md5))
-            throw IOException("Data read was corrupted: md5 does not match! " +
+            throw ConcatenatedDataIntegrityException("Data read was corrupted: md5 does not match! " +
                     "Expected MD5: ${entryVal.md5.toHexString()} / Actual ${dataMd5.toHexString()}")
     }
 

@@ -1,5 +1,7 @@
 package com.ustadmobile.core.io
 
+import com.ustadmobile.lib.db.entities.ContainerEntryFile
+
 /**
  * Represents an entry in a ConcatenatedStream. It is similar to java.util.ZipEntry. As the
  * concatenated stream is designed to be fixed-length, it does not include a name. This means the
@@ -59,7 +61,6 @@ class ConcatenatedEntry(
     }
 
     companion object {
-
 
         //compressed size (8 bytes), total size (8 bytes), compression (1 byte), last modified (8 bytes), md5sum (16 bytes)
         const val SIZE = 8 + 8 + 1 + 8 + 16
