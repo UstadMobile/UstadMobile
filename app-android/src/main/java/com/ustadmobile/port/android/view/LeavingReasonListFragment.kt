@@ -16,6 +16,7 @@ import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
@@ -59,14 +60,17 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = LeavingReasonListRecyclerAdapter(mPresenter)
-       /* val createNewText = requireContext().getString(R.string.create_new,
-                requireContext().getString(R.string.leavingreason))
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText)*/
+        val createNewText = requireContext().getString(R.string.add_new,
+                requireContext().getString(R.string.reason))
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText)
+
+
         return view
     }
 
-    override fun onResume() {
-        super.onResume()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        ustadFragmentTitle = requireContext().getString(R.string.select_reason)
     }
 
     /**
@@ -75,6 +79,8 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.leaving_reason_edit, LeavingReason::class.java)
+        else
+            super.onClick(view)
     }
 
     override fun onDestroyView() {
@@ -84,7 +90,7 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
     }
 
     override val displayTypeRepo: Any?
-        get() = dbRepo?.personDao //TODO("Provide repo e.g. dbRepo.LeavingReasonDao")
+        get() = dbRepo?.leavingReasonDao
 
 
     companion object {

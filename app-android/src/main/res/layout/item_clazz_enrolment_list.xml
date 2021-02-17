@@ -1,15 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.ClazzEnrolment"/>
+        <import type="com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason"/>
         <import type="com.ustadmobile.port.android.view.ClazzEnrolmentListFragment"/>
         <import type="com.ustadmobile.port.android.view.ClazzEnrolmentListFragment.ClazzEnrolmentRecyclerAdapter"/>
 
         <variable
             name="clazzEnrolment"
-            type="ClazzEnrolment" />
+            type="ClazzEnrolmentWithLeavingReason" />
 
         <variable
             name="presenter"
@@ -18,6 +19,7 @@
         <variable
             name="selectablePagedListAdapter"
             type="ClazzEnrolmentRecyclerAdapter" />
+
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -26,18 +28,19 @@
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, clazzEnrolment)}"
         app:onSelectableItemClicked="@{() -> presenter.handleClickClazzEnrolment(clazzEnrolment)}"
-        android:background="@drawable/bg_listitem"
+        android:layout_margin="8dp"
         >
 
-        <!-- TODO: Change or remove this icon -->
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/item_clazzEnrolment_newitemicon"
-            app:srcCompat="@drawable/ic_add_black_24dp"
+        <ImageView
+            android:id="@+id/item_clazz_enrolment_edit_enrolment"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:src="@drawable/ic_edit_white_24dp"
+            app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            />
+            android:layout_margin="@dimen/dimen_8dp"
+            android:tint="@android:color/black"/>
+
 
         <!-- Line 1-->
         <TextView
@@ -46,9 +49,11 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
-            />
+            android:layout_margin="@dimen/dimen_8dp"
+            app:layout_constraintEnd_toStartOf="@id/item_clazz_enrolment_edit_enrolment"
+            app:memberEnrolmentStatusWithReason="@{clazzEnrolment}"
+            tools:text="Student - Enroled(transport)"
+            android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"/>
 
         <!-- Line 2-->
         <TextView
@@ -57,10 +62,16 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="@+id/line1_text"
             app:layout_constraintTop_toBottomOf="@+id/line1_text"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_margin="@dimen/dimen_8dp"
+            app:layout_constraintEnd_toStartOf="@id/item_clazz_enrolment_edit_enrolment"
+            app:textFromDateLong="@{clazzEnrolment.clazzEnrolmentDateJoined}"
+            app:textToDateLong="@{clazzEnrolment.clazzEnrolmentDateLeft}"
+            tools:text="start - end"
             app:layout_constraintBottom_toBottomOf="parent"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             />
+
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>

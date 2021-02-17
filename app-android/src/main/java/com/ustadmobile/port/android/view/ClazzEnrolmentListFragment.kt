@@ -16,16 +16,18 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.view.ClazzEnrolmentListView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
+import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
 
-class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzEnrolment>(),
+class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzEnrolmentWithLeavingReason>(),
         ClazzEnrolmentListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
     private var profileHeaderAdapter: ClazzEnrolmentProfileHeaderAdapter? = null
@@ -35,21 +37,20 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
     override val listPresenter: UstadListPresenter<*, in ClazzEnrolment>?
         get() = mPresenter
 
+    private var selectedPersonUid: Long = 0
 
     class ClazzEnrolmentProfileHeaderAdapter(val personUid: Long, var presenter: ClazzEnrolmentListPresenter?):
-            ListAdapter<Person, ClazzEnrolmentProfileHeaderAdapter.ClazzEnrolmentPersonHeaderViewHolder>(DIFF_CALLBACK_PERSON){
+            SingleItemRecyclerViewAdapter<ClazzEnrolmentProfileHeaderAdapter.ClazzEnrolmentPersonHeaderViewHolder>(true){
 
         class ClazzEnrolmentPersonHeaderViewHolder(val itemBinding: ItemClazzEnrolmentPersonHeaderListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzEnrolmentPersonHeaderViewHolder {
-            val itemBinding = ItemClazzEnrolmentPersonHeaderListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
-            itemBinding.presenter = presenter
-            itemBinding.personUid = personUid
-            return ClazzEnrolmentPersonHeaderViewHolder(itemBinding)
-        }
-
-        override fun onBindViewHolder(holder: ClazzEnrolmentPersonHeaderViewHolder, position: Int) {
-
+            return ClazzEnrolmentPersonHeaderViewHolder(
+                    ItemClazzEnrolmentPersonHeaderListBinding.inflate(LayoutInflater
+                    .from(parent.context), parent, false).also {
+                        it.presenter = presenter
+                        it.personUid = personUid
+                    })
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -60,7 +61,7 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
     }
 
     class ClazzEnrolmentRecyclerAdapter(var presenter: ClazzEnrolmentListPresenter?):
-            SelectablePagedListAdapter<ClazzEnrolment, ClazzEnrolmentRecyclerAdapter
+            SelectablePagedListAdapter<ClazzEnrolmentWithLeavingReason, ClazzEnrolmentRecyclerAdapter
             .ClazzEnrolmentListViewHolder>(DIFF_CALLBACK_ENROLMENT) {
 
         class ClazzEnrolmentListViewHolder(val itemBinding: ItemClazzEnrolmentListBinding): RecyclerView.ViewHolder(itemBinding.root)
@@ -85,16 +86,16 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
 
     }
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
 
+        selectedPersonUid = arguments?.getString(ARG_PERSON_UID)?.toLong() ?: 0
         mPresenter = ClazzEnrolmentListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
+        profileHeaderAdapter = ClazzEnrolmentProfileHeaderAdapter(selectedPersonUid, mPresenter)
 
-        profileHeaderAdapter = ClazzEnrolmentProfileHeaderAdapter(
-                arguments?.get(ARG_PERSON_UID) as Long? ?: 0L, mPresenter)
         mDataRecyclerViewAdapter = ClazzEnrolmentRecyclerAdapter(mPresenter)
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this)
 
         mMergeRecyclerViewAdapter = MergeAdapter(profileHeaderAdapter, mDataRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
@@ -102,13 +103,9 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
         return view
     }
 
-
-    /**
-     * OnClick function that will handle when the user clicks to create a new item
-     */
-    override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.clazz_list_dest, ClazzEnrolment::class.java)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        fabManager?.text = requireContext().getText(R.string.enrolment)
     }
 
     override fun onDestroyView() {
@@ -130,29 +127,15 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
 
     companion object {
 
-        val DIFF_CALLBACK_ENROLMENT: DiffUtil.ItemCallback<ClazzEnrolment> = object
-            : DiffUtil.ItemCallback<ClazzEnrolment>() {
-            override fun areItemsTheSame(oldItem: ClazzEnrolment,
-                                         newItem: ClazzEnrolment): Boolean {
+        val DIFF_CALLBACK_ENROLMENT: DiffUtil.ItemCallback<ClazzEnrolmentWithLeavingReason> = object
+            : DiffUtil.ItemCallback<ClazzEnrolmentWithLeavingReason>() {
+            override fun areItemsTheSame(oldItem: ClazzEnrolmentWithLeavingReason,
+                                         newItem: ClazzEnrolmentWithLeavingReason): Boolean {
                 return oldItem.clazzEnrolmentUid == newItem.clazzEnrolmentUid
             }
 
-            override fun areContentsTheSame(oldItem: ClazzEnrolment,
-                                            newItem: ClazzEnrolment): Boolean {
-                return oldItem == newItem
-            }
-        }
-
-
-        val DIFF_CALLBACK_PERSON: DiffUtil.ItemCallback<Person> = object
-            : DiffUtil.ItemCallback<Person>() {
-            override fun areItemsTheSame(oldItem: Person,
-                                         newItem: Person): Boolean {
-                return oldItem.personUid == newItem.personUid
-            }
-
-            override fun areContentsTheSame(oldItem: Person,
-                                            newItem: Person): Boolean {
+            override fun areContentsTheSame(oldItem: ClazzEnrolmentWithLeavingReason,
+                                            newItem: ClazzEnrolmentWithLeavingReason): Boolean {
                 return oldItem == newItem
             }
         }

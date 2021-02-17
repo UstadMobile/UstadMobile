@@ -7,11 +7,8 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazz
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithPerson
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
-import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 
 @UmDao(inheritPermissionFrom = ClazzDao::class, inheritPermissionForeignKey = "clazzEnrolmentClazzUid",
         inheritPermissionJoinedPrimaryKey = "clazzUid")
@@ -28,13 +25,22 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         }
     }
 
-    @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = :personUid " + "AND clazzEnrolmentClazzUid = :clazzUid")
+    @Query("""SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = :personUid 
+        AND clazzEnrolmentClazzUid = :clazzUid 
+        AND clazzEnrolmentStatus = ${ClazzEnrolment.STATUS_ENROLED} LIMIT 1""")
     abstract suspend fun findByPersonUidAndClazzUidAsync(personUid: Long, clazzUid: Long): ClazzEnrolment?
 
-    @Query("""SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = :personUid 
+    @Query("""SELECT ClazzEnrolment.*, LeavingReason.* FROM ClazzEnrolment LEFT JOIN
+        LeavingReason ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
+        WHERE clazzEnrolmentPersonUid = :personUid 
         AND clazzEnrolmentClazzUid = :clazzUid ORDER BY clazzEnrolmentDateLeft DESC""")
     abstract fun findAllEnrolmentsByPersonAndClazzUid(personUid: Long, clazzUid: Long):
-            DataSource.Factory<Int, ClazzEnrolment>
+            DataSource.Factory<Int, ClazzEnrolmentWithLeavingReason>
+
+    @Query("""SELECT ClazzEnrolment.*, LeavingReason.* FROM ClazzEnrolment LEFT JOIN
+        LeavingReason ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
+        WHERE ClazzEnrolment.clazzEnrolmentUid = :enrolmentUid""")
+    abstract fun findEnrolmentWithLeavingReason(enrolmentUid: Long): ClazzEnrolmentWithLeavingReason?
 
     @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentDateLeft = :endDate,
             clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 

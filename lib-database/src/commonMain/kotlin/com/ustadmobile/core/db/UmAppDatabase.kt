@@ -85,6 +85,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     fun preload() {
         verbDao.initPreloadedVerbs()
         reportDao.initPreloadedTemplates()
+        leavingReasonDao.initPreloadedLeavingReasons()
     }
 
     @JsName("networkNodeDao")
@@ -4041,6 +4042,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 database.execSQL("""ALTER TABLE ClazzEnrolment 
                         ADD COLUMN clazzEnrolmentStatus INTEGER DEFAULT 0 NOT NULL""".trimMargin())
+
+                database.execSQL("""UPDATE ClazzEnrolment SET 
+                    clazzEnrolmentStatus = ${ClazzEnrolment.STATUS_ENROLED}""".trimMargin())
 
                 if (database.dbType() == DoorDbType.SQLITE) {
 

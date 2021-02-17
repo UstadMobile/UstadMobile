@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentLeavingReasonEditBinding
 import com.ustadmobile.core.controller.LeavingReasonEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
@@ -38,6 +39,11 @@ class LeavingReasonEditFragment: UstadEditFragment<LeavingReason>(), LeavingReas
         return rootView
     }
 
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        setEditFragmentTitle(R.string.new_leaving_reason, R.string.edit_leaving_reason)
+    }
+
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding = null
@@ -56,6 +62,7 @@ class LeavingReasonEditFragment: UstadEditFragment<LeavingReason>(), LeavingReas
         get() = field
         set(value) {
             field = value
+            mBinding?.reasonTitleError = value
         }
 
     override var fieldsEnabled: Boolean = false

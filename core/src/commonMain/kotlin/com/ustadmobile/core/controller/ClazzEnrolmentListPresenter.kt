@@ -19,7 +19,7 @@ class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, 
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        selectedPerson = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
+        selectedPerson = arguments[UstadView.ARG_PERSON_UID]?.toLong() ?: 0L
         selectedClazz = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
         updateListOnView()
     }
@@ -38,12 +38,13 @@ class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, 
     }
 
     override fun handleClickCreateNewFab() {
-          systemImpl.go(ClazzEnrolmentEditView.VIEW_NAME, mapOf(), context)
+          systemImpl.go(ClazzEnrolmentEditView.VIEW_NAME, arguments, context)
     }
 
     fun handleClickClazzEnrolment(enrolment: ClazzEnrolment){
         systemImpl.go(ClazzEnrolmentEditView.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to enrolment.clazzEnrolmentUid.toString()), context)
+                mapOf(UstadView.ARG_ENTITY_UID to enrolment.clazzEnrolmentUid.toString())
+                        .plus(arguments), context)
     }
 
     fun handleClickProfile(personUid: Long){

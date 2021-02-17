@@ -5,10 +5,14 @@
 
     <data>
         <import type="android.view.View"/>
+        <import type="android.text.InputType" />
+        <import type="com.ustadmobile.core.util.IdOption" />
+        <import type="com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason"/>
+        <import type="com.ustadmobile.lib.db.entities.ClazzEnrolment"/>
 
         <variable
             name="clazzEnrolment"
-            type="com.ustadmobile.lib.db.entities.ClazzEnrolment" />
+            type="ClazzEnrolmentWithLeavingReason" />
 
         <variable
             name="loading"
@@ -17,6 +21,22 @@
         <variable
             name="fieldsEnabled"
             type="boolean" />
+
+        <variable
+            name="roleOptions"
+            type="java.util.List&lt;IdOption&gt;" />
+
+        <variable
+            name="statusOptions"
+            type="java.util.List&lt;IdOption&gt;" />
+
+        <variable
+            name="startDateError"
+            type="String" />
+
+        <variable
+            name="endDateError"
+            type="String" />
 
         <variable
             name="activityEventHandler"
@@ -37,11 +57,122 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/clazz_enrolment_edit_role_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- TODO: Put the actual view for editing ClazzEnrolment here using two-way data binding -->
-            <!-- Available templates:
-            onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-            -->
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
+                    android:id="@+id/clazz_enrolment_edit_role_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/role"
+                    app:messageIdOptions="@{roleOptions}"
+                    app:selectedMessageIdOption="@={clazzEnrolment.clazzEnrolmentRole}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/clazz_enrolment_edit_fromDate_textinputlayout"
+                android:layout_width="@dimen/dimen_0dp"
+                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/clazz_enrolment_edit_role_textinputlayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:errorText="@{startDateError}"
+                app:errorEnabled="@{startDateError != null}"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:hint="@string/start_date">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/clazz_enrolment_edit_fromDate_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:cursorVisible="false"
+                android:inputType="@{InputType.TYPE_NULL}"
+                app:dateLong="@={clazzEnrolment.clazzEnrolmentDateJoined}"
+                app:runOnClickWhenFocused="@{true}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/clazz_enrolment_edit_toDate_textinputlayout"
+                android:layout_width="@dimen/dimen_0dp"
+                android:layout_height="wrap_content"
+                android:enabled="@{fieldsEnabled}"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/clazz_enrolment_edit_fromDate_textinputlayout"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:errorText="@{endDateError}"
+                app:errorEnabled="@{endDateError != null}"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:hint="@string/end_date">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/clazz_enrolment_edit_toDate_text"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:cursorVisible="false"
+                android:inputType="@{InputType.TYPE_NULL}"
+                app:dateLong="@={clazzEnrolment.clazzEnrolmentDateLeft}"
+                app:runOnClickWhenFocused="@{true}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/clazz_enrolment_edit_status_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/clazz_enrolment_edit_toDate_textinputlayout"
+                app:layout_constraintEnd_toEndOf="parent">
+
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
+                    android:id="@+id/clazz_enrolment_edit_status_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/current_status"
+                    app:messageIdOptions="@{statusOptions}"
+                    app:selectedMessageIdOption="@={clazzEnrolment.clazzEnrolmentStatus}" />
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/clazz_enrolment_edit_reason_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:enabled="@{clazzEnrolment.clazzEnrolmentStatus != ClazzEnrolment.STATUS_ENROLED}"
+                app:layout_constraintTop_toBottomOf="@+id/clazz_enrolment_edit_status_textinputlayout"
+                app:layout_constraintStart_toStartOf="parent"
+                android:hint="@string/leaving_reason">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/clazz_enrolment_edit_reason_text"
+                    android:onClick="@{() -> activityEventHandler.handleReasonLeavingClicked()}"
+                    android:text="@{clazzEnrolment.leavingReason.leavingReasonTitle}"
+                    app:runOnClickWhenFocused="@{true}"
+                    android:inputType="@{InputType.TYPE_NULL}"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"/>
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

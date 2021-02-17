@@ -19,6 +19,10 @@
             type="boolean" />
 
         <variable
+            name="reasonTitleError"
+            type="String" />
+
+        <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.LeavingReasonEditFragmentEventHandler" />
 
@@ -37,11 +41,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/leaving_reason_edit_description_textinput"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                app:errorEnabled="true"
+                app:errorText="@{reasonTitleError}"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent">
 
-            <!-- TODO: Put the actual view for editing LeavingReason here using two-way data binding -->
-            <!-- Available templates:
-            onetomanyrecyclerview: Adds a header, add new button, and a recycler view for one-many fields
-            -->
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/leaving_reason_edit_description_text"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@={leavingReason.leavingReasonTitle}"
+                    android:hint="@string/description" />
+            </com.google.android.material.textfield.TextInputLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 
