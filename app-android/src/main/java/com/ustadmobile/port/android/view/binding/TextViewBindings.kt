@@ -321,8 +321,12 @@ fun TextView.setBalanceDueAfterPaymentAndSaleAndDiscount(totalSale : Long, sale:
 
 @BindingAdapter("weTotalSaleValue")
 fun TextView.setWeTotalSale(personWithSaleInfo: PersonWithSaleInfo?){
-    text = personWithSaleInfo?.totalSale.toString() + " " + context.getString(R.string.afs) +
-            " " +  context.getString(R.string.total_sales)
+    if(personWithSaleInfo?.personGoldoziType == Person.GOLDOZI_TYPE_LE) {
+        text = personWithSaleInfo?.totalSale.toString() + " " + context.getString(R.string.afs) +
+                " " + context.getString(R.string.total_sales)
+    }else{
+        text= ""
+    }
 }
 
 @BindingAdapter(value = ["setSeekBarMax", "deliveryMode", "newSaleDelivery"])

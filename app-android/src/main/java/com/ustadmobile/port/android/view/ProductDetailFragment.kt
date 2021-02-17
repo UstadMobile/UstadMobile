@@ -238,7 +238,7 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
         @JvmStatic
         val FOREIGNKEYADAPTER_PRODUCT = object: ForeignKeyAttachmentUriAdapter {
             override suspend fun getAttachmentUri(foreignKey: Long, dbToUse: UmAppDatabase): String? {
-                return dbToUse.productPictureDao.findByPersonUidAsync(foreignKey)?.productPictureUri
+                return dbToUse.productPictureDao.findByProductUidAsync(foreignKey)?.productPictureUri
             }
         }
     }

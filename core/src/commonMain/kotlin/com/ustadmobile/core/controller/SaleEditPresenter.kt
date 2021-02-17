@@ -102,9 +102,9 @@ class SaleEditPresenter(context: Any,
         }
         saleItemEditHelper.liveList.sendValue(saleItemList)
 
-        val saleDeliveryList = withTimeout(2000){
+        val saleDeliveryList = if(entityUid != 0L) {withTimeout(2000){
             db.saleDeliveryDao.findAllBySaleAsList(entityUid)
-        }
+        }}else{ listOf<SaleDelivery>()}
 
         val saleDeliveryWithItems = mutableListOf<SaleDeliveryAndItems>()
         for(eachDelivery in saleDeliveryList){
@@ -116,8 +116,10 @@ class SaleEditPresenter(context: Any,
         }
         saleDeliveryEditHelper.liveList.sendValue(saleDeliveryWithItems)
 
-        val salePaymentList = withTimeout(2000){
+        val salePaymentList = if(entityUid != 0L) {withTimeout(2000){
             db.salePaymentDao.findAllBySaleAsList(entityUid)
+        }}else{
+            listOf<SalePayment>()
         }
         var salePaymentWithItems = mutableListOf<SalePaymentWithSaleItems>()
         for(eachPayment in salePaymentList){

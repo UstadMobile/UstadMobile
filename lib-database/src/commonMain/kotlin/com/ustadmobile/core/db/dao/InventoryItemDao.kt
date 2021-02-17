@@ -19,7 +19,7 @@ import com.ustadmobile.door.annotation.Repository
 abstract class InventoryItemDao : BaseDao<InventoryItem> {
 
     @Query(QUERY_GET_WE_NEW_INVENTORY)
-    abstract suspend fun getAllWeWithNewInventoryItem(leUid: Long)
+    abstract suspend fun getAllWeWithNewInventoryItem(leUid: Long, productUid: Long)
             : List<PersonWithInventoryItemAndStock>
 
     @Query(QUERY_GET_STOCK_LIST_BY_PRODUCT)
@@ -45,12 +45,22 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
 
     companion object{
 
-        //TODO: Count existing stock
         const val QUERY_GET_WE_NEW_INVENTORY = """
         SELECT 
             Person.*,
             InventoryItem.*, 
-            (0)  as stock , 
+            (
+                SELECT SUM(inventoryItemQuantity) FROM InventoryItem WHERE      
+                InventoryItem.inventoryItemProductUid = :productUid
+                AND InventoryItem.inventoryItemWeUid = Person.personUid
+                AND (
+                    InventoryItem.inventoryItemLeUid = MLE.personUid
+                    OR
+                    CAST(MLE.admin AS INTEGER) = 1
+                    )
+                
+                AND CAST(InventoryItem.inventoryItemActive AS INTEGER) = 1
+            )  as stock , 
             0 as selectedStock
         FROM Person
         LEFT JOIN PERSON AS MLE ON MLE.personUid = :leUid

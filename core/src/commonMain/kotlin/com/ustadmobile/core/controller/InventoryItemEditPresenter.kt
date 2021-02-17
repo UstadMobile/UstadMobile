@@ -58,7 +58,7 @@ class InventoryItemEditPresenter(context: Any,
         val productUid = arguments[ARG_PRODUCT_UID]?.toLong()?: 0L
 
        val producers = withTimeout(2000){
-            db.inventoryItemDao.getAllWeWithNewInventoryItem(loggedInPersonUid)
+            db.inventoryItemDao.getAllWeWithNewInventoryItem(loggedInPersonUid, productUid)
        }
         producerSelectionEditHelper.liveList.sendValue(producers)
 
@@ -67,10 +67,11 @@ class InventoryItemEditPresenter(context: Any,
 
     public fun loadList(){
         val loggedInPersonUid = accountManager.activeAccount.personUid
+        val productUid = arguments[ARG_PRODUCT_UID]?.toLong()?: 0L
 
         GlobalScope.launch {
             val producers = withTimeout(2000){
-                db.inventoryItemDao.getAllWeWithNewInventoryItem(loggedInPersonUid)
+                db.inventoryItemDao.getAllWeWithNewInventoryItem(loggedInPersonUid, productUid)
             }
             producerSelectionEditHelper.liveList.sendValue(producers)
         }

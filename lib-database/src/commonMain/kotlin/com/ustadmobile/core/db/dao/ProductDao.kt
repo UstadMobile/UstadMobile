@@ -146,7 +146,7 @@ abstract class ProductDao : BaseDao<Product> {
             ProductCategoryJoin.productCategoryJoinProductUid = :productUid
             AND CAST(productCategoryJoinActive AS INTEGER ) = 1 
             GROUP BY Category.categoryUid
-            ORDER BY ProductCategoryJoin.productCategoryJoinDateCreated DESC
+            ORDER BY Category.categoryDateAdded DESC
         """
 
 
@@ -165,7 +165,7 @@ abstract class ProductDao : BaseDao<Product> {
             
             AND CAST(productCategoryJoinActive AS INTEGER ) = 1
              GROUP BY Category.categoryUid
-            ORDER BY ProductCategoryJoin.productCategoryJoinDateCreated DESC
+             ORDER BY Category.categoryDateAdded DESC
         """
 
 

@@ -28,7 +28,7 @@ abstract class ProductPictureDao : BaseDao<ProductPicture> {
         WHERE productPictureProductUid = :productUid
         AND CAST(productPictureActive AS INTEGER) = 1
         ORDER BY productPictureTimestamp DESC LIMIT 1""")
-    abstract suspend fun findByPersonUidAsync(productUid: Long): ProductPicture?
+    abstract suspend fun findByProductUidAsync(productUid: Long): ProductPicture?
 
     @Query("SELECT * FROM ProductPicture where productPictureProductUid = :productUid ORDER BY " + " productPictureTimestamp DESC LIMIT 1")
     abstract fun findByPersonUidLive(productUid: Long): DoorLiveData<ProductPicture?>
