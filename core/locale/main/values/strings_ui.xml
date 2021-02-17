@@ -435,6 +435,7 @@
     <string name="mark_all">Mark all</string>
     <string name="mark_all_present">Mark all present</string>
     <string name="mark_all_absent">Mark all absent</string>
+    <!-- Present as in physically here, the opposite of absent -->
     <string name="present">Present</string>
     <string name="absent">Absent</string>
     <string name="attendance_report">Attendance report</string>
@@ -516,7 +517,10 @@
     <!-- used to show the enrolments in 1 class by person: e.g Ahmed's enrolment in Class A -->
     <string name="person_enrolment_in_class">%1$s enrolments in %2$s</string>
     <string name="enrolment">Enrolment</string>
-
+    <string name="error_start_date_before_clazz_date">Enrolment cannot start before class start date</string>
+    <string name="error_start_date_before_previous_enrolment_date">New enrolment must be after the end of the last enrolment for this person %1$s</string>
+    <!-- Present as in the current period of time -->
+    <string name="time_present">present</string>
 
     <!--Ascending: used in the context of a sort order -->
     <string name="ascending">Ascending</string>
