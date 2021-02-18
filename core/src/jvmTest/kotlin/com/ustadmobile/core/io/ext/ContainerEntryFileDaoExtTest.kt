@@ -37,6 +37,8 @@ class ContainerEntryFileDaoExtTest {
 
     private lateinit var di: DI
 
+    private lateinit var container: Container
+
     @Before
     fun setup() {
         di = DI {
@@ -50,16 +52,19 @@ class ContainerEntryFileDaoExtTest {
         this::class.java.getResourceAsStream("/com/ustadmobile/core/contentformats/epub/test.epub")
                 .writeToFile(epubTmpFile)
 
+        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        container = Container().apply {
+            this.containerUid = repo.containerDao.insert(this)
+        }
+
     }
 
     @Test
     fun givenContainerWithEntries_whenGenerateConcatenatedResponseCalled_thenShouldWriteData() {
         val db: UmAppDatabase by di.activeDbInstance()
         val repo: UmAppDatabase by di.activeRepoInstance()
-
-        val container = Container().apply {
-            this.containerUid = repo.containerDao.insert(this)
-        }
 
         val storageDir = temporaryFolder.newFolder()
 
@@ -81,7 +86,6 @@ class ContainerEntryFileDaoExtTest {
         val tmpFile = temporaryFolder.newFile()
         FileOutputStream(tmpFile).use {
             concatResponse.writeTo(it)
-
         }
 
         //read the response
@@ -97,6 +101,53 @@ class ContainerEntryFileDaoExtTest {
                 containerEntryFiles.size, numEntries)
 
         //Actual content of the files is already checked by the md5sum of ConcatenatedInputStream2
+    }
+
+    @Test
+    fun givenContaineWithEntries_whenGenerateConcatResponseCalledWithTwoRangeRequestsAppended_thenShouldWriteData() {
+        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
+
+        val storageDir = temporaryFolder.newFolder()
+
+        runBlocking {
+            repo.addEntriesToContainerFromZip(container.containerUid, epubTmpFile.toKmpUriString(),
+                    ContainerAddOptions(storageDir.toKmpUriString(), false))
+        }
+
+        //get a list of all the md5s
+        val containerEntryFiles = db.containerEntryDao.findByContainer(container.containerUid)
+        val requestMd5s = containerEntryFiles.mapNotNull {
+            it.containerEntryFile?.cefMd5?.base64StringToByteArray()?.toHexString()
+        }.sorted().joinToString(separator = ";")
+
+
+        val concatResponse1 = db.containerEntryFileDao.generateConcatenatedFilesResponse2(
+                requestMd5s, mapOf("content-range" to listOf("bytes=0-${2 * 1024 * 1024}")), db)
+
+        val tmpFile = temporaryFolder.newFile()
+        FileOutputStream(tmpFile).use {
+            concatResponse1.writeTo(it)
+        }
+
+        val concatResponse2 = db.containerEntryFileDao.generateConcatenatedFilesResponse2(
+                requestMd5s, mapOf("content-range" to listOf("bytes=${(2 * 1024 * 1024)+1}-")), db)
+
+        FileOutputStream(tmpFile, true).use {
+            concatResponse2.writeTo(it)
+        }
+
+        //read the response
+        var numEntries = 0
+
+        ConcatenatedInputStream2(FileInputStream(tmpFile)).use {concatIn ->
+            while(concatIn.getNextEntry() != null) {
+                numEntries++
+            }
+        }
+
+        Assert.assertEquals("Number of entries in response matches number in zip",
+                containerEntryFiles.size, numEntries)
     }
 
 }

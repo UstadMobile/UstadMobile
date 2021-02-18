@@ -8,6 +8,7 @@ import java.io.InputStream
 import java.lang.Integer.min
 import java.security.MessageDigest
 import com.ustadmobile.door.util.NullOutputStream
+import com.ustadmobile.core.io.ext.readFully
 
 /**
  * Reads concatenated data that was written using ConcatenatedOutputStream2. It is used similarly
