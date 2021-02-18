@@ -18,7 +18,7 @@ import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
 import java.io.File
 
-class UmAppDatabsaeContainerIoExtTest {
+class UmAppDatabaseContainerIoExtTest {
 
     @JvmField
     @Rule
@@ -68,8 +68,8 @@ class UmAppDatabsaeContainerIoExtTest {
 
 
         runBlocking {
-            repo.addDirToContainer(container.containerUid, tmpDir.kmpUri, true,
-                ContainerAddOptions(containerFilesDir.kmpUri))
+            repo.addDirToContainer(container.containerUid, tmpDir.toKmpUriString(), true,
+                ContainerAddOptions(containerFilesDir.toKmpUriString()))
         }
 
         val file1ContainerEntry = db.containerEntryDao.findByPathInContainer(container.containerUid,
@@ -96,10 +96,9 @@ class UmAppDatabsaeContainerIoExtTest {
 
 
         runBlocking {
-            repo.addEntriesToContainerFromZip(container.containerUid, epubTmp.kmpUri,
-                ContainerAddOptions(containerFilesDir.kmpUri))
+            repo.addEntriesToContainerFromZip(container.containerUid, epubTmp.toKmpUriString(),
+                ContainerAddOptions(containerFilesDir.toKmpUriString()))
         }
-        println("a")
     }
 
     //TODO: Test overwriting existing files

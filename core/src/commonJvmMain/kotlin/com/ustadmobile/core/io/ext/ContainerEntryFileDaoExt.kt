@@ -1,24 +1,14 @@
-package com.ustadmobile.core.ext
+package com.ustadmobile.core.io.ext
 
 
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
-import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.core.util.ext.encodeBase64
-import java.io.FileInputStream
-import java.io.InputStream
 import java.io.OutputStream
-import java.security.MessageDigest
-import java.io.ByteArrayInputStream
-import com.github.aakira.napier.Napier
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
-import kotlinx.serialization.toUtf8Bytes
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import com.ustadmobile.core.io.ConcatenatedOutputStream2
-import com.ustadmobile.core.io.ext.putContainerEntryFile
 import com.ustadmobile.door.ext.hexStringToByteArray
-import kotlin.text.toByteArray
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.core.io.ConcatenatedEntry
 import com.ustadmobile.core.io.RangeOutputStream
 import com.ustadmobile.lib.util.RangeResponse

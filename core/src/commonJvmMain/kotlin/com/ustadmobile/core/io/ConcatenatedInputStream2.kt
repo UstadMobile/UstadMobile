@@ -7,7 +7,6 @@ import java.io.IOException
 import java.io.InputStream
 import java.lang.Integer.min
 import java.security.MessageDigest
-import com.ustadmobile.core.io.ext.readFully
 import com.ustadmobile.door.util.NullOutputStream
 
 /**
@@ -26,12 +25,18 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
 
     private val oneByteBuffer = ByteArray(1)
 
+    //MD5Sum of data for the current entry as it has been read through this stream
+    private var currentEntryReadMd5: ByteArray? = null
+
     private fun assertDataReadMatchesMd5() {
         val entryVal = currentEntry ?: throw IOException("No current entry: cannot verify data")
-        val dataMd5 = inflateMessageDigest.digest()
+        val dataMd5 = currentEntryReadMd5 ?: inflateMessageDigest.digest()
+
         if(!dataMd5.contentEquals(entryVal.md5))
             throw ConcatenatedDataIntegrityException("Data read was corrupted: md5 does not match! " +
                     "Expected MD5: ${entryVal.md5.toHexString()} / Actual ${dataMd5.toHexString()}")
+
+        currentEntryReadMd5 = dataMd5
     }
 
     //Read the remainder of the current entry. This is required to ensure that md5sums will match
@@ -50,6 +55,8 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
         if(currentEntry != null)
             assertDataReadMatchesMd5()
 
+        currentEntryReadMd5 = null
+
         val entryBuf = ByteArray(ConcatenatedEntry.SIZE)
 
         val bytesRead = super.`in`.readFully(entryBuf, 0, entryBuf.size)
@@ -62,6 +69,9 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
             currentEntry = nextEntry
             return nextEntry
         }else {
+            //Hit end of stream
+            entryRemaining = 0
+            currentEntry = null
             return null
         }
     }
@@ -93,7 +103,10 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
 
     override fun close(){
         readCurrentEntryRemaining()
-        assertDataReadMatchesMd5()
+
+        if(currentEntry != null)
+            assertDataReadMatchesMd5()
+
         super.close()
     }
 }

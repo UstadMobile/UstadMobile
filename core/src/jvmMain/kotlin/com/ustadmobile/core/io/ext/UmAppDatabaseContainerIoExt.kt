@@ -8,6 +8,8 @@ import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntry
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
@@ -24,22 +26,13 @@ actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: S
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase
 
-    dirUri.parseKmpUriToFile().listFiles()?.forEach { childFile ->
+    dirUri.parseKmpUriStringToFile().listFiles()?.forEach { childFile ->
         db.addFileToContainerInternal(containerUid, childFile, recursive, addOptions,
                 "")
     }
 
-
-    if(addOptions.updateContainer) {
-        //TODO: update container size etc.
-    }
-
+    containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
 }
-
-val File.kmpUri: String
-    get() = this.toURI().toString()
-
-fun String.parseKmpUriToFile() = Paths.get(URI(this)).toFile()
 
 fun File.toContainerEntryFile(totalSize: Long, md5Sum: ByteArray, gzipped: Boolean) = ContainerEntryFile().also {
     it.ceCompressedSize  = this.length()
@@ -59,7 +52,7 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
                                                      addOptions: ContainerAddOptions,
                                                      relativePathPrefix: String) {
 
-    val storageDirFile = addOptions.storageDirUri.parseKmpUriToFile()
+    val storageDirFile = addOptions.storageDirUri.parseKmpUriStringToFile()
 
     if(file.isFile) {
         //add the file
@@ -68,14 +61,16 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
         val relPath = relativePathPrefix + file.name
 
         //TODO: guess Mime type
-        val compress = addOptions.compressionFilter.shouldCompress(file.kmpUri, null)
+        val compress = addOptions.compressionFilter.shouldCompress(file.toKmpUriString(), null)
 
-        val md5Sum = if(compress) {
-            file.gzipAndGetMd5(tmpFile)
-        }else if(addOptions.moveFiles) {
-            file.md5Sum
-        }else {
-            file.copyAndGetMd5(tmpFile)
+        val md5Sum = withContext(Dispatchers.IO) {
+            if(compress) {
+                file.gzipAndGetMd5(tmpFile)
+            }else if(addOptions.moveFiles) {
+                file.md5Sum
+            }else {
+                file.copyAndGetMd5(tmpFile)
+            }
         }
 
         val md5Hex = md5Sum.toHexString()
@@ -93,13 +88,14 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
                     throw IOException("Could not rename $tmpFile to $finalDestFile")
             }
 
-            containerFile = finalDestFile.toContainerEntryFile(file.length(), md5Sum, compress).apply {
-                this.cefUid = containerEntryFileDao.insert(this)
+            containerFile = finalDestFile.toContainerEntryFile(totalSize = file.length(),
+                    md5Sum =  md5Sum, gzipped = compress).apply {
+                this.cefUid = containerEntryFileDao.insertAsync(this)
             }
         }
 
         //link the existing entry
-        val entryPath = addOptions.fileNamer.nameContainerFile(relPath, file.kmpUri)
+        val entryPath = addOptions.fileNamer.nameContainerFile(relPath, file.toKmpUriString())
         containerEntryDao.insertAsync(ContainerEntry().apply {
             this.cePath = entryPath
             this.ceContainerUid = containerUid
@@ -125,41 +121,44 @@ actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase
 
-    val storageDirFile = addOptions.storageDirUri.parseKmpUriToFile()
-    val zipInputStream = ZipInputStream(FileInputStream(zipUri.parseKmpUriToFile()))
-    zipInputStream.use { zipIn ->
-        var zipEntry: ZipEntry? = null
-        while(zipIn.nextEntry?.also { zipEntry = it } != null) {
-            val zipEntryVal = zipEntry ?: throw IllegalStateException("ZipEntry is not null in loop")
-            val nameInZip = zipEntryVal.name
-            val tmpFileOut = File(storageDirFile, "${systemTimeInMillis()}.tmp")
+    withContext(Dispatchers.IO) {
+        val storageDirFile = addOptions.storageDirUri.parseKmpUriStringToFile()
+        val zipInputStream = ZipInputStream(FileInputStream(zipUri.parseKmpUriStringToFile()))
+        zipInputStream.use { zipIn ->
+            var zipEntry: ZipEntry? = null
+            while(zipIn.nextEntry?.also { zipEntry = it } != null) {
+                val zipEntryVal = zipEntry ?: throw IllegalStateException("ZipEntry is not null in loop")
+                val nameInZip = zipEntryVal.name
+                val tmpFileOut = File(storageDirFile, "${systemTimeInMillis()}.tmp")
 
-            //TODO: specify mime type here
-            val gzip = addOptions.compressionFilter.shouldCompress(nameInZip, null)
-            val md5Sum = zipIn.writeToFileAndGetMd5(tmpFileOut, gzip)
+                //TODO: specify mime type here
+                val gzip = addOptions.compressionFilter.shouldCompress(nameInZip, null)
+                val md5Sum = zipIn.writeToFileAndGetMd5(tmpFileOut, gzip)
 
-            var containerFile = db.containerEntryFileDao.findEntryByMd5Sum(md5Sum.encodeBase64())
-            if(containerFile == null) {
-                val finalDestFile = File(storageDirFile, md5Sum.toHexString())
-                if(!tmpFileOut.renameTo(finalDestFile))
-                    throw IOException("Could not rename $tmpFileOut to $finalDestFile")
+                var containerFile = db.containerEntryFileDao.findEntryByMd5Sum(md5Sum.encodeBase64())
+                if(containerFile == null) {
+                    val finalDestFile = File(storageDirFile, md5Sum.toHexString())
+                    if(!tmpFileOut.renameTo(finalDestFile))
+                        throw IOException("Could not rename $tmpFileOut to $finalDestFile")
 
-                containerFile = finalDestFile.toContainerEntryFile(zipEntryVal.size, md5Sum, gzip).apply {
-                    this.cefUid = db.containerEntryFileDao.insert(this)
+                    containerFile = finalDestFile.toContainerEntryFile(zipEntryVal.size, md5Sum, gzip).apply {
+                        this.cefUid = db.containerEntryFileDao.insert(this)
+                    }
                 }
+
+                val entryPath = addOptions.fileNamer.nameContainerFile(nameInZip, nameInZip)
+                db.containerEntryDao.insertAsync(ContainerEntry().apply {
+                    this.cePath = entryPath
+                    this.ceContainerUid = containerUid
+                    this.ceCefUid = containerFile.cefUid
+                })
+
+                tmpFileOut.delete()
+
             }
-
-            val entryPath = addOptions.fileNamer.nameContainerFile(nameInZip, nameInZip)
-            db.containerEntryDao.insertAsync(ContainerEntry().apply {
-                this.cePath = entryPath
-                this.ceContainerUid = containerUid
-                this.ceCefUid = containerFile.cefUid
-            })
-
-            tmpFileOut.delete()
-
         }
     }
 
+    containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
 
 }
