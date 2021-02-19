@@ -347,4 +347,6 @@
     <string name="processing">در حال پروسس</string>
     <string name="uploading">در حال آپلود</string>
     <string name="save_as_template">حفظ به حیث نمونه</string>
+    <string name="students">متعلمین</string>
+    <string name="add_a_student">علاوه ساختن یک متعلم</string>
 </resources>
