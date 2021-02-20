@@ -6,6 +6,7 @@
     <data>
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
+        <import type="com.ustadmobile.port.android.view.ProductDetailFragment"/>
 
         <variable
             name="saleItem"
@@ -47,6 +48,10 @@
                 android:layout_height="250dp"
                 android:src="@drawable/ic_baseline_insert_photo_24"
                 app:layout_constraintStart_toStartOf="parent"
+                app:imageForeignKeyPlaceholder="@{@drawable/ic_baseline_insert_photo_24}"
+                app:imageForeignKey="@{saleItem.saleItemProduct.productUid}"
+                app:imageForeignKeyAdapter="@{ProductDetailFragment.FOREIGNKEYADAPTER_PRODUCT}"
+                app:imageForeignKeyAutoHide="@{false}"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 app:layout_constraintTop_toTopOf="parent"
                 />

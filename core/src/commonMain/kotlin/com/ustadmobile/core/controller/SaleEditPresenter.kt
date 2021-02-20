@@ -131,13 +131,13 @@ class SaleEditPresenter(context: Any,
         }
         salePaymentEditHelper.liveList.sendValue(salePaymentWithItems)
 
-        val totalCount = withTimeout(2000) {
+        val totalCount = if(entityUid != 0L) { withTimeout(2000) {
             db.saleItemDao.findTotalBySale(entityUid)
-        }?:0L
+        }?:0L }else{ 0L}
 
-        val paymentTotal = withTimeout(2000){
+        val paymentTotal = if(entityUid != 0L) { withTimeout(2000){
             db.salePaymentDao.findTotalBySale(entityUid)
-        }?:0L
+        }?:0L}else{0L}
 
         view.runOnUiThread(Runnable {
             view.orderTotal = totalCount
