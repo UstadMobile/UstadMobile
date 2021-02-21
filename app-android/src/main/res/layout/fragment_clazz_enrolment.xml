@@ -156,7 +156,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_8dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
-                android:enabled="@{clazzEnrolment.clazzEnrolmentStatus != ClazzEnrolment.STATUS_ENROLED}"
+                android:enabled="true"
                 app:layout_constraintTop_toBottomOf="@+id/clazz_enrolment_edit_status_textinputlayout"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/leaving_reason">

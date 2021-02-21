@@ -1,8 +1,14 @@
 package com.ustadmobile.core.controller
 
+import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.schedule.localMidnight
+import com.ustadmobile.core.schedule.toLocalMidnight
+import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.createPersonGroupAndMemberWithEnrolment
+import com.ustadmobile.core.util.ext.effectiveTimeZone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -16,6 +22,7 @@ import org.kodein.di.DI
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SAVE_TO_DB
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
@@ -23,9 +30,9 @@ import com.ustadmobile.lib.db.entities.Report
 
 
 class ClazzEnrolmentEditPresenter(context: Any,
-                                   arguments: Map<String, String>, view: ClazzEnrolmentEditView,
-                                   lifecycleOwner: DoorLifecycleOwner,
-                                   di: DI)
+                                  arguments: Map<String, String>, view: ClazzEnrolmentEditView,
+                                  lifecycleOwner: DoorLifecycleOwner,
+                                  di: DI)
     : UstadEditPresenter<ClazzEnrolmentEditView, ClazzEnrolmentWithLeavingReason>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
@@ -55,19 +62,25 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.roleList =  RoleOptions.values().map { RoleMessageIdOption(it, context) }
+        view.roleList = RoleOptions.values().map { RoleMessageIdOption(it, context) }
         view.statusList = StatusOptions.values().map { StatusMessageIdOption(it, context) }
         selectedPerson = arguments[ARG_PERSON_UID]?.toLong() ?: 0L
         selectedClazz = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
+
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzEnrolmentWithLeavingReason? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
 
+        val clazzWithSchoolVal = repo.clazzDao.getClazzWithSchool(selectedClazz)
+
+        val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
+        val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+
         val clazzEnrolment = db.onRepoWithFallbackToDb(2000) {
             it.takeIf { entityUid != 0L }?.clazzEnrolmentDao?.findEnrolmentWithLeavingReason(entityUid)
         } ?: ClazzEnrolmentWithLeavingReason().apply {
-            // TODO set dateJoined to today
+            clazzEnrolmentDateJoined = joinTime
             clazzEnrolmentPersonUid = selectedPerson
             clazzEnrolmentClazzUid = selectedClazz
         }
@@ -80,11 +93,10 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         val editEntity: ClazzEnrolment?
-        if(entityJsonStr != null) {
+        if (entityJsonStr != null) {
             editEntity = safeParse(di, ClazzEnrolmentWithLeavingReason.serializer(), entityJsonStr)
-        }else {
+        } else {
             editEntity = ClazzEnrolmentWithLeavingReason().apply {
-                // TODO set dateJoined to today
                 clazzEnrolmentPersonUid = selectedPerson
                 clazzEnrolmentClazzUid = selectedClazz
             }
@@ -103,32 +115,42 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
     override fun handleClickSave(entity: ClazzEnrolmentWithLeavingReason) {
         GlobalScope.launch(doorMainDispatcher()) {
-            // TODO get clazz data, check if enrolment join date is after start date of class
-            val clazzData = repo.clazzDao.findByUidAsync(selectedClazz)
-            if((clazzData?.clazzStartTime?: 0) > entity.clazzEnrolmentDateJoined){
-                view.startDateError = systemImpl.getString(
-                        MessageID.error_join_date_before_start_date, context)
-            }
-            // TODO get last enrolment, check if join date is after previous end date of class
 
-
-            if(entity.clazzEnrolmentDateJoined == 0L){
+            // must be filled
+            if (entity.clazzEnrolmentDateJoined == 0L) {
                 view.startDateError = systemImpl.getString(MessageID.field_required_prompt, context)
-            }else{
-                view.startDateError = null
+                return@launch
             }
 
-            // TODO check end is not before start
-            if(entity.clazzEnrolmentDateLeft <= entity.clazzEnrolmentDateJoined){
+            if (entity.clazzEnrolmentDateLeft <= entity.clazzEnrolmentDateJoined) {
                 view.endDateError = systemImpl.getString(MessageID.end_is_before_start_error, context)
+                return@launch
             }
 
-            // TODO check if arg save to db is true before updating db
-            if(entity.clazzEnrolmentUid == 0L){
-                entity.clazzEnrolmentUid = repo.clazzEnrolmentDao.insertAsync(entity)
-            }else {
-                repo.clazzEnrolmentDao.updateAsync(entity)
+            val clazzData = repo.clazzDao.findByUidAsync(selectedClazz)
+
+            // if date joined entered is before clazz start date
+            if ((clazzData?.clazzStartTime ?: 0) > entity.clazzEnrolmentDateJoined) {
+                view.startDateError = systemImpl.getString(
+                        MessageID.error_start_date_before_clazz_date, context)
+                return@launch
             }
+            val maxDate = repo.clazzEnrolmentDao.findMaxEndDateForEnrolment(selectedClazz, selectedPerson, entity.clazzEnrolmentUid)
+            // if date joined is before previous enrolment end date
+            if (maxDate != 0L && entity.clazzEnrolmentDateJoined < maxDate) {
+                view.startDateError = systemImpl.getString(
+                        MessageID.error_start_date_before_previous_enrolment_date, context)
+                return@launch
+            }
+
+            view.startDateError = null
+            view.endDateError = null
+
+            val saveToDb = arguments[ARG_SAVE_TO_DB]?.toBoolean() ?: false
+            if(saveToDb){
+                repo.createPersonGroupAndMemberWithEnrolment(entity)
+            }
+
             view.finishWithResult(listOf(entity))
         }
     }

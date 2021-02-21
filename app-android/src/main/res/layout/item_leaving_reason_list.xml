@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <data>
         <import type="com.ustadmobile.lib.db.entities.LeavingReason"/>
@@ -23,41 +24,28 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:paddingBottom="@dimen/dimen_16dp"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, leavingReason)}"
         app:onSelectableItemClicked="@{() -> presenter.onClickLeavingReason(leavingReason)}"
         android:background="@drawable/bg_listitem"
         >
 
-        <!-- TODO: Change or remove this icon -->
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/item_leavingreason_newitemicon"
-            app:srcCompat="@drawable/ic_add_black_24dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            />
-
         <!-- Line 1-->
         <TextView
-            android:id="@+id/line1_text"
+            android:id="@+id/leaving_reason_title"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/dimen_64dp"
+            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginBottom="@dimen/dimen_16dp"
+            android:layout_marginEnd="@dimen/dimen_16dp"
+            tools:text="Medical"
+            android:text="@{leavingReason.leavingReasonTitle}"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"
-            />
-
-        <!-- Line 2-->
-        <TextView
-            android:id="@+id/line2_text"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintStart_toStartOf="@+id/line1_text"
-            app:layout_constraintTop_toBottomOf="@+id/line1_text"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

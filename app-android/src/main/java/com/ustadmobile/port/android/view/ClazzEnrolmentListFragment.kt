@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.MergeAdapter
@@ -17,6 +15,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.Person
@@ -30,9 +29,12 @@ import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzEnrolmentWithLeavingReason>(),
         ClazzEnrolmentListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
+    private var clazzHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
     private var profileHeaderAdapter: ClazzEnrolmentProfileHeaderAdapter? = null
 
     private var mPresenter: ClazzEnrolmentListPresenter? = null
+
+    override var autoMergeRecyclerViewAdapter: Boolean = false
 
     override val listPresenter: UstadListPresenter<*, in ClazzEnrolment>?
         get() = mPresenter
@@ -53,6 +55,11 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
                     })
         }
 
+        override fun onBindViewHolder(holder: ClazzEnrolmentPersonHeaderViewHolder, position: Int) {
+            super.onBindViewHolder(holder, position)
+            holder.itemView.tag = personUid
+        }
+
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
             super.onDetachedFromRecyclerView(recyclerView)
             presenter = null
@@ -69,14 +76,12 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzEnrolmentListViewHolder {
             val itemBinding = ItemClazzEnrolmentListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
-            itemBinding.selectablePagedListAdapter = this
             return ClazzEnrolmentListViewHolder(itemBinding)
         }
 
         override fun onBindViewHolder(holder: ClazzEnrolmentListViewHolder, position: Int) {
             val item = getItem(position)
             holder.itemBinding.clazzEnrolment = item
-            holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK_ENROLMENT)
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
@@ -94,10 +99,12 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
                 this, di, viewLifecycleOwner)
         profileHeaderAdapter = ClazzEnrolmentProfileHeaderAdapter(selectedPersonUid, mPresenter)
 
+        clazzHeaderAdapter = SimpleHeadingRecyclerAdapter("Person")
         mDataRecyclerViewAdapter = ClazzEnrolmentRecyclerAdapter(mPresenter)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this)
 
-        mMergeRecyclerViewAdapter = MergeAdapter(profileHeaderAdapter, mDataRecyclerViewAdapter)
+        mMergeRecyclerViewAdapter = MergeAdapter(profileHeaderAdapter,clazzHeaderAdapter,
+                mDataRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
 
         return view
@@ -106,6 +113,16 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fabManager?.text = requireContext().getText(R.string.enrolment)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = false
     }
 
     override fun onDestroyView() {
@@ -123,6 +140,16 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
         set(value) {
             field = value
             ustadFragmentTitle = person?.personFullName()
+        }
+
+    override var clazz: Clazz? = null
+        get() = field
+        set(value){
+            field = value
+            val personInClazzStr = requireContext().getString(
+                    R.string.person_enrolment_in_class, person?.personFullName(), value?.clazzName)
+            clazzHeaderAdapter?.visible = true
+            clazzHeaderAdapter?.headingText = personInClazzStr
         }
 
     companion object {

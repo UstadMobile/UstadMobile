@@ -16,18 +16,11 @@
             name="presenter"
             type="com.ustadmobile.core.controller.ClazzEnrolmentListPresenter" />
 
-        <variable
-            name="selectablePagedListAdapter"
-            type="ClazzEnrolmentRecyclerAdapter" />
-
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, clazzEnrolment)}"
-        app:onSelectableItemClicked="@{() -> presenter.handleClickClazzEnrolment(clazzEnrolment)}"
         android:layout_margin="8dp"
         >
 
@@ -38,6 +31,8 @@
             android:src="@drawable/ic_edit_white_24dp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
+            android:background="@drawable/bg_listitem"
+            android:onClick="@{() -> presenter.handleClickClazzEnrolment(clazzEnrolment)}"
             android:layout_margin="@dimen/dimen_8dp"
             android:tint="@android:color/black"/>
 

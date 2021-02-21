@@ -9,9 +9,9 @@ import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.ClazzMemberListView
-import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SAVE_TO_DB
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -80,11 +80,11 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
         }
     }
 
-
     override fun handleClickEntry(entry: Person) {
         systemImpl.go(ClazzEnrolmentListView.VIEW_NAME,
                 mapOf(UstadView.ARG_PERSON_UID to entry.personUid.toString(),
-                        ARG_FILTER_BY_CLAZZUID to filterByClazzUid.toString()), context)
+                        ARG_FILTER_BY_CLAZZUID to filterByClazzUid.toString(),
+                        ARG_SAVE_TO_DB to true.toString()), context)
     }
 
     fun handleClickPendingRequest(enrolmentDetails: PersonWithClazzEnrolmentDetails, approved: Boolean) {

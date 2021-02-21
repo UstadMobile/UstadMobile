@@ -133,6 +133,8 @@ interface UstadView {
 
         const val CURRENT_DEST = ""
 
+        const val ARG_SAVE_TO_DB = "saveDb"
+
         /**
          * Tasks that involve multiple destinations (e.g. Login - AcceptTerms - PersonEditRegister )
          * might need to pop off multiple destinations from the stack when they are done.

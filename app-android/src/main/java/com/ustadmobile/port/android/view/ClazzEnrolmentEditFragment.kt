@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
+import android.text.format.DateFormat
 import android.view.*
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
@@ -15,13 +16,15 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
+import java.util.*
 
 
 interface ClazzEnrolmentFragmentEventHandler {
     fun handleReasonLeavingClicked()
 }
 
-class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingReason>(), ClazzEnrolmentEditView, ClazzEnrolmentFragmentEventHandler {
+class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingReason>(),
+        ClazzEnrolmentEditView, ClazzEnrolmentFragmentEventHandler {
 
     private var mBinding: FragmentClazzEnrolmentBinding? = null
 
@@ -34,6 +37,7 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
         val rootView: View
         mBinding = FragmentClazzEnrolmentBinding.inflate(inflater, container, false).also {
             rootView = it.root
+            it.activityEventHandler = this
         }
 
         mPresenter = ClazzEnrolmentEditPresenter(requireContext(), arguments.toStringMap(), this,
@@ -47,18 +51,20 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
         setEditFragmentTitle(R.string.new_enrolment, R.string.edit_enrolment)
         val navController = findNavController()
 
-        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
+        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
         navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 LeavingReason::class.java) {
             val reason = it.firstOrNull() ?: return@observeResult
-            val savedEntity = entity ?: return@observeResult
-            savedEntity.leavingReason = reason
-            entity = savedEntity
+            mBinding?.clazzEnrolmentEditReasonText?.setText(reason.leavingReasonTitle)
+            entity?.clazzEnrolmentLeavingReasonUid = reason.leavingReasonUid
+            entity?.leavingReason = reason
+            mBinding?.clazzEnrolment = entity
         }
     }
 
     override fun handleReasonLeavingClicked() {
+        onSaveStateToBackStackStateHandle()
         navigateToPickEntityFromList(LeavingReason::class.java, R.id.leaving_reason_list)
     }
 
@@ -92,15 +98,21 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
     override var startDateError: String? = null
         get() = field
         set(value) {
-            field = value
-            mBinding?.startDateError = value
+            val newValue: String? = if(value?.contains("%1\$s") == true){
+                val dateFormat = DateFormat.getDateFormat(requireContext())
+                value.replace("%1\$s", dateFormat.format(Date(entity?.clazzEnrolmentDateLeft ?: 0L)))
+            }else{
+                value
+            }
+            field = newValue
+            mBinding?.startDateError = newValue
         }
 
     override var endDateError: String? = null
         get() = field
         set(value) {
             field = value
-            mBinding?.endD = value
+            mBinding?.endDateError = value
         }
 
     override var fieldsEnabled: Boolean = false

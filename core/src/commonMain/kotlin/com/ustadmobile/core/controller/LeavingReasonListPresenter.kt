@@ -33,7 +33,7 @@ class LeavingReasonListPresenter(context: Any, arguments: Map<String, String>, v
     }
 
     fun onClickLeavingReason(leavingReason: LeavingReason) {
-        view?.finishWithResult(listOf(leavingReason))
+        view.finishWithResult(listOf(leavingReason))
     }
 
 }

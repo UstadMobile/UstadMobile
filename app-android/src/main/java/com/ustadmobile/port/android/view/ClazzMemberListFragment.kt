@@ -19,10 +19,14 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toListFilterOptions
+import com.ustadmobile.core.view.AccountListView
+import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
@@ -220,6 +224,11 @@ class ClazzMemberListFragment() : UstadListViewFragment<Person, PersonWithClazzE
         }else{
             bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
                     ARG_CODE_TABLE to Clazz.TABLE_ID.toString())
+        }.also {
+            it.putAll(bundleOf(
+                    UstadView.ARG_NEXT to ClazzMemberListView.VIEW_NAME,
+                    ARG_POPUPTO_ON_FINISH to ClazzMemberListView.VIEW_NAME
+            ))
         }
         navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest,
                 bundle, keyName, true)

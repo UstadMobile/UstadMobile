@@ -4043,9 +4043,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 database.execSQL("""ALTER TABLE ClazzEnrolment 
                         ADD COLUMN clazzEnrolmentStatus INTEGER DEFAULT 0 NOT NULL""".trimMargin())
 
-                database.execSQL("""UPDATE ClazzEnrolment SET 
-                    clazzEnrolmentStatus = ${ClazzEnrolment.STATUS_ENROLED}""".trimMargin())
-
                 if (database.dbType() == DoorDbType.SQLITE) {
 
                     database.execSQL("""ALTER TABLE ClazzEnrolment 
@@ -4130,6 +4127,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
 
                 }else if(database.dbType() == DoorDbType.POSTGRES){
+
+                    database.execSQL("""UPDATE ClazzEnrolment SET 
+                    clazzEnrolmentStatus = ${ClazzEnrolment.STATUS_ENROLED}""".trimMargin())
 
                     database.execSQL("""ALTER TABLE ClazzEnrolment 
                         ADD COLUMN clazzEnrolmentLeavingReasonUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())

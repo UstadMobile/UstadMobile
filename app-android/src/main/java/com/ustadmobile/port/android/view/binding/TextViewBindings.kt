@@ -243,7 +243,7 @@ fun TextView.setMemberRoleName(clazzEnrolment: ClazzEnrolment?) {
 
 @BindingAdapter("memberEnrolmentStatusWithReason")
 fun TextView.setMemberEnrolmentStatus(clazzEnrolment: ClazzEnrolmentWithLeavingReason?){
-    text = "${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)}-${clazzEnrolment?.statusToString(context, UstadMobileSystemImpl())}"
+    text = "${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)} - ${clazzEnrolment?.statusToString(context,  UstadMobileSystemImpl.instance)}"
 }
 
 

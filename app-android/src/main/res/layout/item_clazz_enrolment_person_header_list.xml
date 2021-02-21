@@ -47,7 +47,7 @@
             android:layout_marginTop="@dimen/dimen_8dp"
             android:background="?attr/selectableItemBackground"
             android:onClick="@{() -> presenter.handleClickProfile(personUid)}"
-            app:drawableTopCompat="@drawable/ic_baseline_addchart_24"
+            app:drawableTopCompat="@drawable/ic_person_black_24dp"
             app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
@@ -57,7 +57,7 @@
             android:background="?android:listDivider"
             android:layout_width="0dp"
             android:layout_height="@dimen/dimen_1dp"
-            android:layout_marginTop="@dimen/dimen_16dp"
+            android:layout_marginTop="@dimen/dimen_8dp"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/item_clazz_enrolment_view_profile_button"/>

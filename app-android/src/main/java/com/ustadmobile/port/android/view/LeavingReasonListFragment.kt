@@ -62,8 +62,8 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
         mDataRecyclerViewAdapter = LeavingReasonListRecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.add_new,
                 requireContext().getString(R.string.reason))
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText)
-
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
+                createNewText)
 
         return view
     }

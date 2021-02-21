@@ -3,9 +3,7 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
@@ -17,6 +15,8 @@ class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, 
     var selectedPerson = 0L
     var selectedClazz = 0L
 
+    val loggedInPersonUid = accountManager.activeAccount.personUid
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         selectedPerson = arguments[UstadView.ARG_PERSON_UID]?.toLong() ?: 0L
@@ -25,14 +25,24 @@ class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, 
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return true
+        val hasPermission = db.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
+                selectedClazz, Role.PERMISSION_CLAZZ_ADD_STUDENT
+                or Role.PERMISSION_CLAZZ_ADD_TEACHER)
+        val maxDateOfEnrolment = db.clazzEnrolmentDao.findMaxEndDateForEnrolment(
+                selectedClazz, selectedPerson, 0)
+        return if(maxDateOfEnrolment == Long.MAX_VALUE){
+            false
+        }else{
+            hasPermission
+        }
     }
 
     private fun updateListOnView() {
         GlobalScope.launch(doorMainDispatcher()){
-            view.person = db.personDao.findByUid(selectedPerson)
+            view.person = repo.personDao.findByUid(selectedPerson)
+            view.clazz = repo.clazzDao.findByUidAsync(selectedClazz)
 
-            view.list = db.clazzEnrolmentDao.findAllEnrolmentsByPersonAndClazzUid(
+            view.list = repo.clazzEnrolmentDao.findAllEnrolmentsByPersonAndClazzUid(
                     selectedPerson, selectedClazz)
         }
     }
@@ -41,7 +51,7 @@ class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, 
           systemImpl.go(ClazzEnrolmentEditView.VIEW_NAME, arguments, context)
     }
 
-    fun handleClickClazzEnrolment(enrolment: ClazzEnrolment){
+    fun handleClickClazzEnrolment(enrolment: ClazzEnrolmentWithLeavingReason){
         systemImpl.go(ClazzEnrolmentEditView.VIEW_NAME,
                 mapOf(UstadView.ARG_ENTITY_UID to enrolment.clazzEnrolmentUid.toString())
                         .plus(arguments), context)

@@ -46,6 +46,43 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(clazz: Clazz, impl: UstadMobil
         clazz.clazzPendingStudentsPersonGroupUid, Role.ROLE_CLAZZ_STUDENT_PENDING_UID.toLong()))
 }
 
+
+suspend fun UmAppDatabase.createPersonGroupAndMemberWithEnrolment(entity: ClazzEnrolmentWithLeavingReason){
+
+    val clazzWithSchoolVal = clazzDao.getClazzWithSchool(entity.clazzEnrolmentClazzUid)
+    ?: throw IllegalArgumentException("Class does not exist")
+
+    val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
+    entity.clazzEnrolmentDateJoined = DateTime(entity.clazzEnrolmentDateJoined)
+            .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+    if (entity.clazzEnrolmentUid == 0L) {
+        entity.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(entity)
+    } else {
+        clazzEnrolmentDao.updateAsync(entity)
+    }
+
+    val personGroupUid = when(entity.clazzEnrolmentRole) {
+        ClazzEnrolment.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
+        ClazzEnrolment.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
+        else -> null
+    }
+
+    if(personGroupUid != null) {
+
+        val list = personGroupMemberDao.checkPersonBelongsToGroup(personGroupUid, entity.clazzEnrolmentPersonUid)
+
+        if(list.isEmpty()){
+            PersonGroupMember().also {
+                it.groupMemberPersonUid = entity.clazzEnrolmentPersonUid
+                it.groupMemberGroupUid = personGroupUid
+                it.groupMemberUid = personGroupMemberDao.insertAsync(it)
+            }
+        }
+
+    }
+
+}
+
 /**
  * Enrol the given person into the given class. The effective date of joining is midnight as per
  * the timezone of the class (e.g. when a teacher adds a student to the system who just joined and
