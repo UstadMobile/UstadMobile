@@ -40,10 +40,10 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""SELECT ClazzEnrolment.*, LeavingReason.* FROM ClazzEnrolment LEFT JOIN
         LeavingReason ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
         WHERE ClazzEnrolment.clazzEnrolmentUid = :enrolmentUid""")
-    abstract fun findEnrolmentWithLeavingReason(enrolmentUid: Long): ClazzEnrolmentWithLeavingReason?
+    abstract suspend fun findEnrolmentWithLeavingReason(enrolmentUid: Long): ClazzEnrolmentWithLeavingReason?
 
     @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentDateLeft = :endDate,
-            clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1)
             WHERE clazzEnrolmentUid = :clazzEnrolmentUid""")
     abstract suspend fun updateDateLeftByUid(clazzEnrolmentUid: Long, endDate: Long)
 
@@ -65,6 +65,13 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         AND (:date = 0 OR :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft)
     """)
     abstract fun findAllClazzesByPersonWithClazz(personUid: Long, date: Long): DataSource.Factory<Int, ClazzEnrolmentWithClazz>
+
+    @Query("""SELECT COALESCE(MAX(clazzEnrolmentDateLeft),0) FROM ClazzEnrolment WHERE 
+        ClazzEnrolment.clazzEnrolmentPersonUid = :selectedPerson 
+        AND clazzEnrolmentClazzUid = :selectedClazz AND clazzEnrolmentUid != :selectedEnrolment
+    """)
+    abstract suspend fun findMaxEndDateForEnrolment(selectedClazz: Long, selectedPerson: Long,
+                                            selectedEnrolment: Long): Long
 
     @Query("""SELECT ClazzEnrolment.*, Clazz.* 
         FROM ClazzEnrolment
@@ -90,8 +97,8 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
         ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
         COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) 
-        FROM ClazzLogAttendanceRecord LEFT JOIN PERSON ON Person.personUid = 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid)  as attendance, 
+        FROM ClazzLogAttendanceRecord WHERE 
+        ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid)  as attendance, 
     	(SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) FROM ClazzEnrolment WHERE 
         Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) as earliestJoinDate, 
     	(SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) FROM ClazzEnrolment WHERE 
@@ -100,7 +107,6 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         ClazzEnrolment.clazzEnrolmentPersonUid AND 
         ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid) as enrolmentRole
         FROM PERSON 
-        LEFT JOIN ClazzLogAttendanceRecord ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid
         WHERE Person.personUid IN (SELECT clazzEnrolmentPersonUid FROM ClazzEnrolment 
         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid AND ClazzEnrolment.clazzEnrolmentActive 
         AND ClazzEnrolment.clazzEnrolmentRole = :roleId AND (:filter != $FILTER_ACTIVE_ONLY 
