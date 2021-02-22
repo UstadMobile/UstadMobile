@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view
 import android.os.Bundle
 import android.text.format.DateFormat
 import android.view.*
+import android.widget.AdapterView
 import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzEnrolmentBinding
@@ -12,6 +13,7 @@ import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
@@ -24,7 +26,8 @@ interface ClazzEnrolmentFragmentEventHandler {
 }
 
 class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingReason>(),
-        ClazzEnrolmentEditView, ClazzEnrolmentFragmentEventHandler {
+        ClazzEnrolmentEditView, ClazzEnrolmentFragmentEventHandler,
+        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>  {
 
     private var mBinding: FragmentClazzEnrolmentBinding? = null
 
@@ -38,6 +41,7 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
         mBinding = FragmentClazzEnrolmentBinding.inflate(inflater, container, false).also {
             rootView = it.root
             it.activityEventHandler = this
+            it.statusSelectorListener = this
         }
 
         mPresenter = ClazzEnrolmentEditPresenter(requireContext(), arguments.toStringMap(), this,
@@ -121,4 +125,12 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
             field = value
             mBinding?.fieldsEnabled = value
         }
+
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
+        mBinding?.clazzEnrolmentEditReasonTextinputlayout?.isEnabled = selectedOption.optionId != ClazzEnrolment.STATUS_ENROLED
+    }
+
+    override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {
+
+    }
 }

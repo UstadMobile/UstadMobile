@@ -136,6 +136,15 @@ fun TextView.setTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long)
             " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) dateFormat.format(textToDateLong) else ""}"
 }
 
+@SuppressLint("SetTextI18n")
+@BindingAdapter(value = ["enrolmentTextFromDateLong", "enrolmentTextToDateLong"])
+fun TextView.setEnrolmentTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long) {
+    val dateFormat = DateFormat.getDateFormat(context)
+    text = "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} -" +
+            " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) dateFormat.format(textToDateLong) else context.getString(R.string.time_present)}"
+}
+
+
 
 private val textViewSchoolGenderStringIds: Map<Int, Int> = mapOf(
         School.SCHOOL_GENDER_MIXED to R.string.mixed,

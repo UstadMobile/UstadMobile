@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ROLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SAVE_TO_DB
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -22,7 +23,7 @@ import org.kodein.di.DI
 
 class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, view: ClazzMemberListView,
                                di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<ClazzMemberListView, Person>(context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
+    : UstadListPresenter<ClazzMemberListView, PersonWithClazzEnrolmentDetails>(context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
 
 
     private var filterByClazzUid: Long = -1
@@ -80,10 +81,11 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
         }
     }
 
-    override fun handleClickEntry(entry: Person) {
+    override fun handleClickEntry(entry: PersonWithClazzEnrolmentDetails) {
         systemImpl.go(ClazzEnrolmentListView.VIEW_NAME,
                 mapOf(UstadView.ARG_PERSON_UID to entry.personUid.toString(),
                         ARG_FILTER_BY_CLAZZUID to filterByClazzUid.toString(),
+                        ARG_FILTER_BY_ROLE to entry.enrolmentRole.toString(),
                         ARG_SAVE_TO_DB to true.toString()), context)
     }
 

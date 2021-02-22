@@ -4,6 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.STATUS_TO_MESSAGE_ID_MAP
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ReportFilterEditView
@@ -40,6 +41,8 @@ class ReportFilterEditPresenter(context: Any,
         CONTENT_ENTRY(ReportFilter.FIELD_CONTENT_ENTRY, MessageID.field_content_entry),
         CONTENT_PROGRESS(ReportFilter.FIELD_CONTENT_PROGRESS, MessageID.field_content_progress),
         ATTENDANCE_PERCENTAGE(ReportFilter.FIELD_ATTENDANCE_PERCENTAGE, MessageID.field_attendance_percentage),
+        ENROLMENT_STATUS(ReportFilter.FIELD_CLAZZ_ENROLMENT_STATUS, MessageID.class_enrolment_status),
+        ENROLMENT_LEAVING_REASON(ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON, MessageID.class_enrolment_leaving)
     }
 
     class FieldMessageIdOption(day: FieldOption, context: Any)
@@ -171,6 +174,19 @@ class ReportFilterEditPresenter(context: Any,
                 view.conditionsOptions = listOf(ConditionOption.BETWEEN_CONDITION)
                         .map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.BETWEEN
+            }
+            ReportFilter.FIELD_CLAZZ_ENROLMENT_STATUS -> {
+                view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
+                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
+                view.valueType = FilterValueType.DROPDOWN
+                view.dropDownValueOptions = STATUS_TO_MESSAGE_ID_MAP.map {
+                    MessageIdOption(it.value, context, it.key) }
+            }
+            ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON -> {
+                view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
+                        ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context) }
+                view.valueType = FilterValueType.LIST
+                view.createNewFilter = systemImpl.getString(MessageID.add_content_filter, context)
             }
         }
 

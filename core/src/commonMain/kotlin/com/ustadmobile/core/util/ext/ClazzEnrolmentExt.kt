@@ -37,7 +37,7 @@ fun ClazzEnrolmentWithLeavingReason.statusToString(context: Any, systemImpl: Ust
 
     var statusStr = systemImpl.getString(statusMessageId, context)
     if(clazzEnrolmentLeavingReasonUid != 0L){
-        statusStr = "(${leavingReason?.leavingReasonTitle})"
+        statusStr += " (${leavingReason?.leavingReasonTitle})"
     }
 
     return statusStr

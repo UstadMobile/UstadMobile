@@ -44,7 +44,7 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            android:layout_margin="@dimen/dimen_8dp"
+            android:layout_marginStart="@dimen/dimen_24dp"
             app:layout_constraintEnd_toStartOf="@id/item_clazz_enrolment_edit_enrolment"
             app:memberEnrolmentStatusWithReason="@{clazzEnrolment}"
             tools:text="Student - Enroled(transport)"
@@ -57,15 +57,14 @@
             android:layout_height="wrap_content"
             app:layout_constraintStart_toStartOf="@+id/line1_text"
             app:layout_constraintTop_toBottomOf="@+id/line1_text"
-            android:layout_margin="@dimen/dimen_8dp"
-            app:layout_constraintEnd_toStartOf="@id/item_clazz_enrolment_edit_enrolment"
-            app:textFromDateLong="@{clazzEnrolment.clazzEnrolmentDateJoined}"
-            app:textToDateLong="@{clazzEnrolment.clazzEnrolmentDateLeft}"
+            android:layout_marginTop="@dimen/dimen_8dp"
+            app:layout_constraintStart_toEndOf="@id/item_clazz_enrolment_edit_enrolment"
+            app:enrolmentTextFromDateLong="@{clazzEnrolment.clazzEnrolmentDateJoined}"
+            app:enrolmentTextToDateLong="@{clazzEnrolment.clazzEnrolmentDateLeft}"
             tools:text="start - end"
             app:layout_constraintBottom_toBottomOf="parent"
             android:textAppearance="@style/UmTheme.TextAppearance.Body2"
             />
-
 
 
     </androidx.constraintlayout.widget.ConstraintLayout>

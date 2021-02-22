@@ -88,6 +88,10 @@ open class Report {
 
         const val CLASS = 307
 
+        const val ENROLMENT_STATUS = 308
+
+        const val ENROLMENT_LEAVING_REASON = 309
+
         const val EVERYTHING = 0
 
         const val LAST_WEEK_DATE = 800

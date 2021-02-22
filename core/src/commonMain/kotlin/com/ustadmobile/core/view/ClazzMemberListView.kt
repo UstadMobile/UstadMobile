@@ -6,7 +6,7 @@ import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithPerson
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 
-interface ClazzMemberListView: UstadListView<Person, PersonWithClazzEnrolmentDetails> {
+interface ClazzMemberListView: UstadListView<PersonWithClazzEnrolmentDetails, PersonWithClazzEnrolmentDetails> {
 
     var studentList: DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>?
 

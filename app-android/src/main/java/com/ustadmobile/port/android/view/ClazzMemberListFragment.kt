@@ -36,7 +36,7 @@ import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
-class ClazzMemberListFragment() : UstadListViewFragment<Person, PersonWithClazzEnrolmentDetails>(),
+class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolmentDetails, PersonWithClazzEnrolmentDetails>(),
         ClazzMemberListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener {
 
     private var mPresenter: ClazzMemberListPresenter? = null

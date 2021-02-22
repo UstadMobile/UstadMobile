@@ -273,6 +273,8 @@ private fun groupBy(value: Int, dbType: Int): String {
         Report.CONTENT_ENTRY -> "StatementEntity.statementContentEntryUid "
         Report.GENDER -> "Person.gender "
         Report.CLASS -> "Clazz.clazzUid "
+        Report.ENROLMENT_STATUS -> ""
+        Report.ENROLMENT_LEAVING_REASON -> ""
         else -> ""
     }
 }

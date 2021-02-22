@@ -25,9 +25,15 @@ class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, 
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
+        val isPersonStudentOrTeacherRole = if(arguments[UstadView.ARG_FILTER_BY_ROLE]?.toInt() == ClazzEnrolment.ROLE_STUDENT) {
+            Role.PERMISSION_CLAZZ_ADD_STUDENT
+        } else {
+            Role.PERMISSION_CLAZZ_ADD_TEACHER
+        }
+
         val hasPermission = db.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
-                selectedClazz, Role.PERMISSION_CLAZZ_ADD_STUDENT
-                or Role.PERMISSION_CLAZZ_ADD_TEACHER)
+                selectedClazz, isPersonStudentOrTeacherRole)
+
         val maxDateOfEnrolment = db.clazzEnrolmentDao.findMaxEndDateForEnrolment(
                 selectedClazz, selectedPerson, 0)
         return if(maxDateOfEnrolment == Long.MAX_VALUE){

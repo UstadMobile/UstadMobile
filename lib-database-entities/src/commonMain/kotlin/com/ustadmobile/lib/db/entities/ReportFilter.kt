@@ -35,6 +35,9 @@ open class ReportFilter {
 
         const val FIELD_ATTENDANCE_PERCENTAGE = 105
 
+        const val FIELD_CLAZZ_ENROLMENT_STATUS = 106
+
+        const val FIELD_CLAZZ_ENROLMENT_LEAVING_REASON = 107
 
         const val CONDITION_IS = 200
 

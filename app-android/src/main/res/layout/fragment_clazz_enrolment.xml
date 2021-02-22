@@ -9,6 +9,8 @@
         <import type="com.ustadmobile.core.util.IdOption" />
         <import type="com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason"/>
         <import type="com.ustadmobile.lib.db.entities.ClazzEnrolment"/>
+        <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener" />
+
 
         <variable
             name="clazzEnrolment"
@@ -37,6 +39,10 @@
         <variable
             name="endDateError"
             type="String" />
+
+        <variable
+            name="statusSelectorListener"
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
         <variable
             name="activityEventHandler"
@@ -146,6 +152,7 @@
                     android:layout_height="wrap_content"
                     android:hint="@string/current_status"
                     app:messageIdOptions="@{statusOptions}"
+                    app:onMessageIdOptionSelected="@{statusSelectorListener}"
                     app:selectedMessageIdOption="@={clazzEnrolment.clazzEnrolmentStatus}" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -156,7 +163,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_8dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
-                android:enabled="true"
+                android:enabled="@{clazzEnrolment.clazzEnrolmentStatus != ClazzEnrolment.STATUS_ENROLED}"
                 app:layout_constraintTop_toBottomOf="@+id/clazz_enrolment_edit_status_textinputlayout"
                 app:layout_constraintStart_toStartOf="parent"
                 android:hint="@string/leaving_reason">
