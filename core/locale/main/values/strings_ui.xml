@@ -507,6 +507,8 @@
     <string name="edit_enrolment">Edit enrolment</string>
     <string name="new_enrolment">New enrolment</string>
     <string name="select_reason">Select reason</string>
+    <string name="select_leaving_reason">Select leaving reason</string>
+    <string name="add_leaving_reason">Add new leaving reason</string>
     <string name="current_status">Current status</string>
     <string name="leaving_reason">Reason for leaving</string>
     <string name="reason">reason</string>
