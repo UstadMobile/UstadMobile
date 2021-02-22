@@ -60,8 +60,7 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = LeavingReasonListRecyclerAdapter(mPresenter)
-        val createNewText = requireContext().getString(R.string.add_new,
-                requireContext().getString(R.string.reason))
+        val createNewText = requireContext().getString(R.string.add_leaving_reason)
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 createNewText)
 
@@ -70,7 +69,7 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        ustadFragmentTitle = requireContext().getString(R.string.select_reason)
+        ustadFragmentTitle = requireContext().getString(R.string.select_leaving_reason)
     }
 
     /**

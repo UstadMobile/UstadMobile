@@ -127,6 +127,16 @@ class ReportFilterEditPresenter(context: Any,
                     uidAndLabelOneToManyHelper.liveList.sendValue(entries)
 
                 }
+            }else if(entity.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON){
+                if (entity.reportFilterValue != null && entity.reportFilterValue?.isNotEmpty() == true) {
+                    val reasons = withTimeoutOrNull(2000){
+                        db.leavingReasonDao.getReasonsFromUids(entity.reportFilterValue?.split(", ")
+                                ?.map { it.toLong() }
+                                ?: listOf())
+                    } ?: listOf()
+                    uidAndLabelOneToManyHelper.liveList.sendValue(reasons)
+                }
+
             }
             uidhelperDeferred.complete(true)
         }
@@ -207,7 +217,8 @@ class ReportFilterEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        if (entityVal?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY) {
+        if (entityVal?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY ||
+                entityVal?.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON) {
             entityVal.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
                     ?.joinToString { it.uid.toString() }
         }
@@ -227,7 +238,8 @@ class ReportFilterEditPresenter(context: Any,
         } else {
             view.conditionsErrorText = null
         }
-        if (entity.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY) {
+        if (entity.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY ||
+                entity.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON) {
             entity.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
                     ?.joinToString { it.uid.toString() }
         }

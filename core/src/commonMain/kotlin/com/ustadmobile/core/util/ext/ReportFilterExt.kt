@@ -34,7 +34,7 @@ fun ReportFilter.toDisplayString(context: Any): String {
         reportFilterCondition == ReportFilter.CONDITION_BETWEEN -> {
             valueString = """$reportFilterValueBetweenX ${UstadMobileSystemImpl.instance.getString(MessageID.and, context)} $reportFilterValueBetweenY"""
         }
-        reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY -> {
+        reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY || reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON -> {
            valueString = "..."
         }
     }

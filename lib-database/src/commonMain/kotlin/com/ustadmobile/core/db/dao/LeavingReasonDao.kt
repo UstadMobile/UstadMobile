@@ -5,6 +5,7 @@ import androidx.room.*
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.LeavingReason
+import com.ustadmobile.lib.db.entities.UidAndLabel
 import kotlin.js.JsName
 
 @Repository
@@ -21,6 +22,12 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
     @JsName("findByUidList")
     @Query("SELECT leavingReasonUid FROM LeavingReason WHERE leavingReasonUid IN (:uidList)")
     abstract fun findByUidList(uidList: List<Long>): List<Long>
+
+    @JsName("getReasonsFromUids")
+    @Query("""SELECT LeavingReason.leavingReasonUid AS uid, 
+            LeavingReason.leavingReasonTitle As labelName  
+            FROM LeavingReason WHERE leavingReasonUid IN (:uidList)""")
+    abstract fun getReasonsFromUids(uidList: List<Long>): List<UidAndLabel>
 
     @JsName("replaceList")
     @Insert(onConflict = OnConflictStrategy.REPLACE)
