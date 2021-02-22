@@ -20,6 +20,7 @@ import com.ustadmobile.core.controller.CategoryListListener
 import com.ustadmobile.core.controller.ProductEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ProductEditView
@@ -89,6 +90,17 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
             mPresenter?.handleAddOrEditCategory(category)
         }
 
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                ProductPicture::class.java) {
+            val pic= it.firstOrNull() ?: return@observeResult
+            productPicture = pic
+        }
+
+        val a = navController.currentBackStackEntry?.savedStateHandle?.get<String>("productPicture_test")
+        val pp = defaultGson().fromJson<ProductPicture>(a, ProductPicture::class.java)
+        if(pp != null){
+            productPicture = pp
+        }
         mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
 
     }
@@ -104,6 +116,7 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
 
     override fun onResume() {
         super.onResume()
+
         setEditFragmentTitle(R.string.add_product, R.string.edit_product)
     }
 
@@ -177,7 +190,10 @@ class ProductEditFragment: UstadEditFragment<Product>(), ProductEditView,
         }
 
     override fun addNewCategory() {
+        val navController = findNavController()
+        navController.currentBackStackEntry?.savedStateHandle?.set("productPicture_test", defaultGson().toJson(productPicture))
         onSaveStateToBackStackStateHandle()
+        //TODO: Save picture as well
         navigateToPickEntityFromList(Category::class.java, R.id.category_list_dest)
     }
 
