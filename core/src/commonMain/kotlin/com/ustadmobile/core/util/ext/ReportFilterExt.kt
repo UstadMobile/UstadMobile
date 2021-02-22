@@ -25,6 +25,13 @@ fun ReportFilter.toDisplayString(context: Any): String {
             valueString = UstadMobileSystemImpl.instance.getString(
                     selectedOption?.component2() ?: 0, context)
         }
+        ReportFilter.FIELD_CLAZZ_ENROLMENT_STATUS == reportFilterField -> {
+            val selectedOption = STATUS_TO_MESSAGE_ID_MAP.entries.find {
+                it.key == reportFilterDropDownValue
+            }
+            valueString = UstadMobileSystemImpl.instance.getString(
+                    selectedOption?.component2() ?: 0, context)
+        }
         ReportFilter.FIELD_CONTENT_COMPLETION == reportFilterField -> {
             val selectedOption = ReportFilterEditPresenter.ContentCompletionStatusOption.values()
                     .find { it.optionVal == reportFilterDropDownValue }

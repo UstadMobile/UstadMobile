@@ -2,6 +2,7 @@ package com.ustadmobile.core.util.ext
 
 import androidx.paging.DataSource
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.generated.locale.MessageID
@@ -276,10 +277,7 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
             }
             Report.GENDER -> {
                 MessageIdFormatter(
-                        mapOf(Person.GENDER_MALE.toString() to MessageID.male,
-                                Person.GENDER_FEMALE.toString() to MessageID.female,
-                                Person.GENDER_OTHER.toString() to MessageID.other,
-                                Person.GENDER_UNSET.toString() to MessageID.unset),
+                        genderMap.mapKeys { it.toString() },
                         impl, context)
             }
             Report.CONTENT_ENTRY ->{
@@ -314,10 +312,7 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
         }
         Report.GENDER -> {
             MessageIdFormatter(
-                    mapOf(Person.GENDER_MALE.toString() to MessageID.male,
-                            Person.GENDER_FEMALE.toString() to MessageID.female,
-                            Person.GENDER_OTHER.toString() to MessageID.other,
-                            Person.GENDER_UNSET.toString() to MessageID.unset),
+                    genderMap.mapKeys { it.toString() },
                     impl, context)
         }
         Report.CONTENT_ENTRY ->{
@@ -332,6 +327,7 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
         Report.ENROLMENT_LEAVING_REASON -> {
             val reasonLabelList = leavingReasonDao.getReasonsFromUids(xAxisList
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+                    .plus(0L to impl.getString(MessageID.unset, context))
             UidAndLabelFormatter(reasonLabelList)
         }
         else ->{

@@ -27,7 +27,7 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
     @Query("""SELECT LeavingReason.leavingReasonUid AS uid, 
             LeavingReason.leavingReasonTitle As labelName  
             FROM LeavingReason WHERE leavingReasonUid IN (:uidList)""")
-    abstract fun getReasonsFromUids(uidList: List<Long>): List<UidAndLabel>
+    abstract suspend fun getReasonsFromUids(uidList: List<Long>): List<UidAndLabel>
 
     @JsName("replaceList")
     @Insert(onConflict = OnConflictStrategy.REPLACE)

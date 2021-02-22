@@ -196,7 +196,7 @@ class ReportFilterEditPresenter(context: Any,
                 view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
                         ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.LIST
-                view.createNewFilter = systemImpl.getString(MessageID.add_content_filter, context)
+                view.createNewFilter = systemImpl.getString(MessageID.add_leaving_reason, context)
             }
         }
 

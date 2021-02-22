@@ -92,15 +92,27 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
 
     sql += personPermission
 
+
+    val filterFieldList = reportSeriesFilters?.map { it.reportFilterField }
+
+    val hasFilterEnrolment = filterFieldList?.any {
+        it == ReportFilter.FIELD_CLAZZ_ENROLMENT_STATUS ||
+                it == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON } ?: false
+
     if(report.xAxis == Report.ENROLMENT_STATUS || reportSeriesSubGroup == Report.ENROLMENT_STATUS
             || report.xAxis == Report.ENROLMENT_LEAVING_REASON || reportSeriesSubGroup == Report.ENROLMENT_LEAVING_REASON
-            || report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS){
+            || report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS || hasFilterEnrolment) {
 
-        sql += "LEFT JOIN ClazzEnrolment ON StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid "
+                val joinEnrolment = """LEFT JOIN ClazzEnrolment ON 
+                    StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid """.trimMargin()
+                sql += joinEnrolment
+                if(hasFilterEnrolment){
+                    sqlList += joinEnrolment
+                }
 
-        if(report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS){
-            sql += "LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid "
-        }
+                if(report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS){
+                    sql += "LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid "
+                }
     }
 
     when(reportSeriesYAxis){
@@ -194,21 +206,17 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                 }
                 ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON -> {
 
-                    var filterString = """EXISTS(SELECT ClazzEnrolment.clazzEnrolmentStatus FROM 
-                        ClazzEnrolment WHERE Person.personUid = ClazzEnrolmentPersonUid 
-                        AND ClazzEnrolment.clazzEnrolmentLeavingReasonUid """.trimMargin()
+                    var filterString = "ClazzEnrolment.clazzEnrolmentLeavingReasonUid "
                     filterString += handleCondition(filter.reportFilterCondition)
-                    filterString += "(${filter.reportFilterValue})) "
+                    filterString += "(${filter.reportFilterValue}) "
                     whereList += (filterString)
 
                 }
                 ReportFilter.FIELD_CLAZZ_ENROLMENT_STATUS -> {
 
-                    var filterString = """EXISTS(SELECT ClazzEnrolment.clazzEnrolmentStatus 
-                        FROM ClazzEnrolment WHERE Person.personUid = ClazzEnrolmentPersonUid 
-                        AND ClazzEnrolment.clazzEnrolmentStatus """.trimMargin()
+                    var filterString = "ClazzEnrolment.clazzEnrolmentStatus "
                     filterString += handleCondition(filter.reportFilterCondition)
-                    filterString += "${filter.reportFilterDropDownValue}) "
+                    filterString += "${filter.reportFilterDropDownValue} "
                     whereList += (filterString)
 
                 }
