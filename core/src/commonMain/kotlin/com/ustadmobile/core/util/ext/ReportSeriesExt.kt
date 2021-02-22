@@ -92,9 +92,15 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
 
     sql += personPermission
 
-    if(report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS){
+    if(report.xAxis == Report.ENROLMENT_STATUS || reportSeriesSubGroup == Report.ENROLMENT_STATUS
+            || report.xAxis == Report.ENROLMENT_LEAVING_REASON || reportSeriesSubGroup == Report.ENROLMENT_LEAVING_REASON
+            || report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS){
+
         sql += "LEFT JOIN ClazzEnrolment ON StatementEntity.statementPersonUid = ClazzEnrolment.clazzEnrolmentPersonUid "
-        sql += "LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid "
+
+        if(report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS){
+            sql += "LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid "
+        }
     }
 
     when(reportSeriesYAxis){
@@ -186,6 +192,26 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                     whereList += (filterString)
 
                 }
+                ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON -> {
+
+                    var filterString = """EXISTS(SELECT ClazzEnrolment.clazzEnrolmentStatus FROM 
+                        ClazzEnrolment WHERE Person.personUid = ClazzEnrolmentPersonUid 
+                        AND ClazzEnrolment.clazzEnrolmentLeavingReasonUid """.trimMargin()
+                    filterString += handleCondition(filter.reportFilterCondition)
+                    filterString += "(${filter.reportFilterValue})) "
+                    whereList += (filterString)
+
+                }
+                ReportFilter.FIELD_CLAZZ_ENROLMENT_STATUS -> {
+
+                    var filterString = """EXISTS(SELECT ClazzEnrolment.clazzEnrolmentStatus 
+                        FROM ClazzEnrolment WHERE Person.personUid = ClazzEnrolmentPersonUid 
+                        AND ClazzEnrolment.clazzEnrolmentStatus """.trimMargin()
+                    filterString += handleCondition(filter.reportFilterCondition)
+                    filterString += "${filter.reportFilterDropDownValue}) "
+                    whereList += (filterString)
+
+                }
             }
         }
         if (report.reportDateRangeSelection != 0) {
@@ -273,8 +299,8 @@ private fun groupBy(value: Int, dbType: Int): String {
         Report.CONTENT_ENTRY -> "StatementEntity.statementContentEntryUid "
         Report.GENDER -> "Person.gender "
         Report.CLASS -> "Clazz.clazzUid "
-        Report.ENROLMENT_STATUS -> ""
-        Report.ENROLMENT_LEAVING_REASON -> ""
+        Report.ENROLMENT_STATUS -> "ClazzEnrolment.clazzEnrolmentStatus "
+        Report.ENROLMENT_LEAVING_REASON -> "ClazzEnrolment.clazzEnrolmentLeavingReasonUid "
         else -> ""
     }
 }
