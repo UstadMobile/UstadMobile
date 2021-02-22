@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.dao.PersonDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_EXCLUDE_PERSONUIDS_LIST
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
@@ -62,7 +63,16 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
 
     override fun handleClickEntry(entry: Person) {
         when (mListMode) {
-            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
+            ListViewMode.PICKER -> {
+
+                if(arguments[UstadView.ARG_NEXT]?.startsWith(ClazzMemberListView.VIEW_NAME) == true) {
+                    systemImpl.go(ClazzEnrolmentEditView.VIEW_NAME,
+                            arguments.plus(UstadView.ARG_PERSON_UID to entry.personUid.toString()),
+                            context)
+                }else{
+                    view.finishWithResult(listOf(entry))
+                }
+            }
             ListViewMode.BROWSER -> systemImpl.go(PersonDetailView.VIEW_NAME,
                     mapOf(UstadView.ARG_ENTITY_UID to entry.personUid.toString()), context)
         }

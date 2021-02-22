@@ -111,6 +111,8 @@ interface UstadView {
 
         const val ARG_FILTER_BY_PERSONGROUPUID = "filterByPersonGroupUid"
 
+        const val ARG_FILTER_BY_ENROLMENT_ROLE = "filterByEnrolmentRole"
+
         const val ARG_CLAZZWORK_UID = "clazzworkUid"
 
         const val ARG_PERSON_UID = "personUid"

@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.graph.*
@@ -56,6 +57,11 @@ suspend fun UmAppDatabase.createPersonGroupAndMemberWithEnrolment(entity: ClazzE
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
     entity.clazzEnrolmentDateJoined = DateTime(entity.clazzEnrolmentDateJoined)
             .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+    if(entity.clazzEnrolmentDateLeft != Long.MAX_VALUE){
+        entity.clazzEnrolmentDateLeft = DateTime(entity.clazzEnrolmentDateLeft)
+                .toOffsetByTimezone(clazzTimeZone).localEndOfDay.utc.unixMillisLong
+    }
+
     if (entity.clazzEnrolmentUid == 0L) {
         entity.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(entity)
     } else {

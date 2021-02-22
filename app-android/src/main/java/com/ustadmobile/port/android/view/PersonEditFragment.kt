@@ -25,6 +25,7 @@ import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLiveData
@@ -284,6 +285,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             it.clazzlistRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.rolesAndPermissionsRv.layoutManager = LinearLayoutManager(requireContext())
             it.isAdmin = canDelegatePermissions?:false
+            it.hideClazzes = arguments?.getString(ARG_HIDE_CLAZZES)?.toBoolean() ?: false
         }
 
         mPresenter = PersonEditPresenter(requireContext(), arguments.toStringMap(), this,

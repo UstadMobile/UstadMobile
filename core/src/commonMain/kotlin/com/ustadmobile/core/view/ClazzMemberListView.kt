@@ -17,6 +17,9 @@ interface ClazzMemberListView: UstadListView<PersonWithClazzEnrolmentDetails, Pe
     var addStudentVisible: Boolean
 
     companion object {
+
+        const val ARG_HIDE_CLAZZES = "hideClazzes"
+
         const val VIEW_NAME = "ClazzMemberListView"
     }
 

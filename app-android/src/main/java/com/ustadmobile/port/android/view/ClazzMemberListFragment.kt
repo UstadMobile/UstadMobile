@@ -13,22 +13,26 @@ import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.*
+import com.toughra.ustadmobile.databinding.ItemClazzmemberListItemBinding
+import com.toughra.ustadmobile.databinding.ItemClazzmemberPendingListItemBinding
 import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toListFilterOptions
-import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
@@ -98,11 +102,11 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
     private var filterByClazzUid: Long = 0
 
     private val mOnClickAddStudent: View.OnClickListener = View.OnClickListener {
-        navigateToPickNewMember(KEY_STUDENT_SELECTED)
+        navigateToPickNewMember(ClazzEnrolment.ROLE_STUDENT)
     }
 
     private val mOnClickAddTeacher: View.OnClickListener = View.OnClickListener {
-        navigateToPickNewMember(KEY_TEACHER_SELECTED)
+        navigateToPickNewMember(ClazzEnrolment.ROLE_TEACHER)
     }
 
     override var addTeacherVisible: Boolean = false
@@ -200,38 +204,28 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        val navController = findNavController()
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                Person::class.java, KEY_TEACHER_SELECTED) {
-            val teacherAdded = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleEnrolMember(teacherAdded, ClazzEnrolment.ROLE_TEACHER)
-        }
-
-        navController.currentBackStackEntry?.savedStateHandle?.observeResult(this,
-                Person::class.java, KEY_STUDENT_SELECTED) {
-            val studentAdded = it.firstOrNull() ?: return@observeResult
-            mPresenter?.handleEnrolMember(studentAdded, ClazzEnrolment.ROLE_STUDENT)
-        }
-
         super.onViewCreated(view, savedInstanceState)
         fabManager?.visible = false
     }
 
-    private fun navigateToPickNewMember(keyName: String) {
+    private fun navigateToPickNewMember(role: Int) {
 
-        val bundle = if(keyName == KEY_TEACHER_SELECTED){
-            bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString())
-        }else{
-            bundleOf(ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
-                    ARG_CODE_TABLE to Clazz.TABLE_ID.toString())
-        }.also {
-            it.putAll(bundleOf(
-                    UstadView.ARG_NEXT to ClazzMemberListView.VIEW_NAME,
-                    ARG_POPUPTO_ON_FINISH to ClazzMemberListView.VIEW_NAME
-            ))
+        val bundle = bundleOf(
+                ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
+                ARG_FILTER_BY_ENROLMENT_ROLE to role.toString(),
+                ARG_FILTER_BY_CLAZZUID to (arguments?.get(ARG_FILTER_BY_CLAZZUID) ?: "-1"),
+                ARG_NEXT to ClazzEnrolmentEditView.VIEW_NAME,
+                ARG_POPUPTO_ON_FINISH to ClazzEnrolmentEditView.VIEW_NAME,
+                ClazzMemberListView.ARG_HIDE_CLAZZES to true.toString(),
+                UstadView.ARG_SAVE_TO_DB to true.toString()).also {
+
+            if(role == ClazzEnrolment.ROLE_STUDENT){
+                it.putString(ARG_CODE_TABLE,Clazz.TABLE_ID.toString())
+            }
         }
+
         navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest,
-                bundle, keyName, true)
+                bundle, overwriteDestination = true)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

@@ -11,7 +11,7 @@ import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.ClazzMemberListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ROLE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SAVE_TO_DB
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -85,7 +85,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
         systemImpl.go(ClazzEnrolmentListView.VIEW_NAME,
                 mapOf(UstadView.ARG_PERSON_UID to entry.personUid.toString(),
                         ARG_FILTER_BY_CLAZZUID to filterByClazzUid.toString(),
-                        ARG_FILTER_BY_ROLE to entry.enrolmentRole.toString(),
+                        ARG_FILTER_BY_ENROLMENT_ROLE to entry.enrolmentRole.toString(),
                         ARG_SAVE_TO_DB to true.toString()), context)
     }
 
@@ -109,12 +109,6 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
     override fun handleClickCreateNewFab() {
         //there really isn't a fab here. There are buttons for add teacher and add student in the list itself
-    }
-
-    fun handleEnrolMember(person: Person, role: Int) {
-        GlobalScope.launch {
-            repo.enrolPersonIntoClazzAtLocalTimezone(person, filterByClazzUid, role)
-        }
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {

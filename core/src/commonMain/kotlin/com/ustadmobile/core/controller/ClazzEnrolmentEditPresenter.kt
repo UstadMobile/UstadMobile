@@ -4,7 +4,6 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.schedule.localMidnight
-import com.ustadmobile.core.schedule.toLocalMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.createPersonGroupAndMemberWithEnrolment
@@ -13,7 +12,6 @@ import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
 
 import kotlinx.coroutines.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -21,12 +19,11 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import org.kodein.di.DI
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SAVE_TO_DB
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
-import com.ustadmobile.lib.db.entities.Report
+import com.ustadmobile.lib.db.entities.*
 
 
 class ClazzEnrolmentEditPresenter(context: Any,
@@ -59,14 +56,19 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
     var selectedPerson: Long = 0L
     var selectedClazz: Long = 0L
+    var selectedRole: Int = 0
+    var hasAddStudentPermission = false
+    var hasAddTeacherPermission = false
+
+    val loggedInPersonUid = accountManager.activeAccount.personUid
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.roleList = RoleOptions.values().map { RoleMessageIdOption(it, context) }
+        //view.roleList = RoleOptions.values().map { RoleMessageIdOption(it, context) }
         view.statusList = StatusOptions.values().map { StatusMessageIdOption(it, context) }
         selectedPerson = arguments[ARG_PERSON_UID]?.toLong() ?: 0L
         selectedClazz = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
-
+        selectedRole = arguments[ARG_FILTER_BY_ENROLMENT_ROLE]?.toInt() ?: 0
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): ClazzEnrolmentWithLeavingReason? {
@@ -83,9 +85,30 @@ class ClazzEnrolmentEditPresenter(context: Any,
             clazzEnrolmentDateJoined = joinTime
             clazzEnrolmentPersonUid = selectedPerson
             clazzEnrolmentClazzUid = selectedClazz
+            clazzEnrolmentRole = selectedRole
         }
 
+        handleRoleOptionsList()
+
         return clazzEnrolment
+    }
+
+    private suspend fun handleRoleOptionsList(){
+        GlobalScope.launch(doorMainDispatcher()){
+            hasAddStudentPermission = repo.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
+                    selectedClazz,  Role.PERMISSION_CLAZZ_ADD_STUDENT)
+            hasAddTeacherPermission = repo.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
+                    selectedClazz,  Role.PERMISSION_CLAZZ_ADD_TEACHER)
+
+            val roleList = mutableListOf<RoleMessageIdOption>()
+            if(hasAddStudentPermission){
+                roleList.add(RoleMessageIdOption(RoleOptions.STUDENT, context))
+            }
+            if(hasAddTeacherPermission){
+                roleList.add(RoleMessageIdOption(RoleOptions.TEACHER, context))
+            }
+            view.roleList = roleList.toList()
+        }
     }
 
     override fun onLoadFromJson(bundle: Map<String, String>): ClazzEnrolmentWithLeavingReason? {
@@ -99,7 +122,12 @@ class ClazzEnrolmentEditPresenter(context: Any,
             editEntity = ClazzEnrolmentWithLeavingReason().apply {
                 clazzEnrolmentPersonUid = selectedPerson
                 clazzEnrolmentClazzUid = selectedClazz
+                clazzEnrolmentRole = selectedRole
             }
+        }
+
+        GlobalScope.launch {
+            handleRoleOptionsList()
         }
 
         return editEntity
