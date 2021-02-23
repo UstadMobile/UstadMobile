@@ -180,7 +180,9 @@ class PersonEditPresenter(context: Any,
             passwordError != null ||
             confirmError != null ||
             dateOfBirthError != null ||
-            noMatchPasswordError != null
+            noMatchPasswordError != null ||
+                    firstNameError != null ||
+                    lastNameError != null
 
     override fun handleClickSave(entity: PersonWithAccount) {
         view.loading = true
@@ -195,11 +197,18 @@ class PersonEditPresenter(context: Any,
             view.firstNameError = null
             view.lastNameError = null
 
-            if(registrationMode) {
-                val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
+            val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
+            view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNameError = requiredFieldMessage
+            view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameError = requiredFieldMessage
 
-                view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNameError = requiredFieldMessage
-                view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameError = requiredFieldMessage
+            if(view.hasErrors()) {
+                view.loading = false
+                view.fieldsEnabled = true
+                return@launch
+            }
+
+            if(registrationMode) {
+
                 view.takeIf { entity.username.isNullOrEmpty() }?.usernameError = requiredFieldMessage
                 view.takeIf { entity.newPassword.isNullOrEmpty() }?.passwordError = requiredFieldMessage
                 view.takeIf { entity.confirmedPassword.isNullOrEmpty() }?.confirmError = requiredFieldMessage
