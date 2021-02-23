@@ -9,8 +9,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.createPersonGroupAndMemberWithEnrolment
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ContentEntryListTabsView
@@ -59,7 +59,10 @@ class PersonEditPresenter(context: Any,
             ClazzEnrolmentWithClazz.serializer().list, this, ClazzEnrolmentWithClazz::class) { clazzEnrolmentUid = it }
 
     fun handleAddOrEditClazzMemberWithClazz(clazzEnrolmentWithClazz: ClazzEnrolmentWithClazz) {
-        clazzMemberJoinEditHelper.onEditResult(clazzEnrolmentWithClazz)
+        GlobalScope.launch(doorMainDispatcher()) {
+            clazzEnrolmentWithClazz.clazz = repo.clazzDao.findByUidAsync(clazzEnrolmentWithClazz.clazzEnrolmentClazzUid)
+            clazzMemberJoinEditHelper.onEditResult(clazzEnrolmentWithClazz)
+        }
     }
 
     fun handleClickRemovePersonFromClazz(clazzEnrolmentWithClazz: ClazzEnrolmentWithClazz) {
@@ -263,13 +266,12 @@ class PersonEditPresenter(context: Any,
 
                 //Insert any Clazz Enrolments
                 clazzMemberJoinEditHelper.entitiesToInsert.forEach {
-                    repo.enrolPersonIntoClazzAtLocalTimezone(entity, it.clazzEnrolmentClazzUid,
-                            it.clazzEnrolmentRole)
+                    // if new person, add the personUid
+                    it.clazzEnrolmentPersonUid = entity.personUid
+                    // remove fake pk
+                    it.clazzEnrolmentUid = 0
+                    repo.createPersonGroupAndMemberWithEnrolment(it)
                 }
-                //Update any clazz Enrolments
-                repo.clazzEnrolmentDao.updateDateLeft(clazzMemberJoinEditHelper.primaryKeysToDeactivate,
-                        getSystemTimeInMillis())
-
 
                 val personPictureVal = view.personPicture
                 if(personPictureVal != null) {

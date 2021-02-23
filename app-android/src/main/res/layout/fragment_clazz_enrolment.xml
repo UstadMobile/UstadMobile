@@ -41,6 +41,10 @@
             type="String" />
 
         <variable
+            name="roleSelectedError"
+            type="String" />
+
+        <variable
             name="statusSelectorListener"
             type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
@@ -70,6 +74,8 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_8dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
+                app:errorText="@{roleSelectedError}"
+                app:errorEnabled="@{roleSelectedError != null}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">

@@ -19,7 +19,7 @@ import org.kodein.di.DI
 class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: ClazzList2View,
                          di: DI, lifecycleOwner: DoorLifecycleOwner,
                          private val clazzList2ItemListener:
-                         DefaultClazzListItemListener = DefaultClazzListItemListener(view, ListViewMode.BROWSER, context, di))
+                         DefaultClazzListItemListener = DefaultClazzListItemListener(view, ListViewMode.BROWSER, context, arguments, di))
     : UstadListPresenter<ClazzList2View, Clazz>(context, arguments, view, di, lifecycleOwner), ClazzListItemListener by clazzList2ItemListener, OnSortOptionSelected, OnSearchSubmitted {
 
     var loggedInPersonUid = 0L

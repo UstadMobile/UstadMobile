@@ -14,6 +14,7 @@ interface ClazzEnrolmentEditView: UstadEditView<ClazzEnrolmentWithLeavingReason>
 
     var startDateError: String?
     var endDateError: String?
+    var roleSelectionError: String?
 
     companion object {
 

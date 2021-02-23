@@ -145,6 +145,12 @@ class ClazzEnrolmentEditPresenter(context: Any,
         GlobalScope.launch(doorMainDispatcher()) {
 
             // must be filled
+            if(entity.clazzEnrolmentRole == 0){
+                view.roleSelectionError = systemImpl.getString(MessageID.field_required_prompt, context)
+                return@launch
+            }
+
+            // must be filled
             if (entity.clazzEnrolmentDateJoined == 0L) {
                 view.startDateError = systemImpl.getString(MessageID.field_required_prompt, context)
                 return@launch

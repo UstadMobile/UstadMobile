@@ -111,7 +111,14 @@ class ClazzEdit2Presenter(context: Any,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
 
             view.loading = false
-            onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
+
+            if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
+                systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
+                        arguments.plus(UstadView.ARG_FILTER_BY_CLAZZUID to entity.clazzUid.toString()),
+                        context)
+            }else{
+                onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
+            }
         }
     }
 

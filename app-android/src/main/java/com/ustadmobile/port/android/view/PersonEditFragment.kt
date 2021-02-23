@@ -14,7 +14,6 @@ import androidx.lifecycle.Observer
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.*
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.textfield.TextInputLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonEditBinding
@@ -25,9 +24,12 @@ import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
@@ -117,15 +119,11 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
     }
 
     override fun onClickNewClazzMemberWithClazz()  {
-        MaterialAlertDialogBuilder(requireContext())
-                .setTitle(R.string.role)
-                .setItems(CLAZZ_ROLE_KEY_MAP.map {
-                        requireContext().getString(it.stringId)
-                }.toTypedArray()) { dialog, which ->
-                    onSaveStateToBackStackStateHandle()
-                    navigateToPickEntityFromList(Person::class.java, R.id.clazz_list_dest, bundleOf(),
-                            CLAZZ_ROLE_KEY_MAP[which].resultKey, overwriteDestination = true)
-                }.show()
+        onSaveStateToBackStackStateHandle()
+        navigateToPickEntityFromList(ClazzEnrolmentWithClazz::class.java, R.id.clazz_list_dest,
+                overwriteDestination = true, args = bundleOf(
+                ARG_POPUPTO_ON_FINISH to PersonEditView.VIEW_NAME,
+                ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME))
     }
 
     override fun onClickNewRoleAndAssignment() {
@@ -356,18 +354,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         super.onViewCreated(view, savedInstanceState)
         mPresenter?.onCreate(backStackSavedState)
 
-        CLAZZ_ROLE_KEY_MAP.forEach {roleOption ->
-            findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
-                    Clazz::class.java, roleOption.resultKey) {
-                val clazzSelected = it.firstOrNull() ?: return@observeResult
-                mPresenter?.handleAddOrEditClazzMemberWithClazz(ClazzEnrolmentWithClazz().apply {
-                    clazzEnrolmentPersonUid = arguments?.getString(UstadView.ARG_ENTITY_UID)?.toLong() ?: 0L
-                    clazzEnrolmentClazzUid =  clazzSelected.clazzUid
-                    clazzEnrolmentRole = roleOption.roleId
-                    clazz = clazzSelected
-                    clazzEnrolmentActive = true
-                })
-            }
+        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+                ClazzEnrolmentWithClazz::class.java){
+            val clazzEnrolmentSelected = it.firstOrNull() ?: return@observeResult
+            mPresenter?.handleAddOrEditClazzMemberWithClazz(clazzEnrolmentSelected.apply {
+                clazzEnrolmentPersonUid = arguments?.getString(UstadView.ARG_ENTITY_UID)?.toLong() ?: 0L
+            })
         }
 
         findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
@@ -394,10 +386,6 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
     }
 
     companion object {
-
-        private val CLAZZ_ROLE_KEY_MAP = listOf(
-                ClassRoleOption(ClazzEnrolment.ROLE_STUDENT, "Person_Student", R.string.student),
-                ClassRoleOption(ClazzEnrolment.ROLE_TEACHER, "Person_Teacher", R.string.teacher))
 
         val DIFFUTIL_CLAZZMEMBER_WITH_CLAZZ = object: DiffUtil.ItemCallback<ClazzEnrolmentWithClazz>() {
             override fun areItemsTheSame(oldItem: ClazzEnrolmentWithClazz, newItem: ClazzEnrolmentWithClazz): Boolean {

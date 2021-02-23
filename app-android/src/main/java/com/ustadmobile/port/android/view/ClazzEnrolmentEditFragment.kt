@@ -119,6 +119,13 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
             mBinding?.endDateError = value
         }
 
+    override var roleSelectionError: String? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.roleSelectedError = value
+        }
+
     override var fieldsEnabled: Boolean = false
         get() = field
         set(value) {
