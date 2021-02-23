@@ -70,8 +70,14 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
 
     @Query("""
         SELECT Clazz.*, ClazzEnrolment.*,
-        (SELECT COUNT(*) FROM ClazzEnrolment WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND clazzEnrolmentRole = ${ROLE_STUDENT}) AS numStudents,
-        (SELECT COUNT(*) FROM ClazzEnrolment WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND clazzEnrolmentRole = ${ROLE_TEACHER}) AS numTeachers,
+        (SELECT COUNT(*) FROM ClazzEnrolment WHERE 
+        ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND clazzEnrolmentRole 
+        = ${ROLE_STUDENT} AND :currentTime BETWEEN 
+        ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numStudents,
+        (SELECT COUNT(*) FROM ClazzEnrolment WHERE 
+        ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND clazzEnrolmentRole 
+        = ${ROLE_TEACHER} AND :currentTime BETWEEN 
+        ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers,
         '' AS teacherNames,
         0 AS lastRecorded
         FROM 
@@ -141,13 +147,17 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                                                       permission: Long) : Boolean
 
     @Query("""SELECT Clazz.*, HolidayCalendar.*, School.*,
-        (SELECT COUNT(*) FROM ClazzEnrolment WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND clazzEnrolmentRole = $ROLE_STUDENT) AS numStudents,
-        (SELECT COUNT(*) FROM ClazzEnrolment WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND clazzEnrolmentRole = $ROLE_TEACHER) AS numTeachers
+        (SELECT COUNT(*) FROM ClazzEnrolment WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+        AND clazzEnrolmentRole = $ROLE_STUDENT AND :currentTime BETWEEN 
+        ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numStudents,
+        (SELECT COUNT(*) FROM ClazzEnrolment WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+        AND clazzEnrolmentRole = $ROLE_TEACHER AND :currentTime BETWEEN 
+        ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) AS numTeachers
         FROM Clazz 
         LEFT JOIN HolidayCalendar ON Clazz.clazzHolidayUMCalendarUid = HolidayCalendar.umCalendarUid
         LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
         WHERE Clazz.clazzUid = :clazzUid""")
-    abstract fun getClazzWithDisplayDetails(clazzUid: Long): DoorLiveData<ClazzWithDisplayDetails?>
+    abstract fun getClazzWithDisplayDetails(clazzUid: Long, currentTime: Long): DoorLiveData<ClazzWithDisplayDetails?>
 
 
     /**
