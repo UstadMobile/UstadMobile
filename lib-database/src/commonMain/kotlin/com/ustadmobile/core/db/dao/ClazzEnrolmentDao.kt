@@ -97,8 +97,10 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
         ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
         COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) 
-        FROM ClazzLogAttendanceRecord WHERE 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid)  as attendance, 
+        FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog ON 
+        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid WHERE 
+        ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid 
+        AND ClazzLog.clazzLogClazzUid = :clazzUid)  as attendance, 
     	(SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) FROM ClazzEnrolment WHERE 
         Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) as earliestJoinDate, 
     	(SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) FROM ClazzEnrolment WHERE 
