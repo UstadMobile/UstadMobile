@@ -248,6 +248,20 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             field = value
         }
 
+    override var lastNameError: String? = null
+        get() = field
+        set(value) {
+            field = value
+            handleInputError(mBinding?.lastnameTextInputLayout, value != null, value)
+        }
+
+    override var firstNameError: String? = null
+        get() = field
+        set(value) {
+            field = value
+            handleInputError(mBinding?.firstnamesTextinputlayout, value != null, value)
+        }
+
 
     override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
         val navController = findNavController()

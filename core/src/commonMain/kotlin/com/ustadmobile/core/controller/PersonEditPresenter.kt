@@ -192,10 +192,14 @@ class PersonEditPresenter(context: Any,
             view.confirmError = null
             view.dateOfBirthError = null
             view.noMatchPasswordError = null
+            view.firstNameError = null
+            view.lastNameError = null
 
             if(registrationMode) {
                 val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
 
+                view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNameError = requiredFieldMessage
+                view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameError = requiredFieldMessage
                 view.takeIf { entity.username.isNullOrEmpty() }?.usernameError = requiredFieldMessage
                 view.takeIf { entity.newPassword.isNullOrEmpty() }?.passwordError = requiredFieldMessage
                 view.takeIf { entity.confirmedPassword.isNullOrEmpty() }?.confirmError = requiredFieldMessage
