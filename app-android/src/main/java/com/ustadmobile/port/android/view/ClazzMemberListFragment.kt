@@ -21,13 +21,16 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.ClazzMemberListView
+import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonListView.Companion.ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CODE_TABLE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_ENROLMENT_ROLE
+import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
+import com.ustadmobile.core.view.UstadView.Companion.ARG_SAVE_TO_DB
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
@@ -214,17 +217,17 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
                 ARG_FILTER_EXCLUDE_MEMBERSOFCLAZZ to filterByClazzUid.toString(),
                 ARG_FILTER_BY_ENROLMENT_ROLE to role.toString(),
                 ARG_FILTER_BY_CLAZZUID to (arguments?.get(ARG_FILTER_BY_CLAZZUID) ?: "-1"),
-                ARG_NEXT to ClazzEnrolmentEditView.VIEW_NAME,
-                ARG_POPUPTO_ON_FINISH to ClazzEnrolmentEditView.VIEW_NAME,
-                ClazzMemberListView.ARG_HIDE_CLAZZES to true.toString(),
-                UstadView.ARG_SAVE_TO_DB to true.toString()).also {
+                ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME,
+                ARG_POPUPTO_ON_FINISH to ClazzMemberListView.VIEW_NAME,
+                ARG_HIDE_CLAZZES to true.toString(),
+                ARG_SAVE_TO_DB to true.toString()).also {
 
             if(role == ClazzEnrolment.ROLE_STUDENT){
                 it.putString(ARG_CODE_TABLE,Clazz.TABLE_ID.toString())
             }
         }
 
-        navigateToPickEntityFromList(Person::class.java, R.id.personlist_dest,
+        navigateToPickEntityFromList(ClazzEnrolment::class.java, R.id.personlist_dest,
                 bundle, overwriteDestination = true)
     }
 

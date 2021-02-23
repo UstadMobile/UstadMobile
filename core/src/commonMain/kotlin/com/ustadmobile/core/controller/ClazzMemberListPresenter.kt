@@ -85,8 +85,7 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
         systemImpl.go(ClazzEnrolmentListView.VIEW_NAME,
                 mapOf(UstadView.ARG_PERSON_UID to entry.personUid.toString(),
                         ARG_FILTER_BY_CLAZZUID to filterByClazzUid.toString(),
-                        ARG_FILTER_BY_ENROLMENT_ROLE to entry.enrolmentRole.toString(),
-                        ARG_SAVE_TO_DB to true.toString()), context)
+                        ARG_FILTER_BY_ENROLMENT_ROLE to entry.enrolmentRole.toString()), context)
     }
 
     fun handleClickPendingRequest(enrolmentDetails: PersonWithClazzEnrolmentDetails, approved: Boolean) {

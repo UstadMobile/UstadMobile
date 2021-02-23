@@ -65,8 +65,8 @@ class PersonListPresenter(context: Any, arguments: Map<String, String>, view: Pe
         when (mListMode) {
             ListViewMode.PICKER -> {
 
-                if(arguments[UstadView.ARG_NEXT]?.startsWith(ClazzMemberListView.VIEW_NAME) == true) {
-                    systemImpl.go(ClazzEnrolmentEditView.VIEW_NAME,
+                if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
+                    systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
                             arguments.plus(UstadView.ARG_PERSON_UID to entry.personUid.toString()),
                             context)
                 }else{

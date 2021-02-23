@@ -282,7 +282,13 @@ class PersonEditPresenter(context: Any,
                     }
                 }
 
-                onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)
+                if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
+                    systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
+                            arguments.plus(UstadView.ARG_PERSON_UID to entity.personUid.toString()),
+                            context)
+                }else{
+                    onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)
+                }
             }
         }
     }

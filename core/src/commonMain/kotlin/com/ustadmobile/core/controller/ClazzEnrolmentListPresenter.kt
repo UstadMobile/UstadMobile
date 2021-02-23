@@ -49,12 +49,14 @@ class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, 
     }
 
     override fun handleClickCreateNewFab() {
-          systemImpl.go(ClazzEnrolmentEditView.VIEW_NAME, arguments, context)
+          systemImpl.go(ClazzEnrolmentEditView.VIEW_NAME, arguments
+                  .plus(UstadView.ARG_SAVE_TO_DB to true.toString()), context)
     }
 
     fun handleClickClazzEnrolment(enrolment: ClazzEnrolmentWithLeavingReason){
         systemImpl.go(ClazzEnrolmentEditView.VIEW_NAME,
-                mapOf(UstadView.ARG_ENTITY_UID to enrolment.clazzEnrolmentUid.toString())
+                mapOf(UstadView.ARG_ENTITY_UID to enrolment.clazzEnrolmentUid.toString(),
+                        UstadView.ARG_SAVE_TO_DB to true.toString())
                         .plus(arguments), context)
     }
 

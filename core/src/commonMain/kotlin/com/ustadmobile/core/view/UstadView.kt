@@ -135,6 +135,11 @@ interface UstadView {
 
         const val CURRENT_DEST = ""
 
+        /**
+         * if after selecting from a list, need to open an edit page
+         */
+        const val ARG_GO_TO_COMPLETE = "goToComplete"
+
         const val ARG_SAVE_TO_DB = "saveDb"
 
         /**
