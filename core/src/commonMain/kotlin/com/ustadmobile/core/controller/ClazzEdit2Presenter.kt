@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.schedule.*
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
@@ -90,8 +91,20 @@ class ClazzEdit2Presenter(context: Any,
 
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
         GlobalScope.launch(doorMainDispatcher()) {
+
+            if (entity.clazzStartTime == 0L) {
+                view.clazzStartDateError = systemImpl.getString(MessageID.field_required_prompt, context)
+                return@launch
+            }
+
+            if (entity.clazzEndTime <= entity.clazzStartTime) {
+                view.clazzEndDateError = systemImpl.getString(MessageID.end_is_before_start_error, context)
+                return@launch
+            }
+
             view.loading = true
             view.fieldsEnabled = false
+
             if(entity.clazzUid == 0L) {
                 repo.createNewClazzAndGroups(entity, systemImpl, context)
             }else {
