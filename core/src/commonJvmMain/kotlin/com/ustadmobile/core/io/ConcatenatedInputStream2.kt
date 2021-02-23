@@ -9,6 +9,8 @@ import java.lang.Integer.min
 import java.security.MessageDigest
 import com.ustadmobile.door.util.NullOutputStream
 import com.ustadmobile.core.io.ext.readFully
+import com.github.aakira.napier.Napier
+
 
 /**
  * Reads concatenated data that was written using ConcatenatedOutputStream2. It is used similarly
@@ -37,6 +39,7 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
             throw ConcatenatedDataIntegrityException("Data read was corrupted: md5 does not match! " +
                     "Expected MD5: ${entryVal.md5.toHexString()} / Actual ${dataMd5.toHexString()}")
 
+        Napier.d("ConcatInputStream checksum good: ${dataMd5.toHexString()}")
         currentEntryReadMd5 = dataMd5
     }
 
@@ -48,13 +51,35 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
     }
 
     /**
+     * This function can be used by the consumer to verify that the current entry has been fully
+     * read. Sometimes the consumer might want to verify this before calling getNextEntry
+     */
+    fun verifyCurrentEntryCompleted() {
+        if(entryRemaining != 0L)
+            throw IOException("verifyCurrentEntryCompleted: entry ${currentEntry?.md5?.toHexString()} " +
+                    "is not completed")
+
+        assertDataReadMatchesMd5()
+    }
+
+    /**
      * Get the next entry
      */
     fun getNextEntry() : ConcatenatedEntry? {
+        Napier.d("ConcatenatedInputStream: getNextEntry")
         readCurrentEntryRemaining()
 
-        if(currentEntry != null)
+        // Catch premature end of stream...
+        // e.g. if entryRemaining != 0
+        if(entryRemaining > 0L) {
+            throw IOException("Premature end of stream: ${currentEntry?.md5?.toHexString()} has " +
+                    "$entryRemaining bytes unread")
+        }
+
+        if(currentEntry != null) {
+            Napier.d("ConcatenatedInputStream:  ${currentEntry?.md5?.toHexString()} getNextEntry verifying")
             assertDataReadMatchesMd5()
+        }
 
         currentEntryReadMd5 = null
 
@@ -85,6 +110,9 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
             oneByteBuffer[0] = byteRead.toByte()
             inflateMessageDigest.update(oneByteBuffer)
             entryRemaining--
+            if(entryRemaining == 0L)
+                assertDataReadMatchesMd5()
+
             return byteRead
         }else {
             return -1
@@ -97,16 +125,28 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
             return -1
 
         val bytesRead = super.read(buf, offset, lenToRead)
-        inflateMessageDigest.update(buf, offset, bytesRead)
-        entryRemaining -= bytesRead
+        if(bytesRead != -1) {
+            inflateMessageDigest.update(buf, offset, bytesRead)
+            entryRemaining -= bytesRead
+        }
+
+        if(entryRemaining == 0L) {
+            Napier.d("ConcatenatedInputStream: entry ${currentEntry?.md5?.toHexString()} finished: read verifying")
+            assertDataReadMatchesMd5()
+        }
+
         return bytesRead
     }
 
     override fun close(){
+        Napier.d("ConcatenatedInputStream: entry ${currentEntry?.md5?.toHexString()} : close")
         readCurrentEntryRemaining()
 
-        if(currentEntry != null)
+        if(currentEntry != null && entryRemaining == 0L) {
+            Napier.d("ConcatenatedInputStream: entry ${currentEntry?.md5?.toHexString()} : close check last entry")
             assertDataReadMatchesMd5()
+        }
+
 
         super.close()
     }

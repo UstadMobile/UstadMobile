@@ -60,6 +60,15 @@ class RangeOutputStreamTest {
         Assert.assertArrayEquals("Output data matches expected", expectedOutput, outputData)
     }
 
+    @Test
+    fun givenTwoStreams_whenConcatenated_thenMatchesOriginal() {
+        val inputData = makeInputData(20000)
+        val part1 = copyThroughRangeOutputStream(inputData, 0, 9999)
+        val part2 = copyThroughRangeOutputStream(inputData, 10000, -1)
+        Assert.assertArrayEquals("Data combined is equal to input data",
+                inputData, part1 + part2)
+    }
+
     @Test(expected = IllegalArgumentException::class)
     fun givenStartAfterEnd_whenConstructed_thenShouldThrowException() {
         RangeOutputStream(ByteArrayOutputStream(), 1000, 500)

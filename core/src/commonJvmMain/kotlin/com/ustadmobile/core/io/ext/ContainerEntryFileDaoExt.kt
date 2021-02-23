@@ -25,8 +25,18 @@ class ConcatenatedHttpResponse2(val containerEntryFiles: List<ContainerEntryFile
         get() = containerEntryFiles.sumByLong { it.ceCompressedSize } +
                 (containerEntryFiles.size * ConcatenatedEntry.SIZE)
 
+    /**
+     * The actual content length of the response that is going to be sent. This is what should
+     * be set as the Content-Length header. This reflects the range if any.
+     */
+    val actualContentLength: Long by lazy {
+        rangeResponse?.let {
+            it.actualContentLength
+        } ?: totalLength
+    }
+
     val rangeResponse: RangeResponse? by lazy {
-        requestHeaders.entries.firstOrNull { it.key.toLowerCase()  == "content-range"}?.value
+        requestHeaders.entries.firstOrNull { it.key.toLowerCase()  == "range"}?.value
                 ?.firstOrNull()?.let {
                     parseRangeRequestHeader(it, totalLength)
                 }

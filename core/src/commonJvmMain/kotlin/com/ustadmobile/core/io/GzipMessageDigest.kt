@@ -17,10 +17,10 @@ class GzipMessageDigest(val messageDigest: MessageDigest) {
     val buf = ByteArray(8 * 1024)
 
     @Volatile
-    lateinit var pipeOut: PipedOutputStream
+    private lateinit var pipeOut: PipedOutputStream
 
     @Volatile
-    lateinit var pipeIn: PipedInputStream
+    private lateinit var pipeIn: PipedInputStream
 
     @Volatile
     private var inflate: Boolean = false
@@ -47,8 +47,7 @@ class GzipMessageDigest(val messageDigest: MessageDigest) {
                 }
 
                 DigestInputStream(digestInput, messageDigest).use {
-                    val bytesRead = it.copyTo(NullOutputStream())
-                    println("InflateMessageDigest: Read $bytesRead")
+                    it.copyTo(NullOutputStream())
                 }
             }
         }
@@ -60,7 +59,7 @@ class GzipMessageDigest(val messageDigest: MessageDigest) {
         pipeOut.flush()
         pipeOut.close()
         runBlocking { readJob?.join() }
-        pipeIn.close()
+        //pipeIn will be closed by the .use block in the coroutine job
 
         readJob = null
 

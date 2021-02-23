@@ -1,5 +1,6 @@
 package com.ustadmobile.core.io
 
+import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 
 /**
@@ -58,6 +59,16 @@ class ConcatenatedEntry(
         result = 31 * result + totalSize.hashCode()
         result = 31 * result + lastModified.hashCode()
         return result
+    }
+
+
+    /**
+     * Convert this to a ContainerEntryFile
+     */
+    fun toContainerEntryFile(): ContainerEntryFile {
+        return ContainerEntryFile(md5 = md5.encodeBase64(), totalSize = totalSize,
+                compressedSize = compressedSize, compression = compression.toInt(),
+                lastModified = lastModified)
     }
 
     companion object {

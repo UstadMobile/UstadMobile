@@ -123,18 +123,20 @@ class ContainerEntryFileDaoExtTest {
 
 
         val concatResponse1 = db.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                requestMd5s, mapOf("content-range" to listOf("bytes=0-${2 * 1024 * 1024}")), db)
+                requestMd5s, mapOf("range" to listOf("bytes=0-${2 * 1024 * 1024}")), db)
 
         val tmpFile = temporaryFolder.newFile()
         FileOutputStream(tmpFile).use {
             concatResponse1.writeTo(it)
+            it.flush()
         }
 
         val concatResponse2 = db.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                requestMd5s, mapOf("content-range" to listOf("bytes=${(2 * 1024 * 1024)+1}-")), db)
+                requestMd5s, mapOf("range" to listOf("bytes=${(2 * 1024 * 1024)+1}-")), db)
 
         FileOutputStream(tmpFile, true).use {
             concatResponse2.writeTo(it)
+            it.flush()
         }
 
         //read the response

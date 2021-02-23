@@ -68,6 +68,8 @@ abstract class ContainerEntryFileDao : BaseDao<ContainerEntryFile> {
 
         const val ENDPOINT_CONCATENATEDFILES = "ConcatenatedContainerFiles"
 
+        const val ENDPOINT_CONCATENATEDFILES2 = "ConcatenatedContainerFiles2"
+
     }
 
 }
