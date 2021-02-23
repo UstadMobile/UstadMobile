@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.view.LeavingReasonListView
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.LeavingReason
@@ -32,8 +32,14 @@ class LeavingReasonListPresenter(context: Any, arguments: Map<String, String>, v
 
     }
 
+
+
     fun onClickLeavingReason(leavingReason: LeavingReason) {
-        view.finishWithResult(listOf(leavingReason))
+        when(mListMode) {
+            ListViewMode.PICKER -> view.finishWithResult(listOf(leavingReason))
+            ListViewMode.BROWSER -> systemImpl.go(LeavingReasonEditView.VIEW_NAME,
+                    mapOf(UstadView.ARG_ENTITY_UID to leavingReason.leavingReasonUid.toString()), context)
+        }
     }
 
 }

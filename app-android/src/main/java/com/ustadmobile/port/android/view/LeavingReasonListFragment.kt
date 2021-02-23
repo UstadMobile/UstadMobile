@@ -1,9 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -70,6 +68,16 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ustadFragmentTitle = requireContext().getString(R.string.select_leaving_reason)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = false
     }
 
     /**
