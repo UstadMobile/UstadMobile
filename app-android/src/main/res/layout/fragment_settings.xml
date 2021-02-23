@@ -4,9 +4,31 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
+
+        <import type="android.view.View" />
+
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.SettingsPresenter" />
+
+        <variable
+            name="workspaceSettingsVisible"
+            type="boolean" />
+
+        <variable
+            name="holidayCalendarVisible"
+            type="boolean" />
+
+
+        <variable
+            name="rolesVisible"
+            type="boolean" />
+
+
+        <variable
+            name="reasonLeavingVisible"
+            type="boolean" />
+
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -24,6 +46,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="16dp"
+                android:visibility="@{holidayCalendarVisible ? View.VISIBLE : View.GONE}"
                 android:background="?android:selectableItemBackground"
                 android:onClick="@{() -> presenter.goToHolidayCalendarList()}">
 
@@ -71,6 +94,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_8dp"
+                android:visibility="@{rolesVisible ? View.VISIBLE : View.GONE}"
                 android:background="?android:selectableItemBackground"
                 android:onClick="@{() -> presenter.goToRolesList()}">
 
@@ -119,6 +143,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_8dp"
+                android:visibility="@{workspaceSettingsVisible ? View.VISIBLE : View.GONE}"
                 android:background="?android:selectableItemBackground"
                 android:onClick="@{() -> presenter.handleClickWorkspace()}">
 
@@ -172,6 +197,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_8dp"
+                android:visibility="@{reasonLeavingVisible ? View.VISIBLE : View.GONE}"
                 android:background="?android:selectableItemBackground"
                 android:onClick="@{() -> presenter.handleClickLeavingReason()}">
 
