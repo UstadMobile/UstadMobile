@@ -183,7 +183,8 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
                 headerStringId = R.string.teachers_literal,
                 headerLayoutId = R.layout.item_simple_list_header,
                 filterOptions = ClazzMemberListPresenter.FILTER_OPTIONS.toListFilterOptions(requireContext(), di),
-                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0),
+                onFilterOptionSelected = mPresenter)
         val addStudentText = requireContext().getString(R.string.add_a_student)
         mNewStudentListRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(mOnClickAddStudent,
                 addStudentText, headerStringId = R.string.students,

@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.approvePendingClazzEnrolment
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
@@ -117,6 +118,11 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
     override fun onSearchSubmitted(text: String?) {
         searchText = text
+        updateListOnView()
+    }
+
+    override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {
+        super.onListFilterOptionSelected(filterOptionId)
         updateListOnView()
     }
 
