@@ -27,4 +27,8 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>, view: Sett
         impl.go(SiteDetailView.VIEW_NAME, mapOf(), context)
     }
 
+    fun handleClickLeavingReason(){
+        impl.go(LeavingReasonListView.VIEW_NAME, mapOf(), context)
+    }
+
 }

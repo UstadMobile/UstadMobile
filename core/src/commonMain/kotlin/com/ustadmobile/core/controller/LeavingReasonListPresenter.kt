@@ -29,10 +29,8 @@ class LeavingReasonListPresenter(context: Any, arguments: Map<String, String>, v
     }
 
     override fun handleClickCreateNewFab() {
-
+        systemImpl.go(LeavingReasonEditView.VIEW_NAME, mapOf(), context)
     }
-
-
 
     fun onClickLeavingReason(leavingReason: LeavingReason) {
         when(mListMode) {

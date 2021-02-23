@@ -166,6 +166,56 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
 
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/activity_settings2_leaving_reason_cl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:background="?android:selectableItemBackground"
+                android:onClick="@{() -> presenter.handleClickLeavingReason()}">
+
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/activity_settings2_leaving_reason_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:tint="?colorOnIconTint"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    app:srcCompat="@drawable/workspace_join_24px" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/activity_settings2_leaving_reason_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:text="@string/leaving_reason"
+                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_leaving_reason_iv"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    android:id="@+id/activity_settings2_leaving_reason_desc"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:text="@string/manage_site_settings"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_leaving_reason_iv"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_settings2_leaving_reason_title" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </layout>
