@@ -109,8 +109,10 @@ fun updateDateTimeOnEditTextWithExtra(prepend: String, append: String?, et: Text
 fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: InverseBindingListener) {
     val c = Calendar.getInstance()
     val currentDate = et.getTag(R.id.tag_datelong) as? Long ?: 0L
-    if (currentDate > 0) {
-        c.timeInMillis = currentDate
+    c.timeInMillis = if(!currentDate.isSet){
+        c.time.time
+    }else{
+        currentDate
     }
 
     val builder = AlertDialog.Builder(context)
