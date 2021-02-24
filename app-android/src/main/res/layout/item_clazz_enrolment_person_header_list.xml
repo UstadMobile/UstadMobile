@@ -5,6 +5,7 @@
     <data>
 
         <import type="com.ustadmobile.lib.db.entities.Person"/>
+        <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
 
         <variable
             name="presenter"
@@ -21,16 +22,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <ImageView
+        <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_clazz_enrolment_person_picture"
-            app:personPicturePersonUid="@{personUid}"
-            app:personPictureVisibilityGoneIfNoPicture="@{true}"
-            android:layout_width="@dimen/dimen_40dp"
-            android:layout_height="@dimen/dimen_40dp"
-            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/dimen_256dp"
+            android:scaleType="centerCrop"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
+            app:layout_constraintTop_toTopOf="parent"
+            app:imageForeignKey="@{personUid}"
+            app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
+            app:imageForeignKeyAutoHide="@{true}"
+            />
 
         <TextView
             android:id='@+id/item_clazz_enrolment_view_profile_button'
