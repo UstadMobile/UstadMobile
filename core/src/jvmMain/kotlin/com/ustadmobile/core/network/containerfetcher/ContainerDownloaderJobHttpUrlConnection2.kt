@@ -15,26 +15,18 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.util.NullOutputStream
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
-import org.kodein.di.on
+import kotlinx.coroutines.*
+import org.kodein.di.*
 import java.io.*
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
-import kotlin.collections.ArrayList
 import kotlin.coroutines.coroutineContext
 
 class ContainerDownloaderJobHttpUrlConnection2(val request: ContainerFetcherRequest2,
-                                                val listener2: ContainerFetcherListener2,
+                                                val listener: ContainerFetcherListener2?,
                                                 override val di: DI): DIAware {
-
-    //private val networkManager: NetworkManagerBle by instance()
 
     private val totalDownloadSize = AtomicLong(0L)
 
@@ -54,7 +46,19 @@ class ContainerDownloaderJobHttpUrlConnection2(val request: ContainerFetcherRequ
         "ContainerDownloaderJobHttpUrlConnection2 @${this.doorIdentityHashCode}"
     }
 
+    suspend fun progressUpdater() = coroutineScope {
+        while(isActive) {
+            listener?.onProgress(request, bytesSoFar.get(), totalDownloadSize.get())
+            delay(500L)
+        }
+    }
+
     suspend fun download(): Int {
+        val progressUpdaterJob = GlobalScope.async(Dispatchers.Default) {
+            progressUpdater()
+        }
+
+        startTime = System.currentTimeMillis()
         var downloadStatus = 0
         var urlConnection: HttpURLConnection? = null
         var inStream: ConcatenatedInputStream2? = null
@@ -73,13 +77,15 @@ class ContainerDownloaderJobHttpUrlConnection2(val request: ContainerFetcherRequ
             //check and see if the first file is already here
             val inputUrl = "${request.siteUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/${request.md5list}"
             Napier.d("$logPrefix Download $inputUrl -> ${request.destDirUri}")
-            urlConnection = URL(inputUrl).openConnection() as HttpURLConnection
+            val localConnectionOpener : LocalURLConnectionOpener? = di.direct.instanceOrNull()
+            val url = URL(inputUrl)
+            urlConnection = localConnectionOpener?.openLocalConnection(url)
+                    ?: url.openConnection() as HttpURLConnection
 
             if(firstFilePartPresent) {
                 val startFrom = firstFile.length() + firstFileHeader.length()
                 Napier.d("$logPrefix partial download from $startFrom")
-                urlConnection.addRequestProperty("range",
-                        "bytes=${startFrom}-")
+                urlConnection.addRequestProperty("range", "bytes=${startFrom}-")
             }
 
 
@@ -166,10 +172,14 @@ class ContainerDownloaderJobHttpUrlConnection2(val request: ContainerFetcherRequ
             }else {
                 JobStatus.PAUSED
             }
+            Napier.d("$logPrefix done downloaded ${bytesSoFar.get() - bytesToSkipWriting} bytes" +
+                    " in ${System.currentTimeMillis() - startTime}ms")
         }catch(e: Exception) {
             Napier.e("$logPrefix exception downloading", e)
         }finally {
             inStream?.close()
+            progressUpdaterJob.cancel()
+            listener?.onProgress(request, bytesSoFar.get(), totalDownloadSize.get())
         }
 
         return downloadStatus
