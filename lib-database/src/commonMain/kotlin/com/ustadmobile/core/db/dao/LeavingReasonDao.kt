@@ -2,9 +2,11 @@ package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.*
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.LeavingReason
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UidAndLabel
 import kotlin.js.JsName
 
@@ -14,6 +16,9 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
 
     @Query("""SELECT * FROM LeavingReason""")
     abstract fun findAllReasons(): DataSource.Factory<Int, LeavingReason>
+
+    @Query("SELECT * FROM LeavingReason")
+    abstract fun findAllReasonsLive(): List<LeavingReason>
 
     @JsName("findByUid")
     @Query("SELECT * FROM LeavingReason WHERE leavingReasonUid = :uid")
