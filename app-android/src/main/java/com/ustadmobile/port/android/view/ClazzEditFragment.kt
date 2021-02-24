@@ -83,7 +83,7 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
         get() = field
         set(value) {
             field = value
-            mDataBinding?.clazzStartDateError = null
+            mDataBinding?.clazzStartDateError = value
         }
 
     class ScheduleRecyclerAdapter(val activityEventHandler: ClazzEdit2ActivityEventHandler,
