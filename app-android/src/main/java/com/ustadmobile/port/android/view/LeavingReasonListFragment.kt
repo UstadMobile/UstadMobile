@@ -68,7 +68,7 @@ class LeavingReasonListFragment(): UstadListViewFragment<LeavingReason, LeavingR
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         ustadFragmentTitle = requireContext().getString(R.string.select_leaving_reason)
-        fabManager?.text = requireContext().getText(R.string.leaving_reason)
+        fabManager?.text = requireContext().getText(R.string.leaving_reason_add_title)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

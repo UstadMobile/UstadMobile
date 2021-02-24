@@ -8,6 +8,7 @@ import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
@@ -46,12 +47,12 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
     private fun updateListOnView() {
 
         view.clazzWorkWithMetrics = repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUid(
-                filterByClazzWorkUid)
+                filterByClazzWorkUid, systemTimeInMillis())
 
         view.list = repo.clazzWorkDao.findStudentProgressByClazzWork(
                 filterByClazzWorkUid,
                 selectedSortOption?.flag ?: ClazzWorkDao.SORT_FIRST_NAME_ASC,
-                searchText.toQueryLikeParam())
+                searchText.toQueryLikeParam(), systemTimeInMillis())
     }
 
     override fun handleClickEntry(entry: ClazzEnrolmentWithClazzWorkProgress) {
