@@ -71,6 +71,7 @@ suspend fun UmAppDatabase.createPersonGroupAndMemberWithEnrolment(entity: ClazzE
     val personGroupUid = when(entity.clazzEnrolmentRole) {
         ClazzEnrolment.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
         ClazzEnrolment.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
+        ClazzEnrolment.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
         else -> null
     }
 
