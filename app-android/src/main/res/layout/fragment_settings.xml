@@ -110,7 +110,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.0"
-                    app:srcCompat="@drawable/ic_check_circle_black_24dp" />
+                    app:srcCompat="@drawable/ic_badge_24dp" />
 
                 <TextView
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1"
@@ -213,7 +213,7 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintVertical_bias="0.0"
-                    app:srcCompat="@drawable/workspace_join_24px" />
+                    app:srcCompat="@drawable/ic_baseline_logout_24" />
 
                 <TextView
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1"
@@ -222,7 +222,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/dimen_8dp"
                     android:layout_marginTop="@dimen/dimen_8dp"
-                    android:text="@string/leaving_reason"
+                    android:text="@string/leaving_reasons_title"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_leaving_reason_iv"
                     app:layout_constraintTop_toTopOf="parent" />
 
@@ -234,7 +234,7 @@
                     android:layout_marginStart="@dimen/dimen_8dp"
                     android:layout_marginTop="@dimen/dimen_8dp"
                     android:layout_marginBottom="@dimen/dimen_8dp"
-                    android:text="@string/manage_site_settings"
+                    android:text="@string/leaving_reason_manage"
                     app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_leaving_reason_iv"
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings2_leaving_reason_title" />
