@@ -99,17 +99,17 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
             mBinding?.statusOptions = value
         }
 
-    override var startDateError: String? = null
+    override var startDateError: Pair<String, Long>? = null
         get() = field
         set(value) {
-            val newValue: String? = if(value?.contains("%1\$s") == true){
+            field = value
+            val startDateValue: String? = if(value?.first?.contains("%1\$s") == true){
                 val dateFormat = DateFormat.getDateFormat(requireContext())
-                value.replace("%1\$s", dateFormat.format(Date(entity?.clazzEnrolmentDateLeft ?: 0L)))
+                value.first.replace("%1\$s", dateFormat.format(Date(value.second)))
             }else{
-                value
+                value?.first
             }
-            field = newValue
-            mBinding?.startDateError = newValue
+            mBinding?.startDateError = startDateValue
         }
 
     override var endDateError: String? = null
