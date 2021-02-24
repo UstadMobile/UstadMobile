@@ -511,7 +511,9 @@
     <string name="add_leaving_reason">Add new leaving reason</string>
     <string name="current_status">Current status</string>
     <string name="leaving_reason">Reason for leaving</string>
-    <string name="reason">reason</string>
+    <string name="leaving_reason_add_title">Leaving reason</string>
+    <string name="leaving_reasons_title">Leaving reasons</string>
+    <string name="leaving_reason_manage">Add, remove and modify leaving reasons used when a student leaves a class</string>
     <string name="view_profile">View profile</string>
     <string name="currently_enroled">Currently enroled</string>
     <string name="class_enrolment_status">Class enrolment status</string>
