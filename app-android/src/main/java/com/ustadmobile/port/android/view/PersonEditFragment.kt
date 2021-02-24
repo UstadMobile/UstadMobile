@@ -217,6 +217,24 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             handleInputError(mBinding?.usernameTextinputlayout, value != null, value)
         }
 
+    override var firstNamesFieldError: String? = null
+        set(value) {
+            field = value
+            handleInputError(mBinding?.firstnamesTextinputlayout, value != null, value)
+        }
+
+    override var lastNameFieldError: String? = null
+        set(value) {
+            field = value
+            handleInputError(mBinding?.lastnameTextInputLayout, value != null, value)
+        }
+
+    override var genderFieldError: String? = null
+        set(value) {
+            field = value
+            handleInputError(mBinding?.genderTextinputlayout, value != null, value)
+        }
+
     override var passwordError: String? = null
         set(value) {
             field = null
@@ -316,6 +334,37 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 handleInputError(mBinding?.usernameTextinputlayout, false, null)
             }
         })
+
+        mBinding?.firstnamesText?.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                handleInputError(mBinding?.firstnamesTextinputlayout, false, null)
+            }
+        })
+
+        mBinding?.lastnameText?.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                handleInputError(mBinding?.lastnameTextInputLayout, false, null)
+            }
+        })
+
+        mBinding?.genderValue?.addTextChangedListener(object: TextWatcher {
+            override fun afterTextChanged(p0: Editable?) {}
+
+            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                handleInputError(mBinding?.genderTextinputlayout, false, null)
+            }
+        })
+
 
         mBinding?.passwordText?.addTextChangedListener(object: TextWatcher {
             override fun afterTextChanged(p0: Editable?) {}

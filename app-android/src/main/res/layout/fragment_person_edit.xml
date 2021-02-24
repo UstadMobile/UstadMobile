@@ -92,6 +92,7 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:errorTextColor="?colorError"
                 app:layout_constraintTop_toBottomOf="@id/item_presenter_field_row_picture_photoicon"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 >
@@ -116,6 +117,7 @@
                 app:hintEnabled="true"
                 android:enabled="@{fieldsEnabled}"
                 android:layout_marginEnd="@dimen/dimen_16dp"
+                app:errorTextColor="?colorError"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/firstnames_textinputlayout">
@@ -142,6 +144,7 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
+                app:errorTextColor="?colorError"
                 app:layout_constraintTop_toBottomOf="@+id/lastname_textInputLayout">
 
                 <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
@@ -261,6 +264,7 @@
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
                 android:enabled="@{fieldsEnabled}"
+                app:errorTextColor="?colorError"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/address_textinputlayout">

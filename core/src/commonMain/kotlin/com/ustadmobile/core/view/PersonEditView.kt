@@ -30,6 +30,10 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var canDelegatePermissions: Boolean?
 
+    var firstNamesFieldError: String?
+    var lastNameFieldError: String?
+    var genderFieldError: String?
+
     fun navigateToNextDestination(account: UmAccount?, nextDestination: String)
 
     companion object {
