@@ -25,6 +25,8 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
+import com.ustadmobile.core.view.ClazzList2View
+import com.ustadmobile.core.view.ClazzList2View.Companion.ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
@@ -120,8 +122,11 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
     override fun onClickNewClazzMemberWithClazz()  {
         onSaveStateToBackStackStateHandle()
+        val listOfClazzSelected = clazzEnrolmentWithClazzRecyclerAdapter
+                ?.currentList?.map { it.clazzEnrolmentClazzUid } ?: listOf()
         navigateToPickEntityFromList(ClazzEnrolmentWithClazz::class.java, R.id.clazz_list_dest,
                 overwriteDestination = true, args = bundleOf(
+                ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST to listOfClazzSelected.joinToString(),
                 ARG_POPUPTO_ON_FINISH to PersonEditView.VIEW_NAME,
                 ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME))
     }

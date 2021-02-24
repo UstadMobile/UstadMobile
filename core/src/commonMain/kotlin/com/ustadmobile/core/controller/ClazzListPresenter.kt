@@ -26,6 +26,8 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     private var filterExcludeMembersOfSchool: Long = 0
 
+    private var filterAlreadySelectedList = listOf<Long>()
+
     private var filterByPermission: Long = 0
 
     private var searchText: String? = null
@@ -37,6 +39,10 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
         super.onCreate(savedState)
 
         filterExcludeMembersOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
+        filterAlreadySelectedList = arguments[ClazzList2View.ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST]
+                ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
+                ?: listOf()
+
         clazzList2ItemListener.listViewMode = mListMode
 
         filterByPermission = arguments[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
@@ -52,9 +58,9 @@ class ClazzListPresenter(context: Any, arguments: Map<String, String>, view: Cla
 
     private fun updateList() {
         view.list = repo.clazzDao.findClazzesWithPermission(searchText.toQueryLikeParam(),
-                loggedInPersonUid, filterExcludeMembersOfSchool,
-                selectedSortOption?.flag ?: 0, view.checkedFilterOptionChip?.optionId ?: 0,
-                systemTimeInMillis(), filterByPermission)
+                loggedInPersonUid, filterAlreadySelectedList,
+                filterExcludeMembersOfSchool, selectedSortOption?.flag ?: 0,
+                view.checkedFilterOptionChip?.optionId ?: 0, systemTimeInMillis(), filterByPermission)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {

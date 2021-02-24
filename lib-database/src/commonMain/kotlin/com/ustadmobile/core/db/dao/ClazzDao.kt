@@ -97,6 +97,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         PersonGroupMember.groupMemberPersonUid = :personUid
         AND CAST(Clazz.isClazzActive AS INTEGER) = 1
         AND Clazz.clazzName like :searchQuery
+        AND (Clazz.clazzUid NOT IN (:excludeSelectedClazzList))
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
         AND ( :filter != $FILTER_ACTIVE_ONLY OR (:currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime))
@@ -119,8 +120,10 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         END DESC
     """)
     abstract fun findClazzesWithPermission(searchQuery: String, personUid: Long,
-                           excludeSchoolUid: Long, sortOrder: Int, filter: Int, currentTime: Long,
-                           permission: Long)
+                                           excludeSelectedClazzList: List<Long>,
+                                           excludeSchoolUid: Long, sortOrder: Int, filter: Int,
+                                           currentTime: Long,
+                                           permission: Long)
             : DataSource.Factory<Int, ClazzWithListDisplayDetails>
 
 
