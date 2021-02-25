@@ -224,7 +224,6 @@ class PersonEditPresenter(context: Any,
                 view.takeIf { entity.newPassword.isNullOrEmpty() }?.passwordError = requiredFieldMessage
                 view.takeIf { entity.confirmedPassword.isNullOrEmpty() }?.confirmError = requiredFieldMessage
 
-
                 view.takeIf { entity.dateOfBirth == 0L }?.dateOfBirthError = requiredFieldMessage
                 view.takeIf { !regViaLink && DateTime(entity.dateOfBirth).age() < 13 }?.dateOfBirthError =
                         impl.getString(MessageID.underRegistrationAgeError, context)

@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.text.Editable
+import android.text.InputFilter
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
@@ -10,13 +11,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.fragment.findNavController
 import com.google.android.material.textfield.TextInputLayout
-import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonAccountEditBinding
 import com.ustadmobile.core.controller.PersonAccountEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonAccountEditView
-import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.core.view.PersonAccountEditView.Companion.blockCharacterSet
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
@@ -27,6 +27,15 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 
     private var mPresenter: PersonAccountEditPresenter? = null
 
+
+    private val usernameFilter = InputFilter { source, start, end, dest, dstart, dend ->
+
+        if (source != null && blockCharacterSet.contains("" + source)) {
+            ""
+        } else if(source != null){
+             source.toString().toLowerCase()
+        }else null
+    }
 
     override var currentPasswordError: String? = null
         set(value) {
@@ -137,8 +146,12 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
                 handleInputError(mBinding?.usernameTextinputlayout, false, null)
             }
         })
+
+        mBinding?.accountUsernameText?.filters = arrayOf(usernameFilter)
+
         return rootView
     }
+
 
     override fun onResume() {
         super.onResume()

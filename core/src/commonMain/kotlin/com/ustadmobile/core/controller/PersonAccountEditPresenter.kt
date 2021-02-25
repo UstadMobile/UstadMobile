@@ -17,6 +17,7 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.Role
 import kotlinx.coroutines.GlobalScope
+import com.ustadmobile.core.view.PersonAccountEditView.Companion.blockCharacterSet
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
@@ -89,6 +90,7 @@ class PersonAccountEditPresenter(context: Any,
                     && !createAccount || entity.newPassword.isNullOrEmpty()
                     || entity.confirmedPassword.isNullOrEmpty() || entity.username.isNullOrEmpty()
                     || entity.confirmedPassword != entity.newPassword
+                    //|| entity.username?.contains(blockCharacterSet)
 
             if(hasErrors){
 
