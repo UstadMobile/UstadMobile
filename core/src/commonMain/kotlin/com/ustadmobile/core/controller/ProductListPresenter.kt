@@ -87,13 +87,13 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
 
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? ProductListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            updateListOnView()
-        }
-    }
+//    override fun handleClickSortOrder(sortOption: MessageIdOption) {
+//        val sortOrder = (sortOption as? ProductListSortOption)?.sortOrder ?: return
+//        if(sortOrder != currentSortOrder) {
+//            currentSortOrder = sortOrder
+//            updateListOnView()
+//        }
+//    }
 
     override fun handleClickEntry(entry: Product) {
         when(mListMode) {

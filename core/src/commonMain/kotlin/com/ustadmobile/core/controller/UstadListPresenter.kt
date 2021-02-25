@@ -4,10 +4,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ListFilterIdOption
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.OnListFilterOptionSelectedListener
-import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -94,7 +91,7 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
     }
 
     @Deprecated("Use onSortOptionSelected")
-    open fun handleClickSortOrder(sortOption: MessageIdOption) {
+    open fun handleClickSortOrder(sortOption: IdOption) {
 
     }
 

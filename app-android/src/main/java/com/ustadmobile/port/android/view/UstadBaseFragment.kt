@@ -107,6 +107,8 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
                 viewLifecycleOwner) {
             showSnackBar(it)
         }
+
+
     }
 
     override fun onDestroy() {

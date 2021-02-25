@@ -55,13 +55,13 @@ class CategoryListPresenter(context: Any, arguments: Map<String, String>, view: 
         systemImpl.go(CategoryEditView.VIEW_NAME, mapOf(), context)
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? CategoryListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            updateListOnView()
-        }
-    }
+//    override fun handleClickSortOrder(sortOption: MessageIdOption) {
+//        val sortOrder = (sortOption as? CategoryListSortOption)?.sortOrder ?: return
+//        if(sortOrder != currentSortOrder) {
+//            currentSortOrder = sortOrder
+//            updateListOnView()
+//        }
+//    }
 
     override fun handleClickEntry(category: Category) {
         when(mListMode) {

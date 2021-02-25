@@ -21,5 +21,6 @@ object MainScreen : KScreen<MainScreen>() {
 
     val bottomNav = KBottomNavigationView { withId(R.id.bottom_nav_view)}
 
+    val menuDone = KView { withId(R.id.menu_done)}
 
 }

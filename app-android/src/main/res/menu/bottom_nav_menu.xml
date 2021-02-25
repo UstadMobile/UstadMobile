@@ -41,11 +41,10 @@
 <!--        android:icon="@drawable/ic_report_24dp"-->
 <!--        android:title="@string/reports" />-->
 
-    <item
-        android:visible="false"
-        android:id="@+id/report_list_dest"
-        android:icon="@drawable/ic_report_24dp"
-        android:title="@string/reports" />
+<!--    <item-->
+<!--        android:id="@+id/report_list_dest"-->
+<!--        android:icon="@drawable/ic_report_24dp"-->
+<!--        android:title="@string/reports" />-->
 
 
 </menu>

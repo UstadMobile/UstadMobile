@@ -29,6 +29,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'digital.wup.android-maven-publish'
 apply plugin: 'kotlinx-serialization'
 apply plugin: "kotlin-kapt"
+apply plugin: 'com.google.gms.google-services'
 
 //As Per https://developer.android.com/studio/publish/app-signing.html#release-mode
 def keyStorePropertiesExists = rootProject.file("keystore.properties").exists()
@@ -272,6 +273,10 @@ configurations.all {
 }
 
 dependencies {
+    implementation 'com.google.firebase:firebase-core:17.4.0'
+    implementation platform('com.google.firebase:firebase-bom:26.5.0')
+    implementation 'com.google.firebase:firebase-analytics-ktx'
+    
     coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
 
     implementation project(':core')

@@ -66,13 +66,13 @@ class SaleListPresenter(context: Any, arguments: Map<String, String>, view: Sale
         systemImpl.go(SaleEditView.VIEW_NAME, mapOf(), context)
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? SaleListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            updateListOnView()
-        }
-    }
+//    override fun handleClickSortOrder(sortOption: MessageIdOption) {
+//        val sortOrder = (sortOption as? SaleListSortOption)?.sortOrder ?: return
+//        if(sortOrder != currentSortOrder) {
+//            currentSortOrder = sortOrder
+//            updateListOnView()
+//        }
+//    }
 
     override fun handleClickEntry(entry: Sale) {
         when(mListMode) {

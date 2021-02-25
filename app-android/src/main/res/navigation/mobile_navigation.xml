@@ -130,6 +130,14 @@
         android:name="com.ustadmobile.port.android.view.ReportEditFragment" />
 
     <fragment
+        android:id="@+id/report_template_list_dest"
+        android:name="com.ustadmobile.port.android.view.ReportTemplateListFragment" />
+
+    <fragment
+        android:id="@+id/report_filter_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ReportFilterEditFragment"/>
+
+    <fragment
         android:id="@+id/holidaycalendar_list_dest"
         android:name="com.ustadmobile.port.android.view.HolidayCalendarListFragment" />
 
@@ -269,6 +277,11 @@
         />
 
     <fragment
+        android:id="@+id/date_range_dest"
+        android:name="com.ustadmobile.port.android.view.DateRangeFragment"
+        />
+
+    <fragment
         android:id="@+id/content_xapi_dest"
         android:name="com.ustadmobile.port.android.view.XapiPackageContentFragment"
         android:label="" />
@@ -307,6 +320,7 @@
         android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkFragment"
         android:label=""
         />
+
 
     <fragment
         android:id="@+id/webchunk_view"

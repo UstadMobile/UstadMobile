@@ -35,7 +35,7 @@ import kotlin.jvm.Volatile
     SchoolMember::class, ClazzWork::class, ClazzWorkContentJoin::class, Comments::class,
     ClazzWorkQuestion::class, ClazzWorkQuestionOption::class, ClazzWorkSubmission::class,
     ClazzWorkQuestionResponse::class, ContentEntryProgress::class,
-    Report::class, ReportFilter::class,
+    Report::class,
     DeviceSession::class, Site::class, ContainerImportJob::class,
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
@@ -55,7 +55,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 157)
+], version = 158)
 @MinSyncVersion(28)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -88,6 +88,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
      */
     fun preload() {
         verbDao.initPreloadedVerbs()
+        reportDao.initPreloadedTemplates()
     }
 
     @JsName("networkNodeDao")
@@ -193,9 +194,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
     @JsName("reportDao")
     abstract val reportDao: ReportDao
-
-    @JsName("reportFilterDao")
-    abstract val reportFilterDao: ReportFilterDao
 
     @JsName("containerImportJobDao")
     abstract val containerImportJobDao: ContainerImportJobDao
@@ -3705,6 +3703,105 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
 
+        val MIGRATION_157_158 = object: DoorMigration(157, 158) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("DROP TABLE IF EXISTS ReportFilter")
+                database.execSQL("DROP TABLE IF EXISTS ReportFilter_trk")
+
+                // update statementVerb
+                database.execSQL("""UPDATE StatementEntity SET statementVerbUid = 
+                    ${VerbEntity.VERB_PASSED_UID} WHERE statementVerbUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_PASSED_URL}')""".trimMargin())
+                database.execSQL("""UPDATE StatementEntity SET statementVerbUid = 
+                    ${VerbEntity.VERB_FAILED_UID} WHERE statementVerbUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_FAILED_URL}')""".trimMargin())
+
+                // update subStatementVerb
+                database.execSQL("""UPDATE StatementEntity SET substatementVerbUid = 
+                    ${VerbEntity.VERB_PASSED_UID} WHERE substatementVerbUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_PASSED_URL}')""".trimMargin())
+                database.execSQL("""UPDATE StatementEntity SET substatementVerbUid = 
+                    ${VerbEntity.VERB_FAILED_UID} WHERE substatementVerbUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_FAILED_URL}')""".trimMargin())
+
+                // update langmap
+                database.execSQL("""UPDATE XLangMapEntry SET verbLangMapUid = 
+                    ${VerbEntity.VERB_PASSED_UID} WHERE verbLangMapUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_PASSED_URL}')""".trimMargin())
+                database.execSQL("""UPDATE XLangMapEntry SET verbLangMapUid = 
+                    ${VerbEntity.VERB_FAILED_UID} WHERE verbLangMapUid IN (SELECT verbUid 
+                    FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_FAILED_URL}')""".trimMargin())
+
+
+                if(database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS reportSeries TEXT""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS reportDescription TEXT""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS fromRelTo INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS fromRelOffSet INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS fromRelUnit INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS toRelTo INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS toRelOffSet INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS toRelUnit INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS priority INTEGER""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS reportDateRangeSelection INTEGER""")
+
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS isTemplate BOOL DEFAULT FALSE""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report 
+                        DROP COLUMN IF EXISTS chartType""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report 
+                        DROP COLUMN IF EXISTS yAxis""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report 
+                        DROP COLUMN IF EXISTS subGroup""".trimMargin())
+
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN IF NOT EXISTS contentEntryRoot BOOL DEFAULT FALSE")
+                    database.execSQL("""UPDATE StatementEntity SET contentEntryRoot = true 
+                        WHERE statementUid IN (select statementUid from StatementEntity 
+                        LEFT JOIN ContentEntry ON ContentEntry.contentEntryUid = StatementEntity.statementContentEntryUid 
+                        LEFT JOIN XObjectEntity ON XObjectEntity.xObjectUid = StatementEntity.xObjectUid 
+                        WHERE XObjectEntity.objectId = ContentEntry.entryId)""".trimMargin())
+
+                    database.execSQL("""ALTER TABLE VerbEntity ADD COLUMN IF NOT EXISTS verbInActive BOOL DEFAULT FALSE""")
+                    database.execSQL("""UPDATE VerbEntity SET verbInActive = TRUE WHERE 
+                        urlId = '${VerbEntity.VERB_PASSED_URL}' AND verbUid != ${VerbEntity.VERB_PASSED_UID}""".trimMargin())
+                    database.execSQL("""UPDATE VerbEntity SET verbInActive = TRUE WHERE 
+                        urlId = '${VerbEntity.VERB_FAILED_URL}' AND verbUid != ${VerbEntity.VERB_FAILED_UID}""".trimMargin())
+
+                }else if(database.dbType() == DoorDbType.SQLITE){
+
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN reportSeries TEXT""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report ADD COLUMN reportDescription TEXT""".trimMargin())
+                    database.execSQL("""ALTER TABLE Report 
+                        ADD COLUMN isTemplate INTEGER""".trimMargin())
+
+                    database.execSQL("ALTER TABLE Report RENAME to Report_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Report (`reportUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `reportOwnerUid` INTEGER NOT NULL, `xAxis` INTEGER NOT NULL, `reportDateRangeSelection` INTEGER NOT NULL, `fromDate` INTEGER NOT NULL, `fromRelTo` INTEGER NOT NULL, `fromRelOffSet` INTEGER NOT NULL, `fromRelUnit` INTEGER NOT NULL, `toDate` INTEGER NOT NULL, `toRelTo` INTEGER NOT NULL, `toRelOffSet` INTEGER NOT NULL, `toRelUnit` INTEGER NOT NULL, `reportTitle` TEXT, `reportDescription` TEXT, `reportSeries` TEXT, `reportInactive` INTEGER NOT NULL, `isTemplate` INTEGER NOT NULL, `priority` INTEGER NOT NULL, `reportMasterChangeSeqNum` INTEGER NOT NULL, `reportLocalChangeSeqNum` INTEGER NOT NULL, `reportLastChangedBy` INTEGER NOT NULL)")
+                    database.execSQL("INSERT INTO Report (reportUid, reportOwnerUid, xAxis, reportDateRangeSelection, fromDate, fromRelTo, fromRelOffSet, fromRelUnit, toDate, toRelTo, toRelOffSet, toRelUnit, reportTitle, reportDescription, reportSeries, reportInactive, isTemplate, priority, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy) SELECT reportUid, reportOwnerUid, xAxis,0, fromDate, 0, 0, 0, 0, 0, 0, 0, reportTitle, reportDescription, reportSeries, reportInactive, isTemplate, 1, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy FROM Report_OLD")
+                    database.execSQL("DROP TABLE Report_OLD")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS Report_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
+                    database.execSQL( "CREATE INDEX IF NOT EXISTS `index_Report_trk_clientId_epk_csn` ON Report_trk (`clientId`, `epk`, `csn`)")
+                    database.execSQL( "CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_verbLangMapUid` ON XLangMapEntry (`verbLangMapUid`)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_StatementEntity_statementPersonUid` ON StatementEntity (`statementPersonUid`)")
+
+                    database.execSQL("ALTER TABLE StatementEntity ADD COLUMN contentEntryRoot INTEGER DEFAULT 0 NOT NULL")
+                    database.execSQL("""UPDATE StatementEntity SET contentEntryRoot = 1 WHERE 
+                        statementUid IN (select statementUid from StatementEntity LEFT JOIN 
+                        ContentEntry ON ContentEntry.contentEntryUid = StatementEntity.statementContentEntryUid 
+                        LEFT JOIN XObjectEntity ON XObjectEntity.xObjectUid = StatementEntity.xObjectUid 
+                        WHERE XObjectEntity.objectId = ContentEntry.entryId)""".trimMargin())
+
+                    database.execSQL("""ALTER TABLE VerbEntity ADD COLUMN verbInActive INTEGER DEFAULT 0 NOT NULL""")
+                    database.execSQL("""UPDATE VerbEntity SET verbInActive = 1 WHERE 
+                        urlId = '${VerbEntity.VERB_PASSED_URL}' AND verbUid != ${VerbEntity.VERB_PASSED_UID}""".trimMargin())
+                    database.execSQL("""UPDATE VerbEntity SET verbInActive = 1 WHERE 
+                        urlId = '${VerbEntity.VERB_FAILED_URL}' AND verbUid != ${VerbEntity.VERB_FAILED_UID}""".trimMargin())
+
+                }
+
+            }
+        }
+
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
@@ -3713,7 +3810,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_43_44, MIGRATION_44_45, MIGRATION_45_46, MIGRATION_46_47,
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
                     MIGRATION_51_52, MIGRATION_152_153, MIGRATION_153_154, MIGRATION_154_155,
-                    MIGRATION_155_156, MIGRATION_156_157)
+                    MIGRATION_155_156, MIGRATION_156_157, MIGRATION_157_158)
 
 
             return builder

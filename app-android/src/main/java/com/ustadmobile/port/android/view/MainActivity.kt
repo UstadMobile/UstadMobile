@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.R.id
 import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
@@ -22,6 +23,7 @@ import androidx.navigation.ui.setupWithNavController
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ActivityMainBinding
 import com.ustadmobile.core.account.Endpoint
@@ -75,6 +77,8 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private val destinationProvider: DestinationProvider by instance()
 
+    private var mFirebaseAnalytics: FirebaseAnalytics? = null
+
     //This is actually managed by the underlying fragments.
     override var loading: Boolean
         get() = false
@@ -111,6 +115,15 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main)
         setSupportActionBar(mBinding.root.toolbar)
 
+        mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
+
+//        val bundle = Bundle()
+//        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, id)
+//        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, name)
+//        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image")
+//        mFirebaseAnalytics!!.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle)
+
+
         val host: NavHostFragment = supportFragmentManager
                 .findFragmentById(R.id.activity_main_navhost_fragment) as NavHostFragment? ?: return
         val navController = host.navController
@@ -124,6 +137,10 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         DbPreloadWorker.queuePreloadWorker(applicationContext)
         accountManager.activeAccountLive.observe(this, mActiveUserObserver)
+
+
+
+
 
     }
 

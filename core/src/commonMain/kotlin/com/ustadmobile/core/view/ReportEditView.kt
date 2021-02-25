@@ -1,20 +1,19 @@
 package com.ustadmobile.core.view
 
 import com.ustadmobile.core.controller.ReportEditPresenter
-import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.core.util.IdOption
+import com.ustadmobile.core.util.ObjectMessageIdOption
 import com.ustadmobile.lib.db.entities.*
 
 
-interface ReportEditView: UstadEditView<ReportWithFilters> {
+interface ReportEditView: UstadEditView<ReportWithSeriesWithFilters> {
 
-    var personFilterList : DoorMutableLiveData<List<ReportFilterWithDisplayDetails>>?
-    var verbFilterList : DoorMutableLiveData<List<ReportFilterWithDisplayDetails>>?
-    var contentFilterList: DoorMutableLiveData<List<ReportFilterWithDisplayDetails>>?
-
-    var chartOptions: List<ReportEditPresenter.ChartTypeMessageIdOption>?
-    var yAxisOptions: List<ReportEditPresenter.YAxisMessageIdOption>?
+    var visualTypeOptions: List<ReportEditPresenter.VisualTypeMessageIdOption>?
     var xAxisOptions: List<ReportEditPresenter.XAxisMessageIdOption>?
-    var groupOptions: List<ReportEditPresenter.GroupByMessageIdOption>?
+    var subGroupOptions: List<ReportEditPresenter.SubGroupByMessageIdOption>?
+    var yAxisOptions: List<ReportEditPresenter.YAxisMessageIdOption>?
+    var dateRangeOptions: List<ObjectMessageIdOption<DateRangeMoment>>?
+    var selectedDateRangeMoment: DateRangeMoment?
 
     var titleErrorText: String?
 

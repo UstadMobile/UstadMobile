@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1012027704117",
+    "project_id": "goldozi1",
+    "storage_bucket": "goldozi1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1012027704117:android:8aafbd591ce02001ed027c",
+        "android_client_info": {
+          "package_name": "org.fhi360.goldozi"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1012027704117-po2cpgdqed7rtrp7h76kekdlib1cl7dk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAo3lDK600nzNecDMHWSF58e-WPtp7eZRY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1012027704117-po2cpgdqed7rtrp7h76kekdlib1cl7dk.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

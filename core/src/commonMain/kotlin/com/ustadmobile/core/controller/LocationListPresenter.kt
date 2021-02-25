@@ -51,13 +51,13 @@ class LocationListPresenter(context: Any, arguments: Map<String, String>, view: 
         systemImpl.go(LocationEditView.VIEW_NAME, mapOf(), context)
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? LocationListSortOption)?.sortOrder ?: return
-        if(sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            updateListOnView()
-        }
-    }
+//    override fun handleClickSortOrder(sortOption: MessageIdOption) {
+//        val sortOrder = (sortOption as? LocationListSortOption)?.sortOrder ?: return
+//        if(sortOrder != currentSortOrder) {
+//            currentSortOrder = sortOrder
+//            updateListOnView()
+//        }
+//    }
 
 
     override fun handleClickEntry(entry: Location) {

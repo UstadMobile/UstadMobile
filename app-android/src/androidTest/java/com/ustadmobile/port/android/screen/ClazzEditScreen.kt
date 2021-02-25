@@ -9,7 +9,6 @@ import com.ustadmobile.core.networkmanager.defaultGson
 import com.ustadmobile.lib.db.entities.ClazzWithHolidayCalendarAndSchool
 import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.port.android.view.ClazzEditFragment
-import com.ustadmobile.test.port.android.util.setDateField
 
 object ClazzEditScreen : KScreen<ClazzEditScreen>() {
 
