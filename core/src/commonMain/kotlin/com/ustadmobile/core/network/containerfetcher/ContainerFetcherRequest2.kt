@@ -1,12 +1,15 @@
 package com.ustadmobile.core.network.containerfetcher
 
+import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
+
 class ContainerFetcherRequest2(
         /**
-         * List of the MD5Sums that should be downloaded as a string of the md5 hex separated by ;
-         * e.g.
+         * List of the ContainerEntryFiles that need to be downloaded. This must include the
+         * containerentryfile object so that the md5 is available.
+         *
          * d288df22a4d74bade392dd61766aab55;322e2c67c38104012a7a22bd1ca024f8
          */
-        val md5list: String,
+        val entriesToDownload: List<ContainerEntryWithMd5>,
 
         /**
          * The url of the site to download from (as per the endpoint url)

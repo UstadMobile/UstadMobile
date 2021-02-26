@@ -6,16 +6,14 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.RangeOutputStream
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
+import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
 import com.ustadmobile.core.io.ext.toKmpUriString
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.base64StringToByteArray
-import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.hexStringToByteArray
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.Container
@@ -181,16 +179,14 @@ class ContainerDownloaderJobHttpUrlConnection2Test {
 
     @Test
     fun givenValidRequest_whenDownloadCalled_thenShouldDownloadContainerFiles() {
-        val md5List = serverDb.containerEntryDao.findByContainer(container.containerUid)
-                .map { it.containerEntryFile!!.cefMd5!! }
-
-        val downloadMd5Param =md5List.map { it.base64StringToByteArray().toHexString() }
-                .joinToString(separator = ";")
+        val containerEntriesToDownload = serverDb.containerEntryDao.findByContainer(container.containerUid)
+                .map { it.toContainerEntryWithMd5() }
+        val md5List = containerEntriesToDownload.map { it.cefMd5!! }
 
         val downloadDestDir = temporaryFolder.newFolder()
 
         val siteUrl = mockWebServer.url("/").toString()
-        val request = ContainerFetcherRequest2(downloadMd5Param, siteUrl,
+        val request = ContainerFetcherRequest2(containerEntriesToDownload, siteUrl,
             downloadDestDir.toKmpUriString())
 
         val mockListener = mock<ContainerFetcherListener2> { }
@@ -206,14 +202,15 @@ class ContainerDownloaderJobHttpUrlConnection2Test {
 
 
         serverDb.assertAllContainerEntryFilesPresentInOther(md5List, clientDb)
+        serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
     }
 
     @Test
     fun givenDownloadIsInterrupted_whenNewRequestMade_thenDownloadShouldResume() {
         dispatcher.numTimesToFail.set(1)
 
-        val allMd5sToDownload = serverDb.containerEntryDao.findByContainer(container.containerUid)
-                .map { it.containerEntryFile!!.cefMd5!! }
+        val allContainerEntryFilesToDownload = serverDb.containerEntryDao.findByContainer(container.containerUid)
+                .map { it.toContainerEntryWithMd5() }
 
         val downloadDestDir = temporaryFolder.newFolder()
 
@@ -228,13 +225,12 @@ class ContainerDownloaderJobHttpUrlConnection2Test {
         for(i in 0..1) {
             Napier.d("============ ATTEMPT $i ============")
             try {
-                val entriesInDb = clientDb.containerEntryFileDao.findEntriesByMd5Sums(allMd5sToDownload)
-                val entriesToDownload = allMd5sToDownload.filter { md5 -> ! entriesInDb.any { dbEntry -> dbEntry.cefMd5 ==  md5} }
-                val requestMd5s = entriesToDownload.map { it.base64StringToByteArray().toHexString() }
-                        .sorted()
-                        .joinToString(separator = ";")
+                val entriesInDb = clientDb.containerEntryFileDao.findEntriesByMd5Sums(
+                        allContainerEntryFilesToDownload.mapNotNull { it.cefMd5 })
+                val entriesToDownload = allContainerEntryFilesToDownload
+                        .filter { entry -> ! entriesInDb.any { dbEntry -> dbEntry.cefMd5 ==  entry.cefMd5} }
 
-                val request = ContainerFetcherRequest2(requestMd5s, siteUrl, downloadDestDir.toKmpUriString())
+                val request = ContainerFetcherRequest2(entriesToDownload, siteUrl, downloadDestDir.toKmpUriString())
                 val downloaderJob = ContainerDownloaderJobHttpUrlConnection2(request,
                         mockListener, clientDi)
                 val result = runBlocking { downloaderJob.download() }
@@ -257,8 +253,9 @@ class ContainerDownloaderJobHttpUrlConnection2Test {
                 mockRequest2.getHeader("range"))
 
 
-        serverDb.assertAllContainerEntryFilesPresentInOther(allMd5sToDownload, clientDb)
-
+        serverDb.assertAllContainerEntryFilesPresentInOther(
+                allContainerEntryFilesToDownload.map { it.cefMd5!! }, clientDb)
+        serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
     }
 
 

@@ -9,12 +9,8 @@ import com.ustadmobile.core.io.ConcatenatedDataIntegrityException
 import com.ustadmobile.core.io.ConcatenatedEntry
 import com.ustadmobile.core.io.ConcatenatedInputStream2
 import com.ustadmobile.core.io.RangeOutputStream
-import com.ustadmobile.core.io.ext.parseKmpUriStringToFile
-import com.ustadmobile.core.io.ext.toBytes
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorIdentityHashCode
-import com.ustadmobile.door.ext.toHexString
-import com.ustadmobile.door.util.NullOutputStream
 import kotlinx.coroutines.*
 import org.kodein.di.*
 import java.io.*
@@ -22,6 +18,11 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
+import com.ustadmobile.core.io.ext.parseKmpUriStringToFile
+import com.ustadmobile.core.io.ext.toBytes
+import com.ustadmobile.door.ext.toHexString
+import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import kotlin.coroutines.coroutineContext
 
 class ContainerDownloaderJobHttpUrlConnection2(val request: ContainerFetcherRequest2,
@@ -63,7 +64,10 @@ class ContainerDownloaderJobHttpUrlConnection2(val request: ContainerFetcherRequ
         var urlConnection: HttpURLConnection? = null
         var inStream: ConcatenatedInputStream2? = null
 
-        val md5sToDownload = request.md5list.split(";")
+        val md5sToDownload = request.entriesToDownload.mapNotNull {
+            it.cefMd5?.base64EncodedToHexString()
+        }
+        val md5ListString = md5sToDownload.joinToString(separator = ";")
         val md5ExpectedList = md5sToDownload.toMutableList()
         val firstMd5 = md5sToDownload.first()
         val destDirFile = request.destDirUri.parseKmpUriStringToFile()
@@ -75,7 +79,7 @@ class ContainerDownloaderJobHttpUrlConnection2(val request: ContainerFetcherRequ
 
         try {
             //check and see if the first file is already here
-            val inputUrl = "${request.siteUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/${request.md5list}"
+            val inputUrl = "${request.siteUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/$md5ListString"
             Napier.d("$logPrefix Download $inputUrl -> ${request.destDirUri}")
             val localConnectionOpener : LocalURLConnectionOpener? = di.direct.instanceOrNull()
             val url = URL(inputUrl)
@@ -160,9 +164,17 @@ class ContainerDownloaderJobHttpUrlConnection2(val request: ContainerFetcherRequ
                     throw IOException("Could not rename ${destFileOut} to ${finalDestFile}")
                 headerFile.delete()
 
-                db.containerEntryFileDao.insertAsync(concatenatedEntry.toContainerEntryFile().apply {
+                val containerEntryFile = concatenatedEntry.toContainerEntryFile().apply {
                     cefPath = finalDestFile.absolutePath
-                })
+                    cefUid = db.containerEntryFileDao.insertAsync(this)
+                }
+
+                val md5Base64 = concatenatedEntry.md5.encodeBase64()
+                val entryFiles = request.entriesToDownload.filter { it.cefMd5 == md5Base64 }
+                entryFiles.forEach {
+                    it.ceCefUid = containerEntryFile.cefUid
+                }
+                db.containerEntryDao.insertListAsync(entryFiles)
             }
 
             val payloadExpected = (totalDownloadSize.get() - (md5sToDownload.size * ConcatenatedEntry.SIZE))
