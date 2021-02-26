@@ -121,7 +121,7 @@
     <string name="no_app_found">د وزلې د خلاصولو لپاره هیڅ اپلیکیشن و نه موندل شو</string>
     <string name="insufficient_space">پ حافظه کې ناکافی اندازه ځای موجود دی</string>
     <string name="entry_details_author">لیکوال</string>
-    <string name="entry_details_license">منښتلیک</string>
+    <string name="entry_details_license">جواز:</string>
     <string name="entry_details_description">تفصیل</string>
     <string name="library_reading_level">د لوستلو کچه</string>
     <string name="file_not_found">دوتنه و نه موندل شو</string>
@@ -186,7 +186,7 @@
     <string name="content_editor_create_new_import">له دوتنې څخه یې وارد کړئ</string>
     <string name="content_editor_create_new_import_link">له پیوند څخه واردول</string>
     <string name="download_storage_permission_title">د دوتنې اجازې ته اړتیا شته</string>
-    <string name="content_editor_create_new_category">نوی پوښې ایجادول</string>
+    <string name="content_editor_create_new_category">نوی پوښه</string>
     <string name="content_editor_edit_category">سمون</string>
     <string name="content_editor_create_new_title">محتویات زیاتول</string>
     <string name="content_editor_action_done">ترسره شو</string>
@@ -347,4 +347,78 @@
     <string name="confirm_delete_message">آیا تاسو ډاډه یاست چې غواړئ دغه برخه له خپلې وزلې څخه ړنګ کړئ؟</string>
     <string name="processing">بهیر</string>
     <string name="uploading">د پورته کیدو په حالت کې</string>
+    <string name="created_partnership">جوړه شوې په ملتیا د:</string>
+    <string name="content_type">د محتیواتو ډول</string>
+    <string name="number_students_completed" value="206">د محتویاتو کارول - د زده کوونکو شمیر چې محتویات یې بشپړ کړي</string>
+    <string name="percent_students_attended" value="211">حاضری - سلنه د زده کوونکو چې حاضر شوی</string>
+    <string name="report">راپور</string>
+    <string name="number_unique_students_attending" value="214">حاضری - د بی ساری زده کوونکو شمیر چې حاضر دي</string>
+    <string name="new_custom_date_range" value="804">د نیټې نوی دودیز لړۍ…</string>
+    <string name="add_a_new_verb">د نوی فعل زیاتول</string>
+    <string name="field_content_completion">د محتویاتو د بشپړ کولو حالت</string>
+    <string name="accounts">ګڼون</string>
+    <string name="lets_get_started_label">راځئ چې پیل یې کړو</string>
+    <string name="link">پیوند</string>
+    <string name="choose_template">بیلگه غوره کول</string>
+    <string name="save_as_template">د بیلگي په توګه ثبتول</string>
+    <string name="audio">غږیز</string>
+    <string name="compress">کوټه کول</string>
+    <string name="and">او</string>
+    <string name="added">ورزیات شو</string>
+    <string name="fixed_date">ځانګړی نیټه</string>
+    <string name="relative_date">اړونده نیټه</string>
+    <string name="entry_details_publisher">خپروونکی</string>
+    <string name="preview">مخلید</string>
+    <string name="add_a_student">د زده کوونکی زیاتول</string>
+    <string name="select_language">ژبه غوره کړئ</string>
+    <string name="students">زده کوونکي</string>
+    <string name="import_content">د محتویاتو واردول</string>
+    <string name="ebook">بریښنایی کتاب</string>
+    <string name="interactive">محاوره یی</string>
+    <string name="collection">ټولګه</string>
+    <string name="document">لاسوند</string>
+    <string name="article">مقاله</string>
+    <string name="show_hidden_items">د پټ توکو ښکاره کول</string>
+    <string name="open_folder">د پوښۍ پرانیزل</string>
+    <string name="action_hidden">پټ</string>
+    <string name="content_total_duration" value="200">د محتویاتو کارول - ټولټال موده</string>
+    <string name="count_session" value="202">د محتویاتو کارول - د غونډو شمیر</string>
+    <string name="interaction_recorded" value="203">د محتویاتو کارول - د ثبت شوی متقابل عمل شمیر</string>
+    <string name="average_usage_time_per_user" value="205">د محتویاتو کارول - په هر کاروونکی په منځنۍ کچې د کارولو وخت</string>
+    <string name="percent_students_completed" value="207">د محتویاتو کارول - سلنه زنده کوونکي چې محتویات یې بشپړ کړي</string>
+    <string name="total_attendances" value="208">حاضری - ټولټال حاضر</string>
+    <string name="total_absences" value="209">حاضری - ټولټال غیرحاضر</string>
+    <string name="total_lates" value="210">حاضری - ټولټال ناوخته راغلي</string>
+    <string name="percent_students_attended_or_late" value="212">حاضری - سلنه د زده کوونکو چې حاضر وو او یا ناوخته راغلي</string>
+    <string name="total_number_of_classes" value="213">حاضری - د ټولګیو ټولټال شمیر</string>
+    <string name="last_week_date_range" value="800">تیره اوونۍ</string>
+    <string name="last_two_week_date_range" value="801">تیرې دوې اوونې</string>
+    <string name="last_month_date_range" value="802">تیر میاشت</string>
+    <string name="last_three_months_date_range" value="803">تیرې درې میاشتې</string>
+    <string name="selected_custom_range">دودیز لړۍ: %1$s%</string>
+    <string name="time_range">وخت لړۍ</string>
+    <string name="year">کال</string>
+    <string name="xapi_options_data_set">اومتوک برابرول</string>
+    <string name="xapi_options_series">لړۍ</string>
+    <string name="time_range_all">هرڅه</string>
+    <string name="report_filter_edit_field">ځای</string>
+    <string name="report_filter_edit_condition">حالت</string>
+    <string name="report_filter_edit_values">ارزښت(ونه)</string>
+    <string name="create_a_new_report">د نوی راپول جوړول</string>
+    <string name="id_verbentity_urlid">پیژند: %s</string>
+    <string name="edit_filters">د فلټرونو سمون</string>
+    <string name="field_person_gender">د شخص جنسیت</string>
+    <string name="field_person_age">د شخص عمر</string>
+    <string name="field_content_entry">د محتویاتو داخل کول</string>
+    <string name="edit_report">د راپور سمون</string>
+    <string name="verb">فعل</string>
+    <string name="title">عنوان</string>
+    <string name="move">ځای بدلول</string>
+    <string name="hide">پټول</string>
+    <string name="unhide">ښکاره کول</string>
+    <string name="update_content">د محتویاتو اوسمهالول</string>
+    <string name="underRegistrationAgeError">له ۱۳ کلنو کښته ماشومانو ته پخپله راجسټل کولو اجازه نشته. هیله ده له خپل ښوونکی څخه وغواړئ چې تاسو راجسټر کړی.</string>
+    <string name="line_chart" value="101">لیک چارټ</string>
+    <string name="content_average_duration" value="201">د محتویاتو کارول - منځنۍ کچه په هرې غونډې</string>
+    <string name="number_active_users" value="204">د محتویاتو کارول - د فعاله کاروونکو شمیر</string>
 </resources>
