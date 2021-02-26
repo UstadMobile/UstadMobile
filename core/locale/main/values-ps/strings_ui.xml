@@ -338,4 +338,13 @@
     <string name="users">کارن (کار اخیستونکي)</string>
     <string name="new_person">نوی کس</string>
     <string name="sub_locations">فرعی ځایونه/موقعیت</string>
+    <string name="register_now">اوس نوم لیکنه وکړئ</string>
+    <string name="group_activity">ډله
+\nفعالیت</string>
+    <string name="select_group_members">د ډلې د غړو غوراوی</string>
+    <string name="add_a_new_language">د نوې ژبې زیاتول</string>
+    <string name="description">تفصیل</string>
+    <string name="confirm_delete_message">آیا تاسو ډاډه یاست چې غواړئ دغه برخه له خپلې وزلې څخه ړنګ کړئ؟</string>
+    <string name="processing">بهیر</string>
+    <string name="uploading">د پورته کیدو په حالت کې</string>
 </resources>
