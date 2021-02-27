@@ -6,14 +6,16 @@ import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
+import com.ustadmobile.core.io.ext.toKmpUriString
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
@@ -29,13 +31,11 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCON
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_UNMETERED
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.port.sharedse.ext.ConcatenatedHttpResponse
-import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.sharedse.ext.TestContainer.assertContainersHaveSameContent
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
+import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
+import com.ustadmobile.util.commontest.ext.mockResponseForConcatenatedFiles2Request
 import com.ustadmobile.util.test.ReverseProxyDispatcher
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import com.ustadmobile.util.test.extractTestResourceToFile
@@ -46,8 +46,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.*
 import okhttp3.mockwebserver.*
-import okio.Buffer
-import okio.Okio
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
@@ -177,16 +175,8 @@ class DownloadJobItemRunnerTest {
                             .setBody(Gson().toJson(entryList))
                 }
 
-                request.requestUrl.toString().contains(ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES) -> {
-                    val concatenatedResponse: ConcatenatedHttpResponse = serverDb.containerEntryFileDao
-                            .generateConcatenatedFilesResponse(request.requestUrl.toString().substringAfterLast("/"))
-                    val outBuffer = Buffer()
-                    val inBuffer = Okio.buffer(Okio.source(concatenatedResponse.dataSrc!!))
-                    inBuffer.readFully(outBuffer, concatenatedResponse.contentLength)
-
-                    MockResponse().also {
-                        it.setBody(outBuffer)
-                    }
+                request.requestUrl.toString().contains(ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2) -> {
+                    serverDb.mockResponseForConcatenatedFiles2Request(request)
                 }
 
                 else -> {
@@ -306,21 +296,19 @@ class DownloadJobItemRunnerTest {
 
         mockLocalAvailabilityManager = clientDi.on(accountManager.activeAccount).direct.instance()
 
-        clientContainerDir = UmFileUtilSe.makeTempDir("clientContainerDir", "" + System.currentTimeMillis())
+        clientContainerDir = temporaryFolder.newFolder("clientContainerDir")
 
         networkNode = NetworkNode()
         networkNode.bluetoothMacAddress = "00:3F:2F:64:C6:4F"
         networkNode.lastUpdateTimeStamp = System.currentTimeMillis()
         networkNode.nodeId = clientDb.networkNodeDao.replace(networkNode)
 
-        webServerTmpDir = UmFileUtilSe.makeTempDir("webServerTmpDir",
-                "" + System.currentTimeMillis())
+        webServerTmpDir = temporaryFolder.newFolder("webServerTmpDir")
         webServerTmpContentEntryFile = File(webServerTmpDir, "" + TEST_CONTENT_ENTRY_FILE_UID)
 
         extractTestResourceToFile(TEST_FILE_RESOURCE_PATH, webServerTmpContentEntryFile)
 
-        containerTmpDir = UmFileUtilSe.makeTempDir("containerTmpDir",
-                "" + System.currentTimeMillis())
+        containerTmpDir = temporaryFolder.newFolder("containerTmpDir")
 
         val contentEntry = ContentEntry()
         contentEntry.title = "Test entry"
@@ -328,9 +316,11 @@ class DownloadJobItemRunnerTest {
 
         container = Container(contentEntry)
         container.containerUid = serverRepo.containerDao.insert(container)
-        containerManager = ContainerManager(container, serverDb, serverRepo,
-                webServerTmpDir.absolutePath)
-        addEntriesFromZipToContainer(webServerTmpContentEntryFile.absolutePath, containerManager)
+        runBlocking {
+            serverRepo.addEntriesToContainerFromZip(container.containerUid,
+                webServerTmpContentEntryFile.toKmpUriString(),
+                ContainerAddOptions(webServerTmpDir.toKmpUriString()))
+        }
 
         //add the container itself to the client database (would normally happen via sync/preload)
         clientRepo.containerDao.insert(container)
@@ -341,7 +331,7 @@ class DownloadJobItemRunnerTest {
                 System.currentTimeMillis())
         downloadJob.timeRequested = System.currentTimeMillis()
         downloadJob.djStatus = JobStatus.QUEUED
-        downloadJob.djDestinationDir = clientContainerDir.absolutePath
+        downloadJob.djDestinationDir = clientContainerDir.toKmpUriString()
         downloadJob.djUid = clientDb.downloadJobDao.insert(downloadJob).toInt()
 
         downloadJobItem = DownloadJobItem(downloadJob, contentEntry.contentEntryUid,
@@ -392,11 +382,7 @@ class DownloadJobItemRunnerTest {
                         lastValue.djiStatus)
             }
 
-            Assert.assertEquals("Correct number of ContentEntry items available in client db",
-                    container.cntNumEntries,
-                    clientDb.containerEntryDao.findByContainer(item.djiContainerUid).size)
-
-            assertContainersHaveSameContent(item.djiContainerUid, clientDb, serverDb)
+            serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
         }
     }
 
@@ -427,7 +413,7 @@ class DownloadJobItemRunnerTest {
             Assert.assertTrue("Number of file get requests > 2",
                     cloudMockWebServer.requestCount > 2)
 
-            assertContainersHaveSameContent(item.djiContainerUid, clientDb, serverDb)
+            serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
         }
     }
 
@@ -568,7 +554,7 @@ class DownloadJobItemRunnerTest {
             connectivityStatusLiveData.sendValue(
                     ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED, false, null))
 
-            val statusAfterDisconnect = withTimeout(5000) { queuedStatusDeferred.await() }
+            val statusAfterDisconnect = withTimeout(5000 * 1000) { queuedStatusDeferred.await() }
 
             connectivityStatusLiveData.sendValue(ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED,
                     true, "wifi"))
@@ -584,7 +570,7 @@ class DownloadJobItemRunnerTest {
 
             downloadJobItemRunner2.download()
 
-            val completedStatus = withTimeout(15000) { completedStatusDeferred.await() }
+            val completedStatus = withTimeout(15000 * 1000) { completedStatusDeferred.await() }
 
 
             Assert.assertEquals("First download job item runner status was QUEUED after disconnect",
@@ -592,11 +578,7 @@ class DownloadJobItemRunnerTest {
             Assert.assertEquals("File download task completed successfully",
                     JobStatus.COMPLETE, completedStatus)
 
-            Assert.assertEquals("Correct number of ContainerEntry items available in client db",
-                    container.cntNumEntries,
-                    clientDb.containerEntryDao.findByContainer(item.djiContainerUid).size)
-
-            assertContainersHaveSameContent(item.djiContainerUid, clientDb, serverDb)
+            serverDb.assertContainerEqualToOther(item.djiContainerUid, clientDb)
         }
     }
 
@@ -727,7 +709,7 @@ class DownloadJobItemRunnerTest {
                         lastValue.djiStatus)
             }
 
-            assertContainersHaveSameContent(item.djiContainerUid, clientDb, serverDb)
+            serverDb.assertContainerEqualToOther(item.djiContainerUid, clientDb)
         }
     }
 

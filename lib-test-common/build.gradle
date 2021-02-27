@@ -64,6 +64,7 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
+                implementation project(":core")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.soywiz.korlibs.klock:klock:$version_klock"
@@ -125,7 +126,6 @@ kotlin {
 
         androidMain {
             dependsOn commonJvmMain
-            kotlin.srcDirs += ["src/commonJvmMain/kotlin"]
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"

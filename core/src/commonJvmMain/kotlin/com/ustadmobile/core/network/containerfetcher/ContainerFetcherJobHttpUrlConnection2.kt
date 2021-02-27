@@ -25,9 +25,9 @@ import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import kotlin.coroutines.coroutineContext
 
-class ContainerDownloaderJobHttpUrlConnection2(val request: ContainerFetcherRequest2,
-                                                val listener: ContainerFetcherListener2?,
-                                                override val di: DI): DIAware {
+class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest2,
+                                            val listener: ContainerFetcherListener2?,
+                                            override val di: DI): DIAware {
 
     private val totalDownloadSize = AtomicLong(0L)
 
@@ -64,9 +64,12 @@ class ContainerDownloaderJobHttpUrlConnection2(val request: ContainerFetcherRequ
         var urlConnection: HttpURLConnection? = null
         var inStream: ConcatenatedInputStream2? = null
 
+        //We always download in md5sum (hex) alphabetical order, such that a partial download will
+        //be resumed as expected.
         val md5sToDownload = request.entriesToDownload.mapNotNull {
             it.cefMd5?.base64EncodedToHexString()
-        }
+        }.toSet().toList().sorted()
+
         val md5ListString = md5sToDownload.joinToString(separator = ";")
         val md5ExpectedList = md5sToDownload.toMutableList()
         val firstMd5 = md5sToDownload.first()
@@ -80,7 +83,7 @@ class ContainerDownloaderJobHttpUrlConnection2(val request: ContainerFetcherRequ
         try {
             //check and see if the first file is already here
             val inputUrl = "${request.siteUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/$md5ListString"
-            Napier.d("$logPrefix Download $inputUrl -> ${request.destDirUri}")
+            Napier.d("$logPrefix Download ${md5sToDownload.size} container files $inputUrl -> ${request.destDirUri}")
             val localConnectionOpener : LocalURLConnectionOpener? = di.direct.instanceOrNull()
             val url = URL(inputUrl)
             urlConnection = localConnectionOpener?.openLocalConnection(url)
@@ -172,6 +175,7 @@ class ContainerDownloaderJobHttpUrlConnection2(val request: ContainerFetcherRequ
                 val md5Base64 = concatenatedEntry.md5.encodeBase64()
                 val entryFiles = request.entriesToDownload.filter { it.cefMd5 == md5Base64 }
                 entryFiles.forEach {
+                    it.ceUid = 0L
                     it.ceCefUid = containerEntryFile.cefUid
                 }
                 db.containerEntryDao.insertListAsync(entryFiles)

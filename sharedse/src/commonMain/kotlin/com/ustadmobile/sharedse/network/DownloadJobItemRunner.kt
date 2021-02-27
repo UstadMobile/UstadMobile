@@ -289,8 +289,6 @@ class DownloadJobItemRunner
         //list of all container entries in the container - used to
         val containerEntriesList = mutableListOf<ContainerEntryWithMd5>()
 
-        val containerEntriesToDownloadList = mutableListOf<ContainerEntryWithMd5>()
-
         var attemptNum = 0
         while(attemptNum++ < 3 && coroutineContext.isActive) {
             try {
@@ -364,20 +362,11 @@ class DownloadJobItemRunner
 
                 entriesDownloaded.value = 0
 
-//                val entriesToDownloadVal = containerManager.linkExistingItems(containerEntryListVal)
-//                        .distinctBy { it.cefMd5 }
-//                        .sortedBy { it.cefMd5 }
-//                containerEntriesToDownloadList.clear()
-//                containerEntriesToDownloadList.addAll(entriesToDownloadVal)
                 val containerEntriesPartition = appDb.linkExistingContainerEntries(container.containerUid,
                     containerEntryListVal)
 
                 existingEntriesBytesDownloaded = containerEntriesPartition.entriesWithMatchingFile
                         .sumByLong { it.containerEntryFile?.ceCompressedSize ?: 0L }
-//                existingEntriesBytesDownloaded = containerManager.allEntries
-//                        .sumByLong { it.containerEntryFile?.ceCompressedSize ?: 0L}
-
-                //val entriesListStr = entriesToDownloadVal.joinToString(separator = ";") { it.ceCefUid.toString() }
 
 
                 history.startTime = getSystemTimeInMillis()
@@ -385,8 +374,6 @@ class DownloadJobItemRunner
 
                 val fetchStartTime = getSystemTimeInMillis()
                 Napier.d({"Requesting fetch download $timeSinceStart ms after start"})
-//                val downloadUrl = UMFileUtil.joinPaths(downloadEndpoint, ENDPOINT_CONCATENATEDFILES,
-//                        entriesListStr)
 
                 val containerRequest = ContainerFetcherRequest2(
                         containerEntriesPartition.entriesWithoutMatchingFile, endpointUrl,
@@ -433,18 +420,6 @@ class DownloadJobItemRunner
             UMLog.l(UMLog.INFO, 0, "DownloadJob ${downloadItem.djiUid}  Completed " +
                     "download of ${downloadItem.downloadedSoFar}bytes " +
                     "in $downloadTime ms Speed = $downloadSpeed KB/s")
-
-//            var concatenatedInputStream: ConcatenatedInputStream? = null
-//
-//            //TODO Here: Make the download fail if the validation does not check out, don't crash the app
-//            try {
-//                concatenatedInputStream = ConcatenatedInputStream(FileInputStreamSe(destTmpFile))
-//                val downloadedMd5s = containerEntriesToDownloadList.mapNotNull { it.cefMd5 }
-//                containerManager.addEntriesFromConcatenatedInputStream(concatenatedInputStream,
-//                        containerEntriesList.filter { entryItem -> entryItem.cefMd5 in downloadedMd5s })
-//            }finally {
-//                concatenatedInputStream?.close()
-//            }
         }
 
         stop(if(downloadAttemptStatus != -1) downloadAttemptStatus else JobStatus.FAILED)

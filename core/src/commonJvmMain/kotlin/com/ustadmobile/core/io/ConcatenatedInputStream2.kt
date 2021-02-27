@@ -39,7 +39,6 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
             throw ConcatenatedDataIntegrityException("Data read was corrupted: md5 does not match! " +
                     "Expected MD5: ${entryVal.md5.toHexString()} / Actual ${dataMd5.toHexString()}")
 
-        Napier.d("ConcatInputStream checksum good: ${dataMd5.toHexString()}")
         currentEntryReadMd5 = dataMd5
     }
 
@@ -66,7 +65,6 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
      * Get the next entry
      */
     fun getNextEntry() : ConcatenatedEntry? {
-        Napier.d("ConcatenatedInputStream: getNextEntry")
         readCurrentEntryRemaining()
 
         // Catch premature end of stream...
@@ -77,7 +75,6 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
         }
 
         if(currentEntry != null) {
-            Napier.d("ConcatenatedInputStream:  ${currentEntry?.md5?.toHexString()} getNextEntry verifying")
             assertDataReadMatchesMd5()
         }
 
@@ -131,7 +128,6 @@ class ConcatenatedInputStream2(inputStream: InputStream, messageDigest: MessageD
         }
 
         if(entryRemaining == 0L) {
-            Napier.d("ConcatenatedInputStream: entry ${currentEntry?.md5?.toHexString()} finished: read verifying")
             assertDataReadMatchesMd5()
         }
 

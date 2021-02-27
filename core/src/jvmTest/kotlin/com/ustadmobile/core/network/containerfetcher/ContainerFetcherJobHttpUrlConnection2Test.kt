@@ -17,6 +17,8 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
+import com.ustadmobile.util.commontest.ext.mockResponseForConcatenatedFiles2Request
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import io.ktor.client.*
 import io.ktor.client.features.*
@@ -35,65 +37,23 @@ import org.kodein.di.on
 import java.io.*
 import java.util.concurrent.atomic.AtomicInteger
 
-class ContainerDownloaderJobHttpUrlConnection2Test {
+class ContainerFetcherJobHttpUrlConnection2Test {
 
 
     class ConcatenatedResponse2Dispatcher(private val db: UmAppDatabase) : Dispatcher(){
 
         var numTimesToFail = AtomicInteger(0)
 
-        override fun dispatch(request: RecordedRequest?): MockResponse {
-            val md5s = request?.requestUrl?.toString()?.substringAfterLast("/")
-            if(md5s == null) {
-                TODO("Return bad request here")
+        override fun dispatch(request: RecordedRequest): MockResponse {
+            return db.mockResponseForConcatenatedFiles2Request(request).apply {
+                if(numTimesToFail.getAndDecrement() > 0) {
+                    socketPolicy = SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY
+                }
             }
-
-            val headers = request?.headers?.toMultimap()
-            val range = headers?.get("range")
-            println(range)
-            val concatResponse = db.containerEntryFileDao.generateConcatenatedFilesResponse2(md5s,
-                    headers!!, db)
-
-            val pipeOut = PipedOutputStream()
-            val pipeIn = PipedInputStream(pipeOut)
-            GlobalScope.launch {
-                concatResponse.writeTo(pipeOut)
-                pipeOut.close()
-            }
-            val byteArrayOut = ByteArrayOutputStream()
-            pipeIn.copyTo(byteArrayOut)
-            byteArrayOut.flush()
-            byteArrayOut.close()
-            val responseBytes = byteArrayOut.toByteArray()
-
-            return MockResponse().setBody(Buffer().readFrom(ByteArrayInputStream(responseBytes)))
-                    .setResponseCode(concatResponse.status)
-                    .apply {
-                        if(numTimesToFail.getAndDecrement() > 0) {
-                           socketPolicy = SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY
-                        }
-
-                        concatResponse.rangeResponse?.responseHeaders?.forEach {
-                            addHeader(it.key, it.value)
-                        }
-                    }
         }
     }
 
-    fun UmAppDatabase.assertContainerEqualToOther(containerUid: Long, otherDb: UmAppDatabase) {
-        val entriesInThisDb = containerEntryDao.findByContainer(containerUid)
-        val entriesInOtherDb = otherDb.containerEntryDao.findByContainer(containerUid)
-        Assert.assertEquals("Same number of entries in both containers", entriesInThisDb.size,
-            entriesInOtherDb.size)
 
-        entriesInThisDb.forEach {entryInThis ->
-            val entryInOther = entriesInOtherDb.firstOrNull { it.cePath == entryInThis.cePath }
-                    ?: throw IllegalStateException("ContainerEntry ${entryInThis.cePath} not in other db")
-            Assert.assertArrayEquals("Contents of ${entryInThis.cePath} are the same",
-                File(entryInThis.containerEntryFile!!.cefPath!!).readBytes(),
-                File(entryInOther.containerEntryFile!!.cefPath!!).readBytes())
-        }
-    }
 
     fun UmAppDatabase.assertAllContainerEntryFilesPresentInOther(md5List: List<String>, otherDb: UmAppDatabase) {
         md5List.forEach { md5Base64 ->
@@ -190,7 +150,7 @@ class ContainerDownloaderJobHttpUrlConnection2Test {
             downloadDestDir.toKmpUriString())
 
         val mockListener = mock<ContainerFetcherListener2> { }
-        val downloaderJob = ContainerDownloaderJobHttpUrlConnection2(request,
+        val downloaderJob = ContainerFetcherJobHttpUrlConnection2(request,
             mockListener, clientDi)
 
         val result = runBlocking { downloaderJob.download() }
@@ -231,7 +191,7 @@ class ContainerDownloaderJobHttpUrlConnection2Test {
                         .filter { entry -> ! entriesInDb.any { dbEntry -> dbEntry.cefMd5 ==  entry.cefMd5} }
 
                 val request = ContainerFetcherRequest2(entriesToDownload, siteUrl, downloadDestDir.toKmpUriString())
-                val downloaderJob = ContainerDownloaderJobHttpUrlConnection2(request,
+                val downloaderJob = ContainerFetcherJobHttpUrlConnection2(request,
                         mockListener, clientDi)
                 val result = runBlocking { downloaderJob.download() }
                 results.add(result)

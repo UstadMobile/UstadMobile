@@ -455,14 +455,16 @@ suspend fun UmAppDatabase.linkExistingContainerEntries(containerUid: Long,
             .partition { it.cefMd5 in existingMd5s }
 
     val alreadyLinkedEntries = containerEntryDao.findByContainerAsync(containerUid)
-
-    entriesWithFile
+    val entriesToLink = entriesWithFile
             .filter { entryWithFile ->! alreadyLinkedEntries.any { it.cePath ==  entryWithFile.cePath } }
-            .forEach {  entryWithFile ->
-                entryWithFile.ceCefUid = existingFiles.first { it.cefMd5 == entryWithFile.cefMd5 }.cefUid
+            .apply {
+                forEach { entryWithFile ->
+                    entryWithFile.ceUid = 0L
+                    entryWithFile.ceCefUid = existingFiles.first { it.cefMd5 == entryWithFile.cefMd5 }.cefUid
+                }
             }
 
-    containerEntryDao.insertListAsync(entriesWithFile)
+    containerEntryDao.insertListAsync(entriesToLink)
 
     val entriesWithValRetList = entriesWithFile.map { entryWithFile ->
         ContainerEntryWithContainerEntryFile().apply {
