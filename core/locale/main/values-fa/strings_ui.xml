@@ -108,14 +108,11 @@
     <string name="location_permission_message">این اپلیکیشن به اجازه موقعیت نیاز دارد تا شریک سازی آفلاین با سرعت بالا با کاربران نزدیک فعال گردد.</string>
     <string name="download_wifi_only">صرف وایفای</string>
     <string name="download_calculating">در حال شمارش…</string>
-    <string name="download_state_download">
-        <b>دانلود</b> مجموعاً %1$s اشیأ، که مجموعاً %2$s جای را در حافظه دستگاه شما خواهد گرفت.</string>
+    <string name="download_state_download"><b>دانلود</b> مجموعاً %1$s اشیأ، که مجموعاً %2$s جای را در حافظه دستگاه شما خواهد گرفت.</string>
     <string name="download_summary_title">%1$s دانلودهای فعال</string>
     <string name="download_pause_download">مکث</string>
-    <string name="download_state_downloading">
-        <b> در حال دانلود </b> مجموعاً %1$s اشیأ، که مجموعاً %2$s جای را در حافظه دستگاه شما خواهد گرفت.</string>
-    <string name="download_state_downloaded">
-        <b> دانلود گردید </b> مجموعاً %1$s اشیأ، که در حافظۀ دستگاه شما %2$s جای را گرفته است.</string>
+    <string name="download_state_downloading"><b> در حال دانلود </b> مجموعاً %1$s اشیأ، که مجموعاً %2$s جای را در حافظه دستگاه شما خواهد گرفت.</string>
+    <string name="download_state_downloaded"><b> دانلود گردید </b> مجموعاً %1$s اشیأ، که در حافظۀ دستگاه شما %2$s جای را گرفته است.</string>
     <string name="download_downloading_placeholder">در حال دانلود %1$s از مجموع %2$s</string>
     <string name="insufficient_space">فضای ذخیره سازی کافی نیست</string>
     <string name="download_cancel_all">لغو همه</string>
@@ -278,8 +275,7 @@
     <string name="content_editor_preview">پیش دید</string>
     <string name="content_editor_edit_category">ویرایش</string>
     <string name="content_from_link">از پیوند</string>
-    <string name="supported_files">فایلهای مورد حمایت: <b> ایپب، تینکن (XAPI) زیپ </b>
-    </string>
+    <string name="supported_files">فایلهای مورد حمایت: <b> ایپب، تینکن (XAPI) زیپ </b></string>
     <string name="content_media_photo">عکس</string>
     <string name="content_media_message">چه نوع رسانه را میخواهید بگیرید؟</string>
     <string name="content_editor_directionality">جهت داری</string>
@@ -336,7 +332,8 @@
     <string name="custom_fields">ساحات دلخواه</string>
     <string name="new_person">شخص جدید</string>
     <string name="sub_locations">موقعیتهای فرعی</string>
-    <string name="group_activity">فعالیت</string>
+    <string name="group_activity">گروپ 
+\nفعالیت</string>
     <string name="select_group_members">انتخاب اعضای جدید گروپ</string>
     <string name="register_now">همین اکنون ثبت نام نمایید</string>
     <string name="choose_template">انتخاب نمونه</string>
@@ -402,7 +399,7 @@
     <string name="field_content_completion">حالت تکمیل محتوی</string>
     <string name="condition_not_in_list">در لیست موجود نیست</string>
     <string name="descending">نزولی</string>
-    <string name="add_person_filter">اختیار فلتر نمودن گزارش - فلتر نمودن نتایج گزارش به اساس شخص.</string>
+    <string name="add_person_filter">علاوه ساختن فلتر شخص</string>
     <string name="add_activity">علاوه ساختن فعالیت جدید...</string>
     <string name="report">گزارش</string>
     <string name="measurement_type">نوع اندازه گیری</string>
@@ -495,12 +492,12 @@
     <string name="sync">همگام سازی</string>
     <string name="not_recorded">ضبط نشده</string>
     <string name="rols_assignment">واگذاری نقشها</string>
-    <string name="add_verb_filter">اختیار فلتر گزارش - فلتر نمودن نتایج گزارش به اساس فعل API (مثلاً: کاربر چه کار انجام داد - پاسخ داد، موفق شد، ناکام شد، و غیره).</string>
+    <string name="add_verb_filter">علاوه ساختن فلتر فعل</string>
     <string name="sel_question_set_to_use">سوالات SEL برای استفاده</string>
-    <string name="licence_type_cc_by">توسط</string>
+    <string name="licence_type_cc_by">مجوز CC توسط</string>
     <string name="members">اعضأ</string>
-    <string name="licence_type_cc_by_sa">توسط</string>
-    <string name="licence_type_cc_by_sa_nc">توسط</string>
+    <string name="licence_type_cc_by_sa">مجوز CC توسط SA</string>
+    <string name="licence_type_cc_by_sa_nc">مجوز CC توسط SA NC</string>
     <string name="permission_person_update">بهنگام ساختن اشخاص</string>
     <string name="licence_type_all_rights">تمام حقوق محفوظ است</string>
     <string name="permission_clazz_add_teacher">علاوه ساختن استادان به صنف</string>
@@ -509,11 +506,11 @@
     <string name="permission_attendance_insert">گرفتن حاضری</string>
     <string name="permission_attendance_update">بهنگام ساختن حاضری</string>
     <string name="permission_activity_select">مشاهده فعالیت صنف</string>
-    <string name="schedule">تقسیم اوقات بطور عموم به تقسیم اوقات یک صنف راجع میگردد مثلاً: هر دوشنبه ساعت 2 ب.ظ...</string>
+    <string name="schedule">تقسیم اوقات</string>
     <string name="permission">اجازه</string>
-    <string name="permission_sel_question_insert">علاوه ساختن سوالات SEL</string>
-    <string name="permission_sel_question_update">بهنگام ساختن سوالات SEL</string>
-    <string name="permission_sel_select">مشاهده نتایج SEL</string>
+    <string name="permission_sel_question_insert">علاوه ساختن سوالات آموزش احساس اجتماعی</string>
+    <string name="permission_sel_question_update">بهنگام ساختن سوالات آموزش احساس اجتماعی</string>
+    <string name="permission_sel_select">مشاهده نتایج آموزش احساس اجتماعی</string>
     <string name="mark_all">علامت گذاری همه</string>
     <string name="present">حضور و موجودیت فزیکی، برعکس غیر حاضر</string>
     <string name="scope_by">محدوده به اساس</string>
@@ -539,7 +536,7 @@
     <string name="invalid_link">پیوند نامعتبر</string>
     <string name="due_date">تاریخ موعود</string>
     <string name="ascending">صعودی</string>
-    <string name="permission_sel_update">بهنگام سازی نتایج SEL</string>
+    <string name="permission_sel_update">بهنگام سازی نتایج آموزش احساس اجتماعی</string>
     <string name="save">حفظ</string>
     <string name="school">مکتب</string>
     <string name="assignments">کارخانگی</string>
@@ -654,7 +651,7 @@
     <string name="permission_person_picture_update">بهنگام ساختن تصاویر پروفایل</string>
     <string name="permission_clazz_select">مشاهده صنوف</string>
     <string name="permission_activity_update">بهنگام سازی فعالیت صنف</string>
-    <string name="permission_sel_question_select">مشاهده سوالات SEL</string>
+    <string name="permission_sel_question_select">مشاهده سوالات آموزش احساس اجتماعی</string>
     <string name="timezone">زون وقت</string>
     <string name="join_existing_school">اشتراک در مکتب موجوده</string>
     <string name="store_title">استاد مبایل - منابع آموزشی باز بشکل آفلاین</string>
@@ -802,4 +799,5 @@
     <string name="compress">فشردن</string>
     <string name="underRegistrationAgeError">ثبت نام اطفال کمتر 13 سال مجاز نیست. لطفاً از استاد خود بخواهید که شما را ثبت نام نماید.</string>
     <string name="edit_leaving_reason">ویرایش دلیل نتیجه ثبت نام</string>
+    <string name="license_type_cc_0">مجوز CC0</string>
 </resources>
