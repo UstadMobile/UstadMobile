@@ -93,6 +93,13 @@ class ReportFilterEditPresenter(context: Any,
         uidAndLabelOneToManyHelper.onDeactivateEntity(entry)
     }
 
+    fun clearUidAndLabelList() {
+        uidAndLabelOneToManyHelper.entitiesToInsert
+        uidAndLabelOneToManyHelper.liveList.getValue()?.forEach {
+            uidAndLabelOneToManyHelper.onDeactivateEntity(it)
+        }
+    }
+
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
