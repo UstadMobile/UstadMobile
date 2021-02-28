@@ -63,6 +63,8 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             mBinding?.fragmentReportFilterEditDialogValuesNumberText?.text?.clear()
             mBinding?.fragmentReportFilterEditDialogValuesBetweenXText?.text?.clear()
             mBinding?.fragmentReportFilterEditDialogValuesBetweenYText?.text?.clear()
+            uidAndLabelFilterItemRecyclerAdapter?.submitList(listOf())
+            mPresenter?.clearUidAndLabelList()
         }
 
     override var dropDownValueOptions: List<MessageIdOption>? = null
@@ -214,6 +216,16 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             mPresenter?.handleAddOrEditUidAndLabel(UidAndLabel().apply {
                 uid = entry.contentEntryUid
                 labelName = entry.title
+            })
+        }
+
+        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                LeavingReason::class.java) {
+            val reason = it.firstOrNull() ?: return@observeResult
+
+            mPresenter?.handleAddOrEditUidAndLabel(UidAndLabel().apply {
+                uid = reason.leavingReasonUid
+                labelName = reason.leavingReasonTitle
             })
         }
 

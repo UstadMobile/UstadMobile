@@ -108,12 +108,15 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         (SELECT clazzEnrolmentRole FROM clazzEnrolment WHERE Person.personUid = 
         ClazzEnrolment.clazzEnrolmentPersonUid AND 
         ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid) as enrolmentRole
-        FROM PERSON 
-        WHERE Person.personUid IN (SELECT clazzEnrolmentPersonUid FROM ClazzEnrolment 
+         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+         WHERE
+         PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+        AND Person.personUid IN (SELECT clazzEnrolmentPersonUid FROM ClazzEnrolment 
         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid AND ClazzEnrolment.clazzEnrolmentActive 
         AND ClazzEnrolment.clazzEnrolmentRole = :roleId AND (:filter != $FILTER_ACTIVE_ONLY 
         OR (:currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft))) 
         AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+        GROUP BY Person.personUid
         ORDER BY CASE(:sortOrder)
                 WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
                 WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
@@ -138,7 +141,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
             END DESC
     """)
     abstract fun findByClazzUidAndRole(clazzUid: Long, roleId: Int, sortOrder: Int, searchText: String? = "%",
-                                       filter: Int, currentTime: Long): DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>
+                                       filter: Int, accountPersonUid: Long, currentTime: Long): DataSource.Factory<Int, PersonWithClazzEnrolmentDetails>
 
 
     @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentActive = :enrolled,

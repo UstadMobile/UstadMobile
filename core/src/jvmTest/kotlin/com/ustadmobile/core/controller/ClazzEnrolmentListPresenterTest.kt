@@ -97,7 +97,7 @@ class ClazzEnrolmentListPresenterTest {
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzEnrolmentDaoSpy, timeout(5000)).findAllEnrolmentsByPersonAndClazzUid(
                 eq(activePerson.personUid),eq(testClazz.clazzUid))
-        verify(mockView, timeout(5000)).list = any()
+        verify(mockView, timeout(5000)).enrolmentList = any()
 
     }
 
@@ -117,7 +117,7 @@ class ClazzEnrolmentListPresenterTest {
         val presenter = ClazzEnrolmentListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
-        mockView.waitForListToBeSet()
+        verify(mockView, timeout(5000L).atLeastOnce()).enrolmentList = any()
 
         presenter.handleClickClazzEnrolment(testEntity)
 

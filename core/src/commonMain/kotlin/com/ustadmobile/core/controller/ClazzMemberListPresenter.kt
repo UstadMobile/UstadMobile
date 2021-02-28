@@ -53,16 +53,16 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
     override suspend fun onLoadFromDb() {
         super.onLoadFromDb()
 
-        val activePersonUid = accountManager.activeAccount.personUid
+        mLoggedInPersonUid = accountManager.activeAccount.personUid
 
-        view.addStudentVisible = db.clazzDao.personHasPermissionWithClazz(activePersonUid,
+        view.addStudentVisible = db.clazzDao.personHasPermissionWithClazz(mLoggedInPersonUid,
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_STUDENT)
 
         selectedSortOption = SORT_OPTIONS[0]
         view.listFilterOptionChips = FILTER_OPTIONS.toListFilterOptions(context, di)
         updateListOnView()
 
-        view.addTeacherVisible = db.clazzDao.personHasPermissionWithClazz(activePersonUid,
+        view.addTeacherVisible = db.clazzDao.personHasPermissionWithClazz(mLoggedInPersonUid,
                 filterByClazzUid, Role.PERMISSION_CLAZZ_ADD_TEACHER)
     }
 
@@ -70,16 +70,16 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
         view.list = repo.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
                 ClazzEnrolment.ROLE_TEACHER, selectedSortOption?.flag ?: 0,
                 searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: 0,
-                systemTimeInMillis())
+                mLoggedInPersonUid, systemTimeInMillis())
         view.studentList = repo.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
                 ClazzEnrolment.ROLE_STUDENT, selectedSortOption?.flag ?: 0,
                 searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: 0,
-                systemTimeInMillis())
+                mLoggedInPersonUid, systemTimeInMillis())
         if (view.addStudentVisible) {
             view.pendingStudentList = db.clazzEnrolmentDao.findByClazzUidAndRole(filterByClazzUid,
                     ClazzEnrolment.ROLE_STUDENT_PENDING, selectedSortOption?.flag ?: 0,
                     searchText.toQueryLikeParam(), view.checkedFilterOptionChip?.optionId ?: 0,
-                    systemTimeInMillis())
+                    mLoggedInPersonUid, systemTimeInMillis())
         }
     }
 

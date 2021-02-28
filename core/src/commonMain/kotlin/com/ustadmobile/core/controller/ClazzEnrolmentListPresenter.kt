@@ -25,9 +25,16 @@ class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, 
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        val hasPermission = db.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
-                selectedClazz,  Role.PERMISSION_CLAZZ_ADD_STUDENT
-                or Role.PERMISSION_CLAZZ_ADD_TEACHER)
+        val studentPermission = db.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
+                selectedClazz,  Role.PERMISSION_CLAZZ_ADD_STUDENT)
+
+        val teacherPermission = db.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
+                selectedClazz,  Role.PERMISSION_CLAZZ_ADD_TEACHER)
+
+        view.isStudentEnrolmentEditVisible = studentPermission
+        view.isTeacherEnrolmentEditVisible = teacherPermission
+
+        val hasPermission = studentPermission || teacherPermission
 
         val maxDateOfEnrolment = db.clazzEnrolmentDao.findMaxEndDateForEnrolment(
                 selectedClazz, selectedPerson, 0)
@@ -43,7 +50,7 @@ class ClazzEnrolmentListPresenter(context: Any, arguments: Map<String, String>, 
             view.person = repo.personDao.findByUid(selectedPerson)
             view.clazz = repo.clazzDao.findByUidAsync(selectedClazz)
 
-            view.list = repo.clazzEnrolmentDao.findAllEnrolmentsByPersonAndClazzUid(
+            view.enrolmentList = repo.clazzEnrolmentDao.findAllEnrolmentsByPersonAndClazzUid(
                     selectedPerson, selectedClazz)
         }
     }

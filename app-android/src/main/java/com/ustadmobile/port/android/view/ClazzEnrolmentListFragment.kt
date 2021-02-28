@@ -2,8 +2,11 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.Observer
+import androidx.paging.DataSource
+import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
@@ -15,13 +18,10 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.util.ext.personFullName
 import com.ustadmobile.core.view.ClazzEnrolmentListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
-import com.ustadmobile.lib.db.entities.Clazz
-import com.ustadmobile.lib.db.entities.ClazzEnrolment
-import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.port.android.view.ext.navigateToEditEntity
-import com.ustadmobile.port.android.view.ext.setSelectedIfInList
+import com.ustadmobile.door.ext.asRepositoryLiveData
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.PagedListSubmitObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
@@ -31,10 +31,15 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
 
     private var clazzHeaderAdapter: SimpleHeadingRecyclerAdapter? = null
     private var profileHeaderAdapter: ClazzEnrolmentProfileHeaderAdapter? = null
+    private var enrolmentAdapter: ClazzEnrolmentRecyclerAdapter? = null
 
     private var mPresenter: ClazzEnrolmentListPresenter? = null
 
     override var autoMergeRecyclerViewAdapter: Boolean = false
+
+    private var enrolmentListObserver: Observer<PagedList<ClazzEnrolmentWithLeavingReason>>? = null
+
+    private var mEnrolmentListLiveData: LiveData<PagedList<ClazzEnrolmentWithLeavingReason>>? = null
 
     override val listPresenter: UstadListPresenter<*, in ClazzEnrolment>?
         get() = mPresenter
@@ -73,6 +78,25 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
 
         class ClazzEnrolmentListViewHolder(val itemBinding: ItemClazzEnrolmentListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
+        var isStudentEditVisible = false
+        var isTeacherEditVisible = false
+
+        val boundEnrolmentViewHolder = mutableListOf<ClazzEnrolmentListViewHolder>()
+
+        fun hasPermissionToEdit(item: ClazzEnrolmentWithLeavingReason?): Boolean {
+            return when (item?.clazzEnrolmentRole) {
+                ClazzEnrolment.ROLE_TEACHER -> {
+                    isTeacherEditVisible
+                }
+                ClazzEnrolment.ROLE_STUDENT -> {
+                    isStudentEditVisible
+                }
+                else -> {
+                    false
+                }
+            }
+        }
+
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ClazzEnrolmentListViewHolder {
             val itemBinding = ItemClazzEnrolmentListBinding.inflate(LayoutInflater.from(parent.context), parent, false)
             itemBinding.presenter = presenter
@@ -82,11 +106,20 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
         override fun onBindViewHolder(holder: ClazzEnrolmentListViewHolder, position: Int) {
             val item = getItem(position)
             holder.itemBinding.clazzEnrolment = item
+            holder.itemBinding.isEditVisible = hasPermissionToEdit(item)
+            boundEnrolmentViewHolder += holder
+        }
+
+
+        override fun onViewRecycled(holder: ClazzEnrolmentListViewHolder) {
+            super.onViewRecycled(holder)
+            boundEnrolmentViewHolder -= holder
         }
 
         override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {
             super.onDetachedFromRecyclerView(recyclerView)
             presenter = null
+            boundEnrolmentViewHolder.clear()
         }
 
     }
@@ -100,11 +133,13 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
         profileHeaderAdapter = ClazzEnrolmentProfileHeaderAdapter(selectedPersonUid, mPresenter)
 
         clazzHeaderAdapter = SimpleHeadingRecyclerAdapter("Person")
-        mDataRecyclerViewAdapter = ClazzEnrolmentRecyclerAdapter(mPresenter)
+        enrolmentAdapter = ClazzEnrolmentRecyclerAdapter(mPresenter).also {
+            enrolmentListObserver = PagedListSubmitObserver(it)
+        }
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this)
 
         mMergeRecyclerViewAdapter = MergeAdapter(profileHeaderAdapter,clazzHeaderAdapter,
-                mDataRecyclerViewAdapter)
+                enrolmentAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
 
         return view
@@ -150,6 +185,31 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
                     R.string.person_enrolment_in_class, person?.personFullName(), value?.clazzName)
             clazzHeaderAdapter?.visible = true
             clazzHeaderAdapter?.headingText = personInClazzStr
+        }
+
+    override var isStudentEnrolmentEditVisible: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+            enrolmentAdapter?.isStudentEditVisible = value
+        }
+
+    override var isTeacherEnrolmentEditVisible: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+            enrolmentAdapter?.isTeacherEditVisible = value
+        }
+
+    override var enrolmentList: DataSource.Factory<Int, ClazzEnrolmentWithLeavingReason>? = null
+        get() = field
+        set(value) {
+            field = value
+            val studentObserverVal = enrolmentListObserver ?: return
+            val repoDao = displayTypeRepo ?: return
+            mEnrolmentListLiveData?.removeObserver(studentObserverVal)
+            mEnrolmentListLiveData = value?.asRepositoryLiveData(repoDao)
+            mEnrolmentListLiveData?.observe(viewLifecycleOwner, studentObserverVal)
         }
 
     companion object {

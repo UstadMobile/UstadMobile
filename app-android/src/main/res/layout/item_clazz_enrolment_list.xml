@@ -6,11 +6,16 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason"/>
         <import type="com.ustadmobile.port.android.view.ClazzEnrolmentListFragment"/>
+        <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.ClazzEnrolmentListFragment.ClazzEnrolmentRecyclerAdapter"/>
 
         <variable
             name="clazzEnrolment"
             type="ClazzEnrolmentWithLeavingReason" />
+
+        <variable
+            name="isEditVisible"
+            type="Boolean" />
 
         <variable
             name="presenter"
@@ -32,6 +37,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:background="@drawable/bg_listitem"
+            android:visibility="@{isEditVisible ? View.VISIBLE : View.GONE}"
             android:onClick="@{() -> presenter.handleClickClazzEnrolment(clazzEnrolment)}"
             android:layout_margin="@dimen/dimen_8dp"
             android:tint="@android:color/black"/>

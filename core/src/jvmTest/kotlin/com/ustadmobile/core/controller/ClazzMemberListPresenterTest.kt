@@ -3,8 +3,6 @@ package com.ustadmobile.core.controller
 
 import com.nhaarman.mockitokotlin2.*
 import com.soywiz.klock.DateTime
-import com.soywiz.klock.days
-import com.soywiz.klock.months
 import com.soywiz.klock.weeks
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
@@ -12,7 +10,6 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.dao.ClazzEnrolmentDao
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.ext.approvePendingClazzEnrolment
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
 import com.ustadmobile.core.util.ext.createPersonGroupAndMemberWithEnrolment
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
@@ -22,7 +19,6 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT_PENDING
 import com.ustadmobile.util.test.ext.insertPersonWithRole
 import kotlinx.coroutines.runBlocking
@@ -34,7 +30,6 @@ import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import kotlin.time.days
 
 
 class ClazzMemberListPresenterTest {
@@ -97,9 +92,9 @@ class ClazzMemberListPresenterTest {
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzEnrolmentDaoSpy, timeout(5000)).findByClazzUidAndRole(eq(42L),
-            eq(ClazzEnrolment.ROLE_STUDENT),eq(1), eq("%"), eq(0), any())
+                eq(ClazzEnrolment.ROLE_STUDENT), eq(1), eq("%"), eq(0), any(), any())
         verify(repoClazzEnrolmentDaoSpy, timeout(5000)).findByClazzUidAndRole(eq(42L),
-                eq(ClazzEnrolment.ROLE_TEACHER),eq(1), eq("%"), eq(0), any())
+                eq(ClazzEnrolment.ROLE_TEACHER), eq(1), eq("%"), eq(0), any(), any())
 
         verify(mockView, timeout(5000)).list = any()
         verify(mockView, timeout(5000)).studentList = any()
