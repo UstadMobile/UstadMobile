@@ -78,22 +78,20 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
 
     @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)
-    abstract suspend fun findClazzWorkWithMetricsByClazzWorkUidAsync(clazzWorkUid: Long,
-                                                                     currentTime: Long)
+    abstract suspend fun findClazzWorkWithMetricsByClazzWorkUidAsync(clazzWorkUid: Long)
             : ClazzWorkWithMetrics?
 
     @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)
-    abstract fun findClazzWorkWithMetricsByClazzWorkUid(clazzWorkUid: Long, currentTime: Long)
+    abstract fun findClazzWorkWithMetricsByClazzWorkUid(clazzWorkUid: Long)
             : DataSource.Factory<Int, ClazzWorkWithMetrics>?
 
     @Query(STUDENT_PROGRESS_QUERY)
-    abstract fun findStudentProgressByClazzWork(clazzWorkUid: Long, sortOrder: Int, searchText: String? = "%",
-                                                currentTime: Long): DataSource.Factory<Int,
+    abstract fun findStudentProgressByClazzWork(clazzWorkUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int,
             ClazzEnrolmentWithClazzWorkProgress>
 
     @Query(STUDENT_PROGRESS_QUERY)
     abstract suspend fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long, sortOrder: Int,
-                                                            searchText: String? = "%", currentTime: Long): List<ClazzEnrolmentWithClazzWorkProgress>
+                                                            searchText: String? = "%"): List<ClazzEnrolmentWithClazzWorkProgress>
 
     @Query(FIND_CLAZZEnrolment_AND_SUBMISSION_WITH_PERSON)
     abstract suspend fun findClazzEnrolmentWithAndSubmissionWithPerson(clazzWorkUid: Long,
@@ -136,12 +134,10 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
         const val FIND_CLAZZWORKWITHMETRICS_QUERY = """
             SELECT ClazzWork.*, 
             (
-                SELECT COUNT(*) FROM ClazzEnrolment WHERE 
+                SELECT COUNT(DISTINCT ClazzEnrolment.clazzEnrolmentPersonUid) FROM ClazzEnrolment WHERE 
                 ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
                 AND CAST(ClazzEnrolment.clazzEnrolmentActive AS INTEGER) = 1 
                 AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
-                AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND 
-                ClazzEnrolment.clazzEnrolmentDateLeft
             ) as totalStudents, 
             (
                 SELECT COUNT(DISTINCT clazzWorkSubmissionPersonUid) FROM ClazzWorkSubmission WHERE
@@ -235,10 +231,8 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                     LIMIT 1)
             WHERE 
                     ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
-                    AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
+                    AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                     AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
-                    AND :currentTime BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND 
-                    ClazzEnrolment.clazzEnrolmentDateLeft
                     ORDER BY CASE(:sortOrder)
                         WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
                         WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
