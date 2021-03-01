@@ -78,20 +78,26 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
 
     @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)
-    abstract suspend fun findClazzWorkWithMetricsByClazzWorkUidAsync(clazzWorkUid: Long)
+    abstract suspend fun findClazzWorkWithMetricsByClazzWorkUidAsync(clazzWorkUid: Long,
+                                                                     currentTime: Long, filter: Int)
             : ClazzWorkWithMetrics?
 
     @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)
-    abstract fun findClazzWorkWithMetricsByClazzWorkUid(clazzWorkUid: Long)
+    abstract fun findClazzWorkWithMetricsByClazzWorkUid(clazzWorkUid: Long,
+                                                        currentTime: Long, filter: Int)
             : DataSource.Factory<Int, ClazzWorkWithMetrics>?
 
     @Query(STUDENT_PROGRESS_QUERY)
-    abstract fun findStudentProgressByClazzWork(clazzWorkUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int,
+    abstract fun findStudentProgressByClazzWork(clazzWorkUid: Long, sortOrder: Int,
+                                                searchText: String? = "%", currentTime: Long,
+                                                filter: Int): DataSource.Factory<Int,
             ClazzEnrolmentWithClazzWorkProgress>
 
     @Query(STUDENT_PROGRESS_QUERY)
     abstract suspend fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long, sortOrder: Int,
-                                                            searchText: String? = "%"): List<ClazzEnrolmentWithClazzWorkProgress>
+                                                            searchText: String? = "%",
+                                                            currentTime: Long,
+                                                            filter: Int): List<ClazzEnrolmentWithClazzWorkProgress>
 
     @Query(FIND_CLAZZEnrolment_AND_SUBMISSION_WITH_PERSON)
     abstract suspend fun findClazzEnrolmentWithAndSubmissionWithPerson(clazzWorkUid: Long,
@@ -130,6 +136,8 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
         const val SORT_STATUS_DESC = 14
 
+        const val FILTER_ACTIVE_ONLY = 1
+
 
         const val FIND_CLAZZWORKWITHMETRICS_QUERY = """
             SELECT ClazzWork.*, 
@@ -138,6 +146,11 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                 ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
                 AND CAST(ClazzEnrolment.clazzEnrolmentActive AS INTEGER) = 1 
                 AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
+                AND  (:filter != $FILTER_ACTIVE_ONLY 
+                    OR (ClazzEnrolment.clazzEnrolmentDateLeft >= (CASE WHEN 
+                    (ClazzWork.clazzWorkDueDateTime == ${Long.MAX_VALUE} OR ClazzWork.clazzWorkDueDateTime == 0) 
+                    THEN CASE WHEN Clazz.clazzEndTime == ${Long.MAX_VALUE} THEN :currentTime 
+                    ELSE Clazz.clazzEndTime END ELSE ClazzWork.clazzWorkDueDateTime END)))
             ) as totalStudents, 
             (
                 SELECT COUNT(DISTINCT clazzWorkSubmissionPersonUid) FROM ClazzWorkSubmission WHERE
@@ -233,6 +246,11 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                     ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
                     AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
                     AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
+                    AND  (:filter != $FILTER_ACTIVE_ONLY 
+                    OR (ClazzEnrolment.clazzEnrolmentDateLeft >= (CASE WHEN 
+                    (ClazzWork.clazzWorkDueDateTime == ${Long.MAX_VALUE} OR ClazzWork.clazzWorkDueDateTime == 0) 
+                    THEN CASE WHEN Clazz.clazzEndTime == ${Long.MAX_VALUE} THEN :currentTime 
+                    ELSE Clazz.clazzEndTime END ELSE ClazzWork.clazzWorkDueDateTime END)))
                     ORDER BY CASE(:sortOrder)
                         WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
                         WHEN $SORT_LAST_NAME_ASC THEN Person.lastName

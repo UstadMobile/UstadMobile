@@ -2,12 +2,15 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
@@ -30,7 +33,6 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
         super.onCreate(savedState)
         filterByClazzWorkUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: -1
         selectedSortOption = SORT_OPTIONS[0]
-
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -40,18 +42,20 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
 
     override suspend fun onLoadFromDb() {
         super.onLoadFromDb()
+        view.listFilterOptionChips = FILTER_OPTIONS.toListFilterOptions(context, di)
         updateListOnView()
     }
 
     private fun updateListOnView() {
 
         view.clazzWorkWithMetrics = repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUid(
-                filterByClazzWorkUid)
+                filterByClazzWorkUid, systemTimeInMillis(), view.checkedFilterOptionChip?.optionId ?: 0)
 
         view.list = repo.clazzWorkDao.findStudentProgressByClazzWork(
                 filterByClazzWorkUid,
                 selectedSortOption?.flag ?: ClazzWorkDao.SORT_FIRST_NAME_ASC,
-                searchText.toQueryLikeParam())
+                searchText.toQueryLikeParam(), systemTimeInMillis(),
+                view.checkedFilterOptionChip?.optionId ?: 0)
     }
 
     override fun handleClickEntry(entry: ClazzEnrolmentWithClazzWorkProgress) {
@@ -82,6 +86,12 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
     }
 
 
+    override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {
+        super.onListFilterOptionSelected(filterOptionId)
+        updateListOnView()
+    }
+
+
     companion object {
 
         val SORT_OPTIONS = listOf(
@@ -94,5 +104,8 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
                 SortOrderOption(MessageID.status, ClazzWorkDao.SORT_STATUS_ASC, true),
                 SortOrderOption(MessageID.status, ClazzWorkDao.SORT_STATUS_DESC, false)
         )
+
+        val FILTER_OPTIONS = listOf(MessageID.active to ClazzWorkDao.FILTER_ACTIVE_ONLY,
+                MessageID.all to 0)
     }
 }

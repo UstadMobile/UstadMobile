@@ -18,6 +18,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZWORK_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.util.test.ext.TestClazzWork
 import com.ustadmobile.util.test.ext.createTestContentEntriesAndJoinToClazzWork
@@ -110,12 +111,13 @@ class ClazzWorkDetailProgressListPresenterTest {
 
 
         verify(clazzWorkDaoSpy, timeout(5000)).findClazzWorkWithMetricsByClazzWorkUid(
-                testClazzWork.clazzWork.clazzWorkUid)
+                eq(testClazzWork.clazzWork.clazzWorkUid), any(), any())
         verify(mockView, timeout(5000)).list = any()
 
 
         verify(clazzWorkDaoSpy, timeout(5000)).findStudentProgressByClazzWork(
-                testClazzWork.clazzWork.clazzWorkUid, ClazzWorkDao.SORT_FIRST_NAME_ASC)
+                eq(testClazzWork.clazzWork.clazzWorkUid), eq(ClazzWorkDao.SORT_FIRST_NAME_ASC),
+                any(), any(), any())
         verify(mockView, timeout(5000)).list = any()
 
     }
@@ -132,8 +134,9 @@ class ClazzWorkDetailProgressListPresenterTest {
         mockView.waitForListToBeSet()
 
         val list = runBlocking {
-            db.clazzWorkDao.findStudentProgressByClazzWorkTest(testClazzWork.clazzWork.clazzWorkUid,
-            ClazzWorkDao.SORT_FIRST_NAME_ASC)
+            db.clazzWorkDao.findStudentProgressByClazzWorkTest(
+                    testClazzWork.clazzWork.clazzWorkUid,
+                    ClazzWorkDao.SORT_FIRST_NAME_ASC, currentTime = systemTimeInMillis(), filter = 0)
         }
 
         presenter.handleClickEntry(list.get(0))

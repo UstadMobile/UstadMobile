@@ -126,7 +126,7 @@ class ClazzWorkSubmissionMarkingPresenter(context: Any,
 
         val clazzWorkWithMetrics =
                 repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUidAsync(
-                        filterByClazzWorkUid)
+                        filterByClazzWorkUid, systemTimeInMillis(), 0)
 
         view.runOnUiThread(Runnable {
             view.takeIf { it.clazzWorkMetrics == null}?.clazzWorkMetrics = clazzWorkWithMetrics
