@@ -267,9 +267,6 @@ class ClazzMemberListFragment() : UstadListViewFragment<PersonWithClazzEnrolment
         get() = dbRepo?.personDao
 
     companion object {
-        const val KEY_TEACHER_SELECTED = "Person_Teacher"
-
-        const val KEY_STUDENT_SELECTED = "Person_Student"
 
         val DIFF_CALLBACK: DiffUtil.ItemCallback<PersonWithClazzEnrolmentDetails> = object
             : DiffUtil.ItemCallback<PersonWithClazzEnrolmentDetails>() {

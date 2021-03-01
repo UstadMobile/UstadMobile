@@ -171,7 +171,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
             }
             val maxDate = repo.clazzEnrolmentDao.findMaxEndDateForEnrolment(selectedClazz, selectedPerson, entity.clazzEnrolmentUid)
             // if date joined is before previous enrolment end date
-            if (maxDate != 0L && entity.clazzEnrolmentDateJoined < maxDate) {
+            if (maxDate != 0L && maxDate != Long.MAX_VALUE && entity.clazzEnrolmentDateJoined < maxDate) {
                 view.startDateError = Pair(systemImpl.getString(
                         MessageID.error_start_date_before_previous_enrolment_date, context),maxDate)
                 return@launch
