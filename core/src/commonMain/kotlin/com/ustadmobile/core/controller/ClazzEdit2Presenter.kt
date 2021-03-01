@@ -105,6 +105,13 @@ class ClazzEdit2Presenter(context: Any,
             view.loading = true
             view.fieldsEnabled = false
 
+            entity.clazzStartTime = DateTime(entity.clazzStartTime)
+                    .toOffsetByTimezone(entity.effectiveTimeZone).localMidnight.utc.unixMillisLong
+            if(entity.clazzEndTime != Long.MAX_VALUE){
+                entity.clazzEndTime = DateTime(entity.clazzEndTime)
+                        .toOffsetByTimezone(entity.effectiveTimeZone).localEndOfDay.utc.unixMillisLong
+            }
+
             if(entity.clazzUid == 0L) {
                 repo.createNewClazzAndGroups(entity, systemImpl, context)
             }else {
