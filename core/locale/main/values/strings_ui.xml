@@ -516,6 +516,8 @@
     <string name="currently_enroled">Currently enroled</string>
     <string name="class_enrolment_status">Class enrolment status</string>
     <string name="class_enrolment_leaving">Class enrolment reason for leaving</string>
+    <string name="in_progress">In progress</string>
+    <string name="outcome">Outcome</string>
     <!-- used to show the enrolments in 1 class by person: e.g Ahmed's enrolment in Class A -->
     <string name="person_enrolment_in_class">%1$s enrolments in %2$s</string>
     <string name="enrolment">Enrolment</string>
