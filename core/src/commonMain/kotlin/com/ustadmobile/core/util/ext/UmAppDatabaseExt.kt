@@ -299,9 +299,9 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                         .map { it.uid to it.labelName }.toMap()
                 UidAndLabelFormatter(reasonLabelList)
             }
-            Report.ENROLMENT_STATUS -> {
+            Report.ENROLMENT_OUTCOME -> {
                 MessageIdFormatter(
-                        STATUS_TO_MESSAGE_ID_MAP.mapKeys { it.key.toString() }, impl, context)
+                        OUTCOME_TO_MESSAGE_ID_MAP.mapKeys { it.key.toString() }, impl, context)
             }
             else ->{
                 null
@@ -327,9 +327,9 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(entryLabelList)
         }
-        Report.ENROLMENT_STATUS -> {
+        Report.ENROLMENT_OUTCOME -> {
             MessageIdFormatter(
-                    STATUS_TO_MESSAGE_ID_MAP.mapKeys { it.key.toString() }, impl, context)
+                    OUTCOME_TO_MESSAGE_ID_MAP.mapKeys { it.key.toString() }, impl, context)
         }
         Report.ENROLMENT_LEAVING_REASON -> {
             val reasonLabelList = leavingReasonDao.getReasonsFromUids(xAxisList

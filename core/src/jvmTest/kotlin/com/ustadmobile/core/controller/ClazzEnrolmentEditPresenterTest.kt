@@ -144,7 +144,7 @@ class ClazzEnrolmentEditPresenterTest {
         //Make some changes to the entity (e.g. as the user would do using data binding)
         initialEntity.clazzEnrolmentDateLeft = DateTime(2021, 10, 10).unixMillisLong
         initialEntity.clazzEnrolmentLeavingReasonUid = LeavingReason.FAMILY_PROBLEM_UID
-        initialEntity.clazzEnrolmentStatus = ClazzEnrolment.STATUS_MOVED
+        initialEntity.clazzEnrolmentOutcome = ClazzEnrolment.OUTCOME_FAILED
 
         presenter.handleClickSave(initialEntity)
 

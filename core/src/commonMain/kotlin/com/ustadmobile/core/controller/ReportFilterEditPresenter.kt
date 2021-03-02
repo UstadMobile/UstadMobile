@@ -4,7 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ext.STATUS_TO_MESSAGE_ID_MAP
+import com.ustadmobile.core.util.ext.OUTCOME_TO_MESSAGE_ID_MAP
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ReportFilterEditView
@@ -12,7 +12,6 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -41,7 +40,7 @@ class ReportFilterEditPresenter(context: Any,
         CONTENT_ENTRY(ReportFilter.FIELD_CONTENT_ENTRY, MessageID.field_content_entry),
         CONTENT_PROGRESS(ReportFilter.FIELD_CONTENT_PROGRESS, MessageID.field_content_progress),
         ATTENDANCE_PERCENTAGE(ReportFilter.FIELD_ATTENDANCE_PERCENTAGE, MessageID.field_attendance_percentage),
-        ENROLMENT_STATUS(ReportFilter.FIELD_CLAZZ_ENROLMENT_STATUS, MessageID.class_enrolment_status),
+        ENROLMENT_OUTCOME(ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME, MessageID.class_enrolment_outcome),
         ENROLMENT_LEAVING_REASON(ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON, MessageID.class_enrolment_leaving)
     }
 
@@ -192,11 +191,11 @@ class ReportFilterEditPresenter(context: Any,
                         .map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.BETWEEN
             }
-            ReportFilter.FIELD_CLAZZ_ENROLMENT_STATUS -> {
+            ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME -> {
                 view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
                         ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.DROPDOWN
-                view.dropDownValueOptions = STATUS_TO_MESSAGE_ID_MAP.map {
+                view.dropDownValueOptions = OUTCOME_TO_MESSAGE_ID_MAP.map {
                     MessageIdOption(it.value, context, it.key) }
             }
             ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON -> {

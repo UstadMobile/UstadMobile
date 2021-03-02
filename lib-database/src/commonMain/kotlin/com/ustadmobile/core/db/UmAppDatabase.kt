@@ -4041,7 +4041,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             override fun migrate(database: DoorSqlDatabase) {
 
                 database.execSQL("""ALTER TABLE ClazzEnrolment 
-                        ADD COLUMN clazzEnrolmentStatus INTEGER DEFAULT 0 NOT NULL""".trimMargin())
+                        ADD COLUMN clazzEnrolmentOutcome INTEGER DEFAULT 0 NOT NULL""".trimMargin())
 
                 if (database.dbType() == DoorDbType.SQLITE) {
 
@@ -4129,7 +4129,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }else if(database.dbType() == DoorDbType.POSTGRES){
 
                     database.execSQL("""UPDATE ClazzEnrolment SET 
-                    clazzEnrolmentStatus = ${ClazzEnrolment.STATUS_ENROLED}""".trimMargin())
+                    clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}""".trimMargin())
 
                     database.execSQL("""ALTER TABLE ClazzEnrolment 
                         ADD COLUMN clazzEnrolmentLeavingReasonUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())

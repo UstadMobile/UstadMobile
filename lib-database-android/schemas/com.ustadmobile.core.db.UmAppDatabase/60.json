@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 60,
-    "identityHash": "cde9dff701062a6cf533d28af8ac47c4",
+    "identityHash": "95e7aece93f873e37a7bcec9073fa2cd",
     "entities": [
       {
         "tableName": "NetworkNode",
@@ -1498,7 +1498,7 @@
       },
       {
         "tableName": "ClazzEnrolment",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzEnrolmentUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzEnrolmentPersonUid` INTEGER NOT NULL, `clazzEnrolmentClazzUid` INTEGER NOT NULL, `clazzEnrolmentDateJoined` INTEGER NOT NULL, `clazzEnrolmentDateLeft` INTEGER NOT NULL, `clazzEnrolmentRole` INTEGER NOT NULL, `clazzEnrolmentAttendancePercentage` REAL NOT NULL, `clazzEnrolmentActive` INTEGER NOT NULL, `clazzEnrolmentLeavingReasonUid` INTEGER NOT NULL, `clazzEnrolmentStatus` INTEGER NOT NULL, `clazzEnrolmentLocalChangeSeqNum` INTEGER NOT NULL, `clazzEnrolmentMasterChangeSeqNum` INTEGER NOT NULL, `clazzEnrolmentLastChangedBy` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`clazzEnrolmentUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `clazzEnrolmentPersonUid` INTEGER NOT NULL, `clazzEnrolmentClazzUid` INTEGER NOT NULL, `clazzEnrolmentDateJoined` INTEGER NOT NULL, `clazzEnrolmentDateLeft` INTEGER NOT NULL, `clazzEnrolmentRole` INTEGER NOT NULL, `clazzEnrolmentAttendancePercentage` REAL NOT NULL, `clazzEnrolmentActive` INTEGER NOT NULL, `clazzEnrolmentLeavingReasonUid` INTEGER NOT NULL, `clazzEnrolmentOutcome` INTEGER NOT NULL, `clazzEnrolmentLocalChangeSeqNum` INTEGER NOT NULL, `clazzEnrolmentMasterChangeSeqNum` INTEGER NOT NULL, `clazzEnrolmentLastChangedBy` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "clazzEnrolmentUid",
@@ -1555,8 +1555,8 @@
             "notNull": true
           },
           {
-            "fieldPath": "clazzEnrolmentStatus",
-            "columnName": "clazzEnrolmentStatus",
+            "fieldPath": "clazzEnrolmentOutcome",
+            "columnName": "clazzEnrolmentOutcome",
             "affinity": "INTEGER",
             "notNull": true
           },
@@ -9836,7 +9836,7 @@
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'cde9dff701062a6cf533d28af8ac47c4')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '95e7aece93f873e37a7bcec9073fa2cd')"
     ]
   }
 }

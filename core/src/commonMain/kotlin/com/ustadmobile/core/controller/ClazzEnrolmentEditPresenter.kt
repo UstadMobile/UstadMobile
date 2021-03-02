@@ -43,15 +43,14 @@ class ClazzEnrolmentEditPresenter(context: Any,
     class RoleMessageIdOption(day: RoleOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
-    enum class StatusOptions(val optionVal: Int, val messageId: Int) {
-        ENROLED(ClazzEnrolment.STATUS_ENROLED, MessageID.enroled),
-        GRADUATED(ClazzEnrolment.STATUS_GRADUATED, MessageID.graduated),
-        FAILED(ClazzEnrolment.STATUS_FAILED, MessageID.failed),
-        DROPPED_OUT(ClazzEnrolment.STATUS_DROPPED_OUT, MessageID.dropped_out),
-        MOVED(ClazzEnrolment.STATUS_MOVED, MessageID.moved)
+    enum class OutcomeOptions(val optionVal: Int, val messageId: Int) {
+        INPROGRESS(ClazzEnrolment.OUTCOME_IN_PROGRESS, MessageID.in_progress),
+        GRADUATED(ClazzEnrolment.OUTCOME_GRADUATED, MessageID.graduated),
+        FAILED(ClazzEnrolment.OUTCOME_FAILED, MessageID.failed),
+        DROPPED_OUT(ClazzEnrolment.OUTCOME_DROPPED_OUT, MessageID.dropped_out),
     }
 
-    class StatusMessageIdOption(day: StatusOptions, context: Any)
+    class OutcomeMessageIdOption(day: OutcomeOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
     var selectedPerson: Long = 0L
@@ -65,7 +64,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         //view.roleList = RoleOptions.values().map { RoleMessageIdOption(it, context) }
-        view.statusList = StatusOptions.values().map { StatusMessageIdOption(it, context) }
+        view.statusList = OutcomeOptions.values().map { OutcomeMessageIdOption(it, context) }
         selectedPerson = arguments[ARG_PERSON_UID]?.toLong() ?: 0L
         selectedClazz = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
         selectedRole = arguments[ARG_FILTER_BY_ENROLMENT_ROLE]?.toInt() ?: 0

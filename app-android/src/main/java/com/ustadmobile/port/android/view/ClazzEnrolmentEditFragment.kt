@@ -134,7 +134,7 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
         }
 
     override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
-        mBinding?.clazzEnrolmentEditReasonTextinputlayout?.isEnabled = selectedOption.optionId != ClazzEnrolment.STATUS_ENROLED
+        mBinding?.clazzEnrolmentEditReasonTextinputlayout?.isEnabled = selectedOption.optionId != ClazzEnrolment.OUTCOME_IN_PROGRESS
     }
 
     override fun onNoMessageIdOptionSelected(view: AdapterView<*>?) {

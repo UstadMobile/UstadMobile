@@ -40,7 +40,7 @@ class ClazzEnrolmentListFragmentTest : TestCase()  {
                 clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
                 clazzEnrolmentDateJoined = DateTime(2020, 10, 10).unixMillisLong
                 clazzEnrolmentDateLeft = Long.MAX_VALUE
-                clazzEnrolmentStatus = ClazzEnrolment.STATUS_ENROLED
+                clazzEnrolmentOutcome = ClazzEnrolment.OUTCOME_IN_PROGRESS
                 clazzEnrolmentUid = dbRule.repo.clazzEnrolmentDao.insert(this)
             }
 

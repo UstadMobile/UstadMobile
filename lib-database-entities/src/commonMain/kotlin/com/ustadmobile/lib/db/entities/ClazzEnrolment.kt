@@ -238,7 +238,7 @@ open class ClazzEnrolment()  {
 
     var clazzEnrolmentLeavingReasonUid: Long = 0
 
-    var clazzEnrolmentStatus: Int = STATUS_ENROLED
+    var clazzEnrolmentOutcome: Int = OUTCOME_IN_PROGRESS
 
     @LocalChangeSeqNum
     var clazzEnrolmentLocalChangeSeqNum: Long = 0
@@ -268,15 +268,13 @@ open class ClazzEnrolment()  {
 
         const val ROLE_TEACHER = 1001
 
-        const val STATUS_ENROLED = 200
+        const val OUTCOME_IN_PROGRESS = 200
 
-        const val STATUS_GRADUATED = 201
+        const val OUTCOME_GRADUATED = 201
 
-        const val STATUS_FAILED = 202
+        const val OUTCOME_FAILED = 202
 
-        const val STATUS_DROPPED_OUT = 203
-
-        const val STATUS_MOVED = 204
+        const val OUTCOME_DROPPED_OUT = 203
 
         /**
          * The role given to someone who has the class code, however their registration is not yet approved.

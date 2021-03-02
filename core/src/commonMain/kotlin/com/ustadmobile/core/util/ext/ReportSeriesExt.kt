@@ -96,10 +96,10 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
     val filterFieldList = reportSeriesFilters?.map { it.reportFilterField }
 
     val hasFilterEnrolment = filterFieldList?.any {
-        it == ReportFilter.FIELD_CLAZZ_ENROLMENT_STATUS ||
+        it == ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME ||
                 it == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON } ?: false
 
-    if(report.xAxis == Report.ENROLMENT_STATUS || reportSeriesSubGroup == Report.ENROLMENT_STATUS
+    if(report.xAxis == Report.ENROLMENT_OUTCOME || reportSeriesSubGroup == Report.ENROLMENT_OUTCOME
             || report.xAxis == Report.ENROLMENT_LEAVING_REASON || reportSeriesSubGroup == Report.ENROLMENT_LEAVING_REASON
             || report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS || hasFilterEnrolment) {
 
@@ -212,9 +212,9 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                     whereList += (filterString)
 
                 }
-                ReportFilter.FIELD_CLAZZ_ENROLMENT_STATUS -> {
+                ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME -> {
 
-                    var filterString = "ClazzEnrolment.clazzEnrolmentStatus "
+                    var filterString = "ClazzEnrolment.clazzEnrolmentOutcome "
                     filterString += handleCondition(filter.reportFilterCondition)
                     filterString += "${filter.reportFilterDropDownValue} "
                     whereList += (filterString)
@@ -307,7 +307,7 @@ private fun groupBy(value: Int, dbType: Int): String {
         Report.CONTENT_ENTRY -> "StatementEntity.statementContentEntryUid "
         Report.GENDER -> "Person.gender "
         Report.CLASS -> "Clazz.clazzUid "
-        Report.ENROLMENT_STATUS -> "ClazzEnrolment.clazzEnrolmentStatus "
+        Report.ENROLMENT_OUTCOME -> "ClazzEnrolment.clazzEnrolmentOutcome "
         Report.ENROLMENT_LEAVING_REASON -> "ClazzEnrolment.clazzEnrolmentLeavingReasonUid "
         else -> ""
     }

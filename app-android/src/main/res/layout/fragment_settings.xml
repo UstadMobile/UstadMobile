@@ -222,7 +222,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/dimen_8dp"
                     android:layout_marginTop="@dimen/dimen_8dp"
-                    android:text="@string/leaving_reasons_title"
+                    android:text="@string/leaving_reason"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_leaving_reason_iv"
                     app:layout_constraintTop_toTopOf="parent" />
 

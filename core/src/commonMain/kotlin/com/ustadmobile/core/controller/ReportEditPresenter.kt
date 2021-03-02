@@ -60,8 +60,8 @@ class ReportEditPresenter(context: Any,
                 MessageID.gender_literal),
         CLASS(Report.CLASS,
                 MessageID.clazz),
-        ENROLMENTSTATUS(Report.ENROLMENT_STATUS,
-                MessageID.class_enrolment_status),
+        ENROLMENT_OUTCOME(Report.ENROLMENT_OUTCOME,
+                MessageID.class_enrolment_outcome),
         ENROLMENT_LEAVING(Report.ENROLMENT_LEAVING_REASON,
                 MessageID.class_enrolment_leaving)
     }
@@ -141,8 +141,8 @@ class ReportEditPresenter(context: Any,
                 MessageID.gender_literal),
         CLASS(Report.CLASS,
                 MessageID.clazz),
-        ENROLMENTSTATUS(Report.ENROLMENT_STATUS,
-                MessageID.class_enrolment_status),
+        ENROLMENT_OUTCOME(Report.ENROLMENT_OUTCOME,
+                MessageID.class_enrolment_outcome),
         ENROLMENT_LEAVING(Report.ENROLMENT_LEAVING_REASON,
                 MessageID.class_enrolment_leaving)
     }
@@ -418,13 +418,13 @@ class ReportEditPresenter(context: Any,
                                 it.code == Report.CONTENT_ENTRY ||
                                 it.code == Report.CLASS || it.code == ReportSeries.NONE ||
                                 it.code == Report.ENROLMENT_LEAVING_REASON ||
-                                it.code == Report.ENROLMENT_STATUS
+                                it.code == Report.ENROLMENT_OUTCOME
                     }
         } else if (selectedOption.optionId == Report.CLASS ||
                 selectedOption.optionId == Report.CONTENT_ENTRY ||
                 selectedOption.optionId == Report.GENDER ||
                 selectedOption.optionId == Report.ENROLMENT_LEAVING_REASON ||
-                selectedOption.optionId == Report.ENROLMENT_STATUS) {
+                selectedOption.optionId == Report.ENROLMENT_OUTCOME) {
             view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
         }
     }

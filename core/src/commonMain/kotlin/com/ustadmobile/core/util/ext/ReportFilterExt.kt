@@ -1,7 +1,6 @@
 package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.controller.ReportFilterEditPresenter
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.ReportFilter
@@ -25,8 +24,8 @@ fun ReportFilter.toDisplayString(context: Any): String {
             valueString = UstadMobileSystemImpl.instance.getString(
                     selectedOption?.component2() ?: 0, context)
         }
-        ReportFilter.FIELD_CLAZZ_ENROLMENT_STATUS == reportFilterField -> {
-            val selectedOption = STATUS_TO_MESSAGE_ID_MAP.entries.find {
+        ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME == reportFilterField -> {
+            val selectedOption = OUTCOME_TO_MESSAGE_ID_MAP.entries.find {
                 it.key == reportFilterDropDownValue
             }
             valueString = UstadMobileSystemImpl.instance.getString(

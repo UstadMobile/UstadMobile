@@ -18,7 +18,7 @@ object ClazzEnrolmentEditScreen: KScreen<ClazzEnrolmentEditScreen>() {
 
     val endDateLayout = KTextInputLayout {withId(R.id.clazz_enrolment_edit_toDate_textinputlayout)}
 
-    val statusLayout = KTextInputLayout {withId(R.id.clazz_enrolment_edit_status_textinputlayout)}
+    val statusLayout = KTextInputLayout {withId(R.id.clazz_enrolment_edit_outcome_textinputlayout)}
 
     val leavingReasonLayout = KTextInputLayout {withId(R.id.clazz_enrolment_edit_reason_textinputlayout)}
 

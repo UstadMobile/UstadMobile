@@ -2,7 +2,6 @@ package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzEnrolment.Companion.ROLE_STUDENT_PENDING
 import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithLeavingReason
@@ -24,23 +23,22 @@ fun ClazzEnrolment.roleToString(context: Any, systemImpl: UstadMobileSystemImpl)
     return roleStr
 }
 
-val STATUS_TO_MESSAGE_ID_MAP = mapOf(
-        ClazzEnrolment.STATUS_ENROLED to MessageID.enroled,
-        ClazzEnrolment.STATUS_DROPPED_OUT to MessageID.dropped_out,
-        ClazzEnrolment.STATUS_FAILED to MessageID.failed,
-        ClazzEnrolment.STATUS_GRADUATED to MessageID.graduated,
-        ClazzEnrolment.STATUS_MOVED to MessageID.moved
+val OUTCOME_TO_MESSAGE_ID_MAP = mapOf(
+        ClazzEnrolment.OUTCOME_IN_PROGRESS to MessageID.in_progress,
+        ClazzEnrolment.OUTCOME_DROPPED_OUT to MessageID.dropped_out,
+        ClazzEnrolment.OUTCOME_FAILED to MessageID.failed,
+        ClazzEnrolment.OUTCOME_GRADUATED to MessageID.graduated,
 )
 
-fun ClazzEnrolmentWithLeavingReason.statusToString(context: Any, systemImpl: UstadMobileSystemImpl): String {
-    val statusMessageId = STATUS_TO_MESSAGE_ID_MAP[clazzEnrolmentStatus] ?: 0
+fun ClazzEnrolmentWithLeavingReason.outcomeToString(context: Any, systemImpl: UstadMobileSystemImpl): String {
+    val outcomeMessageId = OUTCOME_TO_MESSAGE_ID_MAP[clazzEnrolmentOutcome] ?: 0
 
-    var statusStr = systemImpl.getString(statusMessageId, context)
+    var outcomeStr = systemImpl.getString(outcomeMessageId, context)
     if(clazzEnrolmentLeavingReasonUid != 0L){
-        statusStr += " (${leavingReason?.leavingReasonTitle})"
+        outcomeStr += " (${leavingReason?.leavingReasonTitle})"
     }
 
-    return statusStr
+    return outcomeStr
 }
 
 

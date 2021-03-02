@@ -27,7 +27,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
     @Query("""SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = :personUid 
         AND clazzEnrolmentClazzUid = :clazzUid 
-        AND clazzEnrolmentStatus = ${ClazzEnrolment.STATUS_ENROLED} LIMIT 1""")
+        AND clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS} LIMIT 1""")
     abstract suspend fun findByPersonUidAndClazzUidAsync(personUid: Long, clazzUid: Long): ClazzEnrolment?
 
     @Query("""SELECT ClazzEnrolment.*, LeavingReason.* FROM ClazzEnrolment LEFT JOIN
