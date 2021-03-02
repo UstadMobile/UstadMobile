@@ -696,7 +696,7 @@
     <string name="edit_terms_and_policies">ویرایش شرایط و پالیسیها</string>
     <string name="share_link">شریک ساختن پیوند</string>
     <string name="moved_x_entries">%1$s موارد انتقال داده شد</string>
-    <string name="end_is_before_start_error">ختم قبل از آغاز است</string>
+
     <string name="add_a_new_occurrence">علاوه ساختن واقعه جدید</string>
     <string name="guest_login_enabled">ورود مهمان فعال گردید</string>
     <string name="registration_allowed">ثبت نام مجاز است</string>
