@@ -15,7 +15,6 @@ import com.ustadmobile.core.view.ClazzEnrolmentEditView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.LeavingReason
@@ -103,14 +102,14 @@ class ClazzEnrolmentEditPresenterTest {
             repo.waitUntil(5000, listOf("ClazzEnrolmentWithClazz")) {
                 runBlocking {
                     repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
-                            activePerson.personUid, systemTimeInMillis()).isNotEmpty()
+                            activePerson.personUid).isNotEmpty()
                 }
             }
         }
 
         runBlocking {
             val list = repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
-                    activePerson.personUid, systemTimeInMillis())
+                    activePerson.personUid)
             Assert.assertEquals("Entity was saved to database", ClazzEnrolment.ROLE_STUDENT,
                     list[0].clazzEnrolmentRole)
         }

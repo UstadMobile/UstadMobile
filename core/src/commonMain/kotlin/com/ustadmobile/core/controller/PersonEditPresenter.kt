@@ -23,7 +23,6 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -121,7 +120,7 @@ class PersonEditPresenter(context: Any,
         } ?: PersonPicture()
 
         val clazzMemberWithClazzList = withTimeoutOrNull(2000) {
-            db.takeIf { entityUid != 0L }?.clazzEnrolmentDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid, getSystemTimeInMillis())
+            db.takeIf { entityUid != 0L }?.clazzEnrolmentDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid)
         } ?: listOf()
         clazzMemberJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
 

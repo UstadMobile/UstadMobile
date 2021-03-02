@@ -6,7 +6,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -78,7 +77,7 @@ class UmAppDatabaseExtTest {
         repo.enrolPersonIntoClazzAtLocalTimezone(testPerson, testClazz.clazzUid, ClazzEnrolment.ROLE_TEACHER)
 
         val personClazzes = db.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
-                testPerson.personUid, systemTimeInMillis())
+                testPerson.personUid)
 
         Assert.assertTrue("PersonMember was created", personClazzes.any { it.clazzEnrolmentClazzUid == testClazz.clazzUid })
 

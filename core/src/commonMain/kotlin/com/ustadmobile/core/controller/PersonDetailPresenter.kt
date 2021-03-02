@@ -27,8 +27,7 @@ class PersonDetailPresenter(context: Any,
 
     override fun onLoadLiveData(repo: UmAppDatabase): DoorLiveData<PersonWithDisplayDetails?>? {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
-        view.clazzes = repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazz(entityUid,
-                getSystemTimeInMillis())
+        view.clazzes = repo.clazzEnrolmentDao.findAllClazzesByPersonWithClazz(entityUid)
 
         GlobalScope.launch(doorMainDispatcher()) {
             val activePersonUid = accountManager.activeAccount.personUid

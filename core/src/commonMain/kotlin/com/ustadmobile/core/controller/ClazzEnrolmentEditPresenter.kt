@@ -149,7 +149,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
             // must be filled
             if (entity.clazzEnrolmentDateJoined == 0L) {
-                view.startDateError = Pair(systemImpl.getString(MessageID.field_required_prompt, context),0)
+                view.startDateErrorWithDate = Pair(systemImpl.getString(MessageID.field_required_prompt, context),0)
                 return@launch
             }
 
@@ -162,19 +162,19 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
             // if date joined entered is before clazz start date
             if ((clazzData?.clazzStartTime ?: 0) > entity.clazzEnrolmentDateJoined) {
-                view.startDateError = Pair(systemImpl.getString(
+                view.startDateErrorWithDate = Pair(systemImpl.getString(
                         MessageID.error_start_date_before_clazz_date, context),0)
                 return@launch
             }
             val maxDate = repo.clazzEnrolmentDao.findMaxEndDateForEnrolment(selectedClazz, selectedPerson, entity.clazzEnrolmentUid)
             // if date joined is before previous enrolment end date
             if (maxDate != 0L && maxDate != Long.MAX_VALUE && entity.clazzEnrolmentDateJoined < maxDate) {
-                view.startDateError = Pair(systemImpl.getString(
+                view.startDateErrorWithDate = Pair(systemImpl.getString(
                         MessageID.error_start_date_before_previous_enrolment_date, context),maxDate)
                 return@launch
             }
 
-            view.startDateError = null
+            view.startDateErrorWithDate = null
             view.endDateError = null
 
             val saveToDb = arguments[ARG_SAVE_TO_DB]?.toBoolean() ?: false

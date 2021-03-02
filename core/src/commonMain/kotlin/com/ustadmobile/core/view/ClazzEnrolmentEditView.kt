@@ -12,7 +12,7 @@ interface ClazzEnrolmentEditView: UstadEditView<ClazzEnrolmentWithLeavingReason>
     var roleList: List<IdOption>?
     var statusList: List<IdOption>?
 
-    var startDateError: Pair<String, Long>?
+    var startDateErrorWithDate: Pair<String, Long>?
     var endDateError: String?
     var roleSelectionError: String?
 

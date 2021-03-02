@@ -99,7 +99,7 @@ class ClazzEnrolmentEditFragment: UstadEditFragment<ClazzEnrolmentWithLeavingRea
             mBinding?.statusOptions = value
         }
 
-    override var startDateError: Pair<String, Long>? = null
+    override var startDateErrorWithDate: Pair<String, Long>? = null
         get() = field
         set(value) {
             field = value

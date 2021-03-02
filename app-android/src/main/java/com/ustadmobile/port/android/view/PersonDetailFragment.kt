@@ -49,7 +49,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
     var dbRepo: UmAppDatabase? = null
 
     class ClazzEnrolmentWithClazzRecyclerAdapter(var presenter: PersonDetailPresenter?)
-        : ListAdapter<ClazzEnrolmentWithClazz,
+        : ListAdapter<ClazzEnrolmentWithClazzAndAttendance,
                 ClazzEnrolmentWithClazzRecyclerAdapter.ClazzEnrolmentWithClazzViewHolder>(
                     DIFFUTIL_CLAZZMEMBERWITHCLAZZ) {
 
@@ -79,7 +79,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             rolesAndPermissionsLiveData?.observe(viewLifecycleOwner, rolesAndPermissionsObserver)
         }
 
-    override var clazzes: DataSource.Factory<Int, ClazzEnrolmentWithClazz>? = null
+    override var clazzes: DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>? = null
         get() = field
         set(value) {
             clazzesLiveData?.removeObserver(clazzMemberWithClazzObserver)
@@ -103,11 +103,11 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
                 View.VISIBLE else View.GONE
         }
 
-    private var clazzesLiveData: LiveData<PagedList<ClazzEnrolmentWithClazz>>? = null
+    private var clazzesLiveData: LiveData<PagedList<ClazzEnrolmentWithClazzAndAttendance>>? = null
 
     private var clazzEnrolmentWithClazzRecyclerAdapter: ClazzEnrolmentWithClazzRecyclerAdapter? = null
 
-    private val clazzMemberWithClazzObserver = Observer<PagedList<ClazzEnrolmentWithClazz>?> {
+    private val clazzMemberWithClazzObserver = Observer<PagedList<ClazzEnrolmentWithClazzAndAttendance>?> {
         t -> clazzEnrolmentWithClazzRecyclerAdapter?.submitList(t)
     }
 
@@ -183,14 +183,14 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
     companion object {
 
         val DIFFUTIL_CLAZZMEMBERWITHCLAZZ =
-                object: DiffUtil.ItemCallback<ClazzEnrolmentWithClazz>() {
-            override fun areItemsTheSame(oldItem: ClazzEnrolmentWithClazz,
-                                         newItem: ClazzEnrolmentWithClazz): Boolean {
+                object: DiffUtil.ItemCallback<ClazzEnrolmentWithClazzAndAttendance>() {
+            override fun areItemsTheSame(oldItem: ClazzEnrolmentWithClazzAndAttendance,
+                                         newItem: ClazzEnrolmentWithClazzAndAttendance): Boolean {
                 return oldItem.clazzEnrolmentUid == newItem.clazzEnrolmentUid
             }
 
-            override fun areContentsTheSame(oldItem: ClazzEnrolmentWithClazz,
-                                            newItem: ClazzEnrolmentWithClazz): Boolean {
+            override fun areContentsTheSame(oldItem: ClazzEnrolmentWithClazzAndAttendance,
+                                            newItem: ClazzEnrolmentWithClazzAndAttendance): Boolean {
                 return oldItem == newItem
             }
         }
