@@ -59,13 +59,22 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
      * @param date If this is not 0, then the query will ensure that the registration is current at
      * the given
      */
-    @Query("""SELECT ClazzEnrolment.*, Clazz.* 
+    @Query("""SELECT ClazzEnrolment.*, Clazz.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
+        ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
+        ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
+        COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) 
+        FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog ON 
+        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid WHERE 
+        ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = :personUid 
+        AND ClazzLog.clazzLogClazzUid = Clazz.clazzUid AND ClazzLog.logDate 
+        BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft) 
+        as attendance
         FROM ClazzEnrolment
         LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
         WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
-        AND (:date = 0 OR :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft)
+        ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
     """)
-    abstract fun findAllClazzesByPersonWithClazz(personUid: Long, date: Long): DataSource.Factory<Int, ClazzEnrolmentWithClazz>
+    abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>
 
     @Query("""SELECT COALESCE(MAX(clazzEnrolmentDateLeft),0) FROM ClazzEnrolment WHERE 
         ClazzEnrolment.clazzEnrolmentPersonUid = :selectedPerson 
@@ -75,12 +84,12 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
                                             selectedEnrolment: Long): Long
 
     @Query("""SELECT ClazzEnrolment.*, Clazz.* 
-        FROM ClazzEnrolment
-        LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
-        WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
-        AND (:date = 0 OR :date BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft)
+        FROM ClazzEnrolment 
+        LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+        WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid 
+        ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
     """)
-    abstract suspend fun findAllClazzesByPersonWithClazzAsListAsync(personUid: Long, date: Long): List<ClazzEnrolmentWithClazz>
+    abstract suspend fun findAllClazzesByPersonWithClazzAsListAsync(personUid: Long): List<ClazzEnrolmentWithClazz>
 
     @Query("""SELECT ClazzEnrolment.*, Person.*
         FROM ClazzEnrolment
