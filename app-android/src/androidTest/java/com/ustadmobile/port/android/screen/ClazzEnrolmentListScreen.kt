@@ -23,29 +23,18 @@ object ClazzEnrolmentListScreen : KScreen<ClazzEnrolmentListScreen>() {
         withId(R.id.fragment_list_recyclerview)
     }, itemTypeBuilder = {
         itemType(::ClazzEnrolment)
-        itemType(::SortOption)
-    })
-
-
-    val sortList: KRecyclerView = KRecyclerView({
-        withId(R.id.fragment_sort_order_list)
-    }, itemTypeBuilder = {
-        itemType(::Sort)
+        itemType(::Profile)
     })
 
 
     class ClazzEnrolment(parent: Matcher<View>) : KRecyclerItem<ClazzEnrolment>(parent) {
-        val title: KTextView = KTextView(parent) { withId(R.id.line1_text) }
+        val roleAndStatusText : KTextView = KTextView(parent) { withId(R.id.line1_text) }
+        val editButton: KImageView = KImageView(parent) { withId(R.id.item_clazz_enrolment_edit_enrolment)}
+        val startEndDate: KTextView = KTextView(parent) {withId(R.id.line2_text)}
     }
 
-    class SortOption(parent: Matcher<View>) : KRecyclerItem<SortOption>(parent) {
-        val sortLayout = KView(parent) { withId(R.id.item_sort_selected_layout) }
-        val selectedSort = KTextView(parent) { withId(R.id.item_sort_selected_text)}
-        val selectedOrder = KImageView(parent) { withId(R.id.item_sort_asc_desc)}
-    }
-
-    class Sort(parent: Matcher<View>) : KRecyclerItem<Sort>(parent) {
-        val personName: KTextView = KTextView(parent) { withId(R.id.item_person_text) }
+    class Profile(parent: Matcher<View>) : KRecyclerItem<Profile>(parent) {
+        val profileButton = KTextView(parent) { withId(R.id.item_clazz_enrolment_view_profile_button)}
     }
 
 

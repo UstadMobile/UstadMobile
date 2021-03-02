@@ -9,10 +9,12 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.MergeAdapter
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.ClazzWorkDetailProgressListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
@@ -48,7 +50,10 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzEnrolment
 
         metricsRecyclerAdapter = ClazzWorkMetricsRecyclerAdapter(null, false)
         mDataRecyclerViewAdapter = ClazzWorkProgressListRecyclerAdapter(mPresenter)
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
+                filterOptions = ClazzWorkDetailProgressListPresenter.FILTER_OPTIONS.toListFilterOptions(requireContext(), di),
+                onFilterOptionSelected = mPresenter, onClickSort = this,
+                sortOrderOption = mPresenter?.sortOptions?.get(0))
 
         mMergeRecyclerViewAdapter = MergeAdapter(mUstadListHeaderRecyclerViewAdapter,
                 metricsRecyclerAdapter, mDataRecyclerViewAdapter)

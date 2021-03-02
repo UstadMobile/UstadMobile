@@ -24,6 +24,7 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.UstadView
+import kotlinx.coroutines.runBlocking
 
 
 @AdbScreenRecord("LeavingReasonEdit screen Test")
@@ -49,40 +50,35 @@ class LeavingReasonEditFragmentTest : TestCase(){
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
+    private lateinit var fragmentScenario: FragmentScenario<LeavingReasonEditFragment>
+
 
     @AdbScreenRecord("given LeavingReason not present when filled then should save to database")
     @Test
     fun givenNoLeavingReasonPresentYet_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
-            LeavingReasonEditFragment(). also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }
-
-        val currentEntity = fragmentScenario.letOnFragment { it.entity }
-        val formVals = LeavingReason().apply {
-            //TODO: set the values that will be entered on the form here
-            //e.g. leavingReasonName = "New LeavingReason"
-        }
 
         init{
+
+            fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
+                LeavingReasonEditFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }
 
         }.run{
 
             LeavingReasonEditScreen{
 
-
-                //TODO: if required, use the savedstatehandle to add link entities
-
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-
-                val leavingReasonList = dbRule.db.clazzDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
-                    it.isNotEmpty()
+                LeavingReasonTitleInput{
+                    isErrorEnabled()
+                    edit{
+                        typeText("Moved Aboard")
+                    }
                 }
 
-                Assert.assertEquals("LeavingReason data set", "New LeavingReason",
-                        leavingReasonList.first() .leavingReasonName)
+                fragmentScenario.clickOptionMenu(R.id.menu_done)
 
             }
 
@@ -94,47 +90,42 @@ class LeavingReasonEditFragmentTest : TestCase(){
     @AdbScreenRecord("given LeavingReason exists when updated then should be updated on database")
     @Test
     fun givenLeavingReasonExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
+
         val existingLeavingReason = LeavingReason().apply {
-            leavingReasonName = "New LeavingReason"
-            leavingReasonUid = dbRule.db.leavingReasonDao.insert(this)
-        }
-
-        val fragmentScenario = launchFragmentInContainer(themeResId = R.style.Theme_UstadTheme,
-                fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingLeavingReason.leavingReasonUid)) {
-            LeavingReasonEditFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
-
-        //Freeze and serialize the value as it was first shown to the user
-        val entityLoadedByFragment = fragmentScenario.letOnFragment { it.entity }
-        val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
-        val newClazzValues = defaultGson().fromJson(entityLoadedJson, LeavingReason::class.java).apply {
-            leavingReasonName = "Updated LeavingReason"
+            leavingReasonTitle = "New LeavingReason"
+            leavingReasonUid = dbRule.repo.leavingReasonDao.insert(this)
         }
 
         init{
 
+            fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingLeavingReason.leavingReasonUid)) {
+                LeavingReasonEditFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }
 
         }.run{
 
             LeavingReasonEditScreen {
 
-                fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment,
-                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
-                        testContext = this@run)
+                LeavingReasonTitleInput {
+                    edit {
+                        hasText(existingLeavingReason.leavingReasonTitle!!)
+                        clearText()
+                        replaceText("Leaving Reason Changed")
+                    }
+                }
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-                Assert.assertEquals("Entity in database was loaded for user",
-                        "New LeavingReason",
-                        defaultGson().fromJson(entityLoadedJson, LeavingReason::class.java).clazzName)
-
-                val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existingLeavingReason.leavingReasonUid)
-                        .waitUntilWithFragmentScenario(fragmentScenario) { it?.clazzName == "Updated LeavingReason" }
-                Assert.assertEquals("LeavingReason name is updated", "Updated LeavingReason",
-                        updatedEntityFromDb?.leavingReasonName)
+                runBlocking {
+                    val reasonFromDb = dbRule.db.leavingReasonDao.findByUidAsync(
+                            existingLeavingReason.leavingReasonUid)
+                    Assert.assertEquals("title change matches",
+                            existingLeavingReason.leavingReasonTitle,
+                            reasonFromDb!!.leavingReasonTitle)
+                }
 
             }
 

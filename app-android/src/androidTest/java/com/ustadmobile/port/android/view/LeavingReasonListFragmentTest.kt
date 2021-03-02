@@ -35,12 +35,12 @@ class LeavingReasonListFragmentTest : TestCase()  {
     val screenRecordRule = AdbScreenRecordRule()
 
 
-    @AdbScreenRecord("Given list when LeavingReason clicked then navigate to LeavingReasonDetail")
+    @AdbScreenRecord("Given list when LeavingReason clicked then navigate to LeavingReasonEdit")
     @Test
-    fun givenLeavingReasonListPresent_whenClickOnLeavingReason_thenShouldNavigateToLeavingReasonDetail() {
+    fun givenLeavingReasonListPresent_whenClickOnLeavingReason_thenShouldNavigateToLeavingReasonEdit() {
         val testEntity = LeavingReason().apply {
             leavingReasonTitle = "Test Name"
-            leavingReasonUid = dbRule.db.leavingReasonDao.insert(this)
+            leavingReasonUid = dbRule.repo.leavingReasonDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
@@ -59,7 +59,7 @@ class LeavingReasonListFragmentTest : TestCase()  {
                 recycler{
 
                     childWith<LeavingReasonListScreen.LeavingReason>{
-                        withDescendant { withTag(testEntity.leavingReasonUid) }
+                        withDescendant { withText(testEntity.leavingReasonTitle!!) }
                     }perform {
                         title {
                             click()
@@ -70,7 +70,7 @@ class LeavingReasonListFragmentTest : TestCase()  {
 
                 flakySafely {
                     Assert.assertEquals("After clicking on item, it navigates to detail view",
-                            R.id.clazz_enrolment_edit, systemImplNavRule.navController.currentDestination?.id)
+                            R.id.leaving_reason_edit, systemImplNavRule.navController.currentDestination?.id)
                 }
 
 
