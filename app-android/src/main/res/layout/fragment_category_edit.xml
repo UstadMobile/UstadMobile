@@ -114,7 +114,6 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
-                android:visibility="gone"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:hintEnabled="true"
                 android:enabled="@{fieldsEnabled}"
@@ -138,7 +137,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
-                android:visibility="gone"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
                 android:enabled="@{fieldsEnabled}"
@@ -160,7 +158,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
-                android:visibility="gone"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
                 android:enabled="@{fieldsEnabled}"
@@ -184,7 +181,6 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
-                android:visibility="gone"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -210,7 +206,6 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                android:visibility="gone"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_category_edit_desc_pashto_til">
 
                 <com.google.android.material.textfield.TextInputEditText
