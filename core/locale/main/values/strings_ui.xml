@@ -401,21 +401,46 @@
     <string name="repo_loading_status_failed_noconnection">No connection or peer</string>
     <string name="repo_loading_status_failed_connection_error">Connection error</string>
 
-    <!-- The Creative Commons CC BY license as per https://creativecommons.org/licenses/ -->
+    <!--
+    The Creative Commons CC BY license as per https://creativecommons.org/licenses/by/4.0/ .
+    Please see the bottom of the link for some of the official translations available for this title.
+    -->
     <string name="licence_type_cc_by">CC BY</string>
-    <!-- The Creative Commons CC BY SA license as per https://creativecommons.org/licenses/ -->
+    <!--
+    The Creative Commons CC BY SA license as per https://creativecommons.org/licenses/by-sa/4.0/
+    Please see the bottom of the link for some of the official translations available for this title.
+    -->
     <string name="licence_type_cc_by_sa">CC BY SA</string>
-    <!-- The Creative Commons CC BY SA NC license as per https://creativecommons.org/licenses/ -->
+
+    <!--
+    The Creative Commons BY-NC-SA license as per  https://creativecommons.org/licenses/by-nc-sa/4.0/
+    Please see the bottom of the link for some of the official translations available for this title.
+    -->
     <string name="licence_type_cc_by_sa_nc">CC BY SA NC</string>
-    <!-- The Creative Commons CC BY NC license as per https://creativecommons.org/licenses/ -->
+    <!--
+    The Creative Commons CC BY NC license as per https://creativecommons.org/licenses/by-nc/4.0/
+    Please see the bottom of the link for some of the official translations available for this title.
+     -->
     <string name="licence_type_cc_by_nc">CC BY NC</string>
-    <!-- The Creative Commons CC BY NC SA license as per https://creativecommons.org/licenses/ -->
+    <!--
+    The Creative Commons CC BY SA NC license as per https://creativecommons.org/licenses/by-nc-sa/4.0/
+    Please see the bottom of the link for some of the official translations available for this title.
+    -->
     <string name="licence_type_cc_by_nc_sa">CC BY NC SA</string>
-    <!-- Public domain license e.g. the copyright has effectively been waived -->
+
+    <!--
+    Public domain license e.g. the copyright owner gives away all permissions to allow anyone
+    to freely copy and make their own modified copies of the work.
+    -->
     <string name="licence_type_public_domain">Public Domain</string>
     <!-- All rights reserved license -->
     <string name="licence_type_all_rights">All Rights Reserved</string>
 
+    <!-- Creative Commons CC0 license (e.g. public domain). When an author uses this license for
+    their work it gives anyone full permission to copy, remix, modify etc. for any purpose with
+    no restrictions and no requirement for credit or attribution. See:
+    https://creativecommons.org/share-your-work/public-domain/cc0
+    -->
     <string name="license_type_cc_0">CC0</string>
 
     <string name="syncing">Syncing..</string>
@@ -506,14 +531,16 @@
     <string name="edit_leaving_reason">Edit enrolment result reason</string>
     <string name="edit_enrolment">Edit enrolment</string>
     <string name="new_enrolment">New enrolment</string>
-    <string name="select_reason">Select reason</string>
-    <string name="current_status">Current status</string>
-    <string name="leaving_reason">Reason for leaving</string>
-    <string name="reason">reason</string>
+    <string name="select_leaving_reason">Select leaving reason</string>
+    <string name="add_leaving_reason">Add new leaving reason</string>
+    <string name="leaving_reason">Leaving reason</string>
+    <string name="leaving_reasons">Leaving reasons</string>
+    <string name="leaving_reason_manage">Add, remove and modify leaving reasons used when a student leaves a class</string>
     <string name="view_profile">View profile</string>
-    <string name="currently_enroled">Currently enroled</string>
-    <string name="class_enrolment_status">Class enrolment status</string>
+    <string name="class_enrolment_outcome">Class enrolment outcome</string>
     <string name="class_enrolment_leaving">Class enrolment reason for leaving</string>
+    <string name="in_progress">In progress</string>
+    <string name="outcome">Outcome</string>
     <!-- used to show the enrolments in 1 class by person: e.g Ahmed's enrolment in Class A -->
     <string name="person_enrolment_in_class">%1$s enrolments in %2$s</string>
     <string name="enrolment">Enrolment</string>
@@ -565,13 +592,22 @@
     <string name="all">All</string>
     <string name="holiday_calendars">Holiday calendars</string>
     <string name="holiday_calendars_desc">Add, remove and modify holiday calendars</string>
+    <!--
+    Social Emotional Learning (SEL) question set
+    -->
     <string name="sel_question_set">SEL Question set</string>
+    <!--
+    Manage Social Emotional Learning (SEL) questions
+    -->
     <string name="sel_question_set_desc">Manage SEL questions</string>
     <string name="users">Users</string>
     <string name="nomination">Nomination</string>
     <string name="active">Active</string>
     <string name="class_id">Class ID</string>
     <string name="gender_literal" value="306">Gender</string>
+    <!--
+    SEL = Social Emotional Learning
+    -->
     <string name="sel_question_set_to_use">SEL question set to use</string>
     <string name="search">Search</string>
     <string name="attendance_percentage">Attendance percentage:</string>
@@ -623,10 +659,26 @@
     <string name="permission_activity_select">View class activity</string>
     <string name="permission_activity_insert">Take class activity</string>
     <string name="permission_activity_update">Update class activity</string>
+
+    <!--
+    SEL = Social Emotional Learning
+    -->
     <string name="permission_sel_question_select">View SEL questions</string>
+    <!--
+    SEL = Social Emotional Learning
+    -->
     <string name="permission_sel_question_insert">Add SEL questions</string>
+    <!--
+    SEL = Social Emotional Learning
+    -->
     <string name="permission_sel_question_update">Update SEL questions</string>
+    <!--
+    SEL = Social Emotional Learning
+    -->
     <string name="permission_sel_select">View SEL results</string>
+    <!--
+    SEL = Social Emotional Learning
+    -->
     <string name="permission_sel_update">Update SEL results</string>
     <string name="custom_fields">Custom fields</string>
     <string name="custom_field">Custom field</string>
