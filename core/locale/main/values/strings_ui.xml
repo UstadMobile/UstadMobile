@@ -539,7 +539,7 @@
     <string name="leaving_reason_manage">Add, remove and modify leaving reasons used when a student leaves a class</string>
     <string name="view_profile">View profile</string>
     <string name="currently_enroled">Currently enroled</string>
-    <string name="class_enrolment_status">Class enrolment status</string>
+    <string name="class_enrolment_outcome">Class enrolment outcome</string>
     <string name="class_enrolment_leaving">Class enrolment reason for leaving</string>
     <string name="in_progress">In progress</string>
     <string name="outcome">Outcome</string>
