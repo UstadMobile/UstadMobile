@@ -250,9 +250,14 @@ fun TextView.setMemberRoleName(clazzEnrolment: ClazzEnrolment?) {
     text = clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
 }
 
-@BindingAdapter("memberEnrolmentStatusWithReason")
-fun TextView.setMemberEnrolmentStatus(clazzEnrolment: ClazzEnrolmentWithLeavingReason?){
+@BindingAdapter("memberEnrolmentOutcomeWithReason")
+fun TextView.setMemberEnrolmentOutcome(clazzEnrolment: ClazzEnrolmentWithLeavingReason?){
     text = "${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)} - ${clazzEnrolment?.outcomeToString(context,  UstadMobileSystemImpl.instance)}"
+}
+
+@BindingAdapter("clazzEnrolmentWithClazzAndOutcome")
+fun TextView.setClazzEnrolmentWithClazzAndOutcome(clazzEnrolment: ClazzEnrolmentWithClazz?){
+    text = "${clazzEnrolment?.clazz?.clazzName} (${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)}) - ${clazzEnrolment?.outcomeToString(context,  UstadMobileSystemImpl.instance)}"
 }
 
 

@@ -156,7 +156,7 @@
                     android:id="@+id/clazz_enrolment_edit_outcome_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/current_status"
+                    android:hint="@string/outcome"
                     app:messageIdOptions="@{statusOptions}"
                     app:onMessageIdOptionSelected="@{statusSelectorListener}"
                     app:selectedMessageIdOption="@={clazzEnrolment.clazzEnrolmentOutcome}" />

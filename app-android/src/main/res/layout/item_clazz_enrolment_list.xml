@@ -52,7 +52,7 @@
             app:layout_constraintStart_toStartOf="parent"
             android:layout_marginStart="@dimen/dimen_24dp"
             app:layout_constraintEnd_toStartOf="@id/item_clazz_enrolment_edit_enrolment"
-            app:memberEnrolmentStatusWithReason="@{clazzEnrolment}"
+            app:memberEnrolmentOutcomeWithReason="@{clazzEnrolment}"
             tools:text="Student - Enroled(transport)"
             android:textAppearance="@style/UmTheme.TextAppearance.Subtitle1"/>
 
