@@ -930,4 +930,94 @@
     <string name="uploading">Таҳти боргирӣ</string>
     <string name="processing">Таҳти коркард</string>
     <string name="confirm_delete_message">Шумо ҳақиқатан мехоҳед ин вурудро аз дастгоҳи худ нест кунед\?</string>
+    <string name="save_as_template">Ҳамчун намуна сабт намоед</string>
+    <string name="choose_template">Интихоби намуна</string>
+    <string name="relative_date">Санаи нисбӣ</string>
+    <string name="fixed_date">Санаи муқарраршуда</string>
+    <string name="action_hidden">Ноаён</string>
+    <string name="line_chart" value="101">Диаграммаи хаттӣ</string>
+    <string name="content_average_duration" value="201">Истифодаи мундариҷа - давомнокии миёнаи як машғулият</string>
+    <string name="interaction_recorded" value="203">Истифодаи мундариҷа - миқдори додугирфти сабтшуда</string>
+    <string name="number_students_completed" value="206">Истифодаи мундариҷа - шумораи хонандагоне, ки машғулиятро хатм кардаанд</string>
+    <string name="total_absences" value="209">Давомот - умуман иштирок накардаанд</string>
+    <string name="percent_students_attended" value="211">Давомот - фоизи хонандагоне, ки иштирок намудаанд</string>
+    <string name="number_unique_students_attending" value="214">Давомот - шумораи хонандагони мушаххас, ки иштирок доранд</string>
+    <string name="time_range_all">Ҳама</string>
+    <string name="report_filter_edit_condition">Шарт</string>
+    <string name="field_content_completion">Вазъи анҷоми машғулият</string>
+    <string name="condition_not_in_list">дар руйхат нест</string>
+    <string name="select_leaving_reason">Сабаби таркро интихоб кунед</string>
+    <string name="leaving_reason_manage">Илова, нест кардан ва тағйир додани сабабҳое, ки хонанда ҳангоми тарки дарс намудан истифода менамояд</string>
+    <string name="sites_can_be_help_text">Сомонаҳо метавонанд барои муассисаҳои таълимӣ, лоиҳаҳо, ташкилот ва ғайраҳо сохта шаванд. Ҳар як сомона метавонад корбарон, маъмурон, мундариҷа, синфҳо, муассисаҳо ва ғайраҳои худро дошта бошад.</string>
+    <string name="new_leaving_reason">Сабаби нави бақайдгирӣ</string>
+    <string name="edit_leaving_reason">Сабаби натиҷаи сабти номро таҳрир кунед</string>
+    <string name="edit_enrolment">Сабти номро таҳрир намоед</string>
+    <string name="new_enrolment">Номнависии нав</string>
+    <string name="leaving_reason">Сабаби тарк</string>
+    <string name="view_profile">Намуди профил</string>
+    <string name="class_enrolment_leaving">Сабти сабаби тарки синф</string>
+    <string name="person_enrolment_in_class">%1$s номнависӣ дар %2$s</string>
+    <string name="enrolment">Номнависӣ</string>
+    <string name="error_start_date_before_clazz_date">Номнавискунӣ пеш аз санаи оғози дарс шурӯъ шуда наметавонад</string>
+    <string name="xapi_options_data_set">Маҷмӯи иттилоот</string>
+    <string name="error_start_date_before_previous_enrolment_date">Номнависии нав бояд пас аз ба охир расидани сабти охирон барои ин шахс %1$s бошад</string>
+    <string name="time_present">иштирок дорад</string>
+    <string name="and">ва</string>
+    <string name="added">Иловашуда</string>
+    <string name="xapi_options_series">Силсила</string>
+    <string name="content_total_duration" value="200">Истифодаи мундариҷа - мӯҳлати умумӣ</string>
+    <string name="count_session" value="202">Истифодаи мундариҷа - миқдори машғулиятҳо</string>
+    <string name="number_active_users" value="204">Истифодаи мундариҷа - миқдори истифодабарандагони фаъол</string>
+    <string name="average_usage_time_per_user" value="205">Истифодаи мундариҷа - вақти миёнаи истифодабарӣ барои як корбар</string>
+    <string name="percent_students_completed" value="207">Истифодаи мундариҷа - фоизи хонандагоне, ки машғулиятро хатм кардаанд</string>
+    <string name="total_attendances" value="208">Давомот - шумораи умумии иштироккунандагон</string>
+    <string name="total_lates" value="210">Давомот - ҳамаи онҳое, ки дер кардаанд</string>
+    <string name="percent_students_attended_or_late" value="212">Давомот - фоизи хонандагоне, ки иштирок ё дер кардаанд</string>
+    <string name="total_number_of_classes" value="213">Давомот - шумораи умумии машғулиятҳо</string>
+    <string name="last_two_week_date_range" value="801">ду ҳафтаи охир</string>
+    <string name="last_week_date_range" value="800">Ҳафтаи охир</string>
+    <string name="last_month_date_range" value="802">Моҳи охир</string>
+    <string name="last_three_months_date_range" value="803">се ҳафтаи охир</string>
+    <string name="year">Сол</string>
+    <string name="time_range">Доираи вақт</string>
+    <string name="selected_custom_range">Доираи фармоишӣ: %1$s%</string>
+    <string name="new_custom_date_range" value="804">Фармоиши нави доираи вақт…</string>
+    <string name="report_filter_edit_field">Майдон</string>
+    <string name="report_filter_edit_values">Қиммат</string>
+    <string name="edit_filters">Таҳрири филтрҳо</string>
+    <string name="field_person_gender">Ҷинси шахс</string>
+    <string name="field_person_age">Синну соли шахс</string>
+    <string name="field_content_entry">Вуруди мундариҷа</string>
+    <string name="field_content_progress">Пешрафти машғулият</string>
+    <string name="field_attendance_percentage">Фоизи иштирок</string>
+    <string name="condition_is">аст</string>
+    <string name="condition_is_not">нест</string>
+    <string name="condition_greater_than">бузургтар аз</string>
+    <string name="condition_less_than">хурдтар аз</string>
+    <string name="condition_in_list">дар руйхат</string>
+    <string name="condition_between">байни</string>
+    <string name="enroled">Номнавис шудааст</string>
+    <string name="class_enrolment">Бақайдгирии синфҳо</string>
+    <string name="graduated">Хатм кардааст</string>
+    <string name="dropped_out">Тарк намудааст</string>
+    <string name="moved">Кӯчидааст</string>
+    <string name="active_classes">синфҳои фаъол</string>
+    <string name="add_leaving_reason">Сабаби нави таркро илова кунед</string>
+    <string name="leaving_reasons">Сабабҳои тарк</string>
+    <string name="class_enrolment_outcome">Натиҷаи бақайдгирии синфҳо</string>
+    <string name="outcome">Натиҷа</string>
+    <string name="terms_and_policies">Шартҳо ва қоидаҳо</string>
+    <string name="manage_site_settings">Танзимот ва қоидаҳои сомонаро идора кунед</string>
+    <string name="guest_login_enabled">Вуруди меҳмон фаъол карда шудааст</string>
+    <string name="registration_allowed">Сабти ном иҷозат дода шудааст</string>
+    <string name="yes">Ҳа</string>
+    <string name="no">Не</string>
+    <string name="edit_site">Сомонаро таҳрир намоед</string>
+    <string name="site">Сомона</string>
+    <string name="site_link">Пайванди сомона</string>
+    <string name="please_enter_the_linK">Лутфан пайванди сомонаи худро, ки омӯзгор ё маъмури шумо пешниҳод кардааст, ворид кунед:</string>
+    <string name="or">Ё</string>
+    <string name="connect_to_site">Ба сомона пайваст шавед</string>
+    <string name="terms_and_policies_text">Матни шартҳо ва қоидаҳо</string>
+    <string name="edit_terms_and_policies">Шартҳо ва қоидаҳоро таҳрир намоед</string>
 </resources>
