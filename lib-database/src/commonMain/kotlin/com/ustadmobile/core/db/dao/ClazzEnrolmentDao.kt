@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.db.entities.*
@@ -92,6 +93,9 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
 
     @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
     abstract suspend fun findByUid(uid: Long): ClazzEnrolment?
+
+    @Query("SELECT * FROM ClazzEnrolment WHERE clazzEnrolmentUid = :uid")
+    abstract fun findByUidLive(uid: Long): DoorLiveData<ClazzEnrolment?>
 
     @Query("""SELECT Person.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
         ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 

@@ -7,12 +7,19 @@ import com.soywiz.klock.DateTime
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
+import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.ClazzEnrolmentListScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.util.test.ext.insertTestStatements
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 
@@ -31,21 +38,49 @@ class ClazzEnrolmentListFragmentTest : TestCase()  {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
+    @Before
+    fun setup() {
+        runBlocking {
+            dbRule.insertPersonForActiveUser(Person().apply {
+                firstNames = "Bob"
+                lastName = "Jones"
+                admin = true
+                personUid = 42
+            })
+        }
+    }
+
     @AdbScreenRecord("Given list when ClazzEnrolment clicked then navigate to ClazzEnrolmentEdit")
     @Test
     fun givenClazzEnrolmentListPresent_whenClickOnClazzEnrolment_thenShouldNavigateToClazzEnrolmentEdit() {
         init{
 
-            val testEntity = ClazzEnrolment().apply {
+            val person = Person().apply {
+                firstNames = "Test"
+                lastName = "User"
+                personUid = dbRule.repo.personDao.insert(this)
+            }
+
+            val clazz = Clazz().apply{
+                clazzName = "new Clazz"
+                clazzUid = dbRule.repo.clazzDao.insert(this)
+            }
+
+            ClazzEnrolment().apply {
                 clazzEnrolmentRole = ClazzEnrolment.ROLE_STUDENT
                 clazzEnrolmentDateJoined = DateTime(2020, 10, 10).unixMillisLong
                 clazzEnrolmentDateLeft = Long.MAX_VALUE
                 clazzEnrolmentOutcome = ClazzEnrolment.OUTCOME_IN_PROGRESS
+                clazzEnrolmentPersonUid = person.personUid
+                clazzEnrolmentClazzUid = clazz.clazzUid
                 clazzEnrolmentUid = dbRule.repo.clazzEnrolmentDao.insert(this)
             }
 
+            val bundle = bundleOf(ARG_PERSON_UID to person.personUid.toString(),
+            ARG_FILTER_BY_CLAZZUID to clazz.clazzUid.toString())
+
             launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                    fragmentArgs = bundleOf()) {
+                    fragmentArgs = bundle) {
                 ClazzEnrolmentListFragment().also {
                     it.installNavController(systemImplNavRule.navController)
                 }
@@ -58,7 +93,9 @@ class ClazzEnrolmentListFragmentTest : TestCase()  {
 
                 recycler{
 
-                    firstChild<ClazzEnrolmentListScreen.ClazzEnrolment> {
+                    childWith<ClazzEnrolmentListScreen.ClazzEnrolment> {
+                        withDescendant { withText("Student - In progress") }
+                    } perform {
                         editButton {
                             click()
                         }

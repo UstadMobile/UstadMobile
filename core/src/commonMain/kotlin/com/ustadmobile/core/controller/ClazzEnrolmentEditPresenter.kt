@@ -63,7 +63,6 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        //view.roleList = RoleOptions.values().map { RoleMessageIdOption(it, context) }
         view.statusList = OutcomeOptions.values().map { OutcomeMessageIdOption(it, context) }
         selectedPerson = arguments[ARG_PERSON_UID]?.toLong() ?: 0L
         selectedClazz = arguments[ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
@@ -75,12 +74,11 @@ class ClazzEnrolmentEditPresenter(context: Any,
 
         val clazzWithSchoolVal = repo.clazzDao.getClazzWithSchool(selectedClazz)
 
-        val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
-        val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
-
         val clazzEnrolment = db.onRepoWithFallbackToDb(2000) {
             it.takeIf { entityUid != 0L }?.clazzEnrolmentDao?.findEnrolmentWithLeavingReason(entityUid)
         } ?: ClazzEnrolmentWithLeavingReason().apply {
+            val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
+            val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
             clazzEnrolmentDateJoined = joinTime
             clazzEnrolmentPersonUid = selectedPerson
             clazzEnrolmentClazzUid = selectedClazz
