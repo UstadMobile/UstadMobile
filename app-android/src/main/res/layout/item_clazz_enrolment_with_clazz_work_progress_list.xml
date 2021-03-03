@@ -28,6 +28,7 @@
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, clazzEnrolmentWithClazzWorkProgress)}"
         app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(clazzEnrolmentWithClazzWorkProgress)}"
         android:background="@drawable/bg_listitem"
+        android:enabled="@{clazzEnrolmentWithClazzWorkProgress.isActiveEnrolment}"
         android:alpha="@{clazzEnrolmentWithClazzWorkProgress.isActiveEnrolment ? 1f : .5f}"
         >
 
