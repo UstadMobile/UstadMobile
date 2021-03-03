@@ -117,12 +117,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
         mFirebaseAnalytics = FirebaseAnalytics.getInstance(this);
 
-//        val bundle = Bundle()
-//        bundle.putString(FirebaseAnalytics.Param.ITEM_ID, id)
-//        bundle.putString(FirebaseAnalytics.Param.ITEM_NAME, name)
-//        bundle.putString(FirebaseAnalytics.Param.CONTENT_TYPE, "image")
-//        mFirebaseAnalytics!!.logEvent(FirebaseAnalytics.Event.SELECT_CONTENT, bundle)
-
 
         val host: NavHostFragment = supportFragmentManager
                 .findFragmentById(R.id.activity_main_navhost_fragment) as NavHostFragment? ?: return
