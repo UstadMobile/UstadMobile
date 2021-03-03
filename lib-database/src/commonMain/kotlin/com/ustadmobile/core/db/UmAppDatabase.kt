@@ -51,7 +51,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 60)
+], version = 61)
 @MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -1117,7 +1117,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
           |WHERE scheduledCheckUid = NEW.scheduledCheckUid
           |; END
           """.trimMargin())
-
 
 
                 }
@@ -2467,7 +2466,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         @Suppress("PARAMETER_NAME_CHANGED_ON_OVERRIDE")
-        val MIGRATION_38_39 = object: DoorMigration(38, 39) {
+        val MIGRATION_38_39 = object : DoorMigration(38, 39) {
             override fun migrate(db: DoorSqlDatabase) {
                 db.execSQL("CREATE TABLE IF NOT EXISTS SqliteSyncablePrimaryKey (sspTableId INTEGER NOT NULL PRIMARY KEY, sspNextPrimaryKey INTEGER NOT NULL)")
 
@@ -2676,7 +2675,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
           """.trimMargin())
 
 
-                    database.execSQL( "CREATE TABLE IF NOT EXISTS LearnerGroupMember (`learnerGroupMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `learnerGroupMemberPersonUid` INTEGER NOT NULL, `learnerGroupMemberLgUid` INTEGER NOT NULL, `learnerGroupMemberRole` INTEGER NOT NULL, `learnerGroupMemberActive` INTEGER NOT NULL, `learnerGroupMemberMCSN` INTEGER NOT NULL, `learnerGroupMemberCSN` INTEGER NOT NULL, `learnerGroupMemberLCB` INTEGER NOT NULL)")
+                    database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroupMember (`learnerGroupMemberUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `learnerGroupMemberPersonUid` INTEGER NOT NULL, `learnerGroupMemberLgUid` INTEGER NOT NULL, `learnerGroupMemberRole` INTEGER NOT NULL, `learnerGroupMemberActive` INTEGER NOT NULL, `learnerGroupMemberMCSN` INTEGER NOT NULL, `learnerGroupMemberCSN` INTEGER NOT NULL, `learnerGroupMemberLCB` INTEGER NOT NULL)")
                     database.execSQL("CREATE TABLE IF NOT EXISTS LearnerGroupMember_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_LearnerGroupMember_trk_clientId_epk_rx_csn` ON LearnerGroupMember_trk (`clientId`, `epk`, `rx`, `csn`)")
 
@@ -2910,7 +2909,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 try {
                     //Sometimes the permission on this goes horribly wrong for no apparent reason
                     database.execSQL("ALTER TABLE SqliteSyncablePrimaryKey RENAME to SqliteSyncablePk")
-                }catch(e: Exception) {
+                } catch (e: Exception) {
                     database.execSQL("CREATE TABLE IF NOT EXISTS SqliteSyncablePk (  sspTableId  INTEGER  PRIMARY KEY  NOT NULL , sspNextPrimaryKey  INTEGER  NOT NULL )")
                 }
 
@@ -2924,7 +2923,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 if (database.dbType() == DoorDbType.SQLITE) {
                     database.execSQL("CREATE TABLE IF NOT EXISTS ContainerImportJob (`cijUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `cijContainerUid` INTEGER NOT NULL, `cijFilePath` TEXT, `cijContainerBaseDir` TEXT, `cijContentEntryUid` INTEGER NOT NULL, `cijMimeType` TEXT, `cijSessionId` TEXT, `cijJobStatus` INTEGER NOT NULL, `cijBytesSoFar` INTEGER NOT NULL, `cijImportCompleted` INTEGER NOT NULL, `cijContentLength` INTEGER NOT NULL, `cijContainerEntryFileUids` TEXT, `cijConversionParams` TEXT)")
-                }else if (database.dbType() == DoorDbType.POSTGRES) {
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("CREATE TABLE IF NOT EXISTS ContainerImportJob (  cijContainerUid  BIGINT , cijFilePath  TEXT , cijContainerBaseDir  TEXT , cijContentEntryUid  BIGINT , cijMimeType  TEXT , cijSessionId  TEXT , cijJobStatus  INTEGER , cijBytesSoFar  BIGINT , cijImportCompleted  BOOL , cijContentLength  BIGINT , cijContainerEntryFileUids  TEXT , cijConversionParams  TEXT , cijUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                 }
             }
@@ -2957,7 +2956,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 database.execSQL("CREATE INDEX index_Role_rolePermissions ON Role(rolePermissions)")
 
                 //Add a PersonGroup for Admin
-                if(database.dbType() == DoorDbType.POSTGRES) {
+                if (database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("""
                         INSERT INTO PersonGroup(groupName, groupActive, personGroupFlag, groupMasterCsn, groupLocalCsn, groupLastChangedBy) 
                         SELECT 'PGA' || person.personUid AS groupName, 
@@ -3021,7 +3020,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("INSERT INTO ScrapeRun (scrapeRunUid, scrapeType, scrapeRunStatus, conversionParams) SELECT scrapeRunUid, scrapeType, status, conversionParams FROM ScrapeRun_OLD")
                     database.execSQL("DROP TABLE ScrapeRun_OLD")
 
-                }else if (database.dbType() == DoorDbType.POSTGRES) {
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("""ALTER TABLE ScrapeRun RENAME COLUMN status to scrapeRunStatus
                         """.trimMargin())
                 }
@@ -3035,16 +3034,16 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_50_51 = object: DoorMigration(50, 51) {
+        val MIGRATION_50_51 = object : DoorMigration(50, 51) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("DROP TABLE IF EXISTS SqliteSyncablePk")
             }
         }
 
         //One off server only change to update clazz end time default to Long.MAX_VALUE
-        val MIGRATION_51_52 = object: DoorMigration(51, 52) {
+        val MIGRATION_51_52 = object : DoorMigration(51, 52) {
             override fun migrate(database: DoorSqlDatabase) {
-                if(database.dbType() == DoorDbType.POSTGRES) {
+                if (database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("UPDATE Clazz SET clazzEndTime = ${systemTimeInMillis()}," +
                             "clazzLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) " +
                             "WHERE clazzEndTime = 0")
@@ -3053,9 +3052,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         //Add the WorkspaceTerms syncable entity
-        val MIGRATION_52_53 = object: DoorMigration(52, 53) {
+        val MIGRATION_52_53 = object : DoorMigration(52, 53) {
             override fun migrate(database: DoorSqlDatabase) {
-                if(database.dbType() == DoorDbType.POSTGRES) {
+                if (database.dbType() == DoorDbType.POSTGRES) {
                     database.execSQL("CREATE TABLE IF NOT EXISTS WorkspaceTerms (  termsHtml  TEXT , wtLang  TEXT , wtLastChangedBy  INTEGER  NOT NULL , wtPrimaryCsn  BIGINT  NOT NULL , wtLocalCsn  BIGINT  NOT NULL , wtUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS WorkspaceTerms_mcsn_seq")
                     database.execSQL("CREATE SEQUENCE IF NOT EXISTS WorkspaceTerms_lcsn_seq")
@@ -3095,7 +3094,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       |UNIQUE INDEX index_WorkspaceTerms_trk_epk_clientId 
                       |ON WorkspaceTerms_trk (epk, clientId)
                       """.trimMargin())
-                }else {
+                } else {
                     database.execSQL("CREATE TABLE IF NOT EXISTS WorkspaceTerms (  termsHtml  TEXT , wtLang  TEXT , wtLastChangedBy  INTEGER  NOT NULL , wtPrimaryCsn  INTEGER  NOT NULL , wtLocalCsn  INTEGER  NOT NULL , wtUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                       |CREATE TRIGGER INS_LOC_272
@@ -3181,12 +3180,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_53_54 = object: DoorMigration(53, 54) {
+        val MIGRATION_53_54 = object : DoorMigration(53, 54) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("ALTER TABLE Language ADD COLUMN Language_Type TEXT")
 
                 //Change WorkSpace into a SyncableEntity
-                if(database.dbType() == DoorDbType.POSTGRES) {
+                if (database.dbType() == DoorDbType.POSTGRES) {
                     //TODO: sync annotation add columns to table
                     database.execSQL("CREATE TABLE IF NOT EXISTS Site_trk (  epk  BIGINT NOT NULL, clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  BOOL NOT NULL, reqId  INTEGER NOT NULL, ts  BIGINT NOT NULL, pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("""
@@ -3282,7 +3281,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       |ON SiteTerms_trk (epk, clientId)
                       """.trimMargin())
 
-                }else {
+                } else {
                     //Create site table as a syncable entity
                     database.execSQL("CREATE TABLE IF NOT EXISTS Site (  sitePcsn  INTEGER  NOT NULL , siteLcsn  INTEGER  NOT NULL , siteLcb  INTEGER  NOT NULL , siteName  TEXT , guestLogin  INTEGER  NOT NULL , registrationAllowed  INTEGER  NOT NULL , siteUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
@@ -3462,7 +3461,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_54_55 = object: DoorMigration(54, 55) {
+        val MIGRATION_54_55 = object : DoorMigration(54, 55) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("ALTER TABLE PersonPicture ADD COLUMN personPictureUri TEXT")
                 database.execSQL("ALTER TABLE PersonPicture ADD COLUMN personPictureMd5 TEXT")
@@ -3470,9 +3469,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
         //Add triggers that check for Zombie attachments
-        val MIGRATION_55_56 = object: DoorMigration(55, 56) {
+        val MIGRATION_55_56 = object : DoorMigration(55, 56) {
             override fun migrate(database: DoorSqlDatabase) {
-                if(database.dbType() == DoorDbType.SQLITE) {
+                if (database.dbType() == DoorDbType.SQLITE) {
                     database.execSQL("CREATE TABLE IF NOT EXISTS ZombieAttachmentData (  zaTableName  TEXT , zaPrimaryKey  INTEGER  NOT NULL , zaUri  TEXT , zaUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
                     database.execSQL("""
                         CREATE TRIGGER ATTUPD_PersonPicture
@@ -3481,7 +3480,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                         BEGIN
                         INSERT INTO ZombieAttachmentData(zaTableName, zaPrimaryKey, zaUri) VALUES('PersonPicture', OLD.personPictureUid, OLD.personPictureUri);
                         END""")
-                }else {
+                } else {
                     database.execSQL("CREATE TABLE IF NOT EXISTS ZombieAttachmentData (  zaTableName  TEXT , zaPrimaryKey  BIGINT  NOT NULL , zaUri  TEXT , zaUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("""
                       |CREATE OR REPLACE FUNCTION attach_PersonPicture_fn() RETURNS trigger AS ${'$'}${'$'}
@@ -3503,7 +3502,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
-        val MIGRATION_56_57 = object: DoorMigration(56, 57) {
+        val MIGRATION_56_57 = object : DoorMigration(56, 57) {
             override fun migrate(database: DoorSqlDatabase) {
                 database.execSQL("""
                     UPDATE ContainerEntryFile SET 
@@ -3514,7 +3513,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         }
 
 
-        val MIGRATION_57_58 = object: DoorMigration(57, 58) {
+        val MIGRATION_57_58 = object : DoorMigration(57, 58) {
             override fun migrate(database: DoorSqlDatabase) {
 
                 database.execSQL("DROP TABLE IF EXISTS ReportFilter")
@@ -3545,7 +3544,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     FROM VerbEntity WHERE urlId = '${VerbEntity.VERB_FAILED_URL}')""".trimMargin())
 
 
-                if(database.dbType() == DoorDbType.POSTGRES) {
+                if (database.dbType() == DoorDbType.POSTGRES) {
 
                     database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS reportSeries TEXT""".trimMargin())
                     database.execSQL("""ALTER TABLE Report ADD COLUMN IF NOT EXISTS reportDescription TEXT""".trimMargin())
@@ -3579,7 +3578,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("""UPDATE VerbEntity SET verbInActive = TRUE WHERE 
                         urlId = '${VerbEntity.VERB_FAILED_URL}' AND verbUid != ${VerbEntity.VERB_FAILED_UID}""".trimMargin())
 
-                }else if(database.dbType() == DoorDbType.SQLITE){
+                } else if (database.dbType() == DoorDbType.SQLITE) {
 
                     database.execSQL("""ALTER TABLE Report ADD COLUMN reportSeries TEXT""".trimMargin())
                     database.execSQL("""ALTER TABLE Report ADD COLUMN reportDescription TEXT""".trimMargin())
@@ -3591,8 +3590,8 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("INSERT INTO Report (reportUid, reportOwnerUid, xAxis, reportDateRangeSelection, fromDate, fromRelTo, fromRelOffSet, fromRelUnit, toDate, toRelTo, toRelOffSet, toRelUnit, reportTitle, reportDescription, reportSeries, reportInactive, isTemplate, priority, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy) SELECT reportUid, reportOwnerUid, xAxis,0, fromDate, 0, 0, 0, 0, 0, 0, 0, reportTitle, reportDescription, reportSeries, reportInactive, isTemplate, 1, reportMasterChangeSeqNum, reportLocalChangeSeqNum, reportLastChangedBy FROM Report_OLD")
                     database.execSQL("DROP TABLE Report_OLD")
                     database.execSQL("CREATE TABLE IF NOT EXISTS Report_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
-                    database.execSQL( "CREATE INDEX IF NOT EXISTS `index_Report_trk_clientId_epk_csn` ON Report_trk (`clientId`, `epk`, `csn`)")
-                    database.execSQL( "CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_verbLangMapUid` ON XLangMapEntry (`verbLangMapUid`)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_Report_trk_clientId_epk_csn` ON Report_trk (`clientId`, `epk`, `csn`)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_XLangMapEntry_verbLangMapUid` ON XLangMapEntry (`verbLangMapUid`)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_StatementEntity_statementPersonUid` ON StatementEntity (`statementPersonUid`)")
 
                     database.execSQL("ALTER TABLE StatementEntity ADD COLUMN contentEntryRoot INTEGER DEFAULT 0 NOT NULL")
@@ -3956,8 +3955,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     database.execSQL("""CREATE INDEX IF NOT EXISTS `index_ClazzEnrolment_clazzEnrolmentClazzUid` ON ClazzEnrolment (`clazzEnrolmentClazzUid`)""")
 
 
-
-                }else if(database.dbType() == DoorDbType.POSTGRES){
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
 
                     database.execSQL("""ALTER TABLE ClazzLogAttendanceRecord 
                         ADD COLUMN clazzLogAttendanceRecordPersonUid BIGINT DEFAULT 0 NOT NULL""".trimMargin())
@@ -4031,13 +4029,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           """.trimMargin())
 
 
-
                 }
 
             }
         }
 
-        val MIGRATION_59_60 = object: DoorMigration(59, 60) {
+        val MIGRATION_59_60 = object : DoorMigration(59, 60) {
             override fun migrate(database: DoorSqlDatabase) {
 
                 database.execSQL("""ALTER TABLE ClazzEnrolment 
@@ -4118,7 +4115,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           |            END
                           """.trimMargin())
                     database.execSQL("CREATE TABLE IF NOT EXISTS LeavingReason_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
-                            database.execSQL("CREATE INDEX IF NOT EXISTS `index_LeavingReason_trk_clientId_epk_csn` ON LeavingReason_trk (`clientId`, `epk`, `csn`)")
+                    database.execSQL("CREATE INDEX IF NOT EXISTS `index_LeavingReason_trk_clientId_epk_csn` ON LeavingReason_trk (`clientId`, `epk`, `csn`)")
                     database.execSQL("""
                         CREATE UNIQUE INDEX IF NOT EXISTS 
                        `index_LeavingReason_trk_epk_clientId` ON 
@@ -4126,7 +4123,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                        """)
 
 
-                }else if(database.dbType() == DoorDbType.POSTGRES){
+                } else if (database.dbType() == DoorDbType.POSTGRES) {
 
                     database.execSQL("""UPDATE ClazzEnrolment SET 
                     clazzEnrolmentOutcome = ${ClazzEnrolment.OUTCOME_IN_PROGRESS}""".trimMargin())
@@ -4179,6 +4176,21 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_60_61 = object : DoorMigration(60, 61) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("""UPDATE Role SET 
+                    rolePermissions = ${Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT} 
+                    WHERE roleUid = ${Role.ROLE_CLAZZ_TEACHER_UID} """.trimMargin())
+
+                }
+
+            }
+
+
+        }
 
 
 
@@ -4191,7 +4203,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
                     MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
-                    MIGRATION_59_60)
+                    MIGRATION_59_60, MIGRATION_60_61)
 
 
 
