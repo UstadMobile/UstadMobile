@@ -32,10 +32,10 @@ class ClazzWorkProgressListRecyclerAdapter(
                                   position: Int) {
         val item = getItem(position)
         holder.itemBinding.clazzEnrolmentWithClazzWorkProgress = item
-        holder.itemView.tag = item?.mClazzEnrolment?.clazzEnrolmentUid?:0L
-        holder.itemBinding.progressBar2.tag = item?.mClazzEnrolment?.clazzEnrolmentUid?:0L
-        holder.itemBinding.itemPersonLine2Text.tag = item?.mClazzEnrolment?.clazzEnrolmentUid?:0L
-        holder.itemBinding.itemClazzworkProgressMemberName.tag = item?.mClazzEnrolment?.clazzEnrolmentUid?:0L
+        holder.itemView.tag = item?.personUid
+        holder.itemBinding.progressBar2.tag = item?.personUid
+        holder.itemBinding.itemPersonLine2Text.tag = item?.personUid
+        holder.itemBinding.itemClazzworkProgressMemberName.tag = item?.personUid
         holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
     }
 
@@ -54,7 +54,7 @@ class ClazzWorkProgressListRecyclerAdapter(
 
             override fun areContentsTheSame(oldItem: ClazzEnrolmentWithClazzWorkProgress,
                                             newItem: ClazzEnrolmentWithClazzWorkProgress): Boolean {
-                return oldItem.mClazzEnrolment == newItem.mClazzEnrolment
+                return oldItem == newItem
             }
         }
     }

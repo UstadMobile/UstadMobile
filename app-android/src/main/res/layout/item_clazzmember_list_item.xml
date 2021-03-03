@@ -29,7 +29,7 @@
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, personWithEnrolmentDetails)}"
         app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(personWithEnrolmentDetails)}"
-        android:background="@drawable/bg_listitem"
+        app:isActiveEnrolment="@{personWithEnrolmentDetails}"
         >
 
         <de.hdodenhof.circleimageview.CircleImageView
@@ -38,6 +38,7 @@
             app:imageForeignKeyAdapter="@{PersonDetailFragment.FOREIGNKEYADAPTER_PERSON}"
             app:imageForeignKeyPlaceholder="@{@drawable/ic_account_circle_black_24dp}"
             tools:src="@drawable/ic_account_circle_black_24dp"
+            app:isActiveEnrolment="@{personWithEnrolmentDetails}"
             android:layout_width="@dimen/dimen_40dp"
             android:layout_height="@dimen/dimen_40dp"
             android:layout_marginTop="@dimen/dimen_16dp"
@@ -52,6 +53,7 @@
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
             android:id="@+id/item_clazzmember_text"
+            app:isActiveEnrolment="@{personWithEnrolmentDetails}"
             android:text='@{personWithEnrolmentDetails.firstNames + " " + personWithEnrolmentDetails.lastName}'
             android:layout_width="0dp"
             android:layout_height="wrap_content"
@@ -73,6 +75,7 @@
             android:layout_height="12dp"
             android:layout_marginTop="@dimen/dimen_8dp"
             android:contentDescription="@string/attendance"
+            app:isActiveEnrolment="@{personWithEnrolmentDetails}"
             app:attendanceTint="@{personWithEnrolmentDetails.attendance}"
             android:layout_marginStart="@dimen/dimen_64dp"
             app:layout_constraintStart_toStartOf="parent"
@@ -89,6 +92,7 @@
             android:paddingStart="@dimen/dimen_8dp"
             android:paddingEnd="@dimen/dimen_8dp"
             android:gravity="center|start"
+            app:isActiveEnrolment="@{personWithEnrolmentDetails}"
             android:visibility="@{personWithEnrolmentDetails.enrolmentRole == ClazzEnrolment.ROLE_STUDENT ? View.VISIBLE : View.GONE}"
             android:text="@{@string/x_percent_attended(personWithEnrolmentDetails.attendance)}"
             app:layout_constraintStart_toEndOf="@+id/item_clazzmember_line2_attendance_trafficlight"

@@ -111,13 +111,13 @@ class ClazzWorkDetailProgressListPresenterTest {
 
 
         verify(clazzWorkDaoSpy, timeout(5000)).findClazzWorkWithMetricsByClazzWorkUid(
-                eq(testClazzWork.clazzWork.clazzWorkUid), any(), any())
+                eq(testClazzWork.clazzWork.clazzWorkUid), any())
         verify(mockView, timeout(5000)).list = any()
 
 
         verify(clazzWorkDaoSpy, timeout(5000)).findStudentProgressByClazzWork(
                 eq(testClazzWork.clazzWork.clazzWorkUid), eq(ClazzWorkDao.SORT_FIRST_NAME_ASC),
-                any(), any(), any())
+                any(), any())
         verify(mockView, timeout(5000)).list = any()
 
     }
@@ -136,7 +136,7 @@ class ClazzWorkDetailProgressListPresenterTest {
         val list = runBlocking {
             db.clazzWorkDao.findStudentProgressByClazzWorkTest(
                     testClazzWork.clazzWork.clazzWorkUid,
-                    ClazzWorkDao.SORT_FIRST_NAME_ASC, currentTime = systemTimeInMillis(), filter = 0)
+                    ClazzWorkDao.SORT_FIRST_NAME_ASC, currentTime = systemTimeInMillis())
         }
 
         presenter.handleClickEntry(list.get(0))

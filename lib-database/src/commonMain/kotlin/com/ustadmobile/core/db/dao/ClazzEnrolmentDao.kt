@@ -110,17 +110,21 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
         ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
         COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) 
-        FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog ON 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid WHERE 
-        ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid 
+        FROM ClazzLogAttendanceRecord JOIN ClazzLog ON 
+        ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid 
+        WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid 
         AND ClazzLog.clazzLogClazzUid = :clazzUid)  as attendance, 
+        
     	(SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) FROM ClazzEnrolment WHERE 
         Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) as earliestJoinDate, 
+        
     	(SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) FROM ClazzEnrolment WHERE 
         Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) as latestDateLeft, 
+        
         (SELECT clazzEnrolmentRole FROM clazzEnrolment WHERE Person.personUid = 
         ClazzEnrolment.clazzEnrolmentPersonUid AND 
         ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid) as enrolmentRole
+        
          ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
          WHERE
          PersonGroupMember.groupMemberPersonUid = :accountPersonUid

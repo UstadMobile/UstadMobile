@@ -4,7 +4,6 @@ import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
@@ -42,20 +41,18 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
 
     override suspend fun onLoadFromDb() {
         super.onLoadFromDb()
-        view.listFilterOptionChips = FILTER_OPTIONS.toListFilterOptions(context, di)
         updateListOnView()
     }
 
     private fun updateListOnView() {
 
         view.clazzWorkWithMetrics = repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUid(
-                filterByClazzWorkUid, systemTimeInMillis(), view.checkedFilterOptionChip?.optionId ?: 0)
+                filterByClazzWorkUid, systemTimeInMillis())
 
         view.list = repo.clazzWorkDao.findStudentProgressByClazzWork(
                 filterByClazzWorkUid,
                 selectedSortOption?.flag ?: ClazzWorkDao.SORT_FIRST_NAME_ASC,
-                searchText.toQueryLikeParam(), systemTimeInMillis(),
-                view.checkedFilterOptionChip?.optionId ?: 0)
+                searchText.toQueryLikeParam(), systemTimeInMillis())
     }
 
     override fun handleClickEntry(entry: ClazzEnrolmentWithClazzWorkProgress) {
@@ -86,12 +83,6 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
     }
 
 
-    override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {
-        super.onListFilterOptionSelected(filterOptionId)
-        updateListOnView()
-    }
-
-
     companion object {
 
         val SORT_OPTIONS = listOf(
@@ -104,8 +95,5 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
                 SortOrderOption(MessageID.status, ClazzWorkDao.SORT_STATUS_ASC, true),
                 SortOrderOption(MessageID.status, ClazzWorkDao.SORT_STATUS_DESC, false)
         )
-
-        val FILTER_OPTIONS = listOf(MessageID.active to ClazzWorkDao.FILTER_ACTIVE_ONLY,
-                MessageID.all to 0)
     }
 }

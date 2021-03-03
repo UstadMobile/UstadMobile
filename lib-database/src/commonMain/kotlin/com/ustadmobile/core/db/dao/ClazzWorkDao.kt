@@ -79,25 +79,23 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
     @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)
     abstract suspend fun findClazzWorkWithMetricsByClazzWorkUidAsync(clazzWorkUid: Long,
-                                                                     currentTime: Long, filter: Int)
+                                                                     currentTime: Long)
             : ClazzWorkWithMetrics?
 
     @Query(FIND_CLAZZWORKWITHMETRICS_QUERY)
     abstract fun findClazzWorkWithMetricsByClazzWorkUid(clazzWorkUid: Long,
-                                                        currentTime: Long, filter: Int)
+                                                        currentTime: Long)
             : DataSource.Factory<Int, ClazzWorkWithMetrics>?
 
     @Query(STUDENT_PROGRESS_QUERY)
     abstract fun findStudentProgressByClazzWork(clazzWorkUid: Long, sortOrder: Int,
-                                                searchText: String? = "%", currentTime: Long,
-                                                filter: Int): DataSource.Factory<Int,
+                                                searchText: String? = "%", currentTime: Long): DataSource.Factory<Int,
             ClazzEnrolmentWithClazzWorkProgress>
 
     @Query(STUDENT_PROGRESS_QUERY)
     abstract suspend fun findStudentProgressByClazzWorkTest(clazzWorkUid: Long, sortOrder: Int,
                                                             searchText: String? = "%",
-                                                            currentTime: Long,
-                                                            filter: Int): List<ClazzEnrolmentWithClazzWorkProgress>
+                                                            currentTime: Long): List<ClazzEnrolmentWithClazzWorkProgress>
 
     @Query(FIND_CLAZZEnrolment_AND_SUBMISSION_WITH_PERSON)
     abstract suspend fun findClazzEnrolmentWithAndSubmissionWithPerson(clazzWorkUid: Long,
@@ -136,9 +134,6 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
         const val SORT_STATUS_DESC = 14
 
-        const val FILTER_ACTIVE_ONLY = 1
-
-
         const val FIND_CLAZZWORKWITHMETRICS_QUERY = """
             SELECT ClazzWork.*, 
             (
@@ -146,11 +141,10 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                 ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
                 AND CAST(ClazzEnrolment.clazzEnrolmentActive AS INTEGER) = 1 
                 AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
-                AND  (:filter != $FILTER_ACTIVE_ONLY 
-                    OR (ClazzEnrolment.clazzEnrolmentDateLeft >= (CASE WHEN 
+                AND (ClazzEnrolment.clazzEnrolmentDateLeft >= (CASE WHEN 
                     (ClazzWork.clazzWorkDueDateTime == ${Long.MAX_VALUE} OR ClazzWork.clazzWorkDueDateTime == 0) 
                     THEN CASE WHEN Clazz.clazzEndTime == ${Long.MAX_VALUE} THEN :currentTime 
-                    ELSE Clazz.clazzEndTime END ELSE ClazzWork.clazzWorkDueDateTime END)))
+                    ELSE Clazz.clazzEndTime END ELSE ClazzWork.clazzWorkDueDateTime END))
             ) as totalStudents, 
             (
                 SELECT COUNT(DISTINCT clazzWorkSubmissionPersonUid) FROM ClazzWorkSubmission WHERE
@@ -194,7 +188,7 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
         //AND ContentEntryProgress.contentEntryProgressStatusFlag = ${ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED}
         const val STUDENT_PROGRESS_QUERY = """
             SELECT 
-                Person.*, ClazzEnrolment.*, cws.*,
+                Person.*, cws.*,
                 (
                     (
                         SELECT SUM(ContentEntryProgress.contentEntryProgressProgress) 
@@ -222,11 +216,14 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                     AND ContentEntry.publik 
                 
                 )
-            THEN 1 ELSE 0 END) as clazzWorkHasContent
-
-            
-            FROM ClazzEnrolment
-                LEFT JOIN Person ON ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
+            THEN 1 ELSE 0 END) as clazzWorkHasContent,
+            EXISTS (SELECT * FROM 
+                    ClazzEnrolment WHERE Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid
+                    AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND ClazzEnrolment.clazzEnrolmentDateLeft >= (CASE WHEN 
+                    (ClazzWork.clazzWorkDueDateTime = ${Long.MAX_VALUE} OR ClazzWork.clazzWorkDueDateTime = 0) 
+                    THEN CASE WHEN Clazz.clazzEndTime = ${Long.MAX_VALUE} THEN :currentTime
+                    ELSE Clazz.clazzEndTime END ELSE ClazzWork.clazzWorkDueDateTime END)) as isActiveEnrolment
+            FROM Person
                 LEFT JOIN ClazzWork ON ClazzWork.clazzWorkUid = :clazzWorkUid
                 LEFT JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
                 LEFT JOIN Comments AS cm ON cm.commentsUid = (
@@ -243,14 +240,10 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                     AND ClazzWorkSubmission.clazzWorkSubmissionPersonUid = Person.personUid
                     LIMIT 1)
             WHERE 
+                    Person.personUid IN (SELECT clazzEnrolmentPersonUid FROM ClazzEnrolment WHERE
                     ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
-                    AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}
+                    AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT})
                     AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
-                    AND  (:filter != $FILTER_ACTIVE_ONLY 
-                    OR (ClazzEnrolment.clazzEnrolmentDateLeft >= (CASE WHEN 
-                    (ClazzWork.clazzWorkDueDateTime == ${Long.MAX_VALUE} OR ClazzWork.clazzWorkDueDateTime == 0) 
-                    THEN CASE WHEN Clazz.clazzEndTime == ${Long.MAX_VALUE} THEN :currentTime 
-                    ELSE Clazz.clazzEndTime END ELSE ClazzWork.clazzWorkDueDateTime END)))
                     ORDER BY CASE(:sortOrder)
                         WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
                         WHEN $SORT_LAST_NAME_ASC THEN Person.lastName

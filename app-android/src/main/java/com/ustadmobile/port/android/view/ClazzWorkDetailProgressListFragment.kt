@@ -50,9 +50,7 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzEnrolment
 
         metricsRecyclerAdapter = ClazzWorkMetricsRecyclerAdapter(null, false)
         mDataRecyclerViewAdapter = ClazzWorkProgressListRecyclerAdapter(mPresenter)
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
-                filterOptions = ClazzWorkDetailProgressListPresenter.FILTER_OPTIONS.toListFilterOptions(requireContext(), di),
-                onFilterOptionSelected = mPresenter, onClickSort = this,
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(onClickSort = this,
                 sortOrderOption = mPresenter?.sortOptions?.get(0))
 
         mMergeRecyclerViewAdapter = MergeAdapter(mUstadListHeaderRecyclerViewAdapter,

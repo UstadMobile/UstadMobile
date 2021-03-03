@@ -7,9 +7,6 @@ import kotlinx.serialization.Serializable
 class ClazzEnrolmentWithClazzWorkProgress : Person() {
 
     @Embedded
-    var mClazzEnrolment: ClazzEnrolment? = null
-
-    @Embedded
     var mLatestPrivateComment: Comments? = null
 
     @Embedded
@@ -19,5 +16,7 @@ class ClazzEnrolmentWithClazzWorkProgress : Person() {
     var mProgress: Float = 0.0F
 
     var clazzWorkHasContent: Boolean = false
+
+    var isActiveEnrolment: Boolean = false
 
 }
