@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentLeavingReasonEditBinding
 import com.ustadmobile.core.controller.LeavingReasonEditPresenter
@@ -11,6 +12,7 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.LeavingReasonEditView
 import com.ustadmobile.lib.db.entities.LeavingReason
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
 
 interface LeavingReasonEditFragmentEventHandler {
@@ -34,7 +36,7 @@ class LeavingReasonEditFragment: UstadEditFragment<LeavingReason>(), LeavingReas
 
         mPresenter = LeavingReasonEditPresenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)
-        mPresenter?.onCreate(backStackSavedState)
+
 
         return rootView
     }
@@ -42,6 +44,8 @@ class LeavingReasonEditFragment: UstadEditFragment<LeavingReason>(), LeavingReas
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setEditFragmentTitle(R.string.new_leaving_reason, R.string.edit_leaving_reason)
+
+        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
     }
 
     override fun onDestroyView() {

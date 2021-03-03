@@ -42,14 +42,6 @@ class LeavingReasonEditFragmentTest : TestCase(){
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
     private lateinit var fragmentScenario: FragmentScenario<LeavingReasonEditFragment>
 
 
@@ -99,7 +91,8 @@ class LeavingReasonEditFragmentTest : TestCase(){
         init{
 
             fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                    fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingLeavingReason.leavingReasonUid)) {
+                    fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to
+                            existingLeavingReason.leavingReasonUid)) {
                 LeavingReasonEditFragment().also {
                     it.installNavController(systemImplNavRule.navController)
                 }

@@ -59,8 +59,6 @@ class ClazzEditFragmentTest : TestCase() {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    
-
 
     @AdbScreenRecord("")
     @Test
@@ -182,6 +180,10 @@ class ClazzEditFragmentTest : TestCase() {
                 }
 
                 fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment)
+
+                val cal = Calendar.getInstance()
+                cal.set(2020,5,31)
+                clazzStartTextInput.edit.setDateWithDialog(cal.timeInMillis)
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
