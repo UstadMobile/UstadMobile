@@ -21,7 +21,6 @@ import io.ktor.client.features.ClientRequestException
 import io.ktor.client.features.json.JsonFeature
 import io.ktor.client.request.get
 import io.ktor.client.request.header
-import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
 import io.ktor.gson.GsonConverter
 import io.ktor.http.ContentType
@@ -41,7 +40,6 @@ import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
 import org.sqlite.SQLiteDataSource
 import java.io.File
-import java.lang.IllegalStateException
 import javax.sql.DataSource
 import kotlin.test.assertEquals
 import com.ustadmobile.door.ext.writeToFile

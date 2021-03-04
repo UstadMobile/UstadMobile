@@ -1,25 +1,15 @@
 package com.ustadmobile.door.attachments
 
-import com.github.aakira.napier.Napier
-import com.ustadmobile.door.DoorConstants
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DoorDatabaseRepository.Companion.DOOR_ATTACHMENT_URI_PREFIX
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.util.systemTimeInMillis
-import io.ktor.client.request.*
-import io.ktor.client.request.forms.*
-import io.ktor.http.*
-import io.ktor.http.content.*
-import io.ktor.utils.io.streams.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
-import java.io.FileInputStream
 import java.io.IOException
-import java.net.HttpURLConnection
 import java.net.URI
-import java.net.URL
-import java.net.URLEncoder
 import java.nio.file.Paths
 
 actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: EntityWithAttachment) {
@@ -58,9 +48,9 @@ actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: 
     }
 }
 
-actual suspend fun DoorDatabaseRepository.retrieveAttachment(uri: String): String {
+actual suspend fun DoorDatabaseRepository.retrieveAttachment(attachmentUri: String): DoorUri {
     val attachmentDirVal = attachmentsDir ?: throw IllegalStateException("No attachments dir!")
-    val file = File(attachmentDirVal, uri.substringAfter("door-attachment://"))
-    return file.toURI().toString()
+    val file = File(attachmentDirVal, attachmentUri.substringAfter("door-attachment://"))
+    return DoorUri(file.toURI())
 }
 
