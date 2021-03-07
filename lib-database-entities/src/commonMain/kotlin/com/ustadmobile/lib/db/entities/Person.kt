@@ -217,20 +217,21 @@ open class Person() {
             FROM
              PersonGroupMember
              LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-             LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions & """
-
-        const val FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2 = """) > 0
+             LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid 
              LEFT JOIN Person ON
              CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = :accountPersonUid) AS INTEGER) = 1
                  OR (Person.personUid = :accountPersonUid)
-                 OR ((EntityRole.erTableId= ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid)
+             OR ((Role.rolePermissions & """
+
+        const val FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2 = """) > 0
+                 AND ((EntityRole.erTableId= ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid)
                  OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid))
                  OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid)) OR
                  (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
                  SELECT DISTINCT Clazz.clazzSchoolUid 
                  FROM Clazz
                  JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
-                 )))"""
+                 ))))"""
 
 
     }

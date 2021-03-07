@@ -92,6 +92,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
             COALESCE((SELECT ClazzEnrolment.clazzEnrolmentUid FROM ClazzEnrolment
              WHERE
              ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
+             AND ClazzEnrolment.clazzEnrolmentActive
              AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid LIMIT 1), 0)
         WHERE
         PersonGroupMember.groupMemberPersonUid = :personUid
