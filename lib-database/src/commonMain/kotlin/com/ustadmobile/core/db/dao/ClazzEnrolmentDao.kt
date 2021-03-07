@@ -34,6 +34,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""SELECT ClazzEnrolment.*, LeavingReason.* FROM ClazzEnrolment LEFT JOIN
         LeavingReason ON LeavingReason.leavingReasonUid = ClazzEnrolment.clazzEnrolmentLeavingReasonUid
         WHERE clazzEnrolmentPersonUid = :personUid 
+        AND ClazzEnrolment.clazzEnrolmentActive 
         AND clazzEnrolmentClazzUid = :clazzUid ORDER BY clazzEnrolmentDateLeft DESC""")
     abstract fun findAllEnrolmentsByPersonAndClazzUid(personUid: Long, clazzUid: Long):
             DataSource.Factory<Int, ClazzEnrolmentWithLeavingReason>
@@ -72,12 +73,14 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         FROM ClazzEnrolment
         LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid
         WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid
+        AND ClazzEnrolment.clazzEnrolmentActive
         ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
     """)
     abstract fun findAllClazzesByPersonWithClazz(personUid: Long): DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>
 
     @Query("""SELECT COALESCE(MAX(clazzEnrolmentDateLeft),0) FROM ClazzEnrolment WHERE 
         ClazzEnrolment.clazzEnrolmentPersonUid = :selectedPerson 
+        AND ClazzEnrolment.clazzEnrolmentActive 
         AND clazzEnrolmentClazzUid = :selectedClazz AND clazzEnrolmentUid != :selectedEnrolment
     """)
     abstract suspend fun findMaxEndDateForEnrolment(selectedClazz: Long, selectedPerson: Long,
@@ -123,11 +126,13 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         
         (SELECT clazzEnrolmentRole FROM clazzEnrolment WHERE Person.personUid = 
         ClazzEnrolment.clazzEnrolmentPersonUid AND 
-        ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid) as enrolmentRole
+        ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
+        AND ClazzEnrolment.clazzEnrolmentActive) as enrolmentRole
         
          ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
          WHERE
          PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+         AND PersonGroupMember.groupMemberActive 
         AND Person.personUid IN (SELECT clazzEnrolmentPersonUid FROM ClazzEnrolment 
         WHERE ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid AND ClazzEnrolment.clazzEnrolmentActive 
         AND ClazzEnrolment.clazzEnrolmentRole = :roleId AND (:filter != $FILTER_ACTIVE_ONLY 
@@ -164,9 +169,9 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentActive = :enrolled,
                 clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
                 WHERE clazzEnrolmentPersonUid = :personUid AND clazzEnrolmentClazzUid = :clazzUid""")
-    abstract fun updateClazzEnrolmentActiveForPersonAndClazz(personUid: Long, clazzUid: Long, enrolled: Int): Int
+    abstract suspend fun updateClazzEnrolmentActiveForPersonAndClazz(personUid: Long, clazzUid: Long, enrolled: Int): Int
 
-    fun updateClazzEnrolmentActiveForPersonAndClazz(personUid: Long, clazzUid: Long, enrolled: Boolean): Int {
+    suspend fun updateClazzEnrolmentActiveForPersonAndClazz(personUid: Long, clazzUid: Long, enrolled: Boolean): Int {
         return if (enrolled) {
             updateClazzEnrolmentActiveForPersonAndClazz(personUid, clazzUid, 1)
         } else {

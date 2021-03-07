@@ -95,6 +95,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
              AND ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid LIMIT 1), 0)
         WHERE
         PersonGroupMember.groupMemberPersonUid = :personUid
+        AND PersonGroupMember.groupMemberActive 
         AND CAST(Clazz.isClazzActive AS INTEGER) = 1
         AND Clazz.clazzName like :searchQuery
         AND (Clazz.clazzUid NOT IN (:excludeSelectedClazzList))

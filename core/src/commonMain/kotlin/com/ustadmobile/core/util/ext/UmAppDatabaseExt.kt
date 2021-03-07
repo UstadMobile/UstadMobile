@@ -190,6 +190,21 @@ suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClaz
     clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.personUid, clazzUid, ClazzEnrolment.ROLE_STUDENT)
 }
 
+suspend fun UmAppDatabase.declinePendingClazzEnrolment(enrolment: PersonWithClazzEnrolmentDetails, clazzUid: Long){
+    val effectiveClazz = clazzDao.findByUidAsync(clazzUid)
+            ?: throw IllegalStateException("Class does not exist")
+
+
+    clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(
+            enrolment.personUid,
+            clazzUid,false)
+
+    personGroupMemberDao.setGroupMemberToInActive(enrolment.personUid,
+            effectiveClazz.clazzPendingStudentsPersonGroupUid)
+
+}
+
+
 suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, school: School? = null) {
     val effectiveClazz = school ?: schoolDao.findByUidAsync(member.schoolMemberSchoolUid)
         ?: throw IllegalStateException("Class does not exist")

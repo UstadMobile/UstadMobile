@@ -30,13 +30,13 @@ import kotlinx.serialization.Serializable
          DeviceSession
          JOIN PersonGroupMember ON DeviceSession.dsPersonUid = PersonGroupMember.groupMemberPersonUid
          LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-         LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0
+         LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
          LEFT JOIN Person ON CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = DeviceSession.dsPersonUid) AS INTEGER) = 1
              OR (Person.personUid = DeviceSession.dsPersonUid)
-             OR ((EntityRole.erTableId= ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid)
-             OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid))
-             OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid)) OR
-             (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
+             OR ((Role.rolePermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0 AND (EntityRole.erTableId= ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid)
+             OR ((Role.rolePermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0 AND EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid))
+             OR ((Role.rolePermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0 AND EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid)) OR
+             ((Role.rolePermissions & ${Role.PERMISSION_PERSON_SELECT}) > 0 AND EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
              SELECT DISTINCT Clazz.clazzSchoolUid 
              FROM Clazz
              JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid

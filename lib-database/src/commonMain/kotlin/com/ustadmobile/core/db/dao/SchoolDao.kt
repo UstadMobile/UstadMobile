@@ -55,6 +55,7 @@ abstract class SchoolDao : BaseDao<School> {
                 OR ((Role.rolePermissions & :permission) > 0 AND EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = School.schoolUid)
         WHERE
             PersonGroupMember.groupMemberPersonUid = :personUid
+            AND PersonGroupMember.groupMemberActive 
             AND CAST(schoolActive AS INTEGER) = 1
             AND schoolName LIKE :searchBit
         GROUP BY School.schoolUid

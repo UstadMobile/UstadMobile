@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.approvePendingClazzEnrolment
+import com.ustadmobile.core.util.ext.declinePendingClazzEnrolment
 import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzEnrolmentListView
@@ -92,17 +93,17 @@ class ClazzMemberListPresenter(context: Any, arguments: Map<String, String>, vie
 
     fun handleClickPendingRequest(enrolmentDetails: PersonWithClazzEnrolmentDetails, approved: Boolean) {
         GlobalScope.launch(doorMainDispatcher()) {
-            if (approved) {
-                try {
+            try {
+                if (approved) {
                     repo.approvePendingClazzEnrolment(enrolmentDetails, filterByClazzUid)
-                } catch (e: IllegalStateException) {
-                    //did not have all entities present yet (e.g. sync race condition)
-                    view.showSnackBar(systemImpl.getString(MessageID.content_editor_save_error, context))
+
+                } else {
+                    repo.declinePendingClazzEnrolment(enrolmentDetails, filterByClazzUid)
                 }
-            } else {
-                repo.clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(
-                        enrolmentDetails.personUid,
-                        filterByClazzUid,false)
+
+            } catch (e: IllegalStateException) {
+                //did not have all entities present yet (e.g. sync race condition)
+                view.showSnackBar(systemImpl.getString(MessageID.content_editor_save_error, context))
             }
         }
     }
