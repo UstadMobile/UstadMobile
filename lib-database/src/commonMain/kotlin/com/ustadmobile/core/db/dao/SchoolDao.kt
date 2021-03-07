@@ -49,10 +49,10 @@ abstract class SchoolDao : BaseDao<School> {
         FROM 
             PersonGroupMember
             LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions & :permission) > 0
+            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
             LEFT JOIN School ON 
                 CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = :personUid) AS INTEGER) = 1
-                OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = School.schoolUid)
+                OR ((Role.rolePermissions & :permission) > 0 AND EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = School.schoolUid)
         WHERE
             PersonGroupMember.groupMemberPersonUid = :personUid
             AND CAST(schoolActive AS INTEGER) = 1

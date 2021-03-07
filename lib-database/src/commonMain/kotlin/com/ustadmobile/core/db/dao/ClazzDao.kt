@@ -83,11 +83,11 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         FROM 
         PersonGroupMember
         LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
-        LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid AND (Role.rolePermissions &  :permission) > 0
+        LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
         LEFT JOIN Clazz ON 
             CAST((SELECT admin FROM Person Person_Admin WHERE Person_Admin.personUid = :personUid) AS INTEGER) = 1
-            OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) 
-            OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
+            OR ((Role.rolePermissions &  :permission) > 0 AND EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) 
+            OR ((Role.rolePermissions &  :permission) > 0 AND EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
         LEFT JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentUid =
             COALESCE((SELECT ClazzEnrolment.clazzEnrolmentUid FROM ClazzEnrolment
              WHERE
@@ -101,6 +101,7 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzUid NOT IN (SELECT cl.clazzUid FROM Clazz AS cl WHERE cl.clazzSchoolUid = :excludeSchoolUid) ) 
         AND ( :excludeSchoolUid = 0 OR Clazz.clazzSchoolUid = 0 )
         AND ( :filter != $FILTER_ACTIVE_ONLY OR (:currentTime BETWEEN Clazz.clazzStartTime AND Clazz.clazzEndTime))
+        AND ( :selectedSchool = 0 OR Clazz.clazzSchoolUid = :selectedSchool)
         GROUP BY Clazz.clazzUid, ClazzEnrolment.clazzEnrolmentUid
         ORDER BY CASE :sortOrder
             WHEN $SORT_ATTENDANCE_ASC THEN Clazz.attendanceAverage
@@ -123,7 +124,8 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
                                            excludeSelectedClazzList: List<Long>,
                                            excludeSchoolUid: Long, sortOrder: Int, filter: Int,
                                            currentTime: Long,
-                                           permission: Long)
+                                           permission: Long,
+                                           selectedSchool: Long)
             : DataSource.Factory<Int, ClazzWithListDisplayDetails>
 
 
