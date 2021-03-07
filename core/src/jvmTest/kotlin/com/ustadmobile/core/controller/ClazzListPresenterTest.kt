@@ -78,7 +78,6 @@ class ClazzListPresenterTest {
         verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
                 eq("%"), eq(accountManager.activeAccount.personUid), eq(listOf()), eq(0),
                 any(), any(), any(), any(), any())
-        )
         verify(mockView, timeout(5000)).list = any()
 
     }
