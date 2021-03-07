@@ -30,6 +30,7 @@ import com.ustadmobile.core.view.ClazzList2View.Companion.ARG_FILTER_EXCLUDE_SEL
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonEditView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_PERMISSION
 import com.ustadmobile.core.view.UstadView.Companion.ARG_GO_TO_COMPLETE
 import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.door.DoorLiveData
@@ -126,6 +127,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 ?.currentList?.map { it.clazzEnrolmentClazzUid } ?: listOf()
         navigateToPickEntityFromList(ClazzEnrolmentWithClazz::class.java, R.id.clazz_list_dest,
                 overwriteDestination = true, args = bundleOf(
+                ARG_FILTER_BY_PERMISSION to Role.PERMISSION_CLAZZ_ADD_STUDENT.toString(),
                 ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST to listOfClazzSelected.joinToString(),
                 ARG_POPUPTO_ON_FINISH to PersonEditView.VIEW_NAME,
                 ARG_GO_TO_COMPLETE to ClazzEnrolmentEditView.VIEW_NAME))

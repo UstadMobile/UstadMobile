@@ -190,7 +190,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""UPDATE ClazzEnrolment SET clazzEnrolmentRole = :role,
             clazzEnrolmentLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
             WHERE clazzEnrolmentPersonUid = :personUid AND clazzEnrolmentClazzUid = :clazzUid""")
-    abstract fun updateClazzEnrolmentRole(personUid: Long, clazzUid: Long, role: Int)
+    abstract suspend fun updateClazzEnrolmentRole(personUid: Long, clazzUid: Long, role: Int)
 
     companion object {
 
