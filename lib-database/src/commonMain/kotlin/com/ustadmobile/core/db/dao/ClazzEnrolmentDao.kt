@@ -63,7 +63,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""SELECT ClazzEnrolment.*, Clazz.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
         ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
         ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
-        COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) 
+        MAX(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) 
         FROM ClazzLogAttendanceRecord LEFT JOIN ClazzLog ON 
         ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid WHERE 
         ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = :personUid 
@@ -113,7 +113,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
     @Query("""SELECT Person.*, (SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
         ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN 
         ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) AS REAL) / 
-        COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) 
+        MAX(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) 
         FROM ClazzLogAttendanceRecord JOIN ClazzLog ON 
         ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid 
         WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid 

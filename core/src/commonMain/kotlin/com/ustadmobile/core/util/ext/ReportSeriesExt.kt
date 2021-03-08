@@ -50,12 +50,12 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         PERCENTAGE_STUDENTS_ATTENDED -> """((CAST(COUNT(DISTINCT CASE WHEN 
             ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
             THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) 
-            AS REAL) / COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) as yAxis, """.trimMargin()
+            AS REAL) / MAX(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) as yAxis, """.trimMargin()
         PERCENTAGE_STUDENTS_ATTENDED_OR_LATE -> """((CAST(COUNT(DISTINCT CASE WHEN 
             ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
             OR ClazzLogAttendanceRecord.attendanceStatus = $STATUS_PARTIAL 
             THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) 
-            AS REAL) / COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) as yAxis, """.trimMargin()
+            AS REAL) / MAX(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) as yAxis, """.trimMargin()
         TOTAL_CLASSES -> """COUNT(DISTINCT ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid) As yAxis, """
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> """COUNT(DISTINCT CASE WHEN 
             ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN
@@ -67,7 +67,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
             (StatementEntity.resultCompletion AND StatementEntity.contentEntryRoot 
             AND StatementEntity.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
             THEN StatementEntity.statementPersonUid ELSE NULL END) 
-            AS REAL) / COUNT(DISTINCT StatementEntity.statementPersonUid)) * 100) as yAxis, """
+            AS REAL) / MAX(COUNT(DISTINCT StatementEntity.statementPersonUid),1)) * 100) as yAxis, """
         else -> ""
     }
 
@@ -188,7 +188,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                     var filterString = """(SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
             ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
             THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) 
-            AS REAL) / COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid)) * 100) as attendance FROM ClazzLogAttendanceRecord) """
+            AS REAL) / MAX(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) as attendance FROM ClazzLogAttendanceRecord) """
                     filterString += handleCondition(filter.reportFilterCondition)
                     filterString += """ ${filter.reportFilterValueBetweenX} 
                         AND ${filter.reportFilterValueBetweenY} """
