@@ -82,7 +82,7 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
 
         try {
             //check and see if the first file is already here
-            val inputUrl = "${request.siteUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/$md5ListString"
+            val inputUrl = "${request.mirrorUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/$md5ListString"
             Napier.d("$logPrefix Download ${md5sToDownload.size} container files $inputUrl -> ${request.destDirUri}")
             val localConnectionOpener : LocalURLConnectionOpener? = di.direct.instanceOrNull()
             val url = URL(inputUrl)

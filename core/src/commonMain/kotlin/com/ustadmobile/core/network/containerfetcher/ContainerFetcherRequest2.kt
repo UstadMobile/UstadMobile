@@ -12,9 +12,14 @@ class ContainerFetcherRequest2(
         val entriesToDownload: List<ContainerEntryWithMd5>,
 
         /**
-         * The url of the site to download from (as per the endpoint url)
+         * The endpoint of the site
          */
         val siteUrl: String,
+
+        /**
+         * The endpoint of the mirror to use. If downloading from the site itself, then siteUrl = mirrorUrl
+         */
+        val mirrorUrl: String,
 
         /**
          * The destination directory uri. This MUST be a URI, not a folder path. At the moment

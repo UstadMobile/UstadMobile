@@ -376,8 +376,9 @@ class DownloadJobItemRunner
                 Napier.d({"Requesting fetch download $timeSinceStart ms after start"})
 
                 val containerRequest = ContainerFetcherRequest2(
-                        containerEntriesPartition.entriesWithoutMatchingFile, endpointUrl,
-                        destinationDir ?: throw IllegalStateException("Null destination dir"))
+                        containerEntriesPartition.entriesWithoutMatchingFile, siteUrl = endpointUrl,
+                        mirrorUrl =  downloadEndpoint,
+                        destDirUri = destinationDir ?: throw IllegalStateException("Null destination dir"))
                 var jobDeferred: Deferred<Int>? = null
                 downloadStatusLock.withLock {
                     Napier.d({"${mkLogPrefix()} enqueuing download URL=$downloadEndpoint fileDest=" +
