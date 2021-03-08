@@ -225,7 +225,7 @@ open class Person() {
 
         const val FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2 = """) > 0
                  AND ((EntityRole.erTableId= ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid)
-                 OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid))
+                 OR (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid AND ClazzEnrolment.clazzEnrolmentActive))
                  OR (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid)) OR
                  (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
                  SELECT DISTINCT Clazz.clazzSchoolUid 
