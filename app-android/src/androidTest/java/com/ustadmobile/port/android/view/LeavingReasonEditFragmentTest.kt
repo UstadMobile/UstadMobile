@@ -102,11 +102,13 @@ class LeavingReasonEditFragmentTest : TestCase(){
 
             LeavingReasonEditScreen {
 
-                LeavingReasonTitleInput {
-                    edit {
-                        hasText(existingLeavingReason.leavingReasonTitle!!)
-                        clearText()
-                        replaceText("Leaving Reason Changed")
+                flakySafely {
+                    LeavingReasonTitleInput {
+                        edit {
+                            clearText()
+                            replaceText("Leaving Reason Changed")
+                            hasText("Leaving Reason Changed")
+                        }
                     }
                 }
 
