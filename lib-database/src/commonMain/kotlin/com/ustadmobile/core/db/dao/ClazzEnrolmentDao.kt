@@ -90,6 +90,7 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         FROM ClazzEnrolment 
         LEFT JOIN Clazz ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
         WHERE ClazzEnrolment.clazzEnrolmentPersonUid = :personUid 
+        AND ClazzEnrolment.clazzEnrolmentActive
         ORDER BY ClazzEnrolment.clazzEnrolmentDateLeft DESC
     """)
     abstract suspend fun findAllClazzesByPersonWithClazzAsListAsync(personUid: Long): List<ClazzEnrolmentWithClazz>
