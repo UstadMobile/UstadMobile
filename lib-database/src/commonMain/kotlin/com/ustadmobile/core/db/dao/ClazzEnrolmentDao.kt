@@ -117,18 +117,18 @@ abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {
         FROM ClazzLogAttendanceRecord JOIN ClazzLog ON 
         ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid 
         WHERE ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid 
-        AND ClazzLog.clazzLogClazzUid = :clazzUid)  as attendance, 
+        AND ClazzLog.clazzLogClazzUid = :clazzUid)  AS attendance, 
         
     	(SELECT MIN(ClazzEnrolment.clazzEnrolmentDateJoined) FROM ClazzEnrolment WHERE 
-        Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) as earliestJoinDate, 
+        Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS earliestJoinDate, 
         
     	(SELECT MAX(ClazzEnrolment.clazzEnrolmentDateLeft) FROM ClazzEnrolment WHERE 
-        Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) as latestDateLeft, 
+        Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid) AS latestDateLeft, 
         
         (SELECT clazzEnrolmentRole FROM clazzEnrolment WHERE Person.personUid = 
         ClazzEnrolment.clazzEnrolmentPersonUid AND 
         ClazzEnrolment.clazzEnrolmentClazzUid = :clazzUid 
-        AND ClazzEnrolment.clazzEnrolmentActive) as enrolmentRole
+        AND ClazzEnrolment.clazzEnrolmentActive) AS enrolmentRole
         
          ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
          WHERE

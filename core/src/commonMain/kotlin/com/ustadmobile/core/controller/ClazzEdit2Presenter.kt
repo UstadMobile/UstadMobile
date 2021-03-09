@@ -132,6 +132,8 @@ class ClazzEdit2Presenter(context: Any,
 
             view.loading = false
 
+            //Handle the following scenario: PersonEdit (user selects to add an enrolment), ClazzList
+            // ClazzEdit, EnrolmentEdit
             if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
                 systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
                         arguments.plus(UstadView.ARG_FILTER_BY_CLAZZUID to entity.clazzUid.toString()),
