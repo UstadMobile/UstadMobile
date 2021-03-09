@@ -180,7 +180,6 @@
     <string name="content_creation_folder_update_message">ফোল্ডারটি সফলভাবে আপডেট হয়েছিল</string>
     <string name="error_message_load_page">পৃষ্ঠাটি লোড করতে ব্যর্থ</string>
     <string name="content_editor_save_error">সংরক্ষণের হচ্ছে না, আবার চেষ্টা করুন</string>
-
     <string name="supported_files">সমর্থিত ফাইল: <b>" ভিডিও, অডিও, ইপিইউবি,এক্সএপিআই  জিপ, এইচফাইভপি "</b></string>
     <string name="download_state_downloading">আপনার ডিভাইস স্টোরেজে মোট %2$s ব্যবহার করা হবে এমন মোট %1$s টি আইটেম &lt;b&gt; ডাউনলোড করা হচ্ছে &lt;/ b&gt;।<b> ডাউনলোড করা হচ্ছে </b>।</string>
     <string name="content_entry_export_message">আপনি আপনার ডিভাইস স্টোরেজে% 1 $ s রফতানি করতে চলেছেন। আপনি কি অবিরত করতে চান\?</string>
@@ -641,4 +640,25 @@
     <string name="document">দলিল</string>
     <string name="article">নিবন্ধ</string>
     <string name="audio">শ্রুতি</string>
+    <string name="confirm_delete_message">আপনার সমস্ত কিছু মুছে ফেলার ব্যাপারে আপনি কি নিশ্চিত\?</string>
+    <string name="uploading">আপলোড হচ্ছে</string>
+    <string name="move">সরানো</string>
+    <string name="hide">লুকান</string>
+    <string name="unhide">লুকানো থেকে বের করুন</string>
+    <string name="show_hidden_items">লুকানো আইটেম দেখান</string>
+    <string name="open_folder">ফোল্ডার ওপেন করুন</string>
+    <string name="action_hidden">লুকানো</string>
+    <string name="line_chart" value="101">লাইন চার্ট</string>
+    <string name="content_total_duration" value="200">কন্টেন্ট ব্যবহার হয়েছে - মোট সময়</string>
+    <string name="content_average_duration" value="201">কন্টেন্ট ব্যবহার হয়েছে - প্রতি সেশনের গড় সময়কাল</string>
+    <string name="count_session" value="202">কন্টেন্ট ব্যবহার হয়েছে - সেশন সংখ্যা</string>
+    <string name="processing">সম্পন্ন হচ্ছে</string>
+    <string name="choose_template">টেমপ্লেট নির্বাচন করুন</string>
+    <string name="save_as_template">টেমপ্লেট হিসেবে সেভ করুন</string>
+    <string name="passed">সম্পন্ন</string>
+    <string name="compress">সংকুচিত করুন</string>
+    <string name="and">এবং</string>
+    <string name="added">যোগ হয়েছে</string>
+    <string name="fixed_date">নির্দিস্ট তারিখ</string>
+    <string name="relative_date">আপেক্ষিক তারিখ</string>
 </resources>
