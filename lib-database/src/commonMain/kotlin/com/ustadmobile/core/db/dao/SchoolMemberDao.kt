@@ -5,6 +5,8 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.annotation.Repository
+import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.SchoolMember
 import com.ustadmobile.lib.db.entities.SchoolMemberWithPerson
 
@@ -29,7 +31,11 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
     abstract suspend fun findBySchoolAndPersonAndRole(schoolUid: Long, personUid: Long, role: Int): List<SchoolMember>
 
 
-    @Query("""SELECT SchoolMember.*, Person.* FROM SchoolMember
+    @Query("""SELECT SchoolMember.*, Person.*
+         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+         WHERE
+         PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+         AND PersonGroupMember.groupMemberActive 
         LEFT JOIN Person ON Person.personUid = SchoolMember.schoolMemberPersonUid
         WHERE CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
         AND SchoolMember.schoolMemberSchoolUid = :schoolUid 
@@ -48,8 +54,9 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
             END DESC
             """)
     abstract fun findAllActiveMembersBySchoolAndRoleUid(schoolUid: Long, role: Int,
-                                                           sortOrder: Int,
-                                                              searchQuery: String)
+                                                        sortOrder: Int,
+                                                        searchQuery: String,
+                                                        accountPersonUid: Long)
             : DataSource.Factory<Int, SchoolMemberWithPerson>
 
     @Query("""SELECT SchoolMember.*, Person.* FROM SchoolMember

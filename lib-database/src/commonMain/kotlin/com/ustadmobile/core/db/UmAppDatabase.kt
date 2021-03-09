@@ -4185,6 +4185,23 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     rolePermissions = ${Role.ROLE_CLAZZ_TEACHER_PERMISSIONS_DEFAULT} 
                     WHERE roleUid = ${Role.ROLE_CLAZZ_TEACHER_UID} """.trimMargin())
 
+                    database.execSQL("""UPDATE persongroupmember SET groupmemberactive = true 
+                        WHERE groupmemberactive is NULL""".trimMargin())
+
+                    database.execSQL("""INSERT INTO PersonGroup
+                        (groupName, groupActive, personGroupFlag) SELECT
+                        'Admin Group', true, ${PersonGroup.PERSONGROUP_FLAG_PERSONGROUP} 
+                        WHERE EXISTS (SELECT * FROM Person WHERE firstNames = 'Admin' 
+                        AND lastName = 'User' AND personGroupUid = 0)""".trimMargin())
+                    database.execSQL("""UPDATE PERSON SET personGroupUid = (SELECT groupUid
+                        FROM PersonGroup WHERE groupName = 'Admin Group' LIMIT 1) WHERE
+                        firstNames = 'Admin' AND lastName = 'User' AND personGroupUid = 0""".trimMargin())
+                    database.execSQL("""INSERT INTO PersonGroupMember 
+                        (groupMemberActive, groupMemberPersonUid, groupMemberGroupUid) 
+                         SELECT true,(SELECT Person.personUid FROM PERSON WHERE username = 'admin') 
+                        , (SELECT groupUid FROM PersonGroup WHERE groupName = 'Admin Group' LIMIT 1) 
+                        WHERE EXISTS (SELECT * FROM PersonGroup WHERE groupName = 'Admin Group'); """.trimMargin())
+
                 }
 
             }
