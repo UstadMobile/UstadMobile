@@ -32,15 +32,14 @@ abstract class SchoolMemberDao : BaseDao<SchoolMember> {
 
 
     @Query("""SELECT SchoolMember.*, Person.*
-         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
-         WHERE
-         PersonGroupMember.groupMemberPersonUid = :accountPersonUid
-         AND PersonGroupMember.groupMemberActive 
-        LEFT JOIN Person ON Person.personUid = SchoolMember.schoolMemberPersonUid
-        WHERE CAST(SchoolMember.schoolMemberActive AS INTEGER) = 1
+         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2} 
+          LEFT JOIN SchoolMember ON Person.personUid = SchoolMember.schoolMemberPersonUid 
+         WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
+         AND PersonGroupMember.groupMemberActive  
+        AND SchoolMember.schoolMemberActive
         AND SchoolMember.schoolMemberSchoolUid = :schoolUid 
         AND SchoolMember.schoolMemberRole = :role
-        AND CAST(Person.active AS INTEGER) = 1
+        AND Person.active
         AND (Person.firstNames || ' ' || Person.lastName) LIKE :searchQuery
          ORDER BY CASE(:sortOrder)
                 WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
