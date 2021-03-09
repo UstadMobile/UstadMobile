@@ -52,7 +52,7 @@ class PersonEditPresenter(context: Any,
 
     private var regViaLink: Boolean = false
 
-    private val clazzMemberJoinEditHelper =
+    private val clazzEnrolmentWithClazzJoinEditHelper =
             DefaultOneToManyJoinEditHelper(ClazzEnrolmentWithClazz::clazzEnrolmentUid,
             "state_ClazzMemberWithClazz_list", ClazzEnrolmentWithClazz.serializer().list,
             ClazzEnrolmentWithClazz.serializer().list, this, ClazzEnrolmentWithClazz::class) { clazzEnrolmentUid = it }
@@ -60,12 +60,8 @@ class PersonEditPresenter(context: Any,
     fun handleAddOrEditClazzMemberWithClazz(clazzEnrolmentWithClazz: ClazzEnrolmentWithClazz) {
         GlobalScope.launch(doorMainDispatcher()) {
             clazzEnrolmentWithClazz.clazz = repo.clazzDao.findByUidAsync(clazzEnrolmentWithClazz.clazzEnrolmentClazzUid)
-            clazzMemberJoinEditHelper.onEditResult(clazzEnrolmentWithClazz)
+            clazzEnrolmentWithClazzJoinEditHelper.onEditResult(clazzEnrolmentWithClazz)
         }
-    }
-
-    fun handleClickRemovePersonFromClazz(clazzEnrolmentWithClazz: ClazzEnrolmentWithClazz) {
-        clazzMemberJoinEditHelper.onDeactivateEntity(clazzEnrolmentWithClazz)
     }
 
     private val rolesAndPermissionEditHelper = DefaultOneToManyJoinEditHelper<EntityRoleWithNameAndRole>(
@@ -87,7 +83,7 @@ class PersonEditPresenter(context: Any,
         view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
                 MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
                 MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
-        view.clazzList = clazzMemberJoinEditHelper.liveList
+        view.clazzList = clazzEnrolmentWithClazzJoinEditHelper.liveList
 
         view.rolesAndPermissionsList = rolesAndPermissionEditHelper.liveList
 
@@ -122,7 +118,7 @@ class PersonEditPresenter(context: Any,
         val clazzMemberWithClazzList = withTimeoutOrNull(2000) {
             db.takeIf { entityUid != 0L }?.clazzEnrolmentDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid)
         } ?: listOf()
-        clazzMemberJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
+        clazzEnrolmentWithClazzJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
 
 
         val rolesAndPermissionList = withTimeoutOrNull(2000){
@@ -277,7 +273,7 @@ class PersonEditPresenter(context: Any,
                         rolesAndPermissionEditHelper.primaryKeysToDeactivate)
 
                 //Insert any Clazz Enrolments
-                clazzMemberJoinEditHelper.entitiesToInsert.forEach {
+                clazzEnrolmentWithClazzJoinEditHelper.entitiesToInsert.forEach {
                     // if new person, add the personUid
                     it.clazzEnrolmentPersonUid = entity.personUid
                     // remove fake pk
@@ -296,6 +292,8 @@ class PersonEditPresenter(context: Any,
                     }
                 }
 
+                //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
+                // PersonList, PersonEdit, EnrolmentEdit
                 if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
                     systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
                             arguments.plus(UstadView.ARG_PERSON_UID to entity.personUid.toString()),
