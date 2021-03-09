@@ -44,17 +44,6 @@ enum class GetResultMode {
 interface UstadView {
 
 
-    /**
-     * Return the system specific context for this view (e.g. Activity on Android
-     * etc)
-     *
-     * Nullable so that this is compliant with fragment.getViewContext()
-     *
-     * @return
-     */
-    val viewContext: Any
-
-
     var loading: Boolean
 
     /**

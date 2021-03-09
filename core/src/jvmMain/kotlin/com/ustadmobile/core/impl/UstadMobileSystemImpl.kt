@@ -88,7 +88,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         val contentDirName = getContentDirName(context)
 
         dirList.add(UMStorageDir(systemBaseDir, getString(MessageID.device, context),
-                removableMedia = false, isAvailable = true, isUserSpecific = false,
+                removableMedia = false, isAvailable = true,
                 usableSpace = File(systemBaseDir).usableSpace))
 
         //Find external directories
@@ -96,7 +96,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         for (extDir in externalDirs) {
             dirList.add(UMStorageDir(UMFileUtil.joinPaths(extDir!!, contentDirName!!),
                     getString(MessageID.memory_card, context),
-                    true, true, false, false))
+                    true, true, false))
         }
         return dirList
     }

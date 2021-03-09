@@ -37,6 +37,4 @@ class SettingsFragment : UstadBaseFragment(), SettingsView {
         return view
     }
 
-    override val viewContext: Any
-        get() = requireContext()
 }

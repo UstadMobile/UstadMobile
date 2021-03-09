@@ -208,9 +208,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     }
 
-    override val viewContext: Any
-        get() = this
-
     override fun onDestroy() {
         super.onDestroy()
         searchView = null

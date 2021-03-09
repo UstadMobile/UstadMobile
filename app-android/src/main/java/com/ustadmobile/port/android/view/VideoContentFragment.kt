@@ -92,7 +92,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             currentWindow = savedInstanceState.get(CURRENT_WINDOW) as Int
         }
 
-        mPresenter = VideoContentPresenter(viewContext,
+        mPresenter = VideoContentPresenter(requireContext(),
                 arguments.toStringMap(), this, di)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
@@ -145,7 +145,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         }
 
     private fun initializePlayer() {
-        player = SimpleExoPlayer.Builder(viewContext as Context).build()
+        player = SimpleExoPlayer.Builder(requireContext()).build()
         player?.addListener(videoListener)
         playerView?.player = player
         controlsView?.player = player
@@ -168,11 +168,11 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             if (srtLangList.size > 1) {
 
                 subtitles?.visibility = View.VISIBLE
-                val arrayAdapter = ArrayAdapter(viewContext as Context,
+                val arrayAdapter = ArrayAdapter(requireContext(),
                         android.R.layout.select_dialog_singlechoice, srtLangList)
 
                 subtitles?.setOnClickListener {
-                    val builderSingle = AlertDialog.Builder(viewContext as Context)
+                    val builderSingle = AlertDialog.Builder(requireContext())
                     builderSingle.setTitle(R.string.select_subtitle_video)
                     builderSingle.setSingleChoiceItems(arrayAdapter, subtitleSelection) { dialogInterface, position ->
                         subtitleSelection = position
@@ -235,7 +235,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     }
 
     fun showError() {
-        showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, viewContext), {}, 0)
+        showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found,
+                requireContext()), {}, 0)
     }
 
     private var videoListener = object : Player.EventListener {
@@ -342,7 +343,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     }
 
     private fun buildMediaSource(uri: Uri): MediaSource {
-        val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(viewContext as Context, "UstadMobile")
+        val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
+                requireContext(), "UstadMobile")
         return ProgressiveMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(uri)
     }

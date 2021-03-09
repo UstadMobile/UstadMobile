@@ -133,11 +133,11 @@ fun Route.ContainerDownload() {
         })
     }
 
-    get("${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/{entryFileList}") {
+    get("${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/{entryFileMd5s}") {
         serveConcatenatedResponse2()
     }
 
-    head("${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/{entryFileList}") {
+    head("${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/{entryFileMd5s}") {
         serveConcatenatedResponse2()
     }
 

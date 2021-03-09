@@ -330,9 +330,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
 
-    override val viewContext: Any
-        get() = requireContext()
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mActivityWithFab = context as? UstadListViewActivityWithFab

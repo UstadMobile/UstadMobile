@@ -93,7 +93,7 @@ class ContentEditorPageListPresenter(context: Any, arguments: Map<String, String
 
     fun handleEditDocument(){
         UstadMobileSystemImpl.instance.go(ContentEntryEdit2View.VIEW_NAME,
-                arguments, view.viewContext)
+                arguments, context)
     }
 
     fun handleDismissDialog() {

@@ -10,6 +10,7 @@ import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
+import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
@@ -149,7 +150,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-            val attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "attachments")
+            val attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
+                UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
             val repo = db.asRepository(Any(), "http://localhost/",
                     "", defaultHttpClient(), attachmentsDir.absolutePath,
                     instance(), false)

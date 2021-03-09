@@ -34,23 +34,23 @@ actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: S
     containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
 }
 
-fun File.toContainerEntryFile(totalSize: Long, md5Sum: ByteArray, gzipped: Boolean) = ContainerEntryFile().also {
+fun File.toContainerEntryFile(totalSize: Long, md5Sum: ByteArray, gzipped: Boolean) = com.ustadmobile.lib.db.entities.ContainerEntryFile().also {
     it.ceCompressedSize  = this.length()
     it.ceTotalSize = totalSize
     it.cefMd5 = md5Sum.encodeBase64()
     it.cefPath = this.absolutePath
     it.compression = if(gzipped) {
-        ContainerEntryFile.COMPRESSION_GZIP
+        com.ustadmobile.lib.db.entities.ContainerEntryFile.COMPRESSION_GZIP
     }else {
-        ContainerEntryFile.COMPRESSION_NONE
+        com.ustadmobile.lib.db.entities.ContainerEntryFile.COMPRESSION_NONE
     }
 }
 
 private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
-                                                     file: File,
-                                                     recursive: Boolean,
-                                                     addOptions: ContainerAddOptions,
-                                                     relativePathPrefix: String) {
+                                                             file: File,
+                                                             recursive: Boolean,
+                                                             addOptions: ContainerAddOptions,
+                                                             relativePathPrefix: String) {
 
     val storageDirFile = addOptions.storageDirUri.parseKmpUriStringToFile()
 

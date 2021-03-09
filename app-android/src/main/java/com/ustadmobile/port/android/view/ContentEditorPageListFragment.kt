@@ -49,9 +49,6 @@ import java.util.*
 class ContentEditorPageListFragment : UstadDialogFragment(),
         UmOnStartDragListener, ContentEditorPageListView {
 
-    override val viewContext: Any
-        get() = activity!!
-
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
 
     }

@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
-import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,7 +21,6 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ReportFilterEditView
@@ -46,9 +44,6 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
     private var mBinding: FragmentReportFilterEditBinding? = null
 
     private var mPresenter: ReportFilterEditPresenter? = null
-
-    override val viewContext: Any
-        get() = requireContext()
 
     override val mEditPresenter: UstadEditPresenter<*, ReportFilter>?
         get() = mPresenter

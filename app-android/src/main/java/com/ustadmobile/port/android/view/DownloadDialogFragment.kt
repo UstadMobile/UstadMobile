@@ -11,6 +11,8 @@ import android.widget.*
 import androidx.annotation.Keep
 import androidx.appcompat.app.AlertDialog
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UMStorageDir
@@ -18,6 +20,9 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.kodein.di.instance
 import java.util.*
 
 //It would be nice to move this to proguard-rules.pro and allow obfuscation of the contents of the class
@@ -25,9 +30,6 @@ import java.util.*
 class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         DialogInterface.OnClickListener, View.OnClickListener, CompoundButton.OnCheckedChangeListener,
         AdapterView.OnItemSelectedListener {
-
-    override val viewContext: Any
-        get() = context!!
 
     private lateinit var rootView: View
 
@@ -47,27 +49,14 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     private lateinit var mStorageOptions: Spinner
 
-    private val impl: UstadMobileSystemImpl = UstadMobileSystemImpl.instance
-
     private var savedInstanceState : Bundle? = null
 
     private lateinit var storageDirs: List<UMStorageDir>
 
     internal var viewIdMap = HashMap<Int, Int>()
 
-    private lateinit var activity: UstadBaseActivity
-
-    override fun onAttach(context: Context) {
-        if (context is UstadBaseActivity) {
-            activity = context
-        }
-
-        super.onAttach(context)
-    }
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        val inflater = Objects.requireNonNull<Context>(context)
-                .getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
+        val inflater = requireContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         rootView = inflater.inflate(R.layout.fragment_download_layout_view, null)
 
         this.savedInstanceState = savedInstanceState
@@ -98,25 +87,29 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
                 this@DownloadDialogFragment, di, this).also {
             it.onCreate(null)
+
+            GlobalScope.launch {
+                showStorageOptions()
+            }
         }
 
         return mDialog
     }
 
-
-    override fun showStorageOptions(storageOptions: List<UMStorageDir>) {
-        val options = ArrayList<String>()
+    private suspend fun showStorageOptions() {
+        val impl: UstadMobileSystemImpl by di.instance()
+        val accountManager: UstadAccountManager by di.instance()
+        val storageOptions = impl.getStorageDirsAsync(requireContext(),
+                Endpoint(accountManager.activeAccount.endpointUrl))
         this.storageDirs = storageOptions
-        for (umStorageDir in storageOptions) {
-            val deviceStorageLabel = String.format(impl.getString(
-                    MessageID.download_storage_option_device, requireContext()), umStorageDir.name,
+        val optionLabels = storageOptions.map { umStorageDir ->
+            String.format(impl.getString(
+                    MessageID.download_storage_option_device, requireContext()),
+                    umStorageDir.name,
                     UMFileUtil.formatFileSize(umStorageDir.usableSpace))
-            options.add(deviceStorageLabel)
         }
-
-        val storageOptionAdapter = ArrayAdapter(
-                Objects.requireNonNull<Context>(context),
-                android.R.layout.simple_spinner_item, options)
+        val storageOptionAdapter = ArrayAdapter(requireContext(), android.R.layout.simple_spinner_item,
+                optionLabels)
         storageOptionAdapter.setDropDownViewResource(
                 android.R.layout.simple_spinner_dropdown_item)
 
