@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -17,7 +16,7 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentPersonDetailBinding
-import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzDetailBinding
+import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentWithClazzDetailBinding
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.PersonDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
@@ -29,7 +28,6 @@ import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.PersonDetailView
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import org.kodein.di.direct
@@ -50,25 +48,25 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
 
     var dbRepo: UmAppDatabase? = null
 
-    class ClazzMemberWithClazzRecyclerAdapter(var presenter: PersonDetailPresenter?)
-        : ListAdapter<ClazzMemberWithClazz,
-                ClazzMemberWithClazzRecyclerAdapter.ClazzMemberWithClazzViewHolder>(
+    class ClazzEnrolmentWithClazzRecyclerAdapter(var presenter: PersonDetailPresenter?)
+        : ListAdapter<ClazzEnrolmentWithClazzAndAttendance,
+                ClazzEnrolmentWithClazzRecyclerAdapter.ClazzEnrolmentWithClazzViewHolder>(
                     DIFFUTIL_CLAZZMEMBERWITHCLAZZ) {
 
-            class ClazzMemberWithClazzViewHolder(val binding: ItemClazzMemberWithClazzDetailBinding)
+            class ClazzEnrolmentWithClazzViewHolder(val binding: ItemClazzEnrolmentWithClazzDetailBinding)
                     : RecyclerView.ViewHolder(binding.root)
 
             override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
-                    : ClazzMemberWithClazzViewHolder {
+                    : ClazzEnrolmentWithClazzViewHolder {
 
-                return ClazzMemberWithClazzViewHolder(ItemClazzMemberWithClazzDetailBinding.inflate(
+                return ClazzEnrolmentWithClazzViewHolder(ItemClazzEnrolmentWithClazzDetailBinding.inflate(
                         LayoutInflater.from(parent.context), parent, false).apply {
                     mPresenter = presenter
                 })
             }
 
-            override fun onBindViewHolder(holder: ClazzMemberWithClazzViewHolder, position: Int) {
-                holder.binding.clazzMemberWithClazz = getItem(position)
+            override fun onBindViewHolder(holder: ClazzEnrolmentWithClazzViewHolder, position: Int) {
+                holder.binding.clazzEnrolmentWithClazz = getItem(position)
             }
         }
 
@@ -81,12 +79,12 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             rolesAndPermissionsLiveData?.observe(viewLifecycleOwner, rolesAndPermissionsObserver)
         }
 
-    override var clazzes: DataSource.Factory<Int, ClazzMemberWithClazz>? = null
+    override var clazzes: DataSource.Factory<Int, ClazzEnrolmentWithClazzAndAttendance>? = null
         get() = field
         set(value) {
             clazzesLiveData?.removeObserver(clazzMemberWithClazzObserver)
             field = value
-            val clazzMemberDao = dbRepo?.clazzMemberDao ?: return
+            val clazzMemberDao = dbRepo?.clazzEnrolmentDao ?: return
             clazzesLiveData = value?.asRepositoryLiveData(clazzMemberDao)
             clazzesLiveData?.observe(viewLifecycleOwner, clazzMemberWithClazzObserver)
         }
@@ -105,12 +103,12 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
                 View.VISIBLE else View.GONE
         }
 
-    private var clazzesLiveData: LiveData<PagedList<ClazzMemberWithClazz>>? = null
+    private var clazzesLiveData: LiveData<PagedList<ClazzEnrolmentWithClazzAndAttendance>>? = null
 
-    private var clazzMemberWithClazzRecyclerAdapter: ClazzMemberWithClazzRecyclerAdapter? = null
+    private var clazzEnrolmentWithClazzRecyclerAdapter: ClazzEnrolmentWithClazzRecyclerAdapter? = null
 
-    private val clazzMemberWithClazzObserver = Observer<PagedList<ClazzMemberWithClazz>?> {
-        t -> clazzMemberWithClazzRecyclerAdapter?.submitList(t)
+    private val clazzMemberWithClazzObserver = Observer<PagedList<ClazzEnrolmentWithClazzAndAttendance>?> {
+        t -> clazzEnrolmentWithClazzRecyclerAdapter?.submitList(t)
     }
 
     private var rolesAndPermissionsLiveData: LiveData<PagedList<EntityRoleWithNameAndRole>>? = null
@@ -126,7 +124,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
         val impl: UstadMobileSystemImpl by instance()
         canManageAccount = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_ACCOUNT_MANAGEMENT,
                 requireContext())
-        clazzMemberWithClazzRecyclerAdapter = ClazzMemberWithClazzRecyclerAdapter(
+        clazzEnrolmentWithClazzRecyclerAdapter = ClazzEnrolmentWithClazzRecyclerAdapter(
             null)
         rolesAndPermissionsRecyclerAdapter = EntityRoleRecyclerAdapter(false, this)
         mBinding = FragmentPersonDetailBinding.inflate(inflater, container, false).also {
@@ -134,7 +132,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             it.createAccountVisibility = View.GONE
             it.changePasswordVisibility = View.GONE
             it.classesRecyclerview.layoutManager = LinearLayoutManager(requireContext())
-            it.classesRecyclerview.adapter = clazzMemberWithClazzRecyclerAdapter
+            it.classesRecyclerview.adapter = clazzEnrolmentWithClazzRecyclerAdapter
             it.rolesAndPermissionsRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.rolesAndPermissionsRecyclerview.adapter = rolesAndPermissionsRecyclerAdapter
 
@@ -144,7 +142,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
         dbRepo = on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
         mPresenter = PersonDetailPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
-        clazzMemberWithClazzRecyclerAdapter?.presenter = mPresenter
+        clazzEnrolmentWithClazzRecyclerAdapter?.presenter = mPresenter
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
         mBinding?.presenter = mPresenter
         return rootView
@@ -153,7 +151,7 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
     override fun onDestroyView() {
         super.onDestroyView()
         mBinding?.classesRecyclerview?.adapter = null
-        clazzMemberWithClazzRecyclerAdapter = null
+        clazzEnrolmentWithClazzRecyclerAdapter = null
         mBinding?.rolesAndPermissionsRecyclerview?.adapter = null
         rolesAndPermissionsRecyclerAdapter = null
         dbRepo = null
@@ -185,14 +183,14 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
     companion object {
 
         val DIFFUTIL_CLAZZMEMBERWITHCLAZZ =
-                object: DiffUtil.ItemCallback<ClazzMemberWithClazz>() {
-            override fun areItemsTheSame(oldItem: ClazzMemberWithClazz,
-                                         newItem: ClazzMemberWithClazz): Boolean {
-                return oldItem.clazzMemberUid == newItem.clazzMemberUid
+                object: DiffUtil.ItemCallback<ClazzEnrolmentWithClazzAndAttendance>() {
+            override fun areItemsTheSame(oldItem: ClazzEnrolmentWithClazzAndAttendance,
+                                         newItem: ClazzEnrolmentWithClazzAndAttendance): Boolean {
+                return oldItem.clazzEnrolmentUid == newItem.clazzEnrolmentUid
             }
 
-            override fun areContentsTheSame(oldItem: ClazzMemberWithClazz,
-                                            newItem: ClazzMemberWithClazz): Boolean {
+            override fun areContentsTheSame(oldItem: ClazzEnrolmentWithClazzAndAttendance,
+                                            newItem: ClazzEnrolmentWithClazzAndAttendance): Boolean {
                 return oldItem == newItem
             }
         }

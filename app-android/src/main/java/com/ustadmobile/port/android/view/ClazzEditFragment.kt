@@ -69,6 +69,18 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
             field = value
             value?.observe(this, scheduleObserver)
         }
+    override var clazzEndDateError: String? = null
+        get() = field
+        set(value) {
+            field = value
+            mDataBinding?.clazzEndDateError = value
+        }
+    override var clazzStartDateError: String? = null
+        get() = field
+        set(value) {
+            field = value
+            mDataBinding?.clazzStartDateError = value
+        }
 
     class ScheduleRecyclerAdapter(val activityEventHandler: ClazzEdit2ActivityEventHandler,
                                   var presenter: ClazzEdit2Presenter?): ListAdapter<Schedule, ScheduleRecyclerAdapter.ScheduleViewHolder>(DIFF_CALLBACK_SCHEDULE) {

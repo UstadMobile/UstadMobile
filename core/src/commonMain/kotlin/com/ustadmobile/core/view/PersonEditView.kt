@@ -12,7 +12,7 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var personPicture: PersonPicture?
 
-    var clazzList: DoorLiveData<List<ClazzMemberWithClazz>>?
+    var clazzList: DoorLiveData<List<ClazzEnrolmentWithClazz>>?
 
     var rolesAndPermissionsList: DoorLiveData<List<EntityRoleWithNameAndRole>>?
 
@@ -29,6 +29,10 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
     var dateOfBirthError: String?
 
     var canDelegatePermissions: Boolean?
+
+    var firstNameError: String?
+
+    var lastNameError: String?
 
     fun navigateToNextDestination(account: UmAccount?, nextDestination: String)
 

@@ -12,29 +12,51 @@ import com.ustadmobile.core.view.SettingsView
 
 class SettingsFragment : UstadBaseFragment(), SettingsView {
 
-    internal lateinit var mPresenter: SettingsPresenter
+    var mPresenter: SettingsPresenter? = null
+
+    private var mBinding: FragmentSettingsBinding? = null
 
     override var workspaceSettingsVisible: Boolean = false
         set(value) {
             field = value
+            mBinding?.workspaceSettingsVisible = value
+        }
+    override var holidayCalendarVisible: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.holidayCalendarVisible = value
+        }
+    override var rolesVisible: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.rolesVisible = value
+        }
+    override var reasonLeavingVisible: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.reasonLeavingVisible = value
         }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
-
-        //val view = super.onCreateView(inflater, container, savedInstanceState)
         val view:View
-        val dataBinding = FragmentSettingsBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentSettingsBinding.inflate(inflater, container, false).also {
             view = it.root
         }
 
         mPresenter = SettingsPresenter(requireContext(), arguments.toStringMap(),
                 this, di)
-        mPresenter.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState))
+        mPresenter?.onCreate(UMAndroidUtil.bundleToHashtable(savedInstanceState))
 
-        dataBinding.presenter = mPresenter
+        mBinding?.presenter = mPresenter
 
         return view
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        mBinding = null
+        mPresenter = null
     }
 
 }

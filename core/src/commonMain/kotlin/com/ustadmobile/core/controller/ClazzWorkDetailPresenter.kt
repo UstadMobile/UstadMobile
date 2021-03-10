@@ -6,10 +6,7 @@ import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ClazzMember
-import com.ustadmobile.lib.db.entities.ClazzWork
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
@@ -45,23 +42,8 @@ class ClazzWorkDetailPresenter(context: Any,
             val clazzWork = withTimeoutOrNull(2000) {
                 db.clazzWorkDao.findByUidAsync(clazzWorkUid)
             } ?: ClazzWork()
-            val clazzMember: ClazzMember? =
-                    db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
-                            clazzWork.clazzWorkClazzUid)
-            val loggedInPerson: Person? = withTimeoutOrNull(2000){
-                db.personDao.findByUid(loggedInPersonUid)
-            }
-            when {
-                loggedInPerson?.admin == true -> {
-                    view.isStudent = false
-                }
-                clazzMember == null -> {
-                    view.isStudent = false
-                }
-                else -> {
-                    view.isStudent = clazzMember.clazzMemberRole != ClazzMember.ROLE_TEACHER
-                }
-            }
+            view.progressOverviewVisible = db.clazzDao.personHasPermissionWithClazz(loggedInPersonUid,
+                    clazzWork.clazzWorkClazzUid, Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT)
         }
 
         super.onCreate(savedState)
@@ -81,15 +63,15 @@ class ClazzWorkDetailPresenter(context: Any,
             return true
         }
 
-        val clazzMember: ClazzMember? = withTimeoutOrNull(2000) {
-            db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
+        val clazzEnrolment: ClazzEnrolment? = withTimeoutOrNull(2000) {
+            db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid,
                     entity?.clazzWorkClazzUid?: 0L)
         }
 
-        return if(clazzMember == null){
+        return if(clazzEnrolment == null){
             false
         }else{
-            clazzMember.clazzMemberRole == ClazzMember.ROLE_TEACHER
+            clazzEnrolment.clazzEnrolmentRole == ClazzEnrolment.ROLE_TEACHER
         }
 
 

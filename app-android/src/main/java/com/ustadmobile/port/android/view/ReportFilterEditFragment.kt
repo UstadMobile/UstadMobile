@@ -58,6 +58,8 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             mBinding?.fragmentReportFilterEditDialogValuesNumberText?.text?.clear()
             mBinding?.fragmentReportFilterEditDialogValuesBetweenXText?.text?.clear()
             mBinding?.fragmentReportFilterEditDialogValuesBetweenYText?.text?.clear()
+            uidAndLabelFilterItemRecyclerAdapter?.submitList(listOf())
+            mPresenter?.clearUidAndLabelList()
         }
 
     override var dropDownValueOptions: List<MessageIdOption>? = null
@@ -212,6 +214,16 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             })
         }
 
+        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                LeavingReason::class.java) {
+            val reason = it.firstOrNull() ?: return@observeResult
+
+            mPresenter?.handleAddOrEditUidAndLabel(UidAndLabel().apply {
+                uid = reason.leavingReasonUid
+                labelName = reason.leavingReasonTitle
+            })
+        }
+
         uidAndLabelFilterItemRecyclerAdapter?.presenter = mPresenter
 
     }
@@ -255,6 +267,8 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
                     bundleOf(ContentEntryList2View.ARG_CONTENT_FILTER to
                                     ContentEntryList2View.ARG_LIBRARIES_CONTENT,
                             UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()))
+        }else if(entity?.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON){
+            navigateToPickEntityFromList(LeavingReason::class.java, R.id.leaving_reason_list)
         }
     }
 

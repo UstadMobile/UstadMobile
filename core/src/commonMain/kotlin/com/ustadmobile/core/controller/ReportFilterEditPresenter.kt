@@ -4,6 +4,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.OUTCOME_TO_MESSAGE_ID_MAP
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ReportFilterEditView
@@ -11,7 +12,6 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
-import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -40,6 +40,8 @@ class ReportFilterEditPresenter(context: Any,
         CONTENT_ENTRY(ReportFilter.FIELD_CONTENT_ENTRY, MessageID.field_content_entry),
         CONTENT_PROGRESS(ReportFilter.FIELD_CONTENT_PROGRESS, MessageID.field_content_progress),
         ATTENDANCE_PERCENTAGE(ReportFilter.FIELD_ATTENDANCE_PERCENTAGE, MessageID.field_attendance_percentage),
+        ENROLMENT_OUTCOME(ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME, MessageID.class_enrolment_outcome),
+        ENROLMENT_LEAVING_REASON(ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON, MessageID.class_enrolment_leaving)
     }
 
     class FieldMessageIdOption(day: FieldOption, context: Any)
@@ -90,6 +92,13 @@ class ReportFilterEditPresenter(context: Any,
         uidAndLabelOneToManyHelper.onDeactivateEntity(entry)
     }
 
+    fun clearUidAndLabelList() {
+        uidAndLabelOneToManyHelper.entitiesToInsert
+        uidAndLabelOneToManyHelper.liveList.getValue()?.forEach {
+            uidAndLabelOneToManyHelper.onDeactivateEntity(it)
+        }
+    }
+
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
@@ -124,6 +133,16 @@ class ReportFilterEditPresenter(context: Any,
                     uidAndLabelOneToManyHelper.liveList.sendValue(entries)
 
                 }
+            }else if(entity.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON){
+                if (entity.reportFilterValue != null && entity.reportFilterValue?.isNotEmpty() == true) {
+                    val reasons = withTimeoutOrNull(2000){
+                        db.leavingReasonDao.getReasonsFromUids(entity.reportFilterValue?.split(", ")
+                                ?.map { it.toLong() }
+                                ?: listOf())
+                    } ?: listOf()
+                    uidAndLabelOneToManyHelper.liveList.sendValue(reasons)
+                }
+
             }
             uidhelperDeferred.complete(true)
         }
@@ -172,6 +191,19 @@ class ReportFilterEditPresenter(context: Any,
                         .map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.BETWEEN
             }
+            ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME -> {
+                view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
+                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
+                view.valueType = FilterValueType.DROPDOWN
+                view.dropDownValueOptions = OUTCOME_TO_MESSAGE_ID_MAP.map {
+                    MessageIdOption(it.value, context, it.key) }
+            }
+            ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON -> {
+                view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
+                        ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context) }
+                view.valueType = FilterValueType.LIST
+                view.createNewFilter = systemImpl.getString(MessageID.add_leaving_reason, context)
+            }
         }
 
     }
@@ -191,7 +223,8 @@ class ReportFilterEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity
-        if (entityVal?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY) {
+        if (entityVal?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY ||
+                entityVal?.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON) {
             entityVal.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
                     ?.joinToString { it.uid.toString() }
         }
@@ -211,7 +244,8 @@ class ReportFilterEditPresenter(context: Any,
         } else {
             view.conditionsErrorText = null
         }
-        if (entity.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY) {
+        if (entity.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY ||
+                entity.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON) {
             entity.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
                     ?.joinToString { it.uid.toString() }
         }

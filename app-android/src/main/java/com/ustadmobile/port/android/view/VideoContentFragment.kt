@@ -84,6 +84,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             it.isPortrait = isPortrait
             it.activityVideoPlayerView.useController = !isPortrait
             (context as? MainActivity)?.slideBottomNavigation(isPortrait)
+            (context as? MainActivity)?.onAppBarExpand(isPortrait)
+            it.videoScroll.isNestedScrollingEnabled = isPortrait
         }
 
         if (savedInstanceState != null) {
@@ -110,6 +112,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         mBinding?.isPortrait = isPortrait
         mBinding?.activityVideoPlayerView?.useController = !isPortrait
         (context as? MainActivity)?.slideBottomNavigation(isPortrait)
+        (context as? MainActivity)?.onAppBarExpand(isPortrait)
+        mBinding?.videoScroll?.isNestedScrollingEnabled = isPortrait
     }
 
     override fun onDestroyView() {

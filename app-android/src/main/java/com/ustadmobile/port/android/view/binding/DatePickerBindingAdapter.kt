@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.content.Context
 import android.text.format.DateFormat
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.DatePicker
 import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
@@ -99,7 +100,7 @@ fun updateDateTimeOnEditTextWithExtra(prepend: String, append: String?, et: Text
     } else {
         dateWithTimeFormatWithPrepend.format(arrayOf(prepend, dateDate, timeDate, append))
     }
-    if (date == 0L) {
+    if (date == 0L || date == Long.MAX_VALUE) {
         text = ""
     }
     et.text = text
@@ -109,8 +110,10 @@ fun updateDateTimeOnEditTextWithExtra(prepend: String, append: String?, et: Text
 fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: InverseBindingListener) {
     val c = Calendar.getInstance()
     val currentDate = et.getTag(R.id.tag_datelong) as? Long ?: 0L
-    if (currentDate > 0) {
-        c.timeInMillis = currentDate
+    c.timeInMillis = if(!currentDate.isSet){
+        c.time.time
+    }else{
+        currentDate
     }
 
     val builder = AlertDialog.Builder(context)
@@ -179,6 +182,11 @@ fun setDateWithDateExtras(et: TextView, date: Long, time: Long, append: String?,
 fun setDateWithDateExtras(et: TextView, date: Long) {
     updateDateTimeOnEditText(et, date)
     et.setTag(R.id.tag_datelong, date)
+}
+
+@BindingAdapter("visibleIfDateSet")
+fun View.setVisibilityIfSetDate(date: Long){
+    visibility = if(date == 0L || date == Long.MAX_VALUE) View.GONE else View.VISIBLE
 }
 
 

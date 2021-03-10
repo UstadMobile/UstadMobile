@@ -86,6 +86,7 @@
             app:dateTimeLongWithExtra="@{clazzWork.clazzWorkDueDateTime}"
             app:dateTimePrepend="@{``}"
             app:dateTimeTimeLongWithExtra="@{clazzWork.clazzWorkDueTime}"
+            app:visibleIfDateSet="@{clazzWork.clazzWorkDueDateTime}"
             app:layout_constraintEnd_toEndOf="@+id/line1_text"
             app:layout_constraintStart_toEndOf="@+id/imageView11"
             app:layout_constraintTop_toBottomOf="@+id/line2_text"
@@ -96,8 +97,8 @@
             android:layout_width="@dimen/dimen_16dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
-            android:visibility="@{clazzWork.clazzWorkDueDateTime>0?View.VISIBLE:View.GONE}"
             app:layout_constraintStart_toStartOf="@+id/line1_text"
+            app:visibleIfDateSet="@{clazzWork.clazzWorkDueDateTime}"
             app:layout_constraintTop_toBottomOf="@+id/line2_text"
             android:tint="#7A7A7A"
             android:src="@drawable/ic_event_available_black_24dp"/>

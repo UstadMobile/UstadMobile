@@ -32,7 +32,7 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-
+        mLoggedInPersonUid = accountManager.activeAccount.personUid
         selectedSortOption = SORT_OPTIONS[0]
         updateListOnView()
     }
@@ -73,12 +73,15 @@ class SchoolMemberListPresenter(context: Any, arguments: Map<String, String>,
                 view.takeIf { hasAddStudentPermission }?.pendingStudentList = db.schoolMemberDao
                         .findAllActiveMembersBySchoolAndRoleUid(
                                 schoolUid, Role.ROLE_SCHOOL_STUDENT_PENDING_UID, selectedSortOption?.flag ?: 0,
-                                searchText.toQueryLikeParam())
+                                searchText.toQueryLikeParam(), mLoggedInPersonUid
+                        )
             }
         }
 
-        view.list = repo.schoolMemberDao.findAllActiveMembersBySchoolAndRoleUid(schoolUid, schoolRole,
-                        selectedSortOption?.flag ?: 0, searchText.toQueryLikeParam())
+        view.list = repo.schoolMemberDao.findAllActiveMembersBySchoolAndRoleUid(
+                schoolUid, schoolRole,
+                selectedSortOption?.flag ?: 0, searchText.toQueryLikeParam(), mLoggedInPersonUid
+        )
     }
 
     fun handleEnrolMember(schoolUid: Long, personUid: Long, role: Int) {
