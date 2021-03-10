@@ -21,7 +21,7 @@ import kotlin.js.JsName
 
 
 @Dao
-@UmRepository
+@Repository
 abstract class PersonDao : BaseDao<Person> {
 
     @JsName("insertListAsync")
@@ -159,10 +159,12 @@ abstract class PersonDao : BaseDao<Person> {
      * @param accountPersonUid the personUid of the person who wants to perform the operation
      * @param personUid the personUid of the person object in the database to perform the operation on
      * @param permission permission to check for
+     * @param checkPermissionForSelf if 0 then don't check for permission when accountPersonUid == personUid
+     * (e.g. where give the person permission over their own entity automatically).
      */
     @Query("SELECT EXISTS(SELECT 1 FROM Person WHERE " +
             "Person.personUid = :personUid AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_PERMISSION_PARAM))")
-    abstract suspend fun personHasPermissionAsync(accountPersonUid: Long, personUid: Long, permission: Long, excludesNameCheck: Int = 0): Boolean
+    abstract suspend fun personHasPermissionAsync(accountPersonUid: Long, personUid: Long, permission: Long, checkPermissionForSelf: Int = 0): Boolean
 
     @Query("SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0)")
     abstract suspend fun personIsAdmin(accountPersonUid: Long): Boolean
@@ -196,11 +198,42 @@ abstract class PersonDao : BaseDao<Person> {
     abstract suspend fun insertPersonGroupMember(personGroupMember:PersonGroupMember):Long
 
     @Query("""
+         SELECT Person.* 
+         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+         WHERE
+         PersonGroupMember.groupMemberPersonUid = :accountPersonUid
+         AND PersonGroupMember.groupMemberActive 
+         AND (:excludeClazz = 0 OR :excludeClazz NOT IN
+            (SELECT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid 
+            AND :timestamp BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft
+            AND ClazzEnrolment.clazzEnrolmentActive))
+            AND (:excludeSchool = 0 OR :excludeSchool NOT IN
+            (SELECT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid 
+            AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
+            AND (Person.personUid NOT IN (:excludeSelected))
+            AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
+         GROUP BY Person.personUid
+         ORDER BY CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
+                WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
+                ELSE ''
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
+                WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
+                ELSE ''
+            END DESC
+    """)
+    abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
+                                                 excludeSchool: Long, excludeSelected: List<Long>,
+                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int, PersonWithDisplayDetails>
+
+    @Query("""
         SELECT Person.* FROM Person 
             WHERE
             (:excludeClazz = 0 OR :excludeClazz NOT IN
-            (SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid 
-            AND :timestamp BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft ))
+            (SELECT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid 
+            AND :timestamp BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft ))
             AND (:excludeSchool = 0 OR :excludeSchool NOT IN
             (SELECT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid 
             AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
@@ -218,9 +251,9 @@ abstract class PersonDao : BaseDao<Person> {
                 ELSE ''
             END DESC
     """)
-    abstract fun findPersonsWithPermission(timestamp: Long, excludeClazz: Long,
-                                                 excludeSchool: Long, excludeSelected: List<Long>,
-                                                 accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): DataSource.Factory<Int, PersonWithDisplayDetails>
+    abstract fun findPersonsWithPermissionAsList(timestamp: Long, excludeClazz: Long,
+                                           excludeSchool: Long, excludeSelected: List<Long>,
+                                           accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): List<Person>
 
 
     @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")
@@ -264,12 +297,12 @@ abstract class PersonDao : BaseDao<Person> {
             OR
             (
             ((EntityRole.erTableId = ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid) OR 
-            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid)) OR
+            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid)) OR
             (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.PersonUid)) OR
             (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
                 SELECT DISTINCT Clazz.clazzSchoolUid 
                 FROM Clazz
-                JOIN ClazzMember ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberPersonUid = Person.personUid
+                JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
             ))
             ) 
             AND (Role.rolePermissions & 
@@ -279,7 +312,7 @@ abstract class PersonDao : BaseDao<Person> {
 
         const val ENTITY_PERSONS_WITH_SELECT_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
-        const val ENTITY_PERSONS_WITH_PERMISSION_PARAM = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :excludesNameCheck $ENTITY_PERSONS_WITH_PERMISSION_PT2  :permission $ENTITY_PERSONS_WITH_PERMISSION_PT4"
+        const val ENTITY_PERSONS_WITH_PERMISSION_PARAM = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :checkPermissionForSelf $ENTITY_PERSONS_WITH_PERMISSION_PT2  :permission $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
 

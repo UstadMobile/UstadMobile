@@ -4,17 +4,15 @@ import androidx.paging.DataSource
 import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.REL_TYPE_TRANSLATED_VERSION
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLangName
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import kotlin.js.JsName
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @Dao
-@UmRepository
+@Repository
 abstract class ContentEntryRelatedEntryJoinDao : BaseDao<ContentEntryRelatedEntryJoin> {
 
     @Query("SELECT ContentEntryRelatedEntryJoin.* FROM ContentEntryRelatedEntryJoin " +

@@ -31,11 +31,13 @@
 
 package com.ustadmobile.core.impl
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
@@ -45,15 +47,22 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.*
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.kodein.di.DI
+import org.kodein.di.android.closestDI
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.io.*
 import java.util.*
 import java.util.zip.GZIPInputStream
@@ -101,12 +110,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
     )
-
-
-    val destinationProvider: DestinationProvider by lazy {
-        Class.forName("com.ustadmobile.port.android.impl.ViewNameToDestMap").newInstance() as DestinationProvider
-    }
-
 
     private abstract class UmCallbackAsyncTask<A, P, R>
     (protected var umCallback: UmCallback<R>) : AsyncTask<A, P, R>() {
@@ -209,6 +212,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         val allArgs = args + UMFileUtil.parseURLQueryString(viewName)
 
 
+        val di: DI by closestDI(context as Context)
+        val destinationProvider: DestinationProvider = di.direct.instance()
+
         val ustadDestination = destinationProvider.lookupDestinationName(viewNameOnly)
         if(ustadDestination != null) {
             val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
@@ -300,6 +306,23 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         }
     }
 
+    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
+        val di : DI by closestDI { context as Context }
+        val destinationProvider: DestinationProvider = di.direct.instance()
+
+        val navController = navController ?: (context as Activity)
+                .findNavController(destinationProvider.navControllerViewId)
+
+        val popBackDestId = if(popUpToViewName == UstadView.CURRENT_DEST) {
+            navController.currentDestination?.id ?: 0
+        }else {
+            destinationProvider.lookupDestinationName(popUpToViewName)
+                    ?.destinationId ?: 0
+        }
+
+        navController.popBackStack(popBackDestId, popUpInclusive)
+    }
+
 
     /**
      * Get a string for use in the UI
@@ -324,39 +347,24 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
 
     /**
-     * Get storage directories
-     *
-     * @param context Platform specific context
-     * @param callback Storage dir list callback
+     * Get a list of available directories on Android. Get the internal directory and the memory
+     * card (if any). This will result in a lis tof UMStorageDir with a path in the following format:
+     * ExternalFilesDir[i]/sitedata/container
      */
-
-    @Deprecated("Use getStorageDirsAsync instead")
-    actual override fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>) {
-        Thread {
-            val dirList = ArrayList<UMStorageDir>()
-            val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
-            val contentDirName = getContentDirName(context)
-
-            var umDir = File(storageOptions[deviceStorageIndex], contentDirName!!)
-            if (!umDir.exists()) umDir.mkdirs()
-            dirList.add(UMStorageDir(umDir.absolutePath,
-                    getString(MessageID.phone_memory, context), true,
-                    isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
-
-            if (storageOptions.size > 1) {
-                val sdCardStorage = storageOptions[sdCardStorageIndex]
-                umDir = File(sdCardStorage, contentDirName)
-                if (!umDir.exists()) umDir.mkdirs()
-                dirList.add(UMStorageDir(umDir.absolutePath,
-                        getString(MessageID.memory_card, context), removableMedia = true,
-                        isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath)))
-            }
-
-            callback.onDone(dirList)
-        }.start()
+    @SuppressLint("UsableSpace")
+    suspend fun getStorageDirsAsync(context: Context, endpoint: Endpoint) : List<UMStorageDir> = withContext(Dispatchers.IO) {
+        ContextCompat.getExternalFilesDirs(context, null).mapIndexed { index, it ->
+            val siteDir = it.siteDataSubDir(endpoint)
+            val storageDir = File(siteDir, SUBDIR_CONTAINER_NAME)
+            storageDir.takeIf { !it.exists() }?.mkdirs()
+            val nameMessageId = if(index == 0) MessageID.phone_memory else MessageID.memory_card
+            UMStorageDir(storageDir.toUri().toString(), name = getString(nameMessageId, context),
+                    removableMedia = index == 0, isAvailable = true, isWritable = true,
+                    usableSpace = it.usableSpace)
+        }
     }
 
-
+    @Deprecated("This is not really a cross platform function. Selecting a storage directory should be done at a platform level e.g. it may lead to a file picker dialog, etc")
     actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> = withContext(Dispatchers.IO){
         val dirList = ArrayList<UMStorageDir>()
         val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
@@ -366,7 +374,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         if (!umDir.exists()) umDir.mkdirs()
         dirList.add(UMStorageDir(umDir.absolutePath,
                 getString(MessageID.phone_memory, context), true,
-                isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath),
+                isAvailable = true, isWritable = canWriteFileInDir(umDir.absolutePath),
                 usableSpace = umDir.usableSpace))
 
         if (storageOptions.size > 1) {
@@ -375,7 +383,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             if (!umDir.exists()) umDir.mkdirs()
             dirList.add(UMStorageDir(umDir.absolutePath,
                     getString(MessageID.memory_card, context), true,
-                    isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath),
+                    isAvailable = true, isWritable = canWriteFileInDir(umDir.absolutePath),
                     usableSpace = umDir.usableSpace))
         }
         return@withContext dirList
@@ -616,6 +624,14 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
     }
 
+    /**
+     * Open the given link in a browser and/or tab depending on the platform
+     */
+    actual fun openLinkInBrowser(url: String, context: Any) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        (context as Context).startActivity(intent)
+    }
+
 
     actual companion object {
 
@@ -626,6 +642,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
 
         const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
+
 
         /**
          * Get an instance of the system implementation - relies on the platform

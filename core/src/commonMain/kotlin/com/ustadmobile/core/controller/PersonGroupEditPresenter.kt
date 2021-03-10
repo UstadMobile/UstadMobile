@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.PersonGroupEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -52,7 +53,7 @@ class PersonGroupEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: PersonGroup? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(PersonGroup.serializer(), entityJsonStr)
+            editEntity = safeParse(di, PersonGroup.serializer(), entityJsonStr)
         }else {
             editEntity = PersonGroup()
         }

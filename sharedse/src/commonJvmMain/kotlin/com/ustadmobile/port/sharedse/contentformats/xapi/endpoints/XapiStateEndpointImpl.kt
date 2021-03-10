@@ -23,24 +23,23 @@ class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiS
 
     private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
 
-    private val gson: Gson by di.instance()
+    private val repo: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
 
-    private val agentDao: AgentDao = db.agentDao
-    private val stateDao: StateDao = db.stateDao
-    private val stateContentDao: StateContentDao = db.stateContentDao
-    private val personDao: PersonDao = db.personDao
+    private val gson: Gson by di.instance()
 
 
     @Throws(StatementRequestException::class)
     override fun storeState(state: State) {
+        val agentVal = state.agent ?: throw IllegalArgumentException("State has null agent")
+        val contentVal = state.content ?: throw IllegalArgumentException("State has null content")
 
-        XapiStatementEndpointImpl.checkValidActor(state.agent!!)
+        XapiStatementEndpointImpl.checkValidActor(agentVal)
 
-        val agentEntity = getAgent(agentDao, personDao, state.agent!!)
+        val agentEntity = getAgent(repo.agentDao, repo.personDao, agentVal)
 
-        val stateEntity = insertOrUpdateState(stateDao, state, agentEntity.agentUid)
+        val stateEntity = insertOrUpdateState(repo.stateDao, state, agentEntity.agentUid)
 
-        insertOrUpdateStateContent(stateContentDao, state.content!!, stateEntity)
+        insertOrUpdateStateContent(repo.stateContentDao, contentVal, stateEntity)
 
     }
 
@@ -48,11 +47,11 @@ class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiS
 
         XapiStatementEndpointImpl.checkValidActor(state.agent!!)
 
-        val agentEntity = getAgent(agentDao, personDao, state.agent!!)
+        val agentEntity = getAgent(repo.agentDao, repo.personDao, state.agent!!)
 
-        val stateEntity = insertOrUpdateState(stateDao, state, agentEntity.agentUid)
+        val stateEntity = insertOrUpdateState(repo.stateDao, state, agentEntity.agentUid)
 
-        deleteAndInsertNewStateContent(stateContentDao, state.content!!, stateEntity)
+        deleteAndInsertNewStateContent(repo.stateContentDao, state.content!!, stateEntity)
 
     }
 
@@ -69,10 +68,10 @@ class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiS
 
         val agent = gson.fromJson(agentJson, Actor::class.java)
 
-        val agentEntity = getAgent(agentDao, personDao, agent)
+        val agentEntity = getAgent(repo.agentDao, repo.personDao, agent)
 
-        val entity = stateDao.findByStateId(stateId, agentEntity.agentUid, activityId, registration)
-        val list = stateContentDao.findAllStateContentWithStateUid(entity!!.stateUid)
+        val entity = db.stateDao.findByStateId(stateId, agentEntity.agentUid, activityId, registration)
+        val list = db.stateContentDao.findAllStateContentWithStateUid(entity!!.stateUid)
         val contentMap = HashMap<String?, String?>()
         for (contentEntity in list) {
             contentMap[contentEntity.stateContentKey] = contentEntity.stateContentValue
@@ -85,9 +84,9 @@ class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiS
 
         val agent = gson.fromJson(agentJson, Actor::class.java)
 
-        val agentEntity = getAgent(agentDao, personDao, agent)
+        val agentEntity = getAgent(db.agentDao, db.personDao, agent)
 
-        val list = stateDao.findStateIdByAgentAndActivity(agentEntity.agentUid, activityId, registration, since)
+        val list = db.stateDao.findStateIdByAgentAndActivity(agentEntity.agentUid, activityId, registration, since)
 
         val idList = ArrayList<String?>()
         for (state in list) {
@@ -102,9 +101,9 @@ class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiS
 
         val agent = gson.fromJson(agentJson, Actor::class.java)
 
-        val agentEntity = getAgent(agentDao, personDao, agent)
+        val agentEntity = getAgent(db.agentDao, db.personDao, agent)
 
-        stateDao.setStateInActive(stateId, agentEntity.agentUid, activityId, registration, false)
+        repo.stateDao.setStateInActive(stateId, agentEntity.agentUid, activityId, registration, false)
     }
 
 
@@ -112,9 +111,9 @@ class XapiStateEndpointImpl(val endpoint: Endpoint, override val di: DI) : XapiS
 
         val agent = gson.fromJson(agentJson, Actor::class.java)
 
-        val agentEntity = getAgent(agentDao, personDao, agent)
+        val agentEntity = getAgent(db.agentDao, db.personDao, agent)
 
-        stateDao.updateStateToInActive(agentEntity.agentUid, activityId, registration, false)
+        repo.stateDao.updateStateToInActive(agentEntity.agentUid, activityId, registration, false)
     }
 
 }

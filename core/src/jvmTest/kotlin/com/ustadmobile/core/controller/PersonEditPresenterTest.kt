@@ -70,7 +70,11 @@ class PersonEditPresenterTest  {
         mockLifecycleOwner = mock { }
 
         mockView = mock{}
-        impl = mock()
+        impl = mock {
+            on { getString(any(), any()) }.thenAnswer {
+                it.arguments[0].toString()
+            }
+        }
 
 
         mockWebServer = MockWebServer()

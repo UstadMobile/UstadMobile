@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.widget.ProgressBar
 import android.widget.TextView
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
@@ -18,6 +19,7 @@ import androidx.navigation.ui.AppBarConfiguration
 import androidx.navigation.ui.onNavDestinationSelected
 import androidx.navigation.ui.setupActionBarWithNavController
 import androidx.navigation.ui.setupWithNavController
+import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.behavior.HideBottomViewOnScrollBehavior
 import com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
 import com.toughra.ustadmobile.R
@@ -27,14 +29,17 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.DbPreloadWorker
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.core.impl.DestinationProvider
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.SettingsView
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener
 import com.ustadmobile.port.android.util.ext.getActivityContext
+import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.appbar_material_collapsing.*
 import kotlinx.android.synthetic.main.appbar_material_collapsing.view.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.Dispatchers
@@ -47,12 +52,16 @@ import java.util.*
 
 
 class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
+        UstadActivityWithProgressBar,
         NavController.OnDestinationChangedListener {
 
     private lateinit var appBarConfiguration: AppBarConfiguration
 
     override val activityFloatingActionButton: ExtendedFloatingActionButton?
         get() = activity_listfragmelayout_behaviornt_fab
+
+    override val activityProgressBar: ProgressBar?
+        get() = main_progress_bar
 
     private lateinit var mBinding: ActivityMainBinding
 
@@ -63,6 +72,13 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
     private var mIsAdmin: Boolean? = null
 
     private var searchView: SearchView? = null
+
+    private val destinationProvider: DestinationProvider by instance()
+
+    //This is actually managed by the underlying fragments.
+    override var loading: Boolean
+        get() = false
+        set(value) {}
 
     //Observe the active account to show/hide the settings based on whether or not the user is admin
     private val mActiveUserObserver = Observer<UmAccount> {account ->
@@ -116,7 +132,17 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         invalidateOptionsMenu()
         onAppBarExpand(true)
 
-        slideBottomNavigation(true)
+        val ustadDestination = destinationProvider.lookupDestinationById(destination.id)
+        val scrollFlags = ustadDestination?.actionBarScrollBehavior ?:
+            (AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS or AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL)
+        (mBinding.root.collapsing_toolbar.layoutParams as? AppBarLayout.LayoutParams)?.scrollFlags = scrollFlags
+
+        mBinding.bottomNavView.visibility = if(ustadDestination?.hideBottomNavigation == true) {
+            View.GONE
+        } else {
+            slideBottomNavigation(true)
+            View.VISIBLE
+        }
     }
 
     fun onAppBarExpand(expand: Boolean){
@@ -147,8 +173,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         menu.findItem(R.id.menu_main_profile).isVisible = mainScreenItemsVisible
         searchView = menu.findItem(R.id.menu_search).actionView as SearchView
 
-        mBinding.bottomNavView.visibility = if (DEST_TO_HIDE_BOTTOM_NAV.contains(currentFrag))
-            View.GONE else View.VISIBLE
         if (mainScreenItemsVisible) {
             setUserProfile(menu.findItem(R.id.menu_main_profile))
         }
@@ -184,9 +208,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     }
 
-    override val viewContext: Any
-        get() = this
-
     override fun onDestroy() {
         super.onDestroy()
         searchView = null
@@ -211,8 +232,5 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         val BOTTOM_NAV_DEST = listOf(R.id.home_content_dest, R.id.home_clazzlist_dest,
                 R.id.home_personlist_dest, R.id.home_schoollist_dest, R.id.report_list_dest)
 
-        val DEST_TO_HIDE_BOTTOM_NAV = listOf(R.id.login_dest, R.id.account_get_started_dest,
-                R.id.workspace_enterlink_dest, R.id.settings_list_dest, R.id.person_edit_register_dest,
-                R.id.content_xapi_dest)
     }
 }

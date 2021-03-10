@@ -327,16 +327,6 @@ abstract class UstadMobileSystemCommon {
     }
 
 
-    /**
-     * Get storage directories
-     *
-     * @param context Platform specific context
-     * @param callback Storage dir list callback
-     */
-    @JsName("getStorageDirs")
-    abstract fun getStorageDirs(context: Any, callback: UmResultCallback<List<UMStorageDir>>)
-
-
     @JsName("getStorageDirAsync")
     abstract suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
 
@@ -488,6 +478,13 @@ abstract class UstadMobileSystemCommon {
         const val TAG_LOCAL_HTTP_PORT = 64
 
         const val LINK_INTENT_FILTER = "umclient"
+
+        const val SUBDIR_SITEDATA_NAME = "sitedata"
+
+        const val SUBDIR_CONTAINER_NAME = "container"
+
+        const val SUBDIR_ATTACHMENTS_NAME = "attachments"
+
 
     }
 }

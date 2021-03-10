@@ -6,10 +6,9 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isJavascriptEnabled
-import androidx.test.espresso.web.sugar.Web.onWebView
-import androidx.test.espresso.web.webdriver.DriverAtoms.findElement
 import androidx.test.espresso.web.webdriver.Locator
 import androidx.test.rule.GrantPermissionRule
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
@@ -18,16 +17,12 @@ import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.port.android.screen.WebChunkScreen
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.apache.commons.io.FileUtils.copyInputStreamToFile
-import org.hamcrest.core.AllOf.allOf
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
@@ -36,11 +31,11 @@ import java.io.File
 
 @AdbScreenRecord("WebChunk Screen Test")
 @ExperimentalStdlibApi
-class WebChunkFragmentTest {
+class WebChunkFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -48,23 +43,10 @@ class WebChunkFragmentTest {
 
     @JvmField
     @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
     val screenRecordRule = AdbScreenRecordRule()
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
-    @get:Rule
-    var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION)
 
     lateinit var container: Container
 
-    private val WAIT_TIME = 2000L
 
     @Before
     fun setup() {
@@ -86,12 +68,12 @@ class WebChunkFragmentTest {
         targetEntry.author = "borrachera"
         targetEntry.primaryLanguageUid = 53
         targetEntry.leaf = true
-        targetEntry.contentEntryUid = dbRule.db.contentEntryDao.insert(targetEntry)
+        targetEntry.contentEntryUid = dbRule.repo.contentEntryDao.insert(targetEntry)
 
         container = Container()
         container.mimeType = "application/webchunk+zip"
         container.containerContentEntryUid = targetEntry.contentEntryUid
-        container.containerUid = dbRule.db.containerDao.insert(container)
+        container.containerUid = dbRule.repo.containerDao.insert(container)
 
         val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,
                 tmpDir.absolutePath)
@@ -105,27 +87,31 @@ class WebChunkFragmentTest {
 
         Assume.assumeTrue(Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP)
 
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(UstadView.ARG_CONTENT_ENTRY_UID to container.containerContentEntryUid, UstadView.ARG_CONTAINER_UID to container.containerUid)) {
-            WebChunkFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-            }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
 
-        repeat(5) {
-            try {
-                onWebView(allOf(isDisplayed(), isJavascriptEnabled()))
-                        .withElement(findElement(Locator.CSS_SELECTOR,
-                                "div[data-test-id=tutorial-page]"))
-            } catch (io: RuntimeException) {
-                if (it == 5) {
-                    throw Exception()
+        init{
+
+            launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadView.ARG_CONTENT_ENTRY_UID to container.containerContentEntryUid, UstadView.ARG_CONTAINER_UID to container.containerUid)) {
+                WebChunkFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
                 }
-                Thread.sleep(WAIT_TIME)
+            }
+
+        }.run{
+            WebChunkScreen{
+
+                webView{
+                    isDisplayed()
+                    isJavascriptEnabled()
+                    withElement(Locator.CSS_SELECTOR, "div[data-test-id=tutorial-page]"){
+
+                    }
+                }
+
             }
         }
+
 
 
     }

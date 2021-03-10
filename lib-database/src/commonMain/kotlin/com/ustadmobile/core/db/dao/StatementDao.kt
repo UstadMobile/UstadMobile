@@ -1,18 +1,20 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.*
+import androidx.room.Dao
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.RawQuery
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorQuery
 import com.ustadmobile.door.SimpleDoorQuery
-import com.ustadmobile.door.annotation.ParamName
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.Serializable
 import kotlin.js.JsName
 
 @Dao
-@UmRepository
+@Repository
 abstract class StatementDao : BaseDao<StatementEntity> {
 
     @JsName("insertListAsync")
@@ -29,20 +31,14 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     abstract fun findByStatementIdList(id: List<String>): List<StatementEntity>
 
     @RawQuery
-    abstract fun getResults(query: DoorQuery): List<ReportData>
+    abstract suspend fun getResults(query: DoorQuery): List<ReportData>
 
-    open suspend fun getResultsFromOptions(@ParamName("options") options: ReportWithFilters): List<ReportData> {
-        val sql = options.toSql()
-        return getResults(SimpleDoorQuery(sql.sqlStr, sql.queryParams))
-    }
-
-    open suspend fun getResultsListFromOptions(@ParamName("options") options: ReportWithFilters): DataSource.Factory<Int, StatementListReport> {
-        val sql = options.toSql()
-        return getListResults(SimpleDoorQuery(sql.sqlListStr, sql.queryParams))
+    open suspend fun getResults(sqlStr: String, paramsList: Array<Any>): List<ReportData> {
+        return getResults(SimpleDoorQuery(sqlStr, paramsList))
     }
 
     @RawQuery(observedEntities = [StatementEntity::class, Person::class, XLangMapEntry::class])
-    abstract fun getListResults(query: DoorQuery): DataSource.Factory<Int, StatementListReport>
+    abstract fun getListResults(query: DoorQuery): DataSource.Factory<Int, StatementEntityWithDisplayDetails>
 
 
     // This is required because of above raw query

@@ -27,9 +27,10 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.port.android.view.ext.adjustHeightToDisplayHeight
 import com.ustadmobile.port.android.view.ext.adjustHeightToWrapContent
-import com.ustadmobile.port.android.view.ext.dpAsPx
+import com.ustadmobile.core.util.ext.dpAsPx
 import com.ustadmobile.port.android.view.ext.scrollToAnchor
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import kotlinx.android.synthetic.main.appbar_material_with_progress.*
 import kotlinx.android.synthetic.main.appbar_material_with_progress.view.*
 import kotlinx.coroutines.CompletableDeferred
 
@@ -63,12 +64,15 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
     private var mSavedInstanceState: Bundle? = null
 
-    override val viewContext: Any
-        get() = this
-
     private lateinit var mBinding: ActivityEpubContentBinding
 
     private lateinit var recyclerViewLinearLayout: LinearLayoutManager
+
+    override var loading: Boolean
+        get() = (findViewById<View>(R.id.progressBar)?.visibility == View.VISIBLE)
+        set(value) {
+            findViewById<View>(R.id.progressBar)?.visibility = if(value) View.VISIBLE else View.GONE
+        }
 
     override var containerTitle: String? = null
         set(value) {

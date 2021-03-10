@@ -23,7 +23,7 @@
     <application android:supportsRtl="true"
         android:usesCleartextTraffic="true">
 
-        <service android:name="com.ustadmobile.sharedse.network.DownloadNotificationService"
+        <service android:name="com.ustadmobile.core.networkmanager.DownloadNotificationService"
             android:enabled="true"/>
 
     </application>

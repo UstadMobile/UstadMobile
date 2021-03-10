@@ -17,7 +17,7 @@ import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonWithDisplayDetails
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 interface InviteWithLinkHandler{
@@ -47,10 +47,10 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
         get() = field
         set(value) {
             mDataBinding?.addMode = value
-            mNewItemRecyclerViewAdapter?.newItemVisible =
+            mUstadListHeaderRecyclerViewAdapter?.newItemVisible =
                     (value == ListViewAddMode.FIRST_ITEM)
             if(arguments?.containsKey(UstadView.ARG_CODE_TABLE) == true){
-                inviteWithLinkRecyclerViewAdapter?.visible = mNewItemRecyclerViewAdapter?.newItemVisible?:false
+                inviteWithLinkRecyclerViewAdapter?.visible = mUstadListHeaderRecyclerViewAdapter?.newItemVisible?:false
             }
 
             fabManager?.visible =
@@ -108,12 +108,12 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
         inviteWithLinkRecyclerViewAdapter?.tableId = arguments?.get(UstadView.ARG_CODE_TABLE)?.toString()?.toInt()?:0
 
         mDataRecyclerViewAdapter = PersonListRecyclerAdapter(mPresenter)
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_a_new_person),
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
 
         mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
-        mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
+        mMergeRecyclerViewAdapter = MergeAdapter(mUstadListHeaderRecyclerViewAdapter,
                 inviteWithLinkRecyclerViewAdapter,
                 mDataRecyclerViewAdapter , mListStatusAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
@@ -132,7 +132,8 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
      */
     override fun onClick(view: View?) {
         if (view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.person_edit_dest, Person::class.java)
+            navigateToEditEntity(null, R.id.person_edit_dest, Person::class.java,
+            argBundle = arguments?: Bundle())
         else {
             super.onClick(view)
         }
@@ -157,7 +158,8 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
 
             override fun areContentsTheSame(oldItem: PersonWithDisplayDetails,
                                             newItem: PersonWithDisplayDetails): Boolean {
-                return oldItem == newItem
+                return oldItem.firstNames == newItem.firstNames &&
+                        oldItem.lastName == newItem.lastName
             }
         }
     }

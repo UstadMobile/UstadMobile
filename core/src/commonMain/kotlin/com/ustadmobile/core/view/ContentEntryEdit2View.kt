@@ -22,7 +22,11 @@ interface ContentEntryEdit2View: UstadEditView<ContentEntryWithLanguage>{
 
     var entryMetaData: ImportedContentEntryMetaData?
 
-    suspend fun saveContainerOnExit(entryUid: Long,selectedBaseDir: String, db: UmAppDatabase, repo: UmAppDatabase): Container?
+    var compressionEnabled: Boolean
+
+    val videoDimensions: Pair<Int, Int>
+
+    var videoUri: String?
 
     companion object {
 

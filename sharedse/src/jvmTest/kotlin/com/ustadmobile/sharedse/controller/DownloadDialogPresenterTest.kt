@@ -1,7 +1,6 @@
 package com.ustadmobile.sharedse.controller
 
 
-import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.JobStatus
@@ -70,7 +69,7 @@ class DownloadDialogPresenterTest {
     @Throws(IOException::class)
     fun setUp() {
         storageDirs = listOf(UMStorageDir("/", name="Phone", isAvailable = true,
-                isUserSpecific = false, removableMedia = false,
+                removableMedia = false,
                 usableSpace = 10 * 1024 * 1024 * 1024L))
         systemImpl = mock {
             on { getString(any(), any())}.thenAnswer {
@@ -101,7 +100,7 @@ class DownloadDialogPresenterTest {
         val accountManager: UstadAccountManager by di.instance()
         db =  di.on(accountManager.activeAccount).direct.instance(tag = TAG_DB)
         repo = di.on(accountManager.activeAccount).direct.instance(tag = TAG_REPO)
-        contentEntrySet = insertTestContentEntries(db, System.currentTimeMillis())
+        contentEntrySet = insertTestContentEntries(repo, System.currentTimeMillis())
     }
 
     @Test
@@ -130,6 +129,7 @@ class DownloadDialogPresenterTest {
 
             presenter.onCreate(mapOf())
             presenter.onStart()
+            presenter.handleStorageOptionSelection(storageDirs[0])
 
             verifyBlocking(contentEntrySpy, timeout(5000 * 50000)) { getRecursiveDownloadTotals(contentEntrySet.rootEntry.contentEntryUid) }
 
@@ -165,7 +165,7 @@ class DownloadDialogPresenterTest {
             whenever(containerDownloadManager.getDownloadJob(any())).thenReturn(downloadJobLiveData)
 
             storageDirs = listOf(UMStorageDir("/", name="Phone", isAvailable = true,
-                    isUserSpecific = false, removableMedia = false,
+                    removableMedia = false,
                     usableSpace = 10L))
 
             presenter = DownloadDialogPresenter(context,
@@ -174,6 +174,7 @@ class DownloadDialogPresenterTest {
 
             presenter.onCreate(mapOf())
             presenter.onStart()
+            presenter.handleStorageOptionSelection(storageDirs[0])
 
             verify(mockedDialogView, timeout(5000).atLeastOnce()).setWarningTextVisible(true)
             verify(mockedDialogView, timeout(5000).atLeastOnce()).setWarningText(

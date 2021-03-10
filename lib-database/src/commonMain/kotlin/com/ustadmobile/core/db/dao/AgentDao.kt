@@ -2,11 +2,12 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.AgentEntity
 
 @Dao
-@UmRepository
+@Repository
 abstract class AgentDao :BaseDao<AgentEntity> {
 
     @Query("SELECT * FROM AgentEntity WHERE agentOpenId = :openId OR agentMbox = :mbox " +

@@ -5,7 +5,6 @@ import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao.Companion.STATUS_RUNNING
-import com.ustadmobile.core.db.dao.ScrapeRunDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -19,8 +18,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_CC_BY
 import com.ustadmobile.lib.db.entities.ContentEntry.Companion.LICENSE_TYPE_PUBLIC_DOMAIN
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import com.ustadmobile.lib.db.entities.ScrapeRun
-import com.ustadmobile.sharedse.util.LiveDataWorkQueue
+import com.ustadmobile.core.util.LiveDataWorkQueue
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.apache.commons.io.FilenameUtils

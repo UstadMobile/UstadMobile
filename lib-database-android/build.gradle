@@ -23,39 +23,28 @@ android {
     }
 
     sourceSets {
-        main.java.srcDirs += ["build/generated/source/door"]
+        main.java.srcDirs += ["build/generated/source/door",
+                              "../lib-door-runtime/src/commonMain/resources/daos"]
         androidTest.assets.srcDirs += files("$projectDir/schemas".toString())
     }
 
     defaultConfig {
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
+        minSdkVersion 21
+        targetSdkVersion 29
         versionCode 1
         versionName "1.0"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
 
-    }
-
-    //We only have an additional flaovr so that the test variant can target the higher api required to run Room testing
-    flavorDimensions "api"
-
-    productFlavors {
-        /**
-         * This dimension if the default that should be used by all dependencies
-         */
-        api18 {
-            dimension "api"
-        }
-
-        /**
-         * This dimension is only here because of Room's migration tester requirements
-         */
-        api21 {
-            dimension "api"
-            minSdkVersion 21
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments = [
+                        "room.schemaLocation": "$projectDir/schemas".toString(),
+                        "room.incremental"   : "true"]
+            }
         }
     }
+
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -79,6 +68,7 @@ android {
 kapt {
     arguments {
         arg("room.schemaLocation", "$projectDir/schemas")
+        arg("room.incremental", "true")
     }
 }
 
@@ -96,7 +86,7 @@ dependencies {
     implementation project(":lib-database-annotations")
     implementation project(':lib-util')
 
-    //Kotlin
+    //Kotlin 
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
     //Repository dependencies
@@ -108,7 +98,6 @@ dependencies {
 
     //ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
-    kapt "androidx.lifecycle:lifecycle-common-java8:$version_androidx_lifecycle"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
@@ -118,6 +107,9 @@ dependencies {
     kapt "androidx.room:room-compiler:$version_android_room"
     //compileOnly  "androidx.room:room-compiler:$version_android_room"
 
+
+    //Logging
+    implementation "com.github.aakira:napier-android:$version_napier"
 
 
 

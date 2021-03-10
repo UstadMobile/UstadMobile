@@ -6,11 +6,30 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.lib.db.entities.Clazz.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT1
+import com.ustadmobile.lib.db.entities.Clazz.Companion.ENTITY_PERSONS_WITH_PERMISSION_PT2
 import com.ustadmobile.lib.db.entities.Clazz.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = TABLE_ID)
+@SyncableEntity(tableId = TABLE_ID,
+    notifyOnUpdate = [
+        """
+        SELECT DISTINCT DeviceSession.dsDeviceId as deviceId, $TABLE_ID as tableId FROM 
+        ChangeLog
+        JOIN Clazz ON ChangeLog.chTableId = $TABLE_ID AND Clazz.clazzUid = ChangeLog.chEntityPk
+        JOIN Person ON Person.personUid IN ($ENTITY_PERSONS_WITH_PERMISSION_PT1  ${Role.PERMISSION_CLAZZ_SELECT } $ENTITY_PERSONS_WITH_PERMISSION_PT2)
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        """
+    ],
+    syncFindAllQuery = """
+        SELECT Clazz.* FROM
+        Clazz
+        JOIN Person ON Person.personUid IN  ($ENTITY_PERSONS_WITH_PERMISSION_PT1 ${Role.PERMISSION_CLAZZ_SELECT } $ENTITY_PERSONS_WITH_PERMISSION_PT2)
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+    """
+)
 @Serializable
 open class Clazz() {
 
@@ -37,10 +56,10 @@ open class Clazz() {
 
     var clazzStartTime: Long = 0
 
-    var clazzEndTime: Long = 0
+    var clazzEndTime: Long = Long.MAX_VALUE
 
     //Clazz features
-    var clazzFeatures: Long = (CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ASSIGNMENT)
+    var clazzFeatures: Long = (CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_CLAZZWORK)
 
     var clazzSchoolUid : Long = 0L
 
@@ -72,14 +91,14 @@ open class Clazz() {
 
     constructor(clazzName: String) : this() {
         this.clazzName = clazzName
-        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY  or CLAZZ_FEATURE_ASSIGNMENT
+        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY  or CLAZZ_FEATURE_CLAZZWORK
         this.isClazzActive = true
     }
 
     constructor(clazzName: String, clazzLocationUid: Long) : this() {
         this.clazzName = clazzName
         this.clazzLocationUid = clazzLocationUid
-        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or CLAZZ_FEATURE_ASSIGNMENT
+        this.clazzFeatures = CLAZZ_FEATURE_ATTENDANCE or CLAZZ_FEATURE_ACTIVITY or CLAZZ_FEATURE_CLAZZWORK
         this.isClazzActive = true
     }
 
@@ -88,9 +107,30 @@ open class Clazz() {
         const val TABLE_ID = 6
         const val CLAZZ_FEATURE_ATTENDANCE = 1L
         const val CLAZZ_FEATURE_ACTIVITY = 4L
-        const val CLAZZ_FEATURE_ASSIGNMENT = 8L
+        const val CLAZZ_FEATURE_CLAZZWORK = 8L
 
         const val CLAZZ_CODE_DEFAULT_LENGTH = 6
+
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT1 = """
+            SELECT DISTINCT Person_Perm.PersonUid FROM Person Person_Perm
+            LEFT JOIN PersonGroupMember ON Person_Perm.personUid = PersonGroupMember.groupMemberPersonUid
+            LEFT JOIN EntityRole ON EntityRole.erGroupUid = PersonGroupMember.groupMemberGroupUid
+            LEFT JOIN Role ON EntityRole.erRoleUid = Role.roleUid
+            WHERE 
+            CAST(Person.admin AS INTEGER) = 1
+            OR 
+            (
+            ((EntityRole.ertableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzUid) OR
+            (EntityRole.ertableId = ${School.TABLE_ID} AND EntityRole.erEntityUid = Clazz.clazzSchoolUid)
+            )
+            AND
+            (Role.rolePermissions &  
+        """
+
+        const val ENTITY_PERSONS_WITH_PERMISSION_PT2 = ") > 0)"
+
+
 
     }
 }

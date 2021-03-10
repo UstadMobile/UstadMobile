@@ -5,7 +5,7 @@
 
     <data>
         <import type="android.view.View"/>
-        <import type="com.ustadmobile.core.util.MessageIdOption"/>
+        <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
 
@@ -23,11 +23,11 @@
 
         <variable
             name="typeOptions"
-            type="java.util.List&lt;MessageIdOption&gt;"/>
+            type="java.util.List&lt;IdOption&gt;"/>
 
         <variable
             name="questionTypeSelectionListener"
-            type="OnDropDownListItemSelectedListener&lt;MessageIdOption&gt;" />
+            type="OnDropDownListItemSelectedListener&lt;IdOption&gt;" />
 
         <variable
             name="optionsVisibility"
@@ -37,6 +37,9 @@
             name="presenter"
             type="com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter" />
 
+        <variable
+            name="errorText"
+            type="String" />
 
         <variable
             name="activityEventHandler"
@@ -83,15 +86,20 @@
                 app:layout_constraintStart_toStartOf="parent"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
                 android:layout_width="match_parent"
+                android:focusable="false"
+                app:errorText="@{errorText}"
+                app:errorEnabled="@{errorText != null}"
+                app:errorTextColor="?colorError"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_16dp"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_clazz_work_question_and_options_edit_question_name_til"
                 android:hint="@string/question_type">
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:id="@+id/fragment_clazz_work_question_and_options_edit_type_ac"
                     android:layout_width="match_parent"
+                    android:focusable="false"
                     android:layout_height="wrap_content"
                     android:inputType="none"
                     app:layout_constraintEnd_toEndOf="parent"

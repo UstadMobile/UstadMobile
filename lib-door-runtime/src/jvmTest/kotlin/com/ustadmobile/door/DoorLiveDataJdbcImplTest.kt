@@ -46,28 +46,4 @@ class DoorLiveDataJdbcImplTest {
         verify(mockDb, timeout(5000)).removeChangeListener(argThat { tableNames.contains("magic") })
     }
 
-    @Test
-    fun givenEmptyLiveData_whenDbChanges_shouldCallFetchFnAgain() {
-        val mockDb = mock<DoorDatabase>() {
-            on {addChangeListener(any())}.thenAnswer {invocation ->
-                GlobalScope.launch {
-                    delay(100)
-                    val changeListenerRequest = invocation.arguments[0] as DoorDatabase.ChangeListenerRequest
-                    changeListenerRequest.onChange(listOf("magic"))
-                }
-            }
-        }
-
-        val countdownLatch = CountDownLatch(2)
-        val liveDataJdbc = DoorLiveDataJdbcImpl<Int>(mockDb, listOf("magic")) {
-            countdownLatch.countDown()
-            42
-        }
-
-        liveDataJdbc.observeForever(mock())
-        countdownLatch.await(5, TimeUnit.SECONDS)
-        Assert.assertEquals("Fetch function was called again after db callback to indicate table change",
-                0, countdownLatch.count)
-    }
-
 }

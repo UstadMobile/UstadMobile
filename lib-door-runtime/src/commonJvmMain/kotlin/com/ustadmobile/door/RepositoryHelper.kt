@@ -9,6 +9,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.ConcurrentHashMap
 import java.lang.ref.WeakReference
 import com.github.aakira.napier.Napier
+import kotlin.reflect.KClass
 
 /**
  * This implements common repository functions such as addMirror, removeMirror, setMirrorPriority
@@ -24,12 +25,26 @@ class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = do
 
     private val weakConnectivityListeners: MutableList<WeakReference<RepositoryConnectivityListener>> = CopyOnWriteArrayList()
 
+    private val tableChangeListeners: MutableList<TableChangeListener> = CopyOnWriteArrayList()
+
+    private val syncListeners: MutableMap<KClass<out Any>, MutableList<SyncListener<out Any>>> = ConcurrentHashMap()
+
     var connectivityStatus: Int
         get() = connectivityStatusAtomic.get()
         set(newValue) {
             connectivityStatusAtomic.set(newValue)
             weakConnectivityListeners.forEach {
-                it.get()?.onConnectivityStatusChanged(newValue)
+                try {
+                    /**
+                     * There could be repo-backed livedata that is waiting to try and re-run.
+                     * This might cause exceptions if the server itself is off even if connectivity
+                     * is back, or if the connectivity is not great. Hence this is wrapped in
+                     * try-catch
+                     */
+                    it?.get()?.onConnectivityStatusChanged(newValue)
+                }catch(e: Exception) {
+                    println("Exception with weakConnectivityListener $e")
+                }
             }
         }
 
@@ -63,8 +78,33 @@ class RepositoryHelper(private val coroutineDispatcher: CoroutineDispatcher = do
     }
 
     fun removeWeakConnectivityListener(listener: RepositoryConnectivityListener) {
-        val list = mutableListOf<Int>()
         weakConnectivityListeners.removeAll { it.get() == listener }
     }
+
+    fun addTableChangeListener(listener: TableChangeListener) {
+        tableChangeListeners += listener
+    }
+
+    fun removeTableChangeListener(listener: TableChangeListener) {
+        tableChangeListeners -= listener
+    }
+
+    fun handleTableChanged(tableName: String) {
+        tableChangeListeners.forEach {
+            //TODO: Call the update function to mark this table as having been changed.
+            it.onTableChanged(tableName)
+        }
+    }
+
+    fun <T : Any> addSyncListener(entityClass: KClass<T>, listener: SyncListener<T>)  {
+        syncListeners.getOrPut(entityClass) { mutableListOf<SyncListener<out Any>>() }.add(listener)
+    }
+
+    fun <T: Any> handleSyncEntitiesReceived(entityClass: KClass<T>, entities: List<T>)  {
+        (syncListeners.get(entityClass) as? List<SyncListener<T>>)?.forEach {
+            it.onEntitiesReceived(entities)
+        }
+    }
+
 
 }

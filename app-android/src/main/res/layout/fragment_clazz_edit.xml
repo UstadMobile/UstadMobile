@@ -21,6 +21,14 @@
             type="boolean" />
 
         <variable
+            name="clazzEndDateError"
+            type="String" />
+
+        <variable
+            name="clazzStartDateError"
+            type="String" />
+
+        <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.ClazzEdit2ActivityEventHandler" />
 
@@ -47,6 +55,9 @@
                 android:id="@+id/activity_clazz_edit_start_date_edittext"
                 android:layout_width="@dimen/dimen_0dp"
                 android:layout_height="wrap_content"
+                android:enabled="@{fieldsEnabled}"
+                app:errorText="@{clazzStartDateError}"
+                app:errorEnabled="@{clazzStartDateError != null}"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_description"
@@ -70,9 +81,12 @@
                 android:id="@+id/activity_clazz_edit_end_date_edittext"
                 android:layout_width="@dimen/dimen_0dp"
                 android:layout_height="wrap_content"
+                android:enabled="@{fieldsEnabled}"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
                 android:layout_marginVertical="@dimen/dimen_8dp"
+                app:errorText="@{clazzEndDateError}"
+                app:errorEnabled="@{clazzEndDateError != null}"
                 app:layout_constraintTop_toBottomOf="@+id/activity_clazz_edit_description"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@+id/activity_clazz_edit_start_date_edittext"

@@ -2,13 +2,15 @@ package com.ustadmobile.core.db.dao
 
 import androidx.room.Dao
 import androidx.room.Query
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionRow
+import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
+import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponseRow
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
-@UmRepository
+@Repository
 @Dao
 abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinDao<ClazzWorkQuestion> {
 
@@ -19,8 +21,9 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
     abstract suspend fun findByUidAsync(uid: Long) : ClazzWorkQuestion?
 
 
-    @Query("UPDATE ClazzWorkQuestion SET clazzWorkQuestionActive = :active " +
-            "WHERE clazzWorkQuestionUid = :clazzWorkQuestionUid ")
+    @Query("""UPDATE ClazzWorkQuestion SET clazzWorkQuestionActive = :active,
+            clazzWorkQuestionLCB = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            WHERE clazzWorkQuestionUid = :clazzWorkQuestionUid """)
     abstract suspend fun updateActiveByClazzWorkQuestionUid(clazzWorkQuestionUid: Long, active : Boolean)
 
     @Query("""
@@ -33,6 +36,25 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
     """)
     abstract suspend fun findAllActiveQuestionsWithOptionsInClazzWorkAsList(clazzWorkUid: Long)
                     : List<ClazzWorkQuestionAndOptionRow>
+
+    @Query("""
+        SELECT ClazzWorkQuestion.* , ClazzWorkQuestionOption.*, ClazzWorkQuestionResponse.* 
+        FROM ClazzWorkQuestion 
+        LEFT JOIN ClazzWorkQuestionOption ON 
+            ClazzWorkQuestionOption.clazzWorkQuestionOptionQuestionUid = ClazzWorkQuestion.clazzWorkQuestionUid 
+            AND CAST(ClazzWorkQuestionOption.clazzWorkQuestionOptionActive AS INTEGER) = 1
+        LEFT JOIN ClazzWorkQuestionResponse ON 
+            ClazzWorkQuestionResponse.clazzWorkQuestionResponseQuestionUid = ClazzWorkQuestion.clazzWorkQuestionUid
+            AND CAST(clazzWorkQuestionResponseInactive AS INTEGER) = 0
+            AND clazzWorkQuestionResponsePersonUid = :personUid
+        WHERE 
+        ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid = :clazzWorkUid 
+        AND CAST(ClazzWorkQuestion.clazzWorkQuestionActive AS INTEGER) = 1	
+    """)
+    abstract suspend fun findAllQuestionsAndOptionsWithResponse(clazzWorkUid: Long,
+                                                                personUid: Long)
+            :List<ClazzWorkQuestionAndOptionWithResponseRow>
+
 
     override suspend fun deactivateByUids(uidList: List<Long>) {
         uidList.forEach {

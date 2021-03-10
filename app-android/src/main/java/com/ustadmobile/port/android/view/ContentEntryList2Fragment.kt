@@ -2,9 +2,9 @@ package com.ustadmobile.port.android.view
 
 import android.Manifest
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import androidx.core.os.bundleOf
+import androidx.navigation.fragment.findNavController
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import com.toughra.ustadmobile.R
@@ -15,17 +15,19 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
+import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_TITLE
-import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.port.android.view.ext.runAfterRequestingPermissionIfNeeded
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -43,14 +45,19 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     private var localAvailabilityCallback: ContentEntryLocalAvailabilityPagedListCallback? = null
 
     override fun showDownloadDialog(args: Map<String, String>) {
-        runAfterRequestingPermissionIfNeeded(Manifest.permission.WRITE_EXTERNAL_STORAGE) {
-            UstadMobileSystemImpl.instance.go(DownloadDialogView.VIEW_NAME, args, requireContext())
-        }
+        val systemImpl : UstadMobileSystemImpl = di.direct.instance()
+        systemImpl.go(DownloadDialogView.VIEW_NAME, args, requireContext())
     }
 
     override var title: String? = null
         set(value) {
             ustadFragmentTitle = value
+            field = value
+        }
+
+    override var editOptionVisible: Boolean = false
+        set(value) {
+            activity?.invalidateOptionsMenu()
             field = value
         }
 
@@ -65,7 +72,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
 
         mDataRecyclerViewAdapter = ContentEntryListRecyclerAdapter(mPresenter,
                 arguments?.get(UstadView.ARG_LISTMODE).toString(), viewLifecycleOwner, di)
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
             requireContext().getString(R.string.add_new_content))
         return view
     }
@@ -74,6 +81,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
         val accountManager: UstadAccountManager by di.instance()
         val localAvailabilityManager: LocalAvailabilityManager by di.on(accountManager.activeAccount).instance()
 
+        val navController = findNavController()
+
         localAvailabilityCallback = ContentEntryLocalAvailabilityPagedListCallback(localAvailabilityManager,
                 null) {availabilityMap ->
             GlobalScope.launch(Dispatchers.Main) {
@@ -81,8 +90,24 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             }
         }
 
+        setHasOptionsMenu(true)
+
+        navController.currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+            ContentEntry::class.java) {
+            val selectedParentChildJoinUids = navController.currentBackStackEntry?.savedStateHandle
+                    ?.get<String>(KEY_SELECTED_ITEMS)?.split(",")?.map { it.trim().toLong() } ?: return@observeResult
+            mPresenter?.handleMoveContentEntries(selectedParentChildJoinUids, it.first().contentEntryUid )
+        }
+
         super.onViewCreated(view, savedInstanceState)
     }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_entrylist_options, menu)
+        menu.findItem(R.id.edit).isVisible = editOptionVisible
+        menu.findItem(R.id.hidden_items).isVisible = editOptionVisible
+    }
+
 
     private var mCurrentPagedList: PagedList<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>? = null
 
@@ -94,6 +119,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
             mCurrentPagedList?.removeWeakCallback(localAvailabilityCallbackVal)
         }
 
+
         if(localAvailabilityCallbackVal != null && t != null) {
             localAvailabilityCallbackVal.pagedList = t
             t.addWeakCallback(listOf(), localAvailabilityCallbackVal)
@@ -103,7 +129,7 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
     override fun onResume() {
         super.onResume()
         mActivityWithFab?.activityFloatingActionButton?.text =
-                getString(R.string.content_editor_create_new_title)
+                getString(R.string.content)
     }
 
     override fun showContentEntryAddOptions(parentEntryUid: Long) {
@@ -119,8 +145,33 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
      * when the user clicks to create a new item
      */
     override fun onClick(view: View?) {
-        if(view?.id == R.id.item_createnew_layout)
+        if (view?.id == R.id.item_createnew_layout)
             mPresenter?.handleClickCreateNewFab()
+    }
+
+    override fun showMoveEntriesFolderPicker(selectedContentEntryParentChildJoinUids: String) {
+        findNavController().currentBackStackEntry?.savedStateHandle?.set(
+                KEY_SELECTED_ITEMS, selectedContentEntryParentChildJoinUids)
+        navigateToPickEntityFromList(ContentEntry::class.java,
+                R.id.content_entry_list_select_folder,
+                bundleOf(UstadView.ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString(),
+                        ContentEntryList2View.ARG_CONTENT_FILTER to ContentEntryList2View.ARG_LIBRARIES_CONTENT,
+                        ContentEntryList2View.ARG_FOLDER_FILTER to true.toString()))
+    }
+
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.edit -> {
+                mPresenter?.handleClickEditFolder()
+                return true
+            }
+            R.id.hidden_items -> {
+                mPresenter?.handleClickShowHiddenItems()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
     }
 
     override fun onDestroyView() {
@@ -160,6 +211,12 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                 ContentEntry.TYPE_AUDIO to MessageID.audio
         )
 
+        /**
+         * Key used when saving selected items to the savedStateHandle
+         */
+        const val KEY_SELECTED_ITEMS = "selected_items"
+
+
         val DIFF_CALLBACK: DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> = object
             : DiffUtil.ItemCallback<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>() {
             override fun areItemsTheSame(oldItem: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer,
@@ -173,7 +230,8 @@ class ContentEntryList2Fragment : UstadListViewFragment<ContentEntry, ContentEnt
                         oldItem.description == newItem.description &&
                         oldItem.contentTypeFlag == newItem.contentTypeFlag &&
                         oldItem.mostRecentContainer?.fileSize == newItem.mostRecentContainer?.fileSize &&
-                        oldItem.thumbnailUrl == newItem.thumbnailUrl
+                        oldItem.thumbnailUrl == newItem.thumbnailUrl &&
+                        oldItem.ceInactive == newItem.ceInactive
             }
         }
     }

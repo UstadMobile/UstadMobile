@@ -28,6 +28,10 @@ abstract class ContainerDownloadManager {
 
     abstract suspend fun handleDownloadJobItemUpdated(downloadJobItem: DownloadJobItem, autoCommit: Boolean = true)
 
+    abstract suspend fun deleteDownloadJobItem(downloadJobItemUid: Int, onprogress: (progress: Int) -> Unit): Boolean
+
+    abstract suspend fun handleContainerLocalImport(container: Container)
+
     /**
      * This is only for handling changes that have been made externally (e.g. change to save directory)
      */
@@ -55,5 +59,7 @@ abstract class ContainerDownloadManager {
             else -> childStatuses.minBy { it.djiStatus }?.djiStatus ?: 0
         }
     }
+
+    abstract suspend fun getDownloadJobItemHolderRef(jobItemUid: Int): Any?
 
 }

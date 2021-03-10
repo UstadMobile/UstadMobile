@@ -14,7 +14,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.LanguageListView
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
@@ -55,7 +55,7 @@ class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = LanguageListRecyclerAdapter(mPresenter)
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
             requireContext().getString(R.string.add_a_new_language))
         return view
     }

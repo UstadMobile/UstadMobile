@@ -60,6 +60,7 @@ class OptionsBottomSheetFragment(private val optionsList: List<BottomSheetOption
 
         mRecyclerView?.adapter = null
         mRecyclerView = null
+        onOptionSelected = null
     }
 
     companion object {

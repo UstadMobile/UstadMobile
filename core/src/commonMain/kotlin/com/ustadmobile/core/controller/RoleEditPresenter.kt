@@ -4,6 +4,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.ext.putEntityAsJson
+import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.RoleEditView
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView
@@ -45,7 +46,7 @@ class RoleEditPresenter(context: Any,
         val entityJsonStr = bundle[ARG_ENTITY_JSON]
         var editEntity: Role? = null
         if(entityJsonStr != null) {
-            editEntity = Json.parse(Role.serializer(), entityJsonStr)
+            editEntity = safeParse(di, Role.serializer(), entityJsonStr)
         }else {
             editEntity = Role()
         }
@@ -109,8 +110,8 @@ class RoleEditPresenter(context: Any,
             BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_SELECT, MessageID.permission_person_picture_select),
             BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_INSERT, MessageID.permission_person_picture_insert),
             BitmaskFlag(Role.PERMISSION_PERSON_PICTURE_UPDATE, MessageID.permission_person_picture_update),
-            BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_VIEW , MessageID.permission_clazz_assignment_view),
-            BitmaskFlag(Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE , MessageID.permission_clazz_asignment_edit),
+            BitmaskFlag(Role.PERMISSION_CLAZZWORK_SELECT , MessageID.permission_clazz_assignment_view),
+            BitmaskFlag(Role.PERMISSION_CLAZZWORK_UPDATE , MessageID.permission_clazz_asignment_edit),
             BitmaskFlag(Role.PERMISSION_PERSON_DELEGATE, MessageID.permission_person_delegate),
             BitmaskFlag(Role.PERMISSION_ROLE_SELECT, MessageID.permission_role_select),
             BitmaskFlag(Role.PERMISSION_ROLE_INSERT, MessageID.permission_role_insert),

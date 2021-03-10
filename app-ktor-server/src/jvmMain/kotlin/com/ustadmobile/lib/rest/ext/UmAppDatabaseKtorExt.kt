@@ -1,33 +1,50 @@
 package com.ustadmobile.lib.rest.ext
 
+import com.google.gson.GsonBuilder
+import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.PersonAuthDao
-import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.lib.db.entities.PersonAuth
-import com.ustadmobile.lib.db.entities.WorkSpace
+import com.ustadmobile.core.util.ext.insertPersonAndGroup
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.encryptPassword
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.lang3.RandomStringUtils
+import java.io.BufferedReader
 import java.io.File
+import java.io.InputStreamReader
+import java.util.ArrayList
 
-fun UmAppDatabase.ktorInit(passwordFilePath: String) {
-    val adminuser = personDao.findByUsername("admin")
-
-
-    if(workSpaceDao.getWorkSpace() == null) {
-        workSpaceDao.insert(WorkSpace().apply {
-            uid = 1L
-            name = "UstadmobileWorkspace"
-            guestLogin = true
-            registrationAllowed = true
+fun UmAppDatabase.ktorInitDbWithRepo(repo: UmAppDatabase, passwordFilePath: String) {
+    if(siteDao.getSite() == null) {
+        repo.siteDao.insert(Site().apply {
+            siteUid = 1L
+            siteName = "My Site"
+            guestLogin = false
+            registrationAllowed = false
         })
     }
 
+    if(languageDao.totalLanguageCount() < 1) {
+        //insert all languages
+        val gson = GsonBuilder().disableHtmlEscaping().create()
+        val langListStr = BufferedReader(InputStreamReader(
+                this::class.java.getResourceAsStream("/languagedata/iso_639_3.json"))).use {
+                    it.readText()
+        }
+
+        val langList = gson.fromJson<ArrayList<Language>>(langListStr,
+                object : TypeToken<List<Language>>() {}.type)
+
+        repo.languageDao.insertList(langList)
+    }
+
+
+    val adminuser = personDao.findByUsername("admin")
 
     if (adminuser == null) {
         val adminPerson = Person("admin", "Admin", "User")
         adminPerson.admin = true
-        adminPerson.personUid = personDao.insert(adminPerson)
+        adminPerson.personUid = runBlocking { repo.insertPersonAndGroup(adminPerson).personUid }
 
         //Remove lower case l, upper case I, and the number 1
         val adminPass = RandomStringUtils.random(10, "abcdefghijkmnpqrstuvxwyzABCDEFGHJKLMNPQRSTUVWXYZ23456789")
@@ -45,5 +62,7 @@ fun UmAppDatabase.ktorInit(passwordFilePath: String) {
         println("Saved admin password to ${adminPassFile.absolutePath}")
     }
 
-    runBlocking { roleDao.insertDefaultRolesIfRequired() }
+    runBlocking {
+        repo.roleDao.insertDefaultRolesIfRequired()
+    }
 }

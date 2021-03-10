@@ -4,25 +4,30 @@ import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.navigation.fragment.findNavController
-import androidx.test.espresso.Espresso.onIdle
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.*
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import androidx.test.core.app.ApplicationProvider
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import com.ustadmobile.port.android.screen.@BaseFileName@Screen
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.networkmanager.defaultGson
 @EditEntity_Import@
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.test.port.android.util.*
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
-import androidx.test.espresso.IdlingRegistry
 import com.ustadmobile.core.view.UstadView
 
 
-class @BaseFileName@FragmentTest {
+@AdbScreenRecord("@BaseFileName@ screen Test")
+class @BaseFileName@FragmentTest : TestCase(){
 
     @JvmField
     @Rule
@@ -32,6 +37,20 @@ class @BaseFileName@FragmentTest {
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
 
+    @JvmField
+    @Rule
+    val screenRecordRule = AdbScreenRecordRule()
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
+
+
+    @AdbScreenRecord("given @Entity@ not present when filled then should save to database")
     @Test
     fun givenNo@Entity@PresentYet_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
@@ -46,19 +65,46 @@ class @BaseFileName@FragmentTest {
             //e.g. @Entity_VariableName@Name = "New @Entity@"
         }
 
-        fillFields(fragmentScenario, formVals, currentEntity)
+        init{
 
-        fragmentScenario.clickOptionMenu(R.id.menu_done)
+        }.run{
 
-        val @Entity_VariableName@List = dbRule.db.clazzDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
-            it.isNotEmpty()
+            @BaseFileName@Screen{
+
+                @Entity_VariableName@.@Entity_VariableName@Name?.takeIf {it != @Entity_VariableName@OnForm?.@Entity_VariableName@Name }?.also {
+                    @Entity@TitleInput{
+                        edit{
+                            clearText()
+                            typeText(it)
+                        }
+                    }
+                }
+
+                //TODO: if required, use the savedstatehandle to add link entities
+                fragmentScenario.onFragment { fragment ->
+                    fragment.takeIf {@Entity_VariableName@.relatedEntity != @Entity_VariableName@OnForm?.relatedEntity }
+                            ?.findNavController()?.currentBackStackEntry?.savedStateHandle
+                            ?.set("RelatedEntityName", defaultGson().toJson(listOf(@Entity_VariableName@.relatedEntity)))
+                }
+
+                fragmentScenario.clickOptionMenu(R.id.menu_done)
+
+
+                val @Entity_VariableName@List = dbRule.db.clazzDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
+                    it.isNotEmpty()
+                }
+
+                Assert.assertEquals("@Entity@ data set", "New @Entity@",
+                        @Entity_VariableName@List.first() .@Entity_VariableName@Name)
+
+            }
+
+
         }
-
-        Assert.assertEquals("@Entity@ data set", "New @Entity@",
-                @Entity_VariableName@List.first() .@Entity_VariableName@Name)
     }
 
 
+    @AdbScreenRecord("given @Entity@ exists when updated then should be updated on database")
     @Test
     fun given@Entity@Exists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
         val existing@Entity@ = @EditEntity@().apply {
@@ -71,12 +117,8 @@ class @BaseFileName@FragmentTest {
             @BaseFileName@Fragment().also {
                 it.installNavController(systemImplNavRule.navController)
             }
-        }
-
-        val editIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it })
-        IdlingRegistry.getInstance().register(editIdlingResource)
-
-        onIdle()
+        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         //Freeze and serialize the value as it was first shown to the user
         val entityLoadedByFragment = fragmentScenario.letOnFragment { it.entity }
@@ -85,45 +127,44 @@ class @BaseFileName@FragmentTest {
             @Entity_VariableName@Name = "Updated @Entity@"
         }
 
+        init{
 
-        fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment)
 
-        fragmentScenario.clickOptionMenu(R.id.menu_done)
+        }.run{
 
-        Assert.assertEquals("Entity in database was loaded for user",
-                "New @Entity@",
-                defaultGson().fromJson(entityLoadedJson, @EditEntity@::class.java).clazzName)
+            @BaseFileName@Screen {
 
-        val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existing@Entity@.@Entity_VariableName@Uid)
-                .waitUntilWithFragmentScenario(fragmentScenario){ it?.clazzName == "Updated @Entity@"}
-        Assert.assertEquals("@Entity@ name is updated", "Updated @Entity@",
-                updatedEntityFromDb?.@Entity_VariableName@Name)
-    }
+                @Entity_VariableName@.@Entity_VariableName@Name?.takeIf {it != @Entity_VariableName@OnForm?.@Entity_VariableName@Name }?.also {
+                    @Entity@TitleInput{
+                        edit{
+                            clearText()
+                            typeText(it)
+                        }
+                    }
+                }
 
-    companion object {
+                //TODO: if required, use the savedstatehandle to add link entities
 
-        fun fillFields(fragmentScenario: FragmentScenario<@BaseFileName@Fragment>,
-                       @Entity_VariableName@: @EditEntity@,
-                       @Entity_VariableName@OnForm: @EditEntity@?,
-                       setFieldsRequiringNavigation: Boolean = true) {
-            //TODO: set these values on the form using Espresso.
+                fragmentScenario.onFragment { fragment ->
+                    fragment.takeIf {@Entity_VariableName@.relatedEntity != @Entity_VariableName@OnForm?.relatedEntity }
+                            ?.findNavController()?.currentBackStackEntry?.savedStateHandle
+                            ?.set("RelatedEntityName", defaultGson().toJson(listOf(@Entity_VariableName@.relatedEntity)))
+                }
 
-            @Entity_VariableName@.@Entity_VariableName@Name?.takeIf {it != @Entity_VariableName@OnForm?.@Entity_VariableName@Name }?.also {
-                onView(withId(R.id.id_of_textfield)).perform(clearText(), typeText(it))
-            }
+                fragmentScenario.clickOptionMenu(R.id.menu_done)
 
-            if(!setFieldsRequiringNavigation) {
-                return
-            }
+                Assert.assertEquals("Entity in database was loaded for user",
+                        "New @Entity@",
+                        defaultGson().fromJson(entityLoadedJson, @EditEntity@::class.java).clazzName)
 
-            //TODO: if required, use the savedstatehandle to add link entities
+                val updatedEntityFromDb = dbRule.db.clazzDao.findByUidLive(existing@Entity@.@Entity_VariableName@Uid)
+                        .waitUntilWithFragmentScenario(fragmentScenario) { it?.clazzName == "Updated @Entity@" }
+                Assert.assertEquals("@Entity@ name is updated", "Updated @Entity@",
+                        updatedEntityFromDb?.@Entity_VariableName@Name)
 
-            fragmentScenario.onFragment { fragment ->
-                fragment.takeIf {@Entity_VariableName@.relatedEntity != @Entity_VariableName@OnForm?.relatedEntity }
-                        ?.findNavController()?.currentBackStackEntry?.savedStateHandle
-                        ?.set("RelatedEntityName", defaultGson().toJson(listOf(@Entity_VariableName@.relatedEntity)))
             }
 
         }
+
     }
 }

@@ -1,43 +1,38 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
 import androidx.core.os.bundleOf
-import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.navigation.fragment.findNavController
 import androidx.test.core.app.ApplicationProvider
-import androidx.test.espresso.Espresso
-import androidx.test.espresso.Espresso.*
-import androidx.test.espresso.action.ViewActions.*
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
+import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
+import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
+import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.networkmanager.defaultGson
-
+import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.screen.ReportEditScreen
+import com.ustadmobile.test.core.impl.CrudIdlingResource
+import com.ustadmobile.test.core.impl.DataBindingIdlingResource
 import com.ustadmobile.test.port.android.util.*
+import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
-import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.matcher.RootMatchers
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.withText
-import com.soywiz.klock.DateTime
-import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
-import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.controller.ReportEditPresenter
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.*
+
 
 @AdbScreenRecord("Report edit screen tests")
-class ReportEditFragmentTest {
+class ReportEditFragmentTest: TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -46,6 +41,15 @@ class ReportEditFragmentTest {
     @JvmField
     @Rule
     var systemImplNavRule = SystemImplTestNavHostRule()
+
+    @JvmField
+    @Rule
+    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
+
+    @JvmField
+    @Rule
+    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
+
 
 
     @AdbScreenRecord("with no report present, fill all the fields and navigate to detail")
@@ -57,62 +61,45 @@ class ReportEditFragmentTest {
             }
         }
 
-        val verb = VerbEntity().apply {
-            urlId = "progressed"
-            verbUid = dbRule.db.verbDao.insert(this)
-        }
-
-        val xlangEntry = XLangMapEntry().apply {
-            verbLangMapUid = verb.verbUid
-            valueLangMap = "Progress"
-            statementLangMapUid = dbRule.db.xLangMapEntryDao.insert(this)
-        }
-
-        val verbDisplay = VerbDisplay().apply {
-            verbUid = verb.verbUid
-            urlId = verb.urlId
-            display = xlangEntry.valueLangMap
-        }
-
-        val person = Person().apply {
-            firstNames = "Ustad"
-            lastName = "Mobile"
-            personUid = dbRule.db.personDao.insert(this)
-        }
-
-        val contentEntry = ContentEntry().apply {
-            title = "Khan Academy"
-            description = "content here"
-            contentEntryUid = dbRule.db.contentEntryDao.insert(this)
-        }
-
-
-        val currentEntity = fragmentScenario.letOnFragment { it.entity }
-        val formVals = ReportWithFilters().apply {
+        val currentEntity: ReportWithSeriesWithFilters? =
+                fragmentScenario.waitUntilLetOnFragment { it.entity }
+        val formVals = ReportWithSeriesWithFilters().apply {
             reportTitle = "New Report"
-            chartType = Report.LINE_GRAPH
-            yAxis = Report.AVG_DURATION
             xAxis = Report.WEEK
-            subGroup = Report.GENDER
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
+            reportSeriesWithFiltersList = listOf(ReportSeries().apply {
+                reportSeriesName = "Total Duration"
+                reportSeriesVisualType = ReportSeries.BAR_CHART
+                reportSeriesYAxis = ReportSeries.TOTAL_DURATION
+            })
         }
 
-        fillFields(fragmentScenario, formVals, currentEntity, true,
-                person, verbDisplay, contentEntry,
-                impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext())
+        init{
 
-        fragmentScenario.clickOptionMenu(R.id.menu_done)
+        }.run{
 
-        val reportList = dbRule.db.reportDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
-            it.isNotEmpty()
+            ReportEditScreen{
+
+                fillFields(fragmentScenario, formVals, currentEntity, true,
+                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
+                        testContext = this@run)
+
+                fragmentScenario.clickOptionMenu(R.id.menu_done)
+
+                val reportList = dbRule.repo.reportDao
+                        .findAllActiveReportLive(false)
+                        .waitUntilWithFragmentScenario(fragmentScenario) {
+                    it.isNotEmpty()
+                }
+
+                Assert.assertEquals("Should not be in db", 0, reportList?.size)
+
+                Assert.assertEquals("After finishing edit report, it navigates to detail view",
+                        R.id.report_detail_dest, systemImplNavRule.navController.currentDestination?.id)
+            }
+
         }
-
-        Assert.assertEquals("Should not be in db", 0, reportList?.size)
-
-        Assert.assertEquals("After finishing edit report, it navigates to detail view",
-                R.id.report_detail_dest, systemImplNavRule.navController.currentDestination?.id)
-        val currentArgs = systemImplNavRule.navController.currentDestination?.arguments
 
     }
 
@@ -120,13 +107,33 @@ class ReportEditFragmentTest {
     @AdbScreenRecord("with an existing report, when updated, on click done, save on database")
     @Test
     fun givenReportExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
-        val existingReport = ReportWithFilters().apply {
+        val existingReport = ReportWithSeriesWithFilters().apply {
             reportTitle = "New Report"
-            chartType = Report.LINE_GRAPH
-            yAxis = Report.AVG_DURATION
             xAxis = Report.WEEK
-            subGroup = Report.GENDER
-            reportUid = dbRule.db.reportDao.insert(this)
+            fromDate = DateTime(2019, 4, 10).unixMillisLong
+            toDate = DateTime(2019, 6, 11).unixMillisLong
+            val reportSeriesList = listOf(ReportSeries().apply {
+                reportSeriesUid = 1
+                reportSeriesName = "Series 2"
+                reportSeriesYAxis = ReportSeries.TOTAL_DURATION
+                reportSeriesSubGroup = Report.GENDER
+                reportSeriesVisualType = ReportSeries.LINE_GRAPH
+                reportSeriesFilters = mutableListOf(ReportFilter().apply {
+                    reportFilterUid = 1
+                    reportFilterSeriesUid = 1
+                    reportFilterField = ReportFilter.FIELD_PERSON_GENDER
+                    reportFilterCondition = ReportFilter.CONDITION_IS
+                    reportFilterDropDownValue = Person.GENDER_MALE
+                }, ReportFilter().apply {
+                    reportFilterUid = 2
+                    reportFilterSeriesUid = 1
+                    reportFilterField = ReportFilter.FIELD_PERSON_AGE
+                    reportFilterCondition = ReportFilter.CONDITION_GREATER_THAN
+                    reportFilterValue = 13.toString()
+                })
+            })
+            reportSeries = Gson().toJson(reportSeriesList)
+            reportUid = dbRule.repo.reportDao.insert(this)
         }
 
         val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
@@ -136,122 +143,70 @@ class ReportEditFragmentTest {
             }
         }
 
-        val editIdlingResource = UstadSingleEntityFragmentIdlingResource(fragmentScenario.letOnFragment { it })
-        IdlingRegistry.getInstance().register(editIdlingResource)
-
-        onIdle()
 
         //Freeze and serialize the value as it was first shown to the user
-        val entityLoadedByFragment = fragmentScenario.letOnFragment { it.entity }
+        var entityLoadedByFragment: ReportWithSeriesWithFilters? = null
+        while(entityLoadedByFragment == null){
+            entityLoadedByFragment = fragmentScenario.nullableLetOnFragment { it.entity}
+        }
         val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
-        val newClazzValues = defaultGson().fromJson(entityLoadedJson, ReportWithFilters::class.java).apply {
+        val updatedReport = defaultGson().fromJson(entityLoadedJson, ReportWithSeriesWithFilters::class.java).apply {
             reportTitle = "Updated Report"
-            chartType = Report.BAR_CHART
-            yAxis = Report.COUNT_ACTIVITIES
             xAxis = Report.MONTH
-            subGroup = Report.GENDER
+            val reportSeriesList = listOf(ReportSeries().apply {
+                reportSeriesUid = 1
+                reportSeriesName = "Series 2"
+                reportSeriesYAxis = ReportSeries.TOTAL_DURATION
+                reportSeriesSubGroup = Report.GENDER
+                reportSeriesVisualType = ReportSeries.BAR_CHART
+                reportSeriesFilters = mutableListOf(ReportFilter().apply {
+                    reportFilterUid = 1
+                    reportFilterSeriesUid = 1
+                    reportFilterField = ReportFilter.FIELD_PERSON_GENDER
+                    reportFilterCondition = ReportFilter.CONDITION_IS
+                    reportFilterDropDownValue = Person.GENDER_MALE
+                })
+            })
+            reportSeriesWithFiltersList = reportSeriesList
+            reportSeries = Gson().toJson(reportSeriesList)
         }
 
-        val person = Person().apply {
-            firstNames = "Ustad"
-            lastName = "Mobile"
-            personUid = dbRule.db.personDao.insert(this)
+        init{
+
+        }.run{
+
+            ReportEditScreen{
+
+                fillFields(fragmentScenario, updatedReport, entityLoadedByFragment, true,
+                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
+                        testContext = this@run)
+
+                fragmentScenario.clickOptionMenu(R.id.menu_done)
+
+                Assert.assertEquals("Entity in database was loaded for user",
+                        "New Report",
+                        defaultGson().fromJson(entityLoadedJson, ReportWithSeriesWithFilters::class.java).reportTitle)
+
+
+                val updatedEntityFromDb = dbRule.db.reportDao.findByUidLive(existingReport.reportUid)
+                        .waitUntilWithFragmentScenario(fragmentScenario) { it?.reportTitle == "Updated Report" }
+
+                val listSeriesType = object : TypeToken<ArrayList<ReportSeries?>?>() {}.type
+                val seriesList = defaultGson().fromJson<List<ReportSeries>>(updatedEntityFromDb!!.reportSeries, listSeriesType)
+
+                Assert.assertEquals("Report name is updated", "Updated Report",
+                        updatedEntityFromDb.reportTitle)
+
+                Assert.assertEquals("Series changed to bar chart", ReportSeries.BAR_CHART,
+                        seriesList[0].reportSeriesVisualType)
+
+                Assert.assertEquals("Filter size reduced to 1", 1,
+                        seriesList[0].reportSeriesFilters!!.size)
+            }
+
         }
 
-        fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment, person = person,
-                impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext())
 
-        fragmentScenario.clickOptionMenu(R.id.menu_done)
-
-        Assert.assertEquals("Entity in database was loaded for user",
-                "New Report",
-                defaultGson().fromJson(entityLoadedJson, ReportWithFilters::class.java).reportTitle)
-
-        val updatedEntityFromDb = dbRule.db.reportDao.findByUidLive(existingReport.reportUid)
-                .waitUntilWithFragmentScenario(fragmentScenario) { it?.reportTitle == "Updated Report" }
-        val reportFilerListFromDb = dbRule.db.reportFilterDao.findAllLive().waitUntilWithFragmentScenario(fragmentScenario) {
-            it.isNotEmpty()
-        }
-
-        Assert.assertEquals("Report name is updated", "Updated Report",
-                updatedEntityFromDb?.reportTitle)
-        Assert.assertEquals("chart type updated", Report.BAR_CHART,
-                updatedEntityFromDb?.chartType)
-        Assert.assertEquals("y axis updated", Report.COUNT_ACTIVITIES,
-                updatedEntityFromDb?.yAxis)
-        Assert.assertEquals("y axis updated", Report.COUNT_ACTIVITIES,
-                updatedEntityFromDb?.yAxis)
-        Assert.assertEquals("x axis updated", Report.MONTH,
-                updatedEntityFromDb?.xAxis)
-        Assert.assertEquals("subgroup updated", Report.GENDER,
-                updatedEntityFromDb?.subGroup)
-        Assert.assertEquals("one filter added", 1,
-                reportFilerListFromDb!!.size)
     }
 
-    companion object {
-
-        fun fillFields(fragmentScenario: FragmentScenario<ReportEditFragment>? = null,
-                       report: ReportWithFilters,
-                       reportOnForm: ReportWithFilters? = ReportWithFilters(),
-                       setFieldsRequiringNavigation: Boolean = true, person: Person? = null,
-                       verbDisplay: VerbDisplay? = null, entry: ContentEntry? = null, impl: UstadMobileSystemImpl, context: Context) {
-
-            report.reportTitle?.takeIf { it != reportOnForm?.reportTitle }?.also {
-                onView(withId(R.id.fragment_report_edit_title)).perform(clearText(), typeText(it))
-            }
-
-            Espresso.closeSoftKeyboard()
-
-            report.chartType.takeIf { it != reportOnForm?.chartType }?.also {
-                setMessageIdOption(R.id.fragment_edit_report_dialog_visual_type_textinputlayout,
-                        impl.getString(ReportEditPresenter.ChartOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
-            }
-
-            report.yAxis.takeIf { it != reportOnForm?.yAxis }?.also {
-                setMessageIdOption(R.id.fragment_edit_report_dialog_yaxis_textinputlayout,
-                        impl.getString(ReportEditPresenter.YAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
-            }
-
-            report.xAxis.takeIf { it != reportOnForm?.xAxis }?.also {
-                setMessageIdOption(R.id.fragment_edit_report_dialog_xaxis_textinputlayout,
-                        impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
-            }
-
-            report.subGroup.takeIf { it != reportOnForm?.subGroup }?.also {
-                setMessageIdOption(R.id.fragment_edit_report_dialog_subgroup_textinputlayout,
-                        impl.getString(ReportEditPresenter.XAxisOptions.values().find { report -> report.optionVal == it }!!.messageId, context))
-            }
-
-            report.fromDate.takeIf { it != reportOnForm?.fromDate }?.also {
-                setDateField(R.id.activity_report_edit_fromDate_textinputlayout, it)
-            }
-            report.toDate.takeIf { it != reportOnForm?.toDate }?.also {
-                setDateField(R.id.activity_report_edit_toDate_textinputlayout, it)
-            }
-
-            if (!setFieldsRequiringNavigation) {
-                return
-            }
-
-            fragmentScenario?.onFragment { fragment ->
-                fragment.takeIf { verbDisplay != null }
-                        ?.findNavController()?.currentBackStackEntry?.savedStateHandle
-                        ?.set("VerbDisplay", defaultGson().toJson(listOf(verbDisplay)))
-            }
-
-            fragmentScenario?.onFragment { fragment ->
-                fragment.takeIf { person != null }
-                        ?.findNavController()?.currentBackStackEntry?.savedStateHandle
-                        ?.set("Person", defaultGson().toJson(listOf(person)))
-            }
-
-            fragmentScenario?.onFragment { fragment ->
-                fragment.takeIf { entry != null }
-                        ?.findNavController()?.currentBackStackEntry?.savedStateHandle
-                        ?.set("Content", defaultGson().toJson(listOf(entry)))
-            }
-
-        }
-    }
 }

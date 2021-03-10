@@ -13,8 +13,11 @@ import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
+import com.ustadmobile.port.android.view.util.ProgressBarLifecycleObserver
 import com.ustadmobile.port.android.view.util.TitleLifecycleObserver
+import com.ustadmobile.port.android.view.util.UstadActivityWithProgressBar
 import org.kodein.di.DIAware
 import org.kodein.di.android.x.di
 import java.util.*
@@ -34,15 +37,24 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
 
     protected var searchManager: SearchViewManagerLifecycleObserver? = null
 
+    protected var progressBarManager: ProgressBarLifecycleObserver? = null
+
     override val di by di()
 
     override var loading: Boolean = false
         get() = field
         set(value) {
-            //TODO: set this on the main activity
+            progressBarManager?.visibility = if(value) View.VISIBLE else View.GONE
             field = value
         }
 
+
+    /**
+     * Shortcut to retrieve the SavedState properties from NavController's backstack savedstate
+     * handle.
+     */
+    protected val backStackSavedState: Map<String, String>?
+        get() = findNavController().currentBackStackEntrySavedStateMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -85,6 +97,12 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
             viewLifecycleOwner.lifecycle.addObserver(it)
         }
 
+        progressBarManager = ProgressBarLifecycleObserver(
+                (activity as? UstadActivityWithProgressBar)?.activityProgressBar,
+                View.INVISIBLE).also {
+            viewLifecycleOwner.lifecycle.addObserver(it)
+        }
+
         findNavController().currentBackStackEntry?.savedStateHandle?.getLiveData<String>(ARG_SNACK_MESSAGE)?.observe(
                 viewLifecycleOwner) {
             showSnackBar(it)
@@ -94,9 +112,6 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
     override fun onDestroy() {
         super.onDestroy()
     }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)

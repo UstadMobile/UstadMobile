@@ -2,12 +2,10 @@ package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.core.app.launchActivity
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.view.LearnerGroupMemberListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.LearnerGroupMemberListScreen
@@ -24,7 +22,7 @@ class LearnerGroupMemberListFragmentTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -46,12 +44,12 @@ class LearnerGroupMemberListFragmentTest : TestCase() {
         Person().apply {
             firstNames = "New"
             lastName = "Student"
-            personUid = dbRule.db.personDao.insert(this)
+            personUid = dbRule.repo.personDao.insert(this)
         }
 
         ContentEntry().apply {
             contentEntryUid = 1
-            dbRule.db.contentEntryDao.insert(this)
+            dbRule.repo.contentEntryDao.insert(this)
         }
 
 
@@ -59,21 +57,21 @@ class LearnerGroupMemberListFragmentTest : TestCase() {
             learnerGroupName = "Test"
             learnerGroupDescription = "New Group"
             learnerGroupUid = 1
-            dbRule.db.learnerGroupDao.insert(this)
+            dbRule.repo.learnerGroupDao.insert(this)
         }
 
         LearnerGroupMember().apply {
             learnerGroupMemberRole = LearnerGroupMember.PRIMARY_ROLE
             learnerGroupMemberLgUid = 1
             learnerGroupMemberPersonUid = dbRule.account.personUid
-            dbRule.db.learnerGroupMemberDao.insert(this)
+            dbRule.repo.learnerGroupMemberDao.insert(this)
         }
 
         GroupLearningSession().apply {
             groupLearningSessionUid = 1
             groupLearningSessionContentUid = 1
             groupLearningSessionLearnerGroupUid = 1
-            dbRule.db.groupLearningSessionDao.insert(this)
+            dbRule.repo.groupLearningSessionDao.insert(this)
         }
 
 

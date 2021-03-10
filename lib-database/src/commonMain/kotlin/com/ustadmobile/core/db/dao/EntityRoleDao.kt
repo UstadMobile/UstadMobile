@@ -2,16 +2,11 @@ package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
 import androidx.room.*
-import com.ustadmobile.core.db.dao.RoleDao.Companion.SELECT_ACCOUNT_IS_ADMIN
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)", 
-        updatePermissionCondition = SELECT_ACCOUNT_IS_ADMIN, 
-        insertPermissionCondition = SELECT_ACCOUNT_IS_ADMIN)
-@UmRepository
+@Repository
 @Dao
 abstract class EntityRoleDao : BaseDao<EntityRole>, OneToManyJoinDao<EntityRole> {
 
@@ -21,7 +16,7 @@ abstract class EntityRoleDao : BaseDao<EntityRole>, OneToManyJoinDao<EntityRole>
     }
 
     @Query("UPDATE EntityRole SET erActive = :active WHERE erUid = :uid")
-    abstract fun updateEntityRoleActive(uid: Long, active: Boolean)
+    abstract suspend fun updateEntityRoleActive(uid: Long, active: Boolean)
 
     @Query("""SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0) 
             OR EXISTS(SELECT EntityRole.erUid FROM EntityRole 

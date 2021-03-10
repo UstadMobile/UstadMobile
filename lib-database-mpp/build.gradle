@@ -23,6 +23,7 @@ kotlin {
         }
     }
 
+    /* JS is disabled until after kotlin 1.4 upgrade
     js {
         nodejs()
 
@@ -32,7 +33,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
-
+    */
 
     sourceSets {
         commonMain {
@@ -42,10 +43,12 @@ kotlin {
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
+                implementation "com.github.aakira:napier:$version_napier"
                 implementation project(":lib-database")
                 implementation project(":lib-database-entities")
                 implementation project(":lib-door-runtime")
                 implementation project(":lib-room-annotations")
+                implementation project(":lib-database-annotations")
             }
         }
 
@@ -61,9 +64,11 @@ kotlin {
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                implementation "com.github.aakira:napier-jvm:$version_napier"
             }
         }
 
+        /*
         jsMain {
             kotlin.srcDir("build/generated/source/door-js")
             dependencies {
@@ -72,8 +77,10 @@ kotlin {
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-js:$version_ktor"
                 implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
+                implementation "com.github.aakira:napier-js:$version_napier"
             }
         }
+        */
     }
 
 }

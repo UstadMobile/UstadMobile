@@ -1,10 +1,7 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.lifecycle.*
 import androidx.paging.DataSource
 import androidx.paging.PagedList
@@ -14,6 +11,8 @@ import androidx.recyclerview.widget.RecyclerView
 import com.github.aakira.napier.Napier
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntry2DetailBinding
 import com.toughra.ustadmobile.databinding.ItemEntryTranslationBinding
 import com.ustadmobile.core.account.UstadAccountManager
@@ -30,7 +29,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
 import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.DownloadJobItem
-import com.ustadmobile.port.android.view.ext.runAfterRequestingPermissionIfNeeded
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
@@ -39,8 +37,6 @@ import org.kodein.di.on
 interface ContentEntryDetailFragmentEventHandler {
 
     fun handleOnClickOpenDownloadButton()
-
-    fun handleOnClickGroupActivityButton()
 
     fun handleOnClickDeleteButton()
 }
@@ -91,12 +87,6 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
 
     private var presenterLifecycleObserver: PresenterViewLifecycleObserver? = null
 
-    override var editButtonMode: EditButtonMode = EditButtonMode.GONE
-        get() = field
-        set(value) {
-            mBinding?.editButtonMode = value
-            field = value
-        }
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
@@ -106,12 +96,14 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
         mPresenter?.handleOnClickOpenDownloadButton()
     }
 
-    override fun handleOnClickGroupActivityButton() {
-        mPresenter?.handleOnClickGroupActivityButton()
-    }
 
     override fun handleOnClickDeleteButton() {
-        mPresenter?.handleOnClickDeleteButton()
+        MaterialAlertDialogBuilder(requireContext())
+                .setTitle(R.string.confirm)
+                .setPositiveButton(R.string.delete) { _, _ -> mPresenter?.handleOnClickDeleteButton() }
+                .setNegativeButton(R.string.cancel) { dialog, _ ->  dialog.cancel() }
+                .setMessage(R.string.confirm_delete_message)
+                .show()
     }
 
     override var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null
@@ -129,14 +121,15 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
 
     override fun showDownloadDialog(args: Map<String, String>) {
         val systemImpl: UstadMobileSystemImpl = direct.instance()
-        runAfterRequestingPermissionIfNeeded(WRITE_EXTERNAL_STORAGE) {
-            systemImpl.go("DownloadDialog", args, requireContext())
-        }
+        systemImpl.go("DownloadDialog", args, requireContext())
     }
 
     override var downloadJobItem: DownloadJobItem? = null
         set(value) {
             Napier.d("ContentEntryDetail: Download Status = ${downloadJobItem?.djiStatus} currentDownloadJobItemStatus = $currentDownloadJobItemStatus")
+            if(field.isStatusCompleted() != value.isStatusCompleted())
+                activity?.invalidateOptionsMenu()
+
             mBinding?.downloadJobItem = value
             if(currentDownloadJobItemStatus != value?.djiStatus) {
                 when {
@@ -230,6 +223,22 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
             viewLifecycleOwner.lifecycle.addObserver(it)
         }
 
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.menu_content_entry, menu)
+        menu.findItem(R.id.content_entry_group_activity).isVisible = downloadJobItem.isStatusCompleted()
+        super.onCreateOptionsMenu(menu, inflater)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when(item.itemId) {
+            R.id.content_entry_group_activity -> {
+                mPresenter?.handleOnClickGroupActivityButton()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
     }
 
     override fun onDestroyView() {

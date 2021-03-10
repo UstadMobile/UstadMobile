@@ -2,21 +2,33 @@ package com.ustadmobile.core.view
 
 import androidx.paging.DataSource
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission
-import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
-import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
-import com.ustadmobile.lib.db.entities.CommentsWithPerson
+import com.ustadmobile.lib.db.entities.*
 
-interface ClazzWorkSubmissionMarkingView: UstadEditView<ClazzMemberAndClazzWorkWithSubmission> {
+interface ClazzWorkSubmissionMarkingView: UstadEditView<PersonWithClazzWorkAndSubmission> {
 
     var privateComments: DataSource.Factory<Int, CommentsWithPerson>?
 
-    var submissionQuestionAndOptionsWithResponse
+    var editableQuizQuestions
+            : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>?
+
+    var viewOnlyQuizQuestions
             : DoorMutableLiveData<List<ClazzWorkQuestionAndOptionWithResponse>>?
 
     var isMarkingFinished: Boolean
 
     var clazzWorkMetrics : ClazzWorkWithMetrics?
+
+    var showRecordForStudent: Boolean
+
+    var showSubmissionHeading: Boolean
+
+    var showSimpleTwoButton: Boolean
+
+    var setQuizEditList : Boolean
+
+    var showShortTextSubmission: Boolean
+
+    var showShortTextResult: Boolean
 
     companion object {
 

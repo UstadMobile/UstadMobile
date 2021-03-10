@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.content.Context
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
@@ -84,27 +83,30 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         }
 
     private fun setTabs(){
-        if(isStudent) {
-            mBinding?.root?.tabs?.visibility = View.GONE
-        }else{
+        if(progressOverviewVisible) {
             mBinding?.root?.tabs?.visibility = View.VISIBLE
+        }else{
+            mBinding?.root?.tabs?.visibility = View.GONE
         }
 
         val entityUidValue : String = arguments?.getString(UstadView.ARG_ENTITY_UID)?:"0"
 
         val tabs: List<String>
-        tabs = if(isStudent){
-            listOf(
-                    ClazzWorkDetailOverviewView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +
-                            entityUidValue
-            )
-        }else {
+        tabs = if(progressOverviewVisible){
+
             listOf(
                     ClazzWorkDetailOverviewView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
                             entityUidValue,
                     ClazzWorkDetailProgressListView.VIEW_NAME + "?${UstadView.ARG_ENTITY_UID}=" +
                             entityUidValue)
+        }else {
+            listOf(
+                    ClazzWorkDetailOverviewView.VIEW_NAME+ "?${UstadView.ARG_ENTITY_UID}=" +
+                            entityUidValue
+            )
         }
+
+        //TODO: why is edit in this list? This list is for the tab titles - edit is not shown as a tab
         val viewNameToTitle = mapOf(
                 ClazzWorkEditView.VIEW_NAME to getText(R.string.edit).toString(),
                 ClazzWorkDetailOverviewView.VIEW_NAME to getText(R.string.overview).toString(),
@@ -121,7 +123,7 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         }
     }
 
-    override var isStudent: Boolean = true
+    override var progressOverviewVisible: Boolean = true
         set(value) {
             field = value
 
@@ -133,6 +135,8 @@ class ClazzWorkDetailFragment: UstadDetailFragment<ClazzWork>(), ClazzWorkDetail
         }
 
     companion object{
+
+        //TODO: why is edit in this list? Edit is not being shown as a tab
         private val VIEW_NAME_TO_FRAGMENT_CLASS = mapOf<String,
                 Class<out Fragment>>(
                 ClazzWorkEditView.VIEW_NAME to ClazzWorkEditFragment::class.java,

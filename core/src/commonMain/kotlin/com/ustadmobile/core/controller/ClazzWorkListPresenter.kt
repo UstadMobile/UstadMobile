@@ -35,18 +35,18 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         val clazzUid = arguments.get(UstadView.ARG_FILTER_BY_CLAZZUID)?.toLong() ?: 0L
         return db.clazzDao.personHasPermissionWithClazz(accountManager.activeAccount.personUid,
-                clazzUid, Role.PERMISSION_CLAZZ_ASSIGNMENT_UPDATE)
+                clazzUid, Role.PERMISSION_CLAZZWORK_UPDATE)
     }
 
     private suspend fun updateListOnView() {
 
         val clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
         val loggedInPersonUid = accountManager.activeAccount.personUid
-        val clazzMember: ClazzMember? =
-                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
+        val clazzEnrolment: ClazzEnrolment? =
+                db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
 
         view.list = repo.clazzWorkDao.findWithMetricsByClazzUidLive(
-                clazzUid, clazzMember?.clazzMemberRole ?: ClazzMember.ROLE_STUDENT,
+                clazzUid, clazzEnrolment?.clazzEnrolmentRole ?: ClazzEnrolment.ROLE_STUDENT,
                 UMCalendarUtil.getDateInMilliPlusDays(0), selectedSortOption?.flag ?: 0,
                 searchText.toQueryLikeParam())
     }

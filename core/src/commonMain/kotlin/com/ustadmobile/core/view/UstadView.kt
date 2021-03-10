@@ -44,17 +44,6 @@ enum class GetResultMode {
 interface UstadView {
 
 
-    /**
-     * Return the system specific context for this view (e.g. Activity on Android
-     * etc)
-     *
-     * Nullable so that this is compliant with fragment.getViewContext()
-     *
-     * @return
-     */
-    val viewContext: Any
-
-
     var loading: Boolean
 
     /**
@@ -111,19 +100,19 @@ interface UstadView {
 
         const val ARG_FILTER_BY_PERSONGROUPUID = "filterByPersonGroupUid"
 
+        const val ARG_FILTER_BY_ENROLMENT_ROLE = "filterByEnrolmentRole"
+
         const val ARG_CLAZZWORK_UID = "clazzworkUid"
 
-        const val ARG_CLAZZMEMBER_UID = "clazzMemberUid"
+        const val ARG_PERSON_UID = "personUid"
 
         const val ARG_NEXT = "next"
 
-        const val ARG_WORKSPACE = "workspace"
+        const val ARG_SITE = "site"
 
         const val ARG_SERVER_URL = "serverUrl"
 
         const val ARG_INTENT = "argIntent"
-
-        const val ARG_FROM = "from"
 
         const val ARG_SNACK_MESSAGE = "snack_message"
 
@@ -134,6 +123,24 @@ interface UstadView {
         const val ARG_ENTITY_NAME = "argEntityName"
 
         const val CURRENT_DEST = ""
+
+        /**
+         * if after selecting from a list, need to open an edit page
+         */
+        const val ARG_GO_TO_COMPLETE = "goToComplete"
+
+        const val ARG_SAVE_TO_DB = "saveDb"
+
+        /**
+         * Tasks that involve multiple destinations (e.g. Login - AcceptTerms - PersonEditRegister )
+         * might need to pop off multiple destinations from the stack when they are done.
+         *
+         * The final destination in the stack might be reachable via different routes (e.g. it might
+         * have started from the login screen, or the account list screen) . The POPUPTO_ON_FINISH
+         * arg is intended to be used in such situations. It can be supplied by the initiator and
+         * passed through until it is used by the final destination.
+         */
+        const val ARG_POPUPTO_ON_FINISH = "popUpToOnFinish"
 
         /**
          * Argument to pass to tell a fragment where on the back stack a result (e.g. entity selected

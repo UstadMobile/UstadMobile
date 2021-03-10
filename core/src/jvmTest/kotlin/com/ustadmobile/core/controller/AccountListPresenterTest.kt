@@ -106,7 +106,7 @@ class AccountListPresenterTest {
 
         argumentCaptor<String>{
             verify(impl).go(capture(), any(), any())
-            assertTrue("Get started screen was opened", GetStartedView.VIEW_NAME == firstValue)
+            assertTrue("Get started screen was opened", SiteEnterLinkView.VIEW_NAME == firstValue)
         }
     }
 

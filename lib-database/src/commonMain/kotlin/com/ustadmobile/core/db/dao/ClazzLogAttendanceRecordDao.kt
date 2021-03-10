@@ -4,9 +4,11 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 
 @Dao
+@Repository
 abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
 
     @Insert
@@ -21,8 +23,7 @@ abstract class ClazzLogAttendanceRecordDao : BaseDao<ClazzLogAttendanceRecord> {
 
     @Query("""SELECT ClazzLogAttendanceRecord.*, Person.*
          FROM ClazzLogAttendanceRecord 
-         LEFT JOIN ClazzMember ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzMemberUid = ClazzMember.clazzMemberUid
-         LEFT JOIN Person ON ClazzMember.clazzMemberPersonUid = Person.personUid
+         LEFT JOIN Person ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid = Person.personUid
          WHERE clazzLogAttendanceRecordClazzLogUid = :clazzLogUid""")
     abstract suspend fun findByClazzLogUid(clazzLogUid: Long): List<ClazzLogAttendanceRecordWithPerson>
 

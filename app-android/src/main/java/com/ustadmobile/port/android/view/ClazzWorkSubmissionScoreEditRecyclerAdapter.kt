@@ -2,35 +2,36 @@ package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionScoreEditBinding
-import com.ustadmobile.lib.db.entities.ClazzWorkWithSubmission
+import com.ustadmobile.lib.db.entities.PersonWithClazzWorkAndSubmission
+import com.ustadmobile.lib.db.entities.ClazzWork
+import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
-class ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWork: ClazzWorkWithSubmission?,
-                                      visible: Boolean = false)
-    : ListAdapter<ClazzWorkWithSubmission,
-        ClazzWorkSubmissionScoreEditRecyclerAdapter.ScoreEditViewHolder>(
-            ClazzWorkDetailOverviewFragment.DU_CLAZZWORKWITHSUBMISSION) {
-
-    var visible: Boolean = visible
-        set(value) {
-            if(field == value)
-                return
-
-            field = value
-        }
+class ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWork: PersonWithClazzWorkAndSubmission?)
+    : SingleItemRecyclerViewAdapter<ClazzWorkSubmissionScoreEditRecyclerAdapter.ScoreEditViewHolder>() {
 
     class ScoreEditViewHolder(var itemBinding: ItemClazzworkSubmissionScoreEditBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
     private var viewHolder: ScoreEditViewHolder? = null
-    private var clazzWorkVal : ClazzWorkWithSubmission? = clazzWork
+
+    var clazzWorkVal : PersonWithClazzWorkAndSubmission? = clazzWork
+        set(value){
+            if(field == value)
+                return
+            field = value
+            viewHolder?.itemBinding?.clazzWorkWithSubmission = value
+            viewHolder?.itemBinding?.noneType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+
+        }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ScoreEditViewHolder {
         return ScoreEditViewHolder(
                 ItemClazzworkSubmissionScoreEditBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
+                    it.noneType = ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_NONE
+                    it.clazzWorkWithSubmission = clazzWorkVal
                 })
     }
 
@@ -39,19 +40,12 @@ class ClazzWorkSubmissionScoreEditRecyclerAdapter(clazzWork: ClazzWorkWithSubmis
         viewHolder = null
     }
 
-    override fun getItemCount(): Int {
-        return if(visible) 1 else 0
-    }
-
     override fun onBindViewHolder(holder: ScoreEditViewHolder, position: Int) {
+        super.onBindViewHolder(holder, position)
+        holder.itemBinding.clazzWorkWithSubmission = clazzWorkVal
+        holder.itemView.tag = clazzWorkVal?.submission?.clazzWorkSubmissionUid?:0L
 
-        if(currentList.size > 0){
-            holder.itemBinding.clazzWorkWithSubmission = getItem(0)
-            holder.itemView.tag = getItem(0).clazzWorkSubmission?.clazzWorkSubmissionUid?:0L
-        }else {
-            holder.itemBinding.clazzWorkWithSubmission = clazzWorkVal
-            holder.itemView.tag = clazzWorkVal?.clazzWorkSubmission?.clazzWorkSubmissionUid?:0L
-        }
+
 
     }
 }

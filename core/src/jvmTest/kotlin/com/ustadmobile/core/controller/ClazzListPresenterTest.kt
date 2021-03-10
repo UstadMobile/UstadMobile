@@ -11,7 +11,6 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.ClazzDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.*
-import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.core.util.ext.insertPersonOnlyAndGroup
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.*
@@ -63,11 +62,12 @@ class ClazzListPresenterTest {
     @Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val accountManager: UstadAccountManager by di.instance<UstadAccountManager>()
 
         val testEntity = Clazz().apply {
             //set variables here
-            clazzUid = db.clazzDao.insert(this)
+            clazzUid = repo.clazzDao.insert(this)
         }
 
         val presenterArgs = mapOf<String,String>()
@@ -76,8 +76,8 @@ class ClazzListPresenterTest {
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
-                eq("%"), eq(accountManager.activeAccount.personUid), eq(0), any(),
-                any())
+                eq("%"), eq(accountManager.activeAccount.personUid), eq(listOf()), eq(0),
+                any(), any(), any(), any(), any())
         verify(mockView, timeout(5000)).list = any()
 
     }
@@ -95,8 +95,9 @@ class ClazzListPresenterTest {
 
         //eg. verify the correct DAO method was called and was set on the view
         verify(repoClazzDaoSpy, timeout(5000)).findClazzesWithPermission(
-                eq("%"), eq(accountManager.activeAccount.personUid), eq(excludeFromSchool),
-                any(), any())
+                eq("%"), eq(accountManager.activeAccount.personUid), eq(listOf()),
+                eq(excludeFromSchool), any(), any(), any(), any(), any()
+        )
         verify(mockView, timeout(5000)).list = any()
     }
 
@@ -104,23 +105,24 @@ class ClazzListPresenterTest {
     @Test
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
         val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
         val activePerson = Person().apply {
             firstNames = "Test"
             lastName = "User"
             username = "testuser"
-            personUid = db.insertPersonOnlyAndGroup(this).personUid
+            personUid = repo.insertPersonOnlyAndGroup(this).personUid
         }
 
         val presenterArgs = mapOf<String,String>()
         val testEntity = Clazz().apply {
             //set variables here
-            clazzUid = db.clazzDao.insert(this)
+            clazzUid = repo.clazzDao.insert(this)
         }
 
         runBlocking {
-            db.insertPersonWithRole(activePerson,
+            repo.insertPersonWithRole(activePerson,
                     Role().apply {
                         rolePermissions = Role.PERMISSION_CLAZZ_OPEN
                     }, EntityRole().apply {

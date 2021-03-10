@@ -66,9 +66,8 @@ tasks.whenTaskAdded { task ->
 }
 
 android {
-    dataBinding {
-        enabled = true
-        enabledForTests = true
+    buildFeatures {
+        dataBinding true
     }
 
     kotlinOptions {
@@ -118,13 +117,12 @@ android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools
 
-    dataBinding {
-        enabled = true
-    }
-
     defaultConfig {
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
+        //When using variables the build analyzer reports that major tasks reran because of a
+        // 'chnage' in the value of minSdkVersion, hence hardcoding them here.
+        minSdkVersion 21
+        targetSdkVersion 29
+
         multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
         versionCode rootProject.ext.ustadVersionCode
@@ -147,27 +145,6 @@ android {
     flavorDimensions "config"
 
     productFlavors {
-        /*
-         * The main flavor
-         */
-        vanilla {
-            dimension "config"
-            testApplicationId "com.toughra.ustadmobile.test"
-            versionCode rootProject.ext.ustadVersionCode
-        }
-
-        /*
-         * Our main application does not exceed 64K methods, but it does exceed this limit with
-         * test libraries. Therefor testing on < Android 4.4 requires multidex to be enabled.
-         *
-         * Min SDK version = 18 as this is required by ui-automator
-         */
-        vanillamultidex {
-            dimension "config"
-            minSdkVersion 18
-            multiDexKeepProguard file('multidex-config.pro')
-        }
-
         /**
          * Used for day to day work in Android studio to avoid the need to use multidex when running tests
          */
@@ -180,14 +157,12 @@ android {
     buildTypes {
         release {
             minifyEnabled true
-            useProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
             signingConfig signingConfigs.release
         }
 
         debug {
             minifyEnabled false
-            useProguard false
             testCoverageEnabled = false
         }
     }
@@ -321,7 +296,7 @@ dependencies {
     implementation "androidx.activity:activity-ktx:$version_androidx_activity"
     implementation "androidx.fragment:fragment:$version_androidx_fragment"
     implementation "androidx.legacy:legacy-support-v4:$version_androidx_legacy_support"
-    vanillamultidexApi "androidx.multidex:multidex:$version_android_multidex"
+    //vanillamultidexApi "androidx.multidex:multidex:$version_android_multidex"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
@@ -355,6 +330,8 @@ dependencies {
 
     //Crash reporting
     implementation "ch.acra:acra-http:$version_android_acra"
+
+    implementation 'com.linkedin.android.litr:litr:1.4.3'
 
 
     implementation "androidx.legacy:legacy-support-core-utils:$version_androidx_legacy"
@@ -419,6 +396,9 @@ dependencies {
 
     //dependency injection
     implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
+
+    //HTML editor
+    implementation "com.github.wordpress-mobile.WordPress-Aztec-Android:aztec:$version_android_aztec"
 
     testImplementation project(":lib-test-common")
     testImplementation "org.mockito:mockito-core:$version_android_mockito"

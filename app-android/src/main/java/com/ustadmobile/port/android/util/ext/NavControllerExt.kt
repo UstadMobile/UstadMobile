@@ -8,6 +8,13 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.port.android.util.DeleteTempFilesNavigationListener.Companion.SHAREDPREF_TMPFILE_REG
 import java.io.File
 
+/**
+ * We are using the NavController saved state handle instead of the SavedState bundle. The SavedState
+ * bundle does not help us when a fragment is destroyed for reasons other than the Android system
+ * reclaiming memory (e.g. when the user wants goes to another screen).
+ *
+ * This is simply a convenience extension function.
+ */
 fun NavController.currentBackStackEntrySavedStateMap() = this.currentBackStackEntry?.savedStateHandle?.toStringMap()
 
 /**
@@ -24,6 +31,16 @@ fun NavController.registerDestinationTempFile(context: Context, file: File,
     val destinationId = destination?.id ?: return
     context.getSharedPreferences(SHAREDPREF_TMPFILE_REG, Context.MODE_PRIVATE).edit {
         putInt(file.absolutePath, destinationId)
+    }
+}
+
+
+/**
+ * Removes the given file from the tmpFile registration
+ */
+fun NavController.unregisterDestinationTempFile(context: Context, file: File){
+    context.getSharedPreferences(SHAREDPREF_TMPFILE_REG, Context.MODE_PRIVATE).edit {
+        remove(file.absolutePath)
     }
 }
 

@@ -9,9 +9,14 @@ android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     defaultConfig {
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
+        minSdkVersion 21
+        targetSdkVersion 29
     }
 }
 
@@ -36,6 +41,7 @@ kotlin {
 
     android()
 
+    /*JS is disabled until after kotlin 1.4 upgrade
     js {
         nodejs()
 
@@ -45,6 +51,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
+    */
 
 
     sourceSets {
@@ -66,11 +73,13 @@ kotlin {
             }
         }
 
+        /*
         jsMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
             }
         }
+        */
     }
 
 

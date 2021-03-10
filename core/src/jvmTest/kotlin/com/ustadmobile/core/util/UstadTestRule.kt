@@ -1,5 +1,6 @@
 package com.ustadmobile.core.util
 
+import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
@@ -17,6 +18,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import io.ktor.client.*
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
@@ -51,8 +53,6 @@ class UstadTestRule: TestWatcher() {
 
     lateinit var diModule: DI.Module
 
-    class SomeDiThing(di: DI)
-
     override fun starting(description: Description?) {
         endpointScope = EndpointScope()
         systemImplSpy = spy(UstadMobileSystemImpl.instance)
@@ -74,6 +74,14 @@ class UstadTestRule: TestWatcher() {
             bind<NetworkManagerBle>() with singleton { mock<NetworkManagerBle> { } }
 
             bind<ContainerMounter>() with singleton { EmbeddedHTTPD(0, di).also { it.start() } }
+
+            bind<Gson>() with singleton {
+                Gson()
+            }
+
+            bind<HttpClient>() with singleton {
+                defaultHttpClient()
+            }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
         }

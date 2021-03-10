@@ -4,9 +4,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -21,7 +19,8 @@ import org.kodein.di.on
 abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arguments: Map<String, String>,
                                                                view: V, di: DI,
                                                     val lifecycleOwner: DoorLifecycleOwner)
-    : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected, OnSearchSubmitted {
+    : UstadBaseController<V>(context, arguments, view, di), DIAware, OnSortOptionSelected,
+        OnSearchSubmitted, OnListFilterOptionSelectedListener {
 
     protected var mListMode = ListViewMode.BROWSER
 
@@ -46,10 +45,8 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
         super.onCreate(savedState)
         mListMode = ListViewMode.valueOf(
                 arguments[UstadView.ARG_LISTMODE] ?: ListViewMode.BROWSER.toString())
-        view.loading = true
         GlobalScope.launch(doorMainDispatcher()) {
             onLoadFromDb()
-            view.loading = false
         }
     }
 
@@ -94,7 +91,7 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
     }
 
     @Deprecated("Use onSortOptionSelected")
-    open fun handleClickSortOrder(sortOption: MessageIdOption) {
+    open fun handleClickSortOrder(sortOption: IdOption) {
 
     }
 
@@ -105,7 +102,19 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
 
     }
 
+    /**
+     * This can be overriden by the child class to udpate the query on the basis
+     * of the selected filterOption
+     */
+    override fun onListFilterOptionSelected(filterOptionId: ListFilterIdOption) {
+
+    }
+
     abstract fun handleClickCreateNewFab()
+
+    open fun handleSelectionOptionChanged(t: List<RT>){
+
+    }
 
 
 }

@@ -23,6 +23,10 @@
     <item name="tag_clazzwork_quiz_question_selected_uid" type="id"/>
     <item name="tag_graphlookup_key" type="id"/>
 
+    <item name="tag_chip_optionid" type="id"/>
+
+
+    <item name="tag_imageforeignkey_props" type="id"/>
 
     <item name="tag_crudidlingresource_ignore" type="id"/>
 

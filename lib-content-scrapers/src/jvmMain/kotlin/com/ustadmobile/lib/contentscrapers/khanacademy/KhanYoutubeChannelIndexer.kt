@@ -16,14 +16,14 @@ class KhanYoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid
 
     override fun indexUrl(sourceUrl: String) {
 
-        val khanEntry = getKhanEntry(englishLang, contentEntryDao)
+        val khanEntry = getKhanEntry(englishLang, repo.contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, khanEntry, 12)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, khanEntry, 12)
 
         parentEntry = createKangLangEntry("ps", "Pashto", "https://ps.khanacademy.org/", db)
         hideContentEntry(parentEntry.contentEntryUid)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, khanEntry, parentEntry, 0)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, khanEntry, parentEntry, 0)
 
         createEntryAndQueue("https://www.youtube.com/playlist?list=PLiCgDNH6P2K7zuKn0DHPZFCNAjL-dfA6B", "لومړۍ ریاضي (Early Math)")
         createEntryAndQueue("https://www.youtube.com/playlist?list=PLiCgDNH6P2K4R2kjpTP7WLVWh3aPqLT69", "ریاضي (Math)")
@@ -39,9 +39,9 @@ class KhanYoutubeChannelIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid
         val playlist = ContentScraperUtil.createOrUpdateContentEntry(sourceUrl.substringAfter("="), title,
                 sourceUrl, ScraperConstants.KHAN, ContentEntry.LICENSE_TYPE_CC_BY_NC, parentEntry.primaryLanguageUid, null,
                 "", false, "", "",
-                "", "", 0, contentEntryDao)
+                "", "", 0, repo.contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentEntry, playlist, playlistCount++)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentEntry, playlist, playlistCount++)
 
         createQueueItem(sourceUrl, playlist, ScraperTypes.KHAN_PLAYLIST_INDEXER, ScrapeQueueItem.ITEM_TYPE_INDEX, parentEntry.contentEntryUid)
     }

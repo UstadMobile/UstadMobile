@@ -19,9 +19,9 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
 
     override fun indexUrl(sourceUrl: String) {
 
-        val khanEntry = getKhanEntry(englishLang, contentEntryDao)
+        val khanEntry = getKhanEntry(englishLang, repo.contentEntryDao)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, parentContentEntry, khanEntry, 12)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, parentContentEntry, khanEntry, 12)
 
         val lang = sourceUrl.substringBefore(".khan").substringAfter("://")
 
@@ -31,7 +31,7 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
         val parentLangEntry = createKangLangEntry(if (lang == "www") "en" else lang, khanLang.title, khanLang.url, db)
         hideContentEntry(parentLangEntry.contentEntryUid)
 
-        ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao, khanEntry, parentLangEntry, 0)
+        ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao, khanEntry, parentLangEntry, 0)
 
         val harEntryList: List<HarEntry>
         try {
@@ -56,9 +56,9 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
                     "", false, "",
                     "", "",
                     "",
-                    0, contentEntryDao)
+                    0, repo.contentEntryDao)
 
-            ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao,
+            ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao,
                     parentLangEntry, topicEntry, topicCount)
 
             createQueueItem(topicUrl.toString(), topicEntry, KHAN_TOPIC_INDEXER,
@@ -77,10 +77,10 @@ class KhanFullIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, conten
                             "", false, "",
                             "", "",
                             "",
-                            0, contentEntryDao)
+                            0, repo.contentEntryDao)
 
 
-                    ContentScraperUtil.insertOrUpdateParentChildJoin(contentEntryParentChildJoinDao,
+                    ContentScraperUtil.insertOrUpdateParentChildJoin(repo.contentEntryParentChildJoinDao,
                             topicEntry, childTopicEntry, childTopicCount)
 
                     createQueueItem(childTopicUrl.toString(), childTopicEntry, KHAN_TOPIC_INDEXER,

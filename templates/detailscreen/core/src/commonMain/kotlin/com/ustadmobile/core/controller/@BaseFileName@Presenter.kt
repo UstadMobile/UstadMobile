@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.@Entity@DetailView
 import com.ustadmobile.core.view.UstadView
@@ -17,16 +16,14 @@ import kotlinx.coroutines.*
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.list
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import org.kodein.di.DI
 
 
 class @Entity@DetailPresenter(context: Any,
-                          arguments: Map<String, String>, view: @Entity@DetailView,
-                          lifecycleOwner: DoorLifecycleOwner,
-                          systemImpl: UstadMobileSystemImpl,
-                          db: UmAppDatabase, repo: UmAppDatabase,
-                          activeAccount: DoorLiveData<UmAccount?> = UmAccountManager.activeAccountLiveData)
-    : UstadDetailPresenter<@Entity@DetailView, @DisplayEntity@>(context, arguments, view, lifecycleOwner, systemImpl,
-        db, repo, activeAccount) {
+        arguments: Map<String, String>, view: @BaseFileName@View,
+        lifecycleOwner: DoorLifecycleOwner,
+        di: DI)
+    : UstadDetailPresenter<@Entity@DetailView, @DisplayEntity@>(context, arguments, view, di, lifecycleOwner) {
 
     override val persistenceMode: PersistenceMode
         get() = TODO("PERSISTENCE_MODE.DB OR PERSISTENCE_MODE.JSON")
@@ -39,6 +36,10 @@ class @Entity@DetailPresenter(context: Any,
         super.onCreate(savedState)
 
         //TODO: Set any additional fields (e.g. joinlist) on the view
+    }
+
+    override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
+        TODO("Not yet implemented")
     }
 
     override suspend fun onLoadEntityFromDb(db: UmAppDatabase): @DisplayEntity@? {

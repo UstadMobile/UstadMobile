@@ -19,39 +19,51 @@
 
     </data>
 
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
+        android:id='@+id/video_scroll'
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:fillViewport="true">
 
-        <com.google.android.exoplayer2.ui.PlayerView
-            android:id="@+id/activity_video_player_view"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:controller_layout_id="@layout/view_custom_exo_playback_control"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            android:layout_height="match_parent">
 
-        <com.google.android.exoplayer2.ui.PlayerControlView
-            android:id="@+id/player_view_controls"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:visibility="@{isPortrait ? View.VISIBLE : View.GONE}"
-            app:controller_layout_id="@layout/view_custom_exo_playback_control"
-            app:layout_constraintTop_toBottomOf="@id/activity_video_player_view"
-            app:show_timeout="0" />
+            <com.google.android.exoplayer2.ui.PlayerView
+                android:id="@+id/activity_video_player_view"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                app:percentageHeight="@{isPortrait ? 0.6f : 0.999f}"
+                app:controller_layout_id="@layout/view_custom_exo_playback_control"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"/>
 
-        <TextView
-            android:id="@+id/activity_video_player_description"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="@dimen/dimen_8dp"
-            android:text="@{entry.description}"
-            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-            android:visibility="@{isPortrait ? View.VISIBLE : View.GONE}"
-            app:layout_constraintTop_toBottomOf="@id/player_view_controls"
-            tools:text="Description here" />
+            <com.google.android.exoplayer2.ui.PlayerControlView
+                android:id="@+id/player_view_controls"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:visibility="@{isPortrait ? View.VISIBLE : View.GONE}"
+                app:controller_layout_id="@layout/view_custom_exo_playback_control"
+                app:layout_constraintTop_toBottomOf="@id/activity_video_player_view"
+                app:show_timeout="0" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <TextView
+                android:id="@+id/activity_video_player_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="@dimen/dimen_8dp"
+                android:text="@{entry.description}"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                android:visibility="@{isPortrait ? View.VISIBLE : View.GONE}"
+                app:layout_constraintTop_toBottomOf="@id/player_view_controls"
+                tools:text="Description here" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.core.widget.NestedScrollView>
+
+
+
 </layout>

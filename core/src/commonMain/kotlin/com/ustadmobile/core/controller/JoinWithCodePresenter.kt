@@ -95,9 +95,11 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
 
                 view.runOnUiThread(Runnable {
                     //Send message invalid code.
-                    view.code = code
-                    view.errorText = systemImpl.getString(MessageID.invalid_register_code,
-                            context)
+                    if(code.isNotEmpty()){
+                        view.code = code
+                        view.errorText = systemImpl.getString(MessageID.invalid_register_code,
+                                context)
+                    }
 
                 })
             } else {
@@ -118,13 +120,18 @@ class JoinWithCodePresenter(context: Any, args: Map<String, String>, view: JoinW
 
     fun handleClickDone(code: String) {
         GlobalScope.launch(doorMainDispatcher()) {
+            if(code.isEmpty()){
+                view.errorText = systemImpl.getString(MessageID.field_required_prompt, context)
+                return@launch
+            }
+
             if(entityTableId == Clazz.TABLE_ID){
                 val clazzToJoin = dbRepo.clazzDao.findByClazzCode(code.trim())
                 val personToEnrol = dbRepo.takeIf { clazzToJoin != null }?.personDao
                         ?.findByUid(accountManager.activeAccount.personUid)
                 if(clazzToJoin  != null && personToEnrol != null) {
                     dbRepo.enrolPersonIntoClazzAtLocalTimezone(personToEnrol,
-                            clazzToJoin.clazzUid, ClazzMember.ROLE_STUDENT_PENDING)
+                            clazzToJoin.clazzUid, ClazzEnrolment.ROLE_STUDENT_PENDING)
                     view.finish()
                 }else {
                     view.errorText = systemImpl.getString(MessageID.invalid_register_code,

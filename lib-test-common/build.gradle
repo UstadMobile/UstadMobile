@@ -8,9 +8,18 @@ android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools
 
+    packagingOptions {
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     defaultConfig {
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
+        minSdkVersion 21
+        targetSdkVersion 29
         missingDimensionStrategy 'api', 'api18'
     }
 }
@@ -39,6 +48,7 @@ kotlin {
 
     android()
 
+    /* JS is disabled until after kotlin 1.4 upgrade
     js {
         nodejs()
 
@@ -48,11 +58,13 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
+    */
 
 
     sourceSets {
         commonMain {
             dependencies {
+                implementation project(":core")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.soywiz.korlibs.klock:klock:$version_klock"
@@ -67,6 +79,7 @@ kotlin {
             }
         }
 
+        /*
         jsMain {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
@@ -78,18 +91,14 @@ kotlin {
                 implementation "com.github.aakira:napier-js:$version_napier"
             }
         }
+        */
         commonJvmMain {
             dependencies {
-                implementation "io.ktor:ktor-server-servlet:$version_ktor"
-                implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "io.ktor:ktor-gson:$version_ktor"
-
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
-                compileOnly project(":app-ktor-server")
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
                 compileOnly project(":lib-door-runtime")
@@ -100,6 +109,11 @@ kotlin {
         jvmMain {
             dependsOn commonJvmMain
             dependencies {
+                compileOnly project(":app-ktor-server")
+                implementation "io.ktor:ktor-server-servlet:$version_ktor"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation "io.ktor:ktor-gson:$version_ktor"
+
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
@@ -112,7 +126,6 @@ kotlin {
 
         androidMain {
             dependsOn commonJvmMain
-            kotlin.srcDirs += ["src/commonJvmMain/kotlin"]
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"

@@ -75,7 +75,7 @@
     <string name="contents">Мундариҷа</string>
     <string name="students">Хонандагон</string>
     <string name="forgot_password">Паролро фаромӯш кардам</string>
-    <string name="account">Саҳифа</string>
+    <string name="account">Ҳисоб</string>
     <string name="share_application">Мубодила кардани барнома</string>
     <string name="share">Мубодила намоед</string>
     <string name="send">Фиристонед</string>
@@ -109,12 +109,10 @@
     <string name="download_continue_btn_label">Идома диҳед</string>
     <string name="download_wifi_only">Танҳо WiFi</string>
     <string name="download_calculating">Ҳисоб карда истодааст …</string>
-    <string name="download_state_download">
-        <b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$sи захирахагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
+    <string name="download_state_download"><b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$sи захирахагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="content_font_24">24pt</string>
     <string name="schools">Муассисаҳои таълимӣ</string>
-    <string name="download_state_downloading">
-        <b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s -и захираи дастгоҳи шуморо истифода хоҳанд кард.</string>
+    <string name="download_state_downloading"><b>Боргирӣ</b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s -и захираи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="download_downloading_placeholder">Боргирии %1$s аз %2$s</string>
     <string name="download_summary_title">Боргирии фаъол %1$s</string>
     <string name="download_cancel_all">Ҳамаро бекор кардан</string>
@@ -621,8 +619,7 @@
     <string name="student_progress">Пешрафти хонанда</string>
     <string name="use_device_language">Забони дастгоҳ</string>
     <string name="location_permission_details">Ин барнома Bluetooth ва WiFi-ро барои ёфтани корбарони дигар дар наздикӣ истифода мебарад. Он гоҳ барнома метавонад бо корбарони наздик бо суръати баланд боркаш кардани мундариҷаро бидуни дархости дастрасӣ ба Интернет имконият диҳад. Азбаски ин амалро барои муайян кардани макони шумо истифода бурдан мумкин аст, шумо бояд барои муайян кардани ҷойгиршавӣ иҷозат диҳед. Ин барнома натиҷаҳои ин амал ва макони шуморо бо ягон роҳ сабт намекунад. Ин барнома аз рамзи кушодаасос сохта шудааст, ки онро дар github.com/UstadMobile/UstadMobile санҷидан мумкин аст</string>
-    <string name="download_state_downloaded">
-        <b>Бор гардид </b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s-и захирагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
+    <string name="download_state_downloaded"><b>Бор гардид </b> ҳамагӣ %1$s мавод, онҳо ҳамагӣ %2$s-и захирагоҳи дастгоҳи шуморо истифода хоҳанд кард.</string>
     <string name="download_storage_option_device">Истифодаи %1$s - аз %2$s озод</string>
     <string name="download_storage_permission_message">Ин барнома барои зеркашӣ ва нигоҳ доштани мундариҷа дар корти SD иҷозати файлро талаб мекунад</string>
     <string name="insufficient_space">Ҷойи кофии нигоҳдории мундариҷа мавҷуд нест</string>
@@ -796,8 +793,7 @@
     <string name="id_verbentity_urlid">ID: %s</string>
     <string name="verb">Феъл</string>
     <string name="report">Гузориш</string>
-    <string name="supported_files">Файлҳои дастгиршаванда: <b> Видео, Аудио, EPUB, Xapi Zip, H5P</b>
-    </string>
+    <string name="supported_files">Файлҳои дастгиршаванда: <b> Видео, Аудио, EPUB, Xapi Zip, H5P</b></string>
     <string name="file_required_prompt">Файли воридшаванда интихоб карда нашудааст, бори дигар кӯшиш кунед</string>
     <string name="video">Видео</string>
     <string name="content_type">Навъи мӯҳтаво</string>
@@ -832,12 +828,12 @@
     <string name="my">%1$s-и ман</string>
     <string name="create_account">Таъсиси саҳифа</string>
     <string name="connect_as_guest">Ҳамчун меҳмон пайваст шавед</string>
-    <string name="create_workspace_organisation">Дар Ustad Mobile барои хонандагон ва омӯзгорони муассисаи худ як фазои кории нав эҷод кунед</string>
-    <string name="create_organisation">Таъсиси фазои нави корӣ</string>
-    <string name="existing_organisation">Муассисаи шумо аллакай Ustad Mobile-ро истифода мебарад</string>
-    <string name="join_existing_workspace">Ҳамроҳ шудан ба фазои кории мавҷуда</string>
+    <string name="create_site_text">Дар Ustad Mobile барои хонандагон ва омӯзгорони муассисаи худ як фазои кории нав эҷод кунед</string>
+    <string name="create_site">Таъсиси фазои нави корӣ</string>
+    <string name="existing_site_text">Муассисаи шумо аллакай Ustad Mobile-ро истифода мебарад</string>
+    <string name="connect_to_existing_site">Ҳамроҳ шудан ба фазои кории мавҷуда</string>
     <string name="access_open_education">Шахсан ба ҳазорон захираҳои таълимии кушода дастрасӣ пайдо кунед</string>
-    <string name="use_public_library">Аз китобхонаи ҷамъиятӣ истифода баред</string>
+    <string name="use_public_library_site">Аз китобхонаи ҷамъиятӣ истифода баред</string>
     <string name="organisation">%1$s-и муассиса</string>
     <string name="workspace">Фазои корӣ</string>
     <string name="not_answered">Ҷавоб надод</string>
@@ -920,4 +916,18 @@
     <string name="school_code">Рамзи муассисаи таълимӣ</string>
     <string name="entity_code">%1$s рамз</string>
     <string name="join_code_instructions">Дархости рамз аз омӯзгор ва ворид намудани он дар зер:</string>
+    <string name="record_for_student">Сабт барои хонанда</string>
+    <string name="add_a_new_occurrence">Воридоти навро илова кунед</string>
+    <string name="record_attendance_for_most_recent_occurrence">Сабти давомнокӣ барои охирин иштироки мавҷуда</string>
+    <string name="end_is_before_start_error">Анҷом пеш аз оғоз аст</string>
+    <string name="moved_x_entries">Вурудоти %1$s интиқол дода шудааст</string>
+    <string name="open_folder">Ҷувздонро кушо</string>
+    <string name="show_hidden_items">Қисматҳои пинҳоншударо нишон деҳ</string>
+    <string name="compress">Пахш намо</string>
+    <string name="unhide">Дубора кушо</string>
+    <string name="hide">Пинҳон намо</string>
+    <string name="move">Интиқол деҳ</string>
+    <string name="uploading">Таҳти боргирӣ</string>
+    <string name="processing">Таҳти коркард</string>
+    <string name="confirm_delete_message">Шумо ҳақиқатан мехоҳед ин вурудро аз дастгоҳи худ нест кунед\?</string>
 </resources>

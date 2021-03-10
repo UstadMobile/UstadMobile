@@ -3,6 +3,7 @@ package com.ustadmobile.core.util.ext
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.tincan.UmAccountGroupActor
 import com.ustadmobile.lib.db.entities.LearnerGroupMemberWithPerson
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 
 
@@ -23,3 +24,10 @@ fun UmAccount?.toXapiGroupJsonObject(memberList: List<LearnerGroupMemberWithPers
 
 val UmAccount.userAtServer: String
     get() = "$username@$endpointUrl"
+
+fun UmAccount.asPerson(admin: Boolean = false) = Person().also {
+    it.firstNames = firstName
+    it.lastName = lastName
+    it.personUid = personUid
+    it.admin = admin
+}

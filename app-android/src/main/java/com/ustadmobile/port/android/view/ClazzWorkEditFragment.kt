@@ -6,37 +6,28 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.core.os.bundleOf
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
-import androidx.paging.DataSource
-import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkEditBinding
-import com.toughra.ustadmobile.databinding.ItemClazzworkquestionBinding
 import com.toughra.ustadmobile.databinding.ItemContentEntrySimpleListBinding
 import com.ustadmobile.core.controller.ClazzWorkEditPresenter
-import com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.ContentEntryListItemListener
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.db.dao.ClazzWorkDao
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkEditView
 import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.ListViewMode
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.door.DoorMutableLiveData
-import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptions
-import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
@@ -51,7 +42,7 @@ interface ClazzWorkEditFragmentEventHandler {
 }
 
 class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
-        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption>,
+        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>,
         ClazzWorkEditFragmentEventHandler, ContentEntryListItemListener {
 
 
@@ -76,11 +67,6 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             holder.binding.contentEntry = getItem(position)
         }
     }
-
-
-
-    override val viewContext: Any
-        get() = requireContext()
 
     var mBinding: FragmentClazzWorkEditBinding? = null
 
@@ -150,11 +136,9 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             val contentEntrySelected = it.firstOrNull()?:return@observeResult
             mPresenter?.handleAddOrEditContent(contentEntrySelected)
         }
-
     }
 
     override var timeZone: String = ""
-        get() = field
         set(value) {
             mBinding?.fragmentClazzWorkEditTimezoneTv?.text =
                     getText(R.string.class_timezone).toString() + " " + value
@@ -162,7 +146,6 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
         }
 
     override var entity: ClazzWork? = null
-        get() = field
         set(value) {
             field = value
             mBinding?.clazzWork = value
@@ -177,7 +160,6 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
 
     override var clazzWorkQuizQuestionsAndOptions:
             DoorMutableLiveData<List<ClazzWorkQuestionAndOptions>>? = null
-        get() = field
         set(value) {
             field?.removeObserver(questionObserver)
             field = value
@@ -203,8 +185,8 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             mBinding?.fieldsEnabled = value
         }
 
-    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: MessageIdOption) {
-        mBinding?.questionsVisibility = if(selectedOption.code ==
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
+        mBinding?.questionsVisibility = if(selectedOption.optionId ==
                 ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) View.VISIBLE else View.GONE
     }
 

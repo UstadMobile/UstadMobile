@@ -19,9 +19,10 @@ import com.ustadmobile.core.controller.OnBoardingPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil.bundleToMap
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.OnBoardingView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_FROM
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.coroutines.CompletableDeferred
+import org.kodein.di.direct
+import org.kodein.di.instance
 
 class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnItemClickListener {
 
@@ -39,8 +40,10 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
 
     private lateinit var screenList: List<OnBoardScreen>
 
-    override val viewContext: Any
-        get() = this
+    //Do nothing - there isn't really any loading of this
+    override var loading: Boolean
+        get() = false
+        set(value) {}
 
     /**
      * Model for the the onboarding screen
@@ -103,9 +106,13 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
 
         pageIndicatorView?.setAnimationType(AnimationType.WORM)
 
+        //We have to put this here because there is no VIEW_NAME for MainActivity. This will
+        // have to be resolved by RedirectFragment
         getStartedBtn?.setOnClickListener {
             val intent = Intent(this, MainActivity::class.java)
-            intent.putExtra(ARG_FROM,OnBoardingView.VIEW_NAME)
+            val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+            systemImpl.setAppPref(OnBoardingView.PREF_TAG, true.toString(), this)
+
             startActivity(intent)
         }
 

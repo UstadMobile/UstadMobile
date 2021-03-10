@@ -1,5 +1,9 @@
 package com.ustadmobile.port.android.screen
 
+import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.agoda.kakao.image.KImageView
+import com.agoda.kakao.progress.KProgressBar
+import com.agoda.kakao.recycler.KRecyclerView
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
@@ -11,6 +15,16 @@ object ContentEntryDetailScreen : KScreen<ContentEntryDetailScreen>() {
     override val viewClass: Class<*>?
         get() = ContentEntry2DetailFragment::class.java
 
-    val groupActivityButton = KTextView { withId(R.id.entry_detail_group_activity_button) }
+    val entryTitleTextView = KTextView { withId(R.id.entry_detail_title)}
+
+    val progress = KProgressBar { withId(R.id.entry_detail_progress_bar)}
+
+    val progressCheck = KImageView { withId(R.id.content_progress_fail_correct)}
+
+    val translationsList: KRecyclerView = KRecyclerView({
+        withId(R.id.availableTranslationView)
+    }, itemTypeBuilder = {
+
+    })
 
 }

@@ -2,6 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
+import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.util.RANGE_CONTENT_ACCEPT_RANGE_HEADER
 import com.ustadmobile.lib.util.RANGE_CONTENT_RANGE_HEADER
@@ -23,11 +24,13 @@ import io.ktor.util.toMap
 import io.ktor.utils.io.ByteWriteChannel
 import io.ktor.utils.io.close
 import io.ktor.utils.io.jvm.javaio.toOutputStream
+import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.File
 import org.kodein.di.ktor.di
 import org.kodein.di.on
 
+@Deprecated("Use ConcatenatedResponse2")
 suspend fun PipelineContext<*, ApplicationCall>.serveConcatenatedResponse(db: UmAppDatabase) {
     val entryFileListStr = call.parameters["entryFileList"]
     if(entryFileListStr == null) {
@@ -84,6 +87,60 @@ suspend fun PipelineContext<*, ApplicationCall>.serveConcatenatedResponse(db: Um
 
 
 fun Route.ContainerDownload() {
+
+    suspend fun PipelineContext<*, ApplicationCall>.serveConcatenatedResponse2() {
+        val entryMd5s = call.parameters["entryFileMd5s"]
+
+        if(entryMd5s == null) {
+            call.respond(HttpStatusCode.BadRequest, "entryFileMd5s parameter missing")
+            return
+        }
+
+        val db : UmAppDatabase = di().direct.on(call).instance(tag = DoorTag.TAG_DB)
+
+        val concatenatedResponse = db.containerEntryFileDao.generateConcatenatedFilesResponse2(
+                entryMd5s, call.request.headers.toMap(), db)
+
+        val headers = Headers.build {
+            set(RANGE_CONTENT_ACCEPT_RANGE_HEADER, "bytes")
+
+            concatenatedResponse.rangeResponse?.responseHeaders?.get(RANGE_CONTENT_RANGE_HEADER)?.also {
+                set(RANGE_CONTENT_RANGE_HEADER, it)
+            }
+        }
+
+        call.respond(object: OutgoingContent.WriteChannelContent() {
+            override val contentType = ContentType.Application.OctetStream
+
+            override val headers: Headers
+                get() = headers
+
+            override val contentLength: Long
+                get() = concatenatedResponse.actualContentLength
+
+            override val status: HttpStatusCode = HttpStatusCode.allStatusCodes
+                    .find { it.value == concatenatedResponse.status } ?: HttpStatusCode.InternalServerError
+
+            override suspend fun writeTo(channel: ByteWriteChannel) {
+                channel.toOutputStream().also {
+                    if(call.request.httpMethod != HttpMethod.Head) {
+                        concatenatedResponse.writeTo(it)
+                    }
+
+                    it.close()
+                }
+            }
+        })
+    }
+
+    get("${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/{entryFileMd5s}") {
+        serveConcatenatedResponse2()
+    }
+
+    head("${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/{entryFileMd5s}") {
+        serveConcatenatedResponse2()
+    }
+
     route("ContainerEntryList") {
         get("findByContainerWithMd5") {
             val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)

@@ -11,8 +11,6 @@ import com.toughra.ustadmobile.databinding.Item@ListItemName@ListBinding
 import com.ustadmobile.core.controller.@BaseFileName@Presenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.impl.UmAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.@BaseFileName@View
@@ -26,6 +24,7 @@ import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
 
+
 class @BaseFileName@Fragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>(),
         @BaseFileName@View, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
@@ -37,11 +36,8 @@ class @BaseFileName@Fragment(): UstadListViewFragment<@Entity@, @DisplayEntity@>
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        mPresenter = @BaseFileName@Presenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
-                this, this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
+        mPresenter = @BaseFileName@Presenter(requireContext(), arguments.toStringMap(), this,
+                viewLifecycleOwner, di)
 
         mDataRecyclerViewAdapter = @BaseFileName@RecyclerAdapter(mPresenter)
         val createNewText = requireContext().getString(R.string.create_new,

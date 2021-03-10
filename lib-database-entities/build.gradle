@@ -10,9 +10,18 @@ android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+    }
+
     defaultConfig {
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
+        minSdkVersion 21
+        targetSdkVersion 29
     }
 }
 
@@ -37,6 +46,7 @@ kotlin {
 
     android()
 
+    /* JS is disabled until after Kotlin 1.4 upgrade
     js {
         nodejs()
 
@@ -46,7 +56,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
-
+    */
 
     jvm {
         compilations.main.kotlinOptions {
@@ -61,6 +71,7 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
                 implementation project(":lib-database-annotations")
+                implementation project(":lib-door-runtime")
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
                 compileOnly project(":lib-room-annotations")
 

@@ -128,6 +128,10 @@ Entities are plain Kotlin classes that are used with Room persistence (and on JD
 
 ### Conventions
 
+#### Spelling
+
+Use US English spellings, the same as system libraries etc.
+
 #### runOnUiThread
 
 It is the job of the presenter to call runOnUiThread when needed. *DO NOT* put runOnUiThread in the view itself.

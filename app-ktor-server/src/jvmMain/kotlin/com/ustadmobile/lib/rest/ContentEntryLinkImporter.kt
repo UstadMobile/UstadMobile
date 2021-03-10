@@ -45,16 +45,19 @@ fun Route.ContentEntryLinkImporter() {
             val url = call.request.queryParameters["url"]?: ""
             val contentEntry = call.receive<ContentEntryWithLanguage>()
             val scraperType = call.request.queryParameters["scraperType"] ?: ""
+            val conversionParams = call.request.queryParameters["conversionParams"]
 
             val db: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_DB)
+            val repo: UmAppDatabase by di().on(call).instance(tag = DoorTag.TAG_REPO)
             val entryFromDb = db.contentEntryDao.findByUid(contentEntry.contentEntryUid)
             if (entryFromDb == null) {
-                db.contentEntryDao.insertWithReplace(contentEntry)
+                repo.contentEntryDao.insertWithReplace(contentEntry)
             }
 
             val scraperManager: ScraperManager by di().on(call).instance()
             try {
-                scraperManager.start(url, scraperType, parentUid, contentEntry.contentEntryUid, true)
+                scraperManager.start(url, scraperType, parentUid, contentEntry.contentEntryUid,
+                        true, conversionParams)
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, "Unsupported")
                 return@post

@@ -6,8 +6,6 @@ import android.view.*
 import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.children
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
@@ -25,6 +23,8 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.IdOption
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toStringMap
@@ -34,7 +34,7 @@ import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.port.android.view.ext.repoLoadingStatus
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -46,7 +46,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
     protected var mRecyclerView: RecyclerView? = null
 
-    internal var mNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+    internal var mUstadListHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
 
     protected var mListStatusAdapter: ListStatusRecyclerViewAdapter<DT>? = null
 
@@ -92,7 +92,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         get() = field
         set(value) {
             field = value
-            //todo: invalidate options if required
+            actionMode?.invalidate()
         }
 
     // See https://developer.android.com/guide/topics/ui/menus#CAB
@@ -112,24 +112,20 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         }
 
         override fun onCreateActionMode(mode: ActionMode, menu: Menu): Boolean {
-            val systemImpl = UstadMobileSystemImpl.instance
-            val fragmentContext = fragmentHost?.requireContext() ?: return false
-
-            fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
-                menu.add(0, item.commandId, index,
-                        systemImpl.getString(item.messageId, fragmentContext)).apply {
-                    val drawable = fragmentContext.getDrawable(SELECTION_ICONS_MAP[item]
-                            ?: R.drawable.ic_delete_black_24dp) ?: return@forEachIndexed
-                    DrawableCompat.setTint(drawable, ContextCompat.getColor(fragmentContext, R.color.onBackgroundColor))
-                    icon = drawable
-                }
-            }
-
             return true
         }
 
         override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-            return false // if nothing has changed
+            menu.clear()
+            val systemImpl = UstadMobileSystemImpl.instance
+            val fragmentContext = fragmentHost?.requireContext() ?: return false
+            fragmentHost?.selectionOptions?.forEachIndexed { index, item ->
+                val optionText = systemImpl.getString(item.messageId, fragmentContext)
+                menu.add(0, item.commandId, index, optionText).apply {
+                    setIcon(SELECTION_ICONS_MAP[item] ?: R.drawable.ic_delete_black_24dp)
+                }
+            }
+            return true
         }
 
         override fun onDestroyActionMode(mode: ActionMode) {
@@ -165,6 +161,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
                         }
                 actionMode = (activity as? AppCompatActivity)?.startSupportActionMode(
                         actionModeCallbackVal)
+                listPresenter?.handleSelectionOptionChanged(t)
             } else if (actionModeVal != null && t.isNullOrEmpty()) {
                 actionModeVal.finish()
             }
@@ -208,6 +205,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
         searchManager?.searchListener = listPresenter
+        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -217,7 +215,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
 
         if (autoMergeRecyclerViewAdapter) {
-            mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
+            mMergeRecyclerViewAdapter = MergeAdapter(mUstadListHeaderRecyclerViewAdapter,
                     mDataRecyclerViewAdapter, mListStatusAdapter)
             mRecyclerView?.adapter = mMergeRecyclerViewAdapter
             mDataRecyclerViewAdapter?.selectedItemsLiveData?.observe(this.viewLifecycleOwner,
@@ -256,12 +254,24 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         get() = field
         set(value) {
             mDataBinding?.addMode = value
-            mNewItemRecyclerViewAdapter.takeIf { autoMergeRecyclerViewAdapter }?.newItemVisible =
+            mUstadListHeaderRecyclerViewAdapter.takeIf { autoMergeRecyclerViewAdapter }?.newItemVisible =
                     (value == ListViewAddMode.FIRST_ITEM)
             fabManager?.takeIf { autoShowFabOnAddPermission }?.visible =
                     (value == ListViewAddMode.FAB)
 
             field = value
+        }
+
+    override var listFilterOptionChips: List<ListFilterIdOption>? = null
+        set(value) {
+            mUstadListHeaderRecyclerViewAdapter?.filterOptions = value ?: listOf()
+            field = value
+        }
+
+    override var checkedFilterOptionChip: ListFilterIdOption?
+        get() = mUstadListHeaderRecyclerViewAdapter?.selectedFilterOption
+        set(value) {
+            mUstadListHeaderRecyclerViewAdapter?.selectedFilterOption = value
         }
 
     override var list: DataSource.Factory<Int, DT>? = null
@@ -281,12 +291,12 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     }
 
     override fun onMessageIdOptionSelected(view: AdapterView<*>?,
-                                           messageIdOption: MessageIdOption) {
+                                           messageIdOption: IdOption) {
         listPresenter?.handleClickSortOrder(messageIdOption)
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {
-        mNewItemRecyclerViewAdapter?.sortOptionSelected = sortOption
+        mUstadListHeaderRecyclerViewAdapter?.sortOptionSelected = sortOption
         listPresenter?.onClickSort(sortOption)
     }
 
@@ -302,7 +312,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
 
     fun showSortOptionsFrag() {
-        SortBottomSheetFragment(listPresenter?.sortOptions, mNewItemRecyclerViewAdapter?.sortOptionSelected, this).also {
+        SortBottomSheetFragment(listPresenter?.sortOptions, mUstadListHeaderRecyclerViewAdapter?.sortOptionSelected, this).also {
             it.show(childFragmentManager, it.tag)
         }
     }
@@ -320,9 +330,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
 
-    override val viewContext: Any
-        get() = requireContext()
-
     override fun onAttach(context: Context) {
         super.onAttach(context)
         mActivityWithFab = context as? UstadListViewActivityWithFab
@@ -337,7 +344,10 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
         val SELECTION_ICONS_MAP =
                 mapOf(SelectionOption.EDIT to R.drawable.ic_edit_white_24dp,
-                        SelectionOption.DELETE to R.drawable.ic_delete_black_24dp)
+                        SelectionOption.DELETE to R.drawable.ic_delete_black_24dp,
+                        SelectionOption.MOVE to R.drawable.ic_move,
+                        SelectionOption.HIDE to R.drawable.ic_baseline_visibility_off_24,
+                        SelectionOption.UNHIDE to R.drawable.ic_baseline_visibility_24)
 
     }
 

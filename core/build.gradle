@@ -26,9 +26,13 @@ android {
         }
     }
 
+    packagingOptions {
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+    }
+
     defaultConfig {
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
+        minSdkVersion 21
+        targetSdkVersion 29
         missingDimensionStrategy 'api', 'api18'
         multiDexEnabled true
     }
@@ -78,7 +82,7 @@ task copyTestResources(type: Copy) {
  * for further information.
  */
 task prepareLocale {
-    inputs.files(fileTree(dir: project.file("locale")).matching { include '*.xml' })
+    inputs.files(fileTree(dir: project.file("locale")).matching { include '**/*.xml' })
     outputs.file("build/generated/source/umlocale/com/ustadmobile/core/generated/locale/MessageID.kt")
 
     doFirst {
@@ -158,6 +162,7 @@ kotlin {
 
     }
 
+    /* JS is disabled until upgrade to Kotlin1.4
     js("js") {
         nodejs()
 
@@ -168,6 +173,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
+    */
 
 
 
@@ -191,6 +197,7 @@ kotlin {
                 implementation "io.ktor:ktor-io:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
                 implementation "com.github.aakira:napier:$version_napier"
+                implementation "io.ktor:ktor-gson:$version_ktor"
                 implementation "org.jetbrains.kotlinx:atomicfu-common:$version_atomicfu"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation project(':lib-door-runtime')
@@ -208,6 +215,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
+                implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "org.jetbrains.kotlinx:atomicfu:$version_atomicfu"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
@@ -230,10 +238,7 @@ kotlin {
 
         commonTest {
             dependencies {
-                implementation project(":lib-database-mpp")
-                implementation project(":lib-database-entities")
-                implementation project(":lib-database")
-                implementation project(":lib-test-common")
+
             }
         }
 
@@ -242,6 +247,10 @@ kotlin {
                 implementation "junit:junit:$version_junit"
                 implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
+                implementation project(":lib-database-mpp")
+                implementation project(":lib-database-entities")
+                implementation project(":lib-database")
+                implementation project(":lib-test-common")
 
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                 implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
@@ -253,6 +262,8 @@ kotlin {
 
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
+
+                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
                 /*
                   For this to work in the IDE, these need to be API instead of implementation
@@ -273,6 +284,7 @@ kotlin {
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "net.sf.kxml:kxml2:$version_kxml"
                 implementation "com.google.code.gson:gson:$version_gson"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
                 //end SharedSE Android and JVM dependencies
             }
         }
@@ -296,6 +308,8 @@ kotlin {
                 implementation "com.squareup.picasso:picasso:$version_android_picasso"
                 implementation "io.ktor:ktor-client-android:$version_ktor"
 
+                implementation 'com.linkedin.android.litr:litr:1.4.3'
+
                 //dependency injection
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
@@ -305,40 +319,7 @@ kotlin {
             dependsOn commonJvmMain
         }
 
-        androidTest{
-            dependencies{
-                implementation "junit:junit:$version_junit"
-                implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.github.aakira:napier-android:$version_napier"
-                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
-
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-
-                implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "androidx.test:runner:$version_android_junit_runner"
-                implementation "androidx.test:rules:$version_android_junit_runner"
-
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-
-                api project(":sharedse")
-                api project(":lib-room-annotations")
-                api project(":core")
-                api project(":lib-database-annotations")
-                api project(":lib-database-android")
-                api project(":lib-door-runtime")
-                api project(":lib-database-mpp")
-
-                implementation "org.robolectric:robolectric:$version_android_roboelectric"
-            }
-        }
-
-        jsMain {
+        /*jsMain {
             dependencies {
                 implementation project(":lib-database-mpp")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
@@ -351,7 +332,7 @@ kotlin {
                 implementation "io.ktor:ktor-io-js:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
             }
-        }
+        }*/
 
     }
 }

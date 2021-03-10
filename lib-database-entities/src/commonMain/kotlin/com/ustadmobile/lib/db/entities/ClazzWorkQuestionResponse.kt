@@ -8,7 +8,24 @@ import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
-@SyncableEntity(tableId = 209)
+@SyncableEntity(tableId = ClazzWorkQuestionResponse.TABLE_ID,
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzWorkQuestionResponse.TABLE_ID} AS tableId FROM 
+        ChangeLog
+        JOIN ClazzWorkQuestionResponse ON ChangeLog.chTableId = ${ClazzWorkQuestionResponse.TABLE_ID} AND ChangeLog.chEntityPk = ClazzWorkQuestionResponse.clazzWorkQuestionResponseUid
+        JOIN Person ON Person.personUid = ClazzWorkQuestionResponse.clazzWorkQuestionResponsePersonUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
+    syncFindAllQuery = """
+        SELECT ClazzWorkQuestionResponse.* FROM
+        ClazzWorkQuestionResponse
+        JOIN Person ON Person.personUid = ClazzWorkQuestionResponse.clazzWorkQuestionResponsePersonUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+    """)
 @Entity
 @Serializable
 open class ClazzWorkQuestionResponse {
@@ -29,8 +46,6 @@ open class ClazzWorkQuestionResponse {
 
     var clazzWorkQuestionResponsePersonUid: Long = 0
 
-    var clazzWorkQuestionResponseClazzMemberUid: Long = 0
-
     var clazzWorkQuestionResponseInactive: Boolean = false
 
     var clazzWorkQuestionResponseDateResponded: Long = 0
@@ -45,4 +60,7 @@ open class ClazzWorkQuestionResponse {
     var clazzWorkQuestionResponseLCB: Int = 0
 
 
+    companion object {
+        const val TABLE_ID = 209
+    }
 }

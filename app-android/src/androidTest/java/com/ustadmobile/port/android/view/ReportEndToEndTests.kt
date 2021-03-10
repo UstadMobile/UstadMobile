@@ -1,119 +1,153 @@
 package com.ustadmobile.port.android.view
 
 import android.app.Application
+import android.content.Context
+import android.content.Intent
+import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
-import androidx.test.espresso.Espresso.onIdle
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.action.ViewActions.click
-import androidx.test.espresso.assertion.ViewAssertions
-import androidx.test.espresso.matcher.ViewMatchers
-import androidx.test.espresso.matcher.ViewMatchers.withId
-import androidx.test.espresso.matcher.ViewMatchers.withText
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
-import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportWithFilters
-import com.ustadmobile.port.android.generated.MessageIDMap
-import com.ustadmobile.port.android.view.ReportEditFragmentTest.Companion.fillFields
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
-import com.ustadmobile.test.port.android.UmAndroidTestUtil
+import com.ustadmobile.core.view.ReportListView
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.port.android.screen.*
 import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
-import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.test.rules.withScenarioIdlingResourceRule
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
-import org.hamcrest.Matchers
-import org.hamcrest.core.AllOf
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 
+@RunWith(AndroidJUnit4::class)
 @AdbScreenRecord("Report end-to-end test")
-class ReportEndToEndTests {
+class ReportEndToEndTests : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
+    val impl = UstadMobileSystemImpl.instance
 
     private val context = ApplicationProvider.getApplicationContext<Application>()
 
-    val impl =  UstadMobileSystemImpl.instance
-
     @Before
     fun setup() {
-        impl.messageIdMap = MessageIDMap.ID_MAP
         runBlocking {
-            dbRule.db.insertTestStatements()
+            dbRule.insertPersonForActiveUser(Person().apply {
+                admin = true
+                firstNames = "Bob"
+                lastName = "Jones"
+                personUid = 42
+            })
+            dbRule.repo.reportDao.initPreloadedTemplates()
+            dbRule.repo.insertTestStatements()
         }
-
     }
 
 
     @AdbScreenRecord("Given an empty report list, when the user clicks add report and fills in form, then the new report is shown in list")
-    //Temporarily disabled by 23/Jul/20 Mike due to two consecutive test failures on Android 7
-    //@Test
+    @Test
     fun givenEmptyReportList_whenUserClicksAddAndFillsInFormAndAddsToDashboardOnDetail_thenReportIsCreatedAndShownInList() {
-        val newClazzValues = ReportWithFilters().apply {
-            reportTitle = "Updated Report"
-            chartType = Report.BAR_CHART
-            yAxis = Report.SCORE
+        val reportToCreate = ReportWithSeriesWithFilters().apply {
+            reportTitle = "New Report"
             xAxis = Report.MONTH
-            subGroup = Report.GENDER
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
+            reportSeriesWithFiltersList = listOf(ReportSeries().apply {
+                reportSeriesName = "Series X"
+                reportSeriesVisualType = ReportSeries.BAR_CHART
+                reportSeriesSubGroup = Report.GENDER
+                reportSeriesYAxis = ReportSeries.INTERACTIONS_RECORDED
+                reportSeriesFilters = listOf(ReportFilter().apply {
+                    reportFilterField = ReportFilter.FIELD_PERSON_GENDER
+                    reportFilterCondition = ReportFilter.CONDITION_IS
+                    reportFilterDropDownValue = Person.GENDER_FEMALE
+                })
+            })
         }
 
-        val activityScenario = launchActivity<MainActivity>()
-                .withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        var activityScenario: ActivityScenario<MainActivity>? = null
+        init {
 
+            val context = ApplicationProvider.getApplicationContext<Context>()
+            val launchIntent = Intent(context, MainActivity::class.java).also {
+                it.putExtra(UstadView.ARG_NEXT,
+                        "${ReportListView.VIEW_NAME}")
+            }
+            activityScenario = launchActivity(launchIntent)
 
-        onView(withId(R.id.report_list_dest)).perform(click())
-        onView(withText(R.string.report)).perform(click())
+        }.run {
 
-        fillFields(report = newClazzValues, setFieldsRequiringNavigation = false, impl = impl, context = context)
+            MainScreen {
+                fab.click()
+            }
 
-        UmAndroidTestUtil.swipeScreenDown()
+            ReportTemplateScreen{
 
-        onIdle()
+                recycler.firstChild<ReportTemplateScreen.ReportTemplate> {
+                    title.click()
+                }
 
-        onView(AllOf.allOf(withId(R.id.item_createnew_line1_text),
-                ViewMatchers.isDescendantOfA(withId(R.id.fragment_edit_report_who_add_layout))))
-                .perform(click())
+            }
 
-        onIdle()
+            ReportEditScreen {
 
-        onView(withText("Hello World")).perform(click())
+                val reportOnForm = Report.FIXED_TEMPLATES[0]
+                val listOfSeries = Json.parse(ReportSeries.serializer().list, reportOnForm.reportSeries!!)
 
-        onView(withId(R.id.menu_done)).perform(click())
+                fillFields(updatedReport = reportToCreate,
+                        reportOnForm = ReportWithSeriesWithFilters(reportOnForm, listOfSeries),
+                        setFieldsRequiringNavigation = false,
+                        impl = impl, context = context, testContext = this@run)
 
-        onView(withId(R.id.preview_add_to_dashboard_button)).perform(click())
+            }
 
-        val createdReport = runBlocking {
-            dbRule.db.reportDao.findAllLive().waitUntilWithActivityScenario(activityScenario) { it.size == 1 }
-        }!!.first()
-        onView(Matchers.allOf(withId(R.id.item_reportlist_report_cl), ViewMatchers.withTagValue(Matchers.equalTo(createdReport.reportUid))))
-                .check(ViewAssertions.matches(ViewMatchers.isDisplayed()))
+            MainScreen {
+                menuDone.click()
+            }
+
+            ReportDetailScreen {
+
+                addToListButton {
+                    click()
+                }
+
+            }
+
+            val createdReport = runBlocking {
+                dbRule.db.reportDao.findAllActiveReportLive(false)
+                        .waitUntilWithActivityScenario(activityScenario!!) { it.size == 1 }
+            }!!.first()
+
+            ReportListScreen {
+
+                recycler {
+
+                    childWith<ReportListScreen.Report> {
+                        withTag(createdReport.reportUid)
+                    } perform {
+                        reportTitle {
+                            hasText(reportToCreate.reportTitle!!)
+                        }
+                    }
+                }
+
+            }
+
+        }
 
     }
 

@@ -62,10 +62,10 @@ class ReportListPresenterTest {
 
     @Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val testEntity = Report().apply {
             //set variables here
-            reportUid = db.reportDao.insert(this)
+            reportUid = repo.reportDao.insert(this)
         }
 
         val presenterArgs = mapOf<String,String>()
@@ -74,7 +74,7 @@ class ReportListPresenterTest {
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
-        verify(repoReportDaoSpy, timeout(5000)).findAllActiveReportByUserAsc(0)
+        verify(repoReportDaoSpy, timeout(5000)).findAllActiveReport(any(), any(), any(), eq(false))
         verify(mockView, timeout(5000)).list = any()
 
         //TODO: verify any other properties that the presenter should set on the view
@@ -82,13 +82,13 @@ class ReportListPresenterTest {
 
     @Test
     fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
-        val db: UmAppDatabase by di.activeDbInstance()
+        val repo: UmAppDatabase by di.activeRepoInstance()
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
         val presenterArgs = mapOf<String,String>()
         val testEntity = Report().apply {
             //set variables here
-            reportUid = db.reportDao.insert(this)
+            reportUid = repo.reportDao.insert(this)
         }
         val presenter = ReportListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
@@ -101,6 +101,5 @@ class ReportListPresenterTest {
                 eq(mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())), any())
     }
 
-    //TODO: Add tests for other scenarios the presenter is expected to handle - e.g. different filters, etc.
 
 }

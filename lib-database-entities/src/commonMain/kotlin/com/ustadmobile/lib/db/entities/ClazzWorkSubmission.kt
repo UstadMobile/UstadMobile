@@ -9,7 +9,24 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 @Entity
-@SyncableEntity(tableId = 206)
+@SyncableEntity(tableId = ClazzWorkSubmission.TABLE_ID,
+    notifyOnUpdate = ["""
+        SELECT DISTINCT DeviceSession.dsDeviceId AS deviceId, ${ClazzWorkSubmission.TABLE_ID} AS tableId FROM 
+        ChangeLog
+        JOIN ClazzWorkSubmission ON ChangeLog.chTableId = ${ClazzWorkSubmission.TABLE_ID} AND ChangeLog.chEntityPk = ClazzWorkSubmission.clazzWorkSubmissionUid
+        JOIN Person ON Person.personUid = ClazzWorkSubmission.clazzWorkSubmissionPersonUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid"""],
+    syncFindAllQuery = """
+        SELECT ClazzWorkSubmission.* FROM
+        ClazzWorkSubmission
+        JOIN Person ON Person.personUid = ClazzWorkSubmission.clazzWorkSubmissionPersonUid
+        JOIN Person Person_With_Perm ON Person_With_Perm.personUid IN 
+            ( ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT1} 0 ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_CLAZZWORK_VIEWSTUDENTPROGRESS} ${Person.ENTITY_PERSONS_WITH_PERMISSION_PT4} )
+        JOIN DeviceSession ON DeviceSession.dsPersonUid = Person_With_Perm.personUid
+        WHERE DeviceSession.dsDeviceId = :clientId
+    """)
 @Serializable
 open class ClazzWorkSubmission() {
 
@@ -17,10 +34,6 @@ open class ClazzWorkSubmission() {
     var clazzWorkSubmissionUid: Long = 0
 
     var clazzWorkSubmissionClazzWorkUid : Long = 0
-
-    var clazzWorkSubmissionClazzMemberUid : Long = 0
-
-    var clazzWorkSubmissionMarkerClazzMemberUid: Long = 0
 
     var clazzWorkSubmissionMarkerPersonUid: Long = 0
 
@@ -50,5 +63,8 @@ open class ClazzWorkSubmission() {
     @LastChangedBy
     var clazzWorkSubmissionLCB: Int = 0
 
+    companion object {
+        const val TABLE_ID = 206
+    }
 
 }

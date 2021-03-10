@@ -1,10 +1,12 @@
 package com.ustadmobile.core.controller
 
+import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.mock
 import com.nhaarman.mockitokotlin2.timeout
 import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -48,6 +50,7 @@ class ContentEntryImportLinkPresenterTest {
 
         di = DI {
             bind<UstadAccountManager>() with singleton { accountManager }
+            bind<Gson>() with singleton { Gson() }
         }
 
 
@@ -62,11 +65,11 @@ class ContentEntryImportLinkPresenterTest {
 
         var importedContentEntryMetaData = ImportedContentEntryMetaData(
                 ContentEntryWithLanguage(), "application/epub+zip",
-                "file://abc.zip", 1, "googleDriveScraper")
+                "file://abc.zip", "googleDriveScraper")
 
         var response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json")
-        response.body = Buffer().write(Json.stringify(ImportedContentEntryMetaData.serializer(),
-                importedContentEntryMetaData).toByteArray())
+        response.body = Buffer().write(
+                safeStringify(di, ImportedContentEntryMetaData.serializer(), importedContentEntryMetaData).toByteArray())
 
         mockWebServer.enqueue(response)
 

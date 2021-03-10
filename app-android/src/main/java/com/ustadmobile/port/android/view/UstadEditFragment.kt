@@ -18,9 +18,6 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
 
     abstract protected val mEditPresenter : UstadEditPresenter<*, T>?
 
-    override val viewContext: Any
-        get() = requireContext()
-
     override fun finishWithResult(result: List<T>) {
         saveResultToBackStackSavedStateHandle(result)
     }
@@ -65,6 +62,6 @@ abstract class UstadEditFragment<T: Any>: UstadBaseFragment(), UstadEditView<T> 
         outState.putAll(mutableMapOf<String, String>().apply { mEditPresenter?.onSaveInstanceState(this) }.toBundle())
     }
 
-    protected fun onSaveStateToBackStackStateHandle() = mEditPresenter?.saveStateToCurrentBackStackStateHandle(findNavController())
+    protected open fun onSaveStateToBackStackStateHandle() = mEditPresenter?.saveStateToCurrentBackStackStateHandle(findNavController())
 
 }

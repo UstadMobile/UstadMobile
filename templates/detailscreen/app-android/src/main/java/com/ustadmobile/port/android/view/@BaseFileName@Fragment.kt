@@ -6,24 +6,28 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.Fragment@Entity@DetailBinding
 import com.ustadmobile.core.controller.@Entity@DetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.impl.UmAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.@Entity@DetailView
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.core.view.EditButtonMode
+import com.ustadmobile.port.android.util.ext.*
 @DisplayEntity_Import@
 
-interface @Entity@DetailFragmentEventHandler {
+interface @BaseFileName@FragmentEventHandler {
 
 }
 
-class @Entity@DetailFragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@DetailView, @Entity@DetailFragmentEventHandler {
+class @BaseFileName@Fragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@DetailView, @Entity@DetailFragmentEventHandler {
 
     private var mBinding: Fragment@Entity@DetailBinding? = null
 
     private var mPresenter: @Entity@DetailPresenter? = null
+
+    override val detailPresenter: UstadDetailPresenter<*, *>?
+        get() = mPresenter
+
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
@@ -31,14 +35,13 @@ class @Entity@DetailFragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@De
             rootView = it.root
         }
 
-        mPresenter = @Entity@DetailPresenter(requireContext(), arguments.toStringMap(), this,
-                this, UstadMobileSystemImpl.instance,
-                UmAccountManager.getActiveDatabase(requireContext()),
-                UmAccountManager.getRepositoryForActiveAccount(requireContext()),
-                UmAccountManager.activeAccountLiveData)
-        mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
-
         return rootView
+    }
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        mPresenter = @Entity@DetailPresenter(requireContext(), arguments.toStringMap(), this,
+                viewLifecycleOwner, di)
+        mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
     }
 
     override fun onDestroyView() {
@@ -48,24 +51,11 @@ class @Entity@DetailFragment: UstadDetailFragment<@DisplayEntity@>(), @Entity@De
         entity = null
     }
 
-    override fun onResume() {
-        super.onResume()
-
-        //TODO: Set title here
-    }
-
     override var entity: @DisplayEntity@? = null
         get() = field
         set(value) {
             field = value
             mBinding?.@Entity_VariableName@ = value
-        }
-
-    override var editButtonMode: EditButtonMode = EditButtonMode.GONE
-        get() = field
-        set(value) {
-            mBinding?.editButtonMode = value
-            field = value
         }
 
 }

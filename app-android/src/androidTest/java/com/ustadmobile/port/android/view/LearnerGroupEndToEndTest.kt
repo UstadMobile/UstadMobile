@@ -5,26 +5,28 @@ import android.content.Intent
 import androidx.test.core.app.ActivityScenario
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.core.app.launchActivity
+import androidx.test.espresso.Espresso.openActionBarOverflowOrOptionsMenu
 import androidx.test.espresso.Espresso.pressBack
 import androidx.test.espresso.web.webdriver.Locator
+import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.agoda.kakao.common.views.KView
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
-import com.ustadmobile.core.view.ContentEntry2DetailView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.test.rules.SystemImplTestNavHostRule
-import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.JobStatus
+import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.DownloadJobItem
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.*
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
-import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
+import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -38,7 +40,7 @@ class LearnerGroupEndToEndTest : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -46,7 +48,6 @@ class LearnerGroupEndToEndTest : TestCase() {
 
     @Before
     fun setup() {
-
         dbRule.insertPersonForActiveUser(Person().apply {
             admin = true
             firstNames = "Test"
@@ -70,7 +71,7 @@ class LearnerGroupEndToEndTest : TestCase() {
         val container = Container().apply {
             containerContentEntryUid = 1
             mimeType = "application/tincan+zip"
-            containerUid = dbRule.db.containerDao.insert(this)
+            containerUid = dbRule.repo.containerDao.insert(this)
         }
         val containerTmpDir = UmFileUtilSe.makeTempDir("xapicontent", "${System.currentTimeMillis()}")
         val testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)
@@ -103,7 +104,10 @@ class LearnerGroupEndToEndTest : TestCase() {
         }.run {
 
             ContentEntryDetailScreen {
-                groupActivityButton {
+                openActionBarOverflowOrOptionsMenu(getInstrumentation().targetContext)
+                KView {
+                    withText(R.string.group_activity)
+                } perform {
                     click()
                 }
             }
@@ -120,7 +124,7 @@ class LearnerGroupEndToEndTest : TestCase() {
                 }
             }
 
-            MainActivityScreen {
+            MainScreen {
                 fab {
                     click()
                 }
@@ -129,9 +133,12 @@ class LearnerGroupEndToEndTest : TestCase() {
             PersonListScreen {
                 recycler {
                     childWith<PersonListScreen.Person> {
-                        withDescendant { withText("New Student") }
+                        withDescendant { withId(R.id.item_person_text) }
                     } perform {
-                        click()
+                        personName{
+                            hasText("New Student")
+                            click()
+                        }
                     }
                 }
             }
@@ -163,7 +170,7 @@ class LearnerGroupEndToEndTest : TestCase() {
                     }
                 }
             }
-            MainActivityScreen{
+            MainScreen{
                 toolBarTitle{
                     hasDescendant { withText("Hello World Example") }
                     isDisplayed()
@@ -179,13 +186,14 @@ class LearnerGroupEndToEndTest : TestCase() {
                         .waitUntilWithActivityScenario(activityScenario!!){
                             it?.fullStatement?.contains("Group") == true
                         }
-                val groupActor = dbRule.repo.agentDao.getAgentByAnyId(account = "group:1", homepage = "http://localhost/")
+                val groupLearnerUid = statement!!.statementLearnerGroupUid
+                val groupActor = dbRule.repo.agentDao.getAgentByAnyId(account = "group:$groupLearnerUid", homepage = "http://localhost/")
                 Assert.assertEquals("Agent id matches on statement", groupActor!!.agentUid, statement!!.agentUid)
-                Assert.assertEquals("group id is same account name", "group:1", groupActor!!.agentAccountName)
+                Assert.assertEquals("group id is same account name", "group:$groupLearnerUid", groupActor!!.agentAccountName)
             }
             pressBack()
             ContentEntryDetailScreen {
-                groupActivityButton {
+                entryTitleTextView {
                     isVisible()
                     isDisplayed()
                 }

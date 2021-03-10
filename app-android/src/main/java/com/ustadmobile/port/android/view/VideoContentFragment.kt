@@ -2,6 +2,7 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.content.res.Configuration
+import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -24,6 +25,7 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.MimeTypes
 import com.google.android.exoplayer2.util.Util
+import com.google.android.exoplayer2.video.VideoListener
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentVideoContentBinding
 import com.ustadmobile.core.container.ContainerManager
@@ -50,7 +52,6 @@ interface VideoContentFragmentEventHandler {
 
 @ExperimentalStdlibApi
 class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentFragmentEventHandler {
-
 
     private var mBinding: FragmentVideoContentBinding? = null
 
@@ -83,6 +84,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             it.isPortrait = isPortrait
             it.activityVideoPlayerView.useController = !isPortrait
             (context as? MainActivity)?.slideBottomNavigation(isPortrait)
+            (context as? MainActivity)?.onAppBarExpand(isPortrait)
+            it.videoScroll.isNestedScrollingEnabled = isPortrait
         }
 
         if (savedInstanceState != null) {
@@ -91,7 +94,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             currentWindow = savedInstanceState.get(CURRENT_WINDOW) as Int
         }
 
-        mPresenter = VideoContentPresenter(viewContext,
+        mPresenter = VideoContentPresenter(requireContext(),
                 arguments.toStringMap(), this, di)
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())
 
@@ -109,6 +112,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         mBinding?.isPortrait = isPortrait
         mBinding?.activityVideoPlayerView?.useController = !isPortrait
         (context as? MainActivity)?.slideBottomNavigation(isPortrait)
+        (context as? MainActivity)?.onAppBarExpand(isPortrait)
+        mBinding?.videoScroll?.isNestedScrollingEnabled = isPortrait
     }
 
     override fun onDestroyView() {
@@ -144,13 +149,15 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         }
 
     private fun initializePlayer() {
-        player = SimpleExoPlayer.Builder(viewContext as Context).build()
+        player = SimpleExoPlayer.Builder(requireContext()).build()
         player?.addListener(videoListener)
         playerView?.player = player
         controlsView?.player = player
         player?.playWhenReady = playWhenReady
         player?.seekTo(currentWindow, playbackPosition)
     }
+
+
 
     fun setVideoParams(videoPath: String?, audioPath: ContainerEntryWithContainerEntryFile?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
         if (audioPath != null) {
@@ -165,11 +172,11 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             if (srtLangList.size > 1) {
 
                 subtitles?.visibility = View.VISIBLE
-                val arrayAdapter = ArrayAdapter(viewContext as Context,
+                val arrayAdapter = ArrayAdapter(requireContext(),
                         android.R.layout.select_dialog_singlechoice, srtLangList)
 
                 subtitles?.setOnClickListener {
-                    val builderSingle = AlertDialog.Builder(viewContext as Context)
+                    val builderSingle = AlertDialog.Builder(requireContext())
                     builderSingle.setTitle(R.string.select_subtitle_video)
                     builderSingle.setSingleChoiceItems(arrayAdapter, subtitleSelection) { dialogInterface, position ->
                         subtitleSelection = position
@@ -232,7 +239,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     }
 
     fun showError() {
-        showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, viewContext), {}, 0)
+        showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found,
+                requireContext()), {}, 0)
     }
 
     private var videoListener = object : Player.EventListener {
@@ -339,7 +347,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     }
 
     private fun buildMediaSource(uri: Uri): MediaSource {
-        val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(viewContext as Context, "UstadMobile")
+        val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(
+                requireContext(), "UstadMobile")
         return ProgressiveMediaSource.Factory(dataSourceFactory)
                 .createMediaSource(uri)
     }

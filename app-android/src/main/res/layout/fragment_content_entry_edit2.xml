@@ -7,7 +7,7 @@
         <import type="android.view.View"/>
         <import type="android.text.InputType" />
         <import type="com.ustadmobile.core.impl.UMStorageDir" />
-        <import type="com.ustadmobile.core.util.MessageIdOption"/>
+        <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="com.ustadmobile.core.controller.ContentEntryEdit2Presenter.StorageOptions"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView"/>
         <import type="com.ustadmobile.port.android.view.DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener"/>
@@ -33,11 +33,19 @@
             type="boolean" />
 
         <variable
+            name="compressionEnabled"
+            type="boolean" />
+
+        <variable
             name="selectedStorageIndex"
             type="Integer" />
 
         <variable
             name="fileImportInfoVisibility"
+            type="Integer" />
+
+        <variable
+            name="videoPreviewVisibility"
             type="Integer" />
 
         <variable
@@ -48,13 +56,19 @@
             name="isImportError"
             type="boolean" />
 
+        <variable name="showVideoPreview"
+            type="boolean" />
+
+        <variable name="showWebPreview"
+            type="boolean" />
+
         <variable
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.ContentEntryEdit2FragmentEventHandler" />
 
         <variable
             name="licenceOptions"
-            type="java.util.List&lt;MessageIdOption&gt;"/>
+            type="java.util.List&lt;IdOption&gt;"/>
 
         <variable
             name="storageOptions"
@@ -83,6 +97,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="@dimen/dimen_16dp"
+                android:enabled="@{fieldsEnabled}"
                 android:backgroundTint="?colorSecondary"
                 android:textColor="?colorOnSecondary"
                 android:onClick="@{()-> activityEventHandler.onClickContentImportSourceSelection()}"
@@ -122,6 +137,36 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
+            <com.google.android.exoplayer2.ui.PlayerView
+                android:id="@+id/entry_edit_video_preview"
+                android:visibility="@{showVideoPreview ? View.VISIBLE: View.GONE}"
+                android:layout_width="@dimen/dimen_0dp"
+                android:layout_height="180dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintTop_toBottomOf="@+id/supported_file_list"
+                app:controller_layout_id="@layout/view_custom_exo_playback_control"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent" />
+
+            <WebView
+                android:visibility="@{showWebPreview ? View.VISIBLE: View.GONE}"
+                android:id="@+id/entry_edit_web_preview"
+                android:layout_width="@dimen/dimen_0dp"
+                android:layout_height="180dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:layout_marginHorizontal="@dimen/dimen_16dp"
+                app:layout_constraintTop_toBottomOf="@+id/supported_file_list"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/preview_barrier"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="entry_edit_web_preview,entry_edit_video_preview"
+                app:barrierDirection="bottom"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_marginTop="@dimen/dimen_20dp"
@@ -135,7 +180,7 @@
                 android:hint="@string/title"
                 app:hintEnabled="true"
                 app:errorTextColor="?colorError"
-                app:layout_constraintTop_toBottomOf="@+id/supported_file_list"
+                app:layout_constraintTop_toBottomOf="@id/preview_barrier"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
 
@@ -229,11 +274,13 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:enabled="@{fieldsEnabled}"
                 app:layout_constraintTop_toBottomOf="@+id/entry_publisher">
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:enabled="@{fieldsEnabled}"
                     app:selectedMessageIdOption="@={contentEntry.licenseType}"
                     app:messageIdOptions="@{licenceOptions}"
                     android:hint="@string/licence"/>
@@ -251,6 +298,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginVertical="@dimen/dimen_16dp"
                 android:layout_marginHorizontal="@dimen/dimen_16dp"
+                android:enabled="@{fieldsEnabled}"
                 app:layout_constraintTop_toBottomOf="@+id/entry_licence">
 
                 <com.ustadmobile.port.android.view.StorageOptionsAutocompleteTextView
@@ -260,11 +308,40 @@
                     android:inputType="none"
                     app:selectedStorageOption="@{selectedStorageIndex}"
                     app:storageOptions="@{storageOptions}"
+                    android:enabled="@{fieldsEnabled}"
                     android:hint="@string/content_creation_storage_option_title"/>
 
             </com.google.android.material.textfield.TextInputLayout>
 
+            <RelativeLayout
+                android:layout_margin="@dimen/dimen_20dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:id="@+id/entry_content_compress"
+                android:layout_width="match_parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/container_storage_option"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:layout_centerVertical="true"
+                    android:layout_toStartOf="@+id/entry_compress_switch"
+                    android:id="@+id/entry_visibility_compress_label"
+                    android:text="@string/compress"
+                    android:enabled="@{fieldsEnabled}"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" />
 
+                <androidx.appcompat.widget.SwitchCompat
+                    android:checked="@{compressionEnabled}"
+                    android:enabled="@{fieldsEnabled}"
+                    android:onCheckedChanged="@{(switch, checked) -> activityEventHandler.handleToggleCompress(checked)}"
+                    android:layout_alignParentEnd="true"
+                    android:id="@+id/entry_compress_switch"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"/>
+            </RelativeLayout>
 
             <RelativeLayout
                 android:layout_margin="@dimen/dimen_20dp"
@@ -274,7 +351,8 @@
                 android:layout_width="match_parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/container_storage_option"
+                app:layout_constraintTop_toBottomOf="@+id/entry_content_compress"
+                android:enabled="@{fieldsEnabled}"
                 android:layout_height="wrap_content">
                 <TextView
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1"
@@ -282,6 +360,7 @@
                     android:layout_toStartOf="@+id/entry_public_switch"
                     android:id="@+id/entry_visibility_public_label"
                     android:text="@string/publicly_accessible"
+                    android:enabled="@{fieldsEnabled}"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" />
 
@@ -289,6 +368,7 @@
                     android:checked="@={contentEntry.publik}"
                     android:layout_alignParentEnd="true"
                     android:id="@+id/entry_public_switch"
+                    android:enabled="@{fieldsEnabled}"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"/>
             </RelativeLayout>

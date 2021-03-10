@@ -2,39 +2,38 @@ package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
-import androidx.test.espresso.Espresso.onIdle
-import androidx.test.espresso.Espresso.onView
-import androidx.test.espresso.IdlingRegistry
-import androidx.test.espresso.assertion.ViewAssertions.matches
-import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
-import androidx.test.espresso.matcher.ViewMatchers.withId
+import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportWithFilters
-import com.ustadmobile.test.core.impl.CrudIdlingResource
-import com.ustadmobile.test.core.impl.DataBindingIdlingResource
-import com.ustadmobile.test.port.android.util.UstadSingleEntityFragmentIdlingResource
+import com.ustadmobile.lib.db.entities.ReportSeries
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
+import com.ustadmobile.port.android.screen.ReportDetailScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.*
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.list
+import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.junit.runners.Parameterized
+import java.time.YearMonth
+import java.time.format.DateTimeFormatter
 
 @AdbScreenRecord("Report Detail Screen Test")
 @RunWith(Parameterized::class)
-class ReportDetailFragmentTest(val report: Report){
+class ReportDetailFragmentTest(val report: Report) : TestCase() {
 
     @JvmField
     @Rule
-    var dbRule = UmAppDatabaseAndroidClientRule(useDbAsRepo = true)
+    var dbRule = UmAppDatabaseAndroidClientRule()
 
     @JvmField
     @Rule
@@ -44,20 +43,16 @@ class ReportDetailFragmentTest(val report: Report){
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-    @JvmField
-    @Rule
-    val dataBindingIdlingResourceRule = ScenarioIdlingResourceRule(DataBindingIdlingResource())
-
-    @JvmField
-    @Rule
-    val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
-
-    lateinit var fragmentIdlingResource: UstadSingleEntityFragmentIdlingResource
-
     @Before
     fun setup() {
         runBlocking {
-            dbRule.db.insertTestStatements()
+            dbRule.insertPersonForActiveUser(Person().apply {
+                firstNames = "Bob"
+                lastName = "Jones"
+                admin = true
+                personUid = 42
+            })
+            dbRule.repo.insertTestStatements()
         }
     }
 
@@ -65,23 +60,24 @@ class ReportDetailFragmentTest(val report: Report){
     @AdbScreenRecord("show report on detail")
     @Test
     fun givenReportExists_whenLaunched_thenShouldShowReport() {
-        val reportUid = dbRule.db.reportDao.insert(report)
 
-        launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                fragmentArgs = bundleOf(ARG_ENTITY_UID to reportUid)) {
-            ReportDetailFragment().also {
-                it.installNavController(systemImplNavRule.navController)
-                fragmentIdlingResource = UstadSingleEntityFragmentIdlingResource(it)
-                IdlingRegistry.getInstance().register(fragmentIdlingResource)
+        init {
+            dbRule.repo.reportDao.insert(report)
+            launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(ARG_ENTITY_UID to report.reportUid)) {
+                ReportDetailFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
             }
-        }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                .withScenarioIdlingResourceRule(crudIdlingResourceRule)
+        }.run {
 
-        onView(withId(R.id.fragment_detail_report_list)).check(matches(isDisplayed()))
+            ReportDetailScreen {
+                reportList {
+                    isDisplayed()
+                }
+            }
 
-        onIdle()
-
-        IdlingRegistry.getInstance().unregister(fragmentIdlingResource)
+        }
 
     }
 
@@ -91,34 +87,23 @@ class ReportDetailFragmentTest(val report: Report){
         @JvmStatic
         @Parameterized.Parameters
         fun data(): Iterable<Report> {
-            return listOf(ReportWithFilters().apply {
-                chartType = Report.BAR_CHART
-                yAxis = Report.AVG_DURATION
-                xAxis = Report.MONTH
-                fromDate = DateTime(2019, 4, 10).unixMillisLong
-                toDate = DateTime(2019, 6, 11).unixMillisLong
-            },
-                    ReportWithFilters().apply {
-                        chartType = Report.LINE_GRAPH
-                        yAxis = Report.AVG_DURATION
-                        xAxis = Report.MONTH
-                        fromDate = DateTime(2019, 4, 10).unixMillisLong
+            return listOf(
+               ReportWithSeriesWithFilters().apply {
+                        reportUid = 3
+                        xAxis = Report.DAY
+                        fromDate = DateTime(2019, 3, 10).unixMillisLong
                         toDate = DateTime(2019, 6, 11).unixMillisLong
-                    }, ReportWithFilters().apply {
-                chartType = Report.BAR_CHART
-                yAxis = Report.SCORE
-                xAxis = Report.MONTH
-                subGroup = Report.GENDER
-                fromDate = DateTime(2019, 4, 10).unixMillisLong
-                toDate = DateTime(2019, 6, 11).unixMillisLong
-            }, ReportWithFilters().apply {
-                chartType = Report.LINE_GRAPH
-                yAxis = Report.SCORE
-                xAxis = Report.MONTH
-                subGroup = Report.CONTENT_ENTRY
-                fromDate = DateTime(2019, 4, 10).unixMillisLong
-                toDate = DateTime(2019, 6, 11).unixMillisLong
-            })
+                        reportSeriesWithFiltersList = listOf(ReportSeries().apply {
+                            reportSeriesYAxis = ReportSeries.TOTAL_DURATION
+                            reportSeriesVisualType = ReportSeries.BAR_CHART
+                            reportSeriesSubGroup = Report.CLASS
+                            reportSeriesUid = 4
+                            reportSeriesName = "Total duration"
+
+                        })
+                        reportSeries = Json.stringify(ReportSeries.serializer().list,
+                                reportSeriesWithFiltersList ?: listOf())
+                    })
         }
 
 

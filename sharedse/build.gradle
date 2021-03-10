@@ -35,15 +35,25 @@ android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools
 
+    lintOptions {
+        abortOnError false
+    }
+
+
     buildTypes {
         release {
             consumerProguardFiles 'proguard-rules.pro'
         }
     }
 
+    packagingOptions {
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+    }
+
+
     defaultConfig {
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
+        minSdkVersion 21
+        targetSdkVersion 29
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         missingDimensionStrategy 'api', 'api18'
     }
@@ -232,6 +242,12 @@ kotlin {
 
         commonTest {
             dependencies {
+
+            }
+        }
+
+        jvmTest {
+            dependencies {
                 implementation project(":lib-database-mpp")
                 implementation project(":lib-database-entities")
                 implementation project(":lib-database")
@@ -239,11 +255,7 @@ kotlin {
 
                 implementation "com.github.aakira:napier:$version_napier"
                 implementation "com.soywiz.korlibs.klock:klock:$version_klock"
-            }
-        }
 
-        jvmTest {
-            dependencies {
                 implementation "junit:junit:$version_junit"
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
@@ -268,50 +280,6 @@ kotlin {
             }
 
         }
-        androidTest {
-            resources.srcDir("src/androidTest/resources")
-            dependencies {
-                implementation "junit:junit:$version_junit"
-                implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
-                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
-                implementation "com.github.aakira:napier-android:$version_napier"
-                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
-                implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
-
-                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
-                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
-                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
-
-                implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "androidx.lifecycle:lifecycle-livedata:$version_androidx_lifecycle"
-                implementation "androidx.arch.core:core-testing:2.1.0"
-                implementation "androidx.test:runner:$version_android_junit_runner"
-                implementation "androidx.test:rules:$version_android_junit_runner"
-
-
-                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
-                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-
-                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
-                implementation "io.ktor:ktor-client-cio:$version_ktor"
-                implementation "io.ktor:ktor-client-gson:$version_ktor"
-
-                api project(":sharedse")
-                api project(":lib-room-annotations")
-                api project(":core")
-                api project(":lib-database-annotations")
-                api project(":lib-database-android")
-                api project(":lib-door-runtime")
-                api project(":lib-database-mpp")
-
-                implementation "org.robolectric:robolectric:$version_android_roboelectric"
-
-            }
-        }
-
-
     }
 
 }

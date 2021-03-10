@@ -2,6 +2,7 @@ package com.ustadmobile.core.networkmanager
 
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.features.*
 import io.ktor.client.features.json.JsonFeature
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
@@ -19,6 +20,7 @@ private val okHttpClient = OkHttpClient.Builder()
 
 private val httpClient = HttpClient(OkHttp){
     install(JsonFeature)
+    install(HttpTimeout)
 
     engine {
         preconfigured = okHttpClient

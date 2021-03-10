@@ -14,7 +14,7 @@ import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.core.view.VerbEntityListView
 import com.ustadmobile.lib.db.entities.VerbDisplay
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class VerbEntityListFragment() : UstadListViewFragment<VerbDisplay, VerbDisplay>(),
@@ -54,7 +54,7 @@ class VerbEntityListFragment() : UstadListViewFragment<VerbDisplay, VerbDisplay>
         mPresenter = VerbEntityListPresenter(requireContext(), UMAndroidUtil.bundleToMap(arguments),
                 this, di, viewLifecycleOwner)
         mDataRecyclerViewAdapter = VerbEntityListRecyclerAdapter(mPresenter)
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_a_new_verb))
         return view
     }
@@ -80,7 +80,7 @@ class VerbEntityListFragment() : UstadListViewFragment<VerbDisplay, VerbDisplay>
             : DiffUtil.ItemCallback<VerbDisplay>() {
             override fun areItemsTheSame(oldItem: VerbDisplay,
                                          newItem: VerbDisplay): Boolean {
-                TODO("e.g. insert primary keys here return oldItem.verbEntity == newItem.verbEntity")
+                return oldItem.verbUid == newItem.verbUid
             }
 
             override fun areContentsTheSame(oldItem: VerbDisplay,

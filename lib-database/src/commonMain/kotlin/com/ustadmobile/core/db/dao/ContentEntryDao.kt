@@ -5,14 +5,11 @@ import androidx.room.*
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.*
 import kotlin.js.JsName
 
-@UmDao(selectPermissionCondition = "(:accountPersonUid = :accountPersonUid)")
 @Dao
-@UmRepository
+@Repository
 abstract class ContentEntryDao : BaseDao<ContentEntry> {
 
     @JsName("insertListAsync")
@@ -145,6 +142,11 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     abstract fun findByUid(entryUid: Long): ContentEntry?
 
 
+    @Query("SELECT * FROM ContentEntry WHERE title = :title")
+    @JsName("findByTitle")
+    abstract fun findByTitle(title: String): DoorLiveData<ContentEntry?>
+
+
     @Query("SELECT ContentEntry.* FROM ContentEntry " +
             "WHERE ContentEntry.sourceUrl = :sourceUrl")
     @JsName("findBySourceUrlWithContentEntryStatusAsync")
@@ -161,13 +163,14 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
             AND 
             (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
-            AND NOT ContentEntry.ceInactive
-            AND (ContentEntry.publik OR :personUid != 0)
+            AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden) 
+            AND (NOT ContentEntry.leaf OR NOT ContentEntry.leaf = :onlyFolder) 
+            AND (ContentEntry.publik OR :personUid != 0) 
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
             WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY ContentEntryParentChildJoin.childIndex, ContentEntry.title ASC , ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameAsc")
-    abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameAsc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long, showHidden: Boolean, onlyFolder: Boolean): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
     @Query("""SELECT ContentEntry.*,ContentEntryStatus.*, ContentEntryParentChildJoin.*, Container.*, ContentEntryProgress.* 
             FROM ContentEntry 
@@ -180,13 +183,14 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = :parentUid 
             AND 
             (:langParam = 0 OR ContentEntry.primaryLanguageUid = :langParam) 
-            AND NOT ContentEntry.ceInactive
+            AND (NOT ContentEntry.ceInactive OR ContentEntry.ceInactive = :showHidden) 
+            AND (NOT ContentEntry.leaf OR NOT ContentEntry.leaf = :onlyFolder) 
             AND (ContentEntry.publik OR :personUid != 0)
             AND 
             (:categoryParam0 = 0 OR :categoryParam0 IN (SELECT ceccjContentCategoryUid FROM ContentEntryContentCategoryJoin 
             WHERE ceccjContentEntryUid = ContentEntry.contentEntryUid)) ORDER BY  ContentEntryParentChildJoin.childIndex, ContentEntry.title DESC, ContentEntry.contentEntryUid""")
     @JsName("getChildrenByParentUidWithCategoryFilterOrderByNameDesc")
-    abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameDesc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
+    abstract fun getChildrenByParentUidWithCategoryFilterOrderByNameDesc(parentUid: Long, langParam: Long, categoryParam0: Long, personUid: Long, showHidden: Boolean, onlyFolder: Boolean): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>
 
 
     @Update
@@ -229,47 +233,30 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
     SELECT COUNT(*) AS numEntries, SUM(containerSize) AS totalSize FROM ContentEntry_recursive""")
     abstract suspend fun getRecursiveDownloadTotals(contentEntryUid: Long): DownloadJobSizeInfo?
 
-    @Query("""WITH RECURSIVE ContentEntry_recursive(
-    contentEntryUid, title, ceInactive, contentFlags, description, entryId, author, publisher, licenseType, licenseName, licenseUrl, sourceUrl, thumbnailUrl, lastModified, primaryLanguageUid, languageVariantUid, leaf, publik, contentTypeFlag, contentEntryLocalChangeSeqNum, contentEntryMasterChangeSeqNum, contentEntryLastChangedBy,
-    
-    cepcjUid, cepcjChildContentEntryUid, cepcjParentContentEntryUid, childIndex, cepcjLocalChangeSeqNum, cepcjMasterChangeSeqNum, cepcjLastChangedBy,
-    
-    containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries
-    ) AS (
-    SELECT ContentEntry.contentEntryUid, ContentEntry.title, ContentEntry.ceInactive, ContentEntry.contentFlags, ContentEntry.description, ContentEntry.entryId, ContentEntry.author, ContentEntry.publisher, ContentEntry.licenseType, ContentEntry.licenseName, ContentEntry.licenseUrl, ContentEntry.sourceUrl, ContentEntry.thumbnailUrl, ContentEntry.lastModified, ContentEntry.primaryLanguageUid, ContentEntry.languageVariantUid, ContentEntry.leaf, ContentEntry.publik, ContentEntry.contentTypeFlag, ContentEntry.contentEntryLocalChangeSeqNum, ContentEntry.contentEntryMasterChangeSeqNum, ContentEntry.contentEntryLastChangedBy,
-    ContentEntryParentChildJoin.cepcjUid, ContentEntryParentChildJoin.cepcjChildContentEntryUid, ContentEntryParentChildJoin.cepcjParentContentEntryUid, ContentEntryParentChildJoin.childIndex, ContentEntryParentChildJoin.cepcjLocalChangeSeqNum, ContentEntryParentChildJoin.cepcjMasterChangeSeqNum, ContentEntryParentChildJoin.cepcjLastChangedBy,
-	Container.containerUid, Container.cntLocalCsn, Container.cntMasterCsn, Container.cntLastModBy, Container.fileSize, Container.containerContentEntryUid, Container.cntLastModified, Container.mimeType, Container.remarks, Container.mobileOptimized, Container.cntNumEntries
-	FROM 
-    ContentEntry
-    LEFT JOIN ContentEntryParentChildJoin ON ContentEntry.contentEntryUid = ContentEntryParentChildJoin.cepcjChildContentEntryUid 
-    LEFT JOIN Container ON Container.containerUid = (SELECT COALESCE((SELECT containerUid FROM Container WHERE containerContentEntryUid = ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1), 0))
-    WHERE ContentEntry.contentEntryUid = :contentEntryUid
-    UNION
-    SELECT ContentEntry.contentEntryUid, ContentEntry.title, ContentEntry.ceInactive, ContentEntry.contentFlags, ContentEntry.description, ContentEntry.entryId, ContentEntry.author, ContentEntry.publisher, ContentEntry.licenseType, ContentEntry.licenseName, ContentEntry.licenseUrl, ContentEntry.sourceUrl, ContentEntry.thumbnailUrl, ContentEntry.lastModified, ContentEntry.primaryLanguageUid, ContentEntry.languageVariantUid, ContentEntry.leaf, ContentEntry.publik, ContentEntry.contentTypeFlag, ContentEntry.contentEntryLocalChangeSeqNum, ContentEntry.contentEntryMasterChangeSeqNum, ContentEntry.contentEntryLastChangedBy,
-    ContentEntryParentChildJoin.cepcjUid, ContentEntryParentChildJoin.cepcjChildContentEntryUid, ContentEntryParentChildJoin.cepcjParentContentEntryUid, ContentEntryParentChildJoin.childIndex, ContentEntryParentChildJoin.cepcjLocalChangeSeqNum, ContentEntryParentChildJoin.cepcjMasterChangeSeqNum, ContentEntryParentChildJoin.cepcjLastChangedBy, 
-	Container.containerUid, Container.cntLocalCsn, Container.cntMasterCsn, Container.cntLastModBy, Container.fileSize, Container.containerContentEntryUid, Container.cntLastModified, Container.mimeType, Container.remarks, Container.mobileOptimized, Container.cntNumEntries
-	FROM 
-    ContentEntry
-    LEFT JOIN ContentEntryParentChildJoin ON ContentEntry.contentEntryUid = ContentEntryParentChildJoin.cepcjChildContentEntryUid 
-    LEFT JOIN Container ON Container.containerUid = (SELECT COALESCE((SELECT containerUid FROM Container WHERE containerContentEntryUid = ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1), 0)),
-    ContentEntry_recursive
-    WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid)
-    SELECT * FROM ContentEntry_recursive""")
+    @Query(ALL_ENTRIES_RECURSIVE_SQL)
     abstract fun getAllEntriesRecursively(contentEntryUid: Long): DataSource.Factory<Int, ContentEntryWithParentChildJoinAndMostRecentContainer>
 
-    @Query("UPDATE ContentEntry SET ceInactive = :ceInactive WHERE ContentEntry.contentEntryUid = :contentEntryUid")
+    @Query(ALL_ENTRIES_RECURSIVE_SQL)
+    abstract fun getAllEntriesRecursivelyAsList(contentEntryUid: Long): List<ContentEntryWithParentChildJoinAndMostRecentContainer>
+
+    @Query("""UPDATE ContentEntry SET ceInactive = :ceInactive, 
+            contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
     @JsName("updateContentEntryInActive")
     abstract fun updateContentEntryInActive(contentEntryUid: Long, ceInactive: Boolean)
 
-    @Query("UPDATE ContentEntry SET  contentTypeFlag = :contentFlag WHERE ContentEntry.contentEntryUid = :contentEntryUid")
+    @Query("""UPDATE ContentEntry SET contentTypeFlag = :contentFlag,
+            contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            WHERE ContentEntry.contentEntryUid = :contentEntryUid""")
     @JsName("updateContentEntryContentFlag")
     abstract fun updateContentEntryContentFlag(contentFlag: Int, contentEntryUid: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entries: List<ContentEntry>)
 
-    @Query("""Select * from ContentEntry WHERE contentEntryUid IN (:contentEntryUids)""")
-    abstract fun getContentEntryFromUids(contentEntryUids: List<Long>): List<ContentEntry>
+    @Query("""Select ContentEntry.contentEntryUid AS uid, ContentEntry.title As labelName 
+                    from ContentEntry WHERE contentEntryUid IN (:contentEntryUids)""")
+    abstract suspend fun getContentEntryFromUids(contentEntryUids: List<Long>): List<UidAndLabel>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun insertWithReplace(entry: ContentEntry)
@@ -282,6 +269,12 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
             "ContentEntry.contentEntryUid = :contentEntryUid AND :accountPersonUid IN ($ENTITY_PERSONS_WITH_PERMISSION))")
     abstract suspend fun personHasPermissionWithContentEntry(accountPersonUid: Long, contentEntryUid: Long,
                                                       permission: Long) : Boolean
+
+
+    @Query("""UPDATE ContentEntry SET ceInactive = :toggleVisibility, 
+                contentEntryLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                WHERE contentEntryUid IN (:selectedItem)""")
+    abstract suspend fun toggleVisibilityContentEntryItems(toggleVisibility: Boolean, selectedItem: List<Long>)
 
     companion object {
 
@@ -301,6 +294,33 @@ abstract class ContentEntryDao : BaseDao<ContentEntry> {
         const val ENTITY_PERSONS_WITH_PERMISSION_PT2 = ") > 0)"
 
         const val ENTITY_PERSONS_WITH_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :permission $ENTITY_PERSONS_WITH_PERMISSION_PT2"
+
+        const val ALL_ENTRIES_RECURSIVE_SQL = """WITH RECURSIVE ContentEntry_recursive(
+            contentEntryUid, title, ceInactive, contentFlags, description, entryId, author, publisher, licenseType, licenseName, licenseUrl, sourceUrl, thumbnailUrl, lastModified, primaryLanguageUid, languageVariantUid, leaf, publik, contentTypeFlag, contentEntryLocalChangeSeqNum, contentEntryMasterChangeSeqNum, contentEntryLastChangedBy,
+            
+            cepcjUid, cepcjChildContentEntryUid, cepcjParentContentEntryUid, childIndex, cepcjLocalChangeSeqNum, cepcjMasterChangeSeqNum, cepcjLastChangedBy,
+            
+            containerUid, cntLocalCsn, cntMasterCsn, cntLastModBy, fileSize, containerContentEntryUid, cntLastModified, mimeType, remarks, mobileOptimized, cntNumEntries
+            ) AS (
+            SELECT ContentEntry.contentEntryUid, ContentEntry.title, ContentEntry.ceInactive, ContentEntry.contentFlags, ContentEntry.description, ContentEntry.entryId, ContentEntry.author, ContentEntry.publisher, ContentEntry.licenseType, ContentEntry.licenseName, ContentEntry.licenseUrl, ContentEntry.sourceUrl, ContentEntry.thumbnailUrl, ContentEntry.lastModified, ContentEntry.primaryLanguageUid, ContentEntry.languageVariantUid, ContentEntry.leaf, ContentEntry.publik, ContentEntry.contentTypeFlag, ContentEntry.contentEntryLocalChangeSeqNum, ContentEntry.contentEntryMasterChangeSeqNum, ContentEntry.contentEntryLastChangedBy,
+            ContentEntryParentChildJoin.cepcjUid, ContentEntryParentChildJoin.cepcjChildContentEntryUid, ContentEntryParentChildJoin.cepcjParentContentEntryUid, ContentEntryParentChildJoin.childIndex, ContentEntryParentChildJoin.cepcjLocalChangeSeqNum, ContentEntryParentChildJoin.cepcjMasterChangeSeqNum, ContentEntryParentChildJoin.cepcjLastChangedBy,
+            Container.containerUid, Container.cntLocalCsn, Container.cntMasterCsn, Container.cntLastModBy, Container.fileSize, Container.containerContentEntryUid, Container.cntLastModified, Container.mimeType, Container.remarks, Container.mobileOptimized, Container.cntNumEntries
+            FROM 
+            ContentEntry
+            LEFT JOIN ContentEntryParentChildJoin ON ContentEntry.contentEntryUid = ContentEntryParentChildJoin.cepcjChildContentEntryUid 
+            LEFT JOIN Container ON Container.containerUid = (SELECT COALESCE((SELECT containerUid FROM Container WHERE containerContentEntryUid = ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1), 0))
+            WHERE ContentEntry.contentEntryUid = :contentEntryUid
+            UNION
+            SELECT ContentEntry.contentEntryUid, ContentEntry.title, ContentEntry.ceInactive, ContentEntry.contentFlags, ContentEntry.description, ContentEntry.entryId, ContentEntry.author, ContentEntry.publisher, ContentEntry.licenseType, ContentEntry.licenseName, ContentEntry.licenseUrl, ContentEntry.sourceUrl, ContentEntry.thumbnailUrl, ContentEntry.lastModified, ContentEntry.primaryLanguageUid, ContentEntry.languageVariantUid, ContentEntry.leaf, ContentEntry.publik, ContentEntry.contentTypeFlag, ContentEntry.contentEntryLocalChangeSeqNum, ContentEntry.contentEntryMasterChangeSeqNum, ContentEntry.contentEntryLastChangedBy,
+            ContentEntryParentChildJoin.cepcjUid, ContentEntryParentChildJoin.cepcjChildContentEntryUid, ContentEntryParentChildJoin.cepcjParentContentEntryUid, ContentEntryParentChildJoin.childIndex, ContentEntryParentChildJoin.cepcjLocalChangeSeqNum, ContentEntryParentChildJoin.cepcjMasterChangeSeqNum, ContentEntryParentChildJoin.cepcjLastChangedBy, 
+            Container.containerUid, Container.cntLocalCsn, Container.cntMasterCsn, Container.cntLastModBy, Container.fileSize, Container.containerContentEntryUid, Container.cntLastModified, Container.mimeType, Container.remarks, Container.mobileOptimized, Container.cntNumEntries
+            FROM 
+            ContentEntry
+            LEFT JOIN ContentEntryParentChildJoin ON ContentEntry.contentEntryUid = ContentEntryParentChildJoin.cepcjChildContentEntryUid 
+            LEFT JOIN Container ON Container.containerUid = (SELECT COALESCE((SELECT containerUid FROM Container WHERE containerContentEntryUid = ContentEntry.contentEntryUid ORDER BY cntLastModified DESC LIMIT 1), 0)),
+            ContentEntry_recursive
+            WHERE ContentEntryParentChildJoin.cepcjParentContentEntryUid = ContentEntry_recursive.contentEntryUid)
+            SELECT * FROM ContentEntry_recursive"""
 
     }
 }
