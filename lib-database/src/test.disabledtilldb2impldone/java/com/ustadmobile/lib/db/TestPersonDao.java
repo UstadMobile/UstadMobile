@@ -3,7 +3,7 @@ package com.ustadmobile.lib.db;
 import com.ustadmobile.core.db.UmAppDatabase;
 import com.ustadmobile.core.db.dao.PersonDao;
 import com.ustadmobile.lib.db.entities.Clazz;
-import com.ustadmobile.lib.db.entities.ClazzMember;
+import com.ustadmobile.lib.db.entities.ClazzEnrolment;
 import com.ustadmobile.lib.db.entities.EntityRole;
 import com.ustadmobile.lib.db.entities.Location;
 import com.ustadmobile.lib.db.entities.LocationAncestorJoin;
@@ -36,9 +36,9 @@ public class TestPersonDao extends AbstractDaoTest{
         otherStudent = new Person("someoneelse", "another", "stranger");
         otherStudent.setPersonUid(serverDummyRepo.getPersonDao().insert(otherStudent));
 
-        ClazzMember studentClazzMember = new ClazzMember(myClazz.getClazzUid(),
+        ClazzEnrolment studentClazzEnrolment = new ClazzEnrolment(myClazz.getClazzUid(),
                 myStudent.getPersonUid());
-        serverDummyRepo.getClazzMemberDao().insert(studentClazzMember);
+        serverDummyRepo.getClazzEnrolmentDao().insert(studentClazzEnrolment);
 
         Role teacherRole = new Role("Teacher", permission);
         teacherRole.setRoleUid(serverDummyRepo.getRoleDao().insert(teacherRole));

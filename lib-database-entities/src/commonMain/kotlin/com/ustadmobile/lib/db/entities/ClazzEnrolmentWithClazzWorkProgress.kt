@@ -4,10 +4,7 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ClazzMemberWithClazzWorkProgress : Person() {
-
-    @Embedded
-    var mClazzMember: ClazzMember? = null
+class ClazzEnrolmentWithClazzWorkProgress : Person() {
 
     @Embedded
     var mLatestPrivateComment: Comments? = null
@@ -19,5 +16,7 @@ class ClazzMemberWithClazzWorkProgress : Person() {
     var mProgress: Float = 0.0F
 
     var clazzWorkHasContent: Boolean = false
+
+    var isActiveEnrolment: Boolean = false
 
 }

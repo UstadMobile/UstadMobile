@@ -59,7 +59,11 @@ class ReportEditPresenter(context: Any,
         GENDER(Report.GENDER,
                 MessageID.gender_literal),
         CLASS(Report.CLASS,
-                MessageID.clazz)
+                MessageID.clazz),
+        ENROLMENT_OUTCOME(Report.ENROLMENT_OUTCOME,
+                MessageID.class_enrolment_outcome),
+        ENROLMENT_LEAVING(Report.ENROLMENT_LEAVING_REASON,
+                MessageID.class_enrolment_leaving)
     }
 
     class XAxisMessageIdOption(day: XAxisOptions, context: Any)
@@ -136,7 +140,11 @@ class ReportEditPresenter(context: Any,
         GENDER(Report.GENDER,
                 MessageID.gender_literal),
         CLASS(Report.CLASS,
-                MessageID.clazz)
+                MessageID.clazz),
+        ENROLMENT_OUTCOME(Report.ENROLMENT_OUTCOME,
+                MessageID.class_enrolment_outcome),
+        ENROLMENT_LEAVING(Report.ENROLMENT_LEAVING_REASON,
+                MessageID.class_enrolment_leaving)
     }
 
     class SubGroupByMessageIdOption(day: SubGroupOptions, context: Any)
@@ -408,11 +416,15 @@ class ReportEditPresenter(context: Any,
                     .filter {
                         it.code == Report.GENDER ||
                                 it.code == Report.CONTENT_ENTRY ||
-                                it.code == Report.CLASS || it.code == ReportSeries.NONE
+                                it.code == Report.CLASS || it.code == ReportSeries.NONE ||
+                                it.code == Report.ENROLMENT_LEAVING_REASON ||
+                                it.code == Report.ENROLMENT_OUTCOME
                     }
         } else if (selectedOption.optionId == Report.CLASS ||
                 selectedOption.optionId == Report.CONTENT_ENTRY ||
-                selectedOption.optionId == Report.GENDER) {
+                selectedOption.optionId == Report.GENDER ||
+                selectedOption.optionId == Report.ENROLMENT_LEAVING_REASON ||
+                selectedOption.optionId == Report.ENROLMENT_OUTCOME) {
             view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
         }
     }

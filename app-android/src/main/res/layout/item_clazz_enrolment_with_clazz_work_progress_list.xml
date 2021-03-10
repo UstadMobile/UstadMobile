@@ -4,14 +4,14 @@
     xmlns:tools="http://schemas.android.com/tools">
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress"/>
+        <import type="com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzWorkProgress"/>
         <import type="com.ustadmobile.port.android.view.ClazzWorkDetailProgressListFragment"/>
         <import type="com.ustadmobile.port.android.view.ClazzWorkProgressListRecyclerAdapter"/>
         <import type="android.view.View"/>
 
         <variable
-            name="clazzMemberWithClazzWorkProgress"
-            type="ClazzMemberWithClazzWorkProgress" />
+            name="clazzEnrolmentWithClazzWorkProgress"
+            type="ClazzEnrolmentWithClazzWorkProgress" />
         <variable
             name="presenter"
             type="com.ustadmobile.core.controller.ClazzWorkDetailProgressListPresenter" />
@@ -25,14 +25,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, clazzMemberWithClazzWorkProgress)}"
-        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(clazzMemberWithClazzWorkProgress)}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, clazzEnrolmentWithClazzWorkProgress)}"
+        app:onSelectableItemClicked="@{() -> presenter.handleClickEntry(clazzEnrolmentWithClazzWorkProgress)}"
         android:background="@drawable/bg_listitem"
+        android:enabled="@{clazzEnrolmentWithClazzWorkProgress.isActiveEnrolment}"
+        android:alpha="@{clazzEnrolmentWithClazzWorkProgress.isActiveEnrolment ? 1f : .5f}"
         >
 
         <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/item_clazzwork_progress_member_pic"
-            app:personPicturePersonUid="@{clazzMemberWithClazzWorkProgress.personUid}"
+            android:alpha="@{clazzEnrolmentWithClazzWorkProgress.isActiveEnrolment ? 1f : .5f}"
+            app:personPicturePersonUid="@{clazzEnrolmentWithClazzWorkProgress.personUid}"
             tools:src="@drawable/ic_person_black_24dp"
             android:layout_width="@dimen/dimen_40dp"
             android:layout_height="@dimen/dimen_40dp"
@@ -47,11 +50,12 @@
         <!-- Line 1-->
         <TextView
             android:id="@+id/item_clazzwork_progress_member_name"
+            android:alpha="@{clazzEnrolmentWithClazzWorkProgress.isActiveEnrolment ? 1f : .5f}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_16dp"
-            android:text='@{clazzMemberWithClazzWorkProgress.firstNames + " " + clazzMemberWithClazzWorkProgress.lastName}'
+            android:text='@{clazzEnrolmentWithClazzWorkProgress.firstNames + " " + clazzEnrolmentWithClazzWorkProgress.lastName}'
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@+id/item_clazzwork_progress_member_pic"
             app:layout_constraintTop_toTopOf="parent"
@@ -60,21 +64,23 @@
         <ProgressBar
             android:id="@+id/progressBar2"
             style="@android:style/Widget.ProgressBar.Horizontal"
+            android:alpha="@{clazzEnrolmentWithClazzWorkProgress.isActiveEnrolment ? 1f : .5f}"
             android:layout_width="0dp"
             android:layout_height="3dp"
             android:layout_marginTop="4dp"
-            android:visibility="@{clazzMemberWithClazzWorkProgress.clazzWorkHasContent?View.VISIBLE:View.GONE}"
-            android:progress="@{Math.round(clazzMemberWithClazzWorkProgress.mProgress)}"
+            android:visibility="@{clazzEnrolmentWithClazzWorkProgress.clazzWorkHasContent?View.VISIBLE:View.GONE}"
+            android:progress="@{Math.round(clazzEnrolmentWithClazzWorkProgress.mProgress)}"
             app:layout_constraintEnd_toEndOf="@+id/item_clazzwork_progress_member_name"
             app:layout_constraintStart_toEndOf="@+id/item_clazzwork_progress_member_pic"
             app:layout_constraintTop_toBottomOf="@+id/item_clazzwork_progress_member_name" />
 
         <TextView
             android:id="@+id/item_person_line2_text"
+            android:alpha="@{clazzEnrolmentWithClazzWorkProgress.isActiveEnrolment ? 1f : .5f}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            app:clazzMemberWithClazzWorkAndProgress="@{clazzMemberWithClazzWorkProgress}"
+            app:clazzMemberWithClazzWorkAndProgress="@{clazzEnrolmentWithClazzWorkProgress}"
             app:layout_constraintEnd_toEndOf="@+id/item_clazzwork_progress_member_name"
             app:layout_constraintStart_toStartOf="@+id/item_clazzwork_progress_member_name"
             app:layout_constraintTop_toBottomOf="@+id/progressBar2"
@@ -82,13 +88,14 @@
 
         <TextView
             android:id="@+id/item_person_line3_text"
+            android:alpha="@{clazzEnrolmentWithClazzWorkProgress.isActiveEnrolment ? 1f : .5f}"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginTop="2dp"
             android:layout_marginBottom="8dp"
-            android:text="@{clazzMemberWithClazzWorkProgress.mLatestPrivateComment.commentsText}"
-            android:visibility="@{(clazzMemberWithClazzWorkProgress.mLatestPrivateComment != null)?View.VISIBLE:View.GONE}"
+            android:text="@{clazzEnrolmentWithClazzWorkProgress.mLatestPrivateComment.commentsText}"
+            android:visibility="@{(clazzEnrolmentWithClazzWorkProgress.mLatestPrivateComment != null)?View.VISIBLE:View.GONE}"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/item_clazzwork_progress_member_name"
             app:layout_constraintHorizontal_bias="1.0"
@@ -99,10 +106,11 @@
 
         <ImageView
             android:id="@+id/imageView"
+            android:alpha="@{clazzEnrolmentWithClazzWorkProgress.isActiveEnrolment ? 1f : .5f}"
             android:layout_width="18dp"
             android:layout_height="18dp"
             android:layout_marginTop="4dp"
-            android:visibility="@{(clazzMemberWithClazzWorkProgress.mLatestPrivateComment != null)?View.VISIBLE:View.GONE}"
+            android:visibility="@{(clazzEnrolmentWithClazzWorkProgress.mLatestPrivateComment != null)?View.VISIBLE:View.GONE}"
             app:layout_constraintStart_toStartOf="@+id/item_person_line2_text"
             app:layout_constraintTop_toBottomOf="@+id/item_person_line2_text"
             app:srcCompat="@drawable/ic_baseline_comment_24"

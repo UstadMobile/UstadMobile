@@ -8,8 +8,11 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.databinding.BindingAdapter
+import com.toughra.ustadmobile.R
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.CustomFieldValue
+import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.port.android.view.util.SelectableViewHelper
 
 @BindingAdapter("android:layout_marginTop")
@@ -126,6 +129,17 @@ fun View.setOnClickCustomFieldHandler(customField: CustomField?, customFieldValu
 interface OnSelectionStateChangedListener {
     fun onSelectionStateChanged(view: View)
 }
+
+@BindingAdapter(value=["isActiveEnrolment"])
+fun View.setAlphaIfActiveEnrolment(person: PersonWithClazzEnrolmentDetails){
+    val currentTime = systemTimeInMillis()
+    alpha = if(currentTime >= person.earliestJoinDate && currentTime <= person.latestDateLeft){
+        1f
+    }else{
+        0.5f
+    }
+}
+
 
 /**
  * Convenience binder for handling events with a selectable view (e.g. an item in a list).
