@@ -146,7 +146,7 @@ class ContainerFetcherJobHttpUrlConnection2Test {
         val downloadDestDir = temporaryFolder.newFolder()
 
         val siteUrl = mockWebServer.url("/").toString()
-        val request = ContainerFetcherRequest2(containerEntriesToDownload, siteUrl,
+        val request = ContainerFetcherRequest2(containerEntriesToDownload, siteUrl, siteUrl,
             downloadDestDir.toKmpUriString())
 
         val mockListener = mock<ContainerFetcherListener2> { }
@@ -190,7 +190,8 @@ class ContainerFetcherJobHttpUrlConnection2Test {
                 val entriesToDownload = allContainerEntryFilesToDownload
                         .filter { entry -> ! entriesInDb.any { dbEntry -> dbEntry.cefMd5 ==  entry.cefMd5} }
 
-                val request = ContainerFetcherRequest2(entriesToDownload, siteUrl, downloadDestDir.toKmpUriString())
+                val request = ContainerFetcherRequest2(entriesToDownload, siteUrl, siteUrl,
+                        downloadDestDir.toKmpUriString())
                 val downloaderJob = ContainerFetcherJobHttpUrlConnection2(request,
                         mockListener, clientDi)
                 val result = runBlocking { downloaderJob.download() }
