@@ -6,8 +6,6 @@ import com.google.gson.Gson
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.door.*
 import com.ustadmobile.door.DoorDatabaseRepository.Companion.STATUS_CONNECTED
-import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.waitUntil
 import db2.AccessGrant
 import db2.ExampleDatabase2
 import db2.ExampleDatabase2_KtorRoute
@@ -42,11 +40,10 @@ import org.sqlite.SQLiteDataSource
 import java.io.File
 import javax.sql.DataSource
 import kotlin.test.assertEquals
-import com.ustadmobile.door.ext.writeToFile
 import java.net.URI
 import java.nio.file.Paths
 import com.ustadmobile.door.attachments.retrieveAttachment
-import com.ustadmobile.door.ext.md5Sum
+import com.ustadmobile.door.ext.*
 
 
 class DbRepoTest {
@@ -798,7 +795,7 @@ class DbRepoTest {
         val storedUri = runBlocking {
             (clientRepo as DoorDatabaseRepository).retrieveAttachment(attachmentEntity.eaAttachmentUri!!)
         }
-        val storedFile = Paths.get(URI(storedUri)).toFile()
+        val storedFile = storedUri.toFile()
 
         Assert.assertTrue("Stored entity exists", storedFile.exists())
     }
@@ -828,7 +825,7 @@ class DbRepoTest {
 
         clientRepo.exampleAttachmentDao().update(attachmentEntity)
 
-        val firstStoredFile = Paths.get(URI(firstStoredUri)).toFile()
+        val firstStoredFile = firstStoredUri.toFile()
         Assert.assertFalse("Old file does not exist anymore", firstStoredFile.exists())
     }
 
@@ -863,7 +860,7 @@ class DbRepoTest {
             (serverRepo as DoorDatabaseRepository).retrieveAttachment(entityOnServer!!.eaAttachmentUri!!)
         }
 
-        val serverFile = Paths.get(URI(serverAttachmentUri)).toFile()
+        val serverFile = serverAttachmentUri.toFile()
         Assert.assertTrue("Attachment file exists on server", serverFile.exists())
         Assert.assertArrayEquals("Attachment data is equal on server and client",
             destFile.md5Sum, serverFile.md5Sum)
@@ -899,7 +896,7 @@ class DbRepoTest {
             (clientRepo as DoorDatabaseRepository).retrieveAttachment(entityOnClient!!.eaAttachmentUri!!)
         }
 
-        val clientFile = Paths.get(URI(clientAttachmentUri)).toFile()
+        val clientFile = clientAttachmentUri.toFile()
 
         Assert.assertTrue("Attachment data was downloaded to file on client",
                 clientFile.exists())
