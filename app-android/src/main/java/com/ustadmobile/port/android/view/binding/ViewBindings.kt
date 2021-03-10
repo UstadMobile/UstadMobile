@@ -3,10 +3,10 @@ package com.ustadmobile.port.android.view.binding
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.net.Uri
-import android.provider.Settings
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.databinding.BindingAdapter
 import com.toughra.ustadmobile.R
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -14,6 +14,7 @@ import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.CustomFieldValue
 import com.ustadmobile.lib.db.entities.PersonWithClazzEnrolmentDetails
 import com.ustadmobile.port.android.view.util.SelectableViewHelper
+
 
 @BindingAdapter("android:layout_marginTop")
 fun View.setMarginTopValue(marginValue: Float) =
@@ -110,7 +111,7 @@ internal class CustomFieldOnClickListener(val customField: CustomField, val cust
                     putExtra(Intent.EXTRA_EMAIL, arrayOf(emailAddr))
                     data = Uri.parse("mailto:")
                 }
-                if(emailIntent.resolveActivity(v.context.packageManager) != null) {
+                if (emailIntent.resolveActivity(v.context.packageManager) != null) {
                     v.context.startActivity(emailIntent)
                 }
             }
@@ -118,7 +119,7 @@ internal class CustomFieldOnClickListener(val customField: CustomField, val cust
     }
 }
 
-@BindingAdapter(value=["onClickCustomField", "onClickCustomFieldValue"])
+@BindingAdapter(value = ["onClickCustomField", "onClickCustomFieldValue"])
 fun View.setOnClickCustomFieldHandler(customField: CustomField?, customFieldValue: CustomFieldValue) {
     val actionOnClick = customField?.actionOnClick
     if(customField != null && actionOnClick != null) {
@@ -144,7 +145,7 @@ fun View.setAlphaIfActiveEnrolment(person: PersonWithClazzEnrolmentDetails){
 /**
  * Convenience binder for handling events with a selectable view (e.g. an item in a list).
  */
-@BindingAdapter(value=["selectableViewHelper", "onSelectableItemClicked", "onSelectedStateChanged"], requireAll = false)
+@BindingAdapter(value = ["selectableViewHelper", "onSelectableItemClicked", "onSelectedStateChanged"], requireAll = false)
 fun <T> View.setSelectableViewHelper(selectableViewHelper: SelectableViewHelper?,
                                      onSelectableItemClicked: View.OnClickListener?,
                                      onSelectedStateChanged: OnSelectionStateChangedListener?) {
@@ -189,11 +190,21 @@ fun View.backgroundIfAnimated(drawable: Drawable) {
         try {
             Class.forName("com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule")
             viewAnimationEnabled = false
-        }catch(e: ClassNotFoundException) {
+        }catch (e: ClassNotFoundException) {
             viewAnimationEnabled = true
         }
     }
 
     if(viewAnimationEnabled == true)
         background = drawable
+}
+
+
+@BindingAdapter("percentageHeight")
+fun View.setPercentageHeight(percentHeight: Float) {
+    val params = layoutParams as ConstraintLayout.LayoutParams
+    params.matchConstraintPercentHeight = percentHeight
+    layoutParams = params
+
+
 }
