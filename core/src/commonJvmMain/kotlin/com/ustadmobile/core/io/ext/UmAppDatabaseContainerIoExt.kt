@@ -75,8 +75,9 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
                 "${systemTimeInMillis()}.tmp")
         val relPath = fixedPath ?: relativePathPrefix + file.name
 
-        //TODO: guess Mime type
-        val compress = addOptions.compressionFilter.shouldCompress(file.toKmpUriString(), null)
+        val entryPath = addOptions.fileNamer.nameContainerFile(relPath, file.toKmpUriString())
+        val compress = addOptions.compressionFilter.shouldCompress(entryPath,
+                file.toDoorUri().guessMimeType())
 
         val md5Sum = withContext(Dispatchers.IO) {
             if(compress) {
@@ -110,7 +111,6 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
         }
 
         //link the existing entry
-        val entryPath = addOptions.fileNamer.nameContainerFile(relPath, file.toKmpUriString())
         containerEntryDao.insertAsync(ContainerEntry().apply {
             this.cePath = entryPath
             this.ceContainerUid = containerUid
