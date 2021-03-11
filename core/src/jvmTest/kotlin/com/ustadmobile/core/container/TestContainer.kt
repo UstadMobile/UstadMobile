@@ -9,6 +9,7 @@ import java.io.IOException
 
 object TestContainer{
 
+    @Deprecated("This uses container manager")
     fun assertContainersHaveSameContent(containerUid: Long, db: UmAppDatabase, repo: UmAppDatabase) {
 
         val repoContainer = repo.containerDao.findByUid(containerUid)!!

@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.door.ext.inflatedMd5Sum
 import com.ustadmobile.door.ext.md5Sum
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.Container
 import kotlinx.coroutines.runBlocking
@@ -68,8 +69,8 @@ class UmAppDatabaseContainerIoExtTest {
 
 
         runBlocking {
-            repo.addDirToContainer(container.containerUid, tmpDir.toKmpUriString(), true,
-                ContainerAddOptions(containerFilesDir.toKmpUriString()))
+            repo.addDirToContainer(container.containerUid, tmpDir.toDoorUri(), true,
+                ContainerAddOptions(containerFilesDir.toDoorUri()))
         }
 
         val file1ContainerEntry = db.containerEntryDao.findByPathInContainer(container.containerUid,
@@ -96,8 +97,8 @@ class UmAppDatabaseContainerIoExtTest {
 
 
         runBlocking {
-            repo.addEntriesToContainerFromZip(container.containerUid, epubTmp.toKmpUriString(),
-                ContainerAddOptions(containerFilesDir.toKmpUriString()))
+            repo.addEntriesToContainerFromZip(container.containerUid, epubTmp.toDoorUri(),
+                ContainerAddOptions(containerFilesDir.toDoorUri()))
         }
     }
 

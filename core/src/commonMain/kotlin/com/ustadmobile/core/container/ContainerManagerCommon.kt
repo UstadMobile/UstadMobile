@@ -6,6 +6,7 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import kotlinx.io.InputStream
 
+@Deprecated("This is being removed for the Kotlin 1.4 upgrade")
 abstract class ContainerManagerCommon(protected val container: Container,
                                       protected val db : UmAppDatabase,
                                       protected val dbRepo: UmAppDatabase,

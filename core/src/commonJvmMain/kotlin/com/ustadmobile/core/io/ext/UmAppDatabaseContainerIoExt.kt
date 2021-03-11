@@ -4,6 +4,7 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntry
@@ -18,7 +19,7 @@ import java.nio.file.Paths
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 
-actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: String,
+actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
                                                    recursive: Boolean,
                                                    addOptions: ContainerAddOptions) {
 
@@ -26,13 +27,23 @@ actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: S
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase
 
-    dirUri.parseKmpUriStringToFile().listFiles()?.forEach { childFile ->
+    dirUri.toFile().listFiles()?.forEach { childFile ->
         db.addFileToContainerInternal(containerUid, childFile, recursive, addOptions,
                 "")
     }
 
     containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
 }
+
+actual suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri: DoorUri,
+                                                    pathInContainer: String, addOptions: ContainerAddOptions) {
+    val repo = this as? DoorDatabaseRepository
+            ?: throw IllegalStateException("Must use repo for addFileToContainer")
+    val db = repo.db as UmAppDatabase
+    db.addFileToContainerInternal(containerUid, fileUri.toFile(), false,
+        addOptions, "", pathInContainer)
+}
+
 
 fun File.toContainerEntryFile(totalSize: Long, md5Sum: ByteArray, gzipped: Boolean) = com.ustadmobile.lib.db.entities.ContainerEntryFile().also {
     it.ceCompressedSize  = this.length()
@@ -46,19 +57,23 @@ fun File.toContainerEntryFile(totalSize: Long, md5Sum: ByteArray, gzipped: Boole
     }
 }
 
+/**
+ * @param containerUid container uid we a
+ */
 private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
                                                              file: File,
                                                              recursive: Boolean,
                                                              addOptions: ContainerAddOptions,
-                                                             relativePathPrefix: String) {
+                                                             relativePathPrefix: String,
+                                                             fixedPath: String? = null) {
 
-    val storageDirFile = addOptions.storageDirUri.parseKmpUriStringToFile()
+    val storageDirFile = addOptions.storageDirUri.toFile()
 
     if(file.isFile) {
         //add the file
         val tmpFile = File(storageDirFile,
                 "${systemTimeInMillis()}.tmp")
-        val relPath = relativePathPrefix + file.name
+        val relPath = fixedPath ?: relativePathPrefix + file.name
 
         //TODO: guess Mime type
         val compress = addOptions.compressionFilter.shouldCompress(file.toKmpUriString(), null)
@@ -114,7 +129,7 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
 
 
 actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
-                                                              zipUri: String,
+                                                              zipUri: DoorUri,
                                                               addOptions: ContainerAddOptions) {
 
     val repo = this as? DoorDatabaseRepository
@@ -122,8 +137,8 @@ actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long
     val db = repo.db as UmAppDatabase
 
     withContext(Dispatchers.IO) {
-        val storageDirFile = addOptions.storageDirUri.parseKmpUriStringToFile()
-        val zipInputStream = ZipInputStream(FileInputStream(zipUri.parseKmpUriStringToFile()))
+        val storageDirFile = addOptions.storageDirUri.toFile()
+        val zipInputStream = ZipInputStream(FileInputStream(zipUri.toFile()))
         zipInputStream.use { zipIn ->
             var zipEntry: ZipEntry? = null
             while(zipIn.nextEntry?.also { zipEntry = it } != null) {

@@ -14,6 +14,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.Container
@@ -118,7 +119,7 @@ class ContainerFetcherJobHttpUrlConnection2Test {
         val containerTmpFolder = temporaryFolder.newFolder()
         runBlocking {
             serverRepo.addEntriesToContainerFromZip(container.containerUid,
-                epubFile.toKmpUriString(), ContainerAddOptions(containerTmpFolder.toKmpUriString()))
+                epubFile.toDoorUri(), ContainerAddOptions(containerTmpFolder.toDoorUri()))
         }
 
         //Create a mock web server that will serve the concatenated data

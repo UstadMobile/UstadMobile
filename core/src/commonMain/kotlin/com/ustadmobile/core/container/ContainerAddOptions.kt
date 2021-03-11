@@ -1,6 +1,8 @@
 package com.ustadmobile.core.container
 
-class ContainerAddOptions(val storageDirUri: String,
+import com.ustadmobile.door.DoorUri
+
+class ContainerAddOptions(val storageDirUri: DoorUri,
 
                           val moveFiles: Boolean = false,
                           /**
