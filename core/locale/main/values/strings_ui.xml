@@ -947,4 +947,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="video">Video</string>
 
+    <string name="content_editor_create_new_category">New folder</string>
+
 </resources>

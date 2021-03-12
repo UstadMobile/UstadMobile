@@ -1,14 +1,11 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerEntryFileDao
-import com.ustadmobile.core.util.ext.encodeBase64
-import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromResource
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
@@ -61,7 +58,7 @@ class TestContainerMountRoute {
 
     private val defaultPort = 8098
 
-    private lateinit var containerManager: ContainerManager
+    //private lateinit var containerManager: ContainerManager
 
     private var testPath: String = ""
 
@@ -94,13 +91,14 @@ class TestContainerMountRoute {
         containerTmpDir = UmFileUtilSe.makeTempDir("testcontainermountroute", "tmpdir")
         container = Container()
         container.containerUid = repo.containerDao.insert(container)
-        epubTmpFile = File.createTempFile("tmp", "epub")
-        UmFileUtilSe.extractResourceToFile("/testfiles/thelittlechicks.epub",
-                epubTmpFile!!)
 
-        containerManager = ContainerManager(container, db, repo, containerTmpDir.absolutePath)
-        addEntriesFromZipToContainer(epubTmpFile.absolutePath, containerManager)
-        testPath = containerManager.allEntries[13].cePath!!
+        runBlocking {
+            repo.addEntriesToContainerFromResource(container.containerUid, this::class.java,
+                    "/testfiles/thelittlechicks.epub",
+                    ContainerAddOptions(storageDirUri = containerTmpDir.toDoorUri()))
+        }
+
+        testPath = db.containerEntryDao.findByContainer(container.containerUid)[13].cePath!!
     }
 
     //@After

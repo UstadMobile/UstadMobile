@@ -128,17 +128,12 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
 }
 
 
-actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
-                                                              zipUri: DoorUri,
-                                                              addOptions: ContainerAddOptions) {
+suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
+    zipInputStream: ZipInputStream, addOptions: ContainerAddOptions) {
 
-    val repo = this as? DoorDatabaseRepository
-            ?: throw IllegalStateException("Must use repo for addFileToContainer")
-    val db = repo.db as UmAppDatabase
-
+    val (db, repo) = requireDbAndRepo()
     withContext(Dispatchers.IO) {
         val storageDirFile = addOptions.storageDirUri.toFile()
-        val zipInputStream = ZipInputStream(FileInputStream(zipUri.toFile()))
         zipInputStream.use { zipIn ->
             var zipEntry: ZipEntry? = null
             while(zipIn.nextEntry?.also { zipEntry = it } != null) {
@@ -172,8 +167,34 @@ actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long
 
             }
         }
+
+        repo.containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
     }
-
-    containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
-
 }
+
+actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
+                                                              zipUri: DoorUri,
+                                                              addOptions: ContainerAddOptions) {
+    withContext(Dispatchers.IO) {
+        val zipInputStream = ZipInputStream(FileInputStream(zipUri.toFile()))
+        addEntriesToContainerFromZip(containerUid, zipInputStream, addOptions)
+    }
+}
+
+/**
+ * Add entries to the given container from a resource. This will open an inputStream using
+ * Class.getResourceAsStream
+ *
+ * @param containerUid The ContainerUID to add the contents to
+ * @param javaClass Java.lang.Class that will be used to invoke getResourceAsStream
+ * @param resourcePath the resource path as it will be provided to getResourceAsStream
+ * @param addOptions ContainerAddOptions
+ */
+suspend fun UmAppDatabase.addEntriesToContainerFromResource(containerUid: Long, javaClass: Class<*>,
+                                                            resourcePath: String, addOptions: ContainerAddOptions) {
+    withContext(Dispatchers.IO) {
+        val zipInputStream = ZipInputStream(javaClass.getResourceAsStream(resourcePath))
+        addEntriesToContainerFromZip(containerUid, zipInputStream, addOptions)
+    }
+}
+
