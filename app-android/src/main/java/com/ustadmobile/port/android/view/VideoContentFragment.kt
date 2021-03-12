@@ -28,20 +28,24 @@ import com.google.android.exoplayer2.util.Util
 import com.google.android.exoplayer2.video.VideoListener
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentVideoContentBinding
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenter
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.io.ext.openEntryInputStream
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.audio.Codec2Player
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.io.BufferedInputStream
 import java.io.IOException
 
@@ -75,6 +79,10 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
     private var controlsView: PlayerControlView? = null
 
+    private var db: UmAppDatabase? = null
+
+    private var containerUid: Long = 0
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mBinding = FragmentVideoContentBinding.inflate(inflater, container, false).also {
             rootView = it.root
@@ -87,6 +95,9 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             (context as? MainActivity)?.onAppBarExpand(isPortrait)
             it.videoScroll.isNestedScrollingEnabled = isPortrait
         }
+
+        db = di.direct.instance(tag = DoorTag.TAG_DB)
+        containerUid = arguments?.getString(UstadView.ARG_CONTAINER_UID)?.toLong() ?: 0L
 
         if (savedInstanceState != null) {
             playbackPosition = savedInstanceState.get(PLAYBACK) as Long
@@ -140,12 +151,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             field = value
             setVideoParams(value?.videoPath, value?.audioPath, value?.srtLangList
                     ?: mutableListOf(), value?.srtMap ?: mutableMapOf())
-        }
-
-    override var containerManager: ContainerManager? = null
-        get() = field
-        set(value) {
-            field = value
         }
 
     private fun initializePlayer() {
@@ -213,15 +218,14 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
         GlobalScope.launch {
             try {
-                val containerManager = containerManager
-                val containerEntry = containerManager?.getEntry(subtitleData)
-                if (containerEntry == null) {
+                val subtitleInputStream = db?.containerEntryDao?.openEntryInputStream(containerUid,
+                        subtitleData)
+                if (subtitleInputStream == null) {
                     showError()
                     loading = false
                     return@launch
                 }
-                val byteArrayDataSource = ByteArrayDataSource(
-                        UMIOUtils.readStreamToByteArray(containerManager.getInputStream(containerEntry)))
+                val byteArrayDataSource = ByteArrayDataSource(subtitleInputStream.readBytes())
 
                 val factory = { byteArrayDataSource }
 
@@ -280,11 +284,15 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
 
     fun playAudio(fromMs: Long) {
-        val audioInput = containerManager?.getInputStream(videoParams?.audioPath
-                ?: ContainerEntryWithContainerEntryFile())
+        val audioInput = videoParams?.audioPath?.cePath?.let { audioPath ->
+            db?.containerEntryDao?.openEntryInputStream(containerUid, audioPath)
+        }
+
         if (audioInput == null) {
             showError()
+            return
         }
+
         audioPlayer = Codec2Player(BufferedInputStream(audioInput), fromMs)
         audioPlayer?.play()
     }

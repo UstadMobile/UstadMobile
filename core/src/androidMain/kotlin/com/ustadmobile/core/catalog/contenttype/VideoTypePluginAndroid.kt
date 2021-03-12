@@ -9,7 +9,6 @@ import com.linkedin.android.litr.MediaTransformer
 import com.linkedin.android.litr.TransformationListener
 import com.linkedin.android.litr.analytics.TrackTransformationInfo
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.util.ext.extractVideoResolutionMetadata
