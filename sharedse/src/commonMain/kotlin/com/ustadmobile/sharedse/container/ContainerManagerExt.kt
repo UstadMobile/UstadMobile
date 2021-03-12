@@ -16,6 +16,7 @@ import com.ustadmobile.sharedse.io.ConcatenatedInputStreamEntrySource
  * @param entries A list of ContainerEntryWithMd5s that correspond to the contents that are in the
  * concatenatedInputStream. This is used to create ContainerEntry objects.
  */
+@Deprecated("This uses ContaineManager, which is being removed")
 suspend fun ContainerManager.addEntriesFromConcatenatedInputStream(
         concatenatedInputStream: ConcatenatedInputStream, entries: List<ContainerEntryWithMd5>) {
 

@@ -14,10 +14,14 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.io.InputStream
+import java.io.ByteArrayInputStream
 import java.net.URI
 import java.nio.file.Paths
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import com.ustadmobile.core.contentformats.har.HarEntry
+import java.util.Base64
 
 actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
                                                    recursive: Boolean,
@@ -127,46 +131,70 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
     }
 }
 
+/**
+ * Lookup a ContainerEntryFile that matches the MD5 of the data from the given InputStream. If there
+ * is no ContainerEntryFile for that MD5 Sum, add a new one. Returns the result
+ *
+ * @param src InputStream from which to read data
+ * @param originalLength the length of the data
+ * @param pathInContainer the path that this entry will receive (used to pass to the
+ * addoptions.compressionFilter)
+ * @param addOptions ContainerAddOptions
+ *
+ * @return ContainerEntryFile with the data as per the MD5Sum of the given InputStream
+ */
+private suspend fun UmAppDatabase.insertOrLookupContainerEntryFile(src: InputStream,
+                                                                   originalLength: Long,
+                                                                   pathInContainer: String,
+                                                                   addOptions: ContainerAddOptions) : ContainerEntryFile {
+
+    val storageDirFile = addOptions.storageDirUri.toFile()
+    val tmpFile = File(storageDirFile, "${systemTimeInMillis()}.tmp")
+    val gzip = addOptions.compressionFilter.shouldCompress(pathInContainer, null)
+    val md5Sum = src.writeToFileAndGetMd5(tmpFile, gzip)
+
+    var containerFile = containerEntryFileDao.findEntryByMd5Sum(md5Sum.encodeBase64())
+    if(containerFile == null) {
+        val finalDestFile = File(storageDirFile, md5Sum.toHexString())
+        if(!tmpFile.renameTo(finalDestFile))
+            throw IOException("Could not rename $tmpFile to $finalDestFile")
+
+        containerFile = finalDestFile.toContainerEntryFile(originalLength, md5Sum, gzip).apply {
+            this.cefUid = containerEntryFileDao.insert(this)
+        }
+    }else {
+        tmpFile.delete()
+    }
+
+    return containerFile
+}
 
 suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
     zipInputStream: ZipInputStream, addOptions: ContainerAddOptions) {
 
     val (db, repo) = requireDbAndRepo()
     withContext(Dispatchers.IO) {
-        val storageDirFile = addOptions.storageDirUri.toFile()
+        val containerEntriesToAdd = mutableListOf<ContainerEntry>()
         zipInputStream.use { zipIn ->
             var zipEntry: ZipEntry? = null
             while(zipIn.nextEntry?.also { zipEntry = it } != null) {
                 val zipEntryVal = zipEntry ?: throw IllegalStateException("ZipEntry is not null in loop")
                 val nameInZip = zipEntryVal.name
-                val tmpFileOut = File(storageDirFile, "${systemTimeInMillis()}.tmp")
-
-                //TODO: specify mime type here
-                val gzip = addOptions.compressionFilter.shouldCompress(nameInZip, null)
-                val md5Sum = zipIn.writeToFileAndGetMd5(tmpFileOut, gzip)
-
-                var containerFile = db.containerEntryFileDao.findEntryByMd5Sum(md5Sum.encodeBase64())
-                if(containerFile == null) {
-                    val finalDestFile = File(storageDirFile, md5Sum.toHexString())
-                    if(!tmpFileOut.renameTo(finalDestFile))
-                        throw IOException("Could not rename $tmpFileOut to $finalDestFile")
-
-                    containerFile = finalDestFile.toContainerEntryFile(zipEntryVal.size, md5Sum, gzip).apply {
-                        this.cefUid = db.containerEntryFileDao.insert(this)
-                    }
-                }
+                val containerFile = db.insertOrLookupContainerEntryFile(zipIn, zipEntryVal.size,
+                        nameInZip, addOptions)
 
                 val entryPath = addOptions.fileNamer.nameContainerFile(nameInZip, nameInZip)
-                db.containerEntryDao.insertAsync(ContainerEntry().apply {
+
+                containerEntriesToAdd.add(ContainerEntry().apply {
                     this.cePath = entryPath
                     this.ceContainerUid = containerUid
                     this.ceCefUid = containerFile.cefUid
                 })
 
-                tmpFileOut.delete()
-
             }
         }
+
+        db.containerEntryDao.insertListAsync(containerEntriesToAdd)
 
         repo.containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
     }
@@ -198,3 +226,34 @@ suspend fun UmAppDatabase.addEntriesToContainerFromResource(containerUid: Long, 
     }
 }
 
+suspend fun UmAppDatabase.addHarEntryToContainer(containerUid: Long, harEntry: HarEntry,
+                                                 pathInContainer: String,
+                                                 addOptions: ContainerAddOptions) {
+
+    val harResponse = harEntry.response ?: throw IllegalArgumentException("HarEntry being added" +
+            " as $pathInContainer to $containerUid must have a response!")
+    val harContent = harResponse.content ?: throw IllegalArgumentException("HarEntry being added" +
+            " as $pathInContainer to $containerUid must have response content!")
+    val harContentText = harContent.text ?: throw IllegalArgumentException("HarEntry being added" +
+            " as $pathInContainer to $containerUid must have response content text!")
+
+    withContext(Dispatchers.IO) {
+        val storageDir = addOptions.storageDirUri.toFile()
+        val tmpFile = File(storageDir, "${systemTimeInMillis()}.tmp")
+        val harInputStream = if(harContent.encoding == "base64") {
+            ByteArrayInputStream(Base64.getDecoder().decode(harContentText))
+        }else {
+            ByteArrayInputStream(harContentText.toByteArray())
+        }
+
+
+        val compress = addOptions.compressionFilter.shouldCompress(pathInContainer, null)
+
+        val entryMd5 = harInputStream.writeToFileAndGetMd5(tmpFile, compress)
+
+    }
+
+    containerDao.takeIf { addOptions.updateContainer }
+            ?.updateContainerSizeAndNumEntriesAsync(containerUid)
+
+}

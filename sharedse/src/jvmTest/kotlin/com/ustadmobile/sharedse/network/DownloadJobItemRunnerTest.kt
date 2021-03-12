@@ -7,7 +7,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
@@ -125,8 +124,6 @@ class DownloadJobItemRunnerTest {
     private lateinit var container: Container
 
     private lateinit var containerWDuplicates: Container
-
-    private lateinit var containerManager: ContainerManager
 
     private val MAX_LATCH_WAITING_TIME = 15000L
 

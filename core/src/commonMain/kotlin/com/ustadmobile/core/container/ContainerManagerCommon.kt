@@ -91,33 +91,6 @@ abstract class ContainerManagerCommon(protected val container: Container,
     }
 
 
-    /**
-     * Make a copy of this container as a new container - e.g. when making a new version of this
-     * file, adding files, etc.
-     *
-     * @return ContainerManager wiht the same contents, linked to the same underlying files, with the
-     * last modified timestamp updated.
-     */
-    fun copyToNewContainer(): ContainerManager {
-        val newContainer = Container()
-        newContainer.fileSize = container.fileSize
-        newContainer.cntLastModified = getSystemTimeInMillis()
-        newContainer.cntNumEntries = pathToEntryMap.size
-        newContainer.containerContentEntryUid = container.containerContentEntryUid
-        newContainer.mimeType = container.mimeType
-        newContainer.mobileOptimized = container.mobileOptimized
-        newContainer.remarks = container.remarks
-        newContainer.containerUid = dbRepo.containerDao.insert(newContainer)
-
-        val newEntryMap = pathToEntryMap.map { it.key to
-                ContainerEntryWithContainerEntryFile(it.value.cePath!!, newContainer, it.value.containerEntryFile!!)
-        }.toMap()
-
-        db.containerEntryDao.insertList(newEntryMap.values.map { it })
-        return ContainerManager(newContainer, db, dbRepo, newFilePath,
-                newEntryMap.toMutableMap())
-    }
-
     abstract suspend fun addEntries(addOptions: AddEntryOptions?, vararg entries: EntrySource)
 
     abstract suspend fun addEntries(addOptions: AddEntryOptions?,
