@@ -18,6 +18,6 @@ actual class WebChunkPresenter actual constructor(context: Any, arguments: Map<S
                     .getString(MessageID.error_opening_file, this))
             return
         }
-        view.containerManager = ContainerManager(result, db, repo)
+        view.containerUid = containerUid ?: 0L
     }
 }

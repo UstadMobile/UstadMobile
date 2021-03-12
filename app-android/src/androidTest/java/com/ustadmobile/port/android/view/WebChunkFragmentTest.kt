@@ -1,13 +1,11 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
 import android.os.Build
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isJavascriptEnabled
 import androidx.test.espresso.web.webdriver.Locator
-import androidx.test.rule.GrantPermissionRule
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
@@ -30,7 +28,6 @@ import org.junit.Test
 import java.io.File
 
 @AdbScreenRecord("WebChunk Screen Test")
-@ExperimentalStdlibApi
 class WebChunkFragmentTest : TestCase() {
 
     @JvmField
