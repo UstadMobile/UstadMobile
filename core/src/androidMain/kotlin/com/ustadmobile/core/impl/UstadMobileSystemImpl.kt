@@ -98,8 +98,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     private val viewNameToAndroidImplMap = mapOf<String, String>(
             "DownloadDialog" to "${PACKAGE_NAME}DownloadDialogFragment",
-            ContentEditorView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorActivity",
-            ContentEditorPageListView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorPageListFragment",
             SplashScreenView.VIEW_NAME to "${PACKAGE_NAME}SplashScreenActivity",
             OnBoardingView.VIEW_NAME to "${PACKAGE_NAME}OnBoardingActivity",
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",

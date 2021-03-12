@@ -64,7 +64,7 @@ class ReportTemplateListPresenter(context: Any, arguments: Map<String, String>, 
                                         repo.reportDao.toggleVisibilityReportItems(false,
                                                 listToHide)
                                     }
-                                }, MessageID.content_editor_menu_undo)
+                                }, MessageID.undo)
                     }
                 }
             }
