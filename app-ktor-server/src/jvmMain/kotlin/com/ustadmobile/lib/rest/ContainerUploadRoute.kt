@@ -59,7 +59,7 @@ fun Route.ContainerUpload() {
             if (!sessionFile.exists() && !skipSessionFile) {
                 call.respond(HttpStatusCode.InternalServerError, "session file not found")
             } else {
-                val containerDir: File by di().on(call).instance(tag = DiTag.TAG_CONTAINER_DIR)
+                val containerDir: File by di().on(call).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
                 var containerFromDb = db.containerDao.findByUid(container.containerUid)
                 if (containerFromDb == null) {

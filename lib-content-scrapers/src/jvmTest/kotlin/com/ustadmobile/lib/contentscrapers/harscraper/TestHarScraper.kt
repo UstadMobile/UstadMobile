@@ -70,7 +70,7 @@ class TestHarScraper {
                     it.clearAllTables()
                 })
             }
-            bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+            bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
                 containerFolder
             }
             bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {

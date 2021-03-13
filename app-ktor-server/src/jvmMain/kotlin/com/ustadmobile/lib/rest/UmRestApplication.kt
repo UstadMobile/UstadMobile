@@ -111,7 +111,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
 
 
-        bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+        bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
             val containerDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "container")
 
             //Move any old container directory to the new path (e.g. pre database v57)
@@ -183,7 +183,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         onReady {
             if(dbMode == CONF_DBMODE_SINGLETON) {
                 //Get the container dir so that any old directories (build/storage etc) are moved if required
-                di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_CONTAINER_DIR)
+                di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
             }
         }
     }

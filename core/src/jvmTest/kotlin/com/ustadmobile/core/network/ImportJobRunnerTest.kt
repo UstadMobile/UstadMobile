@@ -129,7 +129,7 @@ class ImportJobRunnerTest {
                     uploadServerFolder
                 }
 
-                bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(serverEndpointScope).singleton {
+                bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(serverEndpointScope).singleton {
                     serverContainerFolder = temporaryFolder.newFolder("servercontainerdir")
                     serverContainerFolder
                 }
