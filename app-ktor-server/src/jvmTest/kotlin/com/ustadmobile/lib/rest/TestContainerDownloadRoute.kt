@@ -4,7 +4,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.addEntriesToContainerFromResource
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.asRepository
@@ -92,7 +92,7 @@ class TestContainerDownloadRoute {
         container.containerUid = repo.containerDao.insert(container)
 
         runBlocking {
-            repo.addEntriesToContainerFromResource(container.containerUid, repo::class.java,
+            repo.addEntriesToContainerFromZipResource(container.containerUid, repo::class.java,
                     "/testfiles/thelittlechicks.epub",
                     ContainerAddOptions(containerTmpDir.toDoorUri()))
         }

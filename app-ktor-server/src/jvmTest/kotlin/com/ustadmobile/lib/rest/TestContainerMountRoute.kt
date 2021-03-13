@@ -2,7 +2,7 @@ package com.ustadmobile.lib.rest
 
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.addEntriesToContainerFromResource
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
@@ -17,8 +17,6 @@ import io.ktor.routing.Routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import org.junit.Before
-import org.junit.Test
 import java.io.File
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.client.engine.okhttp.*
@@ -26,18 +24,9 @@ import io.ktor.client.request.get
 import io.ktor.client.request.head
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.HttpHeaders
-import io.netty.handler.codec.http.DefaultHttpResponse
 import io.netty.handler.codec.http.HttpResponseStatus
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
-import kotlinx.io.InputStream
-import org.junit.After
 import org.junit.Assert
-import java.io.ByteArrayInputStream
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.util.concurrent.TimeUnit
 
 /**
  * This test is BROKEN 16/Dec/2020
@@ -93,7 +82,7 @@ class TestContainerMountRoute {
         container.containerUid = repo.containerDao.insert(container)
 
         runBlocking {
-            repo.addEntriesToContainerFromResource(container.containerUid, this::class.java,
+            repo.addEntriesToContainerFromZipResource(container.containerUid, this::class.java,
                     "/testfiles/thelittlechicks.epub",
                     ContainerAddOptions(storageDirUri = containerTmpDir.toDoorUri()))
         }

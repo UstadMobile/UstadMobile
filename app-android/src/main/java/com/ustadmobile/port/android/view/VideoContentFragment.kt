@@ -28,6 +28,7 @@ import com.google.android.exoplayer2.util.Util
 import com.google.android.exoplayer2.video.VideoListener
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentVideoContentBinding
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.VideoContentPresenter
 import com.ustadmobile.core.controller.VideoContentPresenterCommon
 import com.ustadmobile.core.db.UmAppDatabase
@@ -46,6 +47,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.on
 import java.io.BufferedInputStream
 import java.io.IOException
 
@@ -96,7 +98,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             it.videoScroll.isNestedScrollingEnabled = isPortrait
         }
 
-        db = di.direct.instance(tag = DoorTag.TAG_DB)
+        val accountManager: UstadAccountManager = di.direct.instance()
+        db = di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB)
         containerUid = arguments?.getString(UstadView.ARG_CONTAINER_UID)?.toLong() ?: 0L
 
         if (savedInstanceState != null) {

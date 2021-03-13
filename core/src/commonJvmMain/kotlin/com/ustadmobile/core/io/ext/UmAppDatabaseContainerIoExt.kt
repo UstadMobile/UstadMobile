@@ -218,13 +218,26 @@ actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long
  * @param resourcePath the resource path as it will be provided to getResourceAsStream
  * @param addOptions ContainerAddOptions
  */
-suspend fun UmAppDatabase.addEntriesToContainerFromResource(containerUid: Long, javaClass: Class<*>,
-                                                            resourcePath: String, addOptions: ContainerAddOptions) {
+suspend fun UmAppDatabase.addEntriesToContainerFromZipResource(containerUid: Long, javaClass: Class<*>,
+                                                               resourcePath: String, addOptions: ContainerAddOptions) {
     withContext(Dispatchers.IO) {
         val zipInputStream = ZipInputStream(javaClass.getResourceAsStream(resourcePath))
         addEntriesToContainerFromZip(containerUid, zipInputStream, addOptions)
     }
 }
+
+suspend fun UmAppDatabase.addEntryToContainerFromResource(containerUid: Long, javaClass: Class<*>,
+                                                         resourcePath: String, pathInContainer: String,
+                                                          addOptions: ContainerAddOptions) {
+    withContext(Dispatchers.IO) {
+        val tmpFile = File(addOptions.storageDirUri.toFile(), "${systemTimeInMillis()}.tmp")
+        val resourceIn = javaClass.getResourceAsStream(resourcePath) ?: throw IOException("resource not found: $resourcePath")
+        resourceIn.writeToFile(tmpFile)
+        addFileToContainer(containerUid, tmpFile.toDoorUri(), pathInContainer, addOptions)
+        tmpFile.takeIf { it.exists() }?.delete()
+    }
+}
+
 
 suspend fun UmAppDatabase.addHarEntryToContainer(containerUid: Long, harEntry: HarEntry,
                                                  pathInContainer: String,

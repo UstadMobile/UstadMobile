@@ -13,7 +13,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.io.ext.addEntriesToContainerFromResource
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
@@ -67,7 +67,7 @@ class EpubContentActivityTest : TestCase() {
         containerTmpDir = tempFileRule.newFolder("epubContent${System.currentTimeMillis()}")
 
         runBlocking {
-            dbRule.repo.addEntriesToContainerFromResource(container.containerUid, this::class.java,
+            dbRule.repo.addEntriesToContainerFromZipResource(container.containerUid, this::class.java,
                 "/com/ustadmobile/app/android/test.epub",
                 ContainerAddOptions(storageDirUri = containerTmpDir.toDoorUri()))
         }
