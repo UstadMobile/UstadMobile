@@ -9,6 +9,7 @@ import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.lib.db.entities.Person
 import kotlin.js.JsName
 
@@ -23,7 +24,7 @@ abstract class LanguageDao : BaseDao<Language> {
     @Query("""
         SELECT Language.* 
         FROM Language
-        WHERE :searchText IS NULL OR name LIKE :searchText
+        WHERE name LIKE :searchText
         ORDER BY CASE(:sortOrder)
             WHEN $SORT_LANGNAME_ASC THEN Language.name
             ELSE ''
@@ -33,7 +34,10 @@ abstract class LanguageDao : BaseDao<Language> {
             ELSE ''
         END DESC
     """)
-    abstract fun findLanguagesAsSource(sortOrder: Int, searchText: String?): DataSource.Factory<Int, Language>
+    abstract fun findLanguagesAsSource(sortOrder: Int, searchText: String): DataSource.Factory<Int, Language>
+
+    @Query("""SELECT * FROM Language""")
+    abstract fun findLanguagesList(): List<Language>
 
     @Query("SELECT * FROM Language WHERE name = :name LIMIT 1")
     abstract fun findByName(name: String): Language?
@@ -55,6 +59,12 @@ abstract class LanguageDao : BaseDao<Language> {
 
     @Query("SELECT *  FROM LANGUAGE where langUid = :primaryLanguageUid LIMIT 1")
     abstract fun findByUid(primaryLanguageUid: Long): Language?
+
+    @Query("SELECT *  FROM LANGUAGE where langUid = :primaryLanguageUid LIMIT 1")
+    abstract suspend fun findByUidAsync(primaryLanguageUid: Long): Language?
+
+    @Update
+    abstract suspend fun updateAsync(entity: Language): Int
 
     companion object  {
 

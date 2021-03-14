@@ -38,6 +38,12 @@ class SettingsFragment : UstadBaseFragment(), SettingsView {
             mBinding?.reasonLeavingVisible = value
         }
 
+    override var langListVisible: Boolean = false
+        set(value) {
+            field = value
+            mBinding?.langListVisible = value
+        }
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         super.onCreateView(inflater, container, savedInstanceState)
         val view:View

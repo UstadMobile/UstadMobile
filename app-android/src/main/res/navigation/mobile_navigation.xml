@@ -178,6 +178,10 @@
         android:label="@string/select_language" />
 
     <fragment
+        android:id="@+id/language_edit_dest"
+        android:name="com.ustadmobile.port.android.view.LanguageEditFragment" />
+
+    <fragment
         android:id="@+id/content_entry_details_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntry2DetailFragment"
         android:label="" />
