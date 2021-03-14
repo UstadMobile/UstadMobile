@@ -1,33 +1,32 @@
 package com.ustadmobile.core.contentformats.har
 
 import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.whenever
 import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ReportDao
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.util.*
 import com.ustadmobile.core.view.ReportListView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.util.test.ext.insertTestStatements
+import jdk.nashorn.internal.objects.Global
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
-import org.kodein.di.bind
 import org.kodein.di.instance
-import org.kodein.di.singleton
 import java.io.File
 
 @ExperimentalStdlibApi
@@ -39,6 +38,10 @@ class TestHarContainer {
     @JvmField
     @Rule
     var ustadTestRule = UstadTestRule()
+
+    @Rule
+    @JvmField
+    val tmpFileRule = TemporaryFolder()
 
     private lateinit var mockView: ReportListView
 
@@ -69,14 +72,7 @@ class TestHarContainer {
         val httpd = EmbeddedHTTPD(0, di)
         httpd.start()
 
-        val tmpDir = UmFileUtilSe.makeTempDir("testHar",
-                "" + System.currentTimeMillis())
-
-        val chunkCountingOut = File(tmpDir, "har.zip")
-
-        FileUtils.copyInputStreamToFile(
-                javaClass.getResourceAsStream("/com/ustadmobile/core/contentformats/har.zip"),
-                chunkCountingOut)
+        val tmpDir = tmpFileRule.newFolder("testHar")
 
         val targetEntry = ContentEntry()
         targetEntry.title = "tiempo de prueba"
@@ -89,16 +85,18 @@ class TestHarContainer {
         targetEntry.contentEntryUid = repo.contentEntryDao.insert(targetEntry)
 
         container = Container()
-        container?.mimeType = "application/har+zip"
-        container?.containerContentEntryUid = targetEntry.contentEntryUid
-        container?.containerUid = repo.containerDao.insert(container!!)
+        container.mimeType = "application/har+zip"
+        container.containerContentEntryUid = targetEntry.contentEntryUid
+        container.containerUid = repo.containerDao.insert(container)
 
-        val containerManager = ContainerManager(container!!, db, repo,
-                tmpDir.absolutePath)
-        addEntriesFromZipToContainer(chunkCountingOut.absolutePath, containerManager)
+        runBlocking {
+            repo.addEntriesToContainerFromZipResource(container.containerUid, this::class.java,
+                    "/com/ustadmobile/core/contentformats/har.zip", ContainerAddOptions(tmpDir.toDoorUri()))
 
-        harContainer = HarContainer(containerManager, targetEntry, accountManager.activeAccount, context, httpd.localHttpUrl){
-
+            harContainer = HarContainer(container.containerUid, targetEntry,
+                    accountManager.activeAccount, db, context, httpd.localHttpUrl){
+            }
+            harContainer?.startingUrlDeferred?.await()
         }
     }
 

@@ -54,11 +54,11 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
                     view.entry = result
                 })
 
-                val containerResult = dbRepo.containerDao.findByUidAsync(containerUid) ?: throw Exception()
-                val containerManager = ContainerManager(containerResult, db, dbRepo)
-                harContainer = HarContainer(containerManager, result, accountManager.activeAccount, context, localHttp) {
+                harContainer = HarContainer(containerUid, result, accountManager.activeAccount, db,
+                        context, localHttp) {
                     handleUrlLinkToContentEntry(it)
                 }
+                harContainer.startingUrlDeferred.await()
                 containerDeferred.complete(harContainer)
                 view.loadUrl(harContainer.startingUrl)
 

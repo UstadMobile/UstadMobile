@@ -1,16 +1,20 @@
 package com.ustadmobile.core.contentformats.har
 
+import com.ustadmobile.core.io.ext.getStringFromContainerEntry
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
+import com.ustadmobile.core.io.ext.openInputStream
+import com.ustadmobile.core.io.ext.openEntryInputStream
 import io.ktor.client.request.put
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url
 import io.ktor.http.takeFrom
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.io.ByteArrayInputStream
@@ -176,33 +180,35 @@ class KhanProgressTracker : HarInterceptor() {
 
         val resultEntry = harList[0]
         val harText = resultEntry.response?.content?.text
-        val containerEntry = harContainer.containerManager.getEntry(harText
-                ?: "") ?: return response
-        val data = harContainer.containerManager.getInputStream(containerEntry)
-        val result = UMIOUtils.readStreamToString(data)
-        val itemResp = json.parse(ItemResponse.serializer(), result).itemData ?: return response
-        var question = json.parse(ItemData.serializer(), itemResp).question?.content
-                ?: return response
+        val data = harContainer.db.containerEntryDao.findByPathInContainer(
+                harContainer.containerUid, harText ?: "") ?: return response
 
-        question = question.replace(Regex("(\\[\\[(.*)]])|\\*|\\n|:-: \\||\\{|\\}|\\\$large"), "")
+        GlobalScope.launch {
 
-        val skipped = bodyInput.skipped
-        val completed = if (skipped) false else bodyInput.completed
-        totalTime += bodyInput.timeTaken
-        val timeTaken = UMTinCanUtil.format8601Duration(bodyInput.timeTaken * 1000)
-        val verbUrl = if (skipped) "http://id.tincanapi.com/verb/skipped" else "http://adlnet.gov/expapi/verbs/answered"
-        val verbDisplay = if (skipped) "skipped" else "answered"
+            val result = data.containerEntryFile?.getStringFromContainerEntry() ?: return@launch
+            val itemResp = json.parse(ItemResponse.serializer(), result).itemData ?: return@launch
+            var question = json.parse(ItemData.serializer(), itemResp).question?.content
+                    ?: return@launch
 
-        if (bodyInput.countHints == 0 && completed) {
-            numCorrect++
-        }
+            question = question.replace(Regex("(\\[\\[(.*)]])|\\*|\\n|:-: \\||\\{|\\}|\\\$large"), "")
 
-        // i don't send a statement if the user is not logged in but still need to everything i did before to show user his final score
-        if(harContainer.umAccount == null){
-            return response
-        }
+            val skipped = bodyInput.skipped
+            val completed = if (skipped) false else bodyInput.completed
+            totalTime += bodyInput.timeTaken
+            val timeTaken = UMTinCanUtil.format8601Duration(bodyInput.timeTaken * 1000)
+            val verbUrl = if (skipped) "http://id.tincanapi.com/verb/skipped" else "http://adlnet.gov/expapi/verbs/answered"
+            val verbDisplay = if (skipped) "skipped" else "answered"
 
-        val statement = """
+            if (bodyInput.countHints == 0 && completed) {
+                numCorrect++
+            }
+
+            // i don't send a statement if the user is not logged in but still need to everything i did before to show user his final score
+            if(harContainer.umAccount == null){
+                return@launch
+            }
+
+            val statement = """
 
         {
             "actor": $actor,
@@ -231,11 +237,12 @@ class KhanProgressTracker : HarInterceptor() {
             
         """.trimIndent()
 
-        if (bodyInput.completed) {
-            counter++
-        }
+            if (bodyInput.completed) {
+                counter++
+            }
 
-        sendStatement(statement, harContainer)
+            sendStatement(statement, harContainer)
+        }
 
 
         return response

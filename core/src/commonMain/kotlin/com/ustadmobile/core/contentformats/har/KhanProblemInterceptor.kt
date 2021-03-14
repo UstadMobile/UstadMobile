@@ -1,6 +1,6 @@
 package com.ustadmobile.core.contentformats.har
 
-
+import io.ktor.utils.io.errors.*
 
 @OptIn(ExperimentalStdlibApi::class)
 class KhanProblemInterceptor : HarInterceptor() {
@@ -27,7 +27,7 @@ class KhanProblemInterceptor : HarInterceptor() {
         val harResponse = harEntry.response ?: return response
         val harText = harResponse.content?.text
 
-        val containerEntry = harContainer.containerManager.getEntry(harText
+        val containerEntry = harContainer.db.containerEntryDao.findByPathInContainer(harContainer.containerUid,harText
                 ?: "") ?: return response
 
         val entryFile = containerEntry.containerEntryFile
@@ -39,12 +39,11 @@ class KhanProblemInterceptor : HarInterceptor() {
             return harResponse
         }
 
-        val data = harContainer.containerManager.getInputStream(containerEntry)
-
-        harResponse.content?.data = data
 
         val mutMap = harContainer.getHeaderMap(harResponse.headers, entryFile)
         harResponse.headers = mutMap.map { HarNameValuePair(it.key, it.value) }
+
+        harResponse.content?.entryFile = entryFile
 
         return harResponse
     }

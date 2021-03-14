@@ -27,3 +27,5 @@ fun ContainerEntryWithContainerEntryFile.toContainerEntryWithMd5(): ContainerEnt
         it.cefMd5 = containerEntryFile?.cefMd5
     }
 }
+
+expect suspend fun ContainerEntryFile.getStringFromContainerEntry(): String
