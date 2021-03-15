@@ -110,8 +110,8 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
             val bytesToSkipWriting = firstFile.length() + firstFileHeader.length()
             totalDownloadSize.set((firstFile.length() + firstFileHeader.length()) + urlConnection.requireContentLength())
 
-            val readAndSaveResult = inStream.readAndSaveToDir(destDirFile, db, bytesSoFar,
-                    request.entriesToDownload, md5ExpectedList, logPrefix)
+            val readAndSaveResult = inStream.readAndSaveToDir(destDirFile, destDirFile, db,
+                    bytesSoFar, request.entriesToDownload, md5ExpectedList, logPrefix)
             val totalBytesRead= readAndSaveResult.totalBytesRead
             val payloadExpected = (totalDownloadSize.get() - (md5sToDownload.size * ConcatenatedEntry.SIZE))
 

@@ -55,24 +55,6 @@ class ContainerFetcherJobHttpUrlConnection2Test {
     }
 
 
-
-    fun UmAppDatabase.assertAllContainerEntryFilesPresentInOther(md5List: List<String>, otherDb: UmAppDatabase) {
-        md5List.forEach { md5Base64 ->
-            val md5Hex = md5Base64.base64StringToByteArray().toHexString()
-            val fileEntryInThisDb = runBlocking {
-                containerEntryFileDao.findEntryByMd5Sum(md5Base64)
-            }
-            val fileEntryInOtherDb = runBlocking {
-                otherDb.containerEntryFileDao.findEntryByMd5Sum(md5Base64)
-            }
-
-            Assert.assertArrayEquals("Content of containerfileentry for $md5Base64  ($md5Hex) are the same in both db",
-                File(fileEntryInThisDb!!.cefPath!!).readBytes(),
-                File(fileEntryInOtherDb!!.cefPath!!).readBytes())
-        }
-    }
-
-
     private lateinit var mockWebServer: MockWebServer
 
     private lateinit var dispatcher: ConcatenatedResponse2Dispatcher
@@ -162,7 +144,6 @@ class ContainerFetcherJobHttpUrlConnection2Test {
         val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct.instance(tag = DoorTag.TAG_DB)
 
 
-        serverDb.assertAllContainerEntryFilesPresentInOther(md5List, clientDb)
         serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
     }
 
@@ -215,8 +196,6 @@ class ContainerFetcherJobHttpUrlConnection2Test {
                 mockRequest2.getHeader("range"))
 
 
-        serverDb.assertAllContainerEntryFilesPresentInOther(
-                allContainerEntryFilesToDownload.map { it.cefMd5!! }, clientDb)
         serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
     }
 
