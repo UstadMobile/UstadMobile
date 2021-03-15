@@ -17,7 +17,6 @@ import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonConfiguration
 
 
-@ExperimentalStdlibApi
 class HarContainer(val containerUid: Long, val entry: ContentEntry,
                    val umAccount: UmAccount?, val db: UmAppDatabase,
                    val context: Any, val localHttp: String, var block: (sourceUrl: String) -> Unit) {
@@ -40,9 +39,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
             throw Exception()
         }
 
-
         GlobalScope.launch(doorMainDispatcher()){
-
 
             val harContentData = indexEntry.containerEntryFile?.getStringFromContainerEntry() ?: throw Exception()
 
@@ -91,7 +88,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
     }
 
 
-    fun serve(request: HarRequest): HarResponse {
+    suspend fun serve(request: HarRequest): HarResponse {
         var regexedUrl = request.url ?: ""
         regexList?.forEach { itRegex ->
             regexedUrl = regexedUrl.replace(Regex(itRegex.regex), itRegex.replacement)
@@ -109,7 +106,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
         return response
     }
 
-    private fun getInitialResponse(request: HarRequest): HarResponse {
+    private suspend fun getInitialResponse(request: HarRequest): HarResponse {
         val harList = requestMap[(Pair(request.method, request.regexedUrl))]
 
         val defaultResponse = HarResponse()
@@ -149,6 +146,11 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
         val harContent = harResponse.content ?: defaultHarContent
         harContent.entryFile = entryFile
 
+        if(harContent.mimeType?.startsWith("text/") == true ||
+                harContent.mimeType?.startsWith("application/json") == true){
+            harContent.text = entryFile.getStringFromContainerEntry()
+        }
+
         val rangeHeader: String? = mutMap["Range"] ?: return harResponse
 
         val totalLength = entryFile.ceTotalSize
@@ -167,6 +169,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
             harResponse.statusText = "Partial Content"
             harResponse.headers = mutMap.map { HarNameValuePair(it.key, it.value) }
             harContent.entryFile = if (isHEADRequest) null else entryFile
+            harContent.text =  if (isHEADRequest) null else harContent.text
             harResponse.content = harContent
 
             return harResponse
@@ -176,6 +179,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
             harResponse.status = 416
             harResponse.statusText = if (isHEADRequest) "" else "Range request not satisfiable"
             harContent.entryFile = null
+            harContent.text = null
             harResponse.content = harContent
 
             return harResponse

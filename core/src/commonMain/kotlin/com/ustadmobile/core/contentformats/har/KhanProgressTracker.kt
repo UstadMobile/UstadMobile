@@ -3,23 +3,17 @@ package com.ustadmobile.core.contentformats.har
 import com.ustadmobile.core.io.ext.getStringFromContainerEntry
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.UmAccountActor
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
-import com.ustadmobile.core.io.ext.openInputStream
-import com.ustadmobile.core.io.ext.openEntryInputStream
 import io.ktor.client.request.put
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.URLBuilder
 import io.ktor.http.URLProtocol
 import io.ktor.http.Url
 import io.ktor.http.takeFrom
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.io.ByteArrayInputStream
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.toUtf8Bytes
 
 @Serializable
 class ItemResponse {
@@ -42,7 +36,6 @@ class ItemData {
 }
 
 
-@ExperimentalStdlibApi
 class KhanProgressTracker : HarInterceptor() {
 
     val exercisePath = "/api/internal/user/exercises/"
@@ -54,7 +47,7 @@ class KhanProgressTracker : HarInterceptor() {
     val client = defaultHttpClient()
     var totalTime = 0L
 
-    override fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
+    override suspend fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
 
         if (request.regexedUrl?.contains("khanacademy.org") == false || (request.regexedUrl?.contains("attempt") == false && request.regexedUrl?.contains("getEotCardDetails") == false)) {
             return response
@@ -153,7 +146,6 @@ class KhanProgressTracker : HarInterceptor() {
             }
 
             val cardDetailsContent = HarContent()
-            cardDetailsContent.data = ByteArrayInputStream(completeResponse.encodeToByteArray())
             cardDetailsContent.text = completeResponse
             cardDetailsContent.mimeType = "application/json"
             cardDetailsContent.size = completeResponse.length.toLong()

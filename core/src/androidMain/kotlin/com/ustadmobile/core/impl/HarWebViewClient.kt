@@ -11,6 +11,9 @@ import com.ustadmobile.core.contentformats.har.HarResponse
 import com.ustadmobile.core.io.RangeInputStream
 import com.ustadmobile.core.io.ext.openInputStream
 import com.ustadmobile.lib.util.RANGE_CONTENT_RANGE_HEADER
+import kotlinx.coroutines.runBlocking
+import java.io.ByteArrayInputStream
+import java.nio.charset.StandardCharsets
 
 
 @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -46,13 +49,20 @@ fun HarResponse.toWebResourceResponse(): WebResourceResponse {
                 RangeInputStream(entryFile.openInputStream(),fromByte, toByte))
     }
 
+    val inputStream = if(content?.mimeType?.startsWith("text/") == true ||
+            content?.mimeType?.startsWith("application/json") == true){
+        ByteArrayInputStream(content?.text?.toByteArray(StandardCharsets.UTF_8))
+    }else{
+        entryFile?.openInputStream()
+    }
+
     return WebResourceResponse(
             this.content?.mimeType?.split(";")?.get(0) ?: "text/html",
             this.content?.encoding ?: "utf-8",
             if (this.status < 100 || (this.status > 299 || this.status < 400)) 200 else this.status,
             this.statusText ?: "OK",
             headerMap,
-            this.content?.entryFile?.openInputStream())
+            inputStream)
 }
 
 
@@ -64,7 +74,9 @@ class HarWebViewClient(private val harContainer: HarContainer) : WebViewClient()
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
         val payload = recorder?.getPayload(request.method, request.url.toString())
-        harContainer.serve(request.toHarRequest(payload))
+        runBlocking {
+            harContainer.serve(request.toHarRequest(payload))
+        }
         return super.shouldOverrideUrlLoading(view, request)
     }
 
@@ -76,7 +88,10 @@ class HarWebViewClient(private val harContainer: HarContainer) : WebViewClient()
                 payload = recorder?.getPayload(request.method, request.url.toString())
             }
         }
-        val response = harContainer.serve(request.toHarRequest(payload))
+
+        val response = runBlocking {
+            harContainer.serve(request.toHarRequest(payload))
+        }
         return response.toWebResourceResponse()
     }
 
