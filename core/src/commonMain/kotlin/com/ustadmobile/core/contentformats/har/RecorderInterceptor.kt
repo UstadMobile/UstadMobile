@@ -15,6 +15,7 @@ class RecorderInterceptor : HarInterceptor() {
         data = data.replace(head, "$1$jsInject")
 
         response.content?.text = data
+        response.content?.size = data.length.toLong()
 
         return response
     }

@@ -10,9 +10,11 @@ import com.ustadmobile.core.contentformats.har.HarRequest
 import com.ustadmobile.core.contentformats.har.HarResponse
 import com.ustadmobile.core.io.RangeInputStream
 import com.ustadmobile.core.io.ext.openInputStream
+import com.ustadmobile.core.util.ext.isTextContent
 import com.ustadmobile.lib.util.RANGE_CONTENT_RANGE_HEADER
 import kotlinx.coroutines.runBlocking
 import java.io.ByteArrayInputStream
+import java.io.InputStream
 import java.nio.charset.StandardCharsets
 
 
@@ -30,10 +32,10 @@ fun WebResourceRequest.toHarRequest(payload: String?): HarRequest {
 fun HarResponse.toWebResourceResponse(): WebResourceResponse {
     val headerMap = this.headers.map { it.name to it.value }.toMap()
 
-    val entryFile = content?.entryFile
+    val inputStreamContent = getInputStreamFromContent()
 
     // range request
-    if(status == 206 && entryFile != null){
+    if(status == 206 && inputStreamContent != null){
 
         val rangeString = headerMap[RANGE_CONTENT_RANGE_HEADER]?.substringAfter("bytes ")
                 ?.substringBefore("/")?.split("-") ?: listOf()
@@ -46,14 +48,7 @@ fun HarResponse.toWebResourceResponse(): WebResourceResponse {
                 if (this.status < 100 || (this.status > 299 || this.status < 400)) 200 else this.status,
                 this.statusText ?: "OK",
                 headerMap,
-                RangeInputStream(entryFile.openInputStream(),fromByte, toByte))
-    }
-
-    val inputStream = if(content?.mimeType?.startsWith("text/") == true ||
-            content?.mimeType?.startsWith("application/json") == true){
-        ByteArrayInputStream(content?.text?.toByteArray(StandardCharsets.UTF_8))
-    }else{
-        entryFile?.openInputStream()
+                RangeInputStream(inputStreamContent,fromByte, toByte))
     }
 
     return WebResourceResponse(
@@ -62,7 +57,16 @@ fun HarResponse.toWebResourceResponse(): WebResourceResponse {
             if (this.status < 100 || (this.status > 299 || this.status < 400)) 200 else this.status,
             this.statusText ?: "OK",
             headerMap,
-            inputStream)
+            inputStreamContent)
+}
+
+fun HarResponse.getInputStreamFromContent(): InputStream? {
+    return if(content?.isTextContent() == true
+            && content?.text != null){
+        ByteArrayInputStream(content?.text?.toByteArray(StandardCharsets.UTF_8))
+    }else{
+        content?.entryFile?.openInputStream()
+    }
 }
 
 

@@ -1,5 +1,8 @@
 package com.ustadmobile.core.contentformats.har
 
+import com.ustadmobile.core.io.ext.getStringFromContainerEntry
+import com.ustadmobile.core.util.ext.isTextContent
+
 class KhanProblemInterceptor : HarInterceptor() {
 
     override suspend fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
@@ -22,15 +25,14 @@ class KhanProblemInterceptor : HarInterceptor() {
         }
 
         val harResponse = harEntry.response ?: return response
-        val harText = harResponse.content?.text
+        val harText = harResponse.content?.text ?: ""
 
-        val containerEntryFile = harContainer.db.containerEntryDao.findByPathInContainer(harContainer.containerUid,harText
-                ?: "")?.containerEntryFile ?: harResponse.content?.entryFile
+        val containerEntryFile = harContainer.db.containerEntryDao.findByPathInContainer(
+                harContainer.containerUid, harText)?.containerEntryFile ?: harResponse.content?.entryFile
 
         if (containerEntryFile == null) {
             harResponse.status = 402
             harResponse.statusText = "Not Found"
-
             harResponse.content = null
             return harResponse
         }
@@ -39,6 +41,9 @@ class KhanProblemInterceptor : HarInterceptor() {
         val mutMap = harContainer.getHeaderMap(harResponse.headers, containerEntryFile)
         harResponse.headers = mutMap.map { HarNameValuePair(it.key, it.value) }
 
+        if(harResponse.content?.isTextContent() == true){
+            harResponse.content?.text = containerEntryFile.getStringFromContainerEntry()
+        }
         harResponse.content?.entryFile = containerEntryFile
 
         return harResponse

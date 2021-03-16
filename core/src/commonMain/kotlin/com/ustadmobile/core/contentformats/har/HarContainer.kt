@@ -4,6 +4,7 @@ import com.ustadmobile.core.contentformats.har.HarInterceptor.Companion.intercep
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getStringFromContainerEntry
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.util.ext.isTextContent
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -131,7 +132,6 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
         if (entryFile == null) {
             harResponse.status = 402
             harResponse.statusText = "Not Found"
-
             harResponse.content = defaultHarContent
             return harResponse
         }
@@ -146,8 +146,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
         val harContent = harResponse.content ?: defaultHarContent
         harContent.entryFile = entryFile
 
-        if(harContent.mimeType?.startsWith("text/") == true ||
-                harContent.mimeType?.startsWith("application/json") == true){
+        if(harContent.isTextContent()){
             harContent.text = entryFile.getStringFromContainerEntry()
         }
 
