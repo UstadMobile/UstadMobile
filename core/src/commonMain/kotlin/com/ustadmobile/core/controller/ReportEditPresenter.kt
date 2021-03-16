@@ -54,12 +54,12 @@ class ReportEditPresenter(context: Any,
                 MessageID.xapi_week),
         MONTH(Report.MONTH,
                 MessageID.xapi_month),
-        CONTENT_ENTRY(Report.CONTENT_ENTRY,
-                MessageID.xapi_content_entry),
         GENDER(Report.GENDER,
                 MessageID.gender_literal),
-        CLASS(Report.CLASS,
-                MessageID.clazz)
+        LE(Report.LE, MessageID.le),
+        PRODUCT_CATEGORY(Report.PRODUCT_CATEGORY, MessageID.category),
+        CUSTOMER(Report.CUSTOMER, MessageID.customer),
+        PROVINCE(Report.PROVINCE, MessageID.province)
     }
 
     class XAxisMessageIdOption(day: XAxisOptions, context: Any)
@@ -131,48 +131,19 @@ class ReportEditPresenter(context: Any,
                 MessageID.xapi_week),
         MONTH(Report.MONTH,
                 MessageID.xapi_month),
-        CONTENT_ENTRY(Report.CONTENT_ENTRY,
-                MessageID.xapi_content_entry),
-        GENDER(Report.GENDER,
-                MessageID.gender_literal),
-        CLASS(Report.CLASS,
-                MessageID.clazz)
+//        GENDER(Report.GENDER,
+//                MessageID.gender_literal),
+        PROVINCE(Report.PROVINCE, MessageID.province)
+
     }
 
     class SubGroupByMessageIdOption(day: SubGroupOptions, context: Any)
         : MessageIdOption(day.messageId, context, day.optionVal)
 
     enum class YAxisOptions(val optionVal: Int, val messageId: Int) {
-        TOTAL_DURATION(ReportSeries.TOTAL_DURATION,
-                MessageID.content_total_duration),
-        AVERAGE_DURATION(ReportSeries.AVERAGE_DURATION,
-                MessageID.content_average_duration),
-        NUMBER_SESSIONS(ReportSeries.NUMBER_SESSIONS,
-                MessageID.count_session),
-        INTERACTIONS_RECORDED(ReportSeries.INTERACTIONS_RECORDED,
-                MessageID.interaction_recorded),
-        NUMBER_ACTIVE_USERS(ReportSeries.NUMBER_ACTIVE_USERS,
-                MessageID.number_active_users),
-        AVERAGE_USAGE_TIME_PER_USER(ReportSeries.AVERAGE_USAGE_TIME_PER_USER,
-                MessageID.average_usage_time_per_user),
-        NUMBER_STUDENTS_COMPLETED(ReportSeries.NUMBER_OF_STUDENTS_COMPLETED_CONTENT,
-                MessageID.number_students_completed),
-        PERCENT_STUDENTS_COMPLETED(ReportSeries.PERCENT_OF_STUDENTS_COMPLETED_CONTENT,
-                MessageID.percent_students_completed),
-        TOTAL_ATTENDANCE(ReportSeries.TOTAL_ATTENDANCE,
-                MessageID.total_attendances),
-        TOTAL_ABSENCES(ReportSeries.TOTAL_ABSENCES,
-                MessageID.total_absences),
-        TOTAL_LATES(ReportSeries.TOTAL_LATES,
-                MessageID.total_lates),
-        PERCENT_STUDENTS_ATTENDED(ReportSeries.PERCENTAGE_STUDENTS_ATTENDED,
-                MessageID.percent_students_attended),
-        PERCENT_STUDENTS_ATTENDED_OR_LATE(ReportSeries.PERCENTAGE_STUDENTS_ATTENDED_OR_LATE,
-                MessageID.percent_students_attended_or_late),
-        TOTAL_CLASSES(ReportSeries.TOTAL_CLASSES,
-                MessageID.total_number_of_classes),
-        UNIQUE_STUDENTS_ATTENDING(ReportSeries.NUMBER_UNIQUE_STUDENTS_ATTENDING,
-                MessageID.number_unique_students_attending)
+        SALES_TOTAL(ReportSeries.SALES_TOTAL, MessageID.sales_total_afs),
+        NUMBER_OF_SALES(ReportSeries.NUMBER_OF_SALES, MessageID.number_of_sales),
+        AVERAGE_SALE_TOTAL(ReportSeries.AVERAGE_SALE_TOTAL, MessageID.average_sale_total)
     }
 
     class YAxisMessageIdOption(data: YAxisOptions, context: Any)

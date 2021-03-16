@@ -76,9 +76,9 @@ class ReportDetailPresenter(context: Any,
         view.loading = true
         GlobalScope.launch(doorMainDispatcher()) {
             val chartData = db.generateChartData(reportWithFilters, context, systemImpl, loggedInPersonUid)
-            val statementList = db.generateStatementList(reportWithFilters, loggedInPersonUid)
+            //val statementList = db.generateStatementList(reportWithFilters, loggedInPersonUid)
             view.chartData = chartData
-            view.statementListDetails = statementList
+            //view.statementListDetails = statementList
             view.loading = false
 
             loggedInPerson = withTimeoutOrNull(2000){

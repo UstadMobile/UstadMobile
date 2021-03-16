@@ -99,4 +99,8 @@
     <string name="product_description">Product description</string>
     <string name="product_price">Product price (AFN)</string>
 
+    <string name="sales_total_afs">Sales total (AFS)</string>
+    <string name="number_of_sales">Number of sales</string>
+    <string name="average_sale_total">Average sale total</string>
+
 </resources>

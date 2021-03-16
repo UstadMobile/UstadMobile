@@ -54,6 +54,12 @@ class ReportSeries{
 
         const val NUMBER_UNIQUE_STUDENTS_ATTENDING = 214
 
+        const val SALES_TOTAL = 215
+
+        const val NUMBER_OF_SALES = 216
+
+        const val AVERAGE_SALE_TOTAL = 217
+
         const val NONE = 0
 
     }

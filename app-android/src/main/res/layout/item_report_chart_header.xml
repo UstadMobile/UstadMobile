@@ -144,6 +144,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/person"
+            android:visibility="gone"
             app:layout_constraintEnd_toStartOf="@+id/guideline_person"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/xapi_space" />
@@ -161,6 +162,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/xapi_verb_header"
+            android:visibility="gone"
             app:layout_constraintEnd_toStartOf="@+id/guideline_verb"
             app:layout_constraintStart_toEndOf="@id/guideline_person"
             app:layout_constraintTop_toBottomOf="@id/xapi_space" />
@@ -176,6 +178,7 @@
             android:id="@+id/xapi_result_header"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:text="@string/xapi_result_header"
             app:layout_constraintEnd_toStartOf="@+id/guideline_result"
             app:layout_constraintStart_toEndOf="@id/guideline_verb"
@@ -193,6 +196,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:text="@string/xapi_options_when"
+            android:visibility="gone"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/guideline_result"
             app:layout_constraintTop_toBottomOf="@id/xapi_space" />
@@ -203,6 +207,7 @@
             android:layout_margin="@dimen/dimen_2dp"
             android:background="@android:color/darker_gray"
             app:layout_constraintEnd_toEndOf="parent"
+            android:visibility="gone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/xapi_when_header" />
 

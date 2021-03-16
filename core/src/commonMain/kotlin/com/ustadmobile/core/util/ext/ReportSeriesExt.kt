@@ -7,6 +7,9 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ABSENT
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_PARTIAL
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.SALES_TOTAL
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_OF_SALES
+import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_SALE_TOTAL
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.INTERACTIONS_RECORDED
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.AVERAGE_DURATION
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.NUMBER_SESSIONS
@@ -23,6 +26,7 @@ import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_CLASSES
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_DURATION
 import com.ustadmobile.lib.db.entities.ReportSeries.Companion.TOTAL_LATES
 
+
 data class QueryParts(val sqlStr: String, val sqlListStr: String, val queryParams: Array<Any>)
 
 fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): QueryParts {
@@ -30,6 +34,20 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
     val paramList = mutableListOf<Any>()
 
     var sql = "SELECT " + when (reportSeriesYAxis) {
+        SALES_TOTAL -> """ COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - 
+                                SUM(Sale.saleDiscount)  
+                            FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = 
+                                Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  
+                            WHERE Sale.saleUid = Sale.saleUid) ,
+                        0 ) AS yAxis, """.trimMargin()
+        NUMBER_OF_SALES -> """COUNT(Sale.saleActive) AS yAxis, """
+        AVERAGE_SALE_TOTAL -> """ 
+                            COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - 
+                                SUM(Sale.saleDiscount)  
+                            FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = 
+                                Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  
+                            WHERE Sale.saleUid = Sale.saleUid) ,
+                        0 ) AS yAxis, """           //TODO: Fix
         TOTAL_DURATION -> "SUM(StatementEntity.resultDuration) AS yAxis, "
         AVERAGE_DURATION -> """SUM(StatementEntity.resultDuration) / COUNT(DISTINCT 
             StatementEntity.contextRegistration) AS yAxis, """.trimMargin()
@@ -71,14 +89,24 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         else -> ""
     }
 
-    val personPermission = """${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} 
-        ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
-         LEFT JOIN StatementEntity ON StatementEntity.statementPersonUid = Person.personUid """.replace(":accountPersonUid","?")
-    paramList.add(accountPersonUid)
+//    val personPermission = """${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1}
+//        ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+//         LEFT JOIN StatementEntity ON StatementEntity.statementPersonUid = Person.personUid """.replace(":accountPersonUid","?")
+//    paramList.add(accountPersonUid)
+//    paramList.add(accountPersonUid)
+
+    var personPermission = """ 
+        FROM Sale  
+                    LEFT JOIN Person AS Customer ON Customer.personUid = Sale.saleCustomerUid
+                    LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = Sale.saleUid 
+                        AND CAST(SaleItem.saleItemActive AS INTEGER) = 1
+                    LEFT JOIN Person as LE ON LE.personUid = :leUid
+                
+    """.replace(":leUid","?")
     paramList.add(accountPersonUid)
 
 
-    var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 
+    var sqlList = """SELECT  Person.* , Sale.* 
                 $personPermission 
                 LEFT JOIN XLangMapEntry ON XLangMapEntry.statementLangMapUid = 
                 (SELECT statementLangMapUid FROM XLangMapEntry 
@@ -108,10 +136,26 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         }
     }
 
-    val where = " WHERE PersonGroupMember.groupMemberPersonUid = ? "
+//    when(reportSeriesYAxis){
+//        SALES_TOTAL, NUMBER_OF_SALES, AVERAGE_SALE_TOTAL -> {
+//            sql+= """ LEFT JOIN SaleItem ON    SaleItem.saleItemSaleUid = Sale.saleUid
+//                    AND CAST(SaleItem.saleItemActive AS INTEGER) = 1      """
+//        }
+//    }
+
+//    val where = " WHERE PersonGroupMember.groupMemberPersonUid = ? "
+//    sql += where
+//    sqlList += where
+//    paramList.add(accountPersonUid)
+
+    val where = """ WHERE CAST(Sale.saleActive AS INTEGER) = 1
+                    AND (
+                        CAST(LE.admin AS INTEGER) = 1 OR 
+                        Sale.salePersonUid = LE.personUid
+                        )
+                """
     sql += where
     sqlList += where
-    paramList.add(accountPersonUid)
 
     if(report.reportDateRangeSelection != 0 || reportSeriesFilters?.isNotEmpty() == true){
 
@@ -214,7 +258,8 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
     sqlList += " GROUP BY StatementEntity.statementUid ORDER BY StatementEntity.timestamp DESC"
 
 
-    return QueryParts(sql, sqlList, paramList.toTypedArray())
+//    return QueryParts(sql, sqlList, paramList.toTypedArray())
+    return QueryParts(sql, "", paramList.toTypedArray())
 }
 
 private fun handleCondition(conditionOption: Int): String{
@@ -236,10 +281,10 @@ private fun groupBy(value: Int, dbType: Int): String {
         Report.DAY -> {
             when (dbType) {
                 DoorDbType.SQLITE -> {
-                    "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
+                    "strftime('%d %m %Y', Sale.saleCreationDate/1000, 'unixepoch') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "TO_CHAR(TO_TIMESTAMP(StatementEntity.timestamp/1000), 'DD MM YYYY') "
+                    "TO_CHAR(TO_TIMESTAMP(Sale.saleCreationDate/1000), 'DD MM YYYY') "
                 }
                 else -> {
                     ""
@@ -250,10 +295,10 @@ private fun groupBy(value: Int, dbType: Int): String {
             when (dbType) {
                 DoorDbType.SQLITE -> {
                     // -5 days to get the date on monday
-                    "strftime('%d %m %Y', StatementEntity.timestamp/1000, 'unixepoch', 'weekday 6', '-5 day') "
+                    "strftime('%d %m %Y', Sale.saleCreationDate/1000, 'unixepoch', 'weekday 6', '-5 day') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP(StatementEntity.timestamp/1000))), 'DD MM YYYY') "
+                    "TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP(Sale.saleCreationDate/1000))), 'DD MM YYYY') "
                 }
                 else -> {
                     ""
@@ -263,10 +308,10 @@ private fun groupBy(value: Int, dbType: Int): String {
         Report.MONTH -> {
             when (dbType) {
                 DoorDbType.SQLITE -> {
-                    "strftime('%m %Y', StatementEntity.timestamp/1000, 'unixepoch') "
+                    "strftime('%m %Y', Sale.saleCreationDate/1000, 'unixepoch') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "TO_CHAR(TO_TIMESTAMP(StatementEntity.timestamp/1000), 'MM YYYY') "
+                    "TO_CHAR(TO_TIMESTAMP(Sale.saleCreationDate/1000), 'MM YYYY') "
                 }
                 else -> {
                     ""
