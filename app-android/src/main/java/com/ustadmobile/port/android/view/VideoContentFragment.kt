@@ -18,6 +18,7 @@ import com.google.android.exoplayer2.Format
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.SimpleExoPlayer
 import com.google.android.exoplayer2.source.*
+import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.ByteArrayDataSource
@@ -51,7 +52,7 @@ interface VideoContentFragmentEventHandler {
 }
 
 @ExperimentalStdlibApi
-class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentFragmentEventHandler {
+class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentFragmentEventHandler, VideoListener {
 
     private var mBinding: FragmentVideoContentBinding? = null
 
@@ -151,6 +152,9 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     private fun initializePlayer() {
         player = SimpleExoPlayer.Builder(viewContext as Context).build()
         player?.addListener(videoListener)
+        player?.addVideoListener(sizeListener)
+        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
+        player?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
         playerView?.player = player
         controlsView?.player = player
         player?.playWhenReady = playWhenReady
@@ -242,6 +246,16 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, viewContext), {}, 0)
     }
 
+    private var sizeListener = object: VideoListener{
+        override fun onVideoSizeChanged(width: Int, height: Int, unappliedRotationDegrees: Int, pixelWidthHeightRatio: Float) {
+            super.onVideoSizeChanged(width, height, unappliedRotationDegrees, pixelWidthHeightRatio)
+        }
+
+        override fun onSurfaceSizeChanged(width: Int, height: Int) {
+            super.onSurfaceSizeChanged(width, height)
+        }
+    }
+
     private var videoListener = object : Player.EventListener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             if (playWhenReady && playbackState == Player.STATE_READY) {
@@ -257,8 +271,10 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
                 mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
                         ?: 100L)
             }
-
         }
+
+
+
     }
 
     private var audioListener = object : Player.EventListener {
@@ -300,6 +316,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         currentWindow = player?.currentWindowIndex ?: 0
         playWhenReady = player?.playWhenReady ?: false
         player?.removeListener(videoListener)
+        player?.removeVideoListener(sizeListener)
         player?.release()
         mPresenter?.updateProgress(playbackPosition, player?.contentDuration ?: 100)
         player = null

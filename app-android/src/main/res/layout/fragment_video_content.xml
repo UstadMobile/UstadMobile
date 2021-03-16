@@ -31,14 +31,14 @@
 
             <com.google.android.exoplayer2.ui.PlayerView
                 android:id="@+id/activity_video_player_view"
-                android:layout_width="match_parent"
+                android:layout_width="0dp"
                 android:layout_height="0dp"
-                app:percentageHeight="@{isPortrait ? 0.6f : 0.999f}"
+                android:background="@android:color/black"
                 app:controller_layout_id="@layout/view_custom_exo_playback_control"
-                app:layout_constraintRight_toRightOf="parent"
+                app:percentageHeight="@{isPortrait ? 0.6f : 0.999f}"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"/>
+                app:layout_constraintEnd_toEndOf="parent"
+                />
 
             <com.google.android.exoplayer2.ui.PlayerControlView
                 android:id="@+id/player_view_controls"
@@ -63,7 +63,6 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
     </androidx.core.widget.NestedScrollView>
-
 
 
 </layout>
