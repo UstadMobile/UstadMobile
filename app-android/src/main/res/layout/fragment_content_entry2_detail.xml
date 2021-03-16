@@ -82,7 +82,7 @@
                 android:max="100"
                 android:progress="@{contentEntryProgress.contentEntryProgressProgress}"
                 android:progressTint="@color/primaryColor"
-                android:visibility="@{contentEntryProgress == null ? View.GONE : View.VISIBLE}"
+                android:visibility="@{contentEntryProgress != null &amp; contentEntryProgress.contentEntryProgressProgress > 0 ? View.VISIBLE : View.GONE}"
                 app:layout_constraintEnd_toEndOf="@id/entry_detail_thumbnail"
                 app:layout_constraintStart_toStartOf="@id/entry_detail_thumbnail"
                 app:layout_constraintTop_toBottomOf="@id/entry_detail_thumbnail"
