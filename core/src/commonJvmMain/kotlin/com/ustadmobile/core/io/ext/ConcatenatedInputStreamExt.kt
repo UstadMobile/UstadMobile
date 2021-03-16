@@ -89,7 +89,7 @@ suspend fun ConcatenatedInputStream2.readAndSaveToDir(destDirFile: File,
             }
             destFileOut.flush()
         }catch(die: ConcatenatedDataIntegrityException) {
-            Napier.e("${logPrefix }Data Integrity Exception", die)
+            Napier.e("${logPrefix }Data Integrity Exception - deleting partial file ${destFile.absolutePath}", die)
             destFileOut.close()
 
             if(!destFile.delete()) {

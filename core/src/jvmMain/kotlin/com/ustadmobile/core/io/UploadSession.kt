@@ -4,6 +4,7 @@ import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.readAndSaveToDir
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobHttpUrlConnection2
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toHexString
@@ -48,7 +49,20 @@ class UploadSession(val sessionUuid: String,
 
     private val db : UmAppDatabase by di.on(siteEndpoint).instance(tag = DoorTag.TAG_DB)
 
-    //TODO : Add start from byte
+    val firstFile: File by lazy {
+        File(uploadWorkDir, "${md5sExpected.first()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART}")
+    }
+
+    val firstFileHeader: File by lazy {
+        File(uploadWorkDir, "${md5sExpected.first()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER}")
+    }
+
+    val startFromByte: Long by lazy {
+        if(firstFile.exists() && firstFileHeader.exists())
+            firstFile.length() + firstFileHeader.length()
+        else
+            0L
+    }
 
     private val pipeOut = PipedOutputStream()
 
@@ -61,7 +75,8 @@ class UploadSession(val sessionUuid: String,
             concatIn.readAndSaveToDir(containerDir, uploadWorkDir, db, AtomicLong(0L),
                 containerEntryPaths, md5sExpected.toMutableList(), "UploadSession")
         }catch(e: Exception) {
-            Napier.e("UploadSession;Exception reading, closing pipe")
+            Napier.e("UploadSession;Exception reading, closing pipeOut to ")
+            pipeOut.close()
             e.printStackTrace()
         }finally {
             concatIn?.close()

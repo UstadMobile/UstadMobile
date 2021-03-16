@@ -12,9 +12,12 @@ import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
+import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
+import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import kotlinx.coroutines.GlobalScope
@@ -25,10 +28,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import java.io.ByteArrayInputStream
-import java.io.File
-import java.io.PipedInputStream
-import java.io.PipedOutputStream
+import java.io.*
 import java.util.*
 
 class UploadSessionTest {
@@ -58,6 +58,8 @@ class UploadSessionTest {
     lateinit var serverDb: UmAppDatabase
 
     lateinit var container: Container
+
+    lateinit var entriesToUpload: List<ContainerEntryWithMd5>
 
     @Suppress("BlockingMethodInNonBlockingContext")
     @Before
@@ -89,34 +91,33 @@ class UploadSessionTest {
                     ContainerAddOptions(storageDirUri = temporaryFolder.newFolder().toDoorUri()))
         }
 
+        entriesToUpload = clientDb.containerEntryDao.findByContainer(container.containerUid)
+                .map { it.toContainerEntryWithMd5() }
+
+
     }
 
     @Suppress("BlockingMethodInNonBlockingContext")
     @Test
     fun givenFileUploadedInChunks_whenClosed_thenCompletedContainerShouldBeSaved() {
-        val entriesToUpload = clientDb.containerEntryDao.findByContainer(container.containerUid)
-
-        val md5sToWrite = entriesToUpload.mapNotNull { it.containerEntryFile?.cefMd5?.base64EncodedToHexString() }
-
+        val md5sToWrite = entriesToUpload.mapNotNull { it.cefMd5?.base64EncodedToHexString() }
+                .sorted()
         val uploadToWrite = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
                 md5sToWrite.joinToString(separator = ";"), mapOf(), clientDb)
-
-
+        
         val uploadSession = UploadSession(UUID.randomUUID().toString(),
-                entriesToUpload.map { it.toContainerEntryWithMd5() }, md5sToWrite,
+                entriesToUpload, md5sToWrite,
                 serverEndpoint.url, null, di)
 
-        val pipeIn = PipedInputStream()
-        val pipeOut = PipedOutputStream(pipeIn)
-
-        GlobalScope.launch {
-            uploadToWrite.writeTo(pipeOut)
-            pipeOut.close()
+        val byteArrayOut = ByteArrayOutputStream().also {
+            uploadToWrite.writeTo(it)
+            it.flush()
         }
 
         val uploadBuffer = ByteArray(200 * 1024)//200K chunks
         var bytesRead = 0
-        while(pipeIn.read(uploadBuffer).also { bytesRead = it } != -1) {
+        val byteArrayIn = ByteArrayInputStream(byteArrayOut.toByteArray())
+        while(byteArrayIn.read(uploadBuffer).also { bytesRead = it } != -1) {
             uploadSession.onReceiveChunk(ByteArrayInputStream(uploadBuffer, 0, bytesRead))
         }
 
@@ -125,5 +126,106 @@ class UploadSessionTest {
         clientDb.assertContainerEqualToOther(container.containerUid, serverDb)
     }
 
+    @Test
+    fun givenFileUploadedInTwoSessions_whenClosed_thenCompletedContainerShouldBeSaved() {
+        var totalBytesRead = 0
 
+        for(i in 0 .. 1) {
+            //figure out what remains
+            val containerEntriesPartition = runBlocking {
+                serverDb.linkExistingContainerEntries(container.containerUid,
+                        entriesToUpload)
+            }
+
+            val remainingEntries = containerEntriesPartition.entriesWithoutMatchingFile
+                    .sortedBy { it.cefMd5 }
+            val md5sToWrite = remainingEntries.mapNotNull { it.cefMd5?.base64EncodedToHexString() }
+
+
+            val uploadToWrite1 = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
+                    md5sToWrite.joinToString(separator = ";"), mapOf(), clientDb)
+
+
+            val uploadSession1 = UploadSession(UUID.randomUUID().toString(),
+                    remainingEntries, md5sToWrite, serverEndpoint.url, null, di)
+
+            val byteArrayOut = ByteArrayOutputStream().also {
+                uploadToWrite1.writeTo(it)
+                it.flush()
+            }
+
+            val uploadBuffer = ByteArray(200 * 1024)//200K chunks
+            var bytesRead = 0
+            val byteArrayIn = ByteArrayInputStream(byteArrayOut.toByteArray())
+            while(byteArrayIn.read(uploadBuffer).also { bytesRead = it } != -1
+                    && !(i == 0 && totalBytesRead > (uploadToWrite1.actualContentLength / 2))) {
+                uploadSession1.onReceiveChunk(ByteArrayInputStream(uploadBuffer, 0, bytesRead))
+                totalBytesRead += bytesRead
+            }
+
+            byteArrayIn.close()
+            uploadSession1.close()
+        }
+
+        clientDb.assertContainerEqualToOther(container.containerUid, serverDb)
+    }
+
+
+    @Test
+    fun givenCorruptedIntermediateData_whenUploaded_thenShouldDeleteCorruptedPartAndResume() {
+        var totalBytesRead = 0
+
+        var corruptPacketWritten = false
+
+        for (i in 0..1) {
+            //figure out what remains
+            val containerEntriesPartition = runBlocking {
+                serverDb.linkExistingContainerEntries(container.containerUid,
+                        entriesToUpload)
+            }
+
+            val remainingEntries = containerEntriesPartition.entriesWithoutMatchingFile
+                    .sortedBy { it.cefMd5 }
+            val md5sToWrite = remainingEntries.mapNotNull { it.cefMd5?.base64EncodedToHexString() }
+
+
+            val uploadToWrite1 = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
+                    md5sToWrite.joinToString(separator = ";"), mapOf(), clientDb)
+
+
+            val uploadSession1 = UploadSession(UUID.randomUUID().toString(),
+                    remainingEntries, md5sToWrite, serverEndpoint.url, null, di)
+
+            val byteArrayOut = ByteArrayOutputStream().also {
+                uploadToWrite1.writeTo(it)
+                it.flush()
+            }
+
+            val byteArrayIn = ByteArrayInputStream(byteArrayOut.toByteArray())
+            try {
+                val uploadBuffer = ByteArray(200 * 1024)//200K chunks
+                var bytesRead = 0
+                while(byteArrayIn.read(uploadBuffer).also { bytesRead = it } != -1) {
+                    if(!corruptPacketWritten && i == 0 &&
+                            totalBytesRead > (uploadToWrite1.actualContentLength / 2)) {
+                        //write a corrupt packet
+                        uploadSession1.onReceiveChunk(ByteArrayInputStream(ByteArray(uploadBuffer.size)))
+                        corruptPacketWritten = true
+                    }else {
+                        uploadSession1.onReceiveChunk(ByteArrayInputStream(uploadBuffer, 0, bytesRead))
+                    }
+
+                    totalBytesRead += bytesRead
+                }
+
+            }catch(e: Exception) {
+                e.printStackTrace()
+            }finally {
+                byteArrayIn.close()
+                uploadSession1.close()
+            }
+        }
+
+        clientDb.assertContainerEqualToOther(container.containerUid, serverDb)
+    }
 }

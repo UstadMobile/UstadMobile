@@ -8,6 +8,8 @@ import java.io.PipedOutputStream
 import java.security.DigestInputStream
 import java.security.MessageDigest
 import java.util.zip.GZIPInputStream
+import java.io.IOException
+import com.github.aakira.napier.Napier
 
 /**
  * To verify data integrity ConcatenatedInput and ConcatenatedOutput streams need to md5 sum,
@@ -47,12 +49,27 @@ class GzipMessageDigest(val messageDigest: MessageDigest) {
                 }
 
                 DigestInputStream(digestInput, messageDigest).use {
-                    it.copyTo(NullOutputStream())
+                    try {
+                        it.copyTo(NullOutputStream())
+                    }catch(e: IOException) {
+                        // If there was an exception in this async job reading using pipeIn,
+                        // then we need to close pipeOut to avoid a potential deadlock
+                        // (where calling pipeOut.write blocks forever because there is nothing
+                        // left to read from pipeIn).
+
+                        Napier.e("GzipMessageDigest: Exception reading bytes for digest", e)
+                        pipeOut.close()
+                    }
                 }
             }
         }
 
-        pipeOut.write(byteArray, offset, len)
+        try {
+            pipeOut.write(byteArray, offset, len)
+        }catch(e: IOException) {
+            throw ConcatenatedDataIntegrityException("GzipMessageDigest: exception writing to digest " +
+                    "pipe (data is probably corrupted)", e)
+        }
     }
 
     fun digest() : ByteArray{
