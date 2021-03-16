@@ -16,13 +16,11 @@ import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -130,6 +128,10 @@ class UploadSessionTest {
     fun givenFileUploadedInTwoSessions_whenClosed_thenCompletedContainerShouldBeSaved() {
         var totalBytesRead = 0
 
+        val uploadSessionUuid = UUID.randomUUID()
+
+        var lastStartFrom = 0L
+
         for(i in 0 .. 1) {
             //figure out what remains
             val containerEntriesPartition = runBlocking {
@@ -142,12 +144,16 @@ class UploadSessionTest {
             val md5sToWrite = remainingEntries.mapNotNull { it.cefMd5?.base64EncodedToHexString() }
 
 
-            val uploadToWrite1 = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                    md5sToWrite.joinToString(separator = ";"), mapOf(), clientDb)
 
-
-            val uploadSession1 = UploadSession(UUID.randomUUID().toString(),
+            val uploadSession1 = UploadSession(uploadSessionUuid.toString(),
                     remainingEntries, md5sToWrite, serverEndpoint.url, null, di)
+
+            val uploadToWrite1 = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
+                    md5sToWrite.joinToString(separator = ";"),
+                    mapOf("range" to listOf("bytes=${uploadSession1.startFromByte}-")),
+                    clientDb)
+
+            lastStartFrom = uploadSession1.startFromByte
 
             val byteArrayOut = ByteArrayOutputStream().also {
                 uploadToWrite1.writeTo(it)
@@ -168,6 +174,7 @@ class UploadSessionTest {
         }
 
         clientDb.assertContainerEqualToOther(container.containerUid, serverDb)
+        Assert.assertTrue("Resumed upload from starting position", lastStartFrom > 0)
     }
 
 
@@ -176,6 +183,8 @@ class UploadSessionTest {
         var totalBytesRead = 0
 
         var corruptPacketWritten = false
+
+        val uploadUuid = UUID.randomUUID()
 
         for (i in 0..1) {
             //figure out what remains
@@ -188,13 +197,13 @@ class UploadSessionTest {
                     .sortedBy { it.cefMd5 }
             val md5sToWrite = remainingEntries.mapNotNull { it.cefMd5?.base64EncodedToHexString() }
 
+            val uploadSession1 = UploadSession(uploadUuid.toString(),
+                    remainingEntries, md5sToWrite, serverEndpoint.url, null, di)
 
             val uploadToWrite1 = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                    md5sToWrite.joinToString(separator = ";"), mapOf(), clientDb)
+                    md5sToWrite.joinToString(separator = ";"),
+                    mapOf("range" to listOf("bytes=${uploadSession1.startFromByte}-")), clientDb)
 
-
-            val uploadSession1 = UploadSession(UUID.randomUUID().toString(),
-                    remainingEntries, md5sToWrite, serverEndpoint.url, null, di)
 
             val byteArrayOut = ByteArrayOutputStream().also {
                 uploadToWrite1.writeTo(it)
@@ -227,5 +236,7 @@ class UploadSessionTest {
         }
 
         clientDb.assertContainerEqualToOther(container.containerUid, serverDb)
+        //Note: When a concatenatedentry is corrupted, it will be deleted, and the next uploadSession
+        //starts at zero, hence there is no assertion here of using a range request etc.
     }
 }

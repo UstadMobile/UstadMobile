@@ -85,6 +85,16 @@ class UploadSession(val sessionUuid: String,
 
     init {
         UUID.fromString(sessionUuid) //validate this is a real uuid, does not contain nasty characters
+
+        if(startFromByte > 0) {
+            FileInputStream(firstFileHeader).use { firstFileHeaderIn ->
+                firstFileHeaderIn.copyTo(pipeOut)
+            }
+
+            FileInputStream(firstFile).use { firstFileIn ->
+                firstFileIn.copyTo(pipeOut)
+            }
+        }
     }
 
     /**
