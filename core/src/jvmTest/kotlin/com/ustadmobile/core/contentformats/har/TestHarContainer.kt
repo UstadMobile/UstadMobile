@@ -102,35 +102,42 @@ class TestHarContainer {
 
     @Test
     fun givenRequest_whenServedByContainer_thenSameResponse() {
-        val response = harContainer?.serve(HarRequest().apply {
-            this.url = "http://www.ustadmobile.com/index.html"
-            this.body = "index.html"
-            this.method = "GET"
-        })
+        runBlocking {
+            val response = harContainer?.serve(HarRequest().apply {
+                this.url = "http://www.ustadmobile.com/index.html"
+                this.body = "index.html"
+                this.method = "GET"
+            })
 
-        Assert.assertEquals("index html was found", 200, response!!.status)
+            Assert.assertEquals("index html was found", 200, response!!.status)
+        }
     }
 
     @Test
     fun givenUrlLoaded_whenNotInIndex_Return404ErrorResponse() {
-        val response = harContainer?.serve(HarRequest().apply {
-            this.url = "http://www.ustadmobile.com/faketest.html"
-            this.body = "faketest.html"
-            this.method = "GET"
-        })
+        runBlocking {
+            val response = harContainer?.serve(HarRequest().apply {
+                this.url = "http://www.ustadmobile.com/faketest.html"
+                this.body = "faketest.html"
+                this.method = "GET"
+            })
 
-        Assert.assertEquals("index html was found", 404, response!!.status)
+            Assert.assertEquals("index html was found", 404, response!!.status)
+        }
+
     }
 
     @Test
     fun givenUrlLoaded_whenInIndexButContainerMissing_thenReturn404ErrorResponse() {
-        val response = harContainer?.serve(HarRequest().apply {
-            this.url = "http://www.ustadmobile.com/favicon.ico"
-            this.body = "favicon.ico"
-            this.method = "GET"
-        })
+        runBlocking {
+            val response = harContainer?.serve(HarRequest().apply {
+                this.url = "http://www.ustadmobile.com/favicon.ico"
+                this.body = "favicon.ico"
+                this.method = "GET"
+            })
 
-        Assert.assertEquals("index html was found", 402, response!!.status)
+            Assert.assertEquals("index html was found", 402, response!!.status)
+        }
     }
 
 }
