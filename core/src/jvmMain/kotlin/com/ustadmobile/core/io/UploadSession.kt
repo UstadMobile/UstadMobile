@@ -6,8 +6,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.readAndSaveToDir
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobHttpUrlConnection2
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import kotlinx.coroutines.*
 import org.kodein.di.*
@@ -25,7 +25,7 @@ import java.util.concurrent.atomic.AtomicLong
  * @param containerEntryPaths a list of the paths that should be created in this container. When each
  * ConcatenatedEntry is received, ContainerEntry(s) will be inserted to link to the given container
  * paths.
- * @param md5sExpected the expected order in which md5s will be received
+ * @param md5sExpected the expected order in which md5s will be received (Base64 md5sum)
  * @param siteUrl Endpoint Site URL (used for retrieving dependencies)
  * @param di the dependency injection object
  */
@@ -33,7 +33,6 @@ class UploadSession(val sessionUuid: String,
                     val containerEntryPaths: List<ContainerEntryWithMd5>,
                     val md5sExpected: List<String>,
                     val siteUrl: String,
-                    val resumeFromMd5: String?,
                     override val di: DI) : DIAware, Closeable {
 
     private val siteEndpoint = Endpoint(siteUrl)
@@ -50,11 +49,11 @@ class UploadSession(val sessionUuid: String,
     private val db : UmAppDatabase by di.on(siteEndpoint).instance(tag = DoorTag.TAG_DB)
 
     val firstFile: File by lazy {
-        File(uploadWorkDir, "${md5sExpected.first()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART}")
+        File(uploadWorkDir, "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART}")
     }
 
     val firstFileHeader: File by lazy {
-        File(uploadWorkDir, "${md5sExpected.first()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER}")
+        File(uploadWorkDir, "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER}")
     }
 
     val startFromByte: Long by lazy {

@@ -2,7 +2,6 @@ package com.ustadmobile.core.io
 
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
@@ -11,7 +10,7 @@ import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
 import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.ext.base64EncodedToHexString
+import com.ustadmobile.core.util.ext.distinctMds5sSorted
 import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
@@ -98,14 +97,13 @@ class UploadSessionTest {
     @Suppress("BlockingMethodInNonBlockingContext")
     @Test
     fun givenFileUploadedInChunks_whenClosed_thenCompletedContainerShouldBeSaved() {
-        val md5sToWrite = entriesToUpload.mapNotNull { it.cefMd5?.base64EncodedToHexString() }
-                .sorted()
+        val md5sToWrite = entriesToUpload.distinctMds5sSorted()
         val uploadToWrite = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                md5sToWrite.joinToString(separator = ";"), mapOf(), clientDb)
+                md5sToWrite, mapOf(), clientDb)
         
         val uploadSession = UploadSession(UUID.randomUUID().toString(),
                 entriesToUpload, md5sToWrite,
-                serverEndpoint.url, null, di)
+                serverEndpoint.url, di)
 
         val byteArrayOut = ByteArrayOutputStream().also {
             uploadToWrite.writeTo(it)
@@ -140,16 +138,13 @@ class UploadSessionTest {
             }
 
             val remainingEntries = containerEntriesPartition.entriesWithoutMatchingFile
-                    .sortedBy { it.cefMd5 }
-            val md5sToWrite = remainingEntries.mapNotNull { it.cefMd5?.base64EncodedToHexString() }
-
-
+            val md5sToWrite = remainingEntries.distinctMds5sSorted()
 
             val uploadSession1 = UploadSession(uploadSessionUuid.toString(),
-                    remainingEntries, md5sToWrite, serverEndpoint.url, null, di)
+                    remainingEntries, md5sToWrite, serverEndpoint.url, di)
 
             val uploadToWrite1 = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                    md5sToWrite.joinToString(separator = ";"),
+                    md5sToWrite,
                     mapOf("range" to listOf("bytes=${uploadSession1.startFromByte}-")),
                     clientDb)
 
@@ -194,14 +189,13 @@ class UploadSessionTest {
             }
 
             val remainingEntries = containerEntriesPartition.entriesWithoutMatchingFile
-                    .sortedBy { it.cefMd5 }
-            val md5sToWrite = remainingEntries.mapNotNull { it.cefMd5?.base64EncodedToHexString() }
+            val md5sToWrite = remainingEntries.distinctMds5sSorted()
 
             val uploadSession1 = UploadSession(uploadUuid.toString(),
-                    remainingEntries, md5sToWrite, serverEndpoint.url, null, di)
+                    remainingEntries, md5sToWrite, serverEndpoint.url, di)
 
             val uploadToWrite1 = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                    md5sToWrite.joinToString(separator = ";"),
+                    md5sToWrite,
                     mapOf("range" to listOf("bytes=${uploadSession1.startFromByte}-")), clientDb)
 
 

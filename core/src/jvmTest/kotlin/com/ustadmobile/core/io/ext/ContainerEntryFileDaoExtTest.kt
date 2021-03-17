@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.base64StringToByteArray
+import com.ustadmobile.core.util.ext.distinctMds5sSorted
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.ext.writeToFile
@@ -76,9 +77,7 @@ class ContainerEntryFileDaoExtTest {
 
         //get a list of all the md5s
         val containerEntryFiles = db.containerEntryDao.findByContainer(container.containerUid)
-        val requestMd5s = containerEntryFiles.mapNotNull {
-            it.containerEntryFile?.cefMd5?.base64StringToByteArray()?.toHexString()
-        }.sorted().joinToString(separator = ";")
+        val requestMd5s = containerEntryFiles.map { it.toContainerEntryWithMd5()}.distinctMds5sSorted()
 
 
         val concatResponse = db.containerEntryFileDao.generateConcatenatedFilesResponse2(
@@ -118,10 +117,7 @@ class ContainerEntryFileDaoExtTest {
 
         //get a list of all the md5s
         val containerEntryFiles = db.containerEntryDao.findByContainer(container.containerUid)
-        val requestMd5s = containerEntryFiles.mapNotNull {
-            it.containerEntryFile?.cefMd5?.base64StringToByteArray()?.toHexString()
-        }.sorted().joinToString(separator = ";")
-
+        val requestMd5s = containerEntryFiles.map { it.toContainerEntryWithMd5() }.distinctMds5sSorted()
 
         val concatResponse1 = db.containerEntryFileDao.generateConcatenatedFilesResponse2(
                 requestMd5s, mapOf("range" to listOf("bytes=0-${2 * 1024 * 1024}")), db)

@@ -3,7 +3,9 @@ package com.ustadmobile.lib.rest
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
 import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
+import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.hexStringToByteArray
 import com.ustadmobile.lib.util.RANGE_CONTENT_ACCEPT_RANGE_HEADER
 import com.ustadmobile.lib.util.RANGE_CONTENT_RANGE_HEADER
 import io.ktor.application.ApplicationCall
@@ -39,10 +41,14 @@ fun Route.ContainerDownload() {
             return
         }
 
+        val entryMd5List = entryMd5s.split(";").map {
+            it.hexStringToByteArray().encodeBase64()
+        }
+
         val db : UmAppDatabase = di().direct.on(call).instance(tag = DoorTag.TAG_DB)
 
         val concatenatedResponse = db.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                entryMd5s, call.request.headers.toMap(), db)
+                entryMd5List, call.request.headers.toMap(), db)
 
         val headers = Headers.build {
             set(RANGE_CONTENT_ACCEPT_RANGE_HEADER, "bytes")

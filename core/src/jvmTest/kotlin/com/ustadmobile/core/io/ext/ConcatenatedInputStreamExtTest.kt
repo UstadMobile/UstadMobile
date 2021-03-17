@@ -5,7 +5,7 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ConcatenatedInputStream2
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.ext.base64EncodedToHexString
+import com.ustadmobile.core.util.ext.distinctMds5sSorted
 import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
@@ -89,9 +89,9 @@ class ConcatenatedInputStreamExtTest {
     @Test
     fun givenValidStream_whenReadAndSaveCalled_thenShouldBeTheSameInOtherDb() {
         val entryOut = ByteArrayOutputStream()
-        val md5s = entriesToWrite.mapNotNull { it.cefMd5?.base64EncodedToHexString() }
+        val md5s = entriesToWrite.distinctMds5sSorted()
         val concatResponse = sourceDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                md5s.joinToString(separator = ";"), mapOf(), sourceDb)
+                md5s, mapOf(), sourceDb)
         concatResponse.writeTo(entryOut)
         entryOut.flush()
 
@@ -112,9 +112,9 @@ class ConcatenatedInputStreamExtTest {
                 destDb.linkExistingContainerEntries(container.containerUid, entriesToWrite)
             }.entriesWithoutMatchingFile.sortedBy { it.cefMd5 }
 
-            val md5s = entriesRemaining.mapNotNull { it.cefMd5?.base64EncodedToHexString() }
+            val md5s = entriesRemaining.distinctMds5sSorted()
             val concatResponse = sourceDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                    md5s.joinToString(separator = ";"), mapOf(), sourceDb)
+                    md5s, mapOf(), sourceDb)
             concatResponse.writeTo(concatOut)
             concatOut.flush()
 

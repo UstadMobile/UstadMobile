@@ -9,6 +9,7 @@ import okio.Buffer
 import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
+import com.ustadmobile.core.util.ext.hexStringToBase64Encoded
 import org.junit.Assert
 import java.io.File
 
@@ -22,7 +23,11 @@ fun UmAppDatabase.mockResponseForConcatenatedFiles2Request(request: RecordedRequ
     val headers = request?.headers?.toMultimap()
     val range = headers?.get("range")
     println(range)
-    val concatResponse = containerEntryFileDao.generateConcatenatedFilesResponse2(md5s,
+    val md5List = md5s.split(";").map {
+        it.hexStringToBase64Encoded()
+    }
+
+    val concatResponse = containerEntryFileDao.generateConcatenatedFilesResponse2(md5List,
             headers!!, this)
 
     val pipeOut = PipedOutputStream()

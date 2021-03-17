@@ -35,7 +35,8 @@ data class ConcatenatedReadAndSaveResult(val totalBytesRead: Long)
  *
  * @param db UmAppDatabase
  * @param progressAtomicLong An AtomicLong that will be updated as reading progresses.
- * @param md5ExpectedList The expected order of MD5s that will be read. This MUST match the stream itself
+ * @param md5ExpectedList The expected order of MD5s that will be read. This MUST match the stream itself.
+ * This is a list of Base64 encoded strings.
  * @param logPrefix prefix to use when logging using Napier
  */
 suspend fun ConcatenatedInputStream2.readAndSaveToDir(destDirFile: File,
@@ -50,7 +51,7 @@ suspend fun ConcatenatedInputStream2.readAndSaveToDir(destDirFile: File,
     var bytesRead = 0
     var totalBytesRead = 0L
 
-    val firstMd5 = md5ExpectedList.first()
+    val firstMd5 = md5ExpectedList.first().base64EncodedToHexString()
 
     val firstFile = File(tmpDirFile, "$firstMd5${ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART}")
     val firstFileHeader = File(tmpDirFile, "$firstMd5${ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER}")
@@ -60,7 +61,7 @@ suspend fun ConcatenatedInputStream2.readAndSaveToDir(destDirFile: File,
 
     while(this.getNextEntry()?.also { concatenatedEntry = it } != null) {
         val entryMd5 = concatenatedEntry.md5.toHexString()
-        val nextMd5Expected = md5ExpectedList.removeAt(0)
+        val nextMd5Expected = md5ExpectedList.removeAt(0).base64EncodedToHexString()
         if(entryMd5 != nextMd5Expected)
             throw IOException("Server gave us the wrong md5: wanted: $nextMd5Expected / actually got $entryMd5")
 

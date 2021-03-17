@@ -18,9 +18,9 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 import com.ustadmobile.core.io.ext.parseKmpUriStringToFile
 import com.ustadmobile.core.io.ext.readAndSaveToDir
-import com.ustadmobile.door.ext.toHexString
-import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
+import com.ustadmobile.core.util.ext.distinctMd5sSortedAsJoinedQueryParam
+import com.ustadmobile.core.util.ext.distinctMds5sSorted
 
 class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest2,
                                             val listener: ContainerFetcherListener2?,
@@ -63,13 +63,10 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
 
         //We always download in md5sum (hex) alphabetical order, such that a partial download will
         //be resumed as expected.
-        val md5sToDownload = request.entriesToDownload.mapNotNull {
-            it.cefMd5?.base64EncodedToHexString()
-        }.toSet().toList().sorted()
+        val md5sToDownload = request.entriesToDownload.distinctMds5sSorted()
 
-        val md5ListString = md5sToDownload.joinToString(separator = ";")
         val md5ExpectedList = md5sToDownload.toMutableList()
-        val firstMd5 = md5sToDownload.first()
+        val firstMd5 = md5sToDownload.first().base64EncodedToHexString()
         val destDirFile = request.destDirUri.parseKmpUriStringToFile()
 
 
@@ -80,7 +77,8 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
 
         try {
             //check and see if the first file is already here
-            val inputUrl = "${request.mirrorUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/$md5ListString"
+            val inputUrl = "${request.mirrorUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/" +
+                    "${request.entriesToDownload.distinctMd5sSortedAsJoinedQueryParam()}"
             Napier.d("$logPrefix Download ${md5sToDownload.size} container files $inputUrl -> ${request.destDirUri}")
             val localConnectionOpener : LocalURLConnectionOpener? = di.direct.instanceOrNull()
             val url = URL(inputUrl)
