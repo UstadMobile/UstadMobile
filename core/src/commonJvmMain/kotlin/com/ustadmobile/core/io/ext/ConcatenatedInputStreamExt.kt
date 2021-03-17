@@ -29,12 +29,17 @@ data class ConcatenatedReadAndSaveResult(val totalBytesRead: Long)
  * receiving uploads on the server.
  *
  * @param destDirFile The directory where output is being saved (e.g. where ContainerEntryFiles are saved)
+ * @param tmpDirFile: The directory where work work-in-progress is being saved. This could be the same
+ * as destDirFile, or it could be somewhere else. It should be on the same file system so that File.moveTo
+ * will work
+ *
  * @param db UmAppDatabase
  * @param progressAtomicLong An AtomicLong that will be updated as reading progresses.
  * @param md5ExpectedList The expected order of MD5s that will be read. This MUST match the stream itself
  * @param logPrefix prefix to use when logging using Napier
  */
 suspend fun ConcatenatedInputStream2.readAndSaveToDir(destDirFile: File,
+                                                      tmpDirFile: File,
                                                       db: UmAppDatabase,
                                                       progressAtomicLong: AtomicLong,
                                                       entriesToLink: List<ContainerEntryWithMd5>,
@@ -47,8 +52,8 @@ suspend fun ConcatenatedInputStream2.readAndSaveToDir(destDirFile: File,
 
     val firstMd5 = md5ExpectedList.first()
 
-    val firstFile = File(destDirFile, "$firstMd5${ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART}")
-    val firstFileHeader = File(destDirFile, "$firstMd5${ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER}")
+    val firstFile = File(tmpDirFile, "$firstMd5${ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART}")
+    val firstFileHeader = File(tmpDirFile, "$firstMd5${ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER}")
     val firstFilePartPresent = firstFile.exists() && firstFileHeader.exists()
 
     var bytesToSkipWriting = firstFile.length() + firstFileHeader.length()
@@ -60,8 +65,8 @@ suspend fun ConcatenatedInputStream2.readAndSaveToDir(destDirFile: File,
             throw IOException("Server gave us the wrong md5: wanted: $nextMd5Expected / actually got $entryMd5")
 
 
-        val destFile = File(destDirFile, entryMd5 + ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART)
-        val headerFile = File(destDirFile, entryMd5 + ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER)
+        val destFile = File(tmpDirFile, entryMd5 + ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART)
+        val headerFile = File(tmpDirFile, entryMd5 + ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER)
         headerFile.writeBytes(concatenatedEntry.toBytes())
 
         val destFileOut = if(bytesToSkipWriting > 0) {
@@ -84,7 +89,7 @@ suspend fun ConcatenatedInputStream2.readAndSaveToDir(destDirFile: File,
             }
             destFileOut.flush()
         }catch(die: ConcatenatedDataIntegrityException) {
-            Napier.e("${logPrefix }Data Integrity Exception", die)
+            Napier.e("${logPrefix }Data Integrity Exception - deleting partial file ${destFile.absolutePath}", die)
             destFileOut.close()
 
             if(!destFile.delete()) {

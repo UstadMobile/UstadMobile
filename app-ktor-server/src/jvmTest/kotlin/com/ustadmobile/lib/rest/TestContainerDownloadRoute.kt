@@ -54,6 +54,12 @@ class TestContainerDownloadRoute {
 
     @Before
     fun setup() {
+        //make the data path if needed (UmRestApplication does this in di onReady)
+        val dataDir = File("data")
+        val singletonDataDir = File(dataDir, "singleton")
+
+        singletonDataDir.takeIf { !it.exists() }?.mkdirs()
+
         db = DatabaseBuilder.databaseBuilder(Any() ,UmAppDatabase::class, "UmAppDatabase").build()
         db.clearAllTables()
         val attachmentsDir = temporaryFolder.newFolder()

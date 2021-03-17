@@ -1,70 +1,114 @@
 package com.ustadmobile.core.io
 
+import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.readAndSaveToDir
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobHttpUrlConnection2
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.isActive
-import kotlinx.coroutines.launch
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
-import org.kodein.di.on
+import kotlinx.coroutines.*
+import org.kodein.di.*
 import java.io.*
 import java.util.*
+import java.util.concurrent.atomic.AtomicLong
 
 /**
  * This class manages a resumable upload session. It will be held in memory until there is an
- * activity timeout.
+ * activity timeout. It is designed to receive uploads chunk by chunk. The server receiving
+ * requests (e.g. via PUT requests) should call onReceiveChunk. onReceiveChunk MUST be called in
+ * order.
+ *
+ * @param sessionUuid UUID for the session. This is used to create a temporary directory
+ * @param containerEntryPaths a list of the paths that should be created in this container. When each
+ * ConcatenatedEntry is received, ContainerEntry(s) will be inserted to link to the given container
+ * paths.
+ * @param md5sExpected the expected order in which md5s will be received
+ * @param siteUrl Endpoint Site URL (used for retrieving dependencies)
+ * @param di the dependency injection object
  */
 class UploadSession(val sessionUuid: String,
                     val containerEntryPaths: List<ContainerEntryWithMd5>,
+                    val md5sExpected: List<String>,
                     val siteUrl: String,
                     val resumeFromMd5: String?,
                     override val di: DI) : DIAware, Closeable {
 
-    private val uploadDir: File by di.on(Endpoint(siteUrl)).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
+    private val siteEndpoint = Endpoint(siteUrl)
 
-    val pipeOut = PipedOutputStream()
+    private val containerDir: File by di.on(siteEndpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
-    val pipeIn = PipedInputStream(pipeOut)
+    private val uploadWorkDir: File by lazy {
+        File(containerDir, sessionUuid).apply {
+            if(!exists())
+                mkdirs()
+        }
+    }
 
-    val readJob = GlobalScope.launch(Dispatchers.IO) {
+    private val db : UmAppDatabase by di.on(siteEndpoint).instance(tag = DoorTag.TAG_DB)
+
+    val firstFile: File by lazy {
+        File(uploadWorkDir, "${md5sExpected.first()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART}")
+    }
+
+    val firstFileHeader: File by lazy {
+        File(uploadWorkDir, "${md5sExpected.first()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER}")
+    }
+
+    val startFromByte: Long by lazy {
+        if(firstFile.exists() && firstFileHeader.exists())
+            firstFile.length() + firstFileHeader.length()
+        else
+            0L
+    }
+
+    private val pipeOut = PipedOutputStream()
+
+    private val pipeIn = PipedInputStream(pipeOut)
+
+    private val readJob = GlobalScope.launch(Dispatchers.IO) {
         var concatIn: ConcatenatedInputStream2? = null
         try {
             concatIn = ConcatenatedInputStream2(pipeIn)
-
-            lateinit var concatenatedEntry: ConcatenatedEntry
-            while(isActive && concatIn.getNextEntry()?.also { concatenatedEntry = it } != null) {
-                val entryMd5 = concatenatedEntry.md5.toHexString()
-
-            }
+            concatIn.readAndSaveToDir(containerDir, uploadWorkDir, db, AtomicLong(0L),
+                containerEntryPaths, md5sExpected.toMutableList(), "UploadSession")
         }catch(e: Exception) {
-
+            Napier.e("UploadSession;Exception reading, closing pipeOut to ")
+            pipeOut.close()
+            e.printStackTrace()
+        }finally {
+            concatIn?.close()
         }
     }
 
     init {
         UUID.fromString(sessionUuid) //validate this is a real uuid, does not contain nasty characters
 
+        if(startFromByte > 0) {
+            FileInputStream(firstFileHeader).use { firstFileHeaderIn ->
+                firstFileHeaderIn.copyTo(pipeOut)
+            }
 
+            FileInputStream(firstFile).use { firstFileIn ->
+                firstFileIn.copyTo(pipeOut)
+            }
+        }
     }
 
-    fun onReceiveChunk(chunkInput: InputStream, close: Boolean){
+    /**
+     *
+     */
+    fun onReceiveChunk(chunkInput: InputStream){
         chunkInput.copyTo(pipeOut)
-
-
     }
 
     override fun close() {
-
+        pipeOut.close()
+        runBlocking {
+            readJob.join()
+        }
     }
 
-    companion object {
-        const val SUFFIX_PART = ".part"
-
-        const val SUFFIX_HEADER = ".header"
-    }
 }
