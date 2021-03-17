@@ -34,6 +34,7 @@
                 android:layout_width="0dp"
                 android:layout_height="0dp"
                 android:background="@android:color/black"
+                app:resize_mode="fit"
                 app:controller_layout_id="@layout/view_custom_exo_playback_control"
                 app:percentageHeight="@{isPortrait ? 0.6f : 0.999f}"
                 app:layout_constraintStart_toStartOf="parent"

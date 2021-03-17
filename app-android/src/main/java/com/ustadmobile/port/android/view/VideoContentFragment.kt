@@ -21,7 +21,6 @@ import com.google.android.exoplayer2.upstream.DataSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import com.google.android.exoplayer2.util.MimeTypes
 import com.google.android.exoplayer2.util.Util
-import com.google.android.exoplayer2.video.VideoListener
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentVideoContentBinding
 import com.ustadmobile.core.container.ContainerManager
@@ -47,7 +46,7 @@ interface VideoContentFragmentEventHandler {
 }
 
 @ExperimentalStdlibApi
-class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentFragmentEventHandler, VideoListener {
+class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentFragmentEventHandler {
 
     private var mBinding: FragmentVideoContentBinding? = null
 
