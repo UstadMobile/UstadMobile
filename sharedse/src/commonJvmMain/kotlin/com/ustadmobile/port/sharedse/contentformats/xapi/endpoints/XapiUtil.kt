@@ -345,7 +345,9 @@ object XapiUtil {
     fun insertOrUpdateEntryProgress(statementEntity: StatementEntity, progressDao: ContentEntryProgressDao, verbEntity: VerbEntity) {
         val statusFlag = getStatusFlag(verbEntity.urlId)
         var progress  = statementEntity.extensionProgress
-        if(progress == 0 && statusFlag == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED){
+        if(progress == 0 &&
+                (statusFlag == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED ||
+                        statementEntity.resultCompletion)){
             progress = 100
         }
         progressDao.updateProgress(statementEntity.statementContentEntryUid,
