@@ -2,7 +2,6 @@ package com.ustadmobile.port.android.view
 
 import android.content.Context
 import android.content.res.Configuration
-import android.media.MediaPlayer
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,12 +12,8 @@ import android.widget.ImageButton
 import androidx.appcompat.app.AlertDialog
 import androidx.lifecycle.DefaultLifecycleObserver
 import androidx.lifecycle.LifecycleOwner
-import com.google.android.exoplayer2.C
-import com.google.android.exoplayer2.Format
-import com.google.android.exoplayer2.Player
-import com.google.android.exoplayer2.SimpleExoPlayer
+import com.google.android.exoplayer2.*
 import com.google.android.exoplayer2.source.*
-import com.google.android.exoplayer2.ui.AspectRatioFrameLayout
 import com.google.android.exoplayer2.ui.PlayerControlView
 import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.ByteArrayDataSource
@@ -152,15 +147,12 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     private fun initializePlayer() {
         player = SimpleExoPlayer.Builder(viewContext as Context).build()
         player?.addListener(videoListener)
-        player?.addVideoListener(sizeListener)
-        playerView?.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
         player?.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
         playerView?.player = player
         controlsView?.player = player
         player?.playWhenReady = playWhenReady
         player?.seekTo(currentWindow, playbackPosition)
     }
-
 
 
     fun setVideoParams(videoPath: String?, audioPath: ContainerEntryWithContainerEntryFile?, srtLangList: MutableList<String>, srtMap: MutableMap<String, String>) {
@@ -196,7 +188,8 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
             } else {
                 subtitles?.visibility = View.GONE
-                player?.prepare(mediaSource, false, false)
+                player?.setMediaSource(mediaSource)
+                player?.prepare()
             }
         } else {
             loading = false
@@ -212,9 +205,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
         playerView?.subtitleView?.visibility = View.VISIBLE
 
-        val subtitleFormat = Format.createTextSampleFormat(null, MimeTypes.APPLICATION_SUBRIP, // The mime type. Must be set correctly.
-                C.SELECTION_FLAG_DEFAULT, null)
-
         GlobalScope.launch {
             try {
                 val containerManager = containerManager
@@ -229,12 +219,15 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
 
                 val factory = { byteArrayDataSource }
 
-                val subTitleSource = SingleSampleMediaSource.Factory(factory).createMediaSource(Uri.EMPTY, subtitleFormat, C.TIME_UNSET)
+                val subTitleSource = SingleSampleMediaSource.Factory(factory)
+                        .createMediaSource(MediaItem.Subtitle(Uri.EMPTY,
+                                MimeTypes.APPLICATION_SUBRIP, null), C.TIME_UNSET)
 
                 val mergedSource = MergingMediaSource(mediaSource, subTitleSource)
 
                 runOnUiThread(Runnable {
-                    player?.prepare(mergedSource, false, false)
+                    player?.setMediaSource(mergedSource)
+                    player?.prepare()
                 })
             } catch (ignored: IOException) {
                 loading = false
@@ -246,16 +239,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         showSnackBar(UstadMobileSystemImpl.instance.getString(MessageID.no_video_file_found, viewContext), {}, 0)
     }
 
-    private var sizeListener = object: VideoListener{
-        override fun onVideoSizeChanged(width: Int, height: Int, unappliedRotationDegrees: Int, pixelWidthHeightRatio: Float) {
-            super.onVideoSizeChanged(width, height, unappliedRotationDegrees, pixelWidthHeightRatio)
-        }
-
-        override fun onSurfaceSizeChanged(width: Int, height: Int) {
-            super.onSurfaceSizeChanged(width, height)
-        }
-    }
-
     private var videoListener = object : Player.EventListener {
         override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
             if (playWhenReady && playbackState == Player.STATE_READY) {
@@ -265,7 +248,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
             } else if (playbackState == Player.STATE_ENDED) {
                 mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
                         ?: 100L)
-            }else if (playbackState == Player.STATE_READY) {
+            } else if (playbackState == Player.STATE_READY) {
                 // player is ready or paused
                 loading = false
                 mPresenter?.updateProgress(player?.currentPosition ?: 0, player?.contentDuration
@@ -274,22 +257,20 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         }
 
 
-
     }
 
     private var audioListener = object : Player.EventListener {
-        override fun onPlayerStateChanged(playWhenReady: Boolean, playbackState: Int) {
+        override fun onPlaybackStateChanged(state: Int) {
             runOnUiThread(Runnable {
-                if (playbackState == Player.STATE_READY && playWhenReady) {
+                if(state == Player.STATE_READY && player?.playWhenReady == true){
                     playbackPosition = player?.contentPosition ?: 0L
                     releaseAudio()
                     playAudio(playbackPosition)
-                } else {
+                } else{
                     releaseAudio()
                 }
-                super.onPlayerStateChanged(playWhenReady, playbackState)
+                super.onPlaybackStateChanged(state)
             })
-
         }
     }
 
@@ -316,7 +297,6 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
         currentWindow = player?.currentWindowIndex ?: 0
         playWhenReady = player?.playWhenReady ?: false
         player?.removeListener(videoListener)
-        player?.removeVideoListener(sizeListener)
         player?.release()
         mPresenter?.updateProgress(playbackPosition, player?.contentDuration ?: 100)
         player = null
@@ -365,7 +345,7 @@ class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentF
     private fun buildMediaSource(uri: Uri): MediaSource {
         val dataSourceFactory: DataSource.Factory = DefaultDataSourceFactory(viewContext as Context, "UstadMobile")
         return ProgressiveMediaSource.Factory(dataSourceFactory)
-                .createMediaSource(uri)
+                .createMediaSource(MediaItem.Builder().setUri(uri).build())
     }
 
     companion object {
