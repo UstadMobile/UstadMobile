@@ -8,12 +8,18 @@ import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobHttpUrlC
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import kotlinx.coroutines.*
+import kotlinx.serialization.Serializable
 import org.kodein.di.*
 import java.io.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
+
+@Serializable
+data class UploadSessionParams(val containerEntryPaths: List<ContainerEntryWithMd5>,
+                               val md5sExpected: List<String>)
 
 /**
  * This class manages a resumable upload session. It will be held in memory until there is an
@@ -35,12 +41,14 @@ class UploadSession(val sessionUuid: String,
                     val siteUrl: String,
                     override val di: DI) : DIAware, Closeable {
 
+    val lastActive = AtomicLong(systemTimeInMillis())
+
     private val siteEndpoint = Endpoint(siteUrl)
 
     private val containerDir: File by di.on(siteEndpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     private val uploadWorkDir: File by lazy {
-        File(containerDir, sessionUuid).apply {
+        File(containerDir, "upload-$sessionUuid").apply {
             if(!exists())
                 mkdirs()
         }
@@ -101,6 +109,7 @@ class UploadSession(val sessionUuid: String,
      */
     fun onReceiveChunk(chunkInput: InputStream){
         chunkInput.copyTo(pipeOut)
+        lastActive.set(systemTimeInMillis())
     }
 
     override fun close() {
@@ -108,6 +117,8 @@ class UploadSession(val sessionUuid: String,
         runBlocking {
             readJob.join()
         }
+
+        uploadWorkDir.deleteRecursively()
     }
 
 }
