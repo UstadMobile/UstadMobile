@@ -15,7 +15,7 @@ import java.util.*
 import java.util.concurrent.locks.ReentrantLock
 
 typealias UploadSessionFactory = (sessionUuid: UUID, containerEntryPaths: List<ContainerEntryWithMd5>,
-                          md5sExpected: List<String>, site: Endpoint, di: DI) -> UploadSession
+                          site: Endpoint, di: DI) -> UploadSession
 
 class UploadSessionManager(val site: Endpoint, override val di: DI,
                            private val inactiveCheckInterval: Int = 60000,
@@ -41,7 +41,7 @@ class UploadSessionManager(val site: Endpoint, override val di: DI,
             if(activeSessions.containsKey(sessionUuid))
                 throw IllegalStateException("Cannot init session. It is currently active. Close it first")
 
-            uploadSessionFactory(sessionUuid, containerEntryPaths, md5sExpected, site, di).also {
+            uploadSessionFactory(sessionUuid, containerEntryPaths, site, di).also {
                 activeSessions[sessionUuid] = it
             }
         }
@@ -71,8 +71,8 @@ class UploadSessionManager(val site: Endpoint, override val di: DI,
 
     companion object {
         val DEFAULT_UPLOAD_SESSION_FACTORY = {sessionUuid: UUID, containerEntryPaths: List<ContainerEntryWithMd5>,
-                                              md5sExpected: List<String>, site: Endpoint, di: DI ->
-            UploadSession(sessionUuid.toString(), containerEntryPaths, md5sExpected, site.url, di)
+                                              site: Endpoint, di: DI ->
+            UploadSession(sessionUuid.toString(), containerEntryPaths, site.url, di)
         }
     }
 

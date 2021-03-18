@@ -7,6 +7,8 @@ import com.ustadmobile.core.io.ext.readAndSaveToDir
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobHttpUrlConnection2
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
+import com.ustadmobile.core.util.ext.distinctMds5sSorted
+import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
@@ -37,7 +39,6 @@ data class UploadSessionParams(val containerEntryPaths: List<ContainerEntryWithM
  */
 class UploadSession(val sessionUuid: String,
                     val containerEntryPaths: List<ContainerEntryWithMd5>,
-                    val md5sExpected: List<String>,
                     val siteUrl: String,
                     override val di: DI) : DIAware, Closeable {
 
@@ -56,42 +57,56 @@ class UploadSession(val sessionUuid: String,
 
     private val db : UmAppDatabase by di.on(siteEndpoint).instance(tag = DoorTag.TAG_DB)
 
-    val firstFile: File by lazy {
-        File(uploadWorkDir, "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART}")
-    }
+    val entriesRequired: List<ContainerEntryWithMd5>
 
-    val firstFileHeader: File by lazy {
-        File(uploadWorkDir, "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER}")
-    }
+    private val md5sExpected: List<String>
 
-    val startFromByte: Long by lazy {
-        if(firstFile.exists() && firstFileHeader.exists())
-            firstFile.length() + firstFileHeader.length()
-        else
-            0L
-    }
+    private val firstFile: File
+
+    private val firstFileHeader: File
+
+    val startFromByte: Long
 
     private val pipeOut = PipedOutputStream()
 
     private val pipeIn = PipedInputStream(pipeOut)
 
-    private val readJob = GlobalScope.launch(Dispatchers.IO) {
-        var concatIn: ConcatenatedInputStream2? = null
-        try {
-            concatIn = ConcatenatedInputStream2(pipeIn)
-            concatIn.readAndSaveToDir(containerDir, uploadWorkDir, db, AtomicLong(0L),
-                containerEntryPaths, md5sExpected.toMutableList(), "UploadSession")
-        }catch(e: Exception) {
-            Napier.e("UploadSession;Exception reading, closing pipeOut to ")
-            pipeOut.close()
-            e.printStackTrace()
-        }finally {
-            concatIn?.close()
-        }
-    }
+    private val readJob: Job
 
     init {
         UUID.fromString(sessionUuid) //validate this is a real uuid, does not contain nasty characters
+
+        val containerUid = containerEntryPaths.first().ceContainerUid
+        entriesRequired = runBlocking {
+            db.linkExistingContainerEntries(containerUid, containerEntryPaths).entriesWithoutMatchingFile
+        }
+
+        md5sExpected = entriesRequired.distinctMds5sSorted()
+
+        firstFile = File(uploadWorkDir,
+                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART}")
+        firstFileHeader = File(uploadWorkDir,
+                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER}")
+
+        startFromByte = if(firstFile.exists() && firstFileHeader.exists())
+            firstFile.length() + firstFileHeader.length()
+        else
+            0L
+
+        readJob = GlobalScope.launch(Dispatchers.IO) {
+            var concatIn: ConcatenatedInputStream2? = null
+            try {
+                concatIn = ConcatenatedInputStream2(pipeIn)
+                concatIn.readAndSaveToDir(containerDir, uploadWorkDir, db, AtomicLong(0L),
+                        containerEntryPaths, md5sExpected.toMutableList(), "UploadSession")
+            }catch(e: Exception) {
+                Napier.e("UploadSession;Exception reading, closing pipeOut to ")
+                pipeOut.close()
+                e.printStackTrace()
+            }finally {
+                concatIn?.close()
+            }
+        }
 
         if(startFromByte > 0) {
             FileInputStream(firstFileHeader).use { firstFileHeaderIn ->
@@ -118,7 +133,7 @@ class UploadSession(val sessionUuid: String,
             readJob.join()
         }
 
-        uploadWorkDir.deleteRecursively()
+        uploadWorkDir.takeIf { it.listFiles().isEmpty() }?.delete()
     }
 
 }

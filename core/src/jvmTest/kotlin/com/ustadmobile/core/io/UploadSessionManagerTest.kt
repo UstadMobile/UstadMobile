@@ -24,7 +24,7 @@ class UploadSessionManagerTest {
         }
 
         mockUploadSessionFactory = { sessionUuid: UUID, containerEntryPaths: List<ContainerEntryWithMd5>,
-                                     md5sExpected: List<String>, site: Endpoint, di: DI ->
+                                     site: Endpoint, di: DI ->
             mockUploadSession
         }
     }

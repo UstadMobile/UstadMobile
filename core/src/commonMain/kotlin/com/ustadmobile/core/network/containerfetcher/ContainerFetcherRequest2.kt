@@ -6,8 +6,6 @@ class ContainerFetcherRequest2(
         /**
          * List of the ContainerEntryFiles that need to be downloaded. This must include the
          * containerentryfile object so that the md5 is available.
-         *
-         * d288df22a4d74bade392dd61766aab55;322e2c67c38104012a7a22bd1ca024f8
          */
         val entriesToDownload: List<ContainerEntryWithMd5>,
 

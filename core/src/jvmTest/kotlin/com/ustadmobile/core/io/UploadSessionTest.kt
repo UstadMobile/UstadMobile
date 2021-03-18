@@ -97,13 +97,13 @@ class UploadSessionTest {
     @Suppress("BlockingMethodInNonBlockingContext")
     @Test
     fun givenFileUploadedInChunks_whenClosed_thenCompletedContainerShouldBeSaved() {
-        val md5sToWrite = entriesToUpload.distinctMds5sSorted()
-        val uploadToWrite = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                md5sToWrite, mapOf(), clientDb)
-        
         val uploadSession = UploadSession(UUID.randomUUID().toString(),
-                entriesToUpload, md5sToWrite,
+                entriesToUpload,
                 serverEndpoint.url, di)
+
+        val uploadToWrite = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
+                uploadSession.entriesRequired.distinctMds5sSorted(), mapOf(), clientDb)
+
 
         val byteArrayOut = ByteArrayOutputStream().also {
             uploadToWrite.writeTo(it)
@@ -131,17 +131,13 @@ class UploadSessionTest {
         var lastStartFrom = 0L
 
         for(i in 0 .. 1) {
-            //figure out what remains
-            val containerEntriesPartition = runBlocking {
-                serverDb.linkExistingContainerEntries(container.containerUid,
-                        entriesToUpload)
-            }
-
-            val remainingEntries = containerEntriesPartition.entriesWithoutMatchingFile
-            val md5sToWrite = remainingEntries.distinctMds5sSorted()
-
+            val containerEntries = clientDb.containerEntryDao.findByContainer(container.containerUid)
+                    .map { it.toContainerEntryWithMd5() }
             val uploadSession1 = UploadSession(uploadSessionUuid.toString(),
-                    remainingEntries, md5sToWrite, serverEndpoint.url, di)
+                    containerEntries, serverEndpoint.url, di)
+
+            val remainingEntries = uploadSession1.entriesRequired
+            val md5sToWrite = remainingEntries.distinctMds5sSorted()
 
             val uploadToWrite1 = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
                     md5sToWrite,
@@ -181,21 +177,16 @@ class UploadSessionTest {
 
         val uploadUuid = UUID.randomUUID()
 
+        val containerEntries = clientDb.containerEntryDao.findByContainer(container.containerUid)
+                .map { it.toContainerEntryWithMd5() }
+
         for (i in 0..1) {
             //figure out what remains
-            val containerEntriesPartition = runBlocking {
-                serverDb.linkExistingContainerEntries(container.containerUid,
-                        entriesToUpload)
-            }
-
-            val remainingEntries = containerEntriesPartition.entriesWithoutMatchingFile
-            val md5sToWrite = remainingEntries.distinctMds5sSorted()
-
             val uploadSession1 = UploadSession(uploadUuid.toString(),
-                    remainingEntries, md5sToWrite, serverEndpoint.url, di)
+                    containerEntries, serverEndpoint.url, di)
 
             val uploadToWrite1 = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                    md5sToWrite,
+                    uploadSession1.entriesRequired.distinctMds5sSorted(),
                     mapOf("range" to listOf("bytes=${uploadSession1.startFromByte}-")), clientDb)
 
 
