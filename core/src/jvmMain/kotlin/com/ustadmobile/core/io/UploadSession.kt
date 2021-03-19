@@ -19,8 +19,6 @@ import java.io.*
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
-@Serializable
-data class UploadSessionParams(val md5sRequired: List<String>, val startFrom: Long)
 
 /**
  * This class manages a resumable upload session on the server side. It will be held in memory until

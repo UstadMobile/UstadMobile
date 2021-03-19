@@ -10,6 +10,7 @@ import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
 import com.ustadmobile.core.util.ext.hexStringToBase64Encoded
+import junit.framework.AssertionFailedError
 import org.junit.Assert
 import java.io.File
 
@@ -53,9 +54,16 @@ fun UmAppDatabase.mockResponseForConcatenatedFiles2Request(request: RecordedRequ
  * present in the first container is present in the second container, and that the content bytes
  * for each entry are exactly the same.
  */
-fun UmAppDatabase.assertContainerEqualToOther(containerUid: Long, otherDb: UmAppDatabase) {
+fun UmAppDatabase.assertContainerEqualToOther(containerUid: Long, otherDb: UmAppDatabase,
+                                              acceptEmptyContainer: Boolean = false) {
     val entriesInThisDb = containerEntryDao.findByContainer(containerUid)
     val entriesInOtherDb = otherDb.containerEntryDao.findByContainer(containerUid)
+
+    if(acceptEmptyContainer != true) {
+        Assert.assertNotEquals("Container is not empty", 0,
+            entriesInThisDb.size)
+    }
+
     Assert.assertEquals("Same number of entries in both containers", entriesInThisDb.size,
             entriesInOtherDb.size)
 

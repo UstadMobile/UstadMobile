@@ -15,9 +15,10 @@ import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.ktor.di
 import org.kodein.di.on
+import java.lang.Exception
 import java.util.*
 
-fun Route.ContainerUpload2() {
+fun Route.ContainerUploadRoute2() {
 
     route("ContainerUpload2") {
         post("{uploadId}/init") {
@@ -36,11 +37,31 @@ fun Route.ContainerUpload2() {
         }
 
         put("{uploadId}/data") {
-
+            val sessionManager: UploadSessionManager = di().on(call).direct.instance()
+            val uploadUuid = call.parameters["uploadId"]
+            if(uploadUuid == null) {
+                call.respond(HttpStatusCode.BadRequest, "no uploaduuid")
+            }
+            try {
+                call.receiveStream().use {
+                    sessionManager.onReceiveSessionChunk(UUID.fromString(uploadUuid), it)
+                }
+                call.respond(HttpStatusCode.NoContent, "")
+            }catch(e: Exception) {
+                e.printStackTrace()
+                call.respond(HttpStatusCode.InternalServerError, "Upload error: $e")
+            }
         }
 
         get("{uploadId}/close") {
-
+            val sessionManager: UploadSessionManager = di().on(call).direct.instance()
+            try {
+                val sessionUuid = UUID.fromString(call.parameters["uploadId"])
+                sessionManager.closeSession(sessionUuid)
+                call.respond(HttpStatusCode.NoContent, "")
+            }catch(e: Exception){
+                call.respond(HttpStatusCode.InternalServerError, "Upload error: $e")
+            }
         }
     }
 }

@@ -193,7 +193,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         PersonAuthRegisterRoute()
         ContainerMountRoute()
         ResumableUploadRoute()
-        ContainerUpload()
+        ContainerUploadRoute2()
         UmAppDatabase_KtorRoute(true)
         SiteRoute()
         ContentEntryLinkImporter()

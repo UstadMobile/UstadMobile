@@ -3,8 +3,6 @@ package com.ustadmobile.core.contentformats.har
 import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.util.*
@@ -15,8 +13,6 @@ import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import jdk.nashorn.internal.objects.Global
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.io.FileUtils
