@@ -75,7 +75,8 @@ class HarContentFragmentTest {
     }
 
     @AdbScreenRecord("given contentEntry when web view loads then show har content")
-    @Test
+    // Disabled temporarily until this is fixed as per Taiga issue #353
+    //@Test
     fun givenContentEntry_whenWebViewLoads_thenShowHarContent() {
 
         launchFragmentInContainer(themeResId = R.style.UmTheme_App,
