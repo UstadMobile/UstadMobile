@@ -343,7 +343,16 @@ object XapiUtil {
     }
 
     fun insertOrUpdateEntryProgress(statementEntity: StatementEntity, progressDao: ContentEntryProgressDao, verbEntity: VerbEntity) {
-        progressDao.updateProgress(statementEntity.statementContentEntryUid, statementEntity.statementPersonUid, statementEntity.extensionProgress, getStatusFlag(verbEntity.urlId))
+        var statusFlag = getStatusFlag(verbEntity.urlId)
+        var progress  = statementEntity.extensionProgress
+        if(progress == 0 &&
+                (statusFlag == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED ||
+                        statementEntity.resultCompletion)){
+            progress = 100
+            statusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
+        }
+        progressDao.updateProgress(statementEntity.statementContentEntryUid,
+                statementEntity.statementPersonUid, progress, statusFlag)
     }
 
     private fun getStatusFlag(id: String?): Int {
