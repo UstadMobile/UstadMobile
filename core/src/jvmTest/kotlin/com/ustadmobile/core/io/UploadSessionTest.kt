@@ -102,7 +102,7 @@ class UploadSessionTest {
                 serverEndpoint.url, di)
 
         val uploadToWrite = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                uploadSession.entriesRequired.distinctMds5sSorted(), mapOf(), clientDb)
+                uploadSession.uploadSessionParams.md5sRequired, mapOf(), clientDb)
 
 
         val byteArrayOut = ByteArrayOutputStream().also {
@@ -136,11 +136,8 @@ class UploadSessionTest {
             val uploadSession1 = UploadSession(uploadSessionUuid.toString(),
                     containerEntries, serverEndpoint.url, di)
 
-            val remainingEntries = uploadSession1.entriesRequired
-            val md5sToWrite = remainingEntries.distinctMds5sSorted()
-
             val uploadToWrite1 = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                    md5sToWrite,
+                    uploadSession1.uploadSessionParams.md5sRequired,
                     mapOf("range" to listOf("bytes=${uploadSession1.startFromByte}-")),
                     clientDb)
 
@@ -186,7 +183,7 @@ class UploadSessionTest {
                     containerEntries, serverEndpoint.url, di)
 
             val uploadToWrite1 = clientDb.containerEntryFileDao.generateConcatenatedFilesResponse2(
-                    uploadSession1.entriesRequired.distinctMds5sSorted(),
+                    uploadSession1.uploadSessionParams.md5sRequired,
                     mapOf("range" to listOf("bytes=${uploadSession1.startFromByte}-")), clientDb)
 
 

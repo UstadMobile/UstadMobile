@@ -33,9 +33,7 @@ class UploadSessionManager(val site: Endpoint, override val di: DI,
 
     private val lock = ReentrantLock()
 
-    fun initSession(sessionUuid: UUID,
-                    containerEntryPaths: List<ContainerEntryWithMd5>,
-                    md5sExpected: List<String>) : UploadSession {
+    fun initSession(sessionUuid: UUID, containerEntryPaths: List<ContainerEntryWithMd5>) : UploadSession {
 
         return lock.withLock {
             if(activeSessions.containsKey(sessionUuid))

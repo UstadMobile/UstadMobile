@@ -42,7 +42,7 @@ class UploadSessionManagerTest {
         })
 
         val sessionUuid = UUID.randomUUID()
-        sessionManager.initSession(sessionUuid, containerEntries, listOf("aabbcc"))
+        sessionManager.initSession(sessionUuid, containerEntries)
         sessionManager.onReceiveSessionChunk(sessionUuid, ByteArrayInputStream(ByteArray(200)))
         sessionManager.closeSession(sessionUuid)
 
@@ -64,8 +64,8 @@ class UploadSessionManagerTest {
         })
 
         val sessionUuid = UUID.randomUUID()
-        sessionManager.initSession(sessionUuid, containerEntries, listOf("aabbcc"))
-        sessionManager.initSession(sessionUuid, containerEntries, listOf("aabbcc"))
+        sessionManager.initSession(sessionUuid, containerEntries)
+        sessionManager.initSession(sessionUuid, containerEntries)
     }
 
 

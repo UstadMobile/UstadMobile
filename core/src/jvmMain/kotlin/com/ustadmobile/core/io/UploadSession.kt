@@ -20,20 +20,25 @@ import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 
 @Serializable
-data class UploadSessionParams(val containerEntryPaths: List<ContainerEntryWithMd5>,
-                               val md5sExpected: List<String>)
+data class UploadSessionParams(val md5sRequired: List<String>, val startFrom: Long)
 
 /**
- * This class manages a resumable upload session. It will be held in memory until there is an
- * activity timeout. It is designed to receive uploads chunk by chunk. The server receiving
- * requests (e.g. via PUT requests) should call onReceiveChunk. onReceiveChunk MUST be called in
- * order.
+ * This class manages a resumable upload session on the server side. It will be held in memory until
+ * it is finished or there is an activity timeout. It is designed to receive uploads chunk by chunk.
+ *
+ * The server receiving requests (e.g. via PUT requests) should call onReceiveChunk when it receives
+ * a chunk of data using a post or put request. onReceiveChunk MUST be called in order.
+ *
+ * When an UploadSession is created, it will check for a previous session with the same UUID. If this
+ * is found, any remaining partial data from the previous session will be used. It will also check
+ * to see what MD5s the server already has. The client can then use entriesRequired to determine
+ * which md5s to upload.
+ *
  *
  * @param sessionUuid UUID for the session. This is used to create a temporary directory
  * @param containerEntryPaths a list of the paths that should be created in this container. When each
  * ConcatenatedEntry is received, ContainerEntry(s) will be inserted to link to the given container
  * paths.
- * @param md5sExpected the expected order in which md5s will be received (Base64 md5sum)
  * @param siteUrl Endpoint Site URL (used for retrieving dependencies)
  * @param di the dependency injection object
  */
@@ -57,7 +62,16 @@ class UploadSession(val sessionUuid: String,
 
     private val db : UmAppDatabase by di.on(siteEndpoint).instance(tag = DoorTag.TAG_DB)
 
-    val entriesRequired: List<ContainerEntryWithMd5>
+    /**
+     * These are the entries that the client must actually upload.
+     */
+    private val entriesRequired: List<ContainerEntryWithMd5>
+
+    /**
+     * The session parameters that can be given to the client. They specify the starting position
+     * for upload and the md5s that actually need uploaded.
+     */
+    val uploadSessionParams: UploadSessionParams
 
     private val md5sExpected: List<String>
 
@@ -93,6 +107,8 @@ class UploadSession(val sessionUuid: String,
         else
             0L
 
+        uploadSessionParams = UploadSessionParams(md5sExpected, startFromByte)
+
         readJob = GlobalScope.launch(Dispatchers.IO) {
             var concatIn: ConcatenatedInputStream2? = null
             try {
@@ -120,10 +136,14 @@ class UploadSession(val sessionUuid: String,
     }
 
     /**
+     * This function is called by the server when an http post or put request containing a chunk of
+     * data is received. It MUST be called in order (e.g. the client must send one chunk at a time).
      *
+     * @param chunkInput InputStream containing data received by the server
      */
     fun onReceiveChunk(chunkInput: InputStream){
         chunkInput.copyTo(pipeOut)
+        pipeOut.flush()
         lastActive.set(systemTimeInMillis())
     }
 

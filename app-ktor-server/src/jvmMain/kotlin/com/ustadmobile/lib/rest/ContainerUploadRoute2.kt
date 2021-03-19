@@ -1,7 +1,10 @@
 package com.ustadmobile.lib.rest
 
+import com.google.gson.Gson
 import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.io.UploadSessionParams
+import com.ustadmobile.core.util.ext.distinctMds5sSorted
+import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
@@ -17,13 +20,16 @@ import java.util.*
 fun Route.ContainerUpload2() {
 
     route("ContainerUpload2") {
-        get("{uploadId}/init") {
+        post("{uploadId}/init") {
             val sessionManager: UploadSessionManager = di().on(call).direct.instance()
             try {
-                val uploadSessionParams = call.receive<UploadSessionParams>()
+                val containerEntryListStr = call.receive<String>()
+                val gson: Gson = di().direct.instance()
+                val containerEntryList : List<ContainerEntryWithMd5> = gson.fromJson(containerEntryListStr,
+                    object: com.google.gson.reflect.TypeToken<List<ContainerEntryWithMd5>>() { }.type)
                 val uploadSession = sessionManager.initSession(UUID.fromString(call.parameters["uploadId"]),
-                    uploadSessionParams.containerEntryPaths, uploadSessionParams.md5sExpected)
-                call.respondText(contentType = ContentType.Text.Plain) { uploadSession.startFromByte.toString() }
+                    containerEntryList)
+                call.respond(uploadSession.uploadSessionParams)
             }catch(se: IllegalStateException) {
                 call.respond(HttpStatus.SC_BAD_REQUEST)
             }
