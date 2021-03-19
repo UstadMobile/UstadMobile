@@ -545,7 +545,8 @@ suspend fun UmAppDatabase.linkExistingContainerEntries(containerUid: Long,
         }
     }
 
-    return ContainerEntryWithMd5Partition(entriesWithValRetList, entriesNeedDownloaded)
+    return ContainerEntryWithMd5Partition(entriesWithValRetList,
+            entriesNeedDownloaded)
 }
 
 

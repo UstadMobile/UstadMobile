@@ -4,6 +4,7 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.encodeBase64
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.*
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntry
@@ -13,12 +14,16 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
+import java.io.InputStream
+import java.io.ByteArrayInputStream
 import java.net.URI
 import java.nio.file.Paths
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import com.ustadmobile.core.contentformats.har.HarEntry
+import java.util.Base64
 
-actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: String,
+actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: DoorUri,
                                                    recursive: Boolean,
                                                    addOptions: ContainerAddOptions) {
 
@@ -26,13 +31,23 @@ actual suspend fun UmAppDatabase.addDirToContainer(containerUid: Long, dirUri: S
             ?: throw IllegalStateException("Must use repo for addFileToContainer")
     val db = repo.db as UmAppDatabase
 
-    dirUri.parseKmpUriStringToFile().listFiles()?.forEach { childFile ->
+    dirUri.toFile().listFiles()?.forEach { childFile ->
         db.addFileToContainerInternal(containerUid, childFile, recursive, addOptions,
                 "")
     }
 
     containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
 }
+
+actual suspend fun UmAppDatabase.addFileToContainer(containerUid: Long, fileUri: DoorUri,
+                                                    pathInContainer: String, addOptions: ContainerAddOptions) {
+    val repo = this as? DoorDatabaseRepository
+            ?: throw IllegalStateException("Must use repo for addFileToContainer")
+    val db = repo.db as UmAppDatabase
+    db.addFileToContainerInternal(containerUid, fileUri.toFile(), false,
+        addOptions, "", pathInContainer)
+}
+
 
 fun File.toContainerEntryFile(totalSize: Long, md5Sum: ByteArray, gzipped: Boolean) = com.ustadmobile.lib.db.entities.ContainerEntryFile().also {
     it.ceCompressedSize  = this.length()
@@ -46,22 +61,27 @@ fun File.toContainerEntryFile(totalSize: Long, md5Sum: ByteArray, gzipped: Boole
     }
 }
 
+/**
+ * @param containerUid container uid we a
+ */
 private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
                                                              file: File,
                                                              recursive: Boolean,
                                                              addOptions: ContainerAddOptions,
-                                                             relativePathPrefix: String) {
+                                                             relativePathPrefix: String,
+                                                             fixedPath: String? = null) {
 
-    val storageDirFile = addOptions.storageDirUri.parseKmpUriStringToFile()
+    val storageDirFile = addOptions.storageDirUri.toFile()
 
     if(file.isFile) {
         //add the file
         val tmpFile = File(storageDirFile,
                 "${systemTimeInMillis()}.tmp")
-        val relPath = relativePathPrefix + file.name
+        val relPath = fixedPath ?: relativePathPrefix + file.name
 
-        //TODO: guess Mime type
-        val compress = addOptions.compressionFilter.shouldCompress(file.toKmpUriString(), null)
+        val entryPath = addOptions.fileNamer.nameContainerFile(relPath, file.toKmpUriString())
+        val compress = addOptions.compressionFilter.shouldCompress(entryPath,
+                file.toDoorUri().guessMimeType())
 
         val md5Sum = withContext(Dispatchers.IO) {
             if(compress) {
@@ -95,7 +115,6 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
         }
 
         //link the existing entry
-        val entryPath = addOptions.fileNamer.nameContainerFile(relPath, file.toKmpUriString())
         containerEntryDao.insertAsync(ContainerEntry().apply {
             this.cePath = entryPath
             this.ceContainerUid = containerUid
@@ -112,53 +131,142 @@ private suspend fun UmAppDatabase.addFileToContainerInternal(containerUid: Long,
     }
 }
 
+/**
+ * Lookup a ContainerEntryFile that matches the MD5 of the data from the given InputStream. If there
+ * is no ContainerEntryFile for that MD5 Sum, add a new one. Returns the result
+ *
+ * @param src InputStream from which to read data
+ * @param originalLength the length of the data
+ * @param pathInContainer the path that this entry will receive (used to pass to the
+ * addoptions.compressionFilter)
+ * @param addOptions ContainerAddOptions
+ *
+ * @return ContainerEntryFile with the data as per the MD5Sum of the given InputStream
+ */
+private suspend fun UmAppDatabase.insertOrLookupContainerEntryFile(src: InputStream,
+                                                                   originalLength: Long,
+                                                                   pathInContainer: String,
+                                                                   addOptions: ContainerAddOptions) : ContainerEntryFile {
 
-actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
-                                                              zipUri: String,
-                                                              addOptions: ContainerAddOptions) {
+    val storageDirFile = addOptions.storageDirUri.toFile()
+    val tmpFile = File(storageDirFile, "${systemTimeInMillis()}.tmp")
+    val gzip = addOptions.compressionFilter.shouldCompress(pathInContainer, null)
+    val md5Sum = src.writeToFileAndGetMd5(tmpFile, gzip)
 
-    val repo = this as? DoorDatabaseRepository
-            ?: throw IllegalStateException("Must use repo for addFileToContainer")
-    val db = repo.db as UmAppDatabase
+    var containerFile = containerEntryFileDao.findEntryByMd5Sum(md5Sum.encodeBase64())
+    if(containerFile == null) {
+        val finalDestFile = File(storageDirFile, md5Sum.toHexString())
+        if(!tmpFile.renameTo(finalDestFile))
+            throw IOException("Could not rename $tmpFile to $finalDestFile")
 
+        containerFile = finalDestFile.toContainerEntryFile(originalLength, md5Sum, gzip).apply {
+            this.cefUid = containerEntryFileDao.insert(this)
+        }
+    }else {
+        tmpFile.delete()
+    }
+
+    return containerFile
+}
+
+suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
+    zipInputStream: ZipInputStream, addOptions: ContainerAddOptions) {
+
+    val (db, repo) = requireDbAndRepo()
     withContext(Dispatchers.IO) {
-        val storageDirFile = addOptions.storageDirUri.parseKmpUriStringToFile()
-        val zipInputStream = ZipInputStream(FileInputStream(zipUri.parseKmpUriStringToFile()))
+        val containerEntriesToAdd = mutableListOf<ContainerEntry>()
         zipInputStream.use { zipIn ->
             var zipEntry: ZipEntry? = null
             while(zipIn.nextEntry?.also { zipEntry = it } != null) {
                 val zipEntryVal = zipEntry ?: throw IllegalStateException("ZipEntry is not null in loop")
                 val nameInZip = zipEntryVal.name
-                val tmpFileOut = File(storageDirFile, "${systemTimeInMillis()}.tmp")
-
-                //TODO: specify mime type here
-                val gzip = addOptions.compressionFilter.shouldCompress(nameInZip, null)
-                val md5Sum = zipIn.writeToFileAndGetMd5(tmpFileOut, gzip)
-
-                var containerFile = db.containerEntryFileDao.findEntryByMd5Sum(md5Sum.encodeBase64())
-                if(containerFile == null) {
-                    val finalDestFile = File(storageDirFile, md5Sum.toHexString())
-                    if(!tmpFileOut.renameTo(finalDestFile))
-                        throw IOException("Could not rename $tmpFileOut to $finalDestFile")
-
-                    containerFile = finalDestFile.toContainerEntryFile(zipEntryVal.size, md5Sum, gzip).apply {
-                        this.cefUid = db.containerEntryFileDao.insert(this)
-                    }
-                }
+                val containerFile = db.insertOrLookupContainerEntryFile(zipIn, zipEntryVal.size,
+                        nameInZip, addOptions)
 
                 val entryPath = addOptions.fileNamer.nameContainerFile(nameInZip, nameInZip)
-                db.containerEntryDao.insertAsync(ContainerEntry().apply {
+
+                containerEntriesToAdd.add(ContainerEntry().apply {
                     this.cePath = entryPath
                     this.ceContainerUid = containerUid
                     this.ceCefUid = containerFile.cefUid
                 })
 
-                tmpFileOut.delete()
-
             }
         }
+
+        db.containerEntryDao.insertListAsync(containerEntriesToAdd)
+
+        repo.containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
+    }
+}
+
+actual suspend fun UmAppDatabase.addEntriesToContainerFromZip(containerUid: Long,
+                                                              zipUri: DoorUri,
+                                                              addOptions: ContainerAddOptions) {
+    withContext(Dispatchers.IO) {
+        val zipInputStream = ZipInputStream(FileInputStream(zipUri.toFile()))
+        addEntriesToContainerFromZip(containerUid, zipInputStream, addOptions)
+    }
+}
+
+/**
+ * Add entries to the given container from a resource. This will open an inputStream using
+ * Class.getResourceAsStream
+ *
+ * @param containerUid The ContainerUID to add the contents to
+ * @param javaClass Java.lang.Class that will be used to invoke getResourceAsStream
+ * @param resourcePath the resource path as it will be provided to getResourceAsStream
+ * @param addOptions ContainerAddOptions
+ */
+suspend fun UmAppDatabase.addEntriesToContainerFromZipResource(containerUid: Long, javaClass: Class<*>,
+                                                               resourcePath: String, addOptions: ContainerAddOptions) {
+    withContext(Dispatchers.IO) {
+        val zipInputStream = ZipInputStream(javaClass.getResourceAsStream(resourcePath))
+        addEntriesToContainerFromZip(containerUid, zipInputStream, addOptions)
+    }
+}
+
+suspend fun UmAppDatabase.addEntryToContainerFromResource(containerUid: Long, javaClass: Class<*>,
+                                                         resourcePath: String, pathInContainer: String,
+                                                          addOptions: ContainerAddOptions) {
+    withContext(Dispatchers.IO) {
+        val tmpFile = File(addOptions.storageDirUri.toFile(), "${systemTimeInMillis()}.tmp")
+        val resourceIn = javaClass.getResourceAsStream(resourcePath) ?: throw IOException("resource not found: $resourcePath")
+        resourceIn.writeToFile(tmpFile)
+        addFileToContainer(containerUid, tmpFile.toDoorUri(), pathInContainer, addOptions)
+        tmpFile.takeIf { it.exists() }?.delete()
+    }
+}
+
+
+suspend fun UmAppDatabase.addHarEntryToContainer(containerUid: Long, harEntry: HarEntry,
+                                                 pathInContainer: String,
+                                                 addOptions: ContainerAddOptions) {
+
+    val harResponse = harEntry.response ?: throw IllegalArgumentException("HarEntry being added" +
+            " as $pathInContainer to $containerUid must have a response!")
+    val harContent = harResponse.content ?: throw IllegalArgumentException("HarEntry being added" +
+            " as $pathInContainer to $containerUid must have response content!")
+    val harContentText = harContent.text ?: throw IllegalArgumentException("HarEntry being added" +
+            " as $pathInContainer to $containerUid must have response content text!")
+
+    withContext(Dispatchers.IO) {
+        val storageDir = addOptions.storageDirUri.toFile()
+        val tmpFile = File(storageDir, "${systemTimeInMillis()}.tmp")
+        val harInputStream = if(harContent.encoding == "base64") {
+            ByteArrayInputStream(Base64.getDecoder().decode(harContentText))
+        }else {
+            ByteArrayInputStream(harContentText.toByteArray())
+        }
+
+
+        val compress = addOptions.compressionFilter.shouldCompress(pathInContainer, null)
+
+        val entryMd5 = harInputStream.writeToFileAndGetMd5(tmpFile, compress)
+
     }
 
-    containerDao.takeIf { addOptions.updateContainer }?.updateContainerSizeAndNumEntriesAsync(containerUid)
+    containerDao.takeIf { addOptions.updateContainer }
+            ?.updateContainerSizeAndNumEntriesAsync(containerUid)
 
 }

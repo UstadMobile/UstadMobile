@@ -2,7 +2,6 @@ package com.ustadmobile.sharedse.impl.http
 
 import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
@@ -44,7 +43,7 @@ class ConcatenatedContainerEntryFileResponderTest {
 
     lateinit var db: UmAppDatabase
 
-    lateinit var container: Pair<Container, ContainerManager>
+    lateinit var container: Container
 
     @Before
     fun setup() {
@@ -64,7 +63,7 @@ class ConcatenatedContainerEntryFileResponderTest {
 
     @Test
     fun givenValidRequest_whenGetCalled_thenShouldServeData() {
-        val containerEntries = db.containerEntryDao.findByContainerWithMd5(container.first.containerUid)
+        val containerEntries = db.containerEntryDao.findByContainerWithMd5(container.containerUid)
         val containerEntryFileUids = containerEntries.map { it.ceCefUid }.joinToString(separator = ";") { it.toString() }
         val mockSession = mock<NanoHTTPD.IHTTPSession> {
             on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/$containerEntryFileUids")
@@ -91,7 +90,7 @@ class ConcatenatedContainerEntryFileResponderTest {
 
     @Test
     fun givenValidRequest_whenHeadCalled_thenShouldServeHeadersWithNoData() {
-        val containerEntries = db.containerEntryDao.findByContainerWithMd5(container.first.containerUid)
+        val containerEntries = db.containerEntryDao.findByContainerWithMd5(container.containerUid)
         val containerEntryFileUids = containerEntries.map { it.ceCefUid }.joinToString(separator = ";") { it.toString() }
         val mockSession = mock<NanoHTTPD.IHTTPSession> {
             on { uri }.thenReturn("/${UMURLEncoder.encodeUTF8(accountManager.activeAccount.endpointUrl)}/$containerEntryFileUids")

@@ -14,7 +14,6 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEBM
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_WEB_CHUNK
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
-import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeQueueItemWithScrapeRun
 import kotlinx.coroutines.runBlocking
 import org.kodein.di.DI
@@ -31,7 +30,7 @@ abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentCon
 
     val repo: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_REPO)
 
-    val containerFolder: File by di.on(endpoint).instance(tag = DiTag.TAG_CONTAINER_DIR)
+    val containerFolder: File by di.on(endpoint).instance(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
 
     val mimeTypeToContentFlag: Map<String, Int> = mapOf(
             MIMETYPE_PDF to ContentEntry.TYPE_DOCUMENT,

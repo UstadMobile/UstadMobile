@@ -4,7 +4,6 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.lib.db.entities.Container
@@ -32,8 +31,6 @@ class ContainerEntryListResponderTest {
 
     private lateinit var container: Container
 
-    private lateinit var containerManager: ContainerManager
-
     private lateinit var di: DI
 
     @JvmField
@@ -53,14 +50,11 @@ class ContainerEntryListResponderTest {
 
         val activeDb: UmAppDatabase by di.activeDbInstance()
         val activeRepo: UmAppDatabase by di.activeRepoInstance()
-        val containerPair = runBlocking {
+        container = runBlocking {
             insertContainerFromResources(activeDb, activeRepo, testFileRule.newFolder(),
                     testFileRule.newFolder(),
                     *RES_FILENAMES.map { "$RES_FOLDER$it" }.toTypedArray())
         }
-
-        container = containerPair.first
-        containerManager = containerPair.second
     }
 
     @ExperimentalStdlibApi

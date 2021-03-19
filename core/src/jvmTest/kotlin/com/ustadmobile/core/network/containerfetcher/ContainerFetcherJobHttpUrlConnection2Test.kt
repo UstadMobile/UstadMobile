@@ -14,6 +14,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.Container
@@ -50,24 +51,6 @@ class ContainerFetcherJobHttpUrlConnection2Test {
                     socketPolicy = SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY
                 }
             }
-        }
-    }
-
-
-
-    fun UmAppDatabase.assertAllContainerEntryFilesPresentInOther(md5List: List<String>, otherDb: UmAppDatabase) {
-        md5List.forEach { md5Base64 ->
-            val md5Hex = md5Base64.base64StringToByteArray().toHexString()
-            val fileEntryInThisDb = runBlocking {
-                containerEntryFileDao.findEntryByMd5Sum(md5Base64)
-            }
-            val fileEntryInOtherDb = runBlocking {
-                otherDb.containerEntryFileDao.findEntryByMd5Sum(md5Base64)
-            }
-
-            Assert.assertArrayEquals("Content of containerfileentry for $md5Base64  ($md5Hex) are the same in both db",
-                File(fileEntryInThisDb!!.cefPath!!).readBytes(),
-                File(fileEntryInOtherDb!!.cefPath!!).readBytes())
         }
     }
 
@@ -118,7 +101,7 @@ class ContainerFetcherJobHttpUrlConnection2Test {
         val containerTmpFolder = temporaryFolder.newFolder()
         runBlocking {
             serverRepo.addEntriesToContainerFromZip(container.containerUid,
-                epubFile.toKmpUriString(), ContainerAddOptions(containerTmpFolder.toKmpUriString()))
+                epubFile.toDoorUri(), ContainerAddOptions(containerTmpFolder.toDoorUri()))
         }
 
         //Create a mock web server that will serve the concatenated data
@@ -161,7 +144,6 @@ class ContainerFetcherJobHttpUrlConnection2Test {
         val clientDb: UmAppDatabase = clientDi.on(Endpoint(siteUrl)).direct.instance(tag = DoorTag.TAG_DB)
 
 
-        serverDb.assertAllContainerEntryFilesPresentInOther(md5List, clientDb)
         serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
     }
 
@@ -214,8 +196,6 @@ class ContainerFetcherJobHttpUrlConnection2Test {
                 mockRequest2.getHeader("range"))
 
 
-        serverDb.assertAllContainerEntryFilesPresentInOther(
-                allContainerEntryFilesToDownload.map { it.cefMd5!! }, clientDb)
         serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
     }
 

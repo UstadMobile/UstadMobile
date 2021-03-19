@@ -6,6 +6,7 @@ import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import kotlinx.io.InputStream
 
+@Deprecated("This is being removed for the Kotlin 1.4 upgrade")
 expect class ContainerManager : ContainerManagerCommon {
 
     constructor(container: Container,

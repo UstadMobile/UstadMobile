@@ -7,23 +7,24 @@ import android.webkit.WebResourceResponse
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.google.gson.Gson
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.IndexLog
 import com.ustadmobile.core.controller.WebChunkPresenter
-import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.openEntryInputStream
+import com.ustadmobile.core.io.ext.openInputStream
 import com.ustadmobile.lib.db.entities.ContainerEntryFile.Companion.COMPRESSION_GZIP
 import com.ustadmobile.lib.util.parseRangeRequestHeader
 import com.ustadmobile.port.sharedse.impl.http.RangeInputStream
 import java.io.ByteArrayInputStream
+import java.io.IOException
 import java.net.HttpURLConnection
 import java.nio.charset.StandardCharsets
 import java.util.*
 import java.util.regex.Pattern
 
 
-@ExperimentalStdlibApi
-class WebChunkWebViewClient(private val containerManager: ContainerManager, mPresenter: WebChunkPresenter?) : WebViewClient() {
+class WebChunkWebViewClient(private val containerUid: Long, private val db: UmAppDatabase,
+                            mPresenter: WebChunkPresenter?) : WebViewClient() {
 
     private var presenter: WebChunkPresenter? = null
     private val indexMap = HashMap<String, IndexLog.IndexEntry>()
@@ -33,9 +34,10 @@ class WebChunkWebViewClient(private val containerManager: ContainerManager, mPre
     init {
         try {
             this.presenter = mPresenter
-            val index = containerManager.getEntry("index.json")
 
-            val indexLog = Gson().fromJson(UMIOUtils.readStreamToString(containerManager.getInputStream(index!!)), IndexLog::class.java)
+            val indexBytes = db.containerEntryDao.openEntryInputStream(containerUid,
+                    "index.json")?.readBytes() ?: throw IOException("Could not find index.json")
+            val indexLog = Gson().fromJson(String(indexBytes), IndexLog::class.java)
             val indexList = indexLog.entries
             val firstUrlToOpen = indexList!![0]
             url = firstUrlToOpen.url
@@ -144,9 +146,9 @@ class WebChunkWebViewClient(private val containerManager: ContainerManager, mPre
             return WebResourceResponse("", "utf-8", 200, "OK", null, null)
         }
         try {
-
-            val entry = containerManager.getEntry(log.path!!)
+            val entry = db.containerEntryDao.findByPathInContainer(containerUid, log.path!!)
                     ?: return WebResourceResponse("", "utf-8", 404, "Not Found", null, null)
+
 
             var mutMap = mutableMapOf<String, String>()
             if (log.headers != null) {
@@ -158,7 +160,8 @@ class WebChunkWebViewClient(private val containerManager: ContainerManager, mPre
             }
 
 
-            var data = containerManager.getInputStream(entry)
+            var data = entry.containerEntryFile?.openInputStream() ?:
+                throw IOException("${entry.cePath} has no containerentryfile")
 
             // if not range header, load the file as normal
             var rangeHeader: String? = request.requestHeaders["Range"]

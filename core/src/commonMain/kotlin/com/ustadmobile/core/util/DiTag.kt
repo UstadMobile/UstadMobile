@@ -8,7 +8,11 @@ object DiTag {
      */
     const val TAG_CONTEXT_DATA_ROOT = 13
 
-    const val TAG_CONTAINER_DIR = 11
+    /**
+     * The default directory to which ContainerEntryFile data will be saved. This is not necessarily
+     * the only directory.
+     */
+    const val TAG_DEFAULT_CONTAINER_DIR = 11
 
     const val TAG_GOOGLE_API = 12
 

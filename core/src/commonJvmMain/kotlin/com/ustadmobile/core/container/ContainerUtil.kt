@@ -35,7 +35,8 @@ class ZipEntrySource(val zipEntry: ZipEntry, val zipFile: ZipFile,
 }
 
 
-actual fun addEntriesFromZipToContainer(zipPath: String, containerManager: ContainerManager, prefix: String) {
+actual fun addEntriesFromZipToContainer(zipPath: String, containerManager: ContainerManager,
+                                        prefix: String) {
     runBlocking {
         var zipFile = null as ZipFile?
         try {

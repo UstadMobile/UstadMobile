@@ -1,6 +1,8 @@
 package com.ustadmobile.core.container
 
-class ContainerAddOptions(val storageDirUri: String,
+import com.ustadmobile.door.DoorUri
+
+class ContainerAddOptions(val storageDirUri: DoorUri,
 
                           val moveFiles: Boolean = false,
                           /**
@@ -28,8 +30,14 @@ class ContainerAddOptions(val storageDirUri: String,
     companion object {
 
         val DEFAULT_COMPRESSION_FILTER = object: CompressionFilter {
-            override fun shouldCompress(uri: String, mimeType: String?) : Boolean{
-                return mimeType?.startsWith("video/") != true
+            private val mediaExtensions = listOf(".mp4", ".mkv", ".webm", ".mov", ".avi", ".flv",
+                ".mp3", ".ogg", ".wav", ".au", ".3gp", ".m4a")
+
+            override fun shouldCompress(pathInContainer: String, mimeType: String?) : Boolean{
+                val isVideoExtension = pathInContainer.toLowerCase().let { pathLowerCase ->
+                    mediaExtensions.any { pathLowerCase.endsWith(it) }
+                }
+                return !isVideoExtension && mimeType?.startsWith("video/") != true
             }
         }
 

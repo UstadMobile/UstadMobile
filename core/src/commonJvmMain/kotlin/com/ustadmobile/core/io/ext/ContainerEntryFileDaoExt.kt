@@ -66,14 +66,15 @@ class ConcatenatedHttpResponse2(val containerEntryFiles: List<ContainerEntryFile
 
 }
 
-fun ContainerEntryFileDao.generateConcatenatedFilesResponse2(md5ListQueryParam: String,
+/**
+ * @param md5ListQueryParam The list of md5sums that should be concatenated together. These must be
+ * encoded in Base64 (e.g. as per ContainerEntryFile.cefMd5).
+ * @param requestHeaders Request headers from the http reqquest. Used for supporting partial responses etc.
+ * @param db the Database object
+ */
+fun ContainerEntryFileDao.generateConcatenatedFilesResponse2(md5List: List<String>,
                                                              requestHeaders: Map<String, List<String>> = mapOf(),
                                                              db: UmAppDatabase) : ConcatenatedHttpResponse2 {
-
-    //Convert from hex string to base64 string as used by the database
-    val md5List = md5ListQueryParam.split(";").map {
-        it.hexStringToByteArray().encodeBase64()
-    }
 
     val containerEntryFiles = findEntriesByMd5SumsSafe(md5List, db)
     val missingMd5s = mutableListOf<String>()

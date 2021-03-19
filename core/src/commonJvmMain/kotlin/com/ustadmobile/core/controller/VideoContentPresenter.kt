@@ -1,7 +1,5 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.VideoPlayerView
@@ -31,8 +29,6 @@ actual class VideoContentPresenter actual constructor(context: Any, arguments: M
                 }
                 container = containerResult
                 val result = containerEntryDao.findByContainerAsync(containerUid)
-                view.containerManager = ContainerManager(containerResult, db, repo)
-                val containerManager = view.containerManager
                 var defaultLangName = ""
                 for (entry in result) {
 

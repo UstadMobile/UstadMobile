@@ -1,7 +1,5 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.lib.db.entities.Container
@@ -11,11 +9,15 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParserException
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.door.ext.toDoorUri
+
 
 class XapiTypePluginCommonJvm : XapiPackageTypePlugin() {
 
@@ -75,9 +77,8 @@ class XapiTypePluginCommonJvm : XapiPackageTypePlugin() {
                 containerUid = repo.containerDao.insert(this)
             }
 
-            val containerManager = ContainerManager(container, db, repo, containerBaseDir)
-
-            addEntriesFromZipToContainer(file.absolutePath, containerManager, "")
+            repo.addEntriesToContainerFromZip(container.containerUid, File(filePath).toDoorUri(),
+                    ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri()))
 
             container
         }

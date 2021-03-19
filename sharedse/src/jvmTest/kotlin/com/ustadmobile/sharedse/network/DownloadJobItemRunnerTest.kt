@@ -7,7 +7,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
@@ -24,6 +23,7 @@ import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTED_LOCAL
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTING_LOCAL
@@ -124,8 +124,6 @@ class DownloadJobItemRunnerTest {
     private lateinit var container: Container
 
     private lateinit var containerWDuplicates: Container
-
-    private lateinit var containerManager: ContainerManager
 
     private val MAX_LATCH_WAITING_TIME = 15000L
 
@@ -318,8 +316,8 @@ class DownloadJobItemRunnerTest {
         container.containerUid = serverRepo.containerDao.insert(container)
         runBlocking {
             serverRepo.addEntriesToContainerFromZip(container.containerUid,
-                webServerTmpContentEntryFile.toKmpUriString(),
-                ContainerAddOptions(webServerTmpDir.toKmpUriString()))
+                webServerTmpContentEntryFile.toDoorUri(),
+                ContainerAddOptions(webServerTmpDir.toDoorUri()))
         }
 
         //add the container itself to the client database (would normally happen via sync/preload)

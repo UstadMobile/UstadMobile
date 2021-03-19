@@ -5,10 +5,8 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
-import com.ustadmobile.core.io.ConcatenatedDataIntegrityException
 import com.ustadmobile.core.io.ConcatenatedEntry
 import com.ustadmobile.core.io.ConcatenatedInputStream2
-import com.ustadmobile.core.io.RangeOutputStream
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.doorIdentityHashCode
 import kotlinx.coroutines.*
@@ -19,11 +17,10 @@ import java.net.URL
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
 import com.ustadmobile.core.io.ext.parseKmpUriStringToFile
-import com.ustadmobile.core.io.ext.toBytes
-import com.ustadmobile.door.ext.toHexString
-import com.ustadmobile.core.util.ext.encodeBase64
+import com.ustadmobile.core.io.ext.readAndSaveToDir
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
-import kotlin.coroutines.coroutineContext
+import com.ustadmobile.core.util.ext.distinctMd5sSortedAsJoinedQueryParam
+import com.ustadmobile.core.util.ext.distinctMds5sSorted
 
 class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest2,
                                             val listener: ContainerFetcherListener2?,
@@ -66,23 +63,22 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
 
         //We always download in md5sum (hex) alphabetical order, such that a partial download will
         //be resumed as expected.
-        val md5sToDownload = request.entriesToDownload.mapNotNull {
-            it.cefMd5?.base64EncodedToHexString()
-        }.toSet().toList().sorted()
+        val md5sToDownload = request.entriesToDownload.distinctMds5sSorted()
 
-        val md5ListString = md5sToDownload.joinToString(separator = ";")
         val md5ExpectedList = md5sToDownload.toMutableList()
-        val firstMd5 = md5sToDownload.first()
+        val firstMd5 = md5sToDownload.first().base64EncodedToHexString()
         val destDirFile = request.destDirUri.parseKmpUriStringToFile()
 
 
+        //TODO: Avoid duplicating this
         val firstFile = File(destDirFile, "$firstMd5$SUFFIX_PART")
         val firstFileHeader = File(destDirFile, "$firstMd5$SUFFIX_HEADER")
         val firstFilePartPresent = firstFile.exists() && firstFileHeader.exists()
 
         try {
             //check and see if the first file is already here
-            val inputUrl = "${request.mirrorUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/$md5ListString"
+            val inputUrl = "${request.mirrorUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/" +
+                    "${request.entriesToDownload.distinctMd5sSortedAsJoinedQueryParam()}"
             Napier.d("$logPrefix Download ${md5sToDownload.size} container files $inputUrl -> ${request.destDirUri}")
             val localConnectionOpener : LocalURLConnectionOpener? = di.direct.instanceOrNull()
             val url = URL(inputUrl)
@@ -109,78 +105,12 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
                 urlConnection.inputStream
             })
 
-            lateinit var concatenatedEntry: ConcatenatedEntry
-            val buf = ByteArray(8192)
-            var bytesRead = 0
-
-            var totalBytesRead = 0L
-
-            var bytesToSkipWriting = firstFile.length() + firstFileHeader.length()
+            val bytesToSkipWriting = firstFile.length() + firstFileHeader.length()
             totalDownloadSize.set((firstFile.length() + firstFileHeader.length()) + urlConnection.requireContentLength())
-            while(inStream.getNextEntry()?.also { concatenatedEntry = it } != null) {
-                val entryMd5 = concatenatedEntry.md5.toHexString()
-                val nextMd5Expected = md5ExpectedList.removeAt(0)
-                if(entryMd5 != nextMd5Expected)
-                    throw IOException("Server gave us the wrong md5: wanted: $nextMd5Expected / actually got $entryMd5")
 
-
-                val destFile = File(destDirFile, entryMd5 + SUFFIX_PART)
-                val headerFile = File(destDirFile, entryMd5 + SUFFIX_HEADER)
-                headerFile.writeBytes(concatenatedEntry.toBytes())
-
-                val destFileOut = if(bytesToSkipWriting > 0) {
-                    //Because we will read through the partially downloaded file, we must use
-                    //RangeOutputStream to avoid those initial bytes being appended (again) to the
-                    //file
-                    RangeOutputStream(FileOutputStream(destFile, true), firstFile.length(), -1L)
-                }else {
-                    FileOutputStream(destFile)
-                }
-
-                bytesToSkipWriting = 0
-
-                try {
-                    while(coroutineContext.isActive && inStream.read(buf).also { bytesRead = it } != -1) {
-                        destFileOut.write(buf, 0, bytesRead)
-                        totalBytesRead += bytesRead
-                        bytesSoFar.set(totalBytesRead)
-                    }
-                    destFileOut.flush()
-                }catch(die: ConcatenatedDataIntegrityException) {
-                    Napier.e("${logPrefix }Data Integrity Exception", die)
-                    destFileOut.close()
-
-                    if(!destFile.delete()) {
-                        Napier.wtf("$logPrefix - could not delete corrupt partial file " +
-                                destFile.absolutePath)
-                    }
-
-                    throw die
-                }finally {
-                    destFileOut.close()
-                }
-
-                inStream.verifyCurrentEntryCompleted()
-
-                val finalDestFile = File(destDirFile, concatenatedEntry.md5.toHexString())
-                if(!destFile.renameTo(finalDestFile))
-                    throw IOException("Could not rename ${destFileOut} to ${finalDestFile}")
-                headerFile.delete()
-
-                val containerEntryFile = concatenatedEntry.toContainerEntryFile().apply {
-                    cefPath = finalDestFile.absolutePath
-                    cefUid = db.containerEntryFileDao.insertAsync(this)
-                }
-
-                val md5Base64 = concatenatedEntry.md5.encodeBase64()
-                val entryFiles = request.entriesToDownload.filter { it.cefMd5 == md5Base64 }
-                entryFiles.forEach {
-                    it.ceUid = 0L
-                    it.ceCefUid = containerEntryFile.cefUid
-                }
-                db.containerEntryDao.insertListAsync(entryFiles)
-            }
-
+            val readAndSaveResult = inStream.readAndSaveToDir(destDirFile, destDirFile, db,
+                    bytesSoFar, request.entriesToDownload, md5ExpectedList, logPrefix)
+            val totalBytesRead= readAndSaveResult.totalBytesRead
             val payloadExpected = (totalDownloadSize.get() - (md5sToDownload.size * ConcatenatedEntry.SIZE))
 
             downloadStatus = if(totalBytesRead == payloadExpected) {
@@ -188,7 +118,7 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
             }else {
                 JobStatus.PAUSED
             }
-            Napier.d("$logPrefix done downloaded ${bytesSoFar.get() - bytesToSkipWriting} bytes" +
+            Napier.d("$logPrefix done downloaded ${bytesSoFar.get() - bytesToSkipWriting}/expected ${payloadExpected} bytes" +
                     " in ${System.currentTimeMillis() - startTime}ms")
         }catch(e: Exception) {
             Napier.e("$logPrefix exception downloading", e)

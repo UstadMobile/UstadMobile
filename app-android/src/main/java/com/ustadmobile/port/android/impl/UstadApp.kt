@@ -45,12 +45,11 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.io.ext.siteDataSubDir
@@ -156,7 +155,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ContentEntryOpener(di, context)
         }
 
-        bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
+        bind<ContainerUploadManager>() with scoped(EndpointScope.Default).singleton {
+            ContainerUploadManagerCommonJvm(di, context)
+        }
 
         bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
             ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),

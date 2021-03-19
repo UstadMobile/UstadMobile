@@ -11,6 +11,7 @@ import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
@@ -111,7 +112,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         }
 
 
-        bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+        bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
             val containerDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT), "container")
 
             //Move any old container directory to the new path (e.g. pre database v57)
@@ -172,6 +173,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     Any(), context, di)
         }
 
+        bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
+            UploadSessionManager(context, di)
+        }
+
         registerContextTranslator { call: ApplicationCall ->
             if(dbMode == CONF_DBMODE_SINGLETON) {
                 Endpoint("localhost")
@@ -183,7 +188,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         onReady {
             if(dbMode == CONF_DBMODE_SINGLETON) {
                 //Get the container dir so that any old directories (build/storage etc) are moved if required
-                di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_CONTAINER_DIR)
+                di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
             }
         }
     }
@@ -192,8 +197,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ContainerDownload()
         PersonAuthRegisterRoute()
         ContainerMountRoute()
-        ResumableUploadRoute()
-        ContainerUpload()
+        ContainerUploadRoute2()
         UmAppDatabase_KtorRoute(true)
         SiteRoute()
         ContentEntryLinkImporter()
