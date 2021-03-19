@@ -115,11 +115,14 @@ class LeavingReasonEditFragmentTest : TestCase(){
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
                 runBlocking {
-                    val reasonFromDb = dbRule.db.leavingReasonDao.findByUidAsync(
-                            existingLeavingReason.leavingReasonUid)
-                    Assert.assertEquals("title change matches",
-                            existingLeavingReason.leavingReasonTitle,
-                            reasonFromDb!!.leavingReasonTitle)
+                        val reasonFromDb = dbRule.db.leavingReasonDao.findByUidLive(
+                                existingLeavingReason.leavingReasonUid)
+                                .waitUntilWithFragmentScenario(fragmentScenario){
+                                    it?.leavingReasonTitle == "Leaving Reason Changed"
+                                }
+                        Assert.assertEquals("title change matches",
+                                "Leaving Reason Changed",
+                                reasonFromDb!!.leavingReasonTitle)
                 }
 
             }
