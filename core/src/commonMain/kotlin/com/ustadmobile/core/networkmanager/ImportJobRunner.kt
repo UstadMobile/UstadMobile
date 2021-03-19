@@ -123,8 +123,7 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
                     containerEntries.map { it.toContainerEntryWithMd5() }, endpointUrl)
                 uploadAttemptStatus = containerUploader.enqueue(containerUploaderRequest2).await()
             } catch (e: Exception) {
-                e.printStackTrace()
-                println("${e.cause?.message}")
+                Napier.e("ImportJobRunner: ${containerImportJob.cijUid} - exception", e)
 
                 val status = connectivityStatus.getValue()
                 val connectivityState = status?.connectivityState
