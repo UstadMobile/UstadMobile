@@ -11,6 +11,7 @@ import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
+import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
@@ -172,6 +173,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                     Any(), context, di)
         }
 
+        bind<UploadSessionManager>() with scoped(EndpointScope.Default).singleton {
+            UploadSessionManager(context, di)
+        }
+
         registerContextTranslator { call: ApplicationCall ->
             if(dbMode == CONF_DBMODE_SINGLETON) {
                 Endpoint("localhost")
@@ -192,7 +197,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ContainerDownload()
         PersonAuthRegisterRoute()
         ContainerMountRoute()
-        ResumableUploadRoute()
         ContainerUploadRoute2()
         UmAppDatabase_KtorRoute(true)
         SiteRoute()
