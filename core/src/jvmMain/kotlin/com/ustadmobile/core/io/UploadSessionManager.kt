@@ -36,8 +36,11 @@ class UploadSessionManager(val site: Endpoint, override val di: DI,
     fun initSession(sessionUuid: UUID, containerEntryPaths: List<ContainerEntryWithMd5>) : UploadSession {
 
         return lock.withLock {
-            if(activeSessions.containsKey(sessionUuid))
-                throw IllegalStateException("Cannot init session. It is currently active. Close it first")
+            val currentUploadSession = activeSessions.get(sessionUuid)
+            if(currentUploadSession != null){
+                currentUploadSession.close()
+                activeSessions.remove(sessionUuid)
+            }
 
             uploadSessionFactory(sessionUuid, containerEntryPaths, site, di).also {
                 activeSessions[sessionUuid] = it

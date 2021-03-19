@@ -13,19 +13,24 @@ import java.util.*
 
 class UploadSessionManagerTest {
 
-    lateinit var mockUploadSession: UploadSession
+    lateinit var mockUploadSessions: MutableList<UploadSession>
 
     lateinit var mockUploadSessionFactory: UploadSessionFactory
 
     @Before
     fun setup() {
-        mockUploadSession = mock {
-            on { startFromByte }.thenReturn(42L)
-        }
+        mockUploadSessions = mutableListOf()
+
 
         mockUploadSessionFactory = { sessionUuid: UUID, containerEntryPaths: List<ContainerEntryWithMd5>,
                                      site: Endpoint, di: DI ->
-            mockUploadSession
+            val session: UploadSession = mock {
+                on { startFromByte }.thenReturn(42L)
+            }
+
+            mockUploadSessions.add(session)
+
+            session
         }
     }
 
@@ -46,13 +51,13 @@ class UploadSessionManagerTest {
         sessionManager.onReceiveSessionChunk(sessionUuid, ByteArrayInputStream(ByteArray(200)))
         sessionManager.closeSession(sessionUuid)
 
-        verify(mockUploadSession).onReceiveChunk(any())
-        verify(mockUploadSession).close()
+        verify(mockUploadSessions[0]).onReceiveChunk(any())
+        verify(mockUploadSessions[0]).close()
     }
 
 
-    @Test(expected = IllegalStateException::class)
-    fun givenSessionAlreadyInitialized_whenCreateSessionCalledAgain_thenShouldThrowException() {
+    @Test
+    fun givenSessionAlreadyInitialized_whenCreateSessionCalledAgain_thenShouldCloseOldSession() {
         val di = DI {
 
         }
@@ -66,6 +71,8 @@ class UploadSessionManagerTest {
         val sessionUuid = UUID.randomUUID()
         sessionManager.initSession(sessionUuid, containerEntries)
         sessionManager.initSession(sessionUuid, containerEntries)
+
+        verify(mockUploadSessions[0]).close()
     }
 
 
