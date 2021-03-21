@@ -28,3 +28,7 @@ fun InputStream.readFully(buf: ByteArray, offset: Int = 0, len: Int = buf.size):
 
     return totalBytesRead
 }
+
+fun InputStream.readString(): String{
+    return this.bufferedReader().use { it.readText() }
+}

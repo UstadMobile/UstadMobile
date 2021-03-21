@@ -1,6 +1,5 @@
 package com.ustadmobile.port.sharedse.util
 
-import com.ustadmobile.core.util.UMIOUtils
 
 import java.io.*
 import java.util.zip.ZipEntry
@@ -10,11 +9,9 @@ object UmZipUtils {
 
     @Throws(IOException::class)
     fun unzip(zipFile: File, destDir: File) {
-        var entryOut: OutputStream? = null
-        try {
-            ZipInputStream(FileInputStream(zipFile)).use { zipIn ->
-                var zipEntry: ZipEntry?
-                while (zipIn.nextEntry.also { zipEntry = it } != null) {
+        ZipInputStream(FileInputStream(zipFile)).use { zipIn ->
+            var zipEntry: ZipEntry?
+            while (zipIn.nextEntry.also { zipEntry = it } != null) {
 
                 val fileName = zipEntry!!.name
                 val fileToCreate = File(destDir, fileName)
@@ -26,16 +23,12 @@ object UmZipUtils {
                     }
                 }
                 if (!zipEntry!!.isDirectory) {
-                    entryOut = FileOutputStream(fileToCreate)
-                    UMIOUtils.readFully(zipIn, entryOut!!)
-                    entryOut!!.close()
+                    FileOutputStream(fileToCreate).use {
+                        zipIn.copyTo(it)
+                    }
                 }
             }
-            }
-        } finally {
-            UMIOUtils.closeOutputStream(entryOut)
         }
-
     }
 
 }

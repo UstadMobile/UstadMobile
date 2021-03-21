@@ -45,7 +45,6 @@ import java.net.URLDecoder
 import java.nio.file.Files
 import kotlin.system.exitProcess
 
-@ExperimentalStdlibApi
 class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpoint, override val di: DI) : DIAware {
 
     private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)

@@ -1,7 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.abztract
 
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.waitForJSandJQueryToLoad
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -19,7 +18,7 @@ import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.remote.CapabilityType
 import org.openqa.selenium.support.ui.WebDriverWait
 
-@ExperimentalStdlibApi
+
 abstract class HarIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntry, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     protected var chromeDriver: ChromeDriver
@@ -89,7 +88,7 @@ abstract class HarIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, co
             if (fileEntry.response.content.text.isNullOrEmpty()) {
                 setIndexerDone(false, ERROR_TYPE_CONTENT_NOT_FOUND)
                 close()
-                throw ScraperException(Scraper.ERROR_TYPE_CONTENT_NOT_FOUND, "file didnt load for ${fileEntry.request.url} for source url $sourceUrl")
+                throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "file didnt load for ${fileEntry.request.url} for source url $sourceUrl")
             }
 
             fileList.add(fileEntry)

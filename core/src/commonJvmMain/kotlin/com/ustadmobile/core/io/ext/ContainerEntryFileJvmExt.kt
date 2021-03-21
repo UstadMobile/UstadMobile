@@ -1,7 +1,6 @@
 package com.ustadmobile.core.io.ext
 
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
-import com.ustadmobile.core.util.UMIOUtils
 import java.io.*
 import java.util.zip.GZIPInputStream
 

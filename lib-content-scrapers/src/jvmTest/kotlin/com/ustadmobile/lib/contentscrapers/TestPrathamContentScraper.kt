@@ -41,7 +41,7 @@ import java.net.URL
 import java.nio.file.Files
 import javax.naming.InitialContext
 
-@ExperimentalStdlibApi
+
 class TestPrathamContentScraper {
 
 

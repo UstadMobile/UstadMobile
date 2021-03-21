@@ -50,7 +50,7 @@ import java.util.*
  * Check if the file was downloaded before with etag or last modified
  * Create the content entry
  */
-@ExperimentalStdlibApi
+
 class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : HarScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     private val licenseList = listOf(
@@ -285,10 +285,11 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
             return
         }
 
-        /*
-        val containerManager = scraperResult.containerManager
+        val containerUid = scraperResult.containerUid
 
-        if (containerManager?.allEntries?.isEmpty() != false) {
+        val entries = db.containerEntryDao.findByContainer(containerUid)
+
+        if(entries.isEmpty()){
             hideContentEntry()
             setScrapeDone(false, ERROR_TYPE_CONTENT_NOT_FOUND)
             UMLogUtil.logError("$DDL Debug - Did not find any content to download at url $sourceUrl")
@@ -296,22 +297,18 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
             throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "Container Manager did not have the file")
         }
 
-
         runBlocking {
 
-            val entry = containerManager.allEntries[0]
+            val entry = entries[0]
             val mimeType = Files.probeContentType(File(entry.cePath ?: "").toPath())
-            val container = db.containerDao.findByUid(containerManager.containerUid)
             repo.contentEntryDao.updateContentEntryInActive(contentEntryUid, false)
-            repo.containerDao.updateMimeType(mimeType, container?.containerUid ?: 0)
+            repo.containerDao.updateMimeType(mimeType, containerUid)
             if (!eTagValue.isNullOrEmpty()) {
-                val etagContainer = ContainerETag(container?.containerUid ?: 0, eTagValue!!)
+                val etagContainer = ContainerETag(containerUid, eTagValue!!)
                 db.containerETagDao.insert(etagContainer)
             }
 
         }
-        */
-
 
         showContentEntry()
         setScrapeDone(true, 0)

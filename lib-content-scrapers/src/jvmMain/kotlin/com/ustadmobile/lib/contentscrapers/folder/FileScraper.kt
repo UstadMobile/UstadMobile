@@ -15,7 +15,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 
-@ExperimentalStdlibApi
+
 class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     private val contentImportManager: ContentImportManager by di.on(endpoint).instance()

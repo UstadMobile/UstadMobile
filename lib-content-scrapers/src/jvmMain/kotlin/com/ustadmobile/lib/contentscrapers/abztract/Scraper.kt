@@ -23,7 +23,6 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
 
-@ExperimentalStdlibApi
 abstract class Scraper(var contentEntryUid: Long, val sqiUid: Int, var parentContentEntryUid: Long, endpoint: Endpoint, di: DI) {
 
     val db: UmAppDatabase by di.on(endpoint).instance(tag = UmAppDatabase.TAG_DB)

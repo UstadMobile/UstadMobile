@@ -1,18 +1,15 @@
 package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.openInputStream
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.getFileNameFromUrl
-import kotlinx.coroutines.runBlocking
 import org.apache.commons.cli.*
-import org.apache.commons.compress.compressors.FileNameUtil
 import org.apache.commons.io.FileUtils
-import org.apache.commons.io.FilenameUtils
-import org.apache.commons.io.IOUtils
 import java.io.File
 import java.net.URL
 import kotlin.system.exitProcess
 
-@ExperimentalStdlibApi
+
 class ExportData(private val containerUid: Long, val path: String) {
 
     var db: UmAppDatabase = UmAppDatabase.getInstance(Any())
@@ -22,15 +19,14 @@ class ExportData(private val containerUid: Long, val path: String) {
         destDir.mkdirs()
         val container = db.containerDao.findByUid(containerUid) ?: exitProcess(1)
 
-        /*
-        val manager = ContainerManager(container, db, db)
+        val list = db.containerEntryDao.findByContainer(containerUid)
 
-        manager.allEntries.forEach{
+        list.forEach{
 
             try {
 
-                val entry = manager.getEntry(it.cePath!!)
-                val input = manager.getInputStream(entry!!)
+                val entry =  db.containerEntryDao.findByPathInContainer(containerUid, it.cePath!!)
+                val input = entry!!.containerEntryFile!!.openInputStream()
                 val file = File(destDir, getFileNameFromUrl(URL(entry.cePath)))
                 FileUtils.copyInputStreamToFile(input, file)
             }catch(e: Exception) {
@@ -38,7 +34,6 @@ class ExportData(private val containerUid: Long, val path: String) {
             }
 
         }
-         */
 
     }
 

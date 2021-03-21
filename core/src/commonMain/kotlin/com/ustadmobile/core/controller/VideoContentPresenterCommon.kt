@@ -1,15 +1,12 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.xapi.*
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis

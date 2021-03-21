@@ -9,7 +9,7 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.kodein.di.DI
 
-@ExperimentalStdlibApi
+
 class DdlFrontPageIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntryUid, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     var langCount = 0

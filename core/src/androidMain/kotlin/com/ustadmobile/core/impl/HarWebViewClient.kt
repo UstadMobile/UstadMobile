@@ -70,7 +70,7 @@ fun HarResponse.getInputStreamFromContent(): InputStream? {
 }
 
 
-@ExperimentalStdlibApi
+
 class HarWebViewClient(private val harContainer: HarContainer) : WebViewClient() {
 
     var recorder: PayloadRecorder? = null

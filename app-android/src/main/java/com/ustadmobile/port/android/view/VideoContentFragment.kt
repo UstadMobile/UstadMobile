@@ -51,7 +51,7 @@ interface VideoContentFragmentEventHandler {
 
 }
 
-@ExperimentalStdlibApi
+
 class VideoContentFragment : UstadBaseFragment(), VideoPlayerView, VideoContentFragmentEventHandler {
 
     private var mBinding: FragmentVideoContentBinding? = null

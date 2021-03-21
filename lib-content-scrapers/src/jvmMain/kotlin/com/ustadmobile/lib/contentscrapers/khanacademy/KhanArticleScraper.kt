@@ -2,8 +2,12 @@ package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.har.HarExtra
 import com.ustadmobile.core.contentformats.har.HarRegexPair
+import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_CSS
@@ -25,9 +29,10 @@ import org.kodein.di.DI
 import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
+import java.io.File
 import java.net.URL
 
-@ExperimentalStdlibApi
+
 class KhanArticleScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid : Long, endpoint: Endpoint, di: DI) : HarScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
 
@@ -169,7 +174,14 @@ class KhanArticleScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
         harExtra.links = linksList
 
         runBlocking {
-            //scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))
+
+            val harExtraFile = File.createTempFile("harextras", "json")
+            val contentInputStream = gson.toJson(harExtra).byteInputStream()
+            contentInputStream.writeToFile(harExtraFile)
+            val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
+            repo.addFileToContainer(scraperResult.containerUid, harExtraFile.toDoorUri(),
+                    harExtraFile.name, containerAddOptions)
+            harExtraFile.delete()
         }
 
         setScrapeDone(true, 0)

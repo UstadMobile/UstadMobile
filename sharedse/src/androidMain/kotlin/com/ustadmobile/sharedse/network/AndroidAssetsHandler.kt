@@ -5,7 +5,6 @@ import android.content.Context
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMIOUtils
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import java.io.ByteArrayInputStream
@@ -27,7 +26,7 @@ class AndroidAssetsHandler : RouterNanoHTTPD.UriResponder {
             val bout = ByteArrayOutputStream()
             assetIn = context.assets.open(UMFileUtil.joinPaths("http", assetPath))
 
-            UMIOUtils.readFully(assetIn!!, bout, 1024)
+            assetIn.copyTo(bout)
             val assetBytes = bout.toByteArray()
             val extension = UMFileUtil.getExtension(assetPath)
 
