@@ -142,7 +142,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
                 NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.CONFLICT, "application/octet", null)
             } else NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/octet", e.message)
         } finally {
-            UMIOUtils.closeInputStream(`is`)
+            `is`?.close()
         }
 
     }
