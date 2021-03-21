@@ -3,7 +3,6 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.UMIOUtils
@@ -36,7 +35,7 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
         gson = GsonBuilder().disableHtmlEscaping().create()
     }
 
-    protected fun scrapeYoutubeVideo(sourceUrl: String, videoQualityOption: String = "worst[ext=webm]/worst"): ContainerManager? {
+    protected fun scrapeYoutubeVideo(sourceUrl: String, videoQualityOption: String = "worst[ext=webm]/worst"): Any? /*ContainerManager?*/ {
 
         UMLogUtil.logTrace("starting youtube scrape for $sourceUrl")
 
@@ -120,6 +119,7 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
             }
         }
 
+        /*
         val containerManager = ContainerManager(createBaseContainer(mimetype), db, db, containerFolder.absolutePath)
         runBlocking {
             containerManager.addEntries(ContainerManager.FileEntrySource(videoFile, videoFile.name))
@@ -128,8 +128,9 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
         showContentEntry()
         setScrapeDone(true, 0)
         close()
+         */
 
-        return containerManager
+        return null
 
     }
 

@@ -4,7 +4,6 @@ import com.google.common.reflect.TypeToken
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
@@ -174,6 +173,7 @@ class KhanVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid
                 }
 
                 val container = createBaseContainer(mimetype)
+                /*
                 val containerManager = ContainerManager(container, db, db, containerFolder.absolutePath)
                 runBlocking {
 
@@ -184,6 +184,7 @@ class KhanVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid
                     }
 
                 }
+                 */
                 if (!eTag.isNullOrEmpty()) {
                     val etagContainer = ContainerETag(container.containerUid, eTag)
                     db.containerETagDao.insert(etagContainer)

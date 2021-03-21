@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.har.HarContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID

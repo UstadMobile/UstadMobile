@@ -30,7 +30,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.LanguageVariant
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_PASS
 
@@ -913,6 +912,8 @@ object ContentScraperUtil {
         } else {
             fileMap[tmpDir] = tmpDir.name
         }
+        /*
+        ContainerManager usage: to be replaced
         val manager = ContainerManager(container, db,
                 repository, containerDir.absolutePath)
         runBlocking {
@@ -921,6 +922,7 @@ object ContentScraperUtil {
             }
         }
 
+         */
         return container
     }
 

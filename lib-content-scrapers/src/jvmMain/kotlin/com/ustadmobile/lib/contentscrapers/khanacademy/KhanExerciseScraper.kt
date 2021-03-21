@@ -6,7 +6,6 @@ import com.ustadmobile.core.contentformats.har.HarExtra
 import com.ustadmobile.core.contentformats.har.HarInterceptor.Companion.KHAN_PROBLEM
 import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.contentformats.har.Interceptors
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_HAR
@@ -18,7 +17,6 @@ import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.exerciseMid
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.exercisePostUrl
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.regexUrlPrefix
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.secondExerciseUrl
-import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import kotlinx.coroutines.runBlocking
@@ -38,7 +36,6 @@ import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.remote.CapabilityType
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
-import java.io.File
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
@@ -539,7 +536,7 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
         harExtra.interceptors = listOf(Interceptors(KHAN_PROBLEM, ""))
 
         runBlocking {
-            scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))
+            //scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))
         }
 
         showContentEntry()

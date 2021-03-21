@@ -3,20 +3,15 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.har.HarRegexPair
-import com.ustadmobile.core.db.UmAppDatabase
 //import com.ustadmobile.core.io.ext.addHarEntryToContainer
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JS
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
-import com.ustadmobile.lib.contentscrapers.util.HarEntrySource
-import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContainerEntry
 import io.github.bonigarcia.wdm.WebDriverManager
-import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
 import net.lightbody.bmp.core.har.HarEntry
@@ -32,7 +27,6 @@ import org.openqa.selenium.chrome.ChromeOptions
 import org.openqa.selenium.remote.CapabilityType
 import org.openqa.selenium.support.ui.ExpectedCondition
 import org.openqa.selenium.support.ui.WebDriverWait
-import java.io.File
 import java.io.StringWriter
 import java.net.URL
 import java.util.concurrent.TimeUnit
@@ -54,7 +48,7 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 
     private val offlineReplacement = "window.addEventListener(\\\"offlineDisabled\\\""
 
-    data class HarScraperResult(val updated: Boolean, val containerManager: ContainerManager?)
+    data class HarScraperResult(val updated: Boolean, val containerManager: Any? /*ContainerManager?*/)
 
 
     init {
@@ -131,9 +125,9 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
     }
 
 
-    private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>, regexes: List<HarRegexPair>, addHarContent: Boolean): ContainerManager {
+    private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>, regexes: List<HarRegexPair>, addHarContent: Boolean): Any/*ContainerManager*/ {
 
-        val containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerFolder.absolutePath)
+        //val containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerFolder.absolutePath)
         val container = createBaseContainer(ScraperConstants.MIMETYPE_HAR)
         val containerEntries = mutableListOf<ContainerEntry>()
 
@@ -169,6 +163,8 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                     return@forEachIndexed
                 }
 
+                /*
+                TODO: replace this usage of containermanager
                 runBlocking {
                     if(containerManager.getEntry(containerPath) != null) {
                         containerPath += counter
@@ -180,6 +176,7 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 //                    db.addHarEntryToContainer(container.containerUid, it)
                     containerManager.addEntries(HarEntrySource(it, listOf(containerPath)))
                 }
+                 */
 
                 it.response.content.text = containerPath
                 it.request.url = regexedString
@@ -194,13 +191,16 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
         val writer = StringWriter()
         proxy.har.writeTo(writer)
 
+        /*
         if (addHarContent) {
             runBlocking {
                 containerManager.addEntries(StringEntrySource(writer.toString(), listOf("harcontent")))
             }
         }
+        */
 
-        return containerManager
+        return Any()
+        //return containerManager
     }
 
     fun addHarEntry(content: String, size: Int = content.length, encoding: String = UTF_ENCODING, mimeType: String, requestUrl: String, requestMethod: String = "GET"): HarEntry {
