@@ -10,26 +10,24 @@ import java.io.PipedInputStream
 import java.io.PipedOutputStream
 import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
 import com.ustadmobile.core.util.ext.hexStringToBase64Encoded
-import junit.framework.AssertionFailedError
 import org.junit.Assert
+import java.io.ByteArrayOutputStream
 import java.io.File
 
 fun UmAppDatabase.mockResponseForConcatenatedFiles2Request(request: RecordedRequest) : MockResponse{
 
-    val md5s = request?.requestUrl?.toString()?.substringAfterLast("/")
-    if(md5s == null) {
-        TODO("Return bad request here")
-    }
+    val headers = request.headers?.toMultimap() ?: mapOf()
+    val bout = ByteArrayOutputStream()
+    request.body.writeTo(bout)
+    bout.flush()
+    val md5s = String(bout.toByteArray())
 
-    val headers = request?.headers?.toMultimap()
-    val range = headers?.get("range")
-    println(range)
     val md5List = md5s.split(";").map {
         it.hexStringToBase64Encoded()
     }
 
     val concatResponse = containerEntryFileDao.generateConcatenatedFilesResponse2(md5List,
-            headers!!, this)
+            headers, this)
 
     val pipeOut = PipedOutputStream()
     val pipeIn = PipedInputStream(pipeOut)

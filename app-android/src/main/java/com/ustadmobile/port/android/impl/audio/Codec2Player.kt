@@ -55,7 +55,7 @@ class Codec2Player(private val inStream: InputStream, private val pos: Long) : R
         } finally {
             track?.release()
             codec2?.destroy()
-            inStream.close()
+            inStream?.close()
         }
 
     }
