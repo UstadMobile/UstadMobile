@@ -22,7 +22,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.js.JsName
 
-@ExperimentalStdlibApi
+
 abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, String>, view: HarView,
                                          val localHttp: String, di: DI) :
         UstadBaseController<HarView>(context, arguments, view, di) {

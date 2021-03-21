@@ -28,7 +28,6 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.nio.file.Files
 
-@ExperimentalStdlibApi
 class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     private var tempDir: File? = null

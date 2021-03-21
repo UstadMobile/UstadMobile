@@ -56,7 +56,7 @@ import java.net.URL
  * until the component type found is ImportedComponent. Once it is found, EdraakK12ContentScraper
  * will decide if its a quiz or course and scrap its content
  */
-@ExperimentalStdlibApi
+
 class IndexEdraakK12Content {
 
     private var url: URL? = null

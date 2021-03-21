@@ -3,6 +3,7 @@ package com.ustadmobile.lib.contentscrapers
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.toContentString
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.LANGUAGE_LIST_LOCATION
 import com.ustadmobile.lib.db.entities.Language
@@ -17,15 +18,15 @@ import java.util.*
  * The data is in .tab format that can be converted to JSON format( i converted to CSV first to modify fields)
  *
  */
-@ExperimentalStdlibApi
 class LanguageList {
 
     @Throws(IOException::class)
     fun addAllLanguages() {
 
         val gson = GsonBuilder().disableHtmlEscaping().create()
-        val langList = gson.fromJson<ArrayList<Language>>(UMIOUtils.readStreamToString(
-                javaClass.getResourceAsStream(LANGUAGE_LIST_LOCATION)), object : TypeToken<List<Language>>() {
+        val langList = gson.fromJson<ArrayList<Language>>(javaClass
+                .getResourceAsStream(LANGUAGE_LIST_LOCATION).toContentString(),
+                object : TypeToken<List<Language>>() {
 
         }.type)
 

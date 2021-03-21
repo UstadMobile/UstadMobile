@@ -22,7 +22,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
-@ExperimentalStdlibApi
+
 class HarContentFragment : UstadBaseFragment(), HarAndroidView, FragmentBackHandler {
 
     private val clientDeferred = CompletableDeferred<HarWebViewClient>()

@@ -16,6 +16,7 @@ import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.io.ext.toContentString
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
@@ -163,7 +164,7 @@ class TestXapiStateResponder {
         Assert.assertEquals("http://www.example.com/activities/1", stateEntity!!.activityId)
     }
 
-    @ExperimentalStdlibApi
+
     @Test
     @Throws(IOException::class)
     fun testAll() {
@@ -199,7 +200,7 @@ class TestXapiStateResponder {
         val getResponse = responder.get(mockUriResource,
                 mutableMapOf(XapiStatementResponder.URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl), mockSession)
 
-        val json = UMIOUtils.readStreamToString(getResponse.data)
+        val json = getResponse.data.toContentString()
         val contentMap = Gson().fromJson<HashMap<String, String>>(json, contentMapToken)
         Assert.assertEquals("Content matches", "Parthenon", contentMap["name"])
 

@@ -3,6 +3,7 @@ package com.ustadmobile.lib.staging.contentscrapers.edraakK12
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
+import com.ustadmobile.core.io.ext.toContentString
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -53,7 +54,7 @@ import javax.xml.transform.TransformerException
  *
  * The Test component type is the same as Exercise component type
  */
-@ExperimentalStdlibApi
+
 class EdraakK12ContentScraper : Runnable {
 
     private lateinit var containerDirectory: File
@@ -207,7 +208,7 @@ class EdraakK12ContentScraper : Runnable {
         }
 
         try {
-            val index = UMIOUtils.readStreamToString(javaClass.getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG))
+            val index = javaClass.getResourceAsStream(ScraperConstants.EDRAAK_INDEX_HTML_TAG).toContentString()
             val doc = Jsoup.parse(index, UTF_ENCODING)
             doc.head().selectFirst("title").text(response.title!!)
             FileUtils.writeStringToFile(File(destinationDirectory, INDEX_HTML), doc.toString(), UTF_ENCODING)

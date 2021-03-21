@@ -3,6 +3,7 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.io.ext.toContentString
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
@@ -19,7 +20,6 @@ import kotlin.random.Random
 import kotlin.system.exitProcess
 
 
-@ExperimentalStdlibApi
 open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntry, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     private val ytPath: String
@@ -53,10 +53,10 @@ open class YoutubePlaylistIndexer(parentContentEntry: Long, runUid: Int, sqiUid:
                     Thread.sleep(Random.nextLong(10000, 30000))
                     process = builder.start()
                     process!!.waitFor()
-                    data = UMIOUtils.readStreamToString(process.inputStream)
+                    data = process.inputStream.toContentString()
                     val exitValue = process.exitValue()
                     if (exitValue != 0) {
-                        val error = UMIOUtils.readStreamToString(process.errorStream)
+                        val error = process.errorStream.toContentString()
                         UMLogUtil.logError("Error Stream for src $sourceUrl with error code  $error")
                         if (!error.contains("429")) {
                             throw ScraperException(Scraper.ERROR_TYPE_UNKNOWN_YOUTUBE, "unknown error: $error")

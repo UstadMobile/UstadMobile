@@ -16,7 +16,7 @@ import java.io.File
 import java.lang.Exception
 import java.nio.file.Files
 
-@ExperimentalStdlibApi
+
 class FolderIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntryUid, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
 

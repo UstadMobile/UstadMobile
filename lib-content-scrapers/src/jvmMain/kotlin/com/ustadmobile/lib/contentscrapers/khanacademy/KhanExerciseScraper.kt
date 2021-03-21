@@ -2,10 +2,14 @@ package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.har.HarExtra
 import com.ustadmobile.core.contentformats.har.HarInterceptor.Companion.KHAN_PROBLEM
 import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.contentformats.har.Interceptors
+import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_HAR
@@ -36,13 +40,14 @@ import org.openqa.selenium.interactions.Actions
 import org.openqa.selenium.remote.CapabilityType
 import org.openqa.selenium.support.ui.ExpectedConditions
 import org.openqa.selenium.support.ui.WebDriverWait
+import java.io.File
 import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
 import java.util.regex.Pattern
 
-@ExperimentalStdlibApi
+
 class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : HarScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     override fun scrapeUrl(sourceUrl: String) {
@@ -536,7 +541,14 @@ class KhanExerciseScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
         harExtra.interceptors = listOf(Interceptors(KHAN_PROBLEM, ""))
 
         runBlocking {
-            //scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))
+
+            val harExtraFile = File.createTempFile("harextras", "json")
+            val contentInputStream = gson.toJson(harExtra).byteInputStream()
+            contentInputStream.writeToFile(harExtraFile)
+            val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
+            repo.addFileToContainer(scraperResult.containerUid, harExtraFile.toDoorUri(),
+                    harExtraFile.name, containerAddOptions)
+            harExtraFile.delete()
         }
 
         showContentEntry()

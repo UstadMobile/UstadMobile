@@ -5,6 +5,7 @@ import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.io.ext.toContentString
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
 import com.ustadmobile.port.sharedse.util.UmZipUtils
@@ -38,7 +39,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import org.kmp.io.KMPPullParserException
 import java.util.function.Consumer
 
-@ExperimentalStdlibApi
+
 class TestShrinkerUtils {
 
 
@@ -281,12 +282,12 @@ class TestShrinkerUtils {
         val zipFile = ZipFile(epub)
         val entry = zipFile.getEntry("META-INF/container.xml")
         val `is` = zipFile.getInputStream(entry)
-        val document = Jsoup.parse(UMIOUtils.readStreamToString(`is`), "", Parser.xmlParser())
+        val document = Jsoup.parse(`is`.toContentString(), "", Parser.xmlParser())
         val path = document.selectFirst("rootfile").attr("full-path")
 
         val opfEntry = zipFile.getEntry(path)
         val opfis = zipFile.getInputStream(opfEntry)
-        val opfdoc = Jsoup.parse(UMIOUtils.readStreamToString(opfis), "", Parser.xmlParser())
+        val opfdoc = Jsoup.parse(opfis.toContentString(), "", Parser.xmlParser())
         val manifestitem = opfdoc.selectFirst("manifest item[href=images/images/logowhite.png]")
 
         Assert.assertEquals("images/images/logowhite.png", manifestitem.attr("href"))
@@ -307,12 +308,12 @@ class TestShrinkerUtils {
         val zipFile = ZipFile(epub)
         val entry = zipFile.getEntry("META-INF/container.xml")
         val `is` = zipFile.getInputStream(entry)
-        val document = Jsoup.parse(UMIOUtils.readStreamToString(`is`), "", Parser.xmlParser())
+        val document = Jsoup.parse(`is`.toContentString(), "", Parser.xmlParser())
         val path = document.selectFirst("rootfile").attr("full-path")
 
         val opfEntry = zipFile.getEntry(path)
         val opfis = zipFile.getInputStream(opfEntry)
-        val opfdoc = Jsoup.parse(UMIOUtils.readStreamToString(opfis), "", Parser.xmlParser())
+        val opfdoc = Jsoup.parse(opfis.toContentString(), "", Parser.xmlParser())
         val manifestitem = opfdoc.selectFirst("manifest item[href=images/cover.png]")
 
         Assert.assertEquals("images/cover.png", manifestitem.attr("href"))

@@ -4,10 +4,9 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.core.io.ext.toContentString
 import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
@@ -26,7 +25,6 @@ import kotlin.math.pow
 import kotlin.random.Random
 import kotlin.system.exitProcess
 
-@ExperimentalStdlibApi
 open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     private val ytPath: String
@@ -66,7 +64,7 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                     process.waitFor()
                     val exitValue = process.exitValue()
                     if (exitValue != 0) {
-                        val error = UMIOUtils.readStreamToString(process.errorStream)
+                        val error = process.errorStream.toContentString()
                         UMLogUtil.logError("Error Stream for src $sourceUrl with error code  $error")
                         if (!error.contains("429")) {
                             throw ScraperException(ERROR_TYPE_UNKNOWN_YOUTUBE, "unknown error: $error")
@@ -119,7 +117,7 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                 showContentEntry()
                 setScrapeDone(true, 0)
                 close()
-                return null
+                return
             }
         }
 
@@ -133,8 +131,6 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
         showContentEntry()
         setScrapeDone(true, 0)
         close()
-
-        return containerManager
 
     }
 
@@ -198,10 +194,10 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                     val builder = ProcessBuilder(ytPath, "--retries", "1", "-i", "-J","--flat-playlist",  sourceUrl)
                     process = builder.start()
                     process.waitFor(30, TimeUnit.SECONDS)
-                    val data = UMIOUtils.readStreamToString(process.inputStream)
+                    val data = process.inputStream.toContentString()
                     val exitValue = process.exitValue()
                     if (exitValue != 0) {
-                        val error = UMIOUtils.readStreamToString(process.errorStream)
+                        val error =  process.errorStream.toContentString()
                         UMLogUtil.logError("Error Stream for src $sourceUrl with error code  $error")
                         if (!error.contains("429")) {
                             throw ScraperException(ERROR_TYPE_UNKNOWN_YOUTUBE, "unknown error: $error")

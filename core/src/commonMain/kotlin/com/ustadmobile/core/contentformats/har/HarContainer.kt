@@ -70,7 +70,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
             entries.forEach {
 
                 val requestMethod = it.request?.method ?: return@forEach
-                val requestUrl = it.request.url ?: return@forEach
+                val requestUrl = it.request?.url ?: return@forEach
 
                 val pair = Pair(requestMethod, requestUrl)
                 if (requestMap.containsKey(pair)) {

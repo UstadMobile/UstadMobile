@@ -31,11 +31,9 @@
 
 package com.ustadmobile.core.util
 
-import com.ustadmobile.core.impl.UMLog
 import kotlinx.io.ByteArrayOutputStream
 import kotlinx.io.InputStream
 import kotlinx.io.OutputStream
-import kotlinx.serialization.stringFromUtf8Bytes
 import org.kmp.io.KMPPullParserException
 import kotlin.jvm.JvmOverloads
 import kotlin.jvm.JvmStatic
@@ -106,16 +104,6 @@ object UMIOUtils {
         out.flush()
     }
 
-    @ExperimentalStdlibApi
-    @JvmOverloads
-    @JvmStatic
-    fun readStreamToString(`in`: InputStream, bufsize: Int = DEFAULT_BUFFER_SIZE): String {
-        val bout = ByteArrayOutputStream()
-        readFully(`in`, bout, bufsize)
-        `in`.close()
-
-        return  bout.toByteArray().decodeToString() //stringFromUtf8Bytes(bout.toByteArray())
-    }
 
     @JvmOverloads
     @JvmStatic
@@ -124,8 +112,6 @@ object UMIOUtils {
         readFully(`in`, bout, bufsize)
         return bout.toByteArray()
     }
-
-
 
 
 

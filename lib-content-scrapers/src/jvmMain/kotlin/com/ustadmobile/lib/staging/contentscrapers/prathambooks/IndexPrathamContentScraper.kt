@@ -57,7 +57,7 @@ import java.util.function.Consumer
  * If IOException is thrown, might be because the session expired so login again.
  * otherwise file is downloaded in its folder
  */
-@ExperimentalStdlibApi
+
 class IndexPrathamContentScraper {
     internal var prefixUrl = "https://storyweaver.org.in/api/v1/books-search?page="
 

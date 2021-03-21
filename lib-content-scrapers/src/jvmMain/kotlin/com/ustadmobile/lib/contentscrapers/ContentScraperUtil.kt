@@ -31,7 +31,6 @@ import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.LanguageVariant
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.io.ext.addDirToContainer
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.io.ext.addFileToContainer
@@ -111,7 +110,6 @@ import java.time.temporal.TemporalQuery
 import kotlin.system.exitProcess
 
 
-@ExperimentalStdlibApi
 object ContentScraperUtil {
 
     private val LOOSE_ISO_DATE_TIME_ZONE_PARSER = DateTimeFormatter.ofPattern("[yyyyMMdd][yyyy-MM-dd][yyyy-DDD]['T'[HHmmss][HHmm][HH:mm:ss][HH:mm][.SSSSSSSSS][.SSSSSS][.SSS][.SS][.S]][OOOO][O][z][XXXXX][XXXX]['['VV']']")

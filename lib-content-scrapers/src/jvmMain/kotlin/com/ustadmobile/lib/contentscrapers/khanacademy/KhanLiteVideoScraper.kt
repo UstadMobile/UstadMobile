@@ -2,7 +2,6 @@ package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.door.ext.toDoorUri
@@ -19,7 +18,7 @@ import java.net.URL
 import java.nio.file.Files
 
 
-@ExperimentalStdlibApi
+
 class KhanLiteVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : YoutubeScraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
 
