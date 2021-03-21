@@ -96,6 +96,7 @@ open class Report {
 
         const val PROVINCE = 311
 
+        const val PRODUCT = 312
 
         const val EVERYTHING = 0
 
@@ -139,86 +140,6 @@ open class Report {
                           "reportSeriesSubGroup": $NONE
                         }]
                     """.trimIndent()
-                },
-                Report().apply {
-                    reportUid = TEMPLATE_CONTENT_USAGE_OVER_TIME_UID
-                    reportTitle = "Content usage over time"
-                    reportDescription = "Total content usage duration over time (disaggregated by gender)"
-                    xAxis = GENDER
-                    isTemplate = true
-                    reportSeries = """                
-                        [{
-                          "reportSeriesUid": 0,
-                          "reportSeriesName": "Series 1",
-                          "reportSeriesYAxis": ${ReportSeries.TOTAL_DURATION},
-                          "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
-                          "reportSeriesSubGroup": $NONE
-                        }]
-                    """.trimIndent()
-                },
-                Report().apply {
-                    reportUid = TEMPLATE_UNIQUE_CONTENT_USERS_UID
-                    reportTitle = "Unique content users over time"
-                    reportDescription = "Number of active users over time"
-                    xAxis = MONTH
-                    isTemplate = true
-                    reportSeries = """                
-                        [{
-                         "reportSeriesUid": 0,
-                         "reportSeriesName": "Series 1",
-                         "reportSeriesYAxis": ${ReportSeries.NUMBER_ACTIVE_USERS},
-                         "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
-                         "reportSeriesSubGroup": $NONE
-                        }]
-                    """.trimIndent()
-                },
-                Report().apply {
-                    reportUid = TEMPLATE_ATTENDANCE_OVER_TIME_BY_CLASS_UID
-                    reportTitle = "Attendance over time by class"
-                    reportDescription = "Percentage of students attending over time"
-                    isTemplate = true
-                    xAxis = CLASS
-                    reportSeries = """                
-                        [{
-                         "reportSeriesUid": 0,
-                         "reportSeriesName": "Series 1",
-                         "reportSeriesYAxis": ${ReportSeries.PERCENTAGE_STUDENTS_ATTENDED},
-                          "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
-                          "reportSeriesSubGroup": $NONE
-                        }]
-                        """.trimIndent()
-                },
-                Report().apply {
-                    reportUid = TEMPLATE_CONTENT_USAGE_BY_CLASS_UID
-                    reportTitle = "Content usage by class"
-                    reportDescription = "Total content usage duration subgroup by class"
-                    xAxis = CLASS
-                    isTemplate = true
-                    reportSeries = """
-                        [{
-                            "reportSeriesUid ": 0,
-                            "reportSeriesName ": " Series 1",
-                            "reportSeriesYAxis": ${ReportSeries.TOTAL_DURATION},
-                            "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
-                            "reportSeriesSubGroup": $NONE
-                        }]
-                            """.trimIndent()
-                },
-                Report().apply {
-                    reportUid = TEMPLATE_CONTENT_COMPLETION_UID
-                    reportTitle = "Content completion"
-                    reportDescription = "Number of students who have completed selected content"
-                    isTemplate = true
-                    xAxis = CONTENT_ENTRY
-                    reportSeries = """
-                            [{
-                                "reportSeriesUid": 0,
-                                "reportSeriesName": "Series 1",
-                                "reportSeriesYAxis": ${ReportSeries.NUMBER_OF_STUDENTS_COMPLETED_CONTENT},
-                                "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
-                                "reportSeriesSubGroup": $NONE
-                            }]
-                            """.trimIndent()
                 }
         )
 

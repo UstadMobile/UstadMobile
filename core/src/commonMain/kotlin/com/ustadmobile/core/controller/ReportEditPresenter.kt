@@ -57,6 +57,7 @@ class ReportEditPresenter(context: Any,
         GENDER(Report.GENDER,
                 MessageID.gender_literal),
         LE(Report.LE, MessageID.le),
+        PRODUCT(Report.PRODUCT, MessageID.product),
         PRODUCT_CATEGORY(Report.PRODUCT_CATEGORY, MessageID.category),
         CUSTOMER(Report.CUSTOMER, MessageID.customer),
         PROVINCE(Report.PROVINCE, MessageID.province)

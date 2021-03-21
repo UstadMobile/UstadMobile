@@ -34,20 +34,15 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
     val paramList = mutableListOf<Any>()
 
     var sql = "SELECT " + when (reportSeriesYAxis) {
-        SALES_TOTAL -> """ COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - 
-                                SUM(Sale.saleDiscount)  
-                            FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = 
-                                Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  
-                            WHERE Sale.saleUid = Sale.saleUid) ,
-                        0 ) AS yAxis, """.trimMargin()
+        SALES_TOTAL -> """ COALESCE(
+                            ( SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) -  SUM(Sale.saleDiscount) 
+                            ) , 0 ) AS  yAxis, """.trimMargin()
         NUMBER_OF_SALES -> """COUNT(Sale.saleActive) AS yAxis, """
         AVERAGE_SALE_TOTAL -> """ 
-                            COALESCE( (SELECT SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - 
-                                SUM(Sale.saleDiscount)  
-                            FROM Sale LEFT JOIN SaleItem on SaleItem.saleItemSaleUid = 
-                                Sale.saleUid AND CAST(SaleItem.saleItemActive AS INTEGER) = 1  
-                            WHERE Sale.saleUid = Sale.saleUid) ,
-                        0 ) AS yAxis, """           //TODO: Fix
+                            COALESCE( (
+			(SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - 
+			SUM(Sale.saleDiscount) ) / COUNT(Sale.saleActive)
+			) , 0 ) AS yAxis, """
         TOTAL_DURATION -> "SUM(StatementEntity.resultDuration) AS yAxis, "
         AVERAGE_DURATION -> """SUM(StatementEntity.resultDuration) / COUNT(DISTINCT 
             StatementEntity.contextRegistration) AS yAxis, """.trimMargin()
@@ -100,7 +95,11 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                     LEFT JOIN Person AS Customer ON Customer.personUid = Sale.saleCustomerUid
                     LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = Sale.saleUid 
                         AND CAST(SaleItem.saleItemActive AS INTEGER) = 1
+                    LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid
                     LEFT JOIN Person as LE ON LE.personUid = :leUid
+                    LEFT JOIN Person as SaleLE ON SaleLE.personUid = Sale.salePersonUid
+                    LEFT JOIN Location ON Location.locationUid = Sale.saleLocationUid 
+                    
                 
     """.replace(":leUid","?")
     paramList.add(accountPersonUid)
@@ -319,8 +318,13 @@ private fun groupBy(value: Int, dbType: Int): String {
             }
         }
         Report.CONTENT_ENTRY -> "StatementEntity.statementContentEntryUid "
-        Report.GENDER -> "Person.gender "
+        Report.GENDER -> " SaleLE.gender "
         Report.CLASS -> "Clazz.clazzUid "
+        Report.LE -> " SaleLE.personUid "
+        Report.PRODUCT_CATEGORY -> " Product.productUid "
+        Report.PRODUCT -> " Product.productUid "
+        Report.CUSTOMER -> " Customer.personUid "
+        Report.PROVINCE -> " Sale.saleLocationUid "
         else -> ""
     }
 }
