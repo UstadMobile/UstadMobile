@@ -1,7 +1,7 @@
 package com.ustadmobile.port.sharedse.impl.http
 
 
-import com.ustadmobile.core.container.ContainerManager
+
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.util.UMFileUtil
 import fi.iki.elonen.NanoHTTPD
@@ -41,8 +41,6 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
 
     private val responseListeners = Vector<ResponseListener>()
 
-    private val mountedContainers = Hashtable<String, ContainerManager>()
-
     private val networkManager: NetworkManagerBle by instance()
 
     /**
@@ -78,8 +76,6 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
 
         addRoute("/:${ContainerEntryListResponder.PATH_VAR_ENDPOINT}/ContainerEntryList/findByContainerWithMd5",
                 ContainerEntryListResponder::class.java, di)
-        addRoute("/:${ConcatenatedContainerEntryFileResponder.URI_PARAM_ENDPOINT}/$ENDPOINT_CONCATENATEDFILES/:entryList",
-                ConcatenatedContainerEntryFileResponder::class.java, di)
         addRoute("/:${XapiStatementResponder.URI_PARAM_ENDPOINT}/xapi/:contentEntryUid/statements",
                 XapiStatementResponder::class.java, di)
         addRoute("/:${XapiStateResponder.URI_PARAM_ENDPOINT}/xapi/activities/state",
@@ -122,7 +118,6 @@ open class EmbeddedHTTPD @JvmOverloads constructor(portNum: Int, override val di
 
         val container = endpointRepo.containerDao.findByUid(containerUid)
                 ?: throw IllegalArgumentException("Container $containerUid on $endpointUrl not found")
-        val containerManager = ContainerManager(container, endpointDb, endpointRepo)
 
         val mountPath = "/${sanitizeDbNameFromUrl(endpointUrl)}/container/$containerUid/"
 

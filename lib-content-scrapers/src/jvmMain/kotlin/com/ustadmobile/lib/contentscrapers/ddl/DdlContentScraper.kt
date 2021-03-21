@@ -285,6 +285,7 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
             return
         }
 
+        /*
         val containerManager = scraperResult.containerManager
 
         if (containerManager?.allEntries?.isEmpty() != false) {
@@ -294,6 +295,7 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
             close()
             throw ScraperException(ERROR_TYPE_CONTENT_NOT_FOUND, "Container Manager did not have the file")
         }
+
 
         runBlocking {
 
@@ -308,6 +310,8 @@ class DdlContentScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUi
             }
 
         }
+        */
+
 
         showContentEntry()
         setScrapeDone(true, 0)

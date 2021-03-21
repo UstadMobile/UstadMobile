@@ -4,7 +4,6 @@ import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.har.HarExtra
 import com.ustadmobile.core.contentformats.har.HarRegexPair
-import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_CSS
@@ -16,7 +15,6 @@ import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.KHAN_COOKIE
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.KHAN_CSS
 import com.ustadmobile.lib.contentscrapers.khanacademy.KhanConstants.regexUrlPrefix
-import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin
 import kotlinx.coroutines.runBlocking
@@ -27,7 +25,6 @@ import org.kodein.di.DI
 import org.openqa.selenium.By
 import org.openqa.selenium.WebElement
 import org.openqa.selenium.support.ui.ExpectedConditions
-import java.io.File
 import java.net.URL
 
 @ExperimentalStdlibApi
@@ -172,7 +169,7 @@ class KhanArticleScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
         harExtra.links = linksList
 
         runBlocking {
-            scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))
+            //scraperResult.containerManager?.addEntries(StringEntrySource(gson.toJson(harExtra).toString(), listOf("harextras.json")))
         }
 
         setScrapeDone(true, 0)
