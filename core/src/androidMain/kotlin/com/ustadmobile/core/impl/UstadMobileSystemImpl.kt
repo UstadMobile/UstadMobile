@@ -157,13 +157,13 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                     zipOut = ZipOutputStream(FileOutputStream(outZipFile))
                     zipOut.putNextEntry(ZipEntry("$baseName.apk"))
                     apkFileIn = FileInputStream(apkFile)
-                    UMIOUtils.readFully(apkFileIn, zipOut, 1024)
+                    apkFileIn.copyTo(zipOut)
                     zipOut.closeEntry()
                 } catch (e: IOException) {
                     e.printStackTrace()
                 } finally {
                     UMIOUtils.closeOutputStream(zipOut)
-                    UMIOUtils.closeInputStream(apkFileIn)
+                    apkFileIn?.close()
                 }
 
                 return outZipFile.absolutePath
@@ -177,8 +177,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 } catch (e: IOException) {
                     e.printStackTrace()
                 } finally {
-                    UMIOUtils.closeInputStream(apkFileIn)
-                    UMIOUtils.closeOutputStream(fout)
+                    apkFileIn?.close()
+                    fout?.close()
                 }
 
                 return outApkFile.absolutePath
@@ -515,7 +515,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             } catch (e: IOException) {
                 UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
             } finally {
-                UMIOUtils.closeInputStream(prefIn)
+                prefIn?.close()
             }
         }
 
@@ -619,7 +619,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             path = path.substring(1)
         }
 
-        return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
+        return ((context as Context).assets.open(path)).readBytes()
     }
 
     /**

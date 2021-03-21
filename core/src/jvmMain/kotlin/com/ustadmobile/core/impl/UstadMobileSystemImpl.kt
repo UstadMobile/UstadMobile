@@ -210,7 +210,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
             } catch (e: IOException) {
                 UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
             } finally {
-                UMIOUtils.closeInputStream(prefIn)
+                prefIn?.close()
             }
         }
 
