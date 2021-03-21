@@ -32,6 +32,7 @@ import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.rest.ContainerUploadRoute2
 import com.ustadmobile.lib.rest.TAG_UPLOAD_DIR
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.sharedse.io.extractResourceToFile
 import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import org.kodein.di.ktor.DIFeature
@@ -185,9 +186,12 @@ class ImportJobRunnerTest {
         contentImportManager = di.on(endpoint).direct.instance()
 
         fileToUpload = File(clientFolder, "tincan.zip")
-        UmFileUtilSe.extractResourceToFile(
-                "/com/ustadmobile/core/container/ustad-tincan.zip",
-                fileToUpload)
+
+        runBlocking {
+            extractResourceToFile(
+                    "/com/ustadmobile/core/container/ustad-tincan.zip",
+                    fileToUpload.path)
+        }
         metadata = runBlocking {
             contentImportManager.extractMetadata(fileToUpload.path)!!
         }
