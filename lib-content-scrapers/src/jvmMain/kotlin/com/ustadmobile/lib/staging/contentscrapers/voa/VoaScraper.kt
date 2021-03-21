@@ -362,10 +362,9 @@ class VoaScraper : Runnable {
             conn.setRequestProperty("Referer", scrapUrl!!.toString())
             out = DataOutputStream(conn.outputStream)
             out.writeBytes(requestParams.toString())
-            out.flush()
-            out.close()
         } finally {
-            UMIOUtils.closeOutputStream(out)
+            out?.flush()
+            out?.close()
         }
         return conn
     }

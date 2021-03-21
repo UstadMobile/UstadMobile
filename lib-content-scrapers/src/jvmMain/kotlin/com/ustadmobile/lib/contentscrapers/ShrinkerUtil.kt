@@ -21,11 +21,6 @@ import org.jsoup.nodes.Element
 import org.jsoup.nodes.Entities
 import org.jsoup.parser.Parser
 
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
 import java.nio.file.InvalidPathException
 import java.nio.file.Paths
 import java.util.ArrayList
@@ -37,6 +32,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JPG
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.PNG_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import org.kmp.io.KMPPullParserException
+import java.io.*
 
 
 object ShrinkerUtil {
@@ -307,9 +303,9 @@ object ShrinkerUtil {
             UMLogUtil.logError("IO Exception for directory " + directory.path)
             throw e
         } finally {
-            UMIOUtils.closeInputStream(opfFileInputStream)
-            UMIOUtils.closeOutputStream(opfFileOutputStream)
-            UMIOUtils.closeInputStream(ocfFileInputStream)
+            opfFileInputStream?.close()
+            opfFileOutputStream?.close()
+            ocfFileInputStream?.close()
         }
 
         return false
@@ -470,7 +466,7 @@ object ShrinkerUtil {
         var process: Process? = null
         try {
             process = builder.start()
-            UMIOUtils.readStreamToByteArray(process!!.inputStream)
+            process?.inputStream?.readBytes()
             process.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
@@ -508,8 +504,8 @@ object ShrinkerUtil {
         var process: Process? = null
         try {
             process = builder.start()
-            UMIOUtils.readStreamToByteArray(process!!.inputStream)
-            process.waitFor()
+            process?.inputStream.readBytes()
+            process?.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
                 UMLogUtil.logError("Error Stream for src " + src.path + process.errorStream.toContentString())
@@ -593,13 +589,16 @@ object ShrinkerUtil {
 
     @Throws(IOException::class, InterruptedException::class)
     private fun startProcess(process: Process) {
-        UMIOUtils.readStreamToByteArray(process.inputStream)
-        process.waitFor()
-        val exitValue = process.exitValue()
-        if (exitValue != 0) {
-            UMLogUtil.logError("Error Stream for src " + process.errorStream.toContentString())
+        try {
+            process.inputStream.readBytes()
+            process.waitFor()
+            val exitValue = process.exitValue()
+            if (exitValue != 0) {
+                UMLogUtil.logError("Error Stream for src " + process.errorStream.toContentString())
+            }
+        }finally {
+            process.destroy()
         }
-        process.destroy()
     }
 
 

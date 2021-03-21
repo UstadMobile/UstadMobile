@@ -301,7 +301,7 @@ class IndexPrathamContentScraper {
             UMLogUtil.logError("IO Error for login to Pratham")
         } finally {
             conn?.disconnect()
-            UMIOUtils.closeOutputStream(out)
+            out?.close()
         }
 
         return ""
