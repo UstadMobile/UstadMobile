@@ -504,7 +504,7 @@ object ShrinkerUtil {
         var process: Process? = null
         try {
             process = builder.start()
-            process?.inputStream.readBytes()
+            process?.inputStream?.readBytes()
             process?.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
