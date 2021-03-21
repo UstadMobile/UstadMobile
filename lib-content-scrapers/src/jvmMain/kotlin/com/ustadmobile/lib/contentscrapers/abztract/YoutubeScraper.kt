@@ -3,10 +3,13 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.YoutubeData
@@ -36,7 +39,7 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
         gson = GsonBuilder().disableHtmlEscaping().create()
     }
 
-    protected fun scrapeYoutubeVideo(sourceUrl: String, videoQualityOption: String = "worst[ext=webm]/worst"): ContainerManager? {
+    protected fun scrapeYoutubeVideo(sourceUrl: String, videoQualityOption: String = "worst[ext=webm]/worst") {
 
         UMLogUtil.logTrace("starting youtube scrape for $sourceUrl")
 
@@ -120,9 +123,11 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
             }
         }
 
-        val containerManager = ContainerManager(createBaseContainer(mimetype), db, db, containerFolder.absolutePath)
+        val container = createBaseContainer(mimetype)
+        val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
         runBlocking {
-            containerManager.addEntries(ContainerManager.FileEntrySource(videoFile, videoFile.name))
+            repo.addFileToContainer(container.containerUid, videoFile.toDoorUri(),
+                    videoFile.name, containerAddOptions)
         }
 
         showContentEntry()

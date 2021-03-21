@@ -1,8 +1,11 @@
 package com.ustadmobile.lib.contentscrapers.khanacademy
 
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
+import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.KHAN_PREFIX
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperException
 import com.ustadmobile.lib.contentscrapers.abztract.YoutubeScraper
@@ -75,9 +78,10 @@ class KhanLiteVideoScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntr
             FileUtils.copyURLToFile(url, tempFile)
 
             val container = createBaseContainer(headRequestValues.mimeType)
-            val containerManager = ContainerManager(container, db, db, containerFolder.absolutePath)
+            val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
             runBlocking {
-                containerManager.addEntries(ContainerManager.FileEntrySource(tempFile, tempFile.name))
+                repo.addFileToContainer(container.containerUid, tempFile.toDoorUri(),
+                        tempFile.name, containerAddOptions)
             }
             if (!headRequestValues.mimeType.isNullOrEmpty()) {
                 val etagContainer = ContainerETag(container.containerUid, headRequestValues.etag)

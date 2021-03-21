@@ -3,9 +3,13 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.core.io.ext.addHarEntryToContainer
+import com.ustadmobile.door.ext.toDoorUri
 //import com.ustadmobile.core.io.ext.addHarEntryToContainer
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JS
@@ -133,8 +137,8 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 
     private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>, regexes: List<HarRegexPair>, addHarContent: Boolean): ContainerManager {
 
-        val containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerFolder.absolutePath)
         val container = createBaseContainer(ScraperConstants.MIMETYPE_HAR)
+        val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
         val containerEntries = mutableListOf<ContainerEntry>()
 
         val containerPathsAdded = mutableListOf<String>()
@@ -170,14 +174,16 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                 }
 
                 runBlocking {
-                    if(containerManager.getEntry(containerPath) != null) {
+                    val containerEntry = repo.containerEntryDao.findByPathInContainer(container.containerUid, containerPath)
+                    if(containerEntry != null) {
                         containerPath += counter
                     }
                     if(containerPath in containerPathsAdded) {
                         containerPath += counter
                     }
 
-//                    db.addHarEntryToContainer(container.containerUid, it)
+                    repo.addHarEntryToContainer(container.containerUid, it, containerPath, containerAddOptions)
+                    //db.addHarEntryToContainer(container.containerUid, it)
                     containerManager.addEntries(HarEntrySource(it, listOf(containerPath)))
                 }
 
@@ -196,6 +202,7 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 
         if (addHarContent) {
             runBlocking {
+                repo.addHarEntryToContainer()
                 containerManager.addEntries(StringEntrySource(writer.toString(), listOf("harcontent")))
             }
         }

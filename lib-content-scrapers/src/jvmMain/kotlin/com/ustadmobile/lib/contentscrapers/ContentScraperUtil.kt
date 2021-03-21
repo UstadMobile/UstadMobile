@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder
 import com.neovisionaries.i18n.CountryCode
 import com.neovisionaries.i18n.LanguageAlpha3Code
 import com.neovisionaries.i18n.LanguageCode
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContentCategoryDao
@@ -31,7 +32,11 @@ import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.LanguageVariant
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.io.ext.addDirToContainer
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
+import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.CK12_PASS
 
 import org.apache.commons.codec.digest.DigestUtils
@@ -92,6 +97,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.TINCAN_FILENAME
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBM_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.WEBP_EXT
+import com.ustadmobile.lib.contentscrapers.abztract.Scraper
 import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
 import net.lightbody.bmp.client.ClientUtil
@@ -907,17 +913,19 @@ object ContentScraperUtil {
         container.mobileOptimized = mobileOptimized
         container.containerUid = containerDao.insert(container)
 
-        val fileMap = HashMap<File, String>()
-        if (tmpDir.isDirectory) {
-            createContainerFromDirectory(tmpDir, fileMap)
-        } else {
-            fileMap[tmpDir] = tmpDir.name
-        }
-        val manager = ContainerManager(container, db,
-                repository, containerDir.absolutePath)
+        val containerAddOptions = ContainerAddOptions(storageDirUri = containerDir.toDoorUri())
         runBlocking {
-            fileMap.forEach {
-                manager.addEntries(ContainerManager.FileEntrySource(it.component1(), it.component2()))
+            if (tmpDir.isDirectory) {
+                repository.addDirToContainer(container.containerUid, tmpDir.toDoorUri(),
+                        true, containerAddOptions)
+            } else if(fileType == ScraperConstants.MIMETYPE_ZIP ||
+                    fileType == ScraperConstants.MIMETYPE_EPUB ||
+                    fileType == ScraperConstants.MIMETYPE_TINCAN){
+                repository.addEntriesToContainerFromZip(container.containerUid,
+                        tmpDir.toDoorUri(), containerAddOptions)
+            }else{
+                repository.addFileToContainer(container.containerUid, tmpDir.toDoorUri(),
+                        tmpDir.name, containerAddOptions)
             }
         }
 

@@ -1,7 +1,9 @@
 package com.ustadmobile.lib.contentscrapers
 
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.getFileNameFromUrl
 import kotlinx.coroutines.runBlocking
 import org.apache.commons.cli.*
@@ -23,8 +25,9 @@ class ExportData(private val containerUid: Long, val path: String) {
         destDir.mkdirs()
         val container = db.containerDao.findByUid(containerUid) ?: exitProcess(1)
 
-        val manager = ContainerManager(container, db, db)
-        manager.allEntries.forEach{
+        val list = db.containerEntryDao.findByContainer(containerUid)
+
+        list.forEach{
 
             try {
 
