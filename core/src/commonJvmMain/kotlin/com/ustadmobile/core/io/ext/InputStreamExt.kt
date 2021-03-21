@@ -21,6 +21,6 @@ fun InputStream.readFully(buf: ByteArray, offset: Int, len: Int): Int {
     return totalBytesRead
 }
 
-fun InputStream.toContentString(): String{
+fun InputStream.readString(): String{
     return this.bufferedReader().use { it.readText() }
 }

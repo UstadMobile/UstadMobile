@@ -4,9 +4,8 @@ import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.io.ext.toContentString
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.CODEC2_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.FFMPEG_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.WEBP_PATH_KEY
@@ -189,7 +188,7 @@ object ShrinkerUtil {
 
                     val htmlFile = File(opfDir, opfItem.href!!)
                     FileInputStream(htmlFile).use { htmlFileInputStream ->
-                        var html = htmlFileInputStream.toContentString()
+                        var html = htmlFileInputStream.readString()
                         /*
                          * Pratham uses an entity code to map &nbsp; to &#160; - this confuses jsoup
                          */
@@ -430,7 +429,7 @@ object ShrinkerUtil {
             process!!.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream for src " + src.path + process.errorStream.toContentString())
+                UMLogUtil.logError("Error Stream for src " + src.path + process.errorStream.readString())
                 throw IOException()
             }
         } catch (e: IOException) {
@@ -470,7 +469,7 @@ object ShrinkerUtil {
             process.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream for src " + src.path + process.errorStream.toContentString())
+                UMLogUtil.logError("Error Stream for src " + src.path + process.errorStream.readString())
                 throw IOException()
             }
             process.destroy()
@@ -508,7 +507,7 @@ object ShrinkerUtil {
             process?.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream for src " + src.path + process.errorStream.toContentString())
+                UMLogUtil.logError("Error Stream for src " + src.path + process.errorStream.readString())
             }
             process.destroy()
         } catch (e: IOException) {
@@ -594,7 +593,7 @@ object ShrinkerUtil {
             process.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream for src " + process.errorStream.toContentString())
+                UMLogUtil.logError("Error Stream for src " + process.errorStream.readString())
             }
         }finally {
             process.destroy()

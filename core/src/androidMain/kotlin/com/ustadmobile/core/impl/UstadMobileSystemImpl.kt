@@ -54,7 +54,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
 import kotlinx.coroutines.Dispatchers
@@ -162,7 +161,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 } catch (e: IOException) {
                     e.printStackTrace()
                 } finally {
-                    UMIOUtils.closeOutputStream(zipOut)
+                    zipOut?.close()
                     apkFileIn?.close()
                 }
 
@@ -173,7 +172,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 try {
                     apkFileIn = FileInputStream(apkFile)
                     fout = FileOutputStream(outApkFile)
-                    UMIOUtils.readFully(apkFileIn, fout, 1024)
+                    apkFileIn.copyTo(fout)
                 } catch (e: IOException) {
                     e.printStackTrace()
                 } finally {
@@ -538,7 +537,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 gzipIn = GZIPInputStream(FileInputStream(File(path)))
                 var destFile = File(file.parentFile, file.name + "unzip")
                 destOut = FileOutputStream(destFile)
-                UMIOUtils.readFully(gzipIn, destOut)
+                gzipIn.copyTo(destOut)
                 file = destFile
             } finally {
                 gzipIn?.close()

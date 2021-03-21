@@ -9,8 +9,7 @@ import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContextXObjectStatementJoinDao
-import com.ustadmobile.core.io.ext.toContentString
-import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.parse8601Duration
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
@@ -258,7 +257,7 @@ class TestStatementEndpoint {
     @Throws(IOException::class)
     fun givenValidStatementWithSubStatement_whenParsed_thenDbAndStatementShouldMatch() {
 
-        val statement = gson.fromJson(javaClass.getResourceAsStream(subStatement).toContentString(), Statement::class.java)
+        val statement = gson.fromJson(javaClass.getResourceAsStream(subStatement).readString(), Statement::class.java)
         endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo.statementDao.findByStatementId("fd41c918-b88b-4b20-a0a5-a4c32391aaa0")
@@ -308,7 +307,7 @@ class TestStatementEndpoint {
             repo.learnerGroupDao.insert(this)
         }
 
-        val statement = gson.fromJson(javaClass.getResourceAsStream(statementWithLearnerGroup).toContentString(), Statement::class.java)
+        val statement = gson.fromJson(javaClass.getResourceAsStream(statementWithLearnerGroup).readString(), Statement::class.java)
         endpoint.storeStatements(listOf(statement), "", entry.contentEntryUid)
 
         val entity = repo.statementDao.findByStatementId("442f1133-bcd0-42b5-957e-4ad36f9414e0")

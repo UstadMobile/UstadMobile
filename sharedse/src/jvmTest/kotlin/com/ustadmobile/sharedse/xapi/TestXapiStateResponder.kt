@@ -13,20 +13,15 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
-import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.io.ext.toContentString
-import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.UMURLEncoder
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
-import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.XapiStateResponder
 import com.ustadmobile.port.sharedse.impl.http.XapiStatementResponder
 import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
@@ -40,15 +35,9 @@ import org.junit.Test
 import org.kodein.di.*
 import java.io.File
 import java.io.IOException
-import java.io.OutputStreamWriter
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
-import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import javax.naming.InitialContext
 
 class TestXapiStateResponder {
 
@@ -200,7 +189,7 @@ class TestXapiStateResponder {
         val getResponse = responder.get(mockUriResource,
                 mutableMapOf(XapiStatementResponder.URI_PARAM_ENDPOINT to accountManager.activeAccount.endpointUrl), mockSession)
 
-        val json = getResponse.data.toContentString()
+        val json = getResponse.data.readString()
         val contentMap = Gson().fromJson<HashMap<String, String>>(json, contentMapToken)
         Assert.assertEquals("Content matches", "Parthenon", contentMap["name"])
 

@@ -10,7 +10,7 @@ import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
 import com.ustadmobile.core.io.ext.openInputStream
-import com.ustadmobile.core.io.ext.toContentString
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
@@ -30,7 +30,6 @@ import org.kodein.di.*
 import java.io.File
 import java.io.StringWriter
 import java.lang.IllegalArgumentException
-import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
 import javax.naming.InitialContext
 
@@ -113,7 +112,7 @@ class TestHarScraper {
         scraper.proxy.har.writeTo(writer)
 
         var harEntry = db.containerEntryDao.findByPathInContainer(containerUid, "harcontent")
-        var harContent = harEntry?.containerEntryFile?.openInputStream()?.toContentString()
+        var harContent = harEntry?.containerEntryFile?.openInputStream()?.readString()
 
         Assert.assertEquals("har content matches", writer.toString(), harContent)
 
@@ -180,7 +179,7 @@ class TestHarScraper {
         }
 
         var harEntry = db.containerEntryDao.findByPathInContainer(containerUid, "harcontent")
-        var harContent = harEntry?.containerEntryFile?.openInputStream()!!.toContentString()
+        var harContent = harEntry?.containerEntryFile?.openInputStream()!!.readString()
 
         val gson = GsonBuilder().disableHtmlEscaping().create()
 

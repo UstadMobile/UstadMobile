@@ -6,8 +6,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.controller.VideoContentPresenterCommon.Companion.VIDEO_MIME_MAP
 import com.ustadmobile.core.io.ext.addFileToContainer
-import com.ustadmobile.core.io.ext.toContentString
-import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
@@ -64,7 +63,7 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                     process.waitFor()
                     val exitValue = process.exitValue()
                     if (exitValue != 0) {
-                        val error = process.errorStream.toContentString()
+                        val error = process.errorStream.readString()
                         UMLogUtil.logError("Error Stream for src $sourceUrl with error code  $error")
                         if (!error.contains("429")) {
                             throw ScraperException(ERROR_TYPE_UNKNOWN_YOUTUBE, "unknown error: $error")
@@ -194,10 +193,10 @@ open class YoutubeScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                     val builder = ProcessBuilder(ytPath, "--retries", "1", "-i", "-J","--flat-playlist",  sourceUrl)
                     process = builder.start()
                     process.waitFor(30, TimeUnit.SECONDS)
-                    val data = process.inputStream.toContentString()
+                    val data = process.inputStream.readString()
                     val exitValue = process.exitValue()
                     if (exitValue != 0) {
-                        val error =  process.errorStream.toContentString()
+                        val error =  process.errorStream.readString()
                         UMLogUtil.logError("Error Stream for src $sourceUrl with error code  $error")
                         if (!error.contains("429")) {
                             throw ScraperException(ERROR_TYPE_UNKNOWN_YOUTUBE, "unknown error: $error")

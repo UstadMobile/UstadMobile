@@ -3,8 +3,7 @@ package com.ustadmobile.lib.contentscrapers
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.ext.toContentString
-import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.LANGUAGE_LIST_LOCATION
 import com.ustadmobile.lib.db.entities.Language
 import java.io.IOException
@@ -25,7 +24,7 @@ class LanguageList {
 
         val gson = GsonBuilder().disableHtmlEscaping().create()
         val langList = gson.fromJson<ArrayList<Language>>(javaClass
-                .getResourceAsStream(LANGUAGE_LIST_LOCATION).toContentString(),
+                .getResourceAsStream(LANGUAGE_LIST_LOCATION).readString(),
                 object : TypeToken<List<Language>>() {
 
         }.type)

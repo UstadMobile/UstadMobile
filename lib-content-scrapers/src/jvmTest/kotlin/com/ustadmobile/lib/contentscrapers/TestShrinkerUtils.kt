@@ -2,24 +2,18 @@ package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
-import com.ustadmobile.core.contentformats.epub.opf.OpfItem
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.io.ext.toContentString
-import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
 import com.ustadmobile.port.sharedse.util.UmZipUtils
 
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Attributes
-import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Entities
-import org.jsoup.nodes.Node
 import org.jsoup.parser.Parser
-import org.jsoup.select.Elements
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -27,12 +21,10 @@ import org.junit.Test
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.ArrayList
 import java.util.HashMap
-import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
@@ -282,12 +274,12 @@ class TestShrinkerUtils {
         val zipFile = ZipFile(epub)
         val entry = zipFile.getEntry("META-INF/container.xml")
         val `is` = zipFile.getInputStream(entry)
-        val document = Jsoup.parse(`is`.toContentString(), "", Parser.xmlParser())
+        val document = Jsoup.parse(`is`.readString(), "", Parser.xmlParser())
         val path = document.selectFirst("rootfile").attr("full-path")
 
         val opfEntry = zipFile.getEntry(path)
         val opfis = zipFile.getInputStream(opfEntry)
-        val opfdoc = Jsoup.parse(opfis.toContentString(), "", Parser.xmlParser())
+        val opfdoc = Jsoup.parse(opfis.readString(), "", Parser.xmlParser())
         val manifestitem = opfdoc.selectFirst("manifest item[href=images/images/logowhite.png]")
 
         Assert.assertEquals("images/images/logowhite.png", manifestitem.attr("href"))
@@ -308,12 +300,12 @@ class TestShrinkerUtils {
         val zipFile = ZipFile(epub)
         val entry = zipFile.getEntry("META-INF/container.xml")
         val `is` = zipFile.getInputStream(entry)
-        val document = Jsoup.parse(`is`.toContentString(), "", Parser.xmlParser())
+        val document = Jsoup.parse(`is`.readString(), "", Parser.xmlParser())
         val path = document.selectFirst("rootfile").attr("full-path")
 
         val opfEntry = zipFile.getEntry(path)
         val opfis = zipFile.getInputStream(opfEntry)
-        val opfdoc = Jsoup.parse(opfis.toContentString(), "", Parser.xmlParser())
+        val opfdoc = Jsoup.parse(opfis.readString(), "", Parser.xmlParser())
         val manifestitem = opfdoc.selectFirst("manifest item[href=images/cover.png]")
 
         Assert.assertEquals("images/cover.png", manifestitem.attr("href"))

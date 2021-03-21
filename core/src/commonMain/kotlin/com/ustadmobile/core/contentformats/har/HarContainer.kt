@@ -3,7 +3,6 @@ package com.ustadmobile.core.contentformats.har
 import com.ustadmobile.core.contentformats.har.HarInterceptor.Companion.interceptorMap
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getStringFromContainerEntry
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.isTextContent
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContainerEntryFile

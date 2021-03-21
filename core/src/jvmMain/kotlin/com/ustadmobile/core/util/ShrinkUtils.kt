@@ -2,7 +2,7 @@ package com.ustadmobile.core.util
 
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.catalog.contenttype.VideoTypePlugin
-import com.ustadmobile.core.io.ext.toContentString
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.ext.commandExists
 import java.io.BufferedReader
 import java.io.File
@@ -67,7 +67,7 @@ object ShrinkUtils {
             process.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
-                Napier.e("Error Stream for src " + srcFile.path + process.errorStream.toContentString())
+                Napier.e("Error Stream for src " + srcFile.path + process.errorStream.readString())
                 return Triple(0, 0, "")
             }
             process.destroy()
@@ -108,7 +108,7 @@ object ShrinkUtils {
             process.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
-                val errorStreamStr =process.errorStream.toContentString()
+                val errorStreamStr =process.errorStream.readString()
                 val errorMsg = "Non-zero exit value: $exitValue running " +
                         "'${ffmpegCommand.joinToString(separator = " ")}'. ErrorStream=$errorStreamStr"
                 Napier.e(errorMsg)
