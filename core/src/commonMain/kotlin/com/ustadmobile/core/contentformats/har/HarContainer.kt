@@ -1,85 +1,95 @@
 package com.ustadmobile.core.contentformats.har
 
-
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.har.HarInterceptor.Companion.interceptorMap
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.io.RangeInputStream
+import com.ustadmobile.core.io.ext.getStringFromContainerEntry
 import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.util.ext.isTextContent
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.parseRangeRequestHeader
+import io.ktor.utils.io.errors.*
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonBuilder
 import kotlinx.serialization.json.JsonConfiguration
 
 
-@ExperimentalStdlibApi
-class HarContainer(val containerManager: ContainerManager, val entry: ContentEntry,
-                   val umAccount: UmAccount?, val context: Any,
-                   val localHttp: String, var block: (sourceUrl: String) -> Unit) {
+class HarContainer(val containerUid: Long, val entry: ContentEntry,
+                   val umAccount: UmAccount?, val db: UmAppDatabase,
+                   val context: Any, val localHttp: String, var block: (sourceUrl: String) -> Unit) {
 
-    var startingUrl: String
+    lateinit var startingUrl: String
     private val linkPatterns = mutableMapOf<Regex, String>()
     var regexList: List<HarRegexPair>? = null
     var requestMap = mutableMapOf<Pair<String, String>, MutableList<HarEntry>>()
     var interceptors: MutableMap<HarInterceptor, String?> = mutableMapOf()
+    val startingUrlDeferred = CompletableDeferred<String>()
 
     val json = Json(JsonConfiguration(ignoreUnknownKeys = true))
 
     init {
 
-        val indexEntry = containerManager.getEntry("harcontent")
-        val harExtraEntry = containerManager.getEntry("harextras.json")
+        val indexEntry =  db.containerEntryDao.findByPathInContainer(containerUid, "harcontent")
+        val harExtraEntry = db.containerEntryDao.findByPathInContainer(containerUid, "harextras.json")
 
         if (indexEntry == null) {
             throw Exception()
         }
 
-        var harExtra = HarExtra()
-        if (harExtraEntry != null) {
-            val data = UMIOUtils.readStreamToString(containerManager.getInputStream(harExtraEntry))
-            harExtra = json.parse(HarExtra.serializer(), data)
-        }
+        GlobalScope.launch(doorMainDispatcher()){
 
-        regexList = harExtra.regexes
-        harExtra.links?.forEach {
-            linkPatterns[Regex(it.regex)] = it.replacement
-        }
+            val harContentData = indexEntry.containerEntryFile?.getStringFromContainerEntry() ?: throw Exception()
 
-        interceptors[RecorderInterceptor()] = null
-        interceptors[KhanProgressTracker()] = null
-        harExtra.interceptors?.forEach {
-            val key = interceptorMap[it.name] ?: return@forEach
-            interceptors[key] = it.jsonArgs
-        }
-
-
-        val harContent = json.parse(Har.serializer(), UMIOUtils.readStreamToString(containerManager.getInputStream(indexEntry)))
-
-        val entries = harContent.log.entries
-
-        entries.forEach {
-
-            val requestMethod = it.request?.method ?: return@forEach
-            val requestUrl = it.request.url ?: return@forEach
-
-            val pair = Pair(requestMethod, requestUrl)
-            if (requestMap.containsKey(pair)) {
-                val list = requestMap.getValue(pair)
-                list.add(it)
-            } else {
-                requestMap[pair] = mutableListOf(it)
+            var harExtra = HarExtra()
+            if(harExtraEntry != null){
+                val data = harExtraEntry.containerEntryFile?.getStringFromContainerEntry() ?: throw Exception()
+                harExtra = json.parse(HarExtra.serializer(), data)
             }
+
+            regexList = harExtra.regexes
+            harExtra.links?.forEach {
+                linkPatterns[Regex(it.regex)] = it.replacement
+            }
+
+            interceptors[RecorderInterceptor()] = null
+            interceptors[KhanProgressTracker()] = null
+            harExtra.interceptors?.forEach {
+                val key = interceptorMap[it.name] ?: return@forEach
+                interceptors[key] = it.jsonArgs
+            }
+
+
+            val harContent = json.parse(Har.serializer(), harContentData)
+
+            val entries = harContent.log.entries
+
+            entries.forEach {
+
+                val requestMethod = it.request?.method ?: return@forEach
+                val requestUrl = it.request.url ?: return@forEach
+
+                val pair = Pair(requestMethod, requestUrl)
+                if (requestMap.containsKey(pair)) {
+                    val list = requestMap.getValue(pair)
+                    list.add(it)
+                } else {
+                    requestMap[pair] = mutableListOf(it)
+                }
+            }
+
+            startingUrl = entries[0].request?.url ?: "" // TODO throw error message for dialog
+            startingUrlDeferred.complete(startingUrl)
         }
 
-        startingUrl = entries[0].request?.url ?: "" // TODO throw error message for dialog
 
     }
 
 
-    fun serve(request: HarRequest): HarResponse {
+    suspend fun serve(request: HarRequest): HarResponse {
         var regexedUrl = request.url ?: ""
         regexList?.forEach { itRegex ->
             regexedUrl = regexedUrl.replace(Regex(itRegex.regex), itRegex.replacement)
@@ -97,7 +107,7 @@ class HarContainer(val containerManager: ContainerManager, val entry: ContentEnt
         return response
     }
 
-    private fun getInitialResponse(request: HarRequest): HarResponse {
+    private suspend fun getInitialResponse(request: HarRequest): HarResponse {
         val harList = requestMap[(Pair(request.method, request.regexedUrl))]
 
         val defaultResponse = HarResponse()
@@ -116,13 +126,12 @@ class HarContainer(val containerManager: ContainerManager, val entry: ContentEnt
 
         val harResponse = harEntry.response ?: defaultResponse
         val harText = harResponse.content?.text
-        val containerEntry = containerManager.getEntry(harText ?: "")
+        val containerEntry = db.containerEntryDao.findByPathInContainer(containerUid, harText ?: "")
 
         val entryFile = containerEntry?.containerEntryFile
         if (entryFile == null) {
             harResponse.status = 402
             harResponse.statusText = "Not Found"
-
             harResponse.content = defaultHarContent
             return harResponse
         }
@@ -134,10 +143,12 @@ class HarContainer(val containerManager: ContainerManager, val entry: ContentEnt
             return harResponse
         }
 
-        var data = containerManager.getInputStream(containerEntry)
-
         val harContent = harResponse.content ?: defaultHarContent
-        harContent.data = data
+        harContent.entryFile = entryFile
+
+        if(harContent.isTextContent()){
+            harContent.text = entryFile.getStringFromContainerEntry()
+        }
 
         val rangeHeader: String? = mutMap["Range"] ?: return harResponse
 
@@ -150,16 +161,14 @@ class HarContainer(val containerManager: ContainerManager, val entry: ContentEnt
             null
         }
         if (range != null && range.statusCode == 206) {
-            if (!isHEADRequest) {
-                data = RangeInputStream(data, range.fromByte, range.toByte)
-            }
 
             range.responseHeaders.forEach { mutMap[it.key] = it.value }
 
             harResponse.status = 206
             harResponse.statusText = "Partial Content"
             harResponse.headers = mutMap.map { HarNameValuePair(it.key, it.value) }
-            harContent.data = if (isHEADRequest) null else data
+            harContent.entryFile = if (isHEADRequest) null else entryFile
+            harContent.text =  if (isHEADRequest) null else harContent.text
             harResponse.content = harContent
 
             return harResponse
@@ -168,7 +177,8 @@ class HarContainer(val containerManager: ContainerManager, val entry: ContentEnt
 
             harResponse.status = 416
             harResponse.statusText = if (isHEADRequest) "" else "Range request not satisfiable"
-            harContent.data = null
+            harContent.entryFile = null
+            harContent.text = null
             harResponse.content = harContent
 
             return harResponse

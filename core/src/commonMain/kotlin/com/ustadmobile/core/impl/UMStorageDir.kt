@@ -91,12 +91,6 @@ class UMStorageDir
          * @return true if this directory is only for the current user, false otherwise
          */
         /**
-         * Set whether or not this directory is user specific
-         *
-         * @param userSpecific true if this directory is only for the current user, false otherwise
-         */
-        var isUserSpecific: Boolean,
-        /**
          * Whether or not the directory is writable
          *
          * @return True if this directory is writable for saving content
@@ -134,7 +128,6 @@ class UMStorageDir
         sb.append(dirURI).append(" (").append(name).append(" )")
         sb.append(" available: ").append(isAvailable)
         sb.append(" removable: ").append(isRemovableMedia)
-        sb.append(" user specific: ").append(isUserSpecific)
         return sb.toString()
     }
 

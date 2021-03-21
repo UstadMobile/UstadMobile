@@ -56,9 +56,6 @@ class SchoolEditFragment: UstadEditFragment<SchoolWithHolidayCalendar>(), School
         t -> clazzRecyclerAdapter?.submitList(t)
     }
 
-    override val viewContext: Any
-        get() = requireContext()
-
     class ClazzRecyclerAdapter(
             val activityEventHandler: SchoolEditFragmentEventHandler,
             var presenter: SchoolEditPresenter?)

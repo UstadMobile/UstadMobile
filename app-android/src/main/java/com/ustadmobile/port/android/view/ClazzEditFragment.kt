@@ -25,7 +25,6 @@ import com.ustadmobile.core.view.ClazzEdit2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.TimeZoneListFragment.Companion.RESULT_TIMEZONE_KEY
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
@@ -63,9 +62,6 @@ class ClazzEditFragment() : UstadEditFragment<ClazzWithHolidayCalendarAndSchool>
     private val scheduleObserver = Observer<List<Schedule>?> {
         t -> scheduleRecyclerAdapter?.submitList(t)
     }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     override var clazzSchedules: DoorMutableLiveData<List<Schedule>>? = null
         set(value) {

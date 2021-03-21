@@ -64,9 +64,6 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
 
     private var mSavedInstanceState: Bundle? = null
 
-    override val viewContext: Any
-        get() = this
-
     private lateinit var mBinding: ActivityEpubContentBinding
 
     private lateinit var recyclerViewLinearLayout: LinearLayoutManager

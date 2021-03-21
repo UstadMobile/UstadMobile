@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.toughra.ustadmobile.databinding.FragmentReportEditBinding
 import com.toughra.ustadmobile.databinding.FragmentSettingsBinding
 import com.ustadmobile.core.controller.SettingsPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
@@ -59,9 +58,6 @@ class SettingsFragment : UstadBaseFragment(), SettingsView {
 
         return view
     }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     override fun onDestroyView() {
         super.onDestroyView()

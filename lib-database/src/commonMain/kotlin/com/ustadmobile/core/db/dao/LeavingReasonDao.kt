@@ -28,6 +28,10 @@ abstract class LeavingReasonDao : BaseDao<LeavingReason> {
     @Query("SELECT leavingReasonUid FROM LeavingReason WHERE leavingReasonUid IN (:uidList)")
     abstract fun findByUidList(uidList: List<Long>): List<Long>
 
+    @JsName("findByUidLive")
+    @Query("SELECT * FROM LeavingReason WHERE leavingReasonUid = :uid")
+    abstract fun findByUidLive(uid: Long): DoorLiveData<LeavingReason?>
+
     @JsName("getReasonsFromUids")
     @Query("""SELECT LeavingReason.leavingReasonUid AS uid, 
             LeavingReason.leavingReasonTitle As labelName  

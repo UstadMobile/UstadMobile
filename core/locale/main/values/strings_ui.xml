@@ -192,72 +192,6 @@
     <string name="multiple_choice">Multiple choice</string>
     <string name="preview">Preview</string>
 
-    <!--Content editor -->
-    <string name="content_type_multimedia">Multimedia</string>
-    <string name="content_type">Content type </string>
-
-    <string name="content_type_fill_the_blanks">Fill in the blanks</string>
-    <string name="link">Link</string>
-    <string name="content_format_paragraph">PARAGRAPH</string>
-    <string name="content_direction_ltr">Left To Right</string>
-    <string name="content_direction_rtl">Right To Left</string>
-    <string name="content_font_8">8pt</string>
-    <string name="content_font_10">10pt</string>
-    <string name="content_font_12">12pt</string>
-    <string name="content_font_14">14pt</string>
-    <string name="content_font_18">18pt</string>
-    <string name="content_font_24">24pt</string>
-    <string name="content_font_36">36pt</string>
-    <string name="content_insert_options">Insert</string>
-    <string name="content_source_camera">From camera</string>
-    <string name="content_source_device">From device</string>
-    <string name="content_prepare_file">Preparing file...</string>
-    <string name="content_media_photo">Photo</string>
-    <string name="video">Video</string>
-    <string name="content_media_message">What media type would you like to capture?</string>
-    <string name="content_media_title">Media type</string>
-    <string name="content_blank_page_title">Blank page</string>
-    <string name="content_blank_doc_click_label">Click</string>
-    <string name="content_blank_doc_start_label">to start editing.</string>
-    <string name="content_option_page">New page</string>
-    <string name="content_untitled_page">Untitled page</string>
-    <string name="content_untitled_document">Untitled document</string>
-    <string name="content_add_page">Add page</string>
-    <string name="content_update_page_title">Update page</string>
-    <string name="content_update_document_title">Update document</string>
-    <string name="content_action_page_remove">Remove page</string>
-    <string name="content_editor_page_delete_failure_message">Sorry you can not delete this page</string>
-    <string name="content_editor_directionality">Directionality</string>
-    <string name='content_editor_menu_undo'>Undo</string>
-    <string name='content_editor_menu_redo'>Redo</string>
-    <string name='content_editor_menu_text_formatting'>Text formatting</string>
-    <string name='content_editor_menu_pages'>Pages</string>
-    <string name='content_editor_menu_indent'>Indent</string>
-    <string name='content_editor_menu_outdent'>Outdent</string>
-    <string name='content_editor_menu_unorderd_list'>Unordered List</string>
-    <string name='content_editor_menu_orderd_list'>Ordered List</string>
-    <string name='content_editor_menu_strikesthrough'>Strikethrough</string>
-    <string name='content_editor_menu_underline'>Underline</string>
-    <string name='content_editor_menu_italic'>Italic</string>
-    <string name='content_editor_menu_bold'>Bold</string>
-    <string name='content_editor_menu_fontsize'>Font size</string>
-    <string name='content_editor_menu_align_center'>Center</string>
-    <string name='content_editor_menu_align_left'>Left</string>
-    <string name='content_editor_menu_align_right'>Right</string>
-    <string name='content_editor_menu_superscript'>Superscript</string>
-    <string name='content_editor_menu_subscript'>Subscript</string>
-    <string name='content_editor_link_text'>Link text</string>
-    <string name='content_editor_link_url'>Link Url</string>
-    <string name='content_editor_link_error'>Link text or url can not be empty, try again</string>
-    <string name='content_editor_link_insert'>Insert Link</string>
-    <string name='content_editor_link_remove'>Remove Link</string>
-    <string name="permission_camera_title">Camera and File Permission Required</string>
-    <string name="permission_camera_message">This app requires both camera and file permissions to take photos and record videos</string>
-    <string name="content_editor_create_new_import">Import file</string>
-    <string name="content_editor_create_new_import_link">Import link</string>
-    <string name="content_editor_create_new_content">Create new content</string>
-    <string name="content_editor_create_new_category">New folder</string>
-    <string name="content_editor_create_new_title">Add content</string>
     <string name="content_creation_storage_option_title">Storage option</string>
     <string name="file_required_prompt">File to be imported is not selected, try again</string>
     <string name="content_creation_folder_new_message">New folder was successfully added</string>
@@ -1008,5 +942,11 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="terms_and_policies_text">Terms and policies text</string>
 
     <string name="edit_terms_and_policies">Edit terms and policies</string>
+
+    <string name='undo'>Undo</string>
+
+    <string name="video">Video</string>
+
+    <string name="content_editor_create_new_category">New folder</string>
 
 </resources>

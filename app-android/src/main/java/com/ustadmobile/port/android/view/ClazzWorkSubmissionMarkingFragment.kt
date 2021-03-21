@@ -45,9 +45,6 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<PersonWithClazzWorkA
 
     private lateinit var dbRepo : UmAppDatabase
 
-    override val viewContext: Any
-        get() = requireContext()
-
     private var submissionHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter?= null
 
     private var markingEditRecyclerAdapter

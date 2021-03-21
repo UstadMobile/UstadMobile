@@ -1,6 +1,7 @@
 package com.ustadmobile.door.attachments
 
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.DoorUri
 
 /**
  * Store an attachment locally. This will be called by the generated update and insert implementation.
@@ -21,8 +22,11 @@ expect suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: 
 
 /**
  * Get a platform specific URI for the given attachment URI.
+ *
+ * @param attachmentUri The attachmentUri: this can be a platform dependent URI string, or it could
+ *
  */
-expect suspend fun DoorDatabaseRepository.retrieveAttachment(uri: String): String
+expect suspend fun DoorDatabaseRepository.retrieveAttachment(attachmentUri: String): DoorUri
 
 /**
  * After an update has been performed on a table that has attachments, this function is called

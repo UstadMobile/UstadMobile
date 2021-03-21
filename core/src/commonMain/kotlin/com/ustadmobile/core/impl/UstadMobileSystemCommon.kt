@@ -479,5 +479,12 @@ abstract class UstadMobileSystemCommon {
 
         const val LINK_INTENT_FILTER = "umclient"
 
+        const val SUBDIR_SITEDATA_NAME = "sitedata"
+
+        const val SUBDIR_CONTAINER_NAME = "container"
+
+        const val SUBDIR_ATTACHMENTS_NAME = "attachments"
+
+
     }
 }

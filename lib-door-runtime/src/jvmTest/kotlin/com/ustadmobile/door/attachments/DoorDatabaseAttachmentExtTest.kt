@@ -5,6 +5,7 @@ import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.DummyEntityWithAttachment
 import com.ustadmobile.door.ext.hexStringToByteArray
 import com.ustadmobile.door.ext.md5Sum
+import com.ustadmobile.door.ext.toFile
 import com.ustadmobile.door.ext.writeToFile
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -60,7 +61,7 @@ class DoorDatabaseAttachmentExtTest {
 
         runBlocking {
             val storedUri = repo.retrieveAttachment(dummyEntity.attachmentUri!!)
-            val storedFile = Paths.get(URI(storedUri)).toFile()
+            val storedFile = storedUri.toFile()
             Assert.assertArrayEquals("Data stored is the same as data provided",
                     File(attachmentPath).md5Sum, storedFile.md5Sum)
         }

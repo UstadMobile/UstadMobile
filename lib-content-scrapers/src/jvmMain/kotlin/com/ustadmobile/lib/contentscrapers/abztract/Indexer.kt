@@ -32,7 +32,6 @@ abstract class Indexer(val parentContentEntryUid: Long, val runUid: Int, val sqi
             contentEntry = db.contentEntryDao.findByUidAsync(contentEntryUid)
             scrapeQueueItem = db.scrapeQueueItemDao.findByUid(sqiUid)
         }
-        LanguageList().addAllLanguages()
     }
 
     fun createQueueItem(queueUrl: String, contentEntry: ContentEntry?, contentType: String, scraperType: Int, parentContentEntryUid: Long , priority: Int = 1) {

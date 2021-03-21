@@ -11,6 +11,7 @@ import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.graph.*
+import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -488,3 +489,64 @@ suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzW
 
     return questionsAndOptionsWithResponseList
 }
+
+/**
+ * Gets the maximum number of items that can be in a query parameter of type list. This is 100 on
+ * SQLite and unlimited (-1) on Postgres
+ */
+internal val UmAppDatabase.maxQueryParamListSize: Int
+    get() = if(this.dbType() == DoorDbType.SQLITE) 99 else -1
+
+
+data class ContainerEntryWithMd5Partition(val entriesWithMatchingFile: List<ContainerEntryWithContainerEntryFile>,
+                                          val entriesWithoutMatchingFile: List<ContainerEntryWithMd5>)
+/**
+ * Given a list of ContainerEntryWithMd5 (e.g. the container entries that are required for a
+ * container and the md5 sum of the contents that each should be linked with), link each
+ * ContainerEntry in the list with the ContainerEntryFile where the ContainerEntryFile is already
+ * present locally. Returns a list of those not present locally (e.g. those that need downloaded).
+ *
+ * @param containerUid The container uid for which we are linking entries.
+ * @param containerEntryFiles The ContainerEntryFile list to check.
+ * @param maxListParamSize the maximum number of items in a query parameter list (e.g. to avoid room
+ * throwing an exception)
+ *
+ * @return a pair of
+ */
+suspend fun UmAppDatabase.linkExistingContainerEntries(containerUid: Long,
+                                                       containerEntryFiles: List<ContainerEntryWithMd5>): ContainerEntryWithMd5Partition {
+
+    val existingFiles = containerEntryFileDao.findEntriesByMd5SumsSafeAsync(containerEntryFiles
+            .mapNotNull { it.cefMd5 }, maxQueryParamListSize)
+    val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
+
+    val (entriesWithFile, entriesNeedDownloaded) = containerEntryFiles
+            .partition { it.cefMd5 in existingMd5s }
+
+    val alreadyLinkedEntries = containerEntryDao.findByContainerAsync(containerUid)
+    val entriesToLink = entriesWithFile
+            .filter { entryWithFile ->! alreadyLinkedEntries.any { it.cePath ==  entryWithFile.cePath } }
+            .apply {
+                forEach { entryWithFile ->
+                    entryWithFile.ceUid = 0L
+                    entryWithFile.ceCefUid = existingFiles.first { it.cefMd5 == entryWithFile.cefMd5 }.cefUid
+                }
+            }
+
+    containerEntryDao.insertListAsync(entriesToLink)
+
+    val entriesWithValRetList = entriesWithFile.map { entryWithFile ->
+        ContainerEntryWithContainerEntryFile().apply {
+            this.containerEntryFile = existingFiles.firstOrNull { it.cefMd5 ==  entryWithFile.cefMd5 }
+            ceUid = entryWithFile.ceUid
+            ceContainerUid = containerUid
+            ceCefUid = containerEntryFile?.cefUid ?: 0L
+            cePath = entryWithFile.cePath
+        }
+    }
+
+    return ContainerEntryWithMd5Partition(entriesWithValRetList,
+            entriesNeedDownloaded)
+}
+
+

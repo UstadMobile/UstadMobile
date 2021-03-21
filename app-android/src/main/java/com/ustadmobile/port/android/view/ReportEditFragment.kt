@@ -47,9 +47,6 @@ class ReportEditFragment : UstadEditFragment<ReportWithSeriesWithFilters>(), Rep
 
     private var seriesAdapter: RecyclerViewSeriesAdapter? = null
 
-    override val viewContext: Any
-        get() = requireContext()
-
     override val mEditPresenter: UstadEditPresenter<*, ReportWithSeriesWithFilters>?
         get() = mPresenter
 

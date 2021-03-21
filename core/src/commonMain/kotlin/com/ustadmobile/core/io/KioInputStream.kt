@@ -8,5 +8,6 @@ import kotlinx.io.InputStream
  * compilation failure. This simple workaround class provides an empty constructor in all actual
  * implementations
  */
+@Deprecated("This is dead on Kotlin 1.4")
 expect abstract class KioInputStream(): InputStream {
 }

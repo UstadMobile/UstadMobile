@@ -1,9 +1,7 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.util.getAssetFromResource
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -19,6 +17,12 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.writeToFile
+import com.ustadmobile.core.container.PrefixContainerFileNamer
+
 
 val licenseMap = mapOf(
         "CC-BY" to ContentEntry.LICENSE_TYPE_CC_BY,
@@ -108,23 +112,20 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
         }
 
         val entry = db.contentEntryDao.findByUid(contentEntryUid)
-        val containerManager = ContainerManager(container, db, repo, containerBaseDir)
 
-        addEntriesFromZipToContainer(file.absolutePath, containerManager, "workspace/")
+        val containerAddOptions = ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri())
+        repo.addEntriesToContainerFromZip(container.containerUid, File(filePath).toDoorUri(),
+                ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri(),
+                    fileNamer = PrefixContainerFileNamer("workspace/")))
 
-        val tmpFolder: File = File.createTempFile("res", "")
-        tmpFolder.delete()
-        tmpFolder.mkdirs()
+        val h5pDistTmpFile = File.createTempFile("h5p-dist", "zip")
+        val h5pDistIn = getAssetFromResource("/com/ustadmobile/sharedse/h5p/dist.zip", context)
+                ?: throw IllegalStateException("Could not find h5p dist file")
+        h5pDistIn.writeToFile(h5pDistTmpFile)
+        repo.addEntriesToContainerFromZip(container.containerUid, h5pDistTmpFile.toDoorUri(),
+                containerAddOptions)
+        h5pDistTmpFile.delete()
 
-        val distIn = getAssetFromResource("/com/ustadmobile/sharedse/h5p/dist.zip", context)
-                ?: return container
-        val tempDistFile = File(tmpFolder, "dist.zip")
-        val outputStream = FileOutputStream(tempDistFile)
-        UMIOUtils.readFully(distIn, outputStream)
-        UMIOUtils.closeInputStream(distIn)
-        UMIOUtils.closeOutputStream(outputStream)
-
-        addEntriesFromZipToContainer(tempDistFile.absolutePath, containerManager, "")
 
         // generate tincan.xml
         val tinCan = """
@@ -140,21 +141,21 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
             </tincan>
         """.trimIndent()
 
-        val tinCanFile = File(tmpFolder, "tincan.xml")
-        tinCanFile.writeText(tinCan)
-        containerManager.addEntries(ContainerManager.FileEntrySource(tinCanFile, tinCanFile.name))
+        val tmpTinCanFile = File.createTempFile("h5p-tincan", "xml")
+        tmpTinCanFile.writeText(tinCan)
+        repo.addFileToContainer(container.containerUid, tmpTinCanFile.toDoorUri(),
+                "tincan.xml", containerAddOptions)
+        tmpTinCanFile.delete()
+
 
         // generate index.html
-        val indexInput =  getAssetFromResource("/com/ustadmobile/sharedse/h5p/index.html", context)
-                ?: return container
-        val indexFile = File(tmpFolder, "index.html")
-        val outStream = FileOutputStream(indexFile)
-        UMIOUtils.readFully(indexInput, outStream)
-        UMIOUtils.closeInputStream(indexInput)
-        UMIOUtils.closeOutputStream(outStream)
-        containerManager.addEntries(ContainerManager.FileEntrySource(indexFile, indexFile.name))
-        tmpFolder.deleteRecursively()
-
+        val tmpIndexHtmlFile = File.createTempFile("h5p-index", "html")
+        val h5pIndexIn = getAssetFromResource("/com/ustadmobile/sharedse/h5p/index.html", context)
+                ?: throw IllegalStateException("Could not open h5p index.html file")
+        h5pIndexIn.writeToFile(tmpIndexHtmlFile)
+        repo.addFileToContainer(container.containerUid, tmpIndexHtmlFile.toDoorUri(),
+            "index.html", containerAddOptions)
+        tmpIndexHtmlFile.delete()
 
         return container
 

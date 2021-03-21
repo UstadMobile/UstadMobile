@@ -47,7 +47,4 @@ class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsVi
         return rootView
     }
 
-    override val viewContext: Any
-        get() = requireContext()
-
 }

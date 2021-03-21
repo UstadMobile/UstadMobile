@@ -6,6 +6,7 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.har.HarRegexPair
 import com.ustadmobile.core.db.UmAppDatabase
+//import com.ustadmobile.core.io.ext.addHarEntryToContainer
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JS
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
@@ -13,6 +14,7 @@ import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.util.HarEntrySource
 import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerEntry
 import io.github.bonigarcia.wdm.WebDriverManager
 import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
@@ -132,7 +134,10 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
     private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>, regexes: List<HarRegexPair>, addHarContent: Boolean): ContainerManager {
 
         val containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerFolder.absolutePath)
+        val container = createBaseContainer(ScraperConstants.MIMETYPE_HAR)
+        val containerEntries = mutableListOf<ContainerEntry>()
 
+        val containerPathsAdded = mutableListOf<String>()
         entries.forEachIndexed { counter, it ->
 
             try {
@@ -168,6 +173,11 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                     if(containerManager.getEntry(containerPath) != null) {
                         containerPath += counter
                     }
+                    if(containerPath in containerPathsAdded) {
+                        containerPath += counter
+                    }
+
+//                    db.addHarEntryToContainer(container.containerUid, it)
                     containerManager.addEntries(HarEntrySource(it, listOf(containerPath)))
                 }
 

@@ -157,6 +157,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
                 implementation "com.github.aakira:napier-android:$version_napier"
+                implementation "androidx.core:core-ktx:$version_androidx_core"
             }
         }
         androidTest{
