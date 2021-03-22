@@ -59,7 +59,6 @@ private fun Endpoint.identifier(dbMode: String, singletonName: String = CONF_DBM
     sanitizeDbNameFromUrl(url)
 }
 
-@ExperimentalStdlibApi
 fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: String? = null,
                                   singletonDbName: String = "UmAppDatabase") {
 

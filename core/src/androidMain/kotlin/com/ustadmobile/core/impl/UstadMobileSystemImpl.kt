@@ -54,7 +54,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
 import kotlinx.coroutines.Dispatchers
@@ -157,13 +156,13 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                     zipOut = ZipOutputStream(FileOutputStream(outZipFile))
                     zipOut.putNextEntry(ZipEntry("$baseName.apk"))
                     apkFileIn = FileInputStream(apkFile)
-                    UMIOUtils.readFully(apkFileIn, zipOut, 1024)
+                    apkFileIn.copyTo(zipOut)
                     zipOut.closeEntry()
                 } catch (e: IOException) {
                     e.printStackTrace()
                 } finally {
-                    UMIOUtils.closeOutputStream(zipOut)
-                    UMIOUtils.closeInputStream(apkFileIn)
+                    zipOut?.close()
+                    apkFileIn?.close()
                 }
 
                 return outZipFile.absolutePath
@@ -173,12 +172,12 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 try {
                     apkFileIn = FileInputStream(apkFile)
                     fout = FileOutputStream(outApkFile)
-                    UMIOUtils.readFully(apkFileIn, fout, 1024)
+                    apkFileIn.copyTo(fout)
                 } catch (e: IOException) {
                     e.printStackTrace()
                 } finally {
-                    UMIOUtils.closeInputStream(apkFileIn)
-                    UMIOUtils.closeOutputStream(fout)
+                    apkFileIn?.close()
+                    fout?.close()
                 }
 
                 return outApkFile.absolutePath
@@ -515,7 +514,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             } catch (e: IOException) {
                 UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
             } finally {
-                UMIOUtils.closeInputStream(prefIn)
+                prefIn?.close()
             }
         }
 
@@ -538,7 +537,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 gzipIn = GZIPInputStream(FileInputStream(File(path)))
                 var destFile = File(file.parentFile, file.name + "unzip")
                 destOut = FileOutputStream(destFile)
-                UMIOUtils.readFully(gzipIn, destOut)
+                gzipIn.copyTo(destOut)
                 file = destFile
             } finally {
                 gzipIn?.close()
@@ -619,7 +618,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             path = path.substring(1)
         }
 
-        return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
+        return ((context as Context).assets.open(path)).readBytes()
     }
 
     /**

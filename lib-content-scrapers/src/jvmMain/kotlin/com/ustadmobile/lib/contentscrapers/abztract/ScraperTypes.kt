@@ -12,7 +12,6 @@ import com.ustadmobile.lib.contentscrapers.khanacademy.*
 
 data class IndexerMap(var clazz: Class<*>, var defaultUrl: String?)
 
-@ExperimentalStdlibApi
 object ScraperTypes {
 
     const val DDL_PAGES_INDEXER = "ddlPageIndexer"

@@ -31,7 +31,7 @@ import java.io.IOException
 import java.nio.charset.Charset
 import java.nio.file.Files
 
-@ExperimentalStdlibApi
+
 class TestEdraakContentScraper {
 
 

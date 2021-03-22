@@ -3,7 +3,6 @@ package com.ustadmobile.core.contentformats.har
 import com.ustadmobile.core.contentformats.har.HarInterceptor.Companion.interceptorMap
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.getStringFromContainerEntry
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.isTextContent
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.ContainerEntryFile
@@ -70,7 +69,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
             entries.forEach {
 
                 val requestMethod = it.request?.method ?: return@forEach
-                val requestUrl = it.request.url ?: return@forEach
+                val requestUrl = it.request?.url ?: return@forEach
 
                 val pair = Pair(requestMethod, requestUrl)
                 if (requestMap.containsKey(pair)) {

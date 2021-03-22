@@ -19,7 +19,7 @@ import org.junit.Test
 import java.io.IOException
 import java.nio.file.Files
 
-@ExperimentalStdlibApi
+
 class TestIndexContent {
 
     //@Before

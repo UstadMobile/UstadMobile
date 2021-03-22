@@ -29,7 +29,7 @@ import java.io.IOException
  * Every resource is found by searching the html with a[href] and checking if href url contains "resource/"
  * Traverse all the pages until you hit Max number and then move to next language
  */
-@ExperimentalStdlibApi
+
 class IndexDdlContent {
     private lateinit var db: UmAppDatabase
     private var destinationDirectory: File? = null

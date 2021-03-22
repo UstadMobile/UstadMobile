@@ -77,8 +77,7 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
 
         try {
             //check and see if the first file is already here
-            val inputUrl = "${request.mirrorUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/" +
-                    "${request.entriesToDownload.distinctMd5sSortedAsJoinedQueryParam()}"
+            val inputUrl = "${request.mirrorUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/download"
             Napier.d("$logPrefix Download ${md5sToDownload.size} container files $inputUrl -> ${request.destDirUri}")
             val localConnectionOpener : LocalURLConnectionOpener? = di.direct.instanceOrNull()
             val url = URL(inputUrl)
@@ -89,6 +88,15 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
                 val startFrom = firstFile.length() + firstFileHeader.length()
                 Napier.d("$logPrefix partial download from $startFrom")
                 urlConnection.addRequestProperty("range", "bytes=${startFrom}-")
+            }
+
+
+            urlConnection.doOutput = true
+            urlConnection.requestMethod = "POST"
+
+            urlConnection.outputStream.use {
+                it.write(request.entriesToDownload.distinctMd5sSortedAsJoinedQueryParam().toByteArray())
+                it.flush()
             }
 
 
