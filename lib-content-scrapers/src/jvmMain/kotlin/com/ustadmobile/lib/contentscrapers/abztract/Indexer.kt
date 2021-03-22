@@ -4,8 +4,6 @@ import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.LanguageList
-import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeQueueItemWithScrapeRun

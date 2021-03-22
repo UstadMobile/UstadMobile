@@ -8,7 +8,6 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao.Companion.STATUS_RUNNING
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.LanguageList
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.ROOT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.USTAD_MOBILE
