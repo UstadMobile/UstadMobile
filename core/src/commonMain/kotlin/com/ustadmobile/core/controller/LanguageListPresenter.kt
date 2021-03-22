@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.LanguageDao
+import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
@@ -19,14 +20,12 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
 
     private var searchText: String? = null
 
-    private var currentSortOrder: Int = LanguageDao.SORT_LANGNAME_ASC
-
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
 
     override fun onClickSort(sortOption: SortOrderOption) {
-        currentSortOrder = sortOption.flag
+        super.onClickSort(sortOption)
         getAndSetList()
     }
 
@@ -46,7 +45,9 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
     }
 
     private fun getAndSetList() {
-        view.list = repo.languageDao.findLanguagesAsSource(currentSortOrder, searchText.toQueryLikeParam())
+        view.list = repo.languageDao.findLanguagesAsSource(
+                selectedSortOption?.flag ?: LanguageDao.SORT_LANGNAME_ASC,
+                searchText.toQueryLikeParam())
     }
 
 
@@ -65,7 +66,11 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
     companion object {
         val SORT_OPTIONS = listOf(
                 SortOrderOption(MessageID.name, LanguageDao.SORT_LANGNAME_ASC, true),
-                SortOrderOption(MessageID.name, LanguageDao.SORT_LANGNAME_DESC, false))
+                SortOrderOption(MessageID.name, LanguageDao.SORT_LANGNAME_DESC, false),
+                SortOrderOption(MessageID.two_letter_code, LanguageDao.SORT_TWO_LETTER_ASC, true),
+                SortOrderOption(MessageID.two_letter_code, LanguageDao.SORT_TWO_LETTER_DESC, false),
+                SortOrderOption(MessageID.three_letter_code, LanguageDao.SORT_THREE_LETTER_ASC, true),
+                SortOrderOption(MessageID.three_letter_code, LanguageDao.SORT_THREE_LETTER_DESC, false))
     }
 
 }

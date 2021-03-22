@@ -69,8 +69,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_8dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
-                app:errorEnabled="true"
-                app:errorText="@{langNameError}"
                 app:layout_constraintTop_toBottomOf="@id/lang_edit_name_textinput"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -79,8 +77,8 @@
                     android:id="@+id/lang_edit_twocode_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@={language.name}"
-                    android:hint="@string/description" />
+                    android:text="@={language.iso_639_1_standard}"
+                    android:hint="@string/two_letter_code" />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -90,8 +88,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="@dimen/dimen_8dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
-                app:errorEnabled="true"
-                app:errorText="@{langNameError}"
                 app:layout_constraintTop_toBottomOf="@id/lang_edit_twocode_textinput"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent">
@@ -100,11 +96,9 @@
                     android:id="@+id/lang_edit_threecode_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="@={language.name}"
-                    android:hint="@string/description" />
+                    android:text="@={language.iso_639_2_standard}"
+                    android:hint="@string/three_letter_code" />
             </com.google.android.material.textfield.TextInputLayout>
-
-
 
 
 

@@ -25,11 +25,15 @@ abstract class LanguageDao : BaseDao<Language> {
         FROM Language
         WHERE name LIKE :searchText
         ORDER BY CASE(:sortOrder)
-            WHEN $SORT_LANGNAME_ASC THEN Language.name
+            WHEN $SORT_LANGNAME_ASC THEN Language.name 
+            WHEN $SORT_TWO_LETTER_ASC THEN Language.iso_639_1_standard 
+            WHEN $SORT_THREE_LETTER_ASC THEN Language.iso_639_2_standard 
             ELSE ''
         END ASC,
         CASE(:sortOrder)
-            WHEN $SORT_LANGNAME_DESC THEN Language.name
+            WHEN $SORT_LANGNAME_DESC THEN Language.name 
+            WHEN $SORT_TWO_LETTER_DESC THEN Language.iso_639_1_standard 
+            WHEN $SORT_THREE_LETTER_DESC THEN Language.iso_639_2_standard 
             ELSE ''
         END DESC
     """)
@@ -87,6 +91,14 @@ abstract class LanguageDao : BaseDao<Language> {
         const val SORT_LANGNAME_ASC = 1
 
         const val SORT_LANGNAME_DESC = 2
+
+        const val SORT_TWO_LETTER_ASC = 3
+
+        const val SORT_TWO_LETTER_DESC = 4
+
+        const val SORT_THREE_LETTER_ASC = 5
+
+        const val SORT_THREE_LETTER_DESC = 6
 
     }
 }

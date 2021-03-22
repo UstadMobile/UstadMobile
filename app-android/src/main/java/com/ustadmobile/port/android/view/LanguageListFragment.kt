@@ -64,6 +64,7 @@ class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         fabManager?.text = requireContext().getText(R.string.language)
+        ustadFragmentTitle = requireContext().getString(R.string.languages)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -73,7 +74,7 @@ class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        menu.findItem(R.id.menu_search).isVisible = false
+        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     /**
@@ -82,6 +83,8 @@ class LanguageListFragment(): UstadListViewFragment<Language, Language>(),
     override fun onClick(view: View?) {
         if(view?.id == R.id.item_createnew_layout)
             navigateToEditEntity(null, R.id.language_edit_dest, Language::class.java)
+        else
+            super.onClick(view)
     }
 
     override fun onDestroyView() {

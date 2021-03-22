@@ -42,7 +42,7 @@ class LanguageEditFragment: UstadEditFragment<Language>(), LanguageEditView, Lan
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        setEditFragmentTitle(R.string.add_a_new_language, R.string.edit_enrolment)
+        setEditFragmentTitle(R.string.add_new_language, R.string.edit_language)
 
 
         mPresenter?.onCreate(findNavController().currentBackStackEntrySavedStateMap())
