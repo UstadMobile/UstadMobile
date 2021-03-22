@@ -83,9 +83,9 @@ class LanguageEditPresenterTest {
             }
         }
 
-        val entitySaved = repo.leavingReasonDao.findAllReasonsLive()[0]
-        Assert.assertEquals("Entity was saved to database", "Moved Aboard",
-                entitySaved.leavingReasonTitle)
+        val entitySaved = repo.languageDao.findLanguagesList()[0]
+        Assert.assertEquals("Entity was saved to database", initialEntity.name,
+                entitySaved.name)
 
 
     }
@@ -113,7 +113,7 @@ class LanguageEditPresenterTest {
         runBlocking {
             val reason = repo.languageDao.findByUidAsync(testEntity.langUid)
             Assert.assertEquals("Name was saved and updated",
-                    "Russian", reason!!.langUid)
+                    "Russian", reason!!.name)
 
         }
     }
