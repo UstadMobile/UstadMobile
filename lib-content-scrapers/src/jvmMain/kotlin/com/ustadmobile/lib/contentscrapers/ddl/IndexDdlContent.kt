@@ -61,8 +61,6 @@ class IndexDdlContent {
         contentCategoryChildJoinDao = repository.contentEntryContentCategoryJoinDao
         languageDao = repository.languageDao
 
-        LanguageList().addAllLanguages()
-
         val englishLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "en")
         val farsiLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "fa")
         val pashtoLang = ContentScraperUtil.insertOrUpdateLanguageByTwoCode(languageDao, "ps")

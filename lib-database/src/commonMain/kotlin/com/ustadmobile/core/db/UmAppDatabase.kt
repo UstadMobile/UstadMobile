@@ -86,6 +86,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         verbDao.initPreloadedVerbs()
         reportDao.initPreloadedTemplates()
         leavingReasonDao.initPreloadedLeavingReasons()
+        languageDao.initPreloadedLanguages()
     }
 
     @JsName("networkNodeDao")

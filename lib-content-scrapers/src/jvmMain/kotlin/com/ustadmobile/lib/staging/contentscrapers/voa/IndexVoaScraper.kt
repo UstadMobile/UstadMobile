@@ -216,8 +216,6 @@ class IndexVoaScraper internal constructor(private val indexerUrl: URL, private 
             val languageDao = repository.languageDao
             queueDao = db.scrapeQueueItemDao
 
-            LanguageList().addAllLanguages()
-
             englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English")
 
             val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,

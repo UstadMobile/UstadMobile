@@ -98,8 +98,6 @@ class IndexEdraakK12Content {
         val languageDao = repository.languageDao
         queueDao = db.scrapeQueueItemDao
 
-        LanguageList().addAllLanguages()
-
         arabicLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "Arabic")
         var connection: HttpURLConnection? = null
         try {

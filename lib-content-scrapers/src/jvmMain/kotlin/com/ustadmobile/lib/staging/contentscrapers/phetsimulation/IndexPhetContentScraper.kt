@@ -77,7 +77,6 @@ class IndexPhetContentScraper {
         languageDao = repository!!.languageDao
         languageVariantDao = repository!!.languageVariantDao
 
-        LanguageList().addAllLanguages()
 
         val document = Jsoup.connect(urlString).get()
 

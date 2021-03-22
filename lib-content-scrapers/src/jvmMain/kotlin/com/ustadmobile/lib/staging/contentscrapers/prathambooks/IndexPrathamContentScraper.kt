@@ -91,8 +91,6 @@ class IndexPrathamContentScraper {
         containerDao = repository!!.containerDao
         languageDao = repository!!.languageDao
 
-        LanguageList().addAllLanguages()
-
         val englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English")
 
 

@@ -1,10 +1,7 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
@@ -12,6 +9,7 @@ import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Report
 import kotlin.js.JsName
 
 @Dao
@@ -69,6 +67,20 @@ abstract class LanguageDao : BaseDao<Language> {
 
     @Query("SELECT * FROM LANGUAGE")
     abstract fun findAllLanguageLive(): DoorLiveData<List<Language>>
+
+    @JsName("findByUidList")
+    @Query("SELECT langUid FROM LANGUAGE WHERE langUid IN (:uidList)")
+    abstract fun findByUidList(uidList: List<Long>): List<Long>
+
+    @JsName("replaceList")
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun replaceList(entityList: List<Language>)
+
+    fun initPreloadedLanguages() {
+        val uidsInserted = findByUidList(Language.FIXED_LANGUAGES.map { it.langUid })
+        val templateListToInsert = Language.FIXED_LANGUAGES.filter { it.langUid !in uidsInserted }
+        replaceList(templateListToInsert)
+    }
 
     companion object  {
 

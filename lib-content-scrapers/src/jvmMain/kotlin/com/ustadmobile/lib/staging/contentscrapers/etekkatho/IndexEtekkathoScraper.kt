@@ -78,8 +78,6 @@ class IndexEtekkathoScraper {
         val languageDao = repository!!.languageDao
         headingHashMap = HashMap()
 
-        LanguageList().addAllLanguages()
-
         englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English")
 
         val masterRootParent = ContentScraperUtil.createOrUpdateContentEntry(ROOT, USTAD_MOBILE,
