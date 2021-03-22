@@ -58,7 +58,13 @@
     <string name='settings'>Settings</string>
     <string name='language'>Language</string>
     <string name='add_a_new_language'>Add a new language</string>
+    <string name='add_new_language'>Add new language</string>
     <string name='select_language'>Pick Language</string>
+    <string name="languages">Languages</string>
+    <string name="edit_language">Edit Language</string>
+    <string name="two_letter_code">Two letter code (ISO 639–1)</string>
+    <string name="three_letter_code">Three letter code (ISO 639–2)</string>
+    <string name="languages_description">Add, remove, and modify languages used for categorizing educational content and user preferences</string>
     <string name='advanced'>Advanced</string>
     <string name='optional'>Optional</string>
     <string name='email'>Email</string>
