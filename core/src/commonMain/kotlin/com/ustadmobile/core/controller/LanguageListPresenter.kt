@@ -7,8 +7,12 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: LanguageListView,
@@ -61,6 +65,29 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
 
     override fun handleClickCreateNewFab() {
         systemImpl.go(LanguageEditView.VIEW_NAME, mapOf(), context)
+    }
+
+    override suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
+        return listOf(SelectionOption.HIDE)
+    }
+
+    override fun handleClickSelectionOption(selectedItem: List<Language>, option: SelectionOption) {
+        GlobalScope.launch(doorMainDispatcher()) {
+            when (option) {
+                SelectionOption.HIDE -> {
+                    repo.languageDao.toggleVisibilityLanguage(true,
+                            selectedItem.map { it.langUid })
+                    view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context), {
+
+                        GlobalScope.launch(doorMainDispatcher()){
+                            repo.languageDao.toggleVisibilityLanguage(false,
+                                    selectedItem.map { it.langUid })
+                        }
+
+                    }, MessageID.undo)
+                }
+            }
+        }
     }
 
     companion object {

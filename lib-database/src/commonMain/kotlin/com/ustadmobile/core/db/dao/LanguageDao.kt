@@ -76,6 +76,12 @@ abstract class LanguageDao : BaseDao<Language> {
     @Query("SELECT langUid FROM LANGUAGE WHERE langUid IN (:uidList)")
     abstract fun findByUidList(uidList: List<Long>): List<Long>
 
+
+    @Query("""UPDATE Language SET languageActive = :toggleVisibility, 
+                langLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                WHERE langUid IN (:selectedItem)""")
+    abstract suspend fun toggleVisibilityLanguage(toggleVisibility: Boolean, selectedItem: List<Long>)
+
     @JsName("replaceList")
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract fun replaceList(entityList: List<Language>)

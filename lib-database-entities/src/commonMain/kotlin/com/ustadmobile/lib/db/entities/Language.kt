@@ -34,6 +34,8 @@ class Language() {
     //Language Type - we are only normally interested in "L"
     var Language_Type: String? = null
 
+    var languageActive: Boolean = true
+
     @LocalChangeSeqNum
     var langLocalChangeSeqNum: Long = 0
 
@@ -141,9 +143,9 @@ class Language() {
                 Language().apply{
                     name = "پښتو"
                     langUid = PASHTO_LANG_UID
-                    iso_639_1_standard = "pus"
+                    iso_639_1_standard = "ps"
                     iso_639_2_standard = "pus"
-                    iso_639_3_standard = "ps"
+                    iso_639_3_standard = "pus"
                 },
                 Language().apply{
                     name = "فارسی"
