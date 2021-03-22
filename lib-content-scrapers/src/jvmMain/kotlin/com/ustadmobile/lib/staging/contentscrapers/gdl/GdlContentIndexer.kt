@@ -29,7 +29,7 @@ import java.net.MalformedURLException
 import java.net.URL
 import kotlin.system.exitProcess
 
-@ExperimentalStdlibApi
+
 class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: File,
                         val contentType: String, val scrapeQueueItemUid: Int, val runId: Int) : Runnable {
 

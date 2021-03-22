@@ -36,7 +36,7 @@ fun getLangCodeFromURL(sourceUrl: URL): String {
     return langCode
 }
 
-@ExperimentalStdlibApi
+
 fun getKhanEntry(englishLang: Language, contentEntryDao: ContentEntryDao): ContentEntry {
     return ContentScraperUtil.createOrUpdateContentEntry(
             "https://www.khanacademy.org/", "Khan Academy",
@@ -56,7 +56,7 @@ fun getJsonContent(sourceUrl: URL): String {
     return IOUtils.toString(getJsonURL(langCode, sourceUrl), UTF8)
 }
 
-@ExperimentalStdlibApi
+
 fun createKangLangEntry(langCode: String, langName: String, url: String, db: UmAppDatabase): ContentEntry {
 
     val langSplitArray = langCode.split("-")

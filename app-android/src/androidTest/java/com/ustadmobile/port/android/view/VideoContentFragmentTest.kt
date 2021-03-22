@@ -32,7 +32,6 @@ import org.junit.rules.TemporaryFolder
 
 
 @AdbScreenRecord("Video Content Screen Test")
-@ExperimentalStdlibApi
 class VideoContentFragmentTest : TestCase() {
 
     @JvmField

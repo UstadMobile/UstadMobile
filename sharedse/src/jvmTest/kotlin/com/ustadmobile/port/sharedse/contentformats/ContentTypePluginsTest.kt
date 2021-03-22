@@ -11,7 +11,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe.makeTempContainerFromClassResource
 import com.ustadmobile.sharedse.util.UstadTestRule
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert

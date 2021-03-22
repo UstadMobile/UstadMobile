@@ -33,7 +33,6 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMIOUtils
 import kotlinx.io.InputStream
 import java.io.*
 import java.util.*
@@ -210,7 +209,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
             } catch (e: IOException) {
                 UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
             } finally {
-                UMIOUtils.closeInputStream(prefIn)
+                prefIn?.close()
             }
         }
 

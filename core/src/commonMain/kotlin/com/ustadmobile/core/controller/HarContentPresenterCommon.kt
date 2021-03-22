@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.contentformats.har.HarContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -23,7 +22,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.js.JsName
 
-@ExperimentalStdlibApi
+
 abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, String>, view: HarView,
                                          val localHttp: String, di: DI) :
         UstadBaseController<HarView>(context, arguments, view, di) {

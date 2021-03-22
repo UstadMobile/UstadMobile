@@ -8,7 +8,6 @@ import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
@@ -57,7 +56,7 @@ import java.util.function.Consumer
  * If IOException is thrown, might be because the session expired so login again.
  * otherwise file is downloaded in its folder
  */
-@ExperimentalStdlibApi
+
 class IndexPrathamContentScraper {
     internal var prefixUrl = "https://storyweaver.org.in/api/v1/books-search?page="
 
@@ -301,7 +300,7 @@ class IndexPrathamContentScraper {
             UMLogUtil.logError("IO Error for login to Pratham")
         } finally {
             conn?.disconnect()
-            UMIOUtils.closeOutputStream(out)
+            out?.close()
         }
 
         return ""

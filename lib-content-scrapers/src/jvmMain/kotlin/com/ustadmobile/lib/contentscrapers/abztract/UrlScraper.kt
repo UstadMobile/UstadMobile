@@ -14,7 +14,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.parseMap
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
 import org.kodein.di.DI
@@ -25,7 +24,7 @@ import java.net.URL
 import java.net.URLDecoder
 import java.nio.file.Files
 
-@ExperimentalStdlibApi
+
 class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     var tempDir: File? = null

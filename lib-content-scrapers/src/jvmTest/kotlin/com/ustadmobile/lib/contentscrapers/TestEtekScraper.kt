@@ -20,7 +20,7 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 
-@ExperimentalStdlibApi
+
 class TestEtekScraper {
 
     internal val dispatcher: Dispatcher = object : Dispatcher() {

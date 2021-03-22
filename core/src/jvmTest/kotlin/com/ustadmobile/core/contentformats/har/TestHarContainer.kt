@@ -25,7 +25,6 @@ import org.kodein.di.DI
 import org.kodein.di.instance
 import java.io.File
 
-@ExperimentalStdlibApi
 class TestHarContainer {
 
     private lateinit var container: Container

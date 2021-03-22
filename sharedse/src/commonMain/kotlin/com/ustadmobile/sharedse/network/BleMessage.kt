@@ -1,7 +1,6 @@
 package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.sharedse.io.ByteBufferSe
 import com.ustadmobile.sharedse.io.GzInputStreamConstants.GZIP_MAGIC
 import com.ustadmobile.sharedse.io.GzipInputStreamSe
@@ -235,7 +234,7 @@ class BleMessage {
                 UMLog.l(UMLog.ERROR, 100, "IOException", e)
                 return arrayOf()
             } finally {
-                UMIOUtils.closeOutputStream(outputStream)
+                outputStream.close()
             }
             val totalPayLoad = outputStream.toByteArray()
             val packets = Array(numPackets) { ByteArray(mtu) }
@@ -268,7 +267,7 @@ class BleMessage {
                 try {
                     outputStream.write(packetContent, 1, packetContent.size - 1)
                 } finally {
-                    UMIOUtils.closeOutputStream(outputStream)
+                    outputStream.close()
                 }
             }
             return outputStream.toByteArray()

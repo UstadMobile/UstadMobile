@@ -43,7 +43,7 @@ import java.util.*
  * Need to go to the next page to get more content for the same subheading.
  * This can be found by taking href link of css selector li.next a
  */
-@ExperimentalStdlibApi
+
 class IndexEtekkathoScraper {
     private var url: URL? = null
     private var contentEntryDao: ContentEntryDao? = null

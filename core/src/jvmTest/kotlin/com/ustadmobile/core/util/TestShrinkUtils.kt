@@ -1,8 +1,8 @@
 package com.ustadmobile.core.util
 
-import com.github.aakira.napier.Napier
 import com.ustadmobile.core.util.ext.fitWithin
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.sharedse.io.extractResourceToFile
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -33,9 +33,11 @@ class TestShrinkUtils {
     fun testgetVideoResolutionMetadata(){
 
         val fileToCheck = temporaryFolder.newFile("newVideo.mp4")
-        UmFileUtilSe.extractResourceToFile(
-                "/com/ustadmobile/core/container/BigBuckBunny.mp4",
-                fileToCheck)
+        runBlocking {
+            extractResourceToFile(
+                    "/com/ustadmobile/core/container/BigBuckBunny.mp4",
+                    fileToCheck.path)
+        }
 
         val videoDimensions = ShrinkUtils.getVideoResolutionMetadata(fileToCheck)
         Assert.assertEquals("ffprobe found same dimensions in video",
@@ -48,9 +50,11 @@ class TestShrinkUtils {
 
         val videoFile = temporaryFolder.newFile("video.mp4")
         val newVideo = temporaryFolder.newFile("newVideo.mp4")
-        UmFileUtilSe.extractResourceToFile(
-                "/com/ustadmobile/core/container/BigBuckBunny.mp4",
-                videoFile)
+        runBlocking {
+            extractResourceToFile(
+                    "/com/ustadmobile/core/container/BigBuckBunny.mp4",
+                    videoFile.path)
+        }
 
         val fileVideoDimensions = ShrinkUtils.getVideoResolutionMetadata(videoFile)
         val newVideoDimensions = Pair(fileVideoDimensions.first, fileVideoDimensions.second).fitWithin()

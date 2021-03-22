@@ -22,6 +22,7 @@ import java.lang.Exception
 import java.net.HttpURLConnection
 import java.net.URL
 import com.github.aakira.napier.Napier
+import com.ustadmobile.core.io.ext.readFully
 
 
 class ContainerUploader2(val request: ContainerUploaderRequest2,
@@ -73,7 +74,7 @@ class ContainerUploader2(val request: ContainerUploaderRequest2,
                     }
                 }
 
-                while(coroutineContext.isActive && pipeIn.read(buffer).also { bytesRead = it } != -1) {
+                while(coroutineContext.isActive && pipeIn.readFully(buffer).also { bytesRead = it } != -1) {
                     val urlConnection = (URL("${endpoint.url}ContainerUpload2/${request.uploadUuid}/data")
                             .openConnection() as HttpURLConnection).also {
                         it.doOutput = true

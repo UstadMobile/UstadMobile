@@ -26,7 +26,6 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 @AdbScreenRecord("Har Content Screen Test")
-@ExperimentalStdlibApi
 class HarContentFragmentTest {
 
     @JvmField
