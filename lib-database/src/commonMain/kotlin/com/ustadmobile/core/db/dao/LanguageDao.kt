@@ -5,6 +5,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
@@ -65,6 +66,9 @@ abstract class LanguageDao : BaseDao<Language> {
 
     @Update
     abstract suspend fun updateAsync(entity: Language): Int
+
+    @Query("SELECT * FROM LANGUAGE")
+    abstract fun findAllLanguageLive(): DoorLiveData<List<Language>>
 
     companion object  {
 
