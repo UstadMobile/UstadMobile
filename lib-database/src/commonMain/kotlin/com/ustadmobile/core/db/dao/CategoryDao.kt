@@ -7,6 +7,7 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Category
+import com.ustadmobile.lib.db.entities.UidAndLabel
 import com.ustadmobile.door.annotation.Repository
 
 @Repository
@@ -31,6 +32,12 @@ abstract class CategoryDao : BaseDao<Category> {
          AND CAST(categoryActive AS INTEGER) = 1
     """)
     abstract suspend fun findByUidAsync(uid: Long): Category?
+
+
+    @Query("""SELECT Category.categoryUid AS uid, Category.categoryName As labelName 
+                    FROM Category WHERE categoryUid IN (:categoryList)""")
+    abstract suspend fun getCategoriesFromUids(categoryList: List<Long>): List<UidAndLabel>
+
 
     companion object {
 

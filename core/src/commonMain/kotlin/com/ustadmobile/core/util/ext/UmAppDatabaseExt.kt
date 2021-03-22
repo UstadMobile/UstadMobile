@@ -280,6 +280,28 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(entryLabelList)
         }
+        Report.LE, Report.CUSTOMER -> {
+            val personList = personDao.getPeopleFromUids(xAxisList
+                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+            UidAndLabelFormatter(personList)
+        }
+
+        Report.PRODUCT -> {
+            val productList = productDao.getProductsFromUids(xAxisList
+                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+            UidAndLabelFormatter(productList)
+        }
+        Report.PROVINCE -> {
+            val locationList = locationDao.getLocationsFromUids(xAxisList
+                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+            UidAndLabelFormatter(locationList)
+        }
+        Report.PRODUCT_CATEGORY -> {
+            val categoryList = categoryDao.getCategoriesFromUids(xAxisList
+                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+            UidAndLabelFormatter(categoryList)
+        }
+
         else ->{
             null
         }

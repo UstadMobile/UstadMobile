@@ -277,6 +277,12 @@ abstract class PersonDao : BaseDao<Person> {
     abstract fun getAllPerson(): List<Person>
 
 
+    @Query("""SELECT Person.personUid AS uid, Person.firstNames||' '||Person.lastName As labelName 
+                    FROM Person WHERE personUid IN (:personList)""")
+    abstract suspend fun getPeopleFromUids(personList: List<Long>): List<UidAndLabel>
+
+
+
     companion object {
 
         const val SORT_FIRST_NAME_ASC = 1

@@ -96,6 +96,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                     LEFT JOIN SaleItem ON SaleItem.saleItemSaleUid = Sale.saleUid 
                         AND CAST(SaleItem.saleItemActive AS INTEGER) = 1
                     LEFT JOIN Product ON Product.productUid = SaleItem.saleItemProductUid
+                    LEFT JOIN Category ON Category.categoryUid = (SELECT productCategoryJoinCategoryUid FROM ProductCategoryJoin WHERE productCategoryJoinProductUid = Product.productUid AND productCategoryJoinActive)
                     LEFT JOIN Person as LE ON LE.personUid = :leUid
                     LEFT JOIN Person as SaleLE ON SaleLE.personUid = Sale.salePersonUid
                     LEFT JOIN Location ON Location.locationUid = Sale.saleLocationUid 
@@ -321,7 +322,7 @@ private fun groupBy(value: Int, dbType: Int): String {
         Report.GENDER -> " SaleLE.gender "
         Report.CLASS -> "Clazz.clazzUid "
         Report.LE -> " SaleLE.personUid "
-        Report.PRODUCT_CATEGORY -> " Product.productUid "
+        Report.PRODUCT_CATEGORY -> " Category.categoryUid "
         Report.PRODUCT -> " Product.productUid "
         Report.CUSTOMER -> " Customer.personUid "
         Report.PROVINCE -> " Sale.saleLocationUid "

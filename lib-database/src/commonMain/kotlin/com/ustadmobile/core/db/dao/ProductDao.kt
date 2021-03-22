@@ -8,6 +8,7 @@ import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Category
 import com.ustadmobile.lib.db.entities.Product
+import com.ustadmobile.lib.db.entities.UidAndLabel
 import com.ustadmobile.lib.db.entities.ProductWithInventoryCount
 import com.ustadmobile.door.annotation.Repository
 
@@ -75,6 +76,11 @@ abstract class ProductDao : BaseDao<Product> {
 
     @Query(QUERY_FIND_ALL_CATEGORY_BY_LE)
     abstract suspend fun findAllCategoriesByLeUidAsync(leUid: Long): List<Category>
+
+    @Query("""SELECT Product.productUid AS uid, Product.productName As labelName 
+                    FROM Product WHERE productUid IN (:productList)""")
+    abstract suspend fun getProductsFromUids(productList: List<Long>): List<UidAndLabel>
+
 
     companion object {
 
