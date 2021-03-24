@@ -178,7 +178,7 @@ class PersonEditPresenter(context: Any,
             noMatchPasswordError != null ||
             firstNamesFieldError != null ||
             lastNameFieldError != null ||
-            genderFieldError != null
+            genderFieldError != null ||
                     firstNameError != null ||
                     lastNameError != null
 
