@@ -1,5 +1,9 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.dao.StatementDao
+import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -7,14 +11,22 @@ import com.ustadmobile.lib.db.entities.PersonWithStatementDisplay
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
-class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<String, String>, view: ContentEntryDetailAttemptsListView,
+class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<String, String>,
+                                              view: ContentEntryDetailAttemptsListView,
                                               di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<ContentEntryDetailAttemptsListView, PersonWithStatementDisplay>(context, arguments, view, di, lifecycleOwner){
+    : UstadListPresenter<ContentEntryDetailAttemptsListView, PersonWithStatementDisplay>(
+        context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
 
     private var contentEntryUid: Long = 0L
 
+    var searchText: String? = null
+
+    override val sortOptions: List<SortOrderOption>
+        get() = SORT_OPTIONS
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+        selectedSortOption = SORT_OPTIONS[0]
         contentEntryUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
     }
 
@@ -28,10 +40,22 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
         updateListOnView()
     }
 
+    override fun onClickSort(sortOption: SortOrderOption) {
+        super.onClickSort(sortOption)
+        updateListOnView()
+    }
 
     private fun updateListOnView() {
-        view.list = repo.personDao.findPersonsWithContentEntryAttempts(contentEntryUid, mLoggedInPersonUid)
+        view.list = repo.personDao.findPersonsWithContentEntryAttempts(contentEntryUid,
+                mLoggedInPersonUid, searchText.toQueryLikeParam(),
+                selectedSortOption?.flag ?: StatementDao.SORT_FIRST_NAME_ASC)
     }
+
+    override fun onSearchSubmitted(text: String?) {
+        searchText = text
+        updateListOnView()
+    }
+
 
     override fun handleClickCreateNewFab() {
 
@@ -41,4 +65,19 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
        /* systemImpl.go(LeavingReasonEditView.VIEW_NAME,
                     mapOf(UstadView.ARG_ENTITY_UID to leavingReason.leavingReasonUid.toString()), context)*/
     }
+
+    companion object {
+
+        val SORT_OPTIONS = listOf(
+                SortOrderOption(MessageID.first_name, StatementDao.SORT_FIRST_NAME_ASC, true),
+                SortOrderOption(MessageID.first_name, StatementDao.SORT_FIRST_NAME_DESC, false),
+                SortOrderOption(MessageID.last_name, StatementDao.SORT_LAST_NAME_ASC, true),
+                SortOrderOption(MessageID.last_name, StatementDao.SORT_LAST_NAME_DESC, false),
+                SortOrderOption(MessageID.last_active, StatementDao.SORT_LAST_ACTIVE_ASC, true),
+                SortOrderOption(MessageID.last_active, StatementDao.SORT_LAST_ACTIVE_DESC, false)
+        )
+
+    }
+
+
 }

@@ -1,11 +1,10 @@
 package com.ustadmobile.port.android.view
 
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemContentEntryDetailAttemptBinding
 import com.ustadmobile.core.controller.ContentEntryDetailAttemptsListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
@@ -49,15 +48,25 @@ class ContentEntryDetailAttemptsListFragment(): UstadListViewFragment<PersonWith
 
     }
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
         mPresenter = ContentEntryDetailAttemptsListPresenter(requireContext(), arguments.toStringMap(),
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = PersonWithStatementDisplayListRecyclerAdapter(mPresenter)
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter()
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(
+                onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         return view
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        menu.findItem(R.id.menu_search).isVisible = true
     }
 
     override fun onDestroyView() {

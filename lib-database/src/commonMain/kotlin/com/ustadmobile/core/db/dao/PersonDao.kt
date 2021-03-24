@@ -287,10 +287,30 @@ abstract class PersonDao : BaseDao<Person> {
           WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
          AND PersonGroupMember.groupMemberActive  
          AND Person.personUid IN (SELECT statementPersonUid FROM StatementEntity WHERE 
-         statementContentEntryUid = :contentEntryUid)
+         statementContentEntryUid = :contentEntryUid) 
+         AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
          GROUP BY Person.personUid 
+         ORDER BY CASE(:sortOrder)
+                WHEN ${StatementDao.SORT_FIRST_NAME_ASC} THEN Person.firstNames
+                WHEN ${StatementDao.SORT_LAST_NAME_ASC} THEN Person.lastName
+                ELSE ''
+            END ASC,
+            CASE(:sortOrder)
+                WHEN ${StatementDao.SORT_FIRST_NAME_DESC} THEN Person.firstNames
+                WHEN ${StatementDao.SORT_LAST_NAME_DESC} THEN Person.lastName
+                ELSE ''
+            END DESC,
+            CASE(:sortOrder)
+                WHEN ${StatementDao.SORT_LAST_ACTIVE_ASC} THEN endDate 
+                ELSE 0
+            END ASC,
+            CASE(:sortOrder)
+                WHEN ${StatementDao.SORT_LAST_ACTIVE_DESC} then endDate
+                ELSE 0
+            END DESC
          """)
-    abstract fun findPersonsWithContentEntryAttempts(contentEntryUid: Long, accountPersonUid: Long)
+    abstract fun findPersonsWithContentEntryAttempts(contentEntryUid: Long, accountPersonUid: Long,
+                                                    searchText: String, sortOrder: Int)
                                     : DataSource.Factory<Int, PersonWithStatementDisplay>
 
 
