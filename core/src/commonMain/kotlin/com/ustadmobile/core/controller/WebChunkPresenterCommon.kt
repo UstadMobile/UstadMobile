@@ -8,6 +8,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.view.ContentEntryDetailViewPagerView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NO_IFRAMES
 import com.ustadmobile.core.view.WebChunkView
@@ -92,7 +93,7 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
         val impl = UstadMobileSystemImpl.instance
 
         val dest = sourceUrl.replace("content-detail?",
-                ContentEntry2DetailView.VIEW_NAME + "?")
+                ContentEntryDetailViewPagerView.VIEW_NAME + "?")
         val params = UMFileUtil.parseURLQueryString(dest)
 
         if (params.containsKey("sourceUrl")) {

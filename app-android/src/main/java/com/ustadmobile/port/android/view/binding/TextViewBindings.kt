@@ -6,6 +6,7 @@ import android.text.format.DateFormat
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
+import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -17,6 +18,7 @@ import java.util.*
 import com.soywiz.klock.DateFormat as KlockDateFormat
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.util.ext.outcomeToString
+import java.util.concurrent.TimeUnit
 
 @BindingAdapter("textMessageId")
 fun TextView.setTextMessageId(messageId: Int) {
@@ -279,5 +281,42 @@ fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
     val fullText =entityRole.entityRoleRole?.roleName +  " @ " +
             entityRole.entityRoleScopeName + scopeType
     text = fullText
+
+}
+
+@BindingAdapter("statementDate")
+fun TextView.setStatementDate(person: PersonWithStatementDisplay){
+    val dateFormatter = DateFormat.getDateFormat(context)
+    var statementDate = dateFormatter.format(person.startDate)
+
+    if(person.endDate != 0L && person.endDate != Long.MAX_VALUE){
+        val startDate = DateTime(person.startDate)
+        val endDate = DateTime(person.endDate)
+        if(startDate.dayOfYear != endDate.dayOfYear){
+            statementDate += " - ${dateFormatter.format(person.endDate)}"
+        }
+    }
+
+    text = statementDate
+
+}
+
+@BindingAdapter("duration")
+fun TextView.setDuration(duration: Long){
+    val hours = TimeUnit.MILLISECONDS.toHours(duration).toInt()
+
+    var minutes = TimeUnit.MILLISECONDS.toMinutes(duration)
+
+    var durationString = ""
+
+    if(hours >= 1){
+        minutes -= TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(duration))
+        durationString += "${resources.getQuantityString(R.plurals.duration_hours, hours, hours)} "
+    }
+
+    durationString += resources.getQuantityString(R.plurals.duration_minutes,
+            minutes.toInt(), minutes.toInt())
+
+    text = durationString
 
 }

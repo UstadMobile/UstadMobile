@@ -46,6 +46,8 @@ class ViewNameToDestMap: DestinationProvider {
             ContentEntryListTabsView.VIEW_NAME to UstadDestination(R.id.home_content_dest),
             ContentEntryList2View.VIEW_NAME to UstadDestination(R.id.content_entry_list_dest),
             ContentEntry2DetailView.VIEW_NAME to UstadDestination(R.id.content_entry_details_dest),
+            ContentEntryDetailViewPagerView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_viewpager_dest),
+            ContentEntryDetailAttemptsListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_attempt_dest),
             ClazzLogEditAttendanceView.VIEW_NAME to UstadDestination(R.id.clazz_log_edit_attendance_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             ClazzWorkDetailProgressListView.VIEW_NAME to UstadDestination(R.id.clazzwork_detail_progress_list),

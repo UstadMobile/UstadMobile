@@ -178,6 +178,16 @@
         android:label="@string/select_language" />
 
     <fragment
+        android:id="@+id/content_entry_detail_viewpager_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryDetailViewPagerFragment"
+        android:label="" />
+
+    <fragment
+        android:id="@+id/content_entry_detail_attempt_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryDetailAttemptsListFragment"
+        android:label="" />
+
+    <fragment
         android:id="@+id/content_entry_details_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntry2DetailFragment"
         android:label="" />
