@@ -1,15 +1,12 @@
 package com.ustadmobile.sharedse.network.containerfetcher
 
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherListener2
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherRequest2
 import kotlinx.coroutines.Deferred
-
-data class ContainerFetcherRequest(val url: String, val fileDest: String) {
-    val id: Int
-        get() = (url.hashCode() * 31) + fileDest.hashCode()
-}
 
 abstract class ContainerFetcher() {
 
-    abstract suspend fun enqueue(request: ContainerFetcherRequest,
-                                 listener: ContainerFetcherListener? = null): Deferred<Int>
+    abstract suspend fun enqueue(request: ContainerFetcherRequest2,
+                                 listener: ContainerFetcherListener2? = null): Deferred<Int>
 
 }

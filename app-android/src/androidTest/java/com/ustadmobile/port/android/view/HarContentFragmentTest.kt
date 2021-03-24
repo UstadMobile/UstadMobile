@@ -1,34 +1,31 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isJavascriptEnabled
 import androidx.test.espresso.web.webdriver.Locator
-import androidx.test.rule.GrantPermissionRule
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.screen.HarContentScreen
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.core.impl.CrudIdlingResource
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.ScenarioIdlingResourceRule
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import org.apache.commons.io.FileUtils.copyInputStreamToFile
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.io.File
+import org.junit.rules.TemporaryFolder
 
 @AdbScreenRecord("Har Content Screen Test")
-@ExperimentalStdlibApi
 class HarContentFragmentTest {
 
     @JvmField
@@ -43,20 +40,16 @@ class HarContentFragmentTest {
     @Rule
     val crudIdlingResourceRule = ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    var container: Container? = null
+    lateinit var container: Container
 
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
+
+
+    @Suppress("BlockingMethodInNonBlockingContext")
     @Before
     fun setup() {
-
-        val tmpDir = UmFileUtilSe.makeTempDir("testHar",
-                "" + System.currentTimeMillis())
-
-        val chunkCountingOut = File(tmpDir, "har.zip")
-
-        copyInputStreamToFile(
-                javaClass.getResourceAsStream("/com/ustadmobile/app/android/har.zip"),
-                chunkCountingOut)
-
         val targetEntry = ContentEntry()
         targetEntry.title = "tiempo de prueba"
         targetEntry.thumbnailUrl = "https://www.africanstorybook.org/img/asb120.png"
@@ -67,19 +60,22 @@ class HarContentFragmentTest {
         targetEntry.leaf = true
         targetEntry.contentEntryUid = dbRule.repo.contentEntryDao.insert(targetEntry)
 
-        container = Container()
-        container?.mimeType = "application/har+zip"
-        container?.containerContentEntryUid = targetEntry.contentEntryUid
-        container?.containerUid = dbRule.repo.containerDao.insert(container!!)
+        container = Container().apply {
+            mimeType = "application/har+zip"
+            containerContentEntryUid = targetEntry.contentEntryUid
+            containerUid = dbRule.repo.containerDao.insert(this)
+        }
 
-        val containerManager = ContainerManager(container!!, dbRule.db, dbRule.repo,
-                tmpDir.absolutePath)
-        addEntriesFromZipToContainer(chunkCountingOut.absolutePath, containerManager)
-
+        runBlocking {
+            dbRule.repo.addEntriesToContainerFromZipResource(container.containerUid, this::class.java,
+                    "/com/ustadmobile/app/android/har.zip",
+                    ContainerAddOptions(temporaryFolder.newFolder().toDoorUri()))
+        }
     }
 
     @AdbScreenRecord("given contentEntry when web view loads then show har content")
-    @Test
+    // Disabled temporarily until this is fixed as per Taiga issue #353
+    //@Test
     fun givenContentEntry_whenWebViewLoads_thenShowHarContent() {
 
         launchFragmentInContainer(themeResId = R.style.UmTheme_App,

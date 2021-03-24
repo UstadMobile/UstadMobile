@@ -8,10 +8,12 @@ import com.github.aakira.napier.Napier
 import com.linkedin.android.litr.MediaTransformer
 import com.linkedin.android.litr.TransformationListener
 import com.linkedin.android.litr.analytics.TrackTransformationInfo
-import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.util.ext.extractVideoResolutionMetadata
 import com.ustadmobile.core.util.ext.fitWithin
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -141,9 +143,8 @@ class VideoTypePluginAndroid : VideoTypePlugin() {
                 containerUid = repo.containerDao.insert(this)
             }
 
-            val containerManager = ContainerManager(container, db, repo, containerBaseDir)
-
-            containerManager.addEntries(ContainerManager.FileEntrySource(newVideo, newVideo.name))
+            repo.addFileToContainer(container.containerUid, newVideo.toDoorUri(), newVideo.name,
+                ContainerAddOptions(File(containerBaseDir).toDoorUri()))
 
             videoFile.delete()
 

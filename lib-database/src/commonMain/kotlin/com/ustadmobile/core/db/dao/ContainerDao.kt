@@ -75,14 +75,11 @@ abstract class ContainerDao : BaseDao<Container> {
     @JsName("findByUidAsync")
     abstract suspend fun findByUidAsync(containerUid: Long): Container?
 
-    @Query("UPDATE Container " +
-            "SET cntNumEntries = (SELECT COUNT(*) FROM ContainerEntry WHERE ceContainerUid = Container.containerUid)," +
-            "fileSize = (SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize FROM ContainerEntry " +
-            "JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid " +
-            "WHERE ContainerEntry.ceContainerUid = Container.containerUid) " +
-            "WHERE containerUid = :containerUid")
-    @JsName("updateContainerSizeAndNumEntries")
+    @Query(UPDATE_SIZE_AND_NUM_ENTRIES_SQL)
     abstract fun updateContainerSizeAndNumEntries(containerUid: Long)
+
+    @Query(UPDATE_SIZE_AND_NUM_ENTRIES_SQL)
+    abstract suspend fun updateContainerSizeAndNumEntriesAsync(containerUid: Long)
 
     @Query("UPDATE Container SET fileSize = " +
             "(SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize " +
@@ -133,6 +130,25 @@ abstract class ContainerDao : BaseDao<Container> {
         private const val SELECT_ACTIVE_RECENT_CONTAINER = "Select Container.* FROM Container " +
                 "WHERE Container.containerContentEntryUid = :contentEntry " +
                 "ORDER BY Container.cntLastModified DESC LIMIT 1"
+
+        private const val UPDATE_SIZE_AND_NUM_ENTRIES_SQL = """
+            UPDATE Container 
+               SET cntNumEntries = COALESCE(
+                   (SELECT COUNT(*) 
+                      FROM ContainerEntry 
+                     WHERE ceContainerUid = Container.containerUid), 0),
+                   fileSize = COALESCE(
+                   (SELECT SUM(ContainerEntryFile.ceCompressedSize) AS totalSize 
+                      FROM ContainerEntry
+                      JOIN ContainerEntryFile ON ContainerEntry.ceCefUid = ContainerEntryFile.cefUid
+                     WHERE ContainerEntry.ceContainerUid = Container.containerUid), 0),
+                   cntLastModBy = 
+                   (SELECT nodeClientId 
+                      FROM SyncNode 
+                     LIMIT 1)
+                     
+             WHERE containerUid = :containerUid
+        """
     }
 
 }

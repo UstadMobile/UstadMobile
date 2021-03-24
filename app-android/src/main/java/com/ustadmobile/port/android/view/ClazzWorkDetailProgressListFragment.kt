@@ -9,20 +9,22 @@ import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.MergeAdapter
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.ClazzWorkDetailProgressListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.impl.UMAndroidUtil
+import com.ustadmobile.core.util.ext.toListFilterOptions
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.door.ext.asRepositoryLiveData
-import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
+import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.ClazzWorkWithMetrics
 import com.ustadmobile.port.android.view.ext.observeIfFragmentViewIsReady
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 
-class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWithClazzWorkProgress,
-        ClazzMemberWithClazzWorkProgress>(), ClazzWorkDetailProgressListView {
+class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzEnrolmentWithClazzWorkProgress,
+        ClazzEnrolmentWithClazzWorkProgress>(), ClazzWorkDetailProgressListView {
 
     private var mPresenter: ClazzWorkDetailProgressListPresenter? = null
 
@@ -36,7 +38,7 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWit
         metricsRecyclerAdapter?.submitList(t)
     }
 
-    override val listPresenter: UstadListPresenter<*, in ClazzMemberWithClazzWorkProgress>?
+    override val listPresenter: UstadListPresenter<*, in ClazzEnrolmentWithClazzWorkProgress>?
         get() = mPresenter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -48,7 +50,8 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzMemberWit
 
         metricsRecyclerAdapter = ClazzWorkMetricsRecyclerAdapter(null, false)
         mDataRecyclerViewAdapter = ClazzWorkProgressListRecyclerAdapter(mPresenter)
-        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(onClickSort = this,
+                sortOrderOption = mPresenter?.sortOptions?.get(0))
 
         mMergeRecyclerViewAdapter = MergeAdapter(mUstadListHeaderRecyclerViewAdapter,
                 metricsRecyclerAdapter, mDataRecyclerViewAdapter)

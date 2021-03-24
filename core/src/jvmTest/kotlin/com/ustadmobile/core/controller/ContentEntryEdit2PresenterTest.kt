@@ -80,7 +80,7 @@ class ContentEntryEdit2PresenterTest {
 
             onBlocking { getStorageDirsAsync(any()) }.thenAnswer {
                 mutableListOf(UMStorageDir("", "", removableMedia = false,
-                        isAvailable = false, isUserSpecific = false))
+                        isAvailable = false))
             }
 
             on { getString(any(), any()) }.thenAnswer { errorMessage }
@@ -101,7 +101,7 @@ class ContentEntryEdit2PresenterTest {
         runBlocking {
             whenever(systemImpl.getStorageDirsAsync(any())).thenAnswer {
                 mutableListOf(UMStorageDir("", "", removableMedia = false,
-                        isAvailable = false, isUserSpecific = false))
+                        isAvailable = false))
             }
         }
 

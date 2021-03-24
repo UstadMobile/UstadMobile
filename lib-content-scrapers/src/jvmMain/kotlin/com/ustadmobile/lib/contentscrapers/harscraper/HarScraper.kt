@@ -21,7 +21,6 @@ typealias ScrapeFilterFn = (harEntry: HarEntry) -> HarEntry
 
 typealias WaitConditionFn = (waitCondition: WebDriverWait) -> Unit
 
-@ExperimentalStdlibApi
 fun setupProxyWithSelenium(proxy: BrowserMobProxyServer, seleniumProxy: Proxy, name: String): ChromeDriver {
 
     ContentScraperUtil.setChromeDriverLocation()
@@ -32,7 +31,7 @@ fun setupProxyWithSelenium(proxy: BrowserMobProxyServer, seleniumProxy: Proxy, n
     return driver
 
 }
-@ExperimentalStdlibApi
+
 fun scrapeUrlwithHar(proxy: BrowserMobProxyServer, driver: ChromeDriver, url: String, destination: File, waitCondition: WaitConditionFn?, filter: ScrapeFilterFn?) {
 
     try {

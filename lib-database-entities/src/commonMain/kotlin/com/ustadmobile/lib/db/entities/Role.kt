@@ -199,7 +199,10 @@ open class Role() {
                 PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT or
                 PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE or
                 PERMISSION_CLAZZWORK_SELECT or
-                PERMISSION_CLAZZWORK_UPDATE
+                PERMISSION_CLAZZWORK_UPDATE or
+                        PERMISSION_PERSON_LEARNINGRECORD_SELECT or
+                        PERMISSION_PERSON_LEARNINGRECORD_INSERT or
+                        PERMISSION_PERSON_LEARNINGRECORD_UPDATE
 
 
         const val ROLE_CLAZZ_STUDENT_NAME = "Class Student"

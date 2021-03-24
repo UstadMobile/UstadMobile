@@ -201,8 +201,7 @@ abstract class PersonDao : BaseDao<Person> {
          SELECT Person.* 
          FROM Person
          LEFT JOIN Person AS LE ON LE.personUid = :leUid
-         WHERE
-        
+         WHERE 
         Person.personUid NOT IN (:excludeSelected)
         AND Person.firstNames || ' ' || Person.lastName LIKE :searchText
         AND (:filterLE = 0 OR Person.personGoldoziType = ${Person.GOLDOZI_TYPE_LE})
@@ -210,7 +209,6 @@ abstract class PersonDao : BaseDao<Person> {
         AND (:filterCustomer = 0 OR Person.personGoldoziType = ${Person.GOLDOZI_TYPE_CUSTOMER})
         AND ( CAST(Person.admin AS INTEGER) = 0 OR CAST(LE.admin AS INTEGER) = 1) 
         AND Person.personCreatedBy = :leUid
-            
          GROUP BY Person.personUid
          ORDER BY CASE(:sortOrder)
                 WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
@@ -235,8 +233,8 @@ abstract class PersonDao : BaseDao<Person> {
         SELECT Person.* FROM Person 
             WHERE
             (:excludeClazz = 0 OR :excludeClazz NOT IN
-            (SELECT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid 
-            AND :timestamp BETWEEN ClazzMember.clazzMemberDateJoined AND ClazzMember.clazzMemberDateLeft ))
+            (SELECT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid 
+            AND :timestamp BETWEEN ClazzEnrolment.clazzEnrolmentDateJoined AND ClazzEnrolment.clazzEnrolmentDateLeft ))
             AND (:excludeSchool = 0 OR :excludeSchool NOT IN
             (SELECT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.personUid 
             AND :timestamp BETWEEN SchoolMember.schoolMemberJoinDate AND SchoolMember.schoolMemberLeftDate )) 
@@ -306,12 +304,12 @@ abstract class PersonDao : BaseDao<Person> {
             OR
             (
             ((EntityRole.erTableId = ${Person.TABLE_ID} AND EntityRole.erEntityUid = Person.personUid) OR 
-            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzMemberClazzUid FROM ClazzMember WHERE clazzMemberPersonUid = Person.personUid)) OR
+            (EntityRole.erTableId = ${Clazz.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT clazzEnrolmentClazzUid FROM ClazzEnrolment WHERE clazzEnrolmentPersonUid = Person.personUid)) OR
             (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (SELECT DISTINCT schoolMemberSchoolUid FROM SchoolMember WHERE schoolMemberPersonUid = Person.PersonUid)) OR
             (EntityRole.erTableId = ${School.TABLE_ID} AND EntityRole.erEntityUid IN (
                 SELECT DISTINCT Clazz.clazzSchoolUid 
                 FROM Clazz
-                JOIN ClazzMember ON ClazzMember.clazzMemberClazzUid = Clazz.clazzUid AND ClazzMember.clazzMemberPersonUid = Person.personUid
+                JOIN ClazzEnrolment ON ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid AND ClazzEnrolment.clazzEnrolmentPersonUid = Person.personUid
             ))
             ) 
             AND (Role.rolePermissions & 

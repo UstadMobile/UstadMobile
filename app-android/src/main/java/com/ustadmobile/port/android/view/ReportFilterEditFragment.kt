@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.AdapterView
 import androidx.core.os.bundleOf
 import androidx.lifecycle.Observer
-import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,7 +21,6 @@ import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
-import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ReportFilterEditView
@@ -47,9 +45,6 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
 
     private var mPresenter: ReportFilterEditPresenter? = null
 
-    override val viewContext: Any
-        get() = requireContext()
-
     override val mEditPresenter: UstadEditPresenter<*, ReportFilter>?
         get() = mPresenter
 
@@ -63,6 +58,8 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             mBinding?.fragmentReportFilterEditDialogValuesNumberText?.text?.clear()
             mBinding?.fragmentReportFilterEditDialogValuesBetweenXText?.text?.clear()
             mBinding?.fragmentReportFilterEditDialogValuesBetweenYText?.text?.clear()
+            uidAndLabelFilterItemRecyclerAdapter?.submitList(listOf())
+            mPresenter?.clearUidAndLabelList()
         }
 
     override var dropDownValueOptions: List<MessageIdOption>? = null
@@ -217,6 +214,16 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
             })
         }
 
+        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                LeavingReason::class.java) {
+            val reason = it.firstOrNull() ?: return@observeResult
+
+            mPresenter?.handleAddOrEditUidAndLabel(UidAndLabel().apply {
+                uid = reason.leavingReasonUid
+                labelName = reason.leavingReasonTitle
+            })
+        }
+
         uidAndLabelFilterItemRecyclerAdapter?.presenter = mPresenter
 
     }
@@ -260,6 +267,8 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
                     bundleOf(ContentEntryList2View.ARG_CONTENT_FILTER to
                                     ContentEntryList2View.ARG_LIBRARIES_CONTENT,
                             UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()))
+        }else if(entity?.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON){
+            navigateToPickEntityFromList(LeavingReason::class.java, R.id.leaving_reason_list)
         }
     }
 

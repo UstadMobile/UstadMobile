@@ -1,12 +1,13 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import org.kodein.di.DI
@@ -20,10 +21,13 @@ class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
 
+    var loggedInPersonUid = 0L
+
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
+        loggedInPersonUid = accountManager.activeAccount.personUid
 
         GlobalScope.launch {
             view.schoolCodeVisible = repo.schoolDao.personHasPermissionWithSchool(
@@ -40,7 +44,10 @@ class SchoolDetailOverviewPresenter(context: Any, arguments: Map<String, String>
          } ?: SchoolWithHolidayCalendar()
 
         val clazzes = withTimeoutOrNull(2000) {
-            db.clazzDao.findAllClazzesBySchoolLive(entityUid)
+            repo.clazzDao.findClazzesWithPermission(
+                    "".toQueryLikeParam(),
+                    loggedInPersonUid, listOf(), 0, 0,
+                    0, systemTimeInMillis(), Role.PERMISSION_CLAZZ_SELECT,  entityUid)
         }
         view.schoolClazzes = clazzes
 

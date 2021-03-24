@@ -73,9 +73,6 @@ class SaleEditFragment: UstadEditFragment<SaleWithCustomerAndLocation>(), SaleEd
         }
     }
 
-    override val viewContext: Any
-        get() = requireContext()
-
     override var saleItemList: DoorMutableLiveData<List<SaleItemWithProduct>>? = null
         set(value) {
             field?.removeObserver(saleItemObserver)

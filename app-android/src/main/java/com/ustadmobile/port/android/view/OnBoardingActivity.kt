@@ -40,9 +40,6 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
 
     private lateinit var screenList: List<OnBoardScreen>
 
-    override val viewContext: Any
-        get() = this
-
     //Do nothing - there isn't really any loading of this
     override var loading: Boolean
         get() = false

@@ -8,7 +8,7 @@ import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.ClazzMember
+import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.lib.db.entities.Role
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -45,11 +45,11 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
 
         val clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
         val loggedInPersonUid = accountManager.activeAccount.personUid
-        val clazzMember: ClazzMember? =
-                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
+        val clazzEnrolment: ClazzEnrolment? =
+                db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
 
         view.list = repo.clazzWorkDao.findWithMetricsByClazzUidLive(
-                clazzUid, clazzMember?.clazzMemberRole ?: ClazzMember.ROLE_STUDENT,
+                clazzUid, clazzEnrolment?.clazzEnrolmentRole ?: ClazzEnrolment.ROLE_STUDENT,
                 UMCalendarUtil.getDateInMilliPlusDays(0), selectedSortOption?.flag ?: 0,
                 searchText.toQueryLikeParam())
     }

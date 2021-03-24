@@ -12,6 +12,7 @@ import androidx.lifecycle.Observer
 import androidx.navigation.fragment.findNavController
 import androidx.paging.DataSource
 import androidx.paging.PagedList
+import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
@@ -25,6 +26,7 @@ import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.SchoolDetailOverviewView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.Clazz
+import com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails
 import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 
@@ -34,7 +36,7 @@ interface SchoolDetailOverviewEventListener {
 
 class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalendar>(),
         SchoolDetailOverviewView, SchoolDetailOverviewEventListener,
-        Observer<PagedList<Clazz>>{
+        Observer<PagedList<ClazzWithListDisplayDetails>>{
 
     private var mBinding: FragmentSchoolOverviewBinding? = null
 
@@ -44,13 +46,13 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
 
     private var clazzRecyclerView : RecyclerView? = null
 
-    protected var currentLiveData: LiveData<PagedList<Clazz>>? = null
+    protected var currentLiveData: LiveData<PagedList<ClazzWithListDisplayDetails>>? = null
 
-    private val clazzObserver = Observer<List<Clazz>?>{
+    private val clazzObserver = Observer<List<ClazzWithListDisplayDetails>?>{
         t -> clazzRecyclerAdapter?.submitList(t)
     }
 
-    override var schoolClazzes: DataSource.Factory<Int, Clazz>? = null
+    override var schoolClazzes: DataSource.Factory<Int, ClazzWithListDisplayDetails>? = null
         get() = field
         set(value) {
             currentLiveData?.removeObserver(this)
@@ -59,8 +61,8 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
         }
 
     class ClazzRecyclerAdapter(var presenter: SchoolDetailOverviewPresenter?)
-        : ListAdapter<Clazz,
-            ClazzRecyclerAdapter.ClazzViewHolder>(SchoolEditFragment.DIFF_CALLBACK_CLAZZ) {
+        : ListAdapter<ClazzWithListDisplayDetails,
+            ClazzRecyclerAdapter.ClazzViewHolder>(DIFF_CALLBACK_CLAZZ) {
 
         class ClazzViewHolder(val binding: ItemClazzSimpleDetailBinding)
             : RecyclerView.ViewHolder(binding.root)
@@ -132,7 +134,7 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
             mBinding?.schoolCodeVisible = value
         }
 
-    override fun onChanged(t: PagedList<Clazz>?) {
+    override fun onChanged(t: PagedList<ClazzWithListDisplayDetails>?) {
         clazzRecyclerAdapter?.submitList(t)
     }
 
@@ -144,6 +146,19 @@ class SchoolDetailOverviewFragment: UstadDetailFragment<SchoolWithHolidayCalenda
                 as? ClipboardManager
         clipboard?.setPrimaryClip(ClipData(ClipData.newPlainText("link", code)))
         showSnackBar(requireContext().getString(R.string.copied_to_clipboard))
+    }
+
+    companion object{
+        val DIFF_CALLBACK_CLAZZ = object: DiffUtil.ItemCallback<ClazzWithListDisplayDetails>() {
+            override fun areItemsTheSame(oldItem: ClazzWithListDisplayDetails, newItem: ClazzWithListDisplayDetails): Boolean {
+                return oldItem.clazzUid == newItem.clazzUid
+            }
+
+            override fun areContentsTheSame(oldItem: ClazzWithListDisplayDetails,
+                                            newItem: ClazzWithListDisplayDetails): Boolean {
+                return oldItem == newItem
+            }
+        }
     }
 
 }

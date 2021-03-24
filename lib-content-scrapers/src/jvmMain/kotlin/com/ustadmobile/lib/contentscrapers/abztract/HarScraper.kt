@@ -3,16 +3,19 @@ package com.ustadmobile.lib.contentscrapers.abztract
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.har.HarRegexPair
-import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.core.io.ext.addHarEntryToContainer
+import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JS
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
-import com.ustadmobile.lib.contentscrapers.util.HarEntrySource
-import com.ustadmobile.lib.contentscrapers.util.StringEntrySource
+import com.ustadmobile.lib.contentscrapers.util.toHarEntryContent
 import com.ustadmobile.lib.db.entities.Container
+import com.ustadmobile.lib.db.entities.ContainerEntry
 import io.github.bonigarcia.wdm.WebDriverManager
 import kotlinx.coroutines.runBlocking
 import net.lightbody.bmp.BrowserMobProxyServer
@@ -40,7 +43,6 @@ typealias ScrapeFilterFn = (harEntry: HarEntry) -> HarEntry
 
 typealias WaitConditionFn = (waitCondition: WebDriverWait) -> Unit
 
-@ExperimentalStdlibApi
 abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     protected var chromeDriver: ChromeDriver
@@ -52,7 +54,7 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 
     private val offlineReplacement = "window.addEventListener(\\\"offlineDisabled\\\""
 
-    data class HarScraperResult(val updated: Boolean, val containerManager: ContainerManager?)
+    data class HarScraperResult(val updated: Boolean, val containerUid: Long)
 
 
     init {
@@ -111,13 +113,13 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 
         val isContentUpdated = block.invoke(proxy)
 
-        val containerManager = if (isContentUpdated) {
+        val containerUid = if (isContentUpdated) {
             makeHarContainer(proxy, proxy.har.log.entries, filters, regexes, addHarContent)
         } else {
-            null
+            0
         }
 
-        return HarScraperResult(isContentUpdated, containerManager)
+        return HarScraperResult(isContentUpdated, containerUid)
     }
 
     private fun checkStartingUrlNot404(entries: List<HarEntry>, url: String) {
@@ -129,10 +131,13 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
     }
 
 
-    private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>, regexes: List<HarRegexPair>, addHarContent: Boolean): ContainerManager {
+    private fun makeHarContainer(proxy: BrowserMobProxyServer, entries: MutableList<HarEntry>, filters: List<ScrapeFilterFn>, regexes: List<HarRegexPair>, addHarContent: Boolean): Long {
 
-        val containerManager = ContainerManager(createBaseContainer(ScraperConstants.MIMETYPE_HAR), db, db, containerFolder.absolutePath)
+        val container = createBaseContainer(ScraperConstants.MIMETYPE_HAR)
+        val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
+        val containerEntries = mutableListOf<ContainerEntry>()
 
+        val containerPathsAdded = mutableListOf<String>()
         entries.forEachIndexed { counter, it ->
 
             try {
@@ -165,10 +170,15 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
                 }
 
                 runBlocking {
-                    if(containerManager.getEntry(containerPath) != null) {
+                    val containerEntry = repo.containerEntryDao.findByPathInContainer(container.containerUid, containerPath)
+                    if(containerEntry != null) {
                         containerPath += counter
                     }
-                    containerManager.addEntries(HarEntrySource(it, listOf(containerPath)))
+                    if(containerPath in containerPathsAdded) {
+                        containerPath += counter
+                    }
+
+                    repo.addHarEntryToContainer(container.containerUid, it.toHarEntryContent(), containerPath, containerAddOptions)
                 }
 
                 it.response.content.text = containerPath
@@ -186,11 +196,17 @@ abstract class HarScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntry
 
         if (addHarContent) {
             runBlocking {
-                containerManager.addEntries(StringEntrySource(writer.toString(), listOf("harcontent")))
+                val harContentfile = File.createTempFile("harContent", "")
+                val contentInputStream = writer.toString().byteInputStream()
+                contentInputStream.writeToFile(harContentfile)
+                val containerAddOptions = ContainerAddOptions(storageDirUri = containerFolder.toDoorUri())
+                repo.addFileToContainer(container.containerUid, harContentfile.toDoorUri(),
+                        harContentfile.name, containerAddOptions)
+                harContentfile.delete()
             }
         }
 
-        return containerManager
+        return container.containerUid
     }
 
     fun addHarEntry(content: String, size: Int = content.length, encoding: String = UTF_ENCODING, mimeType: String, requestUrl: String, requestMethod: String = "GET"): HarEntry {

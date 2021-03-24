@@ -49,7 +49,7 @@ open class ClazzWork {
 
     var clazzWorkDueTime: Long = 0
 
-    var clazzWorkDueDateTime: Long = 0
+    var clazzWorkDueDateTime: Long = Long.MAX_VALUE
 
     var clazzWorkSubmissionType: Int = 0
 

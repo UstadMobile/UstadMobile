@@ -19,12 +19,14 @@ import org.kodein.di.DI
 class   ClazzListPresenter(context: Any, arguments: Map<String, String>, view: ClazzList2View,
                          di: DI, lifecycleOwner: DoorLifecycleOwner,
                          private val clazzList2ItemListener:
-                         DefaultClazzListItemListener = DefaultClazzListItemListener(view, ListViewMode.BROWSER, context, di))
+                         DefaultClazzListItemListener = DefaultClazzListItemListener(view, ListViewMode.BROWSER, context, arguments, di))
     : UstadListPresenter<ClazzList2View, Clazz>(context, arguments, view, di, lifecycleOwner), ClazzListItemListener by clazzList2ItemListener, OnSortOptionSelected, OnSearchSubmitted {
 
     var loggedInPersonUid = 0L
 
     private var filterExcludeMembersOfSchool: Long = 0
+
+    private var filterAlreadySelectedList = listOf<Long>()
 
     private var filterByPermission: Long = 0
 
@@ -37,6 +39,10 @@ class   ClazzListPresenter(context: Any, arguments: Map<String, String>, view: C
         super.onCreate(savedState)
 
         filterExcludeMembersOfSchool = arguments[ARG_FILTER_EXCLUDE_MEMBERSOFSCHOOL]?.toLong() ?: 0L
+        filterAlreadySelectedList = arguments[ClazzList2View.ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST]
+                ?.split(",")?.filter { it.isNotEmpty() }?.map { it.trim().toLong() }
+                ?: listOf()
+
         clazzList2ItemListener.listViewMode = mListMode
 
         filterByPermission = arguments[UstadView.ARG_FILTER_BY_PERMISSION]?.toLong()
@@ -51,17 +57,23 @@ class   ClazzListPresenter(context: Any, arguments: Map<String, String>, view: C
     }
 
     private fun updateList() {
-        view.list = repo.clazzDao.findClazzesWithPermission(searchText.toQueryLikeParam(),
-                loggedInPersonUid, filterExcludeMembersOfSchool,
-                selectedSortOption?.flag ?: 0, view.checkedFilterOptionChip?.optionId?.toInt() ?: 0,
-                systemTimeInMillis(), filterByPermission)
+        view.list = repo.clazzDao.findClazzesWithPermission(
+                searchText.toQueryLikeParam(),
+                loggedInPersonUid, filterAlreadySelectedList,
+                filterExcludeMembersOfSchool, selectedSortOption?.flag ?: 0,
+                view.checkedFilterOptionChip?.optionId ?: 0,
+                systemTimeInMillis(), filterByPermission, 0)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         //All user should be able to see the plus button - but only those with permission can create a new class
         view.newClazzListOptionVisible = repo.entityRoleDao.userHasTableLevelPermission(
                 loggedInPersonUid, PERMISSION_CLAZZ_INSERT)
-        return true
+
+        return when(mListMode){
+            ListViewMode.PICKER -> view.newClazzListOptionVisible
+            ListViewMode.BROWSER -> true
+        }
     }
 
     override fun handleClickCreateNewFab() {

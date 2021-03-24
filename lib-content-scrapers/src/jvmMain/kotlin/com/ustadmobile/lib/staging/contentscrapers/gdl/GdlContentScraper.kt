@@ -14,7 +14,7 @@ import org.apache.commons.lang.exception.ExceptionUtils
 import java.io.File
 import java.net.HttpURLConnection
 import java.net.URL
-@ExperimentalStdlibApi
+
 class GdlContentScraper(var scrapeUrl: URL, var destLocation: File, var containerDir: File, var parentEntry: ContentEntry, var contentType: String, var sqiUid: Int) : Runnable {
 
 

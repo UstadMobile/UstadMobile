@@ -235,6 +235,10 @@ fun ImageView.setImageLookupMap(imageLookupMap: Map<Int, Int>?, imageLookupFallb
 @BindingAdapter(value=["iconStatusFlag"])
 fun ImageView.setIconOnStatusFlag(statusFlag: Int){
     when {
+        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED ->{
+            setImageResource(R.drawable.ic_content_complete)
+            visibility = View.VISIBLE
+        }
         (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED -> {
             setImageResource(R.drawable.ic_content_complete)
             visibility = View.VISIBLE

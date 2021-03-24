@@ -6,11 +6,11 @@ import com.nhaarman.mockitokotlin2.doAnswer
 import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.tincan.UmAccountGroupActor
 import com.ustadmobile.core.util.UMFileUtil
@@ -21,19 +21,24 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
 import com.ustadmobile.core.view.XapiPackageContentView
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.util.test.extractTestResourceToFile
 import kotlinx.coroutines.Runnable
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
-import org.junit.*
-import org.kodein.di.*
-import org.mockito.Mockito.*
+import org.junit.Assert
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.rules.TemporaryFolder
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 import org.mockito.Mockito.timeout
-import java.io.File
+import org.mockito.Mockito.verify
 import java.util.*
-import java.util.concurrent.CountDownLatch
 
 
 class XapiPackageContentPresenterTest {
@@ -48,16 +53,9 @@ class XapiPackageContentPresenterTest {
     @Rule
     var ustadTestRule = UstadTestRule()
 
-    private lateinit var xapiTmpFile: File
-
-    private var containerDirTmp: File? = null
-
     private lateinit var xapiContainer: Container
 
     private lateinit var mockedView: XapiPackageContentView
-
-
-    private val mountLatch = CountDownLatch(1)
 
     private val contentEntryUid = 1234L
 
@@ -65,6 +63,11 @@ class XapiPackageContentPresenterTest {
 
     private lateinit var endpoint: Endpoint
 
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
+
+    @Suppress("BlockingMethodInNonBlockingContext")
     @Before
     fun setup() {
         val endpointUrl = account.endpointUrl!!
@@ -86,16 +89,11 @@ class XapiPackageContentPresenterTest {
         }
         xapiContainer.containerUid = repo.containerDao.insert(xapiContainer)
 
-        xapiTmpFile = File.createTempFile("testxapipackagecontentpresenter",
-                "xapiTmpFile")
-        extractTestResourceToFile("/com/ustadmobile/core/contentformats/XapiPackage-JsTetris_TCAPI.zip",
-                xapiTmpFile)
-
-        containerDirTmp = UmFileUtilSe.makeTempDir("testxapipackagecontentpresenter",
-                "containerDirTmp")
-        val containerManager = ContainerManager(xapiContainer, db, repo,
-                containerDirTmp!!.absolutePath)
-        addEntriesFromZipToContainer(xapiTmpFile.absolutePath, containerManager)
+        runBlocking {
+            repo.addEntriesToContainerFromZipResource(xapiContainer.containerUid, this::class.java,
+                "/com/ustadmobile/core/contentformats/XapiPackage-JsTetris_TCAPI.zip",
+                ContainerAddOptions(temporaryFolder.newFolder().toDoorUri()))
+        }
 
         mockedView = mock{
             on { runOnUiThread(any())}.doAnswer{
@@ -140,13 +138,6 @@ class XapiPackageContentPresenterTest {
         }
 
     }
-
-    @After
-    fun tearDown() {
-        xapiTmpFile.delete()
-        UmFileUtilSe.deleteRecursively(containerDirTmp!!)
-    }
-
 
     @Test
     fun givenValidXapiPackage_whenCreated_shouldLoadAndSetTitle() {

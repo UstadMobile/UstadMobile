@@ -9,7 +9,7 @@ object HarContentScreen : KScreen<HarContentScreen>() {
     override val layoutId: Int?
         get() = R.layout.fragment_har_content
 
-    @ExperimentalStdlibApi
+
     override val viewClass: Class<*>?
         get() = HarContentFragment::class.java
 

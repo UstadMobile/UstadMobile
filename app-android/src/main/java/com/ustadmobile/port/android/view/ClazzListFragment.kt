@@ -101,6 +101,7 @@ class ClazzListFragment(): UstadListViewFragment<Clazz, ClazzWithListDisplayDeta
             if(filterExcludeMembersOfSchool != 0L){
                 args = bundleOf(UstadView.ARG_SCHOOL_UID to filterExcludeMembersOfSchool.toString())
             }
+            args.putAll(arguments)
             navigateToEditEntity(null, R.id.clazz_edit_dest, Clazz::class.java,
                     argBundle = args)
         } else {

@@ -655,6 +655,7 @@
                 tools:listitem="@layout/item_clazz_member_with_clazz_detail"
                />
 
+
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/roles_and_permissions_heading_textview"

@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.contentformats.xapi.Actor
 import com.ustadmobile.core.contentformats.xapi.State
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint

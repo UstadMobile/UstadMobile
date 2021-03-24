@@ -9,11 +9,14 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
+import com.ustadmobile.core.io.ext.openInputStream
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.folder.TestFolderIndexer
+import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import net.lightbody.bmp.core.har.Har
@@ -27,11 +30,10 @@ import org.kodein.di.*
 import java.io.File
 import java.io.StringWriter
 import java.lang.IllegalArgumentException
-import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file.Files
 import javax.naming.InitialContext
 
-@ExperimentalStdlibApi
+
 class TestHarScraper {
 
 
@@ -70,7 +72,7 @@ class TestHarScraper {
                     it.clearAllTables()
                 })
             }
-            bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+            bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
                 containerFolder
             }
             bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
@@ -103,14 +105,14 @@ class TestHarScraper {
         var writer = StringWriter()
 
         var scraper = TestChildHarScraper(entry.contentEntryUid, endpoint, di)
-        val(isContentUpdated, containerManager) = scraper.startHarScrape(url.toString()){
+        val(isContentUpdated, containerUid) = scraper.startHarScrape(url.toString()){
             true
         }
 
         scraper.proxy.har.writeTo(writer)
 
-        var harEntry = containerManager?.getEntry("harcontent")
-        var harContent = containerManager?.getInputStream(harEntry!!)?.readBytes()?.toString(UTF_8)
+        var harEntry = db.containerEntryDao.findByPathInContainer(containerUid, "harcontent")
+        var harContent = harEntry?.containerEntryFile?.openInputStream()?.readString()
 
         Assert.assertEquals("har content matches", writer.toString(), harContent)
 
@@ -125,15 +127,12 @@ class TestHarScraper {
             }
 
             var path = it.response.content.text
-            var pathEntry = containerManager?.getEntry(path)
+            var pathEntry: ContainerEntryWithContainerEntryFile? = db.containerEntryDao.findByPathInContainer(containerUid, path)
+                    ?: return@forEach
 
-            if(pathEntry == null){
-                return@forEach
-            }
-            var contentBytes = containerManager?.getInputStream(pathEntry)?.readBytes()
+            var contentBytes =  pathEntry?.containerEntryFile?.openInputStream()?.readBytes()
 
-            var originalBytes: ByteArray?
-            originalBytes = when {
+            var originalBytes: ByteArray? = when {
                 path.contains("index.html") -> javaClass.getResourceAsStream(UMFileUtil.joinPaths(RESOURCE_PATH,"index.html")).readBytes()
                 path.contains("style.css") -> javaClass.getResourceAsStream(UMFileUtil.joinPaths(RESOURCE_PATH,"style.css")).readBytes()
                 else -> byteArrayOf()
@@ -175,12 +174,12 @@ class TestHarScraper {
         var regex = "[?&]ts=[0-9]+".toRegex()
 
         var scraper = TestChildHarScraper(entry.contentEntryUid, endpoint, di)
-        val(isContentUpdated, containerManager)  = scraper.startHarScrape(url.toString(), regexes = listOf(HarRegexPair(regex.toString(),""))){
+        val(isContentUpdated, containerUid)  = scraper.startHarScrape(url.toString(), regexes = listOf(HarRegexPair(regex.toString(),""))){
             true
         }
 
-        var harEntry = containerManager?.getEntry("harcontent")
-        var harContent = containerManager?.getInputStream(harEntry!!)?.readBytes()?.toString(UTF_8)
+        var harEntry = db.containerEntryDao.findByPathInContainer(containerUid, "harcontent")
+        var harContent = harEntry?.containerEntryFile?.openInputStream()!!.readString()
 
         val gson = GsonBuilder().disableHtmlEscaping().create()
 

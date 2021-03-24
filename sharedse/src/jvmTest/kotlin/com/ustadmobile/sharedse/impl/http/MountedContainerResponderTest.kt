@@ -1,14 +1,16 @@
 package com.ustadmobile.sharedse.impl.http
 
 import com.nhaarman.mockitokotlin2.mock
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.ContainerManagerCommon
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.io.ext.addFileToContainer
+import com.ustadmobile.core.io.ext.openEntryInputStream
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.port.sharedse.ext.dataInflatedIfRequired
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_CONTAINERUID_INDEX
 import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Companion.PARAM_DB_INDEX
@@ -26,8 +28,6 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.io.IOException
-import java.io.InputStream
-import java.util.zip.GZIPInputStream
 
 class MountedContainerResponderTest {
 
@@ -39,7 +39,7 @@ class MountedContainerResponderTest {
 
     private lateinit var container: Container
 
-    private lateinit var containerManager: ContainerManager
+//    private lateinit var containerManager: ContainerManager
 
     @JvmField
     @Rule
@@ -57,20 +57,20 @@ class MountedContainerResponderTest {
 
         container = Container()
         container.containerUid = repo.containerDao.insert(container)
-        containerManager = ContainerManager(container, db, repo,
-                containerTmpDir.absolutePath)
 
         val tmpFiles = (1..2).map {index ->
             File(containerTmpDir, "testfile$index.png").also {file ->
-                UmFileUtilSe.extractResourceToFile("/com/ustadmobile/port/sharedse/container/testfile$index.png",
-                        file)
+                this::class.java.getResourceAsStream("/com/ustadmobile/port/sharedse/container/testfile$index.png")
+                        .writeToFile(file)
             }
         }
 
         runBlocking {
-            containerManager.addEntries(ContainerManagerCommon.AddEntryOptions(dontUpdateTotals = false),
-                    ContainerManager.FileEntrySource(tmpFiles[0], "subfolder/testfile1.png"),
-                    ContainerManager.FileEntrySource(tmpFiles[1], "subfolder/test file2.png"))
+            val containerAddOptions = ContainerAddOptions(containerTmpDir.toDoorUri())
+            repo.addFileToContainer(container.containerUid, tmpFiles[0].toDoorUri(),
+                    "subfolder/testfile1.png", containerAddOptions)
+            repo.addFileToContainer(container.containerUid, tmpFiles[1].toDoorUri(),
+                    "subfolder/test file2.png", containerAddOptions)
         }
     }
 
@@ -117,8 +117,8 @@ class MountedContainerResponderTest {
         val response = responder.get(mockUriResource, mutableMapOf(), mockSession)
         val gzipHeader = response.getHeader("Content-Encoding")
         Assert.assertEquals("Content was gzipped", "gzip", gzipHeader)
-        val containerIn = containerManager.getInputStream(
-                containerManager.getEntry("subfolder/testfile1.png")!!)
+        val containerIn = db.containerEntryDao.openEntryInputStream(container.containerUid,
+                ("subfolder/testfile1.png"))!!
         Assert.assertArrayEquals("Data returned by URI responder matches actual container entry",
                 containerIn.use { it.readBytes() },
                 response.dataInflatedIfRequired().use { it.readBytes() })
@@ -167,8 +167,8 @@ class MountedContainerResponderTest {
 
         val response = responder.get(mockUriResource, mutableMapOf(), mockSession)
 
-        val containerIn = containerManager.getInputStream(
-                containerManager.getEntry("subfolder/testfile1.png")!!)
+        val containerIn = db.containerEntryDao.openEntryInputStream(
+                container.containerUid, "subfolder/testfile1.png")!!
         Assert.assertArrayEquals("Data returned by URI responder matches actual container entry",
                 containerIn.use { it.readBytes() },
                 response.data.use { it.readBytes() })

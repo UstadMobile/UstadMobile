@@ -272,6 +272,26 @@
         />
 
     <fragment
+        android:id="@+id/clazz_enrolment_list"
+        android:name="com.ustadmobile.port.android.view.ClazzEnrolmentListFragment"
+        />
+
+    <fragment
+        android:id="@+id/clazz_enrolment_edit"
+        android:name="com.ustadmobile.port.android.view.ClazzEnrolmentEditFragment"
+        />
+
+    <fragment
+        android:id="@+id/leaving_reason_list"
+        android:name="com.ustadmobile.port.android.view.LeavingReasonListFragment"
+        />
+
+    <fragment
+        android:id="@+id/leaving_reason_edit"
+        android:name="com.ustadmobile.port.android.view.LeavingReasonEditFragment"
+        />
+
+    <fragment
         android:id="@+id/report_detail_dest"
         android:name="com.ustadmobile.port.android.view.ReportDetailFragment"
         />

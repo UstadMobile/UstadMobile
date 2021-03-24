@@ -3,7 +3,6 @@ package com.ustadmobile.lib.contentscrapers.voa
 import com.google.gson.GsonBuilder
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.JQUERY_JS
@@ -53,7 +52,7 @@ import javax.xml.transform.TransformerException
  * Store the quiz data, store the page data, add some css and tags to existing page to make it more mobile friendly
  * Write a tin can file for the html content and zip everything in the directory.
  */
-@ExperimentalStdlibApi
+
 class VoaScraper : Runnable {
 
     private lateinit var containerDir: File
@@ -362,10 +361,9 @@ class VoaScraper : Runnable {
             conn.setRequestProperty("Referer", scrapUrl!!.toString())
             out = DataOutputStream(conn.outputStream)
             out.writeBytes(requestParams.toString())
-            out.flush()
-            out.close()
         } finally {
-            UMIOUtils.closeOutputStream(out)
+            out?.flush()
+            out?.close()
         }
         return conn
     }

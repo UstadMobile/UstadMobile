@@ -4,24 +4,24 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
-import com.toughra.ustadmobile.databinding.ItemClazzMemberWithClazzWorkProgressListBinding
+import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentWithClazzWorkProgressListBinding
 import com.ustadmobile.core.controller.ClazzWorkDetailProgressListPresenter
-import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
+import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzWorkProgress
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class ClazzWorkProgressListRecyclerAdapter(
         var presenter: ClazzWorkDetailProgressListPresenter?)
-    : SelectablePagedListAdapter<ClazzMemberWithClazzWorkProgress,
+    : SelectablePagedListAdapter<ClazzEnrolmentWithClazzWorkProgress,
         ClazzWorkProgressListRecyclerAdapter.ClazzWorkProgressListViewHolder>(DIFF_CALLBACK) {
 
     class ClazzWorkProgressListViewHolder(
-            val itemBinding: ItemClazzMemberWithClazzWorkProgressListBinding)
+            val itemBinding: ItemClazzEnrolmentWithClazzWorkProgressListBinding)
         : RecyclerView.ViewHolder(itemBinding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int)
             : ClazzWorkProgressListViewHolder {
-        val itemBinding = ItemClazzMemberWithClazzWorkProgressListBinding.inflate(
+        val itemBinding = ItemClazzEnrolmentWithClazzWorkProgressListBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false)
         itemBinding.presenter = presenter
         itemBinding.selectablePagedListAdapter = this
@@ -31,11 +31,11 @@ class ClazzWorkProgressListRecyclerAdapter(
     override fun onBindViewHolder(holder: ClazzWorkProgressListViewHolder,
                                   position: Int) {
         val item = getItem(position)
-        holder.itemBinding.clazzMemberWithClazzWorkProgress = item
-        holder.itemView.tag = item?.mClazzMember?.clazzMemberUid?:0L
-        holder.itemBinding.progressBar2.tag = item?.mClazzMember?.clazzMemberUid?:0L
-        holder.itemBinding.itemPersonLine2Text.tag = item?.mClazzMember?.clazzMemberUid?:0L
-        holder.itemBinding.itemClazzworkProgressMemberName.tag = item?.mClazzMember?.clazzMemberUid?:0L
+        holder.itemBinding.clazzEnrolmentWithClazzWorkProgress = item
+        holder.itemView.tag = item?.personUid
+        holder.itemBinding.progressBar2.tag = item?.personUid
+        holder.itemBinding.itemPersonLine2Text.tag = item?.personUid
+        holder.itemBinding.itemClazzworkProgressMemberName.tag = item?.personUid
         holder.itemView.setSelectedIfInList(item, selectedItems, DIFF_CALLBACK)
     }
 
@@ -45,16 +45,16 @@ class ClazzWorkProgressListRecyclerAdapter(
     }
 
     companion object{
-        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzMemberWithClazzWorkProgress> = object
-            : DiffUtil.ItemCallback<ClazzMemberWithClazzWorkProgress>() {
-            override fun areItemsTheSame(oldItem: ClazzMemberWithClazzWorkProgress,
-                                         newItem: ClazzMemberWithClazzWorkProgress): Boolean {
+        val DIFF_CALLBACK: DiffUtil.ItemCallback<ClazzEnrolmentWithClazzWorkProgress> = object
+            : DiffUtil.ItemCallback<ClazzEnrolmentWithClazzWorkProgress>() {
+            override fun areItemsTheSame(oldItem: ClazzEnrolmentWithClazzWorkProgress,
+                                         newItem: ClazzEnrolmentWithClazzWorkProgress): Boolean {
                 return oldItem.personUid == newItem.personUid
             }
 
-            override fun areContentsTheSame(oldItem: ClazzMemberWithClazzWorkProgress,
-                                            newItem: ClazzMemberWithClazzWorkProgress): Boolean {
-                return oldItem.mClazzMember == newItem.mClazzMember
+            override fun areContentsTheSame(oldItem: ClazzEnrolmentWithClazzWorkProgress,
+                                            newItem: ClazzEnrolmentWithClazzWorkProgress): Boolean {
+                return oldItem == newItem
             }
         }
     }

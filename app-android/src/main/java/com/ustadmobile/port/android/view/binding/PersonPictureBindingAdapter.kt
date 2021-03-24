@@ -24,6 +24,7 @@ import java.io.File
 
 
 @BindingAdapter(value=["personPicturePersonUid", "personPictureVisibilityGoneIfNoPicture"], requireAll = false)
+@Deprecated("This is not supported")
 fun ImageView.setPersonPicture(personPicturePersonUid: Long?, personPictureVisibilityGoneIfNoPicture: Boolean?){
     val personUid = personPicturePersonUid ?: 0L
 

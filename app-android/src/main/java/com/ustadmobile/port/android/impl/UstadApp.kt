@@ -24,7 +24,6 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
@@ -46,13 +45,14 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
-import com.ustadmobile.core.impl.DestinationProvider
+import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
+import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import io.ktor.client.*
@@ -64,6 +64,7 @@ import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
+import java.io.File
 
 import java.util.concurrent.TimeUnit
 
@@ -91,9 +92,11 @@ open class UstadApp : BaseUstadApp(), DIAware {
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val attachmentFilters = listOf(
                     ImageResizeAttachmentFilter("PersonPicture", 1280, 1280))
-            instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
+            val attachmentDir = File(applicationContext.filesDir.siteDataSubDir(context),
+                    UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
+            instance<UmAppDatabase>(tag = TAG_DB).asRepository(applicationContext,
                     context.url, "", defaultHttpClient(), useClientSyncManager = true,
-                    attachmentFilters = attachmentFilters).also {
+                    attachmentFilters = attachmentFilters, attachmentsDir = attachmentDir.absolutePath).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
             }
         }
@@ -152,7 +155,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ContentEntryOpener(di, context)
         }
 
-        bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
+        bind<ContainerUploadManager>() with scoped(EndpointScope.Default).singleton {
+            ContainerUploadManagerCommonJvm(di, context)
+        }
 
         bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
             ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),

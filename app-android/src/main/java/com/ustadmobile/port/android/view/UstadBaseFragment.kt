@@ -115,9 +115,6 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
         super.onDestroy()
     }
 
-    override val viewContext: Any
-        get() = requireContext()
-
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }

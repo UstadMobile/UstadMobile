@@ -41,6 +41,10 @@
         <variable
             name="registrationMode"
             type="boolean" />
+        
+        <variable
+            name="hideClazzes"
+            type="boolean" />
 
         <variable
             name="activityEventHandler"
@@ -344,6 +348,7 @@
 
             <TextView
                 android:visibility="gone"
+
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/clazzlist_header_textview"
                 android:layout_width="match_parent"
@@ -355,6 +360,7 @@
 
             <androidx.recyclerview.widget.RecyclerView
                 android:visibility="gone"
+
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:id="@+id/clazzlist_recyclerview"
                 android:layout_width="match_parent"
@@ -379,7 +385,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="@dimen/dimen_8dp"
-                android:visibility="@{isAdmin ?  View.VISIBLE: View.GONE}"
+                android:visibility="@{isAdmin ?  View.GONE: View.GONE}"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/roles_and_permissions_header_textview" />

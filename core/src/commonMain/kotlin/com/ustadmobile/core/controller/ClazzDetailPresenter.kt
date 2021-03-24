@@ -7,6 +7,7 @@ import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_FILTER_BY_CLAZZUID
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.Dispatchers
@@ -15,7 +16,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.coroutines.*
 import com.ustadmobile.lib.db.entities.Role
-import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
 
@@ -64,14 +64,16 @@ class ClazzDetailPresenter(context: Any,
     private suspend fun setupTabs(clazz: Clazz) {
         val entityUid = arguments[ARG_ENTITY_UID]?.toLong() ?: 0L
         val personUid = accountManager.activeAccount.personUid
-        view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
-                "${ClazzMemberListView.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid") +
-                CLAZZ_FEATURES.filter {featureFlag ->
-                    (clazz.clazzFeatures and featureFlag) > 0 &&  db.clazzDao.personHasPermissionWithClazz(personUid, entityUid,
-                        FEATURE_PERMISSION_MAP[featureFlag] ?: -1)
-                }.map {
-                    (VIEWNAME_MAP[it] ?: "INVALID") + "?$ARG_FILTER_BY_CLAZZUID=$entityUid"
-                }
+        GlobalScope.launch(doorMainDispatcher()) {
+            view.tabs = listOf("${ClazzDetailOverviewView.VIEW_NAME}?$ARG_ENTITY_UID=$entityUid",
+                    "${ClazzMemberListView.VIEW_NAME}?$ARG_FILTER_BY_CLAZZUID=$entityUid") +
+                    CLAZZ_FEATURES.filter { featureFlag ->
+                        (clazz.clazzFeatures and featureFlag) > 0 && db.clazzDao.personHasPermissionWithClazz(personUid, entityUid,
+                                FEATURE_PERMISSION_MAP[featureFlag] ?: -1)
+                    }.map {
+                        (VIEWNAME_MAP[it] ?: "INVALID") + "?$ARG_FILTER_BY_CLAZZUID=$entityUid"
+                    }
+        }
     }
 
     companion object {

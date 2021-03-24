@@ -26,7 +26,7 @@ import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
 
-@ExperimentalStdlibApi
+
 class TestGoogleDriveScraper {
 
     @Rule
@@ -56,7 +56,7 @@ class TestGoogleDriveScraper {
                     it.clearAllTables()
                 })
             }
-            bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+            bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
                 containerDir
             }
             bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
