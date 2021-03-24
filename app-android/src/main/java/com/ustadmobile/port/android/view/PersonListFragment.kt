@@ -132,7 +132,8 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
      */
     override fun onClick(view: View?) {
         if (view?.id == R.id.item_createnew_layout)
-            navigateToEditEntity(null, R.id.person_edit_dest, Person::class.java)
+            navigateToEditEntity(null, R.id.person_edit_dest, Person::class.java,
+            argBundle = arguments?: Bundle())
         else {
             super.onClick(view)
         }

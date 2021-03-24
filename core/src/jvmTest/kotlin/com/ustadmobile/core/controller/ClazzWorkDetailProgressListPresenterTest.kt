@@ -13,11 +13,12 @@ import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
-import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZMEMBER_UID
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CLAZZWORK_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.util.test.ext.TestClazzWork
 import com.ustadmobile.util.test.ext.createTestContentEntriesAndJoinToClazzWork
@@ -110,12 +111,13 @@ class ClazzWorkDetailProgressListPresenterTest {
 
 
         verify(clazzWorkDaoSpy, timeout(5000)).findClazzWorkWithMetricsByClazzWorkUid(
-                testClazzWork.clazzWork.clazzWorkUid)
+                eq(testClazzWork.clazzWork.clazzWorkUid), any())
         verify(mockView, timeout(5000)).list = any()
 
 
         verify(clazzWorkDaoSpy, timeout(5000)).findStudentProgressByClazzWork(
-                testClazzWork.clazzWork.clazzWorkUid, ClazzWorkDao.SORT_FIRST_NAME_ASC)
+                eq(testClazzWork.clazzWork.clazzWorkUid), eq(ClazzWorkDao.SORT_FIRST_NAME_ASC),
+                any(), any())
         verify(mockView, timeout(5000)).list = any()
 
     }
@@ -133,14 +135,15 @@ class ClazzWorkDetailProgressListPresenterTest {
 
         val list = runBlocking {
             db.clazzWorkDao.findStudentProgressByClazzWorkTest(
-                    testClazzWork.clazzWork.clazzWorkUid, ClazzWorkDao.SORT_FIRST_NAME_ASC)
+                    testClazzWork.clazzWork.clazzWorkUid,
+                    ClazzWorkDao.SORT_FIRST_NAME_ASC, currentTime = systemTimeInMillis())
         }
 
         presenter.handleClickEntry(list.get(0))
 
         verify(systemImpl, timeout(5000)).go(eq(ClazzWorkSubmissionMarkingView.VIEW_NAME),
-                eq(mapOf(ARG_CLAZZWORK_UID to testClazzWork.clazzWork.clazzWorkUid.toString(), ARG_CLAZZMEMBER_UID to
-                list.get(0).mClazzMember?.clazzMemberUid.toString())), any())
+                eq(mapOf(ARG_CLAZZWORK_UID to testClazzWork.clazzWork.clazzWorkUid.toString(), ARG_PERSON_UID to
+                list.get(0).personUid.toString())), any())
     }
 
 

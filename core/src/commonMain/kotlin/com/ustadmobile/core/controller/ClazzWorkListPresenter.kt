@@ -42,11 +42,11 @@ class ClazzWorkListPresenter(context: Any, arguments: Map<String, String>, view:
 
         val clazzUid = arguments[UstadView.ARG_FILTER_BY_CLAZZUID]?.toLong() ?: 0L
         val loggedInPersonUid = accountManager.activeAccount.personUid
-        val clazzMember: ClazzMember? =
-                db.clazzMemberDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
+        val clazzEnrolment: ClazzEnrolment? =
+                db.clazzEnrolmentDao.findByPersonUidAndClazzUidAsync(loggedInPersonUid, clazzUid)
 
         view.list = repo.clazzWorkDao.findWithMetricsByClazzUidLive(
-                clazzUid, clazzMember?.clazzMemberRole ?: ClazzMember.ROLE_STUDENT,
+                clazzUid, clazzEnrolment?.clazzEnrolmentRole ?: ClazzEnrolment.ROLE_STUDENT,
                 UMCalendarUtil.getDateInMilliPlusDays(0), selectedSortOption?.flag ?: 0,
                 searchText.toQueryLikeParam())
     }

@@ -2,13 +2,16 @@ package com.ustadmobile.core.util.ext
 
 import androidx.paging.DataSource
 import com.soywiz.klock.DateTime
+import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.schedule.localEndOfDay
 import com.ustadmobile.core.schedule.localMidnight
 import com.ustadmobile.core.schedule.toOffsetByTimezone
 import com.ustadmobile.core.util.graph.*
+import com.ustadmobile.door.DoorDbType
 import com.ustadmobile.door.SimpleDoorQuery
 import com.ustadmobile.door.ext.dbType
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -46,6 +49,49 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(clazz: Clazz, impl: UstadMobil
         clazz.clazzPendingStudentsPersonGroupUid, Role.ROLE_CLAZZ_STUDENT_PENDING_UID.toLong()))
 }
 
+
+suspend fun UmAppDatabase.createPersonGroupAndMemberWithEnrolment(entity: ClazzEnrolment){
+
+    val clazzWithSchoolVal = clazzDao.getClazzWithSchool(entity.clazzEnrolmentClazzUid)
+    ?: throw IllegalArgumentException("Class does not exist")
+
+    val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
+    entity.clazzEnrolmentDateJoined = DateTime(entity.clazzEnrolmentDateJoined)
+            .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
+    if(entity.clazzEnrolmentDateLeft != Long.MAX_VALUE){
+        entity.clazzEnrolmentDateLeft = DateTime(entity.clazzEnrolmentDateLeft)
+                .toOffsetByTimezone(clazzTimeZone).localEndOfDay.utc.unixMillisLong
+    }
+
+    if (entity.clazzEnrolmentUid == 0L) {
+        entity.clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(entity)
+    } else {
+        clazzEnrolmentDao.updateAsync(entity)
+    }
+
+    val personGroupUid = when(entity.clazzEnrolmentRole) {
+        ClazzEnrolment.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
+        ClazzEnrolment.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
+        ClazzEnrolment.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
+        else -> null
+    }
+
+    if(personGroupUid != null) {
+
+        val list = personGroupMemberDao.checkPersonBelongsToGroup(personGroupUid, entity.clazzEnrolmentPersonUid)
+
+        if(list.isEmpty()){
+            PersonGroupMember().also {
+                it.groupMemberPersonUid = entity.clazzEnrolmentPersonUid
+                it.groupMemberGroupUid = personGroupUid
+                it.groupMemberUid = personGroupMemberDao.insertAsync(it)
+            }
+        }
+
+    }
+
+}
+
 /**
  * Enrol the given person into the given class. The effective date of joining is midnight as per
  * the timezone of the class (e.g. when a teacher adds a student to the system who just joined and
@@ -53,26 +99,26 @@ suspend fun UmAppDatabase.createNewClazzAndGroups(clazz: Clazz, impl: UstadMobil
  */
 suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Person, clazzUid: Long,
                                                               role: Int,
-                                                              clazzWithSchool: ClazzWithSchool? = null): ClazzMemberWithPerson {
+                                                              clazzWithSchool: ClazzWithSchool? = null): ClazzEnrolmentWithPerson {
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(clazzUid)
         ?: throw IllegalArgumentException("Class does not exist")
 
     val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
     val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
-    val clazzMember = ClazzMemberWithPerson().apply {
-        clazzMemberPersonUid = personToEnrol.personUid
-        clazzMemberClazzUid = clazzUid
-        clazzMemberRole = role
-        clazzMemberActive = true
-        clazzMemberDateJoined = joinTime
+    val clazzMember = ClazzEnrolmentWithPerson().apply {
+        clazzEnrolmentPersonUid = personToEnrol.personUid
+        clazzEnrolmentClazzUid = clazzUid
+        clazzEnrolmentRole = role
+        clazzEnrolmentActive = true
+        clazzEnrolmentDateJoined = joinTime
         person = personToEnrol
-        clazzMemberUid = clazzMemberDao.insertAsync(this)
+        clazzEnrolmentUid = clazzEnrolmentDao.insertAsync(this)
     }
 
     val personGroupUid = when(role) {
-        ClazzMember.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
-        ClazzMember.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
-        ClazzMember.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
+        ClazzEnrolment.ROLE_TEACHER -> clazzWithSchoolVal.clazzTeachersPersonGroupUid
+        ClazzEnrolment.ROLE_STUDENT -> clazzWithSchoolVal.clazzStudentsPersonGroupUid
+        ClazzEnrolment.ROLE_STUDENT_PENDING -> clazzWithSchoolVal.clazzPendingStudentsPersonGroupUid
         else -> null
     }
 
@@ -128,12 +174,12 @@ suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Pe
     return schoolMember
 }
 
-suspend fun UmAppDatabase.approvePendingClazzMember(member: ClazzMember, clazz: Clazz? = null) {
-    val effectiveClazz = clazz ?: clazzDao.findByUidAsync(member.clazzMemberClazzUid)
+suspend fun UmAppDatabase.approvePendingClazzEnrolment(enrolment: PersonWithClazzEnrolmentDetails, clazzUid: Long) {
+    val effectiveClazz = clazzDao.findByUidAsync(clazzUid)
         ?: throw IllegalStateException("Class does not exist")
 
     //find the group member and update that
-    val numGroupUpdates = personGroupMemberDao.moveGroupAsync(member.clazzMemberPersonUid,
+    val numGroupUpdates = personGroupMemberDao.moveGroupAsync(enrolment.personUid,
             effectiveClazz.clazzStudentsPersonGroupUid,
             effectiveClazz.clazzPendingStudentsPersonGroupUid)
 
@@ -142,10 +188,23 @@ suspend fun UmAppDatabase.approvePendingClazzMember(member: ClazzMember, clazz: 
     }
 
     //change the role
-    member.clazzMemberRole = ClazzMember.ROLE_STUDENT
-    clazzMemberDao.updateAsync(member)
+    clazzEnrolmentDao.updateClazzEnrolmentRole(enrolment.personUid, clazzUid, ClazzEnrolment.ROLE_STUDENT)
+}
+
+suspend fun UmAppDatabase.declinePendingClazzEnrolment(enrolment: PersonWithClazzEnrolmentDetails, clazzUid: Long){
+    val effectiveClazz = clazzDao.findByUidAsync(clazzUid)
+            ?: throw IllegalStateException("Class does not exist")
+
+
+    clazzEnrolmentDao.updateClazzEnrolmentActiveForPersonAndClazz(
+            enrolment.personUid,
+            clazzUid,false)
+
+    personGroupMemberDao.setGroupMemberToInActive(enrolment.personUid,
+            effectiveClazz.clazzPendingStudentsPersonGroupUid)
 
 }
+
 
 suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, school: School? = null) {
     val effectiveClazz = school ?: schoolDao.findByUidAsync(member.schoolMemberSchoolUid)
@@ -241,10 +300,7 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
             }
             Report.GENDER -> {
                 MessageIdFormatter(
-                        mapOf(Person.GENDER_MALE.toString() to MessageID.male,
-                                Person.GENDER_FEMALE.toString() to MessageID.female,
-                                Person.GENDER_OTHER.toString() to MessageID.other,
-                                Person.GENDER_UNSET.toString() to MessageID.unset),
+                        genderMap.mapKeys { it.toString() },
                         impl, context)
             }
             Report.CONTENT_ENTRY ->{
@@ -252,6 +308,16 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
                 val entryLabelList = contentEntryDao.getContentEntryFromUids(listOfUids)
                         .map { it.uid to it.labelName }.toMap()
                 UidAndLabelFormatter(entryLabelList)
+            }
+            Report.ENROLMENT_LEAVING_REASON -> {
+                val listOfUids = reportList.mapNotNull { it.subgroup?.toLong() }.toSet().toList()
+                val reasonLabelList = leavingReasonDao.getReasonsFromUids(listOfUids)
+                        .map { it.uid to it.labelName }.toMap()
+                UidAndLabelFormatter(reasonLabelList)
+            }
+            Report.ENROLMENT_OUTCOME -> {
+                MessageIdFormatter(
+                        OUTCOME_TO_MESSAGE_ID_MAP.mapKeys { it.key.toString() }, impl, context)
             }
             else ->{
                 null
@@ -269,16 +335,23 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
         }
         Report.GENDER -> {
             MessageIdFormatter(
-                    mapOf(Person.GENDER_MALE.toString() to MessageID.male,
-                            Person.GENDER_FEMALE.toString() to MessageID.female,
-                            Person.GENDER_OTHER.toString() to MessageID.other,
-                            Person.GENDER_UNSET.toString() to MessageID.unset),
+                    genderMap.mapKeys { it.toString() },
                     impl, context)
         }
         Report.CONTENT_ENTRY ->{
             val entryLabelList = contentEntryDao.getContentEntryFromUids(xAxisList
                     .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
             UidAndLabelFormatter(entryLabelList)
+        }
+        Report.ENROLMENT_OUTCOME -> {
+            MessageIdFormatter(
+                    OUTCOME_TO_MESSAGE_ID_MAP.mapKeys { it.key.toString() }, impl, context)
+        }
+        Report.ENROLMENT_LEAVING_REASON -> {
+            val reasonLabelList = leavingReasonDao.getReasonsFromUids(xAxisList
+                    .map { it.toLong() }).map { it.uid to it.labelName }.toMap()
+                    .plus(0L to impl.getString(MessageID.unset, context))
+            UidAndLabelFormatter(reasonLabelList)
         }
         else ->{
             null
@@ -384,13 +457,12 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
 }
 
 
-suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzWorkWithSubmission,
-                                                 clazzMemberUid: Long, responsePersonUid : Long)
+suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzWorkWithSubmission, responsePersonUid : Long)
         : List<ClazzWorkQuestionAndOptionWithResponse>{
 
     val questionsAndOptionsWithResponses :List<ClazzWorkQuestionAndOptionWithResponseRow> = withTimeoutOrNull(2000){
-        clazzWorkQuestionDao.findAllQuestionsAndOptionsWithResponse(clazzWorkWithSubmission.clazzWorkUid?:0L,
-                clazzMemberUid)
+        clazzWorkQuestionDao.findAllQuestionsAndOptionsWithResponse(clazzWorkWithSubmission.clazzWorkUid,
+                responsePersonUid)
     } ?: listOf()
 
     val questionsAndOptionsWithResponseList: List<ClazzWorkQuestionAndOptionWithResponse> =
@@ -409,8 +481,6 @@ suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzW
                                 }.first()?: ClazzWorkQuestionResponse().apply {
                                     clazzWorkQuestionResponseQuestionUid = questionUid?:0L
                                     clazzWorkQuestionResponsePersonUid = responsePersonUid
-                                    clazzWorkQuestionResponseClazzMemberUid = clazzMemberUid
-                                            ?: 0L
                                     clazzWorkQuestionResponseClazzWorkUid = clazzWorkWithSubmission.clazzWorkUid
                                             ?: 0L
                                 })
@@ -419,3 +489,64 @@ suspend fun UmAppDatabase.getQuestionListForView(clazzWorkWithSubmission: ClazzW
 
     return questionsAndOptionsWithResponseList
 }
+
+/**
+ * Gets the maximum number of items that can be in a query parameter of type list. This is 100 on
+ * SQLite and unlimited (-1) on Postgres
+ */
+internal val UmAppDatabase.maxQueryParamListSize: Int
+    get() = if(this.dbType() == DoorDbType.SQLITE) 99 else -1
+
+
+data class ContainerEntryWithMd5Partition(val entriesWithMatchingFile: List<ContainerEntryWithContainerEntryFile>,
+                                          val entriesWithoutMatchingFile: List<ContainerEntryWithMd5>)
+/**
+ * Given a list of ContainerEntryWithMd5 (e.g. the container entries that are required for a
+ * container and the md5 sum of the contents that each should be linked with), link each
+ * ContainerEntry in the list with the ContainerEntryFile where the ContainerEntryFile is already
+ * present locally. Returns a list of those not present locally (e.g. those that need downloaded).
+ *
+ * @param containerUid The container uid for which we are linking entries.
+ * @param containerEntryFiles The ContainerEntryFile list to check.
+ * @param maxListParamSize the maximum number of items in a query parameter list (e.g. to avoid room
+ * throwing an exception)
+ *
+ * @return a pair of
+ */
+suspend fun UmAppDatabase.linkExistingContainerEntries(containerUid: Long,
+                                                       containerEntryFiles: List<ContainerEntryWithMd5>): ContainerEntryWithMd5Partition {
+
+    val existingFiles = containerEntryFileDao.findEntriesByMd5SumsSafeAsync(containerEntryFiles
+            .mapNotNull { it.cefMd5 }, maxQueryParamListSize)
+    val existingMd5s = existingFiles.mapNotNull { it.cefMd5 }.toSet()
+
+    val (entriesWithFile, entriesNeedDownloaded) = containerEntryFiles
+            .partition { it.cefMd5 in existingMd5s }
+
+    val alreadyLinkedEntries = containerEntryDao.findByContainerAsync(containerUid)
+    val entriesToLink = entriesWithFile
+            .filter { entryWithFile ->! alreadyLinkedEntries.any { it.cePath ==  entryWithFile.cePath } }
+            .apply {
+                forEach { entryWithFile ->
+                    entryWithFile.ceUid = 0L
+                    entryWithFile.ceCefUid = existingFiles.first { it.cefMd5 == entryWithFile.cefMd5 }.cefUid
+                }
+            }
+
+    containerEntryDao.insertListAsync(entriesToLink)
+
+    val entriesWithValRetList = entriesWithFile.map { entryWithFile ->
+        ContainerEntryWithContainerEntryFile().apply {
+            this.containerEntryFile = existingFiles.firstOrNull { it.cefMd5 ==  entryWithFile.cefMd5 }
+            ceUid = entryWithFile.ceUid
+            ceContainerUid = containerUid
+            ceCefUid = containerEntryFile?.cefUid ?: 0L
+            cePath = entryWithFile.cePath
+        }
+    }
+
+    return ContainerEntryWithMd5Partition(entriesWithValRetList,
+            entriesNeedDownloaded)
+}
+
+

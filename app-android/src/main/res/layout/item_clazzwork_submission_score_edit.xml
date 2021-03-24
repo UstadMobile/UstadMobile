@@ -12,7 +12,7 @@
 
         <variable
             name="clazzWorkWithSubmission"
-            type="com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission" />
+            type="com.ustadmobile.lib.db.entities.PersonWithClazzWorkAndSubmission" />
 
     </data>
 

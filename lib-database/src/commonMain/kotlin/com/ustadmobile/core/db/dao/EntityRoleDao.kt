@@ -16,7 +16,7 @@ abstract class EntityRoleDao : BaseDao<EntityRole>, OneToManyJoinDao<EntityRole>
     }
 
     @Query("UPDATE EntityRole SET erActive = :active WHERE erUid = :uid")
-    abstract fun updateEntityRoleActive(uid: Long, active: Boolean)
+    abstract suspend fun updateEntityRoleActive(uid: Long, active: Boolean)
 
     @Query("""SELECT COALESCE((SELECT admin FROM Person WHERE personUid = :accountPersonUid), 0) 
             OR EXISTS(SELECT EntityRole.erUid FROM EntityRole 

@@ -20,37 +20,4 @@ object @BaseFileName@Screen : KScreen<@BaseFileName@Screen>() {
 
     val @Entity@TitleInput = KTextInputLayout { withId(R.id.id_of_textfield_input_layout)}
 
-
-    fun fillFields(fragmentScenario: FragmentScenario<@BaseFileName@Fragment>,
-                   @Entity_VariableName@: @EditEntity@,
-                   @Entity_VariableName@OnForm: @EditEntity@?,
-                   setFieldsRequiringNavigation: Boolean = true,
-                   impl: UstadMobileSystemImpl, context: Context,
-                   testContext: TestContext<Unit>) {
-        //TODO: set these values on the form using Espresso.
-
-        @Entity_VariableName@.@Entity_VariableName@Name?.takeIf {it != @Entity_VariableName@OnForm?.@Entity_VariableName@Name }?.also {
-            @Entity@TitleInput{
-                edit{
-                    clearText()
-                    typeText(it)
-                }
-            }
-        }
-
-        if(!setFieldsRequiringNavigation) {
-            return
-        }
-
-        //TODO: if required, use the savedstatehandle to add link entities
-
-        fragmentScenario.onFragment { fragment ->
-            fragment.takeIf {@Entity_VariableName@.relatedEntity != @Entity_VariableName@OnForm?.relatedEntity }
-                    ?.findNavController()?.currentBackStackEntry?.savedStateHandle
-                    ?.set("RelatedEntityName", defaultGson().toJson(listOf(@Entity_VariableName@.relatedEntity)))
-        }
-
-    }
-
-
 }

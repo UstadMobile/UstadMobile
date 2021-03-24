@@ -6,7 +6,7 @@
     <data>
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="com.ustadmobile.core.util.ext.ClazzExtKt"/>
-        <import type="com.ustadmobile.core.util.ext.ClazzMemberExtKt"/>
+        <import type="com.ustadmobile.core.util.ext.ClazzEnrolmentExtKt"/>
         <import type="android.view.View"/>
 
         <variable
@@ -38,7 +38,7 @@
             android:tint="?colorOnIconTint"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/item_clazzlist_role_text"
-            android:visibility="@{clazz.clazzActiveMember != null ? View.VISIBLE : View.GONE}"
+            android:visibility="@{clazz.clazzActiveEnrolment != null ? View.VISIBLE : View.GONE}"
             app:srcCompat="@drawable/ic_badge_24dp" />
 
         <TextView
@@ -49,8 +49,8 @@
             android:minWidth="@dimen/dimen_64dp"
             android:gravity="center"
             android:textAppearance="@style/UmTheme.TextAppearance.Caption"
-            app:memberRoleName="@{clazz.clazzActiveMember}"
-            android:visibility="@{clazz.clazzActiveMember != null ? View.VISIBLE : View.GONE}"
+            app:memberRoleName="@{clazz.clazzActiveEnrolment}"
+            android:visibility="@{clazz.clazzActiveEnrolment != null ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Student - (Pending)"

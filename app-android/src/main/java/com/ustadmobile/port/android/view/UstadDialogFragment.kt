@@ -21,9 +21,6 @@ open class UstadDialogFragment : DialogFragment(), DismissableDialog, UstadView,
 
     private val runOnAttach = Vector<Runnable>()
 
-    override val viewContext: Any
-        get() = requireContext()
-
     override var loading: Boolean = false
         get() = false
         set(value) {

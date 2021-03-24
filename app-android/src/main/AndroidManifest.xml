@@ -83,10 +83,6 @@
             android:name="com.ustadmobile.port.android.view.AboutActivity"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize" />
 
-
-
-        <activity android:name="com.ustadmobile.port.android.view.ContentEditorActivity" />
-
         <service
             android:name="com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService"
             android:enabled="true" />

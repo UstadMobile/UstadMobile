@@ -467,14 +467,14 @@ class ClazzWorkDetailOverviewFragment: UstadDetailFragment<ClazzWorkWithSubmissi
         }
 
         val DU_CLAZZMEMBERANDCLAZZWORKWITHSUBMISSION =
-                object: DiffUtil.ItemCallback<ClazzMemberAndClazzWorkWithSubmission>() {
-                    override fun areItemsTheSame(oldItem: ClazzMemberAndClazzWorkWithSubmission,
-                                                 newItem: ClazzMemberAndClazzWorkWithSubmission): Boolean {
+                object: DiffUtil.ItemCallback<PersonWithClazzWorkAndSubmission>() {
+                    override fun areItemsTheSame(oldItem: PersonWithClazzWorkAndSubmission,
+                                                 newItem: PersonWithClazzWorkAndSubmission): Boolean {
                         return oldItem.clazzWork?.clazzWorkUid == newItem.clazzWork?.clazzWorkUid
                     }
 
-                    override fun areContentsTheSame(oldItem: ClazzMemberAndClazzWorkWithSubmission,
-                                                    newItem: ClazzMemberAndClazzWorkWithSubmission): Boolean {
+                    override fun areContentsTheSame(oldItem: PersonWithClazzWorkAndSubmission,
+                                                    newItem: PersonWithClazzWorkAndSubmission): Boolean {
                         return oldItem.clazzWork?.clazzWorkUid == newItem.clazzWork?.clazzWorkUid
                                 && oldItem.clazzWork?.clazzWorkInstructions == newItem.clazzWork?.clazzWorkInstructions
                                 && oldItem.clazzWork?.clazzWorkCommentsEnabled == newItem.clazzWork?.clazzWorkCommentsEnabled

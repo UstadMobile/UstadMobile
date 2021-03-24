@@ -33,7 +33,6 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMIOUtils
 import kotlinx.io.InputStream
 import java.io.*
 import java.util.*
@@ -88,7 +87,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         val contentDirName = getContentDirName(context)
 
         dirList.add(UMStorageDir(systemBaseDir, getString(MessageID.device, context),
-                removableMedia = false, isAvailable = true, isUserSpecific = false,
+                removableMedia = false, isAvailable = true,
                 usableSpace = File(systemBaseDir).usableSpace))
 
         //Find external directories
@@ -96,7 +95,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
         for (extDir in externalDirs) {
             dirList.add(UMStorageDir(UMFileUtil.joinPaths(extDir!!, contentDirName!!),
                     getString(MessageID.memory_card, context),
-                    true, true, false, false))
+                    true, true, false))
         }
         return dirList
     }
@@ -210,7 +209,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
             } catch (e: IOException) {
                 UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
             } finally {
-                UMIOUtils.closeInputStream(prefIn)
+                prefIn?.close()
             }
         }
 

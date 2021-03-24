@@ -6,7 +6,6 @@ import com.google.gson.reflect.TypeToken
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.xapi.ContextActivity
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.XContext
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
@@ -142,7 +141,7 @@ class XapiStatementResponder : RouterNanoHTTPD.UriResponder {
                 NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.CONFLICT, "application/octet", null)
             } else NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.BAD_REQUEST, "application/octet", e.message)
         } finally {
-            UMIOUtils.closeInputStream(`is`)
+            `is`?.close()
         }
 
     }

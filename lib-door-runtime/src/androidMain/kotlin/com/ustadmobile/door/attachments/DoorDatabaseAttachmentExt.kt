@@ -3,6 +3,7 @@ package com.ustadmobile.door.attachments
 import android.content.Context
 import android.net.Uri
 import com.ustadmobile.door.DoorDatabaseRepository
+import com.ustadmobile.door.DoorUri
 import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.ext.writeToFileAndGetMd5
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -45,6 +46,7 @@ actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: 
         val inStream = androidContext.contentResolver.openInputStream(androidUri) ?: throw IOException("No input stream for $androidUri")
         val tmpDestFile = File(attachmentsDir, "${System.currentTimeMillis()}.tmp")
         val md5 = inStream.writeToFileAndGetMd5(tmpDestFile)
+        inStream.close()
         filteredEntity.attachmentMd5 = md5.toHexString()
 
         val finalDestFile = File(requireAttachmentDirFile(), filteredEntity.tableNameAndMd5Path)
@@ -58,8 +60,8 @@ actual suspend fun DoorDatabaseRepository.storeAttachment(entityWithAttachment: 
     }
 }
 
-actual suspend fun DoorDatabaseRepository.retrieveAttachment(uri: String): String {
-    val file = File(requireAttachmentDirFile(), uri.substringAfter("door-attachment://"))
-    return Uri.fromFile(file).toString()
+actual suspend fun DoorDatabaseRepository.retrieveAttachment(attachmentUri:  String): DoorUri {
+    val file = File(requireAttachmentDirFile(), attachmentUri.substringAfter("door-attachment://"))
+    return DoorUri(Uri.fromFile(file))
 }
 

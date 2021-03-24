@@ -41,6 +41,10 @@
         <variable
             name="registrationMode"
             type="boolean" />
+        
+        <variable
+            name="hideClazzes"
+            type="boolean" />
 
         <variable
             name="activityEventHandler"
@@ -347,7 +351,7 @@
                 android:layout_height="wrap_content"/>
 
             <TextView
-                android:visibility="@{registrationMode ?  View.GONE: View.VISIBLE}"
+                android:visibility="@{registrationMode || hideClazzes ?  View.GONE: View.VISIBLE}"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/clazzlist_header_textview"
                 android:layout_width="match_parent"
@@ -358,7 +362,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/error_text" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:visibility="@{registrationMode ?  View.GONE: View.VISIBLE}"
+                android:visibility="@{registrationMode || hideClazzes ?  View.GONE: View.VISIBLE}"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:id="@+id/clazzlist_recyclerview"
                 android:layout_width="match_parent"
