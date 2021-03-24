@@ -132,8 +132,8 @@ class ReportEditPresenter(context: Any,
                 MessageID.xapi_week),
         MONTH(Report.MONTH,
                 MessageID.xapi_month),
-//        GENDER(Report.GENDER,
-//                MessageID.gender_literal),
+        GENDER(Report.GENDER,
+                MessageID.gender_literal),
         PROVINCE(Report.PROVINCE, MessageID.province)
 
     }
