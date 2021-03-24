@@ -331,7 +331,7 @@ class XapiStatementEndpointImpl(val endpoint: Endpoint, override val di: DI) : X
 
         //ContentEntry should be available locally
         if (contentEntryRoot) {
-            XapiUtil.insertOrUpdateEntryProgress(statementEntity, repo.contentEntryProgressDao,
+            XapiUtil.insertOrUpdateEntryProgress(statementEntity, repo,
                     verbEntity)
         }
 

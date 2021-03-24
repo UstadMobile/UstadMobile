@@ -268,7 +268,7 @@ abstract class PersonDao : BaseDao<Person> {
          
          (SELECT MAX(resultScoreScaled * 100) FROM StatementEntity WHERE 
          Person.personUid = StatementEntity.statementPersonUid 
-         AND statementContentEntryUid = :contentEntryUid) as score,
+         AND statementContentEntryUid = :contentEntryUid and contentEntryRoot) as score,
           
          (SELECT MIN(timestamp) FROM StatementEntity WHERE 
          Person.personUid = StatementEntity.statementPersonUid 
@@ -283,7 +283,7 @@ abstract class PersonDao : BaseDao<Person> {
          AND statementContentEntryUid = :contentEntryUid) as duration
          
          
-         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
           WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
          AND PersonGroupMember.groupMemberActive  
          AND Person.personUid IN (SELECT statementPersonUid FROM StatementEntity WHERE 

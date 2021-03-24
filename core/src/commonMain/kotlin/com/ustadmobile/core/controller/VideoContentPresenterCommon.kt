@@ -7,6 +7,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
+import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -38,6 +39,8 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
     var timeVideoPlayed = 0L
 
+    var contextRegistration: String? = null
+
     internal lateinit var contentEntryDao: ContentEntryDao
     internal lateinit var containerDao: ContainerDao
     internal lateinit var containerEntryDao: ContainerEntryDao
@@ -60,6 +63,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
         containerEntryDao = db.containerEntryDao
         containerDao = db.containerDao
         contentEntryDao = db.contentEntryDao
+        contextRegistration = UMUUID.randomUUID().toString()
 
         entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
@@ -101,13 +105,15 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
         }
 
         GlobalScope.launch {
+            val registration = contextRegistration ?: UMUUID.randomUUID().toString()
             val progress = (position.toFloat() / videoLength * 100).toInt()
             val flag = if (progress == 100) ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_SATISFIED or ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED else 0
             repo.contentEntryProgressDao.updateProgress(entryUuid, accountManager.activeAccount.personUid, progress, flag)
 
             entry?.also {
-                statementEndpoint.storeProgressStatement(accountManager.activeAccount, it, progress,
-                        playerPlayedVideoDuration)
+                statementEndpoint.storeProgressStatement(
+                        accountManager.activeAccount, it, progress,
+                        playerPlayedVideoDuration,registration)
             }
         }
     }

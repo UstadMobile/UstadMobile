@@ -74,6 +74,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.dumpException
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.ContainerMounter.Companion.FILTER_MODE_EPUB
 import com.ustadmobile.core.view.EpubContentView
@@ -88,7 +89,6 @@ import kotlinx.coroutines.launch
 import kotlinx.io.ByteArrayInputStream
 import org.kmp.io.KMPXmlParser
 import org.kodein.di.DI
-import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.js.JsName
@@ -132,6 +132,8 @@ class EpubContentPresenter(context: Any,
 
     var mCurrentPage: Int = 0
 
+    var contextRegistration: String? = null
+
     private val pageTitles = mutableMapOf<Int, String?>()
 
     @Volatile
@@ -143,6 +145,7 @@ class EpubContentPresenter(context: Any,
         super.onCreate(savedState)
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 100
         contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
+        contextRegistration = UMUUID.randomUUID().toString()
         view.progressValue = -1
         view.progressVisible = true
         mountedEndpoint = accountManager.activeAccount.endpointUrl
@@ -165,10 +168,12 @@ class EpubContentPresenter(context: Any,
             return //no one is really logged in
 
         GlobalScope.launch {
+            val registration = contextRegistration ?: UMUUID.randomUUID().toString()
             val contentEntry =  db.contentEntryDao.findByUid(contentEntryUid) ?: return@launch
             val progress = ((maxPageReached + 1) * 100) / max(linearSpineUrls.size, 1)
-            xapiStatementEndpoint.storeProgressStatement(accountManager.activeAccount,
-                    contentEntry, progress, duration)
+            xapiStatementEndpoint.storeProgressStatement(
+                    accountManager.activeAccount,
+                    contentEntry, progress, duration, registration)
         }
 
     }

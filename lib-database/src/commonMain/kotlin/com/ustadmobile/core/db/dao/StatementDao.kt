@@ -48,6 +48,12 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     @Query("SELECT * FROM XLangMapEntry LIMIT 1")
     abstract fun getXLangMap(): XLangMapEntry?
 
+
+    @Query("""UPDATE StatementEntity SET extensionProgress = :progress,
+            statementLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+            WHERE statementUid = :uid""")
+    abstract fun updateProgress(uid: Long, progress: Int)
+
     @Serializable
     data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")
 
