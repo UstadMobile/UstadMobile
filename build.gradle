@@ -5,7 +5,7 @@ buildscript {
     ext.version_kotlin = '1.4.31'
     ext.version_shadow = "5.2.0"
     ext.version_gradle_versions_plugin = "0.28.0"
-    ext.atomicfu_version = '0.15.1'
+    ext.atomicfu_version = '0.15.2'
 
     repositories {
         google()
@@ -94,7 +94,7 @@ ext {
     version_kmp = "0.0.2"
     version_ktor = "1.5.2"
     version_coroutines = "1.4.3"
-    version_atomicfu = "0.15.1"
+    version_atomicfu = "0.15.2"
     version_krypto = "1.0.1"
 
     version_junit = "4.13"
@@ -136,8 +136,8 @@ ext {
     version_kodein_di = "7.4.0"
 
     version_android_buildtools = "29.0.3"
-    version_android_compile_sdk = 29
-    version_android_target_sdk = 29
+    version_android_compile_sdk = 30
+    version_android_target_sdk = 30
     version_android_min_sdk = 21
     version_android_picasso = 2.71828
     version_android_desugar_jdk_libs = "1.0.10"

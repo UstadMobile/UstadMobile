@@ -121,7 +121,7 @@ android {
         //When using variables the build analyzer reports that major tasks reran because of a
         // 'chnage' in the value of minSdkVersion, hence hardcoding them here.
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
 
         multiDexEnabled true //required for all variants to use java library desugaring
         vectorDrawables.useSupportLibrary = true
@@ -446,7 +446,6 @@ dependencies {
     androidTestImplementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
     androidTestImplementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
     androidTestImplementation "commons-io:commons-io:$version_commons_io"
-    androidTestImplementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
     androidTestImplementation "com.ustadmobile.adbscreenrecorder:lib-client:$version_android_adbscreenrecorder"
 
     kaptAndroidTest "androidx.databinding:databinding-compiler:$version_androidx_databinding"
