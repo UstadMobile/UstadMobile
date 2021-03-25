@@ -34,56 +34,30 @@ kotlin {
         }
     }
 
-    /* JS is disabled until upgrade to Kotlin1.4
-    js {
-        nodejs()
-
-        compilations.main.kotlinOptions {
-            metaInfo = true
-            sourceMap = true
-            moduleKind = "commonjs"
-        }
-    }
-    */
-
     sourceSets {
         commonMain {
             //Add the SyncHelperEntitiesDao
             kotlin.srcDir("../lib-door-runtime/src/commonMain/resources/daos")
 
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+                implementation kotlin('stdlib-common')
+                implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0'
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation project(":lib-util")
                 implementation project(":lib-database-entities")
-                implementation project(':lib-door-runtime')
-                implementation project(":lib-database-annotations")
+                implementation "com.ustadmobile.door:door-runtime:$version_door"
                 implementation "com.github.aakira:napier:$version_napier"
-                compileOnly project(":lib-room-annotations")
+                compileOnly "com.ustadmobile.door:room-annotations:$version_door"
  
             }
         }
 
         jvmMain {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
-                compileOnly "com.github.aakira:napier-jvm:$version_napier"
+
             }
         }
 
-        /*
-        jsMain {
-            dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
-                implementation "com.github.aakira:napier-js:$version_napier"
-            }
-        }
-        */
     }
 
 }
@@ -109,29 +83,21 @@ kapt {
 
 
 dependencies {
-    /**
-     * Since Gradle 5.4 using kapt project(":...") does not work.
-     */
-    kapt files("../lib-database-annotation-processor/build/libs/lib-database-annotation-processor.jar",
-            "../lib-door-runtime/build/libs/lib-door-runtime-jvm-${rootProject.version}.jar")
-    kapt "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-    kapt "com.squareup:kotlinpoet:$version_kotlinpoet"
-    kapt "com.github.jsqlparser:jsqlparser:$version_jsqlparser"
-    kapt "io.ktor:ktor-server-netty:$version_ktor"
-    kapt "org.apache.commons:commons-text:$version_apache_commons_text"
-    kapt "com.google.code.gson:gson:$version_gson"
-    kapt "io.ktor:ktor-client-core:$version_ktor"
-    kapt "io.ktor:ktor-client-json:$version_ktor"
-    kapt "io.ktor:ktor-client-okhttp:$version_ktor"
-    kapt "io.ktor:ktor-client-gson:$version_ktor"
-    kapt "io.ktor:ktor-client-okhttp:$version_ktor"
-    kapt "org.nanohttpd:nanohttpd:$version_nanohttpd"
-    kapt "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
-    kapt "org.kodein.di:kodein-di:$version_kodein_di"
-    kapt "com.github.aakira:napier-jvm:$version_napier"
+    kapt "com.ustadmobile.door:door-compiler:$version_door"
 }
 
-compileKotlinJvm.dependsOn(":lib-database-annotation-processor:jar")
+def platformTypeAttr = Attribute.of("org.jetbrains.kotlin.platform.type", String)
+
+afterEvaluate {
+    configurations.all { configuration ->
+        // Workaround for kapt bug with MPP dependencies
+        // https://youtrack.jetbrains.com/issue/KT-31641
+        // https://youtrack.jetbrains.com/issue/KT-33206
+        if (name.contains('kapt')) {
+            attributes.attribute(platformTypeAttr, "jvm")
+        }
+    }
+}
 
 publishing {
     publications {

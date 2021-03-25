@@ -67,7 +67,8 @@ class KhanProgressTracker : HarInterceptor() {
 
         val totalQuestions = harContainer.requestMap.filterKeys { it.second.startsWith(urlToFindTotalQuestions) }.size
 
-        val actor = harContainer.json.stringify(UmAccountActor.serializer(), harContainer.umAccount.toXapiActorJsonObject(harContainer.context))
+        val actor = harContainer.json.encodeToString(UmAccountActor.serializer(),
+            harContainer.umAccount.toXapiActorJsonObject(harContainer.context))
 
         if (request.regexedUrl?.contains("getEotCardDetails") == true) {
 
@@ -160,7 +161,7 @@ class KhanProgressTracker : HarInterceptor() {
         }
 
         val attemptBody = request.body ?: return response
-        val body = json.parse(KhanProblemBody.serializer(), attemptBody)
+        val body = json.decodeFromString(KhanProblemBody.serializer(), attemptBody)
         val bodyInput = body.variables?.input ?: return response
 
         // build url to get question content
@@ -178,8 +179,8 @@ class KhanProgressTracker : HarInterceptor() {
         GlobalScope.launch {
 
             val result = data.containerEntryFile?.getStringFromContainerEntry() ?: return@launch
-            val itemResp = json.parse(ItemResponse.serializer(), result).itemData ?: return@launch
-            var question = json.parse(ItemData.serializer(), itemResp).question?.content
+            val itemResp = json.decodeFromString(ItemResponse.serializer(), result).itemData ?: return@launch
+            var question = json.decodeFromString(ItemData.serializer(), itemResp).question?.content
                     ?: return@launch
 
             question = question.replace(Regex("(\\[\\[(.*)]])|\\*|\\n|:-: \\||\\{|\\}|\\\$large"), "")

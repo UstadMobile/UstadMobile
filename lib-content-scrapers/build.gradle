@@ -1,17 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-buildscript {
-    repositories {
-        maven {
-            url 'https://plugins.gradle.org/m2/'
-        }
-    }
-    dependencies {
-        classpath "com.github.jengelman.gradle.plugins:shadow:$version_shadow"
-        classpath "org.jetbrains.kotlin:kotlin-serialization:$version_kotlin"
-    }
-}
-
 apply plugin: "kotlin-multiplatform"
 apply plugin: 'kotlinx-serialization'
 apply plugin: 'com.github.johnrengelman.shadow'
@@ -36,15 +24,20 @@ kotlin {
     }
 
     sourceSets {
+        commonMain {
+            dependencies {
+                kotlin("stdlib-common")
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
+            }
+        }
+
         jvmMain {
             dependencies {
-
-                implementation fileTree(dir: 'libs', include: ['*.jar'])
                 implementation project(":core")
                 implementation project(':lib-database')
                 implementation project(":lib-database-mpp")
                 implementation project(":lib-database-entities")
-                implementation project(":lib-door-runtime")
+                implementation "com.ustadmobile.door:door-runtime:$version_door"
                 implementation project(":sharedse")
                 implementation project(":lib-util")
 
@@ -60,9 +53,7 @@ kotlin {
                 implementation "org.apache.logging.log4j:log4j-api:$version_log4j"
                 implementation "net.lightbody.bmp:browsermob-core:$version_browser_proxy"
 
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
-                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
 
                 implementation "org.postgresql:postgresql:$version_postgres_jdbc"
                 implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
@@ -85,8 +76,7 @@ kotlin {
                 implementation "junit:junit:$version_junit"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "org.mockito:mockito-core:$version_android_mockito"
-                implementation "com.ustadmobile.kmpxmlpullparser:kmpxmlpullparser-jvm:$version_kmp"
-                implementation "com.nhaarman.mockitokotlin2:mockito-kotlin:$version_kotlin_mockito"
+                implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
             }
         }
 

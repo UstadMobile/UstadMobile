@@ -30,12 +30,11 @@
  */
 package com.ustadmobile.lib.util
 
-import org.kmp.io.KMPPullParser
-import org.kmp.io.KMPSerializerParser
-import org.kmp.io.KMPXmlParser
-import kotlin.js.JsName
+
+import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
 import kotlin.jvm.JvmOverloads
-import kotlin.jvm.JvmStatic
+import org.xmlpull.v1.XmlSerializer
 
 /**
  * Misc utility methods
@@ -43,12 +42,6 @@ import kotlin.jvm.JvmStatic
  * @author mike
  */
 object UMUtil {
-
-    val PORT_ALLOC_IO_ERR = -1
-
-    val PORT_ALLOC_SECURITY_ERR = -2
-
-    val PORT_ALLOC_OTHER_ERR = 3
 
     /**
      * A list of elements that must have their own end tag
@@ -101,7 +94,7 @@ object UMUtil {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    fun passXmlThrough(parser: KMPXmlParser, serializer: KMPSerializerParser,
+    fun passXmlThrough(parser: XmlPullParser, serializer: XmlSerializer,
                        seperateEndTagRequiredElements: Array<String>) {
         val filter: PassXmlThroughFilter? = null
         passXmlThrough(parser, serializer, seperateEndTagRequiredElements, filter)
@@ -116,7 +109,7 @@ object UMUtil {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    fun passXmlThrough(parser: KMPXmlParser, serializer: KMPSerializerParser) {
+    fun passXmlThrough(parser: XmlPullParser, serializer: XmlSerializer) {
         val filter: PassXmlThroughFilter? = null
         passXmlThrough(parser, serializer, null, filter)
     }
@@ -133,9 +126,10 @@ object UMUtil {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    fun passXmlThrough(xpp: KMPXmlParser, xs: KMPSerializerParser,
+    fun passXmlThrough(xpp: XmlPullParser, xs: XmlSerializer,
                        separateHtmlEndTagRequiredElements: Boolean,
-                       filter: PassXmlThroughFilter) {
+                       filter: PassXmlThroughFilter
+    ) {
         passXmlThrough(xpp, xs,
                 if (separateHtmlEndTagRequiredElements) SEPARATE_END_TAG_REQUIRED_ELEMENTS else null, filter)
     }
@@ -153,37 +147,37 @@ object UMUtil {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    fun passXmlThrough(xpp: KMPXmlParser, xs: KMPSerializerParser,
+    fun passXmlThrough(xpp: XmlPullParser, xs: XmlSerializer,
                        seperateEndTagRequiredElements: Array<String>?,
                        filter: PassXmlThroughFilter?) {
 
         var evtType = xpp.getEventType()
         var lastEvent = -1
         var tagName: String
-        while (evtType != KMPPullParser.END_DOCUMENT) {
+        while (evtType != XmlPullParserConstants.END_DOCUMENT) {
             if (filter != null && !filter.beforePassthrough(evtType, xpp, xs))
                 return
 
             when (evtType) {
-                KMPPullParser.DOCDECL -> {
+                XmlPullParserConstants.DOCDECL -> {
                     xpp.getText()?.let {
                         xs.docdecl(it)
                     }
                 }
 
-                KMPPullParser.START_TAG -> {
+                XmlPullParserConstants.START_TAG -> {
                     xs.startTag(xpp.getNamespace(), xpp.getName().toString())
                     for (i in 0 until xpp.getAttributeCount()) {
                         xs.attribute(xpp.getAttributeNamespace(i),
                                 xpp.getAttributeName(i).toString(), xpp.getAttributeValue(i).toString())
                     }
                 }
-                KMPPullParser.TEXT -> xs.text(xpp.getText().toString())
-                KMPPullParser.END_TAG -> {
+                XmlPullParserConstants.TEXT -> xs.text(xpp.getText().toString())
+                XmlPullParserConstants.END_TAG -> {
                     tagName = xpp.getName().toString()
 
                     val haystack = seperateEndTagRequiredElements
-                    if (lastEvent == KMPPullParser.START_TAG
+                    if (lastEvent == XmlPullParserConstants.START_TAG
                             && seperateEndTagRequiredElements != null
                             && indexInArray(haystack as Array<Any>, tagName) != -1) {
                         xs.text(" ")
@@ -212,17 +206,18 @@ object UMUtil {
      * @throws XmlPullParserException
      * @throws IOException
      */
-    fun passXmlThrough(xpp: KMPXmlParser, xs: KMPSerializerParser,
+    fun passXmlThrough(xpp: XmlPullParser, xs: XmlSerializer,
                        seperateEndTagRequiredElements: Array<String>?,
                        endTagName: String) {
+
         passXmlThrough(xpp, xs, seperateEndTagRequiredElements, object : PassXmlThroughFilter {
 
-            override fun beforePassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean {
-                return !(evtType == KMPPullParser.END_TAG && parser.getName() != null
+            override fun beforePassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
+                return !(evtType == XmlPullParserConstants.END_TAG && parser.getName() != null
                         && parser.getName() == endTagName)
             }
 
-            override fun afterPassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean {
+            override fun afterPassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
                 return true
             }
         })
@@ -245,7 +240,7 @@ object UMUtil {
          * @throws IOException
          * @throws XmlPullParserException
          */
-        fun beforePassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean
+        fun beforePassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean
 
         /**
          * Called after the given event was passed through to the XmlSerializer.
@@ -258,155 +253,8 @@ object UMUtil {
          * @throws IOException
          * @throws XmlPullParserException
          */
-        fun afterPassthrough(evtType: Int, parser: KMPXmlParser, serializer: KMPSerializerParser): Boolean
+        fun afterPassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean
 
-    }
-
-    /**
-     * Determine if the two given locales are the same language - e.g. en, en-US, en-GB etc.
-     *
-     * @param locale1
-     * @param locale2
-     *
-     * @return True if the given locales are the same language, false otherwise
-     */
-    fun isSameLanguage(locale1: String?, locale2: String?): Boolean {
-        return if (locale1 == null && locale2 == null) {
-            true//no language to compare
-        } else if (locale1 == null || locale2 == null) {
-            false//one is null
-        } else {
-            locale1.substring(0, 2) == locale2.substring(0, 2)
-        }
-    }
-
-    /**
-     * Generate a new hashtable which is 'flipped' - e.g. where the keys of the input hashtable become
-     * the values in the output hashtable, and vice versa.
-     *
-     * @return Flip hashtable
-     */
-    fun <V, K> flipMap(source: Map<K, V>, dest: MutableMap<V, K>): Map<V, K> {
-        for ((key, value) in source) {
-            dest[value] = key
-        }
-
-        return dest
-    }
-
-    /**
-     * Joins strings e.g. from an array generate a single string with "Bob", "Anand", "Kate" etc.
-     *
-     * @param objects Objects to join - using toString method
-     * @param joiner String to use between each object.
-     *
-     * @return A single string formed by each object's toString method, followed by the joiner, the
-     * next object, and so on.
-     */
-    fun joinStrings(objects: Array<Any>, joiner: String): String {
-        val buffer = StringBuilder()
-        for (i in objects.indices) {
-            buffer.append(objects.toString())
-
-            if (i < objects.size - 1)
-                buffer.append(joiner)
-        }
-
-        return buffer.toString()
-    }
-
-    fun joinStrings(strings: Iterable<*>, joiner: String): String {
-        var isFirst = true
-        val sb = StringBuilder()
-        for (o in strings) {
-            if (!isFirst)
-                sb.append(joiner)
-
-            sb.append(o.toString())
-            isFirst = false
-        }
-
-        return sb.toString()
-    }
-
-    /**
-     * Joins strings e.g. from an array generate a single string with "Bob", "Anand", "Kate" etc.
-     *
-     * @param objects Objects to join - using toString method
-     * @param joiner String to use between each object.
-     *
-     * @return A single string formed by each object's toString method, followed by the joiner, the
-     * next object, and so on.
-     */
-    fun joinStrings(objects: MutableList<*>, joiner: String): String {
-        val buffer = StringBuilder()
-        for (i in objects.indices) {
-            buffer.append(objects.elementAt(i))
-
-            if (i < objects.size - 1)
-                buffer.append(joiner)
-        }
-
-        return buffer.toString()
-    }
-
-
-    /* /**
-      * Encode a username and password as a basic auth header
-      * @param username
-      * @param password
-      * @return
-      */
-     fun encodeBasicAuth(username: String, password: String): String {
-         return "Basic " + Base64Coder.encodeToString(username +
-                 ':'.toString() + password)
-     } */
-
-
-    @JsName("jsArrayToKotlinList")
-    @JvmStatic
-    fun jsArrayToKotlinList(array: Any): Any{
-        val jsArray = array as Array<Any>
-        return jsArray.toList()
-    }
-
-    @JsName("kotlinListToJsArray")
-    @JvmStatic
-    fun kotlinListToJsArray(list: ArrayList<Any>): Any{
-        return list.toTypedArray()
-    }
-
-    @JsName("kotlinCategoryMapToJsArray")
-    @JvmStatic
-    fun kotlinCategoryMapToJsArray(categoriesMap: HashMap<Long, List<Any>>) : Array<Any>{
-        val categories = mutableListOf<Any>()
-        (ArrayList(categoriesMap.values)).forEach { list -> categories.add(list.toTypedArray()) }
-        return categories.toTypedArray()
-    }
-
-    @JsName("kotlinMapToJsArray")
-    @JvmStatic
-    fun kotlinMapToJsArray(map: HashMap<String,String>): Any{
-        val outList = mutableListOf<Any>()
-        map.entries.forEach {
-            outList.add(object {
-                var key =  it.key
-                var value = it.value})
-        }
-        return outList.toTypedArray()
-    }
-
-
-    @JvmStatic
-    fun getH5pLicenceId(licence: String?): Int{
-        when(licence){
-            "cc-by" -> return 1
-            "cc-by-sa" -> return 2
-            "cc-by-nc" -> return 4
-            "cc-by-nc-sa" -> return 6
-
-        }
-        return 8
     }
 
 }

@@ -42,7 +42,7 @@ kotlin {
                   implementation "org.seleniumhq.selenium:selenium-java:$version_selenium"
                   implementation "org.seleniumhq.selenium:selenium-chrome-driver:$version_selenium"
                   implementation "io.github.bonigarcia:webdrivermanager:$version_chrome_manager"
-                  implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+                  implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
 
                   implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                   implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
@@ -65,9 +65,7 @@ kotlin {
                   implementation project(":sharedse")
                   implementation project(":lib-database")
                   implementation project(":lib-database-mpp")
-                  implementation project(":lib-door-runtime")
-                  implementation project(":lib-room-annotations")
-                  implementation project(":lib-database-annotations")
+                  implementation "com.ustadmobile.door:room-annotations:$version_door"
                   implementation project(":lib-database-entities")
                   implementation project(":lib-util")
                   implementation project(":lib-content-scrapers")
@@ -94,7 +92,6 @@ kotlin {
                   implementation "io.ktor:ktor-client-json:$version_ktor"
                   implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                   implementation "io.ktor:ktor-client-gson:$version_ktor"
-                  implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
                   implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
                   implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"

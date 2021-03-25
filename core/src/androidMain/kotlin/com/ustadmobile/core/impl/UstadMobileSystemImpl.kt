@@ -122,13 +122,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         }
     }
 
-
-    fun handleActivityCreate(mContext: Activity, savedInstanceState: Bundle?) {
-        init(mContext)
-    }
-
-
-
     /**
      * Simple async task to handle getting the setup file
      * Param 0 = boolean - true to zip, false otherwise

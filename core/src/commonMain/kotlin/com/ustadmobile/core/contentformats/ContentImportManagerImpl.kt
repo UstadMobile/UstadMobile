@@ -91,7 +91,7 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
             this.cijMimeType = metadata.mimeType
             this.cijContainerBaseDir = containerBaseDir
             this.cijJobStatus = JobStatus.QUEUED
-            this.cijConversionParams = Json.stringify(JsonObject.serializer(), conversionParams.convertToJsonObject())
+            this.cijConversionParams = Json.encodeToString(JsonObject.serializer(), conversionParams.convertToJsonObject())
             cijUid = db.containerImportJobDao.insertAsync(this)
         }
     }

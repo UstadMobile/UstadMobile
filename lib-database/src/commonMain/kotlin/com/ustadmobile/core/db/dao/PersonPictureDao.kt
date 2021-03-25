@@ -4,9 +4,7 @@ import androidx.room.Dao
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.door.annotation.GetAttachmentData
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.door.annotation.SetAttachmentData
 import com.ustadmobile.lib.db.entities.PersonPicture
 
 
@@ -14,15 +12,6 @@ import com.ustadmobile.lib.db.entities.PersonPicture
 @Repository
 abstract class PersonPictureDao : BaseDao<PersonPicture> {
 
-    @SetAttachmentData
-    open fun setAttachment(entity: PersonPicture, filePath: String) {
-
-    }
-
-    @GetAttachmentData
-    open fun getAttachmentPath(entity: PersonPicture): String? {
-        return ""
-    }
 
     @Query("""SELECT * FROM PersonPicture 
         WHERE personPicturePersonUid = :personUid

@@ -10,8 +10,6 @@ import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.util.KmpUuid
-import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.database.annotation.UmRestAccessible
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.encryptPassword
@@ -46,8 +44,6 @@ abstract class PersonDao : BaseDao<Person> {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     abstract suspend fun insertOrReplace(person: Person)
 
-    @UmRestAccessible
-    @UmRepository(delegateType = UmRepository.UmRepositoryMethodType.DELEGATE_TO_WEBSERVICE)
     suspend fun loginAsync(username: String, password: String): UmAccount? {
 
         val person = findUidAndPasswordHashAsync(username)

@@ -1,9 +1,8 @@
 package com.ustadmobile.core.contentformats.scorm
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import kotlinx.io.InputStream
-import org.kmp.io.KMPPullParser
-import org.kmp.io.KMPXmlParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
+
 
 /**
  * Represents a scorm manifest.
@@ -74,7 +73,7 @@ class ScormManifest {
         resourceMap = HashMap()
     }
 
-    fun loadFromXpp(xpp: KMPXmlParser) {
+    fun loadFromXpp(xpp: XmlPullParser) {
         var evtType: Int ? = null
         var tagName: String
 
@@ -83,9 +82,9 @@ class ScormManifest {
 
         var currentResource: Resource?
 
-        while ({evtType = xpp.next(); evtType}() != KMPPullParser.END_DOCUMENT) {
+        while ({evtType = xpp.next(); evtType}() != XmlPullParserConstants.END_DOCUMENT) {
             when (evtType) {
-                KMPPullParser.START_TAG -> {
+                XmlPullParserConstants.START_TAG -> {
                     tagName = xpp.getName()?: ""
 
                     if (TAG_MANIFEST == tagName) {
@@ -102,10 +101,10 @@ class ScormManifest {
                         currentOrgItem.identifier = xpp.getAttributeValue(null, ATTR_IDENTIFIER)
                         currentOrg.items.add(currentOrgItem)
                     } else if (currentOrgItem != null && TAG_TITLE == tagName
-                            && xpp.next() == KMPPullParser.TEXT) {
+                            && xpp.next() == XmlPullParserConstants.TEXT) {
                         currentOrgItem.title = xpp.getText()
                     } else if (currentOrg != null && TAG_TITLE == tagName
-                            && xpp.next() == KMPPullParser.TEXT) {
+                            && xpp.next() == XmlPullParserConstants.TEXT) {
                         currentOrg.title = xpp.getText()
                     } else if (TAG_RESOURCE == tagName) {
                         currentResource = Resource()
@@ -117,7 +116,7 @@ class ScormManifest {
                     }
                 }
 
-                KMPPullParser.END_TAG -> {
+                XmlPullParserConstants.END_TAG -> {
                     tagName = xpp.getName()?: ""
 
                     when {
@@ -128,17 +127,6 @@ class ScormManifest {
                 }
             }
         }
-    }
-
-    /**
-     *
-     * @param in
-     */
-    fun loadFromInputStream(`in`: InputStream) {
-        val xpp = UstadMobileSystemImpl.instance.newPullParser()
-        xpp.setFeature(KMPPullParser.FEATURE_PROCESS_NAMESPACES, true)
-        xpp.setInput(`in`, "UTF-8")
-        loadFromXpp(xpp)
     }
 
     fun getOrganizationByIdentifier(identifier: String?): Organization {

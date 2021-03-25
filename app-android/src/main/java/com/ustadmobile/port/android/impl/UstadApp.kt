@@ -190,9 +190,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<EmbeddedHTTPD>().listeningPort
         }
 
-        bind<XmlPullParserFactory>() with singleton { XmlPullParserFactory.newInstance().also {
-            it.isNamespaceAware = true
-        }}
+        bind<XmlPullParserFactory>() with provider {
+            XmlPullParserFactory.newInstance()
+        }
 
         bind<XmlPullParser>() with provider {
             instance<XmlPullParserFactory>().newPullParser()
@@ -233,14 +233,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
 
-            val downloader = if(Build.VERSION.SDK_INT >= 21) {
-                OkHttp3Downloader(instance<OkHttpClient>())
-            }else {
-                PicassoUrlConnectionDownloader()
-            }
-
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
-                    .downloader(downloader)
+                    .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
                     .build())
         }
     }

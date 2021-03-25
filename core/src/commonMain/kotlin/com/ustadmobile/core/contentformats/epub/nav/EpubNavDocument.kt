@@ -30,9 +30,9 @@
  */
 package com.ustadmobile.core.contentformats.epub.nav
 
-import org.kmp.io.KMPPullParser
-import org.kmp.io.KMPSerializerParser
-import org.kmp.io.KMPXmlParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
+
 
 /**
  * This class represents an EPUB navigation document as indicated by the OPF. It can be used to
@@ -76,8 +76,8 @@ class EpubNavDocument {
             return null
         }
 
-    fun load(xpp: KMPXmlParser) {
-        xpp.setFeature(KMPPullParser.FEATURE_PROCESS_NAMESPACES, true)
+    fun load(xpp: XmlPullParser) {
+        xpp.setFeature(XmlPullParserConstants.FEATURE_PROCESS_NAMESPACES, true)
 
         var evtType: Int = -1
         var currentNav: EpubNavItem? = null//represents the current nav tag
@@ -85,9 +85,9 @@ class EpubNavDocument {
         var itemDepth = 0
         var tagName: String
 
-        while ({evtType = xpp.next(); evtType}() != KMPPullParser.END_DOCUMENT) {
+        while ({evtType = xpp.next(); evtType}() != XmlPullParserConstants.END_DOCUMENT) {
             when (evtType) {
-                KMPPullParser.START_TAG -> {
+                XmlPullParserConstants.START_TAG -> {
                     tagName = xpp.getName()?: ""
                     if (tagName == "nav") {
                         currentNav = EpubNavItem(null, null, null, 0)
@@ -112,14 +112,14 @@ class EpubNavDocument {
                         itemDepth++
                     } else if (tagName == "a") {
                         currentItem?.href = xpp.getAttributeValue(null, "href")
-                        if (xpp.next() == KMPPullParser.TEXT) {
+                        if (xpp.next() == XmlPullParserConstants.TEXT) {
                             currentItem?.title = xpp.getText()
                         }
                     }else if(tagName == "navPoint") {
                         //Epub 2.0 NCX navPoint also starts a new item
                         currentItem = EpubNavItem(currentItem ?: currentNav, itemDepth)
                     }else if(tagName =="text") {
-                        if(xpp.next() == KMPPullParser.TEXT) {
+                        if(xpp.next() == XmlPullParserConstants.TEXT) {
                             currentItem?.title = xpp.getText()
                         }
                     }else if(tagName =="content") {
@@ -127,7 +127,7 @@ class EpubNavDocument {
                     }
                 }
 
-                KMPPullParser.END_TAG -> {
+                XmlPullParserConstants.END_TAG -> {
                     if (xpp.getName() == "nav") {
                         currentNav = null
                     } else if (xpp.getName() == "li") {
@@ -142,6 +142,10 @@ class EpubNavDocument {
         }
     }
 
+    /*
+     * This code is being preserved for if/when a ContentEditor function is added. Our current
+     * XmlPullParser for Kotlin Multiplatform does not yet have an XmlSerializer implementation.
+     *
     fun serialize(xs: KMPSerializerParser) {
         xs.startDocument("UTF-8", false)
         xs.setPrefix("", NAMESPACE_XHTML)
@@ -194,7 +198,7 @@ class EpubNavDocument {
 
         xs.endTag(NAMESPACE_XHTML, "li")
     }
-
+    */
 
     fun getNavById(id: String): EpubNavItem? {
         return if (navItems.containsKey(id)) {

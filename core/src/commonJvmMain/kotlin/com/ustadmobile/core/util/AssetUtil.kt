@@ -1,6 +1,5 @@
 package com.ustadmobile.core.util
 
-import kotlinx.io.InputStream
+import java.io.InputStream
 
 expect fun getAssetFromResource(path: String, context: Any): InputStream?
-

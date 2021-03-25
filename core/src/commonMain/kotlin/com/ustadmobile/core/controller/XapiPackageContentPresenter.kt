@@ -3,7 +3,6 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.xapi.Actor
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.tincan.UmAccountGroupActor
@@ -16,16 +15,16 @@ import com.ustadmobile.core.util.ext.toXapiGroupJsonObject
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
+import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import io.ktor.client.*
 import io.ktor.client.request.get
-import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import kotlinx.io.ByteArrayInputStream
 import kotlinx.serialization.json.Json
-import org.kmp.io.KMPXmlParser
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 
@@ -68,20 +67,19 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
 
         GlobalScope.launch {
             mountedPath = mounter.mountContainer(activeEndpoint, containerUid)
-            val client = defaultHttpClient()
+            val client: HttpClient = di.direct.instance()
             val tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, "tincan.xml"))
 
-            val xpp = KMPXmlParser()
-            xpp.setInput(ByteArrayInputStream(tincanContent.toByteArray()), "UTF-8")
+            val xpp: XmlPullParser = di.direct.instance(arg = tincanContent)
             tinCanXml = TinCanXML.loadFromXML(xpp)
             val launchHref = tinCanXml?.launchActivity?.launchUrl
             val actorJsonStr: String = if(learnerGroupUid == 0L){
-                Json.stringify(UmAccountActor.serializer(),
+                Json.encodeToString(UmAccountActor.serializer(),
                         accountManager.activeAccount.toXapiActorJsonObject(context))
             }else{
                 val memberList = repo.learnerGroupMemberDao.findLearnerGroupMembersByGroupIdAndEntryList(
                         learnerGroupUid,contentEntryUid)
-                Json.stringify(UmAccountGroupActor.serializer(),
+                Json.encodeToString(UmAccountGroupActor.serializer(),
                         accountManager.activeAccount.toXapiGroupJsonObject(memberList))
             }
             val launchMethodParams = mapOf(

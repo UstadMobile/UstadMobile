@@ -72,21 +72,19 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.dumpException
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
+import com.ustadmobile.core.util.XmlPullParserConfig
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.ContainerMounter.Companion.FILTER_MODE_EPUB
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.util.UMUtil
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import io.ktor.client.*
 import io.ktor.client.request.get
-import io.ktor.utils.io.core.toByteArray
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
-import kotlinx.io.ByteArrayInputStream
-import org.kmp.io.KMPXmlParser
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -175,13 +173,11 @@ class EpubContentPresenter(context: Any,
 
     private suspend fun handleMountedContainer(){
         try {
-            val client = defaultHttpClient()
+            val client : HttpClient = di.direct.instance()
             val ocfContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, OCF_CONTAINER_PATH))
 
             ocf = OcfDocument()
-            val ocfParser = KMPXmlParser()
-
-            ocfParser.setInput(ByteArrayInputStream(ocfContent.toByteArray()), "UTF-8")
+            val ocfParser: XmlPullParser = di.direct.instance(arg = XmlPullParserConfig.fromString(ocfContent))
             ocf?.loadFromParser(ocfParser)
 
             //get and parse the first publication
@@ -191,8 +187,7 @@ class EpubContentPresenter(context: Any,
             val opfContent = client.get<String>(opfUrl.toString())
 
             val opf = OpfDocument()
-            val opfParser = KMPXmlParser()
-            opfParser.setInput(ByteArrayInputStream(opfContent.toByteArray()), "UTF-8")
+            val opfParser : XmlPullParser= di.direct.instance(XmlPullParserConfig.fromString(opfContent))
             opf.loadFromOPF(opfParser)
             val linearSpineHrefsRelative = opf.linearSpineHREFs
 
@@ -209,7 +204,7 @@ class EpubContentPresenter(context: Any,
 
             val opfCoverImageItem = opf.getCoverImage("")
             val authorNames = if (opf.numCreators > 0)
-                opf.creators?.let { UMUtil.joinStrings(it, ", ") }
+                opf.creators?.joinToString(separator = ",")
             else
                 null
 
@@ -256,8 +251,7 @@ class EpubContentPresenter(context: Any,
                     mNavDocument = it
                 }
 
-                val navParser = KMPXmlParser()
-                navParser.setInput(ByteArrayInputStream(navContent.toByteArray()), "UTF-8")
+                val navParser: XmlPullParser  = di.direct.instance(arg = XmlPullParserConfig.fromString(navContent))
                 navDocument.load(navParser)
                 epubContentView.runOnUiThread(Runnable {
                     epubContentView.tableOfContents = navDocument.toc ?: navDocument.ncxNavMap
