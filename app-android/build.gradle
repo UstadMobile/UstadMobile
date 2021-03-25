@@ -284,7 +284,7 @@ dependencies {
      */
     //compileOnly files("../sharedse/build/libs/sharedse-jvm.jar")
 
-    implementation "com.ustadmobile.door:door-runtime$version_door"
+    implementation "com.ustadmobile.door:door-runtime:$version_door"
     implementation project(':lib-database-android')
     implementation project(":lib-database-entities")
     implementation project(':lib-util')

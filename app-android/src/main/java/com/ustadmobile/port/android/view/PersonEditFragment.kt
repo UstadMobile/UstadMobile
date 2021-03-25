@@ -223,11 +223,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             handleInputError(mBinding?.usernameTextinputlayout, value != null, value)
         }
 
-    override var passwordError: String?
+    override var passwordError: String? = null
         set(value) {
-            mBinding?.passwordError = value
+            field = value
+            handleInputError(mBinding?.passwordTextinputlayout, value != null, value)
         }
-        get() = mBinding?.passwordError
+
 
 
     override var noMatchPasswordError: String? = null
@@ -322,10 +323,10 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 requireContext().getString(R.string.add_role_permission)).apply {
             newItemVisible = true
         }
-        mBinding?.clazzlistRecyclerview?.adapter = MergeAdapter(clazzEnrolmentWithClazzRecyclerAdapter,
+        mBinding?.clazzlistRecyclerview?.adapter = ConcatAdapter(clazzEnrolmentWithClazzRecyclerAdapter,
                 clazzMemberUstadListHeaderRecyclerViewAdapter)
 
-        mBinding?.rolesAndPermissionsRv?.adapter = MergeAdapter(rolesAndPermissionRecyclerAdapter,
+        mBinding?.rolesAndPermissionsRv?.adapter = ConcatAdapter(rolesAndPermissionRecyclerAdapter,
                 rolesAndPermissionUstadListHeaderRecyclerViewAdapter)
 
         mBinding?.usernameText?.addTextChangedListener(object: TextWatcher {

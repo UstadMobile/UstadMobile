@@ -11,7 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkSubmissionMarkingBinding
@@ -69,12 +69,12 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<PersonWithClazzWorkA
     private var privateCommentsRecyclerAdapter: CommentsRecyclerAdapter? = null
     private var privateCommentsLiveData: LiveData<PagedList<CommentsWithPerson>>? = null
     private var newPrivateCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
-    private var privateCommentsMergerRecyclerAdapter: MergeAdapter? = null
+    private var privateCommentsMergerRecyclerAdapter: ConcatAdapter? = null
     private var submitWithMetricsRecyclerAdapter: ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter ? = null
     private var recordForStudentButtonRecyclerAdapter: SimpleButtonRecyclerAdapter? = null
     private var simpleTwoButtonRecyclerAdapter: SimpleTwoButtonRecyclerAdapter? = null
 
-    private var detailMergerRecyclerAdapter: MergeAdapter? = null
+    private var detailMergerRecyclerAdapter: ConcatAdapter? = null
     private var detailMergerRecyclerView: RecyclerView? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -154,11 +154,11 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<PersonWithClazzWorkA
             privateCommentsObserver = PagedListSubmitObserver(it)
         }
 
-        privateCommentsMergerRecyclerAdapter = MergeAdapter(
+        privateCommentsMergerRecyclerAdapter = ConcatAdapter(
                 privateCommentsHeadingRecyclerAdapter, privateCommentsRecyclerAdapter,
                 newPrivateCommentRecyclerAdapter)
 
-        detailMergerRecyclerAdapter = MergeAdapter(
+        detailMergerRecyclerAdapter = ConcatAdapter(
                 submissionHeadingRecyclerAdapter, shortTextSubmissionRecyclerAdapter,
                 shortTextResultRecyclerAdapter,
                 quizViewRecyclerAdapter, quizEditRecyclerAdapter,

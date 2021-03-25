@@ -25,7 +25,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -60,7 +60,7 @@ class ReportListFragment() : UstadListViewFragment<Report, Report>(),
             val graphJob = GlobalScope.async(Dispatchers.Main) {
                 try {
                     val series = if (!item.reportSeries.isNullOrEmpty()) {
-                        safeParseList(di, ReportSeries.serializer().list,
+                        safeParseList(di, ListSerializer(ReportSeries.serializer()),
                                 ReportSeries::class, item.reportSeries ?: "")
                     } else {
                         listOf()
