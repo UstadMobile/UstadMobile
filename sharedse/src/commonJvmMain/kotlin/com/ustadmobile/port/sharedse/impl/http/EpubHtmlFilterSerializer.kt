@@ -4,9 +4,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.util.UMUtil
 import com.ustadmobile.port.sharedse.util.XmlPassThroughFilter
 import com.ustadmobile.port.sharedse.util.passXmlThrough
-import org.kmp.io.KMPPullParser.Companion.FEATURE_PROCESS_DOCDECL
-import org.kmp.io.KMPSerializerParser
-import org.kmp.io.KMPXmlParser
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -34,7 +31,6 @@ class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
 
     //add the script
     val output: ByteArray
-        @Throws(IOException::class, XmlPullParserException::class)
         get() {
             val bout = ByteArrayOutputStream()
             val xs: XmlSerializer by di.instance()
@@ -72,7 +68,6 @@ class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
                     return true
                 }
 
-                @Throws(IOException::class, XmlPullParserException::class)
                 override fun afterPassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
                     if(evtType == XmlPullParser.START_TAG && parser.getName() == "meta"
                             && parser.getAttributeValue(null, "name") == "viewport") {

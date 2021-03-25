@@ -144,6 +144,7 @@ kotlin {
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
                 compileOnly "com.ustadmobile.door:room-annotations:$version_door"
+                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
             }
         }
 
@@ -164,6 +165,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
                 implementation "io.ktor:ktor-io-jvm:$version_ktor"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
+                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
 
             }
         }

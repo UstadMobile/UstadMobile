@@ -1,7 +1,7 @@
 package com.ustadmobile.sharedse.network
 
 import fi.iki.elonen.NanoHTTPD
-import kotlinx.io.InputStream
-import kotlinx.io.OutputStream
+import java.io.InputStream
+import java.io.OutputStream
 
 typealias NanoHttpdSessionSource = (inStream: InputStream, outStream: OutputStream) -> NanoHTTPD.IHTTPSession

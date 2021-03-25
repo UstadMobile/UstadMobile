@@ -39,6 +39,7 @@ import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
+import kotlinx.coroutines.runBlocking
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.File
@@ -222,11 +223,11 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             handleInputError(mBinding?.usernameTextinputlayout, value != null, value)
         }
 
-    override var passwordError: String? = null
+    override var passwordError: String?
         set(value) {
-            field = null
-            handleInputError(mBinding?.passwordTextinputlayout, value != null, value)
+            mBinding?.passwordError = value
         }
+        get() = mBinding?.passwordError
 
 
     override var noMatchPasswordError: String? = null

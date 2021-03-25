@@ -61,7 +61,7 @@ class DownloadDialogPresenter(context: Any,
 
     private val jobSizeTotals = atomic(null as DownloadJobSizeInfo?)
 
-    private val wifiOnlyChecked = atomic(false)
+    private val wifiOnlyChecked = atomic(0)
 
     private lateinit var downloadJobItemLiveData : DoorLiveData<DownloadJobItem?>
 
@@ -114,9 +114,11 @@ class DownloadDialogPresenter(context: Any,
             downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(
                     contentEntryUid)
             downloadJobCompletable.complete(true)
-            val isWifiOnly = !appDatabase.downloadJobDao.getMeteredNetworkAllowed(currentJobId)
-            wifiOnlyChecked.value = isWifiOnly
-            view.setDownloadOverWifiOnly(isWifiOnly)
+            val wifiOnly: Boolean = !appDatabase.downloadJobDao.getMeteredNetworkAllowed(currentJobId)
+            view.setDownloadOverWifiOnly(wifiOnly)
+            val checkedVal = if(wifiOnly) 1 else 0
+            wifiOnlyChecked.value = checkedVal
+
             downloadJobItemLiveData.observe(lifecycleOwner, downloadJobItemObserver)
 
             updateWarningMessage(downloadJobItemLiveData.getValue())
@@ -233,7 +235,7 @@ class DownloadDialogPresenter(context: Any,
         newDownloadJob.djDestinationDir = selectedStorageDir?.dirURI
         newDownloadJob.djStatus = JobStatus.NEEDS_PREPARED
         val isWifiOnlyChecked = wifiOnlyChecked.value
-        newDownloadJob.meteredNetworkAllowed = !isWifiOnlyChecked
+        newDownloadJob.meteredNetworkAllowed = isWifiOnlyChecked != 0
         containerDownloadManager.createDownloadJob(newDownloadJob)
         currentJobId = newDownloadJob.djUid
         val downloadPrepRequester: DownloadPreparationRequester by on(accountManager.activeAccount).instance()
@@ -305,7 +307,8 @@ class DownloadDialogPresenter(context: Any,
     }
 
     fun handleClickWiFiOnlyOption(wifiOnly: Boolean) {
-        wifiOnlyChecked.value = wifiOnly
+        val wifiOnlyCheckedVal = if(wifiOnly) 1 else 0
+        wifiOnlyChecked.value = wifiOnlyCheckedVal
         if(currentJobId != 0) {
             GlobalScope.launch {
                 containerDownloadManager.setMeteredDataAllowed(currentJobId, !wifiOnly)
