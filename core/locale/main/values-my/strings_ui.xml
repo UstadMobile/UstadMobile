@@ -1,2 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="login">လော့ဂ်အင်</string>
+    <string name="err_registering_new_user">မှားယွင်းနေသည်အသုံးပြုသူအသစ်မှတ်ပုံတင်:</string>
+    <string name="error">အမှား</string>
+    <string name="register_empty_fields">အားလုံးလိုအပ်သောကွက်လပ်များကိုဖြည့်စွက်ပေးပါ</string>
+</resources>
