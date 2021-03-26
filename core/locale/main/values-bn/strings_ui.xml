@@ -503,7 +503,7 @@
     <string name="submitted_cap">জমা দেওয়া হয়েছে</string>
     <string name="not_submitted_cap">জমা না</string>
     <string name="submitliteral">জমা দিন</string>
-    <string name="x_percent_attended">% 1.0f %% উপস্থিতি</string>
+    <string name="x_percent_attended">%1.0f%% উপস্থিতি</string>
     <string name="attendance_low_to_high">উপস্থিতি (নিম্ন থেকে উচ্চ)</string>
     <string name="answer">উত্তর</string>
     <string name="of_content">বিষয়বস্তু</string>
