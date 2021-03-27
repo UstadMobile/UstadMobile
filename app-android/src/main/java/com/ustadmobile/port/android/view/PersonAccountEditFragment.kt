@@ -1,5 +1,6 @@
 package com.ustadmobile.port.android.view
 
+import android.R.attr
 import android.os.Bundle
 import android.text.Editable
 import android.text.InputFilter
@@ -30,11 +31,19 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 
     private val usernameFilter = InputFilter { source, start, end, dest, dstart, dend ->
 
-        if (source != null && blockCharacterSet.contains("" + source)) {
-            ""
-        } else if(source != null){
-             source.toString().toLowerCase()
-        }else null
+        val sb = StringBuilder(attr.end - start)
+
+        for (i in start until end) {
+            val c = source[i]
+            if (blockCharacterSet.contains(c)) {
+                ""
+            }else if(c != null || !c.equals("")) {
+                sb.append(c.toString().toLowerCase())
+            } else {
+                null
+            }
+        }
+        sb.toString()
     }
 
     override var currentPasswordError: String?
