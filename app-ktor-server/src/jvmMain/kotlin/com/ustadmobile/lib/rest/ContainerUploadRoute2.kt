@@ -10,6 +10,8 @@ import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
 import io.ktor.routing.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.apache.http.HttpStatus
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -43,10 +45,12 @@ fun Route.ContainerUploadRoute2() {
                 call.respond(HttpStatusCode.BadRequest, "no uploaduuid")
             }
             try {
-                call.receiveStream().use {
-                    sessionManager.onReceiveSessionChunk(UUID.fromString(uploadUuid), it)
+                withContext(Dispatchers.IO) {
+                    call.receiveStream().use {
+                        sessionManager.onReceiveSessionChunk(UUID.fromString(uploadUuid), it)
+                    }
+                    call.respond(HttpStatusCode.NoContent, "")
                 }
-                call.respond(HttpStatusCode.NoContent, "")
             }catch(e: Exception) {
                 e.printStackTrace()
                 call.respond(HttpStatusCode.InternalServerError, "Upload error: $e")

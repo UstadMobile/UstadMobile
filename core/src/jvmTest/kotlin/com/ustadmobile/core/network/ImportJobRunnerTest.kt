@@ -1,7 +1,7 @@
 package com.ustadmobile.core.network
 
 import com.google.gson.Gson
-import com.nhaarman.mockitokotlin2.spy
+import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.catalog.contenttype.H5PTypePluginCommonJvm
@@ -27,6 +27,7 @@ import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_DB
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.rest.ContainerUploadRoute2
@@ -187,11 +188,9 @@ class ImportJobRunnerTest {
 
         fileToUpload = File(clientFolder, "tincan.zip")
 
-        runBlocking {
-            extractResourceToFile(
-                    "/com/ustadmobile/core/container/ustad-tincan.zip",
-                    fileToUpload.path)
-        }
+        javaClass.getResourceAsStream("/com/ustadmobile/core/container/ustad-tincan.zip")
+            .writeToFile(fileToUpload)
+
         metadata = runBlocking {
             contentImportManager.extractMetadata(fileToUpload.path)!!
         }

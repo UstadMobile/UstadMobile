@@ -24,6 +24,7 @@ import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTED_LOCAL
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTING_LOCAL
@@ -304,7 +305,7 @@ class DownloadJobItemRunnerTest {
         webServerTmpDir = temporaryFolder.newFolder("webServerTmpDir")
         webServerTmpContentEntryFile = File(webServerTmpDir, "" + TEST_CONTENT_ENTRY_FILE_UID)
 
-        extractTestResourceToFile(TEST_FILE_RESOURCE_PATH, webServerTmpContentEntryFile)
+        javaClass.getResourceAsStream(TEST_FILE_RESOURCE_PATH).writeToFile(webServerTmpContentEntryFile)
 
         containerTmpDir = temporaryFolder.newFolder("containerTmpDir")
 

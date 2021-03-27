@@ -28,6 +28,7 @@ kotlin {
             dependencies {
                 kotlin("stdlib-common")
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
+                implementation "com.ustadmobile.xmlpullparserkmp:xmlpullparserkmp:$version_xmlpullparserkmp"
             }
         }
 
@@ -66,6 +67,7 @@ kotlin {
                 implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
+                implementation "net.sf.kxml:kxml2:$version_kxml"
 
 
             }

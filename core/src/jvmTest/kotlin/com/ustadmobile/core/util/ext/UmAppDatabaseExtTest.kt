@@ -1,7 +1,7 @@
 package com.ustadmobile.core.util.ext
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient

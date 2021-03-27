@@ -11,8 +11,10 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlSerializer
 import java.io.ByteArrayOutputStream
+import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
+import org.xmlpull.v1.XmlPullParserFactory
 
 /**
  * Performs some minor tweaks on HTML being served to enable EPUB pagination and handling html
@@ -32,12 +34,16 @@ class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
     //add the script
     val output: ByteArray
         get() {
+            val xppFactory = XmlPullParserFactory.newInstance().also {
+                it.isNamespaceAware = true
+            }
+
             val bout = ByteArrayOutputStream()
-            val xs: XmlSerializer by di.instance()
+            val xs: XmlSerializer = xppFactory.newSerializer()
             xs.setOutput(bout, "UTF-8")
 
-            val xpp: XmlPullParser by di.instance()
-            xpp.setInput(`in`!!, "UTF-8")
+            val xpp: XmlPullParser = xppFactory.newPullParser()
+            xpp.setInput(`in`, "UTF-8")
 
             xs.startDocument("UTF-8", false)
             var seenViewPort = false

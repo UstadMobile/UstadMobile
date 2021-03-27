@@ -32,6 +32,7 @@ package com.ustadmobile.core.contentformats.epub.nav
 
 import com.ustadmobile.xmlpullparserkmp.XmlPullParser
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
+import com.ustadmobile.xmlpullparserkmp.XmlSerializer
 
 
 /**
@@ -76,6 +77,9 @@ class EpubNavDocument {
             return null
         }
 
+    /**
+     * Load from the given XML Pull Parser. This is done in Namespace Aware Mode
+     */
     fun load(xpp: XmlPullParser) {
         xpp.setFeature(XmlPullParserConstants.FEATURE_PROCESS_NAMESPACES, true)
 
@@ -142,11 +146,7 @@ class EpubNavDocument {
         }
     }
 
-    /*
-     * This code is being preserved for if/when a ContentEditor function is added. Our current
-     * XmlPullParser for Kotlin Multiplatform does not yet have an XmlSerializer implementation.
-     *
-    fun serialize(xs: KMPSerializerParser) {
+    fun serialize(xs: XmlSerializer) {
         xs.startDocument("UTF-8", false)
         xs.setPrefix("", NAMESPACE_XHTML)
         xs.setPrefix("epub", NAMESPACE_OPS)
@@ -181,7 +181,7 @@ class EpubNavDocument {
         xs.endDocument()
     }
 
-    private fun writeNavItem(item: EpubNavItem, xs: KMPSerializerParser) {
+    private fun writeNavItem(item: EpubNavItem, xs: XmlSerializer) {
         xs.startTag(NAMESPACE_XHTML, "li")
                 .startTag(NAMESPACE_XHTML, "a")
                 .attribute(null, "href", item.href!!)
@@ -198,7 +198,7 @@ class EpubNavDocument {
 
         xs.endTag(NAMESPACE_XHTML, "li")
     }
-    */
+
 
     fun getNavById(id: String): EpubNavItem? {
         return if (navItems.containsKey(id)) {

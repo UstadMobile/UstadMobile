@@ -1,13 +1,13 @@
 package com.ustadmobile.util.test
 
 import okhttp3.*
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.mockwebserver.Dispatcher
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
 import okhttp3.mockwebserver.SocketPolicy
-import okio.Buffer
-import okio.BufferedSink
-import okio.Okio
+import okio.*
 import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.util.concurrent.TimeUnit
@@ -31,21 +31,23 @@ class ReverseProxyDispatcher(private val serverUrl: HttpUrl) : Dispatcher() {
 
     @Throws(InterruptedException::class)
     override fun dispatch(request: RecordedRequest): MockResponse {
-        val proxiedUri = HttpUrl.parse("http://example.com" + request.path)!!
+        val proxiedUri =  ("http://example.com" + request.path).toHttpUrl()
                 .newBuilder()
-                .scheme(serverUrl.scheme())
-                .host(serverUrl.host())
-                .port(serverUrl.port())
+                .scheme(serverUrl.scheme)
+                .host(serverUrl.host)
+                .port(serverUrl.port)
                 .build()
 
         val requestBuilder = Request.Builder()
                 .url(proxiedUri)
                 .headers(request.headers)
 
+        val method = request.method ?: throw IllegalArgumentException("request has no method!")
         if (request.bodySize != 0L) {
-            requestBuilder.method(request.method, object : RequestBody() {
+            requestBuilder.method(method, object : RequestBody() {
                 override fun contentType(): MediaType {
-                    return MediaType.parse(request.getHeader("Content-Type"))!!
+                    val contentType = request.getHeader("Content-Type") ?: "application/octet-stream"
+                    return contentType.toMediaType()
                 }
 
                 @Throws(IOException::class)
@@ -67,19 +69,21 @@ class ReverseProxyDispatcher(private val serverUrl: HttpUrl) : Dispatcher() {
                     .setStatus("Reverse proxy error")
                     .setResponseCode(500)
         }else {
-            val responseBytes = response.body()!!.bytes()
-            val fileBuffer = Okio.buffer(Okio.source(ByteArrayInputStream(responseBytes)))
+            val responseBytes = response.body!!.bytes()
+            val fileBuffer = ByteArrayInputStream(responseBytes).source().buffer()
             val outBuffer = Buffer()
             fileBuffer.readFully(outBuffer, responseBytes.size.toLong())
 
             val mockResponse = MockResponse()
                     .setBody(outBuffer)
-                    .setResponseCode(response!!.code())
+                    .setResponseCode(response.code)
 
             //Chunked transfer encoding won't work here.
             //This was related to ktor not handling partial response... may or may not be needed..
-            response.headers().names().filter { !it.equals("transfer-encoding", ignoreCase = true) }
-                    .forEach { mockResponse.addHeader(it,response.header(it)) }
+            response.headers.filter { !it.first.equals("transfer-encoding", ignoreCase = true) }
+                    .forEach { responseHeader ->
+                        mockResponse.addHeader(responseHeader.first, responseHeader.second)
+                    }
 
             if(numTimesToFail.decrementAndGet() >= 0) {
                 mockResponse.setSocketPolicy(SocketPolicy.DISCONNECT_DURING_RESPONSE_BODY)

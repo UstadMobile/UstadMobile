@@ -131,7 +131,30 @@ kotlin {
             dependencies {
                 implementation "org.jetbrains.kotlin:kotlin-test:$version_kotlin"
                 implementation "org.jetbrains.kotlin:kotlin-test-junit:$version_kotlin"
+                implementation "org.mockito.kotlin:mockito-kotlin:$version_kotlin_mockito"
+                implementation "junit:junit:$version_junit"
 
+                implementation project(":sharedse")
+                implementation project(":lib-database-mpp")
+                implementation project(":lib-database-entities")
+                implementation project(":lib-database")
+                implementation project(":lib-test-common")
+                implementation project(":app-ktor-server")
+
+                implementation "com.github.h-thurow:simple-jndi:$version_simple_jndi"
+                implementation "org.apache.commons:commons-pool2:$version_apache_commons_pool2"
+                implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
+                implementation "org.apache.commons:commons-dbcp2:$version_apache_commons_dbcp2"
+
+                implementation "org.nanohttpd:nanohttpd:$version_nanohttpd"
+                implementation "org.nanohttpd:nanohttpd-nanolets:$version_nanohttpd"
+
+                implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation "io.ktor:ktor-gson:$version_ktor"
+                implementation "io.ktor:ktor-client-gson:$version_ktor"
+
+                implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
             }
         }
 

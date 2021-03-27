@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
 import org.junit.Assert
 import org.junit.Test
+import org.xmlpull.v1.XmlPullParserFactory
 
 /**
  * Created by mike on 1/6/18.
@@ -15,7 +16,7 @@ class TestScormManifest {
     @Test
     fun testParseScormManifest() {
         val scormManifest = ScormManifest()
-        val xpp = UstadMobileSystemImpl.instance.newPullParser()
+        val xpp = XmlPullParserFactory.newInstance().newPullParser()
         val inStream = javaClass.getResourceAsStream(SCORM_MANIFEST_RESOURCE)
         xpp.setFeature(XmlPullParserConstants.FEATURE_PROCESS_NAMESPACES, true)
         xpp.setInput(inStream, "UTF-8")

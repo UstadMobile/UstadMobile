@@ -7,7 +7,7 @@ package com.ustadmobile.core.util
  */
 class XmlPullParserConfig internal constructor(val namespaceAware: Boolean,
                                                val features: Map<String, Boolean>,
-                                                internal val xmlText: String? = null) {
+                                                val xmlText: String? = null) {
 
     class XmlPullParserConfigBuilder(var namespaceAware: Boolean = false,
                                      internal val features: MutableMap<String, Boolean> = mutableMapOf()) {

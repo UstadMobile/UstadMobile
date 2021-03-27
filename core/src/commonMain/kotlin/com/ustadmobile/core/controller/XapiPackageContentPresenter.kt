@@ -9,6 +9,7 @@ import com.ustadmobile.core.tincan.UmAccountGroupActor
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.UMUUID
+import com.ustadmobile.core.util.XmlPullParserConfig
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
 import com.ustadmobile.core.util.ext.toXapiGroupJsonObject
@@ -70,7 +71,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
             val client: HttpClient = di.direct.instance()
             val tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, "tincan.xml"))
 
-            val xpp: XmlPullParser = di.direct.instance(arg = tincanContent)
+            val xpp: XmlPullParser = di.direct.instance(arg = XmlPullParserConfig.fromString(tincanContent))
             tinCanXml = TinCanXML.loadFromXML(xpp)
             val launchHref = tinCanXml?.launchActivity?.launchUrl
             val actorJsonStr: String = if(learnerGroupUid == 0L){

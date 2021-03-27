@@ -177,7 +177,8 @@ class EpubContentPresenter(context: Any,
             val ocfContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, OCF_CONTAINER_PATH))
 
             ocf = OcfDocument()
-            val ocfParser: XmlPullParser = di.direct.instance(arg = XmlPullParserConfig.fromString(ocfContent))
+            val ocfParser: XmlPullParser = di.direct.instance(arg =
+                XmlPullParserConfig.fromString(ocfContent) { namespaceAware = true })
             ocf?.loadFromParser(ocfParser)
 
             //get and parse the first publication
@@ -187,7 +188,8 @@ class EpubContentPresenter(context: Any,
             val opfContent = client.get<String>(opfUrl.toString())
 
             val opf = OpfDocument()
-            val opfParser : XmlPullParser= di.direct.instance(XmlPullParserConfig.fromString(opfContent))
+            val opfParser : XmlPullParser= di.direct.instance(arg =
+                XmlPullParserConfig.fromString(opfContent) { namespaceAware = false })
             opf.loadFromOPF(opfParser)
             val linearSpineHrefsRelative = opf.linearSpineHREFs
 
@@ -251,7 +253,8 @@ class EpubContentPresenter(context: Any,
                     mNavDocument = it
                 }
 
-                val navParser: XmlPullParser  = di.direct.instance(arg = XmlPullParserConfig.fromString(navContent))
+                val navParser: XmlPullParser  = di.direct.instance(arg =
+                    XmlPullParserConfig.fromString(navContent) { namespaceAware = true })
                 navDocument.load(navParser)
                 epubContentView.runOnUiThread(Runnable {
                     epubContentView.tableOfContents = navDocument.toc ?: navDocument.ncxNavMap

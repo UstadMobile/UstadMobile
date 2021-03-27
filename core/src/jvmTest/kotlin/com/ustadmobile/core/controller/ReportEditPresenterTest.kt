@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.google.gson.Gson
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.db.waitUntil
@@ -17,7 +17,7 @@ import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.junit.Assert
 import org.junit.Before
@@ -121,7 +121,8 @@ class ReportEditPresenterTest {
         val testEntity = ReportWithSeriesWithFilters().apply {
             reportTitle = "Old Title"
             xAxis = Report.MONTH
-            reportSeries = Json.stringify(ReportSeries.serializer().list, reportSeriesList)
+            reportSeries = Json.encodeToString(ListSerializer(ReportSeries.serializer()),
+                reportSeriesList)
             reportSeriesWithFiltersList = reportSeriesList
             reportUid = repo.reportDao.insert(this)
         }

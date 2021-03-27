@@ -18,6 +18,7 @@ import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
@@ -107,7 +108,8 @@ class TestXapiStatementResponder {
     @Throws(IOException::class)
     fun givenValidPostRequest_whenDataInQueryParamString_thenDbShouldBeUpdated() {
         val tmpFile = temporaryFolder.newFile("statement.json")
-        extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
+        javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement")
+            .writeToFile(tmpFile)
 
         val contentEntryUid = 1234L
 
@@ -142,7 +144,8 @@ class TestXapiStatementResponder {
     fun givenValidPutRequest_whenDataInContentMap_thenDbShouldBeUpdated() {
 
         val tmpFile = temporaryFolder.newFile("testStatement")
-        extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
+        javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement")
+            .writeToFile(tmpFile)
 
         val contentEntryUid = 1234L
 
@@ -176,7 +179,8 @@ class TestXapiStatementResponder {
     fun givenAValidPutRequest_whenPutRequestHasStatementIdParam_thenShouldUpdateDb() {
 
         val tmpFile = temporaryFolder.newFile("testStatement")
-        extractTestResourceToFile("/com/ustadmobile/port/sharedse/fullstatement", tmpFile)
+        javaClass.getResourceAsStream("/com/ustadmobile/port/sharedse/fullstatement")
+            .writeToFile(tmpFile)
 
         val contentEntryUid = 1234L
 
