@@ -37,36 +37,41 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
         }else null
     }
 
-    override var currentPasswordError: String? = null
+    override var currentPasswordError: String?
         set(value) {
-            field = value
-            handleInputError(mBinding?.currentPasswordTextinputlayout, value != null,value)
+            mBinding?.currentPasswordError = value
         }
-
-    override var newPasswordError: String? = null
-        set(value) {
-            field = value
-            handleInputError(mBinding?.newPasswordTextinputlayout, value != null,value)
-        }
-    override var confirmedPasswordError: String? = null
-       set(value) {
-            field = value
-            handleInputError(mBinding?.confirmPasswordTextinputlayout, value != null,value)
-        }
-    override var noPasswordMatchError: String? = null
-        set(value) {
-            if(value != null){
-                handleInputError(mBinding?.newPasswordTextinputlayout, true, value)
-                handleInputError(mBinding?.confirmPasswordTextinputlayout, true, value)
-            }
-        }
+        get() = mBinding?.currentPasswordError
 
 
-    override var usernameError: String? = null
+    override var newPasswordError: String?
         set(value) {
-            field = value
-            handleInputError(mBinding?.usernameTextinputlayout, value != null,value)
+            mBinding?.passwordError = value
         }
+        get() = mBinding?.passwordError
+
+
+    override var confirmedPasswordError: String?
+        set(value) {
+            mBinding?.passwordConfirmError = value
+        }
+        get() = mBinding?.passwordConfirmError
+
+    override var noPasswordMatchError: String?
+
+        set(value) {
+            mBinding?.passwordError = value
+            mBinding?.passwordConfirmError = value
+        }
+        get() = mBinding?.passwordError
+
+
+    override var usernameError: String?
+        set(value) {
+            mBinding?.usernameError = value
+        }
+        get() = mBinding?.usernameError
+
 
     override var errorMessage: String? = null
         set(value) {
@@ -96,6 +101,19 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
     override val mEditPresenter: UstadEditPresenter<*, PersonWithAccount>?
         get() = mPresenter
 
+    class ClearErrorTextWatcher(private val onTextFunction: () -> Unit ):TextWatcher{
+        override fun afterTextChanged(p0: Editable?) {
+
+        }
+
+        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+
+        }
+
+        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            onTextFunction()
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView: View
@@ -106,45 +124,21 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
         mPresenter = PersonAccountEditPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
-        mBinding?.currentPasswordText?.addTextChangedListener(object: TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {}
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                handleInputError(mBinding?.currentPasswordTextinputlayout, false, null)
-            }
+        mBinding?.currentPasswordText?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.currentPasswordError = null
         })
 
-        mBinding?.newPasswordText?.addTextChangedListener(object: TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {}
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                handleInputError(mBinding?.newPasswordTextinputlayout, false, null)
-            }
+        mBinding?.newPasswordText?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.passwordError = null
         })
 
 
-        mBinding?.confirmPasswordText?.addTextChangedListener(object: TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {}
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                handleInputError(mBinding?.confirmPasswordTextinputlayout, false, null)
-            }
+        mBinding?.confirmPasswordText?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.passwordConfirmError = null
         })
 
-        mBinding?.accountUsernameText?.addTextChangedListener(object: TextWatcher {
-            override fun afterTextChanged(p0: Editable?) {}
-
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                handleInputError(mBinding?.usernameTextinputlayout, false, null)
-            }
+        mBinding?.accountUsernameText?.addTextChangedListener(ClearErrorTextWatcher {
+            mBinding?.usernameError = null
         })
 
         mBinding?.accountUsernameText?.filters = arrayOf(usernameFilter)
@@ -156,7 +150,8 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
     override fun onResume() {
         super.onResume()
         if(mBinding?.person != null) {
-            (activity as? AppCompatActivity)?.supportActionBar?.title = mBinding?.person?.firstNames + " " + mBinding?.person?.lastName
+            (activity as? AppCompatActivity)?.supportActionBar?.title =
+                    mBinding?.person?.firstNames + " " + mBinding?.person?.lastName
         }
     }
 

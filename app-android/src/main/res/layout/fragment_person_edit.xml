@@ -50,6 +50,40 @@
             name="activityEventHandler"
             type="com.ustadmobile.port.android.view.PersonEditFragmentEventHandler" />
 
+        <variable
+            name="firstNamesError"
+            type="String" />
+
+        <variable
+            name="lastNameError"
+            type="String" />
+
+        <variable
+            name="usernameError"
+            type="String" />
+
+        <variable
+            name="genderFieldError"
+            type="String" />
+
+        <variable
+            name="passwordError"
+            type="String" />
+
+        <variable
+            name="passwordConfirmError"
+            type="String"
+            />
+
+        <variable
+            name="dateOfBirthFieldError"
+            type="String" />
+
+
+
+
+
+
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -93,6 +127,8 @@
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
+                app:errorText="@{firstNamesError}"
+                app:errorEnabled="@{firstNamesError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -119,6 +155,8 @@
                 android:layout_marginStart="@dimen/dimen_16dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 app:hintEnabled="true"
+                app:errorText="@{lastNameError}"
+                app:errorEnabled="@{lastNameError != null}"
                 android:enabled="@{fieldsEnabled}"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:errorTextColor="?colorError"
@@ -145,6 +183,8 @@
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
+                app:errorText="@{genderFieldError}"
+                app:errorEnabled="@{genderFieldError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
@@ -171,6 +211,8 @@
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:hintEnabled="true"
+                app:errorText="@{dateOfBirthFieldError}"
+                app:errorEnabled="@{dateOfBirthFieldError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/gender_textinputlayout">
@@ -267,6 +309,8 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
+                app:errorText="@{usernameError}"
+                app:errorEnabled="@{usernameError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:errorTextColor="?colorError"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -298,6 +342,8 @@
                 app:passwordToggleEnabled="true"
                 app:errorTextColor="?colorError"
                 app:hintEnabled="true"
+                app:errorText="@{passwordError}"
+                app:errorEnabled="@{passwordError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintTop_toBottomOf="@+id/username_textinputlayout">
 
@@ -323,6 +369,8 @@
                 android:layout_margin="@dimen/dimen_16dp"
                 app:passwordToggleEnabled="true"
                 app:hintEnabled="true"
+                app:errorText="@{passwordConfirmError}"
+                app:errorEnabled="@{passwordConfirmError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

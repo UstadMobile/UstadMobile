@@ -21,7 +21,7 @@ interface PersonAccountEditView: UstadEditView<PersonWithAccount> {
     companion object {
 
         const val VIEW_NAME = "PersonAccountEditView"
-        const val blockCharacterSet="~!@#$%^&*()_+-[]'\\/.{} "
+        const val blockCharacterSet="~!#$%^&*()_+-[]'\\/.|\"{} "
 
     }
 

@@ -90,7 +90,6 @@ class PersonAccountEditPresenter(context: Any,
                     && !createAccount || entity.newPassword.isNullOrEmpty()
                     || entity.confirmedPassword.isNullOrEmpty() || entity.username.isNullOrEmpty()
                     || entity.confirmedPassword != entity.newPassword
-                    //|| entity.username?.contains(blockCharacterSet)
 
             if(hasErrors){
 
