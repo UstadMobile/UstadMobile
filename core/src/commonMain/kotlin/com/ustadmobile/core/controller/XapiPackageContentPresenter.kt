@@ -6,17 +6,15 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.core.tincan.UmAccountActor
 import com.ustadmobile.core.tincan.UmAccountGroupActor
-import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMURLEncoder
-import com.ustadmobile.core.util.UMUUID
-import com.ustadmobile.core.util.XmlPullParserConfig
+import com.ustadmobile.core.util.*
 import com.ustadmobile.core.util.ext.toQueryString
 import com.ustadmobile.core.util.ext.toXapiActorJsonObject
 import com.ustadmobile.core.util.ext.toXapiGroupJsonObject
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
-import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
+import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
 import io.ktor.client.request.get
 import kotlinx.coroutines.Dispatchers
@@ -71,7 +69,9 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
             val client: HttpClient = di.direct.instance()
             val tincanContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, "tincan.xml"))
 
-            val xpp: XmlPullParser = di.direct.instance(arg = XmlPullParserConfig.fromString(tincanContent))
+            val xppFactory : XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSAWARE)
+            val xpp = xppFactory.newPullParser()
+            xpp.setInputString(tincanContent)
             tinCanXml = TinCanXML.loadFromXML(xpp)
             val launchHref = tinCanXml?.launchActivity?.launchUrl
             val actorJsonStr: String = if(learnerGroupUid == 0L){

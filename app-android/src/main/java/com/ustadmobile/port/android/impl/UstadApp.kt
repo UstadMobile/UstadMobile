@@ -54,6 +54,7 @@ import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import io.ktor.client.*
 import io.ktor.client.features.json.*
@@ -190,12 +191,14 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<EmbeddedHTTPD>().listeningPort
         }
 
-        bind<XmlPullParserFactory>() with provider {
-            XmlPullParserFactory.newInstance()
+        bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
+            XmlPullParserFactory.newInstance().also {
+                it.isNamespaceAware = true
+            }
         }
 
-        bind<XmlPullParser>() with provider {
-            instance<XmlPullParserFactory>().newPullParser()
+        bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
+            XmlPullParserFactory.newInstance()
         }
 
         bind<XmlSerializer>() with provider {

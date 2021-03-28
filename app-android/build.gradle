@@ -85,7 +85,7 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        coreLibraryDesugaringEnabled true
+        //coreLibraryDesugaringEnabled true
     }
 
     testOptions {
@@ -272,17 +272,10 @@ configurations.all {
 }
 
 dependencies {
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
+    //coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
 
     implementation project(':core')
     implementation project(':sharedse')
-
-    /*
-     * This is a hack: Intellisense does not seem to recognize classes that are outside the common
-     * sourceset (e.g. android/jvm sourcesets) in Kotlin multiplatform project dependencies. Adding
-     * this will allow autocomplete etc. to work.
-     */
-    //compileOnly files("../sharedse/build/libs/sharedse-jvm.jar")
 
     implementation "com.ustadmobile.door:door-runtime:$version_door"
     implementation project(':lib-database-android')

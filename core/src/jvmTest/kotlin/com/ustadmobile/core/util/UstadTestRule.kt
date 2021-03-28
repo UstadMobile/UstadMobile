@@ -86,17 +86,14 @@ class UstadTestRule: TestWatcher() {
                 defaultHttpClient()
             }
 
-            bind<XmlPullParser>() with factory { xppConfig: XmlPullParserConfig ->
-                val xppFactory = XmlPullParserFactory.newInstance().also {
-                    it.isNamespaceAware = xppConfig.namespaceAware
+            bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
+                XmlPullParserFactory.newInstance().also {
+                    it.isNamespaceAware = true
                 }
+            }
 
-                xppFactory.newPullParser().also { xpp ->
-                    val xmlText: String? = xppConfig.xmlText
-                    if(xmlText != null) {
-                        xpp.setInput(StringReader(xmlText))
-                    }
-                }
+            bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
+                XmlPullParserFactory.newInstance()
             }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

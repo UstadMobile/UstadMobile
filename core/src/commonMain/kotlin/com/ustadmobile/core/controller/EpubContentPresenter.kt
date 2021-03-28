@@ -72,14 +72,15 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.impl.dumpException
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.XmlPullParserConfig
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.ContainerMounter.Companion.FILTER_MODE_EPUB
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.util.getSystemTimeInMillis
-import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
+import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
 import io.ktor.client.request.get
 import kotlinx.coroutines.GlobalScope
@@ -175,10 +176,11 @@ class EpubContentPresenter(context: Any,
         try {
             val client : HttpClient = di.direct.instance()
             val ocfContent = client.get<String>(UMFileUtil.joinPaths(mountedPath, OCF_CONTAINER_PATH))
+            val xppFactoryNsAware: XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSAWARE)
 
             ocf = OcfDocument()
-            val ocfParser: XmlPullParser = di.direct.instance(arg =
-                XmlPullParserConfig.fromString(ocfContent) { namespaceAware = true })
+            val ocfParser = xppFactoryNsAware.newPullParser()
+            ocfParser.setInputString(ocfContent)
             ocf?.loadFromParser(ocfParser)
 
             //get and parse the first publication
@@ -188,8 +190,9 @@ class EpubContentPresenter(context: Any,
             val opfContent = client.get<String>(opfUrl.toString())
 
             val opf = OpfDocument()
-            val opfParser : XmlPullParser= di.direct.instance(arg =
-                XmlPullParserConfig.fromString(opfContent) { namespaceAware = false })
+            val xppFactoryNsUnaware: XmlPullParserFactory = di.direct.instance(tag = DiTag.XPP_FACTORY_NSUNAWARE)
+            val opfParser = xppFactoryNsUnaware.newPullParser()
+            opfParser.setInputString(opfContent)
             opf.loadFromOPF(opfParser)
             val linearSpineHrefsRelative = opf.linearSpineHREFs
 
@@ -253,8 +256,8 @@ class EpubContentPresenter(context: Any,
                     mNavDocument = it
                 }
 
-                val navParser: XmlPullParser  = di.direct.instance(arg =
-                    XmlPullParserConfig.fromString(navContent) { namespaceAware = true })
+                val navParser = xppFactoryNsAware.newPullParser()
+                navParser.setInputString(navContent)
                 navDocument.load(navParser)
                 epubContentView.runOnUiThread(Runnable {
                     epubContentView.tableOfContents = navDocument.toc ?: navDocument.ncxNavMap
