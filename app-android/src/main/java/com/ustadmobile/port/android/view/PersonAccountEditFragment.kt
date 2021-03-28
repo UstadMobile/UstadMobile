@@ -28,24 +28,6 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 
     private var mPresenter: PersonAccountEditPresenter? = null
 
-
-    private val usernameFilter = InputFilter { source, start, end, dest, dstart, dend ->
-
-        val sb = StringBuilder(attr.end - start)
-
-        for (i in start until end) {
-            val c = source[i]
-            if (blockCharacterSet.contains(c)) {
-                ""
-            }else if(c != null || !c.equals("")) {
-                sb.append(c.toString().toLowerCase())
-            } else {
-                null
-            }
-        }
-        sb.toString()
-    }
-
     override var currentPasswordError: String?
         set(value) {
             mBinding?.currentPasswordError = value
@@ -150,7 +132,7 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
             mBinding?.usernameError = null
         })
 
-        mBinding?.accountUsernameText?.filters = arrayOf(usernameFilter)
+        mBinding?.accountUsernameText?.filters = arrayOf(USERNAME_FILTER)
 
         return rootView
     }
@@ -180,5 +162,24 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
         mBinding = null
         mPresenter = null
         entity = null
+    }
+
+    companion object{
+        val USERNAME_FILTER = InputFilter { source, start, end, dest, dstart, dend ->
+
+            val sb = StringBuilder(attr.end - start)
+
+            for (i in start until end) {
+                val c = source[i]
+                if (blockCharacterSet.contains(c)) {
+                    ""
+                }else if(c != null || !c.equals("")) {
+                    sb.append(c.toString().toLowerCase())
+                } else {
+                    null
+                }
+            }
+            sb.toString()
+        }
     }
 }

@@ -198,9 +198,6 @@ class PersonEditPresenter(context: Any,
             view.genderFieldError == null
 
             val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
-            //TODO:
-            val specialCharactersNotAllowedFieldMessage =
-                    impl.getString(MessageID.strings_not_allowed, context)
 
             view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNamesFieldError = requiredFieldMessage
             view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameFieldError = requiredFieldMessage

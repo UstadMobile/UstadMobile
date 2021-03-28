@@ -35,6 +35,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_POPUPTO_ON_FINISH
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
+import com.ustadmobile.port.android.view.PersonAccountEditFragment.Companion.USERNAME_FILTER
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
@@ -384,6 +385,8 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         mBinding?.birthdayText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.dateOfBirthFieldError = null
         })
+
+        mBinding?.usernameText?.filters = arrayOf(USERNAME_FILTER)
 
         return rootView
     }
