@@ -1,17 +1,16 @@
-    package com.ustadmobile.port.android.view.binding
+package com.ustadmobile.port.android.view.binding
 
-import android.Manifest
 import android.content.DialogInterface
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.MediaStore
 import android.view.View
+import android.widget.ImageView
 import androidx.activity.result.ActivityResultCallback
 import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.databinding.InverseBindingListener
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -20,58 +19,48 @@ import androidx.navigation.findNavController
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
-import java.io.File
 
-    /**
- *
+/**
+ * This LifecycleObserver is used to support two-way viewbinding for an image uri on PersonPicture
  */
-abstract class ViewActivityLauncherLifecycleObserver<V: View>(
-        var view: V,
+class ImageViewLifecycleObserver2(
         private var registry: ActivityResultRegistry?,
-        protected var inverseBindingListener: InverseBindingListener?
-) : DefaultLifecycleObserver, DialogInterface.OnClickListener {
+        var inverseBindingListener: InverseBindingListener?,
+        private var registryId: Int) : DefaultLifecycleObserver,
+        DialogInterface.OnClickListener, View.OnClickListener {
+
+    var view: ImageView? = null
+        set(value) {
+            field?.setOnClickListener(null)
+            value?.setOnClickListener(this)
+            field = value
+        }
 
     private var cameraLauncher: ActivityResultLauncher<Uri>? = null
 
     private var galleryLauncher: ActivityResultLauncher<String>? = null
 
-    private var requestCameraPermission: ActivityResultLauncher<String>? = null
-
-    private var requestStoragePermission: ActivityResultLauncher<String>? = null
-
     private val cameraUriSavedStateKey: String
-        get() = PREFIX_URI_KEY + view.id
+        get() = PREFIX_URI_KEY + registryId
 
-    val takePictureOnClickListener = View.OnClickListener {
-        takePicture()
+    override fun onClick(v: View?) {
+        showOptionsDialog()
     }
 
     override fun onCreate(owner: LifecycleOwner) {
         super.onCreate(owner)
 
-        cameraLauncher = registry?.register("cameraFilePath_${view.id}", owner,
+        cameraLauncher = registry?.register("cameraFilePath_${registryId}", owner,
             ActivityResultContracts.TakePicture(), ActivityResultCallback {
-                val uriStr = view.findNavController().currentBackStackEntry
+                val viewVal = view ?: return@ActivityResultCallback
+                val uriStr = viewVal.findNavController().currentBackStackEntry
                         ?.savedStateHandle?.get<String>(cameraUriSavedStateKey) ?: return@ActivityResultCallback
                 onPictureTakenOrSelected(Uri.parse(uriStr))
         })
 
-        galleryLauncher = registry?.register("galleryFilePath_${view.id}", owner,
+        galleryLauncher = registry?.register("galleryFilePath_${registryId}", owner,
             ActivityResultContracts.GetContent(), ActivityResultCallback {
             onPictureTakenOrSelected(it)
-        })
-
-        requestCameraPermission = registry?.register("cameraPermission_${view.id}", owner,
-            ActivityResultContracts.RequestPermission(), ActivityResultCallback { granted ->
-            if(granted)
-                takePictureInternal()
-        })
-
-        requestStoragePermission = registry?.register("storagePermission_${view.id}", owner,
-            ActivityResultContracts.RequestPermission(), ActivityResultCallback {granted ->
-            if(granted) {
-                openPictureInternal()
-            }
         })
     }
 
@@ -80,16 +69,15 @@ abstract class ViewActivityLauncherLifecycleObserver<V: View>(
 
         cameraLauncher = null
         galleryLauncher = null
-        requestCameraPermission = null
-        requestStoragePermission = null
         inverseBindingListener = null
-        view.setOnClickListener(null)
+        view?.setOnClickListener(null)
     }
 
     fun showOptionsDialog() {
-        MaterialAlertDialogBuilder(view.context)
+        val viewVal = view ?: return
+        MaterialAlertDialogBuilder(viewVal.context)
             .setTitle(R.string.change_photo)
-            .setItems(OPTIONS_STRING_IDS.map { view.context.getString(it) }.toTypedArray(), this)
+            .setItems(OPTIONS_STRING_IDS.map { viewVal.context.getString(it) }.toTypedArray(), this)
             .show()
 
     }
@@ -102,45 +90,38 @@ abstract class ViewActivityLauncherLifecycleObserver<V: View>(
         }
     }
 
-    private fun hasPermission(permission: String): Boolean
-            = ContextCompat.checkSelfPermission(view.context, permission) == PackageManager.PERMISSION_GRANTED
-
     fun takePicture() {
-        takePictureInternal()
-    }
-
-    protected fun takePictureInternal() {
-        val navController = view.findNavController()
-        val fileDest = navController.createTempFileForDestination(view.context,
+        val viewVal = view ?: return
+        val navController = viewVal.findNavController()
+        val fileDest = navController.createTempFileForDestination(viewVal.context,
                 "takePicture-${System.currentTimeMillis()}")
-        val fileUri = FileProvider.getUriForFile(view.context.applicationContext,
-                "${view.context.packageName}.provider", fileDest)
+        val fileUri = FileProvider.getUriForFile(viewVal.context.applicationContext,
+                "${viewVal.context.packageName}.provider", fileDest)
 
         //This is required to grant permission to the third party activity (e.g. camera) to save
         //the image. Only seems to be required on Android 4.4
         val cameraIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-        val resInfoList = view.context.packageManager.queryIntentActivities(cameraIntent,
+        val resInfoList = viewVal.context.packageManager.queryIntentActivities(cameraIntent,
                 PackageManager.MATCH_DEFAULT_ONLY)
         for (resolveInfo in resInfoList) {
             val packageName = resolveInfo.activityInfo.packageName
-            view.context.grantUriPermission(packageName, fileUri,
+            viewVal.context.grantUriPermission(packageName, fileUri,
                     Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
-        view.findNavController().currentBackStackEntry?.savedStateHandle?.set(
+        viewVal.findNavController().currentBackStackEntry?.savedStateHandle?.set(
                 cameraUriSavedStateKey, fileUri.toString())
         cameraLauncher?.launch(fileUri)
     }
 
-    fun openPictureInternal() {
+    fun openPicture() {
         galleryLauncher?.launch("image/*")
     }
 
-    fun openPicture() {
-        openPictureInternal()
+    fun onPictureTakenOrSelected(pictureUri: Uri?) {
+        view?.setImageFilePath(pictureUri?.toString(),null)
+        inverseBindingListener?.onChange()
     }
-
-    abstract fun onPictureTakenOrSelected(pictureUri: Uri?)
 
     companion object {
 

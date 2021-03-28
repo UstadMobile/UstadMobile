@@ -135,7 +135,12 @@ ext {
     version_logback = "1.0.13"
     version_kodein_di = "7.4.0"
 
-    version_android_buildtools = "29.0.3"
+
+    /**
+     * See Google's repo index to check latest versions etc
+     * https://maven.google.com/web/index.html
+     */
+    version_android_buildtools = "30.0.2"
     version_android_compile_sdk = 30
     version_android_target_sdk = 30
     version_android_min_sdk = 21

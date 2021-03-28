@@ -10,6 +10,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.ActivityResultRegistry
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.DefaultLifecycleObserver
@@ -71,6 +72,8 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
     private var playbackPosition: Long = 0
 
     private var webView: WebView?  = null
+
+    var activityResultLauncher: ActivityResultLauncher<String>? = null
 
     override var entity: ContentEntryWithLanguage? = null
         get() = field
@@ -217,8 +220,25 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
 
 
     internal fun handleFileSelection() {
-        registerForActivityResult(ActivityResultContracts.GetContent(),
-                registry ?: requireActivity().activityResultRegistry) { uri: Uri? ->
+            activityResultLauncher?.launch("*/*")
+            //.launch("*/*")
+    }
+
+    override fun handleClickLanguage() {
+        onSaveStateToBackStackStateHandle()
+        navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
+    }
+
+    private fun handleLinkSelection() {
+        onSaveStateToBackStackStateHandle()
+        navigateToPickEntityFromList(ImportedContentEntryMetaData::class.java, R.id.import_link_view)
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        activityResultLauncher = registerForActivityResult(ActivityResultContracts.GetContent(),
+            registry ?: requireActivity().activityResultRegistry) { uri: Uri? ->
             if (uri != null) {
                 try {
                     loading = true
@@ -229,7 +249,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                         val importTmpFolder = File(importFolder, "import-${System.currentTimeMillis()}")
                         importTmpFolder.mkdirs()
                         findNavController().registerDestinationTempFile(requireContext(),
-                                importTmpFolder)
+                            importTmpFolder)
 
                         val tmpFile = File(importTmpFolder, requireContext().contentResolver.getFileName(uri))
                         val output = tmpFile.outputStream()
@@ -247,17 +267,7 @@ class ContentEntryEdit2Fragment(private val registry: ActivityResultRegistry? = 
                 }
             }
 
-        }.launch("*/*")
-    }
-
-    override fun handleClickLanguage() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(Language::class.java, R.id.language_list_dest)
-    }
-
-    private fun handleLinkSelection() {
-        onSaveStateToBackStackStateHandle()
-        navigateToPickEntityFromList(ImportedContentEntryMetaData::class.java, R.id.import_link_view)
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
