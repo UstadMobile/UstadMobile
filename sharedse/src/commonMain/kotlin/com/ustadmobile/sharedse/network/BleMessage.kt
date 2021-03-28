@@ -199,16 +199,20 @@ class BleMessage {
     }
 
     /**
-     * Internal method for reconstructing the payload from packets. Strips out the mesage id
+     * Internal method for reconstructing the payload from packets. Checks that the message id is
+     * as expected, and then strips it out.
      *
      * @param packets Payload packets to be depacketized
      *
      * @return Constructed payload in byte array
      */
-//TODO: Throw an exception if any packet has a different message id
     private fun depacketizePayload(packets: Array<ByteArray>): ByteArray {
         return packets.fold(ByteArray(0)) { acc: ByteArray, bytes: ByteArray ->
-            acc + bytes
+            val packetMessageId = bytes[0]
+            if(packetMessageId != messageId)
+                throw IllegalArgumentException("Packet message id error: expected $messageId / received $packetMessageId")
+
+            acc + bytes.copyOfRange(1, bytes.size)
         }
     }
 

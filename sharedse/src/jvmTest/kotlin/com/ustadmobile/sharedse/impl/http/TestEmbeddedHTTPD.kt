@@ -1,6 +1,6 @@
 package com.ustadmobile.sharedse.impl.http
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import fi.iki.elonen.NanoHTTPD

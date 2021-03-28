@@ -235,7 +235,7 @@ class DownloadDialogPresenter(context: Any,
         newDownloadJob.djDestinationDir = selectedStorageDir?.dirURI
         newDownloadJob.djStatus = JobStatus.NEEDS_PREPARED
         val isWifiOnlyChecked = wifiOnlyChecked.value
-        newDownloadJob.meteredNetworkAllowed = isWifiOnlyChecked != 0
+        newDownloadJob.meteredNetworkAllowed = isWifiOnlyChecked == 0
         containerDownloadManager.createDownloadJob(newDownloadJob)
         currentJobId = newDownloadJob.djUid
         val downloadPrepRequester: DownloadPreparationRequester by on(accountManager.activeAccount).instance()
