@@ -88,15 +88,15 @@ open class Report {
 
         const val CLASS = 307
 
-        const val LE = 308
+        const val LE = 310
 
-        const val PRODUCT_CATEGORY = 309
+        const val PRODUCT_CATEGORY = 311
 
-        const val CUSTOMER = 310
+        const val CUSTOMER = 312
 
-        const val PROVINCE = 311
+        const val PROVINCE = 313
 
-        const val PRODUCT = 312
+        const val PRODUCT = 314
 
         const val ENROLMENT_OUTCOME = 308
 

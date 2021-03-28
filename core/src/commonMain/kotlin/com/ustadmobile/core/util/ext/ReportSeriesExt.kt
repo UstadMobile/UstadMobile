@@ -84,11 +84,6 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         else -> ""
     }
 
-//    val personPermission = """${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1}
-//        ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
-//         LEFT JOIN StatementEntity ON StatementEntity.statementPersonUid = Person.personUid """.replace(":accountPersonUid","?")
-//    paramList.add(accountPersonUid)
-//    paramList.add(accountPersonUid)
 
     var personPermission = """ 
         FROM Sale  
@@ -150,18 +145,6 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
             sql += "LEFT JOIN ClazzLogAttendanceRecord ON StatementEntity.statementPersonUid  = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid "
         }
     }
-
-//    when(reportSeriesYAxis){
-//        SALES_TOTAL, NUMBER_OF_SALES, AVERAGE_SALE_TOTAL -> {
-//            sql+= """ LEFT JOIN SaleItem ON    SaleItem.saleItemSaleUid = Sale.saleUid
-//                    AND CAST(SaleItem.saleItemActive AS INTEGER) = 1      """
-//        }
-//    }
-
-//    val where = " WHERE PersonGroupMember.groupMemberPersonUid = ? "
-//    sql += where
-//    sqlList += where
-//    paramList.add(accountPersonUid)
 
     val where = """ WHERE CAST(Sale.saleActive AS INTEGER) = 1
                     AND (
@@ -270,7 +253,10 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
 
             val dateRangeMoment = report.toDateRangeMoment().toFixedDatePair()
 
-            whereList.add("(StatementEntity.timestamp >= ? AND StatementEntity.timestamp <= ?) ")
+//            if(dateRangeMoment.second == 0){
+//                dateRangeMoment.second =
+//            }
+            whereList.add("(Sale.saleCreationDate >= ? AND Sale.saleCreationDate <= ?) ")
             paramList.add(dateRangeMoment.first)
             paramList.add(dateRangeMoment.second)
         }
