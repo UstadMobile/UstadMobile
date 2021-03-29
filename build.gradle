@@ -45,6 +45,10 @@ allprojects {
         }
 
         maven {
+            url "https://devserver3.ustadmobile.com/repo-mvn"
+        }
+
+        maven {
             url "https://dl.bintray.com/ustadmobile/adbscreenrecord"
         }
 
