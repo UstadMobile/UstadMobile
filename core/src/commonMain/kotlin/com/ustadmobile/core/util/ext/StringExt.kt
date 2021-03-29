@@ -2,6 +2,7 @@ package com.ustadmobile.core.util.ext
 
 import com.ustadmobile.door.ext.hexStringToByteArray
 import com.ustadmobile.door.ext.toHexString
+import kotlin.text.Typography.ellipsis
 
 
 fun String.inBrackets() = "($this)"
@@ -24,4 +25,10 @@ fun String.hexStringToBase64Encoded(): String = hexStringToByteArray().encodeBas
  */
 fun String.base64EncodedToHexString(): String = base64StringToByteArray().toHexString()
 
-
+fun String.truncate(maxLength: Int = 24): String{
+    return if(this.length > maxLength) {
+        this.substring(0, maxLength).plus(ellipsis)
+    } else{
+        this
+    }
+}
