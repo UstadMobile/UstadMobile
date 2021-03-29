@@ -300,7 +300,7 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
             }
             Report.GENDER -> {
                 MessageIdFormatter(
-                        genderMap.mapKeys { it.keys.toString() },
+                        genderMap.mapKeys { it.key.toString() },
                         impl, context)
             }
             Report.CONTENT_ENTRY ->{
@@ -335,7 +335,7 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
         }
         Report.GENDER -> {
             MessageIdFormatter(
-                    genderMap.mapKeys { it.keys.toString() },
+                    genderMap.mapKeys { it.key.toString() },
                     impl, context)
         }
         Report.CONTENT_ENTRY ->{
