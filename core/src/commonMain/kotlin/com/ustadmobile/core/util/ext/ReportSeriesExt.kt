@@ -95,7 +95,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                     LEFT JOIN Person as LE ON LE.personUid = :leUid
                     LEFT JOIN Person as SaleLE ON SaleLE.personUid = Sale.salePersonUid
                     LEFT JOIN Location ON Location.locationUid = Sale.saleLocationUid 
-                    
+
                 
     """.replace(":leUid","?")
     paramList.add(accountPersonUid)
@@ -253,9 +253,6 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
 
             val dateRangeMoment = report.toDateRangeMoment().toFixedDatePair()
 
-//            if(dateRangeMoment.second == 0){
-//                dateRangeMoment.second =
-//            }
             whereList.add("(Sale.saleCreationDate >= ? AND Sale.saleCreationDate <= ?) ")
             paramList.add(dateRangeMoment.first)
             paramList.add(dateRangeMoment.second)

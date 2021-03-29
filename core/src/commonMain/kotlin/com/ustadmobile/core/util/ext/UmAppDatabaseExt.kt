@@ -3,7 +3,6 @@ package com.ustadmobile.core.util.ext
 import androidx.paging.DataSource
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMap
-import com.ustadmobile.core.controller.ReportFilterEditPresenter.Companion.genderMapString
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.StatementDao
 import com.ustadmobile.core.generated.locale.MessageID
@@ -301,7 +300,7 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
             }
             Report.GENDER -> {
                 MessageIdFormatter(
-                        genderMapString.mapKeys { it.toString() },
+                        genderMap.mapKeys { it.keys.toString() },
                         impl, context)
             }
             Report.CONTENT_ENTRY ->{
@@ -336,7 +335,7 @@ suspend fun UmAppDatabase.generateChartData(report: ReportWithSeriesWithFilters,
         }
         Report.GENDER -> {
             MessageIdFormatter(
-                    genderMapString.mapKeys { it.toString() },
+                    genderMap.mapKeys { it.keys.toString() },
                     impl, context)
         }
         Report.CONTENT_ENTRY ->{

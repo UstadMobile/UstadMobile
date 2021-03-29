@@ -11,9 +11,4 @@ object PersonConstants  {
         Person.GENDER_MALE to MessageID.male,
         Person.GENDER_OTHER to MessageID.other)
 
-    @JvmStatic
-    val GENDER_MESSAGE_ID_MAP_STRING = mapOf(Person.GENDER_FEMALE.toString() to MessageID.female,
-            Person.GENDER_MALE.toString() to MessageID.male,
-            Person.GENDER_OTHER.toString() to MessageID.other)
-
 }
