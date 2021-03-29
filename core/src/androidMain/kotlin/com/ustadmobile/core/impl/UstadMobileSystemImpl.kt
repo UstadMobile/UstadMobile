@@ -214,8 +214,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 anim {
                     enter = android.R.anim.slide_in_left
                     exit = android.R.anim.slide_out_right
-                    popEnter = android.R.anim.fade_in
-                    popExit = android.R.anim.fade_out
+                    popEnter = android.R.anim.slide_in_left
+                    popExit = android.R.anim.slide_out_right
                 }
 
                 val popUpToViewName = ustadGoOptions.popUpToViewName

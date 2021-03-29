@@ -28,10 +28,7 @@ import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.sharedse.network.DownloadPreparationRequester
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlin.jvm.Volatile
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -318,7 +315,7 @@ class DownloadDialogPresenter(context: Any,
 
     fun handleStorageOptionSelection(selectedDir: UMStorageDir) {
         selectedStorageDir = selectedDir
-        GlobalScope.launch {
+        GlobalScope.launch(doorMainDispatcher()) {
             downloadJobCompletable.await()
             updateWarningMessage(downloadJobItemLiveData.getValue())
             val downloadJob = containerDownloadManager.getDownloadJob(currentJobId).getValue()
