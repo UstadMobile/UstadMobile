@@ -3,6 +3,7 @@ package com.ustadmobile.door
 import android.content.Context
 import androidx.core.content.ContextCompat
 import androidx.room.RoomDatabase
+import com.ustadmobile.door.attachments.AttachmentFilter
 import io.ktor.client.HttpClient
 import java.io.File
 import kotlin.reflect.KClass
@@ -13,16 +14,18 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
                                                                     httpClient: HttpClient,
                                                                     attachmentsDir: String?,
                                                                     updateNotificationManager: ServerUpdateNotificationManager?,
-                                                                    useClientSyncManager: Boolean): T {
-    val db = if(this is DoorDatabaseSyncableReadOnlyWrapper) {
+                                                                    useClientSyncManager: Boolean,
+                                                                    attachmentFilters: List<AttachmentFilter>): T {
+    val dbUnwrapped = if(this is DoorDatabaseSyncableReadOnlyWrapper) {
         this.unwrap(T::class)
     }else {
         this
     }
 
-    val dbName = (db as RoomDatabase).openHelper.databaseName
+    val androidContext = (context as Context).applicationContext
+    val dbName = (dbUnwrapped as RoomDatabase).openHelper.databaseName
     val attachmentsDirToUse = if(attachmentsDir == null) {
-        File(ContextCompat.getExternalFilesDirs(context as Context, null)[0],
+        File(ContextCompat.getExternalFilesDirs(androidContext, null)[0],
                 "$dbName/attachments").absolutePath
     }else {
         attachmentsDir
@@ -31,10 +34,12 @@ actual inline fun <reified  T: SyncableDoorDatabase> T.asRepository(context: Any
     val dbClass = T::class
     val repoImplClass = Class.forName("${dbClass.qualifiedName}_Repo") as Class<T>
     val repo = repoImplClass
-            .getConstructor(dbClass.java, String::class.java,String::class.java, HttpClient::class.java,
-                    String::class.java, ServerUpdateNotificationManager::class.java, Boolean::class.javaPrimitiveType)
-            .newInstance(db, endpoint, accessToken, httpClient, attachmentsDirToUse,
-                    updateNotificationManager, useClientSyncManager)
+            .getConstructor(Any::class.java, dbClass.java, dbClass.java, String::class.java,
+                    String::class.java, HttpClient::class.java,
+                    String::class.java, ServerUpdateNotificationManager::class.java,
+                    Boolean::class.javaPrimitiveType, List::class.java)
+            .newInstance(androidContext, dbUnwrapped, this, endpoint, accessToken, httpClient, attachmentsDirToUse,
+                    updateNotificationManager, useClientSyncManager, attachmentFilters)
     return repo
 }
 

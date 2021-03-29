@@ -1,37 +1,36 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultRegistry
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
-import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.port.android.util.ext.getActivityContext
-
-class ImageViewLifecycleObserver2(view: ImageView, registry: ActivityResultRegistry, inverseBindingListener: InverseBindingListener)
-    : ViewActivityLauncherLifecycleObserver<ImageView>(view, registry, inverseBindingListener) {
-
-    override fun onPictureTakenOrSelected(pictureUri: Uri?) {
-        view.setImageFilePath(pictureUri?.toString(),null)
-        inverseBindingListener?.onChange()
-    }
-}
+import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
+import kotlinx.coroutines.*
+import org.kodein.di.*
 
 @BindingAdapter(value=["imageUri", "fallbackDrawable"], requireAll = false)
 fun ImageView.setImageFilePath(imageFilePath: String?, fallbackDrawable: Drawable?) {
-    //start observing
     setTag(R.id.tag_imagefilepath, imageFilePath)
+    val di: DI = (context.applicationContext as DIAware).di
+    val accountManager: UstadAccountManager = di.direct.instance()
+    val repo: UmAppDatabase = di.direct.on(accountManager.activeAccount).instance(tag = DoorTag.TAG_REPO)
+    val uriResolved = imageFilePath?.let { repo.resolveAttachmentAndroidUri(it) }
+
     val drawable = fallbackDrawable?: ContextCompat.getDrawable(context,android.R.color.transparent)
-    val picasso = Picasso.get().load(if(imageFilePath != null) Uri.parse(imageFilePath) else null)
+    val picasso = Picasso.get().load(uriResolved)
     if(drawable != null){
         picasso.placeholder(drawable).error(drawable)
     }
@@ -41,19 +40,128 @@ fun ImageView.setImageFilePath(imageFilePath: String?, fallbackDrawable: Drawabl
 
 @BindingAdapter("imageUriAttrChanged")
 fun ImageView.getImageFilePath(inverseBindingListener: InverseBindingListener) {
-    val activity = context.getActivityContext() as ComponentActivity
-    val imageViewLifecycleObserver = ImageViewLifecycleObserver2(this,
-            activity.activityResultRegistry, inverseBindingListener)
-    findViewTreeLifecycleOwner()?.lifecycle?.addObserver(imageViewLifecycleObserver)
+    setTag(R.id.tag_imageview_inversebindinglistener, inverseBindingListener)
+    updateImageViewLifecycleObserver()
+}
 
-    setOnClickListener {
-        imageViewLifecycleObserver.showOptionsDialog()
+@BindingAdapter("imageViewLifecycleObserver")
+fun ImageView.setImageViewLifecycleObserver(imageViewLifecycleObserver: ImageViewLifecycleObserver2) {
+    setTag(R.id.tag_imageviewlifecycleobserver, imageViewLifecycleObserver)
+    updateImageViewLifecycleObserver()
+}
+
+private fun ImageView.updateImageViewLifecycleObserver() {
+    val lifecycleObserver = getTag(R.id.tag_imageviewlifecycleobserver) as? ImageViewLifecycleObserver2
+    val inverseBindingListener = getTag(R.id.tag_imageview_inversebindinglistener) as? InverseBindingListener
+    if(lifecycleObserver != null && inverseBindingListener != null) {
+        lifecycleObserver.view = this
+        lifecycleObserver.inverseBindingListener = inverseBindingListener
     }
 }
 
 @InverseBindingAdapter(attribute = "imageUri")
 fun ImageView.getRealImageFilePath(): String? {
     return (getTag(R.id.tag_imagefilepath) as? String)
+}
+
+
+@BindingAdapter("imageForeignKey")
+fun ImageView.setImageForeignKey(imageForeignKey: Long){
+    foreignKeyProps.foreignKey = imageForeignKey
+    updateImageFromForeignKey()
+}
+
+@BindingAdapter("imageForeignKeyPlaceholder")
+fun ImageView.imageForeignKeyPlaceholder(imageForeignKeyPlaceholder: Drawable?) {
+    foreignKeyProps.placeholder = imageForeignKeyPlaceholder
+    updateImageFromForeignKey()
+}
+
+@BindingAdapter("imageForeignKeyAutoHide")
+fun ImageView.setImageForeignKeyAutoHide(autoHide: Boolean) {
+    foreignKeyProps.autoHide = autoHide
+}
+
+
+val ImageView.foreignKeyProps: ImageViewForeignKeyProps
+    get(){
+        val currentProps = getTag(R.id.tag_imageforeignkey_props) as ImageViewForeignKeyProps?
+        if(currentProps != null)
+            return currentProps
+
+        val newProps = ImageViewForeignKeyProps()
+        setTag(R.id.tag_imageforeignkey_props, newProps)
+        return newProps
+    }
+
+@BindingAdapter("imageForeignKeyAdapter")
+fun ImageView.setImageForeignKeyAdapter(foreignKeyAttachmentUriAdapter: ForeignKeyAttachmentUriAdapter) {
+    foreignKeyProps.foreignKeyAttachmentUriAdapter = foreignKeyAttachmentUriAdapter
+    updateImageFromForeignKey()
+}
+
+/**
+ * Because using a single binding adapter does not seem to trigger changes as expected when only
+ * one property has changed.
+ */
+private fun ImageView.updateImageFromForeignKey() {
+    val foreignKeyPropsVal = foreignKeyProps
+    val adapter = foreignKeyPropsVal.foreignKeyAttachmentUriAdapter
+    if(foreignKeyPropsVal.foreignKey != 0L && adapter != null &&
+            foreignKeyPropsVal.foreignKeyLoadingOrDisplayed != foreignKeyPropsVal.foreignKey) {
+
+        //something new to load - cancel anything loading now and load this instead
+        foreignKeyPropsVal.currentJob?.cancel()
+
+        val di = (context.applicationContext as DIAware).di
+        val foreignKeyVal = foreignKeyPropsVal.foreignKey
+        foreignKeyPropsVal.foreignKeyLoadingOrDisplayed = foreignKeyVal
+
+        foreignKeyPropsVal.currentJob = GlobalScope.async {
+            val accountManager : UstadAccountManager = di.direct.instance()
+            val db : UmAppDatabase = di.direct.on(accountManager.activeAccount).instance(DoorTag.TAG_DB)
+            val repo : UmAppDatabase = di.direct.on(accountManager.activeAccount).instance(DoorTag.TAG_REPO)
+            listOf(db, repo).forEach {
+                if(!coroutineContext.isActive)
+                    return@async
+
+                val uri = withTimeoutOrNull(10000) {
+                    adapter.getAttachmentUri(foreignKeyVal, it)?.let {
+                        repo.resolveAttachmentAndroidUri(it)
+                    }
+                }
+
+                if(!(it === repo && uri == null)) {
+                    withContext(Dispatchers.Main) {
+                        if(foreignKeyPropsVal.imageUriDisplayed != uri) {
+                            Picasso.get().load(uri)
+                                    .apply {
+                                        foreignKeyPropsVal.placeholder?.also {
+                                            placeholder(it)
+                                        }
+                                    }
+                                    .into(this@updateImageFromForeignKey)
+
+                            foreignKeyPropsVal.imageUriDisplayed = uri
+                        }
+
+                        if(foreignKeyPropsVal.autoHide) {
+                            this@updateImageFromForeignKey.visibility = if(uri != null) {
+                                View.VISIBLE
+                            }else {
+                                View.GONE
+                            }
+                        }
+                    }
+                }
+            }
+
+            //mission complete - unset job reference
+            withContext(Dispatchers.Main) {
+                foreignKeyPropsVal.currentJob = null
+            }
+        }
+    }
 }
 
 @BindingAdapter("customFieldIcon")
@@ -115,6 +223,10 @@ fun ImageView.setImageLookupMap(imageLookupMap: Map<Int, Int>?, imageLookupFallb
 @BindingAdapter(value=["iconStatusFlag"])
 fun ImageView.setIconOnStatusFlag(statusFlag: Int){
     when {
+        (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED ->{
+            setImageResource(R.drawable.ic_content_complete)
+            visibility = View.VISIBLE
+        }
         (statusFlag and ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED) == ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_PASSED -> {
             setImageResource(R.drawable.ic_content_complete)
             visibility = View.VISIBLE

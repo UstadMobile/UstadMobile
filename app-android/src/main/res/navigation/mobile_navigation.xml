@@ -88,6 +88,14 @@
         android:name="com.ustadmobile.port.android.view.ReportEditFragment" />
 
     <fragment
+        android:id="@+id/report_template_list_dest"
+        android:name="com.ustadmobile.port.android.view.ReportTemplateListFragment" />
+
+    <fragment
+        android:id="@+id/report_filter_edit_dest"
+        android:name="com.ustadmobile.port.android.view.ReportFilterEditFragment"/>
+
+    <fragment
         android:id="@+id/holidaycalendar_list_dest"
         android:name="com.ustadmobile.port.android.view.HolidayCalendarListFragment" />
 
@@ -183,8 +191,33 @@
         />
 
     <fragment
+        android:id="@+id/clazz_enrolment_list"
+        android:name="com.ustadmobile.port.android.view.ClazzEnrolmentListFragment"
+        />
+
+    <fragment
+        android:id="@+id/clazz_enrolment_edit"
+        android:name="com.ustadmobile.port.android.view.ClazzEnrolmentEditFragment"
+        />
+
+    <fragment
+        android:id="@+id/leaving_reason_list"
+        android:name="com.ustadmobile.port.android.view.LeavingReasonListFragment"
+        />
+
+    <fragment
+        android:id="@+id/leaving_reason_edit"
+        android:name="com.ustadmobile.port.android.view.LeavingReasonEditFragment"
+        />
+
+    <fragment
         android:id="@+id/report_detail_dest"
         android:name="com.ustadmobile.port.android.view.ReportDetailFragment"
+        />
+
+    <fragment
+        android:id="@+id/date_range_dest"
+        android:name="com.ustadmobile.port.android.view.DateRangeFragment"
         />
 
     <fragment
@@ -198,15 +231,9 @@
         android:label="" />
 
     <fragment
-        android:id="@+id/account_get_started_dest"
-        android:name="com.ustadmobile.port.android.view.GetStartedFragment"
-        android:label="@string/lets_get_started_label"
-        />
-
-    <fragment
-        android:id="@+id/workspace_enterlink_dest"
-        android:name="com.ustadmobile.port.android.view.WorkspaceEnterLinkFragment"
-        android:label="@string/workspace"
+        android:id="@+id/site_enterlink_dest"
+        android:name="com.ustadmobile.port.android.view.SiteEnterLinkFragment"
+        android:label="@string/connect_to_site"
         />
 
     <fragment
@@ -232,6 +259,7 @@
         android:name="com.ustadmobile.port.android.view.ContentEntryImportLinkFragment"
         android:label=""
         />
+
 
     <fragment
         android:id="@+id/webchunk_view"
@@ -272,5 +300,31 @@
         android:id="@+id/clazz_log_edit_dest"
         android:name="com.ustadmobile.port.android.view.ClazzLogEditFragment"
         android:label="@string/add_a_new_occurrence"/>
+
+    <fragment
+        android:id="@+id/site_detail_dest"
+        android:name="com.ustadmobile.port.android.view.SiteDetailFragment"
+        android:label="@string/site" />
+
+    <fragment
+        android:id="@+id/site_edit_dest"
+        android:name="com.ustadmobile.port.android.view.SiteEditFragment"
+        android:label="@string/edit_site"/>
+
+    <fragment
+        android:id="@+id/site_terms_detail_dest"
+        android:name="com.ustadmobile.port.android.view.SiteTermsDetailFragment"
+        android:label="@string/terms_and_policies"/>
+
+    <fragment
+        android:id="@+id/site_terms_detail_accept_dest"
+        android:name="com.ustadmobile.port.android.view.SiteTermsDetailFragment"
+        android:label="@string/terms_and_policies"/>
+
+    <fragment
+        android:id="@+id/site_terms_edit_dest"
+        android:name="com.ustadmobile.port.android.view.SiteTermsEditFragment"
+        android:label="@string/edit_terms_and_policies"/>
+
 
 </navigation>

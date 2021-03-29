@@ -18,7 +18,7 @@ import com.toughra.ustadmobile.databinding.ItemContentEntrySimpleListBinding
 import com.ustadmobile.core.controller.ClazzWorkEditPresenter
 import com.ustadmobile.core.controller.ContentEntryListItemListener
 import com.ustadmobile.core.controller.UstadEditPresenter
-import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkEditView
@@ -42,7 +42,7 @@ interface ClazzWorkEditFragmentEventHandler {
 }
 
 class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
-        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<MessageIdOption>,
+        DropDownListAutoCompleteTextView.OnDropDownListItemSelectedListener<IdOption>,
         ClazzWorkEditFragmentEventHandler, ContentEntryListItemListener {
 
 
@@ -67,9 +67,6 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             holder.binding.contentEntry = getItem(position)
         }
     }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     var mBinding: FragmentClazzWorkEditBinding? = null
 
@@ -188,8 +185,8 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             mBinding?.fieldsEnabled = value
         }
 
-    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: MessageIdOption) {
-        mBinding?.questionsVisibility = if(selectedOption.code ==
+    override fun onDropDownItemSelected(view: AdapterView<*>?, selectedOption: IdOption) {
+        mBinding?.questionsVisibility = if(selectedOption.optionId ==
                 ClazzWork.CLAZZ_WORK_SUBMISSION_TYPE_QUIZ) View.VISIBLE else View.GONE
     }
 

@@ -219,7 +219,7 @@ class ClazzLogEditAttendanceFragment: UstadEditFragment<ClazzLog>(), ClazzLogEdi
         clazzLogAttendanceRecordRecyclerAdapter = ClazzLogAttendanceRecordRecyclerAdapter(
                 this, mPresenter)
 
-        clazzLogAttendanceRecordRecyclerView?.adapter = MergeAdapter(clazzLogEditHeaderRecyclerAdapter,
+        clazzLogAttendanceRecordRecyclerView?.adapter = ConcatAdapter(clazzLogEditHeaderRecyclerAdapter,
                 mMarkAllRecyclerAdapter, clazzLogAttendanceRecordRecyclerAdapter)
 
         mPresenter?.onCreate(savedInstanceState.toNullableStringMap())

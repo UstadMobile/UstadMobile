@@ -65,7 +65,7 @@
             android:alpha="@{contentEntry.ceInactive ? .5f : 1f}"
             android:progress="@{contentEntry.contentEntryProgress.contentEntryProgressProgress}"
             android:progressTint="@color/primaryColor"
-            android:visibility="@{contentEntry.contentEntryProgress == null ? View.GONE : View.VISIBLE}"
+            android:visibility="@{contentEntry.contentEntryProgress != null &amp; contentEntry.contentEntryProgress.contentEntryProgressProgress > 0 ? View.VISIBLE : View.GONE}"
             app:layout_constraintEnd_toEndOf="@id/content_entry_item_thumbnail"
             app:layout_constraintStart_toStartOf="@id/content_entry_item_thumbnail"
             app:layout_constraintTop_toBottomOf="@id/content_entry_item_thumbnail"

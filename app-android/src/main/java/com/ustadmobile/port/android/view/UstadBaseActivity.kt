@@ -163,9 +163,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     private var sensorManager: SensorManager? = null
     internal var feedbackDialogVisible = false
 
-    override val viewContext: Any
-        get() = this
-
 
     //The devMinApi21 flavor has SDK Min 21, but other flavors have a lower SDK
     @SuppressLint("ObsoleteSdkInt")
@@ -174,8 +171,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
         }
-        //bind to the LRS forwarding service
-        instance.handleActivityCreate(this, savedInstanceState)
         super.onCreate(savedInstanceState)
         localeOnCreate = instance.getDisplayedLocale(this)
 

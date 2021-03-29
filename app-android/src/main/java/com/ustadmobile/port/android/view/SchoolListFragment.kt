@@ -10,15 +10,12 @@ import com.toughra.ustadmobile.databinding.ItemSchoolListItemBinding
 import com.ustadmobile.core.controller.SchoolListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.impl.UMAndroidUtil
-import com.ustadmobile.core.view.PersonListView
 import com.ustadmobile.core.view.SchoolListView
-import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.School
 import com.ustadmobile.lib.db.entities.SchoolWithMemberCountAndLocation
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAndLocation>(),
@@ -65,7 +62,7 @@ class SchoolListFragment : UstadListViewFragment<School, SchoolWithMemberCountAn
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = SchoolListRecyclerAdapter(mPresenter)
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_a_new_school),
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
         return view

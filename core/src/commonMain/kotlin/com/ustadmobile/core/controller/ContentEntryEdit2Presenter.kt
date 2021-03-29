@@ -175,7 +175,7 @@ class ContentEntryEdit2Presenter(context: Any,
                                 parameter("scraperType", view.entryMetaData?.scraperType)
                                 parameter("url", view.entryMetaData?.uri)
                                 parameter("conversionParams",
-                                        Json.stringify(JsonObject.serializer(),
+                                        Json.encodeToString(JsonObject.serializer(),
                                                 conversionParams.convertToJsonObject()))
                                 header("content-type", "application/json")
                                 body = entity

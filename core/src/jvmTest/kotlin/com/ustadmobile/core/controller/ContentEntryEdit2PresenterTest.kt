@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
@@ -80,7 +80,7 @@ class ContentEntryEdit2PresenterTest {
 
             onBlocking { getStorageDirsAsync(any()) }.thenAnswer {
                 mutableListOf(UMStorageDir("", "", removableMedia = false,
-                        isAvailable = false, isUserSpecific = false))
+                        isAvailable = false))
             }
 
             on { getString(any(), any()) }.thenAnswer { errorMessage }
@@ -101,7 +101,7 @@ class ContentEntryEdit2PresenterTest {
         runBlocking {
             whenever(systemImpl.getStorageDirsAsync(any())).thenAnswer {
                 mutableListOf(UMStorageDir("", "", removableMedia = false,
-                        isAvailable = false, isUserSpecific = false))
+                        isAvailable = false))
             }
         }
 

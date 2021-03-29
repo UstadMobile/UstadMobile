@@ -221,6 +221,10 @@ class DbProcessorAndroid: AbstractDbProcessor() {
         }
         codeBlock.add("initSyncablePrimaryKeys(db)\n")
 
+        dbTypeEl.allEntitiesWithAttachments(processingEnv).forEach {
+            codeBlock.addGenerateAttachmentTriggerSqlite(it, "db.execSQL")
+        }
+
 
         callbackTypeSpec.addFunction(FunSpec.builder("initSyncablePrimaryKeys")
                 .addParameter("db",

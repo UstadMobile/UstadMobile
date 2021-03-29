@@ -17,7 +17,6 @@ import com.ustadmobile.test.port.android.util.letOnFragment
 import com.ustadmobile.test.port.android.util.waitUntilWithFragmentScenario
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import junit.framework.Assert.assertTrue
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -115,7 +114,9 @@ class ContentEntryEdit2FragmentTest : TestCase() {
 
                 val entry = createEntryFromFile("video.mp4", "Dummy Title",
                         systemImplNavRule = systemImplNavRule, dbRule = dbRule)
-                Assert.assertEquals("Entry's data set", "Dummy Title",entry.title)
+                flakySafely {
+                    Assert.assertEquals("Entry's data set", "Dummy Title",entry.title)
+                }
             }
 
         }

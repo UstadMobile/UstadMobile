@@ -1,7 +1,5 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.util.ext.alternative
@@ -13,14 +11,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParserException
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.util.*
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.door.ext.toDoorUri
+import org.xmlpull.v1.XmlPullParserFactory
 
-class EpubTypePluginCommonJvm : EpubTypePlugin() {
+class EpubTypePluginCommonJvm() : EpubTypePlugin() {
 
     override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default) {
@@ -33,7 +35,9 @@ class EpubTypePluginCommonJvm : EpubTypePlugin() {
 
                         val fileName = zipEntry?.name
                         if (fileName!!.contains(".opf")) {
-                            val xpp = UstadMobileSystemImpl.instance.newPullParser(it)
+                            val xppFactory = XmlPullParserFactory.newInstance()
+                            val xpp = xppFactory.newPullParser()
+                            xpp.setInput(it, "UTF-8")
                             val opfDocument = OpfDocument()
                             opfDocument.loadFromOPF(xpp)
                             val contentEntryVal = ContentEntryWithLanguage()
@@ -72,6 +76,7 @@ class EpubTypePluginCommonJvm : EpubTypePlugin() {
                                            containerBaseDir: String, context: Any,
                                            db: UmAppDatabase, repo: UmAppDatabase,
                                            progressListener: (Int) -> Unit): Container {
+
         return withContext(Dispatchers.Default) {
 
             val file = File(filePath)
@@ -83,9 +88,9 @@ class EpubTypePluginCommonJvm : EpubTypePlugin() {
                 containerUid = repo.containerDao.insert(this)
             }
 
-            val containerManager = ContainerManager(container, db, repo, containerBaseDir)
-
-            addEntriesFromZipToContainer(file.absolutePath, containerManager, "")
+            repo.addEntriesToContainerFromZip(container.containerUid,
+                    File(filePath).toDoorUri(),
+                    ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri()))
 
             container
         }

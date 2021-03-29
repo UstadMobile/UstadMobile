@@ -1,9 +1,11 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
+import java.lang.annotation.ElementType
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.Element
 import javax.lang.model.element.ElementKind
 import javax.lang.model.element.PackageElement
+import javax.lang.model.element.TypeElement
 
 /**
  * Get the qualified package name of the given element as a string
@@ -28,3 +30,12 @@ val Element.packageName : String
 
         return (el as PackageElement).qualifiedName.toString()
     }
+
+/**
+ * Get a list of the enclosed elements that have the given annotation. Optionally filtered
+ * by ElementKind
+ */
+fun <A: Annotation> Element.enclosedElementsWithAnnotation(annotationClass: Class<A>, elementKind: ElementKind? = null) : List<Element>{
+    return enclosedElements.filter { it.hasAnnotation(annotationClass) && (elementKind == null || it.kind == elementKind) }
+}
+

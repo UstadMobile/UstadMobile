@@ -30,7 +30,6 @@
  */
 
 package com.ustadmobile.core.impl
-import kotlinx.io.InputStream
 import kotlin.jvm.JvmStatic
 
 
@@ -168,6 +167,12 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
      * @return True if is writable otherwise is read only
      */
     fun canWriteFileInDir(dirPath: String): Boolean
+
+    /**
+     * Open the given link in a browser and/or tab depending on the platform
+     */
+    fun openLinkInBrowser(url: String, context: Any)
+
 
     companion object {
 

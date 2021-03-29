@@ -5,7 +5,7 @@
     <data>
         <import type="android.view.View"/>
         <import type="java.util.List"/>
-        <import type="com.ustadmobile.core.util.MessageIdOption"/>
+        <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="android.text.InputType"/>
 
         <variable
@@ -13,9 +13,16 @@
             type="com.ustadmobile.lib.db.entities.PersonWithAccount" />
 
         <variable
+            name="personPicture"
+            type="com.ustadmobile.lib.db.entities.PersonPicture"/>
+
+        <variable
             name="personPictureUri"
             type="String" />
 
+        <variable
+            name="imageViewLifecycleObserver"
+            type="com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2" />
 
         <variable
             name="loading"
@@ -32,10 +39,14 @@
 
         <variable
             name="genderOptions"
-            type="List&lt;MessageIdOption&gt;" />
+            type="List&lt;IdOption&gt;" />
 
         <variable
             name="registrationMode"
+            type="boolean" />
+        
+        <variable
+            name="hideClazzes"
             type="boolean" />
 
         <variable
@@ -60,7 +71,8 @@
                 android:layout_height="@dimen/dimen_48dp"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 app:civ_circle_background_color="?colorSecondary"
-                app:imageUri="@={personPictureUri}"
+                app:imageUri="@={personPicture.personPictureUri}"
+                app:imageViewLifecycleObserver="@{imageViewLifecycleObserver}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -88,11 +100,13 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/item_presenter_field_row_image_view"
+                app:layout_constraintTop_toBottomOf="@id/item_presenter_field_row_picture_photoicon"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 >
 
                 <com.google.android.material.textfield.TextInputEditText
+                    android:maxLines="1"
+                    android:inputType="text"
                     android:id="@+id/firstnames_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -118,6 +132,8 @@
                     android:id="@+id/lastname_text"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:inputType="text"
                     android:hint="@string/last_name"
                     android:text="@={person.lastName}" />
             </com.google.android.material.textfield.TextInputLayout>
@@ -136,7 +152,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toBottomOf="@+id/lastname_textInputLayout">
 
-                <com.ustadmobile.port.android.view.MessageIdAutoCompleteTextView
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
                     android:id="@+id/gender_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -192,6 +208,8 @@
                     android:text="@={person.phoneNum}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:maxLines="1"
+                    android:inputType="text"
                     android:hint="@string/phone_number" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -214,6 +232,7 @@
                     android:text="@={person.emailAddr}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:inputType="text"
                     android:hint="@string/email" />
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -259,7 +278,10 @@
                     android:text="@={person.username}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="@string/username" />
+                    android:maxLines="1"
+                    android:hint="@string/username"
+                    android:inputType="textNoSuggestions"
+                    />
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
@@ -329,7 +351,7 @@
                 android:layout_height="wrap_content"/>
 
             <TextView
-                android:visibility="@{registrationMode ?  View.GONE: View.VISIBLE}"
+                android:visibility="@{registrationMode || hideClazzes ?  View.GONE: View.VISIBLE}"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/clazzlist_header_textview"
                 android:layout_width="match_parent"
@@ -340,7 +362,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/error_text" />
 
             <androidx.recyclerview.widget.RecyclerView
-                android:visibility="@{registrationMode ?  View.GONE: View.VISIBLE}"
+                android:visibility="@{registrationMode || hideClazzes ?  View.GONE: View.VISIBLE}"
                 android:layout_marginTop="@dimen/dimen_8dp"
                 android:id="@+id/clazzlist_recyclerview"
                 android:layout_width="match_parent"

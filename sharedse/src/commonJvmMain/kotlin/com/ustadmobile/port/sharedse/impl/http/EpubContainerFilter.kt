@@ -5,7 +5,6 @@ import java.io.ByteArrayInputStream
 import com.ustadmobile.port.sharedse.ext.dataInflatedIfRequired
 import com.ustadmobile.port.sharedse.util.XmlPassThroughFilter
 import com.ustadmobile.port.sharedse.util.passXmlThrough
-import kotlinx.serialization.toUtf8Bytes
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 

@@ -1,36 +1,33 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
 import android.os.Build
 import androidx.core.os.bundleOf
 import androidx.fragment.app.testing.launchFragmentInContainer
 import androidx.test.espresso.matcher.ViewMatchers.isDisplayed
 import androidx.test.espresso.matcher.ViewMatchers.isJavascriptEnabled
 import androidx.test.espresso.web.webdriver.Locator
-import androidx.test.rule.GrantPermissionRule
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.screen.WebChunkScreen
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import org.apache.commons.io.FileUtils.copyInputStreamToFile
+import kotlinx.coroutines.runBlocking
 import org.junit.Assume
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.io.File
+import org.junit.rules.TemporaryFolder
 
 @AdbScreenRecord("WebChunk Screen Test")
-@ExperimentalStdlibApi
 class WebChunkFragmentTest : TestCase() {
 
     @JvmField
@@ -45,26 +42,15 @@ class WebChunkFragmentTest : TestCase() {
     @Rule
     val screenRecordRule = AdbScreenRecordRule()
 
-
-    @get:Rule
-    var permissionRule = GrantPermissionRule.grant(Manifest.permission.WRITE_EXTERNAL_STORAGE,
-            Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.ACCESS_COARSE_LOCATION)
-
     lateinit var container: Container
+
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
 
 
     @Before
     fun setup() {
-
-        val tmpDir = UmFileUtilSe.makeTempDir("testWebChunk",
-                "" + System.currentTimeMillis())
-
-        val chunkCountingOut = File(tmpDir, "counting-out.zip")
-
-        copyInputStreamToFile(
-                javaClass.getResourceAsStream("/com/ustadmobile/app/android/counting-out-1-20-objects.zip"),
-                chunkCountingOut)
-
         val targetEntry = ContentEntry()
         targetEntry.title = "tiempo de prueba"
         targetEntry.thumbnailUrl = "https://www.africanstorybook.org/img/asb120.png"
@@ -79,11 +65,11 @@ class WebChunkFragmentTest : TestCase() {
         container.mimeType = "application/webchunk+zip"
         container.containerContentEntryUid = targetEntry.contentEntryUid
         container.containerUid = dbRule.repo.containerDao.insert(container)
-
-        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,
-                tmpDir.absolutePath)
-        addEntriesFromZipToContainer(chunkCountingOut.absolutePath, containerManager)
-
+        runBlocking {
+            dbRule.repo.addEntriesToContainerFromZipResource(container.containerUid, this::class.java,
+                    "/com/ustadmobile/app/android/counting-out-1-20-objects.zip",
+                    ContainerAddOptions(temporaryFolder.newFolder().toDoorUri()))
+        }
     }
 
     @AdbScreenRecord("given contentEntry when web view loads then show web chunk")

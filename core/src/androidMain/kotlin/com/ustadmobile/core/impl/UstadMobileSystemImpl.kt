@@ -31,11 +31,13 @@
 
 package com.ustadmobile.core.impl
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.SharedPreferences
 import android.content.pm.PackageManager
+import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
@@ -45,15 +47,21 @@ import androidx.annotation.VisibleForTesting
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.core.net.toUri
 import androidx.fragment.app.DialogFragment
 import androidx.navigation.*
+import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.kodein.di.DI
+import org.kodein.di.android.closestDI
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.io.*
 import java.util.*
 import java.util.zip.GZIPInputStream
@@ -89,8 +97,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     private val viewNameToAndroidImplMap = mapOf<String, String>(
             "DownloadDialog" to "${PACKAGE_NAME}DownloadDialogFragment",
-            ContentEditorView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorActivity",
-            ContentEditorPageListView.VIEW_NAME to "${PACKAGE_NAME}ContentEditorPageListFragment",
             SplashScreenView.VIEW_NAME to "${PACKAGE_NAME}SplashScreenActivity",
             OnBoardingView.VIEW_NAME to "${PACKAGE_NAME}OnBoardingActivity",
             EpubContentView.VIEW_NAME to "${PACKAGE_NAME}EpubContentActivity",
@@ -101,12 +107,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             SchoolEditView.VIEW_NAME to "${PACKAGE_NAME}SchoolEditActivity",
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
     )
-
-
-    val destinationProvider: DestinationProvider by lazy {
-        Class.forName("com.ustadmobile.port.android.impl.ViewNameToDestMap").newInstance() as DestinationProvider
-    }
-
 
     private abstract class UmCallbackAsyncTask<A, P, R>
     (protected var umCallback: UmCallback<R>) : AsyncTask<A, P, R>() {
@@ -121,13 +121,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             }
         }
     }
-
-
-    fun handleActivityCreate(mContext: Activity, savedInstanceState: Bundle?) {
-        init(mContext)
-    }
-
-
 
     /**
      * Simple async task to handle getting the setup file
@@ -156,13 +149,13 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                     zipOut = ZipOutputStream(FileOutputStream(outZipFile))
                     zipOut.putNextEntry(ZipEntry("$baseName.apk"))
                     apkFileIn = FileInputStream(apkFile)
-                    UMIOUtils.readFully(apkFileIn, zipOut, 1024)
+                    apkFileIn.copyTo(zipOut)
                     zipOut.closeEntry()
                 } catch (e: IOException) {
                     e.printStackTrace()
                 } finally {
-                    UMIOUtils.closeOutputStream(zipOut)
-                    UMIOUtils.closeInputStream(apkFileIn)
+                    zipOut?.close()
+                    apkFileIn?.close()
                 }
 
                 return outZipFile.absolutePath
@@ -172,12 +165,12 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 try {
                     apkFileIn = FileInputStream(apkFile)
                     fout = FileOutputStream(outApkFile)
-                    UMIOUtils.readFully(apkFileIn, fout, 1024)
+                    apkFileIn.copyTo(fout)
                 } catch (e: IOException) {
                     e.printStackTrace()
                 } finally {
-                    UMIOUtils.closeInputStream(apkFileIn)
-                    UMIOUtils.closeOutputStream(fout)
+                    apkFileIn?.close()
+                    fout?.close()
                 }
 
                 return outApkFile.absolutePath
@@ -209,6 +202,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         val allArgs = args + UMFileUtil.parseURLQueryString(viewName)
 
 
+        val di: DI by closestDI(context as Context)
+        val destinationProvider: DestinationProvider = di.direct.instance()
+
         val ustadDestination = destinationProvider.lookupDestinationName(viewNameOnly)
         if(ustadDestination != null) {
             val navController = navController ?: (context as Activity).findNavController(destinationProvider.navControllerViewId)
@@ -216,10 +212,10 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             //Note: default could be set using style as per https://stackoverflow.com/questions/50482095/how-do-i-define-default-animations-for-navigation-actions
             val options = navOptions {
                 anim {
-                    enter = androidx.navigation.ui.R.anim.fragment_open_enter
-                    exit = androidx.navigation.ui.R.anim.fragment_close_exit
-                    popEnter = androidx.navigation.ui.R.anim.fragment_open_enter
-                    popExit = androidx.navigation.ui.R.anim.fragment_close_exit
+                    enter = android.R.anim.slide_in_left
+                    exit = android.R.anim.slide_out_right
+                    popEnter = android.R.anim.slide_in_left
+                    popExit = android.R.anim.slide_out_right
                 }
 
                 val popUpToViewName = ustadGoOptions.popUpToViewName
@@ -301,6 +297,9 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
+        val di : DI by closestDI { context as Context }
+        val destinationProvider: DestinationProvider = di.direct.instance()
+
         val navController = navController ?: (context as Activity)
                 .findNavController(destinationProvider.navControllerViewId)
 
@@ -337,6 +336,25 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
 
+    /**
+     * Get a list of available directories on Android. Get the internal directory and the memory
+     * card (if any). This will result in a lis tof UMStorageDir with a path in the following format:
+     * ExternalFilesDir[i]/sitedata/container
+     */
+    @SuppressLint("UsableSpace")
+    suspend fun getStorageDirsAsync(context: Context, endpoint: Endpoint) : List<UMStorageDir> = withContext(Dispatchers.IO) {
+        ContextCompat.getExternalFilesDirs(context, null).mapIndexed { index, it ->
+            val siteDir = it.siteDataSubDir(endpoint)
+            val storageDir = File(siteDir, SUBDIR_CONTAINER_NAME)
+            storageDir.takeIf { !it.exists() }?.mkdirs()
+            val nameMessageId = if(index == 0) MessageID.phone_memory else MessageID.memory_card
+            UMStorageDir(storageDir.toUri().toString(), name = getString(nameMessageId, context),
+                    removableMedia = index == 0, isAvailable = true, isWritable = true,
+                    usableSpace = it.usableSpace)
+        }
+    }
+
+    @Deprecated("This is not really a cross platform function. Selecting a storage directory should be done at a platform level e.g. it may lead to a file picker dialog, etc")
     actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> = withContext(Dispatchers.IO){
         val dirList = ArrayList<UMStorageDir>()
         val storageOptions = ContextCompat.getExternalFilesDirs(context as Context, null)
@@ -346,7 +364,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         if (!umDir.exists()) umDir.mkdirs()
         dirList.add(UMStorageDir(umDir.absolutePath,
                 getString(MessageID.phone_memory, context), true,
-                isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath),
+                isAvailable = true, isWritable = canWriteFileInDir(umDir.absolutePath),
                 usableSpace = umDir.usableSpace))
 
         if (storageOptions.size > 1) {
@@ -355,7 +373,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             if (!umDir.exists()) umDir.mkdirs()
             dirList.add(UMStorageDir(umDir.absolutePath,
                     getString(MessageID.memory_card, context), true,
-                    isAvailable = true, isUserSpecific = false, isWritable = canWriteFileInDir(umDir.absolutePath),
+                    isAvailable = true, isWritable = canWriteFileInDir(umDir.absolutePath),
                     usableSpace = umDir.usableSpace))
         }
         return@withContext dirList
@@ -489,7 +507,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             } catch (e: IOException) {
                 UMLog.l(UMLog.ERROR, 685, appPrefResource, e)
             } finally {
-                UMIOUtils.closeInputStream(prefIn)
+                prefIn?.close()
             }
         }
 
@@ -512,7 +530,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
                 gzipIn = GZIPInputStream(FileInputStream(File(path)))
                 var destFile = File(file.parentFile, file.name + "unzip")
                 destOut = FileOutputStream(destFile)
-                UMIOUtils.readFully(gzipIn, destOut)
+                gzipIn.copyTo(destOut)
                 file = destFile
             } finally {
                 gzipIn?.close()
@@ -593,7 +611,15 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             path = path.substring(1)
         }
 
-        return UMIOUtils.readStreamToByteArray((context as Context).assets.open(path))
+        return ((context as Context).assets.open(path)).readBytes()
+    }
+
+    /**
+     * Open the given link in a browser and/or tab depending on the platform
+     */
+    actual fun openLinkInBrowser(url: String, context: Any) {
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+        (context as Context).startActivity(intent)
     }
 
 
@@ -606,6 +632,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         const val APP_PREFERENCES_NAME = "UMAPP-PREFERENCES"
 
         const val TAG_DIALOG_FRAGMENT = "UMDialogFrag"
+
 
         /**
          * Get an instance of the system implementation - relies on the platform

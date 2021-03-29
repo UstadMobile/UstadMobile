@@ -1,7 +1,7 @@
 
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.*
@@ -106,7 +106,7 @@ class AccountListPresenterTest {
 
         argumentCaptor<String>{
             verify(impl).go(capture(), any(), any())
-            assertTrue("Get started screen was opened", GetStartedView.VIEW_NAME == firstValue)
+            assertTrue("Get started screen was opened", SiteEnterLinkView.VIEW_NAME == firstValue)
         }
     }
 

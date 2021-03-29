@@ -28,9 +28,7 @@ import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.sharedse.network.DownloadPreparationRequester
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlin.jvm.Volatile
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -47,7 +45,6 @@ class DownloadDialogPresenter(context: Any,
 
     private var contentEntryUid = 0L
 
-
     /**
      * Testing purpose
      */
@@ -57,15 +54,17 @@ class DownloadDialogPresenter(context: Any,
 
     private var statusMessage: String? = null
 
-    //private var destinationDir: String? = null
-
     private val jobSizeLoading = atomic(false)
 
     private val jobSizeTotals = atomic(null as DownloadJobSizeInfo?)
 
-    private val wifiOnlyChecked = atomic(false)
+    private val wifiOnlyChecked = atomic(0)
 
     private lateinit var downloadJobItemLiveData : DoorLiveData<DownloadJobItem?>
+
+    //Used to avoid issues with handleStorageOptionSelection being called before the
+    // downloadJobItemLiveData is ready.
+    private val downloadJobCompletable = CompletableDeferred<Boolean>()
 
     private var currentDownloadJobItem: DownloadJobItem? = null
 
@@ -83,7 +82,10 @@ class DownloadDialogPresenter(context: Any,
 
     private val appDatabaseRepo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = TAG_REPO)
 
-    private val downloadJobItemObserver = object: DoorObserver<DownloadJobItem?> {
+    /**
+     * If this is private, Kotlinx serialization will refuse to compile compileKotlinMetadata
+     */
+    val downloadJobItemObserver = object: DoorObserver<DownloadJobItem?> {
         override fun onChanged(t: DownloadJobItem?) {
             currentDownloadJobItem = t
             val newDownloadJobIdVal = t?.djiDjUid ?: 0
@@ -108,17 +110,15 @@ class DownloadDialogPresenter(context: Any,
         GlobalScope.launch(doorMainDispatcher()) {
             downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(
                     contentEntryUid)
-            val isWifiOnly = !appDatabase.downloadJobDao.getMeteredNetworkAllowed(currentJobId)
-            wifiOnlyChecked.value = isWifiOnly
-            view.setDownloadOverWifiOnly(isWifiOnly)
+            downloadJobCompletable.complete(true)
+            val wifiOnly: Boolean = !appDatabase.downloadJobDao.getMeteredNetworkAllowed(currentJobId)
+            view.setDownloadOverWifiOnly(wifiOnly)
+            val checkedVal = if(wifiOnly) 1 else 0
+            wifiOnlyChecked.value = checkedVal
+
             downloadJobItemLiveData.observe(lifecycleOwner, downloadJobItemObserver)
 
-            val storageDirs = impl.getStorageDirsAsync(context)
-
-            selectedStorageDir = storageDirs.firstOrNull()
-            view.showStorageOptions(storageDirs)
             updateWarningMessage(downloadJobItemLiveData.getValue())
-
         }
     }
 
@@ -232,7 +232,7 @@ class DownloadDialogPresenter(context: Any,
         newDownloadJob.djDestinationDir = selectedStorageDir?.dirURI
         newDownloadJob.djStatus = JobStatus.NEEDS_PREPARED
         val isWifiOnlyChecked = wifiOnlyChecked.value
-        newDownloadJob.meteredNetworkAllowed = !isWifiOnlyChecked
+        newDownloadJob.meteredNetworkAllowed = isWifiOnlyChecked == 0
         containerDownloadManager.createDownloadJob(newDownloadJob)
         currentJobId = newDownloadJob.djUid
         val downloadPrepRequester: DownloadPreparationRequester by on(accountManager.activeAccount).instance()
@@ -304,7 +304,8 @@ class DownloadDialogPresenter(context: Any,
     }
 
     fun handleClickWiFiOnlyOption(wifiOnly: Boolean) {
-        wifiOnlyChecked.value = wifiOnly
+        val wifiOnlyCheckedVal = if(wifiOnly) 1 else 0
+        wifiOnlyChecked.value = wifiOnlyCheckedVal
         if(currentJobId != 0) {
             GlobalScope.launch {
                 containerDownloadManager.setMeteredDataAllowed(currentJobId, !wifiOnly)
@@ -314,8 +315,9 @@ class DownloadDialogPresenter(context: Any,
 
     fun handleStorageOptionSelection(selectedDir: UMStorageDir) {
         selectedStorageDir = selectedDir
-        updateWarningMessage(downloadJobItemLiveData.getValue())
-        GlobalScope.launch {
+        GlobalScope.launch(doorMainDispatcher()) {
+            downloadJobCompletable.await()
+            updateWarningMessage(downloadJobItemLiveData.getValue())
             val downloadJob = containerDownloadManager.getDownloadJob(currentJobId).getValue()
             if(downloadJob != null){
                 containerDownloadManager.handleDownloadJobUpdated(downloadJob.also {

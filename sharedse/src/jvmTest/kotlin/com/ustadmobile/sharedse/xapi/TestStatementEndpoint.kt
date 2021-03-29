@@ -9,8 +9,9 @@ import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContextXObjectStatementJoinDao
-import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.parse8601Duration
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.StatementEntity.Companion.RESULT_SUCCESS
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
@@ -19,10 +20,11 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
 import com.ustadmobile.util.test.checkJndiSetup
-import com.ustadmobile.util.test.extractTestResourceToFile
 import org.junit.Assert
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import java.io.File
 import java.io.IOException
@@ -48,6 +50,10 @@ class TestStatementEndpoint {
     private lateinit var di: DI
 
     val context = Any()
+
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
 
     @Before
     fun setup() {
@@ -78,8 +84,8 @@ class TestStatementEndpoint {
     @Throws(IOException::class)
     fun givenValidStatement_whenParsed_thenDbAndStatementShouldMatch() {
 
-        val tmpFile = File.createTempFile("testStatement", "statement")
-        extractTestResourceToFile(simpleStatement, tmpFile)
+        val tmpFile = temporaryFolder.newFile()
+        javaClass.getResourceAsStream(simpleStatement).writeToFile(tmpFile)
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val statement = gson.fromJson(content, Statement::class.java)
@@ -102,8 +108,8 @@ class TestStatementEndpoint {
     @Throws(IOException::class)
     fun givenValidStatementWithContext_whenParsed_thenDbAndStatementShouldMatch() {
 
-        val tmpFile = File.createTempFile("testStatement", "statement")
-        extractTestResourceToFile(contextWithObject, tmpFile)
+        val tmpFile = temporaryFolder.newFile()
+        javaClass.getResourceAsStream(contextWithObject).writeToFile(tmpFile)
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val statement = gson.fromJson(content, Statement::class.java)
@@ -201,13 +207,10 @@ class TestStatementEndpoint {
 
 
     @Test
-    @Throws(IOException::class)
     fun givenFullValidStatementWithContext_whenParsed_thenDbAndStatementShouldMatch() {
-
-        val tmpFile = File.createTempFile("testStatement", "statement")
-        extractTestResourceToFile(fullstatement, tmpFile)
+        val tmpFile = temporaryFolder.newFile()
+        javaClass.getResourceAsStream(fullstatement).writeToFile(tmpFile)
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
-        println(content)
 
         val statement = gson.fromJson(content, Statement::class.java)
         endpoint.storeStatements(listOf(statement), "")
@@ -252,12 +255,12 @@ class TestStatementEndpoint {
 
     }
 
-    @ExperimentalStdlibApi
+
     @Test
     @Throws(IOException::class)
     fun givenValidStatementWithSubStatement_whenParsed_thenDbAndStatementShouldMatch() {
 
-        val statement = gson.fromJson(UMIOUtils.readStreamToString(javaClass.getResourceAsStream(subStatement)), Statement::class.java)
+        val statement = gson.fromJson(javaClass.getResourceAsStream(subStatement).readString(), Statement::class.java)
         endpoint.storeStatements(listOf(statement), "")
 
         val entity = repo.statementDao.findByStatementId("fd41c918-b88b-4b20-a0a5-a4c32391aaa0")
@@ -284,7 +287,7 @@ class TestStatementEndpoint {
 
     }
 
-    @ExperimentalStdlibApi
+
     @Test
     fun givenValidStatementWithLearnerGroup_whenParsed_thenDbAndStatementShouldMatch(){
 
@@ -307,7 +310,7 @@ class TestStatementEndpoint {
             repo.learnerGroupDao.insert(this)
         }
 
-        val statement = gson.fromJson(UMIOUtils.readStreamToString(javaClass.getResourceAsStream(statementWithLearnerGroup)), Statement::class.java)
+        val statement = gson.fromJson(javaClass.getResourceAsStream(statementWithLearnerGroup).readString(), Statement::class.java)
         endpoint.storeStatements(listOf(statement), "", entry.contentEntryUid)
 
         val entity = repo.statementDao.findByStatementId("442f1133-bcd0-42b5-957e-4ad36f9414e0")

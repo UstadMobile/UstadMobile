@@ -1,13 +1,17 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.timeout
-import com.nhaarman.mockitokotlin2.verify
+import com.google.gson.Gson
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.timeout
+import org.mockito.kotlin.verify
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
+import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.util.safeStringify
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.UmAccount
+import io.ktor.client.*
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
@@ -48,6 +52,10 @@ class ContentEntryImportLinkPresenterTest {
 
         di = DI {
             bind<UstadAccountManager>() with singleton { accountManager }
+            bind<Gson>() with singleton { Gson() }
+            bind<HttpClient>() with singleton {
+                defaultHttpClient()
+            }
         }
 
 
@@ -65,8 +73,8 @@ class ContentEntryImportLinkPresenterTest {
                 "file://abc.zip", "googleDriveScraper")
 
         var response = MockResponse().setResponseCode(200).setHeader("Content-Type", "application/json")
-        response.body = Buffer().write(Json.stringify(ImportedContentEntryMetaData.serializer(),
-                importedContentEntryMetaData).toByteArray())
+            .setBody(Buffer().write(
+                safeStringify(di, ImportedContentEntryMetaData.serializer(), importedContentEntryMetaData).toByteArray()))
 
         mockWebServer.enqueue(response)
 

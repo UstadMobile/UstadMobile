@@ -5,6 +5,7 @@
 
     <data>
         <import type="android.view.View"/>
+        <import type="com.ustadmobile.core.util.ext.ClazzExtKt"/>
 
         <variable
             name="clazz"
@@ -191,7 +192,7 @@
 
             <LinearLayout
                 android:id="@+id/fragment_clazz_start_end_date_linearlayout"
-                android:visibility="@{(clazz.clazzEndTime != 0 || clazz.clazzStartTime != 0) ? View.VISIBLE : View.GONE}"
+                android:visibility="@{ClazzExtKt.isStartOrEndTimeSet(clazz) ? View.VISIBLE : View.GONE}"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginStart="@dimen/dimen_16dp"

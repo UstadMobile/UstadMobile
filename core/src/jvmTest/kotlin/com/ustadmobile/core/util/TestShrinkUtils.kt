@@ -1,8 +1,9 @@
 package com.ustadmobile.core.util
 
-import com.github.aakira.napier.Napier
 import com.ustadmobile.core.util.ext.fitWithin
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
+import com.ustadmobile.door.ext.writeToFile
+import com.ustadmobile.sharedse.io.extractResourceToFile
+import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
@@ -33,9 +34,8 @@ class TestShrinkUtils {
     fun testgetVideoResolutionMetadata(){
 
         val fileToCheck = temporaryFolder.newFile("newVideo.mp4")
-        UmFileUtilSe.extractResourceToFile(
-                "/com/ustadmobile/core/container/BigBuckBunny.mp4",
-                fileToCheck)
+        javaClass.getResourceAsStream("/com/ustadmobile/core/container/BigBuckBunny.mp4")
+            .writeToFile(fileToCheck)
 
         val videoDimensions = ShrinkUtils.getVideoResolutionMetadata(fileToCheck)
         Assert.assertEquals("ffprobe found same dimensions in video",
@@ -48,16 +48,17 @@ class TestShrinkUtils {
 
         val videoFile = temporaryFolder.newFile("video.mp4")
         val newVideo = temporaryFolder.newFile("newVideo.mp4")
-        UmFileUtilSe.extractResourceToFile(
-                "/com/ustadmobile/core/container/BigBuckBunny.mp4",
-                videoFile)
+        javaClass.getResourceAsStream("/com/ustadmobile/core/container/BigBuckBunny.mp4")
+            .writeToFile(videoFile)
 
         val fileVideoDimensions = ShrinkUtils.getVideoResolutionMetadata(videoFile)
         val newVideoDimensions = Pair(fileVideoDimensions.first, fileVideoDimensions.second).fitWithin()
 
         ShrinkUtils.optimiseVideo(videoFile, newVideo, newVideoDimensions, fileVideoDimensions.third)
 
-        Assert.assertTrue("optimzed file", newVideo.length() < videoFile.length())
+        Assert.assertTrue("New video is smaller than old video", newVideo.length() < videoFile.length())
+        Assert.assertTrue("New video file exists", newVideo.exists())
+        Assert.assertTrue("New video has a size > 0", newVideo.length() > 0)
 
     }
 

@@ -1,12 +1,11 @@
 package com.ustadmobile.core.util.ext
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
-import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
@@ -75,12 +74,12 @@ class UmAppDatabaseExtTest {
         repo.createNewClazzAndGroups(testClazz, mockSystemImpl, context)
         repo.personDao.insert(testPerson)
 
-        repo.enrolPersonIntoClazzAtLocalTimezone(testPerson, testClazz.clazzUid, ClazzMember.ROLE_TEACHER)
+        repo.enrolPersonIntoClazzAtLocalTimezone(testPerson, testClazz.clazzUid, ClazzEnrolment.ROLE_TEACHER)
 
-        val personClazzes = db.clazzMemberDao.findAllClazzesByPersonWithClazzAsListAsync(
-                testPerson.personUid, systemTimeInMillis())
+        val personClazzes = db.clazzEnrolmentDao.findAllClazzesByPersonWithClazzAsListAsync(
+                testPerson.personUid)
 
-        Assert.assertTrue("PersonMember was created", personClazzes.any { it.clazzMemberClazzUid == testClazz.clazzUid })
+        Assert.assertTrue("PersonMember was created", personClazzes.any { it.clazzEnrolmentClazzUid == testClazz.clazzUid })
 
         val personGroups = db.personGroupMemberDao.findAllGroupWherePersonIsIn(testPerson.personUid)
         Assert.assertEquals("Person is now teacher group",

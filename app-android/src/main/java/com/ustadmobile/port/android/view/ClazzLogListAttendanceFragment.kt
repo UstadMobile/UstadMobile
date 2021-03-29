@@ -10,13 +10,14 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
 import com.github.mikephil.charting.formatter.PercentFormatter
+import com.github.mikephil.charting.formatter.ValueFormatter
 import com.soywiz.klock.DateTime
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzLogListAttendanceChartheaderBinding
@@ -114,6 +115,8 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
         private var graphDateRange: Pair<Float, Float>? = null
 
+        private var decimalFormat = DecimalFormat("###,###,##0")
+
         override fun onChanged(t: ClazzLogListAttendancePresenter.AttendanceGraphData?) {
             val graphData = t ?: return
             val contextVal = context ?: return
@@ -176,8 +179,10 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
                 chart.description.isEnabled = false
                 chart.axisRight.setDrawLabels(false)
                 val dateFormatter = DateFormat.getDateFormat(parent.context)
-                chart.xAxis.setValueFormatter { value, axis ->
-                    dateFormatter.format(value)
+                chart.xAxis.valueFormatter = object: ValueFormatter(){
+                    override fun getFormattedValue(value: Float): String {
+                        return dateFormatter.format(value)
+                    }
                 }
                 chart.xAxis.position = XAxis.XAxisPosition.BOTTOM
                 chart.xAxis.labelRotationAngle = 45f
@@ -189,8 +194,11 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
                 chart.xAxis.granularity = (1000 * 60 * 60 * 24 * 2).toFloat()
                 chart.axisLeft.axisMinimum = 0f
                 chart.axisLeft.axisMaximum = 100f
-
-                chart.axisLeft.valueFormatter = PercentFormatter(DecimalFormat("###,###,##0"))
+                chart.axisLeft.valueFormatter = object: ValueFormatter(){
+                    override fun getFormattedValue(value: Float): String {
+                        return "${decimalFormat.format(value)}%"
+                    }
+                }
                 var lastCheckedId = R.id.chip_last_week
                 chipGroup.check(lastCheckedId)
                 chipGroup.setOnCheckedChangeListener { group, checkedId ->
@@ -234,7 +242,7 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
         graphRecyclerViewAdapter = ClazzLogListGraphRecyclerAdapter(mPresenter,
                 clazzTimeZone ?: "UTC", requireContext())
-        mMergeRecyclerViewAdapter = MergeAdapter(graphRecyclerViewAdapter, mDataRecyclerViewAdapter)
+        mMergeRecyclerViewAdapter = ConcatAdapter(graphRecyclerViewAdapter, mDataRecyclerViewAdapter)
         mRecyclerView?.adapter = mMergeRecyclerViewAdapter
 
         return view

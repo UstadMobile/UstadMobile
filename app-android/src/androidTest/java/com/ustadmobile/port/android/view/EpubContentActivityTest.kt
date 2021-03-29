@@ -12,14 +12,16 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.screen.EpubScreen
 import com.ustadmobile.test.port.android.util.clickOptionMenu
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -63,13 +65,13 @@ class EpubContentActivityTest : TestCase() {
             dbRule.repo.containerDao.insert(this)
         }
         containerTmpDir = tempFileRule.newFolder("epubContent${System.currentTimeMillis()}")
-        val testFile = tempFileRule.newFile("test${System.currentTimeMillis()}.epub")
-        val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/test.epub")
-        testFile.outputStream().use { input?.copyTo(it) }
 
-        val containerManager = ContainerManager(container, dbRule.db, dbRule.repo,
-                containerTmpDir.absolutePath)
-        addEntriesFromZipToContainer(testFile.absolutePath, containerManager)
+        runBlocking {
+            dbRule.repo.addEntriesToContainerFromZipResource(container.containerUid, this::class.java,
+                "/com/ustadmobile/app/android/test.epub",
+                ContainerAddOptions(storageDirUri = containerTmpDir.toDoorUri()))
+        }
+
     }
 
     @AdbScreenRecord("Given valid epub content when created should be loaded to the view")
@@ -100,6 +102,7 @@ class EpubContentActivityTest : TestCase() {
                             withTag("1.xhtml")
                             withId(R.id.epub_contentview)
                         }.invoke {
+                            reset()
                             ViewMatchers.isDisplayed()
                             ViewMatchers.isJavascriptEnabled()
                             withElement(Locator.CLASS_NAME, "authors") {

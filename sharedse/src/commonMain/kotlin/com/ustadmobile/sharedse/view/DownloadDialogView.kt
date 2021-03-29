@@ -31,8 +31,6 @@ interface DownloadDialogView : UstadView {
 
     fun setCalculatingViewVisible(visible: Boolean)
 
-    fun showStorageOptions(storageOptions: List<UMStorageDir>)
-
     companion object {
 
         const val VIEW_NAME = "DownloadDialog"

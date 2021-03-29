@@ -5,7 +5,7 @@ import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -18,11 +18,13 @@ import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
 import com.ustadmobile.core.util.ext.captureLastEntityValue
+import com.ustadmobile.core.util.test.waitUntil
 import com.ustadmobile.core.view.UstadEditView.Companion.ARG_ENTITY_JSON
-import com.ustadmobile.lib.db.entities.ReportFilter
-import com.ustadmobile.lib.db.entities.ReportWithFilters
+import com.ustadmobile.lib.db.entities.ReportSeries
+import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -73,32 +75,16 @@ class ReportDetailPresenterTest {
     fun givenReportExists_whenOnCreateCalled_thenReportIsSetOnView() {
         val repo: UmAppDatabase by di.activeRepoInstance()
 
-        val testEntity = ReportWithFilters().apply {
+        val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
-            chartType = Report.BAR_CHART
             xAxis = Report.MONTH
-            fromDate =  DateTime(2019, 4, 10).unixMillisLong
+            fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
-            reportFilterList = listOf(
-                    ReportFilter().apply {
-                        entityUid = 100
-                        entityType = ReportFilter.PERSON_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 200
-                        entityType = ReportFilter.VERB_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 300
-                        entityType = ReportFilter.CONTENT_FILTER
-                    }
-            )
             reportUid = repo.reportDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())
         val presenter = ReportDetailPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
-
 
         presenter.onCreate(null)
 
@@ -108,47 +94,45 @@ class ReportDetailPresenterTest {
     }
 
     @Test
-    fun givenNewReport_whenUserClicksOnAddToDashboard_thenDatabaseIsCreated(){
+    fun givenNewReport_whenUserClicksOnAddToDashboard_thenDatabaseIsCreated() {
         val db: UmAppDatabase by di.activeDbInstance()
 
-        val testEntity = ReportWithFilters().apply {
+        val reportSeriesList = listOf(ReportSeries().apply {
+            reportSeriesYAxis = ReportSeries.TOTAL_DURATION
+            reportSeriesVisualType = ReportSeries.LINE_GRAPH
+            reportSeriesSubGroup = Report.CLASS
+            reportSeriesUid = 4
+            reportSeriesName = "total duration"
+        })
+
+        val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
             reportTitle = "New Report Title"
-            chartType = Report.BAR_CHART
             xAxis = Report.MONTH
-            fromDate =  DateTime(2019, 4, 10).unixMillisLong
+            fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
-            reportFilterList = listOf(
-                    ReportFilter().apply {
-                        entityUid = 100
-                        entityType = ReportFilter.PERSON_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 200
-                        entityType = ReportFilter.VERB_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 300
-                        entityType = ReportFilter.CONTENT_FILTER
-                    }
-            )
+            reportSeries = Json.encodeToString(ListSerializer(ReportSeries.serializer()),
+                reportSeriesList)
         }
 
-        val presenterArgs = mapOf(ARG_ENTITY_JSON to Json.stringify(ReportWithFilters.serializer(), testEntity))
+        val presenterArgs = mapOf(ARG_ENTITY_JSON to
+                Json.encodeToString(ReportWithSeriesWithFilters.serializer(), testEntity))
         val presenter = ReportDetailPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
 
-
         presenter.handleOnClickAddFromDashboard(testEntity)
 
-        val existingEntitiesLive = db.reportDao.findAllLive()
-        val entitySaved = runBlocking {
-            existingEntitiesLive.waitUntil { it.size == 1 }
-        }.getValue()!!.first()
+        runBlocking {
+            db.waitUntil(5000, listOf("Report")){
+                db.reportDao.findAllActiveReportList(false).size == 1
+            }
+        }
+
+        val existingEntitiesLive = db.reportDao.findAllActiveReportList(false)[0]
         Assert.assertEquals("Entity was saved to database", "New Report Title",
-                entitySaved.reportTitle)
+                existingEntitiesLive.reportTitle)
 
 
 
@@ -160,26 +144,11 @@ class ReportDetailPresenterTest {
         val repo: UmAppDatabase by di.activeRepoInstance()
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
-        val testEntity = ReportWithFilters().apply {
+        val testEntity = ReportWithSeriesWithFilters().apply {
             //set variables here
-            chartType = Report.BAR_CHART
             xAxis = Report.MONTH
-            fromDate =  DateTime(2019, 4, 10).unixMillisLong
+            fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
-            reportFilterList = listOf(
-                    ReportFilter().apply {
-                        entityUid = 100
-                        entityType = ReportFilter.PERSON_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 200
-                        entityType = ReportFilter.VERB_FILTER
-                    },
-                    ReportFilter().apply {
-                        entityUid = 300
-                        entityType = ReportFilter.CONTENT_FILTER
-                    }
-            )
             reportUid = repo.reportDao.insert(this)
         }
         val presenterArgs = mapOf(ARG_ENTITY_UID to testEntity.reportUid.toString())

@@ -3,8 +3,6 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
-import android.view.View
-import android.widget.Button
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
@@ -18,6 +16,7 @@ import com.ustadmobile.lib.db.entities.*
 import java.util.*
 import com.soywiz.klock.DateFormat as KlockDateFormat
 import com.ustadmobile.core.util.ext.roleToString
+import com.ustadmobile.core.util.ext.outcomeToString
 
 @BindingAdapter("textMessageId")
 fun TextView.setTextMessageId(messageId: Int) {
@@ -133,8 +132,18 @@ fun TextView.setTextFromCustomFieldDropDownOption(customFieldValue: CustomFieldV
 @BindingAdapter(value = ["textFromDateLong", "textToDateLong"])
 fun TextView.setTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long) {
     val dateFormat = DateFormat.getDateFormat(context)
-    text = "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} - ${if (textToDateLong > 0) dateFormat.format(textToDateLong) else ""}"
+    text = "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} -" +
+            " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) dateFormat.format(textToDateLong) else ""}"
 }
+
+@SuppressLint("SetTextI18n")
+@BindingAdapter(value = ["enrolmentTextFromDateLong", "enrolmentTextToDateLong"])
+fun TextView.setEnrolmentTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long) {
+    val dateFormat = DateFormat.getDateFormat(context)
+    text = "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} -" +
+            " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) dateFormat.format(textToDateLong) else context.getString(R.string.time_present)}"
+}
+
 
 
 private val textViewSchoolGenderStringIds: Map<Int, Int> = mapOf(
@@ -199,11 +208,11 @@ fun TextView.setFileSize(fileSize: Long) {
 }
 
 @BindingAdapter(value=["clazzMemberWithClazzWorkAndProgress"])
-fun TextView.setClazzWorkMarking(clazzMemberWithClazzWorkAndProgress: ClazzMemberWithClazzWorkProgress){
-    var line = clazzMemberWithClazzWorkAndProgress.mClazzWorkSubmission.statusString(context)
-    if(clazzMemberWithClazzWorkAndProgress.clazzWorkHasContent && clazzMemberWithClazzWorkAndProgress.mProgress >= 0) {
+fun TextView.setClazzWorkMarking(clazzEnrolmentWithClazzWorkAndProgress: ClazzEnrolmentWithClazzWorkProgress){
+    var line = clazzEnrolmentWithClazzWorkAndProgress.mClazzWorkSubmission.statusString(context)
+    if(clazzEnrolmentWithClazzWorkAndProgress.clazzWorkHasContent && clazzEnrolmentWithClazzWorkAndProgress.mProgress >= 0) {
         line += " ${context.getString(R.string.completed)} " +
-                "${clazzMemberWithClazzWorkAndProgress.mProgress.toInt()}% " +
+                "${clazzEnrolmentWithClazzWorkAndProgress.mProgress.toInt()}% " +
                 context.getString(R.string.of_content)
     }
     text = line
@@ -237,8 +246,18 @@ fun TextView.setResponseTextFilled(responseText: String?){
 }
 
 @BindingAdapter("memberRoleName")
-fun TextView.setMemberRoleName(clazzMember: ClazzMember?) {
-    text = clazzMember?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
+fun TextView.setMemberRoleName(clazzEnrolment: ClazzEnrolment?) {
+    text = clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
+}
+
+@BindingAdapter("memberEnrolmentOutcomeWithReason")
+fun TextView.setMemberEnrolmentOutcome(clazzEnrolment: ClazzEnrolmentWithLeavingReason?){
+    text = "${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)} - ${clazzEnrolment?.outcomeToString(context,  UstadMobileSystemImpl.instance)}"
+}
+
+@BindingAdapter("clazzEnrolmentWithClazzAndOutcome")
+fun TextView.setClazzEnrolmentWithClazzAndOutcome(clazzEnrolment: ClazzEnrolmentWithClazz?){
+    text = "${clazzEnrolment?.clazz?.clazzName} (${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)}) - ${clazzEnrolment?.outcomeToString(context,  UstadMobileSystemImpl.instance)}"
 }
 
 

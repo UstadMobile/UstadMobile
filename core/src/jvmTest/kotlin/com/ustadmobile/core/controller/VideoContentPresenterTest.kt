@@ -2,7 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -49,8 +49,6 @@ class VideoContentPresenterTest {
     @Before
     @Throws(IOException::class)
     fun setup() {
-        checkJndiSetup()
-
         mockView = mock { }
         mockEndpoint = mock {}
         val systemImplSpy = spy(UstadMobileSystemImpl.instance)

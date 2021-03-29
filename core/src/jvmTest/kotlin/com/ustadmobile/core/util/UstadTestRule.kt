@@ -1,8 +1,8 @@
 package com.ustadmobile.core.util
 
 import com.google.gson.Gson
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.spy
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -18,9 +18,13 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.NetworkManagerBle
+import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import io.ktor.client.*
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
+import org.xmlpull.v1.XmlPullParserFactory
+import java.io.StringReader
 import javax.naming.InitialContext
 
 fun DI.onActiveAccount(): DI {
@@ -46,13 +50,11 @@ fun DI.directActiveRepoInstance() = onActiveAccountDirect().instance<UmAppDataba
  */
 class UstadTestRule: TestWatcher() {
 
-    var endpointScope: EndpointScope? = null
+    lateinit var endpointScope: EndpointScope
 
     private var systemImplSpy: UstadMobileSystemImpl? = null
 
     lateinit var diModule: DI.Module
-
-    class SomeDiThing(di: DI)
 
     override fun starting(description: Description?) {
         endpointScope = EndpointScope()
@@ -78,6 +80,20 @@ class UstadTestRule: TestWatcher() {
 
             bind<Gson>() with singleton {
                 Gson()
+            }
+
+            bind<HttpClient>() with singleton {
+                defaultHttpClient()
+            }
+
+            bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
+                XmlPullParserFactory.newInstance().also {
+                    it.isNamespaceAware = true
+                }
+            }
+
+            bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
+                XmlPullParserFactory.newInstance()
             }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

@@ -2,7 +2,7 @@ package com.ustadmobile.sharedse.network
 // DISABLE 20/July/2020 - This needs to be brought into containerdownloadmanager. NetworkManager is
 // not specific to a given endpoint
 //
-//import com.nhaarman.mockitokotlin2.*
+//import org.mockito.kotlin.*
 //import com.ustadmobile.core.networkmanager.AvailabilityMonitorRequest
 //import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 //import com.ustadmobile.lib.db.entities.DownloadJobItem

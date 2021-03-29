@@ -4,9 +4,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.util.UMUtil
 import com.ustadmobile.port.sharedse.util.XmlPassThroughFilter
 import com.ustadmobile.port.sharedse.util.passXmlThrough
-import org.kmp.io.KMPPullParser.Companion.FEATURE_PROCESS_DOCDECL
-import org.kmp.io.KMPSerializerParser
-import org.kmp.io.KMPXmlParser
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -14,8 +11,10 @@ import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserException
 import org.xmlpull.v1.XmlSerializer
 import java.io.ByteArrayOutputStream
+import java.io.ByteArrayInputStream
 import java.io.IOException
 import java.io.InputStream
+import org.xmlpull.v1.XmlPullParserFactory
 
 /**
  * Performs some minor tweaks on HTML being served to enable EPUB pagination and handling html
@@ -34,14 +33,17 @@ class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
 
     //add the script
     val output: ByteArray
-        @Throws(IOException::class, XmlPullParserException::class)
         get() {
+            val xppFactory = XmlPullParserFactory.newInstance().also {
+                it.isNamespaceAware = true
+            }
+
             val bout = ByteArrayOutputStream()
-            val xs: XmlSerializer by di.instance()
+            val xs: XmlSerializer = xppFactory.newSerializer()
             xs.setOutput(bout, "UTF-8")
 
-            val xpp: XmlPullParser by di.instance()
-            xpp.setInput(`in`!!, "UTF-8")
+            val xpp: XmlPullParser = xppFactory.newPullParser()
+            xpp.setInput(`in`, "UTF-8")
 
             xs.startDocument("UTF-8", false)
             var seenViewPort = false
@@ -72,7 +74,6 @@ class EpubHtmlFilterSerializer(override val di: DI) : DIAware {
                     return true
                 }
 
-                @Throws(IOException::class, XmlPullParserException::class)
                 override fun afterPassthrough(evtType: Int, parser: XmlPullParser, serializer: XmlSerializer): Boolean {
                     if(evtType == XmlPullParser.START_TAG && parser.getName() == "meta"
                             && parser.getAttributeValue(null, "name") == "viewport") {

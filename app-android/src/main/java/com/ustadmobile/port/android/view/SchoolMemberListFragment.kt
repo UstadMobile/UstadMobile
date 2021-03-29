@@ -10,7 +10,7 @@ import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.paging.PagedListAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemSchoolmemberListItemBinding
@@ -27,7 +27,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.PresenterViewLifecycleObserver
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
@@ -55,7 +55,7 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
 
     private var mCurrentStudentListLiveData: LiveData<PagedList<SchoolMemberWithPerson>>? = null
 
-    private var mPendingStudentsHeaderRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+    private var mPendingStudentsHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
 
     private var mPendingStudentListRecyclerViewAdapter:
             PendingSchoolMemberListRecyclerAdapter? = null
@@ -148,14 +148,14 @@ class SchoolMemberListFragment : UstadListViewFragment<SchoolMember, SchoolMembe
         val createNewText = requireContext().getString(R.string.add_new,
                 requireContext().getString(addNewStringId))
 
-        mNewItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this, createNewText,
+        mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this, createNewText,
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
 
         mPendingStudentListRecyclerViewAdapter = PendingSchoolMemberListRecyclerAdapter(mPresenter)
-        mPendingStudentsHeaderRecyclerViewAdapter = NewItemRecyclerViewAdapter(null,
+        mPendingStudentsHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(null,
                 "", R.string.pending_requests, headerLayoutId = 0)
 
-        mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
+        mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,
                 mDataRecyclerViewAdapter, mPendingStudentsHeaderRecyclerViewAdapter,
                 mPendingStudentListRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter

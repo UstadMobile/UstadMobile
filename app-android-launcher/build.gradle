@@ -53,13 +53,13 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-        coreLibraryDesugaringEnabled true
+        //coreLibraryDesugaringEnabled true
     }
 
     defaultConfig {
         applicationId "${baseAppId}.launcher"
-        minSdkVersion rootProject.ext.version_android_min_sdk
-        targetSdkVersion rootProject.ext.version_android_target_sdk
+        minSdkVersion 21
+        targetSdkVersion 30
         versionCode rootProject.ext.ustadVersionCode
         versionName rootProject.ext.ustadVersion
         multiDexEnabled true //required for all variants to use java library desugaring
@@ -87,29 +87,7 @@ android {
     flavorDimensions "config"
 
     productFlavors {
-        /*
-         * The vanilla config flavor is here for convenience : it's the same as having no
-         * buildconfig.local.properties and relying on what's in buildconfig.default.properties
-         *
-         * It's just here to make life easier so you can switch flavors in Android studio without
-         * having to remove the local config files themselves
-         */
-        vanilla {
-            dimension "config"
-            applicationId "${baseAppId}"
-            testApplicationId "${baseAppId}.test"
-            versionCode rootProject.ext.ustadVersionCode
-        }
-
-        vanillamultidex {
-            dimension "config"
-            minSdkVersion 18
-            applicationId "${baseAppId}"
-            testApplicationId "${baseAppId}.test"
-            versionCode rootProject.ext.ustadVersionCode
-        }
-
-        devMinApi21 {
+       devMinApi21 {
             dimension "config"
             minSdkVersion 21
             applicationId "${baseAppId}"
@@ -148,23 +126,19 @@ configurations.all {
 
 
 dependencies {
-    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
+    //coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:$version_android_desugar_jdk_libs"
 
     api project(':core')
     api project(':sharedse')
 
     api project(":app-android")
 
-    implementation project(":lib-door-runtime")
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
-    implementation "com.github.aakira:napier-android:$version_napier"
     implementation "com.github.aakira:napier:$version_napier"
     implementation "com.google.android.material:material:$version_android_material"
 
     implementation "com.google.android.gms:play-services-safetynet:$version_android_play_services_safetynet"
-
-    vanillamultidexApi 'androidx.multidex:multidex:2.0.1'
 
     debugImplementation "com.squareup.leakcanary:leakcanary-android:$version_android_leakcanary"
 
@@ -175,9 +149,6 @@ dependencies {
     //dependency injection
     implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
 
-    api fileTree(dir: 'libs', include: ['*.jar'])
-//    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
-//    androidTestImplementation 'androidx.test.espresso:espresso-contrib:3.2.0'
     androidTestImplementation "org.mockito:mockito-android:$version_android_mockito"
 
     testImplementation "junit:junit:$version_junit"

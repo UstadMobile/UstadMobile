@@ -1,12 +1,10 @@
 package com.ustadmobile.lib.annotationprocessor.core
 
 import androidx.room.Embedded
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.TypeName
-import com.squareup.kotlinpoet.asClassName
-import com.squareup.kotlinpoet.asTypeName
+import com.squareup.kotlinpoet.*
 import com.ustadmobile.door.annotation.SyncableEntity
 import javax.annotation.processing.ProcessingEnvironment
+import javax.lang.model.element.TypeElement
 import javax.tools.Diagnostic
 
 /**
@@ -37,8 +35,6 @@ fun ClassName.findAllEntitiesWithAnnotation(annotationClass: Class<out Annotatio
         it.enclosedElements.filter { it.getAnnotation(Embedded::class.java) != null}.forEach {
             val subEmbedPath = mutableListOf(*embedPath.toTypedArray()) + "${it.simpleName}"
             val subClassName = it.asType().asTypeName() as ClassName
-//            syncableEntityList.putAll(findEntitiesWithAnnotation(it.asType().asTypeName() as ClassName,
-//                    annotationClass, processingEnv, subEmbedPath))
             syncableEntityList.putAll(subClassName.findAllEntitiesWithAnnotation(annotationClass,
                     processingEnv, subEmbedPath))
         }
@@ -94,3 +90,27 @@ fun ClassName.entityHasSyncableEntityTypes(processingEnv: ProcessingEnvironment)
  * as the original
  */
 fun ClassName.withSuffix(suffix: String) = ClassName(this.packageName, "$simpleName$suffix")
+
+/**
+ * Create a TypeSpec that represents an entity from a ClassName. There can be two cases:
+ * 1) The ClassName refers to a generated _trk entity. No TypeElement will be available for this as
+ *   it is itself generated and not part of the compilation source being processed. This function
+ *   will look up the original entity itself and generate a TypeSpec for the tracker from that
+ *
+ * 2) The ClassName refers to an actual class that is part of the compilation source annotated by
+ * Entity - in which case we will just look it up using processingEnv
+ */
+fun ClassName.asEntityTypeSpec(processingEnv: ProcessingEnvironment): TypeSpec? {
+    if(simpleName.endsWith("_trk")) {
+        val originalEntityTypeEl = processingEnv.elementUtils.getTypeElement(
+                this.canonicalName.removeSuffix("_trk"))
+        return generateTrackerEntity(originalEntityTypeEl, processingEnv)
+    }else {
+        val entityTypeEl = processingEnv.elementUtils.getTypeElement(canonicalName) as? TypeElement
+        return entityTypeEl?.asEntityTypeSpec()
+    }
+}
+
+fun ClassName.asTypeElement(processingEnv: ProcessingEnvironment): TypeElement? {
+    return processingEnv.elementUtils.getTypeElement(canonicalName) as? TypeElement
+}

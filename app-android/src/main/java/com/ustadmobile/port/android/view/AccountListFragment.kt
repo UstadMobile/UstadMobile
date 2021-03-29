@@ -20,7 +20,7 @@ import com.ustadmobile.core.view.AccountListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 import org.kodein.di.instance
 
@@ -128,11 +128,6 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         navController.navigate(R.id.home_content_dest, null, navOptions)
     }
 
-    override fun showGetStarted(){
-        val navOptions = NavOptions.Builder().setPopUpTo(R.id.account_list_dest, true).build()
-        findNavController().navigate(R.id.account_get_started_dest,null, navOptions)
-    }
-
 
     private var accountAdapter: AccountAdapter ? = null
 
@@ -140,9 +135,9 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
 
     private var mPresenter: AccountListPresenter? = null
 
-    private var newItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+    private var ustadListHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
 
-    private var mergeRecyclerAdapter: MergeAdapter? = null
+    private var mergeRecyclerAdapter: ConcatAdapter? = null
 
     override fun onClick(p0: View?) {
         mPresenter?.handleClickAddAccount()
@@ -165,13 +160,13 @@ class AccountListFragment : UstadBaseFragment(), AccountListView, View.OnClickLi
         accountAdapter = AccountAdapter(mPresenter)
         aboutItemAdapter = AboutItemAdapter(versionText,mPresenter)
 
-        newItemRecyclerViewAdapter = NewItemRecyclerViewAdapter(this,
+        ustadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this,
                 createNewText = String.format(getString(R.string.add_another),
                         getString(R.string.account).toLowerCase()))
-        newItemRecyclerViewAdapter?.newItemVisible = true
+        ustadListHeaderRecyclerViewAdapter?.newItemVisible = true
 
-        mergeRecyclerAdapter = MergeAdapter(accountAdapter,
-                newItemRecyclerViewAdapter, aboutItemAdapter)
+        mergeRecyclerAdapter = ConcatAdapter(accountAdapter,
+                ustadListHeaderRecyclerViewAdapter, aboutItemAdapter)
 
         mBinding?.accountListRecycler?.adapter = mergeRecyclerAdapter
 

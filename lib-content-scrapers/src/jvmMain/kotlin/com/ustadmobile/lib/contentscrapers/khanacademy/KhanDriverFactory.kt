@@ -7,7 +7,7 @@ import org.apache.commons.pool2.PooledObject
 import org.apache.commons.pool2.impl.DefaultPooledObject
 import org.openqa.selenium.chrome.ChromeDriver
 
-@ExperimentalStdlibApi
+
 class KhanDriverFactory : BasePooledObjectFactory<ChromeDriver>() {
 
 

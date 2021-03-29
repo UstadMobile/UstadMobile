@@ -10,8 +10,17 @@ android {
     compileSdkVersion rootProject.ext.version_android_compile_sdk
     buildToolsVersion rootProject.ext.version_android_buildtools
 
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    packagingOptions {
+        excludes += ['META-INF/INDEX.LIST', "**/*.kotlin_metadata", "META-INF/*.kotlin_module", "licenses/**.TXT"]
+    }
+
     defaultConfig {
-        minSdkVersion 18
+        minSdkVersion 21
         targetSdkVersion 29
     }
 }
@@ -37,6 +46,7 @@ kotlin {
 
     android()
 
+    /* JS is disabled until after Kotlin 1.4 upgrade
     js {
         nodejs()
 
@@ -46,7 +56,7 @@ kotlin {
             moduleKind = "commonjs"
         }
     }
-
+    */
 
     jvm {
         compilations.main.kotlinOptions {
@@ -59,33 +69,30 @@ kotlin {
     sourceSets {
         commonMain {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
-                implementation project(":lib-database-annotations")
-                implementation project(":lib-door-runtime")
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
-                compileOnly project(":lib-room-annotations")
+                implementation kotlin('stdlib-common')
+                implementation "com.ustadmobile.door:door-runtime:$version_door"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
+                compileOnly "com.ustadmobile.door:room-annotations:$version_door"
 
             }
         }
 
         jvmMain {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+
             }
         }
 
         jsMain {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
+//                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
+//                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
             }
         }
 
         androidMain {
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+
             }
         }
 

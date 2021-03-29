@@ -5,6 +5,7 @@ import android.app.DatePickerDialog
 import android.content.Context
 import android.text.format.DateFormat
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.DatePicker
 import android.widget.TextView
 import androidx.appcompat.view.ContextThemeWrapper
@@ -20,13 +21,21 @@ import java.util.*
 
 
 /**
+ * Shorthand to check if this Long represents a date that has really been set by the user, or is just
+ * a default. 0 and Long.MAX_VALUE are reserved defaults. MAX_VALUE is used for end times to simplify
+ * queries.
+ */
+private val Long.isSet: Boolean
+    get() = this != 0L && this != Long.MAX_VALUE
+
+/**
  * Data binding Adapter for Date picker types.
  * Contains the logic for linking editText dates with Datepicker
  */
 
 fun updateDateOnEditText(et: TextView, date: Long) {
     val dateFormatter = DateFormat.getDateFormat(et.context)
-    if (date == 0L) {
+    if (!date.isSet) {
         et.setText("")
     } else {
         et.setText(dateFormatter.format(date))
@@ -40,7 +49,7 @@ fun updateDateOnEditText(et: TextView, date: Long) {
 
 fun updateDateOnEditTextWithExtraText(prepent: String, append: String, et: TextView, date: Long) {
     val dateFormatter = DateFormat.getDateFormat(et.context)
-    if (date == 0L) {
+    if (!date.isSet) {
         et.setText(prepent + " " + append)
     } else {
         et.setText(prepent + " " + dateFormatter.format(date) + " - " + append)
@@ -91,7 +100,7 @@ fun updateDateTimeOnEditTextWithExtra(prepend: String, append: String?, et: Text
     } else {
         dateWithTimeFormatWithPrepend.format(arrayOf(prepend, dateDate, timeDate, append))
     }
-    if (date == 0L) {
+    if (date == 0L || date == Long.MAX_VALUE) {
         text = ""
     }
     et.text = text
@@ -101,8 +110,10 @@ fun updateDateTimeOnEditTextWithExtra(prepend: String, append: String?, et: Text
 fun openDatePicker2(et: TextView, context: Context, inverseBindingListener: InverseBindingListener) {
     val c = Calendar.getInstance()
     val currentDate = et.getTag(R.id.tag_datelong) as? Long ?: 0L
-    if (currentDate > 0) {
-        c.timeInMillis = currentDate
+    c.timeInMillis = if(!currentDate.isSet){
+        c.time.time
+    }else{
+        currentDate
     }
 
     val builder = AlertDialog.Builder(context)
@@ -171,6 +182,11 @@ fun setDateWithDateExtras(et: TextView, date: Long, time: Long, append: String?,
 fun setDateWithDateExtras(et: TextView, date: Long) {
     updateDateTimeOnEditText(et, date)
     et.setTag(R.id.tag_datelong, date)
+}
+
+@BindingAdapter("visibleIfDateSet")
+fun View.setVisibilityIfSetDate(date: Long){
+    visibility = if(date == 0L || date == Long.MAX_VALUE) View.GONE else View.VISIBLE
 }
 
 

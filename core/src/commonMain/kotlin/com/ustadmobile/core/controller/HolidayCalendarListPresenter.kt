@@ -1,5 +1,6 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -38,7 +39,7 @@ class HolidayCalendarListPresenter(context: Any, arguments: Map<String, String>,
         systemImpl.go(HolidayCalendarEditView.VIEW_NAME, mapOf(), context)
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
+    override fun handleClickSortOrder(sortOption: IdOption) {
         //no sort options here
     }
 }

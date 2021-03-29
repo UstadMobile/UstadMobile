@@ -18,7 +18,7 @@ import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 
@@ -47,9 +47,9 @@ class ClazzWorkEditPresenter(context: Any,
     private val contentJoinEditHelper = DefaultOneToManyJoinEditHelper(
             ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::contentEntryUid,
             "state_ContentEntryWithMetrics_list",
-            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer().list,
-            ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer().list,
-            this) { contentEntryUid = it }
+            ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()),
+        ListSerializer(ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer.serializer()),
+            this, ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer::class) { contentEntryUid = it }
 
     fun handleAddOrEditContent(entityClass: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         contentJoinEditHelper.onEditResult(entityClass)
@@ -63,8 +63,9 @@ class ClazzWorkEditPresenter(context: Any,
             DefaultOneToManyJoinEditHelper<ClazzWorkQuestionAndOptions>(
             {it.clazzWorkQuestion.clazzWorkQuestionUid},
             "state_ClazzWorkQuestionAndOption_list",
-                    ClazzWorkQuestionAndOptions.serializer().list,
-            ClazzWorkQuestionAndOptions.serializer().list, this)
+                    ListSerializer(ClazzWorkQuestionAndOptions.serializer()),
+            ListSerializer(ClazzWorkQuestionAndOptions.serializer()), this,
+                    ClazzWorkQuestionAndOptions::class)
     { clazzWorkQuestion.clazzWorkQuestionUid = it }
 
     fun handleAddOrEditClazzQuestionAndOptions(entityClass: ClazzWorkQuestionAndOptions) {

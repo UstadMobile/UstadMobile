@@ -11,10 +11,11 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.lib.db.entities.HolidayCalendar
 import com.ustadmobile.lib.db.entities.Person
-import com.ustadmobile.port.android.screen.*
-import com.ustadmobile.test.port.android.util.setDateField
+import com.ustadmobile.port.android.screen.ClazzEditScreen
+import com.ustadmobile.port.android.screen.HolidayCalendarListScreen
+import com.ustadmobile.port.android.screen.MainScreen
+import com.ustadmobile.test.port.android.util.setDateWithDialog
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import kotlinx.coroutines.runBlocking
 import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -47,6 +48,7 @@ class ClazzEndToEndTests : TestCase() {
                 lastName = "Jones"
                 admin = true
             })
+
             launchActivity<MainActivity>()
 
         }.run {
@@ -78,6 +80,11 @@ class ClazzEndToEndTests : TestCase() {
                 }
                 closeSoftKeyboard()
 
+                //Scroll to one below the holiday calendar to avoid the potential that it would be
+                //covered by the bottom nav bar
+                schoolTextInputLayout {
+                    scrollTo()
+                }
 
                 holidayCalendarTextInput{
                     click()
@@ -103,7 +110,7 @@ class ClazzEndToEndTests : TestCase() {
 
                 val cal = Calendar.getInstance()
                 cal.set(2020,5,31)
-                setDateField(R.id.start_date_text, cal.timeInMillis)
+                clazzStartTextInput.edit.setDateWithDialog(cal.timeInMillis)
 
                 KView{
                     withId(R.id.menu_done)

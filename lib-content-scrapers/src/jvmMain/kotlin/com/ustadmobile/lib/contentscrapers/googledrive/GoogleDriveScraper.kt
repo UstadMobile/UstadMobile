@@ -28,7 +28,6 @@ import java.io.FileOutputStream
 import java.io.InputStream
 import java.nio.file.Files
 
-@ExperimentalStdlibApi
 class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     private var tempDir: File? = null
@@ -134,7 +133,8 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     val params = scrapeQueueItem?.scrapeRun?.conversionParams
                     var conversionParams = mapOf<String, String>()
                     if(params != null){
-                        conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+                        conversionParams = Json.decodeFromString(
+                            MapSerializer(String.serializer(), String.serializer()), params)
                     }
                     contentImportManager.importFileToContainer(contentFile.path, metadata.mimeType,
                             fileEntry.contentEntryUid, containerFolder.path, conversionParams){

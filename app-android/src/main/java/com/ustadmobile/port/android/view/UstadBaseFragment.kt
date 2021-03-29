@@ -13,6 +13,7 @@ import androidx.navigation.fragment.findNavController
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_SNACK_MESSAGE
+import com.ustadmobile.port.android.util.ext.currentBackStackEntrySavedStateMap
 import com.ustadmobile.port.android.view.util.FabManagerLifecycleObserver
 import com.ustadmobile.port.android.view.util.ProgressBarLifecycleObserver
 import com.ustadmobile.port.android.view.util.TitleLifecycleObserver
@@ -47,6 +48,13 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
             field = value
         }
 
+
+    /**
+     * Shortcut to retrieve the SavedState properties from NavController's backstack savedstate
+     * handle.
+     */
+    protected val backStackSavedState: Map<String, String>?
+        get() = findNavController().currentBackStackEntrySavedStateMap()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -104,9 +112,6 @@ open class UstadBaseFragment : Fragment(), UstadView, DIAware {
     override fun onDestroy() {
         super.onDestroy()
     }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)

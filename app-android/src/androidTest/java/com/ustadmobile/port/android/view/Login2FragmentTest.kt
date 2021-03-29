@@ -136,7 +136,7 @@ class Login2FragmentTest : TestCase(){
                     click()
                 }
                 assertEquals("It navigated to account creation screen",
-                        R.id.person_edit_register_dest, systemImplNavRule.navController.currentDestination?.id)
+                        R.id.site_terms_detail_accept_dest, systemImplNavRule.navController.currentDestination?.id)
             }
         }
 
@@ -175,13 +175,13 @@ class Login2FragmentTest : TestCase(){
         }.run {
 
             LoginScreen {
-                mockWebServer.setDispatcher(object : Dispatcher() {
-                    override fun dispatch(request: RecordedRequest?): MockResponse {
+                mockWebServer.dispatcher = object : Dispatcher() {
+                    override fun dispatch(request: RecordedRequest): MockResponse {
                         return MockResponse()
                                 .setBody(Gson().toJson(UmAccount(42, VALID_USER, "auth", "")))
                                 .setHeader("Content-Type", "application/json")
                     }
-                })
+                }
 
                 val httpUrl = mockWebServer.url("/").toString()
 
@@ -207,11 +207,11 @@ class Login2FragmentTest : TestCase(){
 
 
         init{
-            mockWebServer.setDispatcher(object: Dispatcher() {
-                override fun dispatch(request: RecordedRequest?): MockResponse {
+            mockWebServer.dispatcher = object: Dispatcher() {
+                override fun dispatch(request: RecordedRequest): MockResponse {
                     return MockResponse().setResponseCode(403)
                 }
-            })
+            }
 
         }.run {
 

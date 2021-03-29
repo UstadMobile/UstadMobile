@@ -7,7 +7,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
-@ExperimentalStdlibApi
+
 actual class HarContentPresenter actual constructor(context: Any, arguments: Map<String, String>,
                                                     view: HarView, localHttp: String,
                                                     di: DI)

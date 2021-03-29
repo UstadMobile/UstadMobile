@@ -1,6 +1,6 @@
 package com.ustadmobile.port.sharedse.contentformats
 
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.mock
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -11,7 +11,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe.makeTempContainerFromClassResource
 import com.ustadmobile.sharedse.util.UstadTestRule
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert

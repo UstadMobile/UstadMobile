@@ -1,46 +1,55 @@
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.ReportGraphHelper
+import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.Report
-import com.ustadmobile.lib.db.entities.ReportWithFilters
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class ReportListPresenter(context: Any, arguments: Map<String, String>, view: ReportListView,
         di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<ReportListView, Report>(context, arguments, view, di, lifecycleOwner) {
+    : UstadListPresenter<ReportListView, Report>(context, arguments, view, di, lifecycleOwner),
+        OnSortOptionSelected, OnSearchSubmitted{
 
     var loggedInPersonUid = 0L
 
-    var currentSortOrder: SortOrder = SortOrder.ORDER_NAME_ASC
-
-    enum class SortOrder(val messageId: Int) {
-        ORDER_NAME_ASC(MessageID.sort_by_name_asc),
-        ORDER_NAME_DSC(MessageID.sort_by_name_desc)
-    }
-
-    class ReportListSortOption(val sortOrder: SortOrder, context: Any) : MessageIdOption(sortOrder.messageId, context)
+    var searchText: String? = null
+    override val sortOptions: List<SortOrderOption>
+        get() = SORT_OPTIONS
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
+        selectedSortOption = SORT_OPTIONS[0]
+        loggedInPersonUid = accountManager.activeAccount.personUid
         updateListOnView()
-        view.sortOptions = SortOrder.values().toList().map { ReportListSortOption(it, context) }
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
         return true
-
     }
 
     private fun updateListOnView() {
-        view.list = when (currentSortOrder) {
-            SortOrder.ORDER_NAME_ASC -> repo.reportDao.findAllActiveReportByUserAsc(loggedInPersonUid)
-            SortOrder.ORDER_NAME_DSC -> repo.reportDao.findAllActiveReportByUserDesc(loggedInPersonUid)
-        }
+        view.list = repo.reportDao.findAllActiveReport(searchText.toQueryLikeParam(),
+        loggedInPersonUid, selectedSortOption?.flag ?: ReportDao.SORT_TITLE_ASC, false)
+    }
+
+    override fun onClickSort(sortOption: SortOrderOption) {
+        super.onClickSort(sortOption)
+        updateListOnView()
+    }
+
+
+    override fun onSearchSubmitted(text: String?) {
+        searchText = text
+        updateListOnView()
     }
 
     override fun handleClickEntry(entry: Report) {
@@ -52,25 +61,38 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
     }
 
     override fun handleClickCreateNewFab() {
-        systemImpl.go(ReportEditView.VIEW_NAME, mapOf(), context)
+        systemImpl.go(ReportTemplateListView.VIEW_NAME, mapOf(), context)
+    }
+    override suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
+        return listOf(SelectionOption.HIDE)
     }
 
-    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-        val sortOrder = (sortOption as? ReportListSortOption)?.sortOrder ?: return
-        if (sortOrder != currentSortOrder) {
-            currentSortOrder = sortOrder
-            updateListOnView()
+    override fun handleClickSelectionOption(selectedItem: List<Report>, option: SelectionOption) {
+        GlobalScope.launch(doorMainDispatcher()) {
+            when (option) {
+                SelectionOption.HIDE -> {
+                    repo.reportDao.toggleVisibilityReportItems(true,
+                            selectedItem.map { it.reportUid })
+                    view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context), {
+
+                        GlobalScope.launch(doorMainDispatcher()){
+                            repo.reportDao.toggleVisibilityReportItems(false,
+                                    selectedItem.map { it.reportUid })
+                        }
+
+                    }, MessageID.undo)
+                }
+            }
         }
     }
 
-    suspend fun getGraphData(item: Report): ReportGraphHelper.ChartData {
-        val reportList = db.reportFilterDao.findByReportUid(item.reportUid)
-        val graphHelper = ReportGraphHelper(context, systemImpl, repo)
-        return graphHelper.getChartDataForReport(ReportWithFilters(item, reportList))
-    }
+    companion object {
 
-    override fun onDestroy() {
-        super.onDestroy()
+        val SORT_OPTIONS = listOf(
+                SortOrderOption(MessageID.title, ReportDao.SORT_TITLE_ASC, true),
+                SortOrderOption(MessageID.title, ReportDao.SORT_TITLE_DESC, false)
+        )
+
     }
 
 }

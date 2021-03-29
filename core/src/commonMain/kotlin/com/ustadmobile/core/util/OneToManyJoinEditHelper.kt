@@ -6,6 +6,8 @@ import com.ustadmobile.door.DoorMutableLiveData
 import kotlinx.serialization.DeserializationStrategy
 import kotlinx.serialization.SerializationStrategy
 import kotlinx.serialization.json.Json
+import org.kodein.di.DI
+import kotlin.reflect.KClass
 
 /**
  * This class is designed to help manager a one to many join in edit mode. E.g. Clazz has a 1:n
@@ -16,14 +18,15 @@ import kotlinx.serialization.json.Json
  * must be updated and some entities will need to be deactivated (e.g. the active field is set to
  * false).
  */
-open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
+open class OneToManyJoinEditHelper<T : Any, K>(val pkGetter: (T) -> K,
                                          val serializationKey: String,
                                          val serializationStrategy: SerializationStrategy<List<T>>? = null,
                                          val deserializationStrategy: DeserializationStrategy<List<T>>? = null,
                                          val newPk: K,
-                                         editPresenter: UstadEditPresenter<*, *>?,
-                                    val pkSetter: T.(K) -> Unit,
-    open protected val fakePkGenerator: () -> K): UstadEditPresenter.JsonLoadListener  {
+                                         editPresenter: UstadEditPresenter<*, *>,
+                                         val entityClass: KClass<T>,
+                                         val pkSetter: T.(K) -> Unit,
+                                         open protected val fakePkGenerator: () -> K): UstadEditPresenter.JsonLoadListener  {
 
     val liveList: DoorMutableLiveData<List<T>> = DoorMutableLiveData(listOf())
 
@@ -31,8 +34,11 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
 
     protected val pksToDeactivate = mutableListOf<K>()
 
+    private val di: DI
+
     init {
-        editPresenter?.addJsonLoadListener(this)
+        di = editPresenter.di
+        editPresenter.addJsonLoadListener(this)
     }
 
     fun onEditResult(entity: T) {
@@ -78,13 +84,13 @@ open class OneToManyJoinEditHelper<T, K>(val pkGetter: (T) -> K,
     override fun onSaveState(outState: MutableMap<String, String>) {
         val listVal = liveList.getValue() ?: return
         val serializer = serializationStrategy ?: return
-        outState[serializationKey] = Json.stringify(serializationStrategy, listVal)
+        outState[serializationKey] = safeStringify(di, serializationStrategy, listVal)
     }
 
     override fun onLoadFromJsonSavedState(savedState: Map<String, String>?) {
         val listJsonStr = savedState?.get(serializationKey) ?: return
         val deserializer = deserializationStrategy ?: return
-        val listVal = Json.parse(deserializer, listJsonStr)
+        val listVal = safeParseList(di, deserializer, entityClass, listJsonStr)//Json.parse(deserializer, listJsonStr)
         liveList.setVal(listVal)
     }
 

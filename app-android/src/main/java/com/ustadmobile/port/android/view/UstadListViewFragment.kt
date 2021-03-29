@@ -6,8 +6,6 @@ import android.view.*
 import android.widget.AdapterView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.children
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
@@ -15,7 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentListBinding
@@ -25,6 +23,8 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.util.IdOption
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toStringMap
@@ -34,7 +34,7 @@ import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.port.android.view.ext.repoLoadingStatus
 import com.ustadmobile.port.android.view.ext.saveResultToBackStackSavedStateHandle
-import com.ustadmobile.port.android.view.util.NewItemRecyclerViewAdapter
+import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 import org.kodein.di.direct
 import org.kodein.di.instance
@@ -46,13 +46,13 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
     protected var mRecyclerView: RecyclerView? = null
 
-    internal var mNewItemRecyclerViewAdapter: NewItemRecyclerViewAdapter? = null
+    internal var mUstadListHeaderRecyclerViewAdapter: ListHeaderRecyclerViewAdapter? = null
 
     protected var mListStatusAdapter: ListStatusRecyclerViewAdapter<DT>? = null
 
     internal var mDataRecyclerViewAdapter: SelectablePagedListAdapter<DT, *>? = null
 
-    protected var mMergeRecyclerViewAdapter: MergeAdapter? = null
+    protected var mMergeRecyclerViewAdapter: ConcatAdapter? = null
 
     internal var mDataBinding: FragmentListBinding? = null
 
@@ -215,7 +215,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
 
         if (autoMergeRecyclerViewAdapter) {
-            mMergeRecyclerViewAdapter = MergeAdapter(mNewItemRecyclerViewAdapter,
+            mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,
                     mDataRecyclerViewAdapter, mListStatusAdapter)
             mRecyclerView?.adapter = mMergeRecyclerViewAdapter
             mDataRecyclerViewAdapter?.selectedItemsLiveData?.observe(this.viewLifecycleOwner,
@@ -254,12 +254,24 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         get() = field
         set(value) {
             mDataBinding?.addMode = value
-            mNewItemRecyclerViewAdapter.takeIf { autoMergeRecyclerViewAdapter }?.newItemVisible =
+            mUstadListHeaderRecyclerViewAdapter.takeIf { autoMergeRecyclerViewAdapter }?.newItemVisible =
                     (value == ListViewAddMode.FIRST_ITEM)
             fabManager?.takeIf { autoShowFabOnAddPermission }?.visible =
                     (value == ListViewAddMode.FAB)
 
             field = value
+        }
+
+    override var listFilterOptionChips: List<ListFilterIdOption>? = null
+        set(value) {
+            mUstadListHeaderRecyclerViewAdapter?.filterOptions = value ?: listOf()
+            field = value
+        }
+
+    override var checkedFilterOptionChip: ListFilterIdOption?
+        get() = mUstadListHeaderRecyclerViewAdapter?.selectedFilterOption
+        set(value) {
+            mUstadListHeaderRecyclerViewAdapter?.selectedFilterOption = value
         }
 
     override var list: DataSource.Factory<Int, DT>? = null
@@ -279,12 +291,12 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     }
 
     override fun onMessageIdOptionSelected(view: AdapterView<*>?,
-                                           messageIdOption: MessageIdOption) {
+                                           messageIdOption: IdOption) {
         listPresenter?.handleClickSortOrder(messageIdOption)
     }
 
     override fun onClickSort(sortOption: SortOrderOption) {
-        mNewItemRecyclerViewAdapter?.sortOptionSelected = sortOption
+        mUstadListHeaderRecyclerViewAdapter?.sortOptionSelected = sortOption
         listPresenter?.onClickSort(sortOption)
     }
 
@@ -300,7 +312,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
 
     fun showSortOptionsFrag() {
-        SortBottomSheetFragment(listPresenter?.sortOptions, mNewItemRecyclerViewAdapter?.sortOptionSelected, this).also {
+        SortBottomSheetFragment(listPresenter?.sortOptions, mUstadListHeaderRecyclerViewAdapter?.sortOptionSelected, this).also {
             it.show(childFragmentManager, it.tag)
         }
     }
@@ -317,9 +329,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

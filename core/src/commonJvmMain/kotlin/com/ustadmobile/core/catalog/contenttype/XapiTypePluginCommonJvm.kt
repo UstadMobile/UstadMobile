@@ -1,7 +1,5 @@
 package com.ustadmobile.core.catalog.contenttype
 
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.tincan.TinCanXML
 import com.ustadmobile.lib.db.entities.Container
@@ -10,12 +8,16 @@ import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.xmlpull.v1.XmlPullParserException
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
+import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.door.ext.toDoorUri
+import org.xmlpull.v1.XmlPullParserFactory
+
 
 class XapiTypePluginCommonJvm : XapiPackageTypePlugin() {
 
@@ -30,7 +32,9 @@ class XapiTypePluginCommonJvm : XapiPackageTypePlugin() {
 
                         val fileName = zipEntry?.name
                         if (fileName?.toLowerCase() == "tincan.xml") {
-                            val xpp = UstadMobileSystemImpl.instance.newPullParser(it)
+                            val xppFactory = XmlPullParserFactory.newInstance()
+                            val xpp = xppFactory.newPullParser()//UstadMobileSystemImpl.instance.newPullParser(it)
+                            xpp.setInput(it, "UTF-8")
                             val activity = TinCanXML.loadFromXML(xpp).launchActivity
                                     ?: throw IOException("TinCanXml from ${file.name} has no launchActivity!")
 
@@ -75,9 +79,8 @@ class XapiTypePluginCommonJvm : XapiPackageTypePlugin() {
                 containerUid = repo.containerDao.insert(this)
             }
 
-            val containerManager = ContainerManager(container, db, repo, containerBaseDir)
-
-            addEntriesFromZipToContainer(file.absolutePath, containerManager, "")
+            repo.addEntriesToContainerFromZip(container.containerUid, File(filePath).toDoorUri(),
+                    ContainerAddOptions(storageDirUri = File(containerBaseDir).toDoorUri()))
 
             container
         }

@@ -69,6 +69,8 @@
     <string name='classes'>Classes</string>
     <string name='exams'>Exams</string>
     <string name='reports'>Reports</string>
+    <string name="choose_template">Choose template</string>
+    <string name="save_as_template">Save as template</string>
     <string name='contents'>Contents</string>
     <string name='students'>Students</string>
     <string name='add_a_student'>Add a student</string>
@@ -84,6 +86,7 @@
     <string name="waiting">Waiting</string>
     <string name="queued">Queued</string>
     <string name="failed">Failed</string>
+    <string name="passed">Passed</string>
     <string name="success">Success</string>
     <string name="completed">Completed</string>
     <string name="select_subtitle_video">Select Subtitle Language</string>
@@ -110,6 +113,8 @@
     <string name="hide">Hide</string>
     <string name="unhide">Unhide</string>
     <string name="compress">Compress</string>
+    <string name="and">and</string>
+    <string name="added">Added</string>
 
     <string name="underRegistrationAgeError">Self-registration of children under 13 is not allowed. Please ask your teacher to register you.</string>
 
@@ -123,6 +128,9 @@
         \n2. Make sure that the device is visible.</string>
     <string name="preparing">Preparing</string>
 
+
+    <string name="fixed_date">Fixed Date</string>
+    <string name="relative_date">Relative Date</string>
 
 
     <!-- Registration dialog feedback -->
@@ -184,72 +192,6 @@
     <string name="multiple_choice">Multiple choice</string>
     <string name="preview">Preview</string>
 
-    <!--Content editor -->
-    <string name="content_type_multimedia">Multimedia</string>
-    <string name="content_type">Content type </string>
-
-    <string name="content_type_fill_the_blanks">Fill in the blanks</string>
-    <string name="link">Link</string>
-    <string name="content_format_paragraph">PARAGRAPH</string>
-    <string name="content_direction_ltr">Left To Right</string>
-    <string name="content_direction_rtl">Right To Left</string>
-    <string name="content_font_8">8pt</string>
-    <string name="content_font_10">10pt</string>
-    <string name="content_font_12">12pt</string>
-    <string name="content_font_14">14pt</string>
-    <string name="content_font_18">18pt</string>
-    <string name="content_font_24">24pt</string>
-    <string name="content_font_36">36pt</string>
-    <string name="content_insert_options">Insert</string>
-    <string name="content_source_camera">From camera</string>
-    <string name="content_source_device">From device</string>
-    <string name="content_prepare_file">Preparing file...</string>
-    <string name="content_media_photo">Photo</string>
-    <string name="video">Video</string>
-    <string name="content_media_message">What media type would you like to capture?</string>
-    <string name="content_media_title">Media type</string>
-    <string name="content_blank_page_title">Blank page</string>
-    <string name="content_blank_doc_click_label">Click</string>
-    <string name="content_blank_doc_start_label">to start editing.</string>
-    <string name="content_option_page">New page</string>
-    <string name="content_untitled_page">Untitled page</string>
-    <string name="content_untitled_document">Untitled document</string>
-    <string name="content_add_page">Add page</string>
-    <string name="content_update_page_title">Update page</string>
-    <string name="content_update_document_title">Update document</string>
-    <string name="content_action_page_remove">Remove page</string>
-    <string name="content_editor_page_delete_failure_message">Sorry you can not delete this page</string>
-    <string name="content_editor_directionality">Directionality</string>
-    <string name='content_editor_menu_undo'>Undo</string>
-    <string name='content_editor_menu_redo'>Redo</string>
-    <string name='content_editor_menu_text_formatting'>Text formatting</string>
-    <string name='content_editor_menu_pages'>Pages</string>
-    <string name='content_editor_menu_indent'>Indent</string>
-    <string name='content_editor_menu_outdent'>Outdent</string>
-    <string name='content_editor_menu_unorderd_list'>Unordered List</string>
-    <string name='content_editor_menu_orderd_list'>Ordered List</string>
-    <string name='content_editor_menu_strikesthrough'>Strikethrough</string>
-    <string name='content_editor_menu_underline'>Underline</string>
-    <string name='content_editor_menu_italic'>Italic</string>
-    <string name='content_editor_menu_bold'>Bold</string>
-    <string name='content_editor_menu_fontsize'>Font size</string>
-    <string name='content_editor_menu_align_center'>Center</string>
-    <string name='content_editor_menu_align_left'>Left</string>
-    <string name='content_editor_menu_align_right'>Right</string>
-    <string name='content_editor_menu_superscript'>Superscript</string>
-    <string name='content_editor_menu_subscript'>Subscript</string>
-    <string name='content_editor_link_text'>Link text</string>
-    <string name='content_editor_link_url'>Link Url</string>
-    <string name='content_editor_link_error'>Link text or url can not be empty, try again</string>
-    <string name='content_editor_link_insert'>Insert Link</string>
-    <string name='content_editor_link_remove'>Remove Link</string>
-    <string name="permission_camera_title">Camera and File Permission Required</string>
-    <string name="permission_camera_message">This app requires both camera and file permissions to take photos and record videos</string>
-    <string name="content_editor_create_new_import">Import file</string>
-    <string name="content_editor_create_new_import_link">Import link</string>
-    <string name="content_editor_create_new_content">Create new content</string>
-    <string name="content_editor_create_new_category">New folder</string>
-    <string name="content_editor_create_new_title">Add content</string>
     <string name="content_creation_storage_option_title">Storage option</string>
     <string name="file_required_prompt">File to be imported is not selected, try again</string>
     <string name="content_creation_folder_new_message">New folder was successfully added</string>
@@ -262,17 +204,31 @@
     <string name="content_entry_export_message">You are about to export %1$s to your device storage. Would you like to continue?</string>
     <string name="show_hidden_items">Show hidden items</string>
     <string name="open_folder">Open Folder</string>
+    <string name="action_hidden">Hidden</string>
 
     <string name="invalid_register_code">Invalid Registration Code</string>
     <string name="enter_register_code">Enter Registration Code</string>
 
     <string name="bar_chart" value="100">Bar Chart</string>
-    <string name="line_graph" value="101">Line Graph</string>
+    <string name="line_chart" value="101">Line Chart</string>
 
     <string name="score" value="200">Average Score</string>
-    <string name="total_duration" value="201">Total Duration</string>
-    <string name="average_duration" value="202">Average Duration</string>
-    <string name="count_activity" value="203"># of activities</string>
+    <string name="content_total_duration" value="200">Content usage - total duration</string>
+    <string name="content_average_duration" value="201">Content usage - average duration per session</string>
+    <string name="count_session" value="202">Content usage - number of sessions</string>
+    <string name="interaction_recorded" value="203">Content usage - number of interactions recorded</string>
+    <string name="number_active_users" value="204">Content usage - number of active users</string>
+    <string name="average_usage_time_per_user"  value="205">Content usage - average usage time per user</string>
+    <string name="number_students_completed" value="206">Content usage - number of students who completed content</string>
+    <string name="percent_students_completed" value="207">Content usage - percentage of students who completed content</string>
+    <string name="total_attendances"  value="208">Attendance - total attendances</string>
+    <string name="total_absences"  value="209">Attendance - total absences</string>
+    <string name="total_lates"  value="210">Attendance - total lates</string>
+    <string name="percent_students_attended"  value="211">Attendance - Percentage of students who attended</string>
+    <string name="percent_students_attended_or_late"  value="212">Attendance - Percentage of students who attended or were late</string>
+    <string name="total_number_of_classes"  value="213">Attendance - Total number of classes</string>
+    <string name="number_unique_students_attending"  value="214">Attendance - Number of unique students attending</string>
+
 
     <string name="xapi_day" value="300">Day</string>
     <string name="xapi_week" value="301">Week</string>
@@ -281,6 +237,15 @@
     <string name="xapi_content_entry" value="304">Content Entry</string>
     <string name="xapi_clear" >Clear</string>
 
+    <string name="last_week_date_range" value="800">Last week</string>
+    <string name="last_two_week_date_range" value="801">Last two weeks</string>
+    <string name="last_month_date_range" value="802">Last month</string>
+    <string name="last_three_months_date_range" value="803">Last three months</string>
+    <string name="new_custom_date_range" value="804">New custom date range…</string>
+    <string name="selected_custom_range">Custom range:  %1$s%</string>
+
+    <string name="time_range">Time Range</string>
+    <string name="year">Year</string>
 
     <string name="from">From</string>
 
@@ -289,6 +254,8 @@
     <string name="xapi_options_general">General</string>
     <string name="xapi_options_report_title">Report Title</string>
     <string name="xapi_options_visual_type">Visualization Type</string>
+    <string name="xapi_options_data_set">Data set</string>
+    <string name="xapi_options_series">Series</string>
     <string name="xapi_options_axes">Axes</string>
     <string name="xapi_options_y_axes">Y-Axis</string>
     <string name="xapi_options_x_axes">X-Axis</string>
@@ -299,6 +266,11 @@
     <string name="xapi_options_what">What</string>
     <string name="xapi_options_when">When</string>
     <string name="xapi_options_where">Where</string>>
+    <string name="time_range_all">Everything</string>
+
+    <string name="report_filter_edit_field">Field</string>
+    <string name="report_filter_edit_condition">Condition</string>
+    <string name="report_filter_edit_values">Value(s)</string>
 
     <string name="report">Report</string>
     <string name="create_a_new_report">Create a new report</string>
@@ -306,6 +278,21 @@
     <string name="verb">Verb</string>
     <string name="add_a_new_verb">Add a new verb</string>
     <string name="id_verbentity_urlid">ID: %s</string>
+    <string name="edit_filters">Edit filters</string>
+
+    <string name="field_person_gender">Person gender</string>
+    <string name="field_person_age">Person age</string>
+    <string name="field_content_completion">Content completion status</string>
+    <string name="field_content_entry">Content entry</string>
+    <string name="field_content_progress">Content progress</string>
+    <string name="field_attendance_percentage">Attendance percentage</string>
+    <string name="condition_is">is</string>
+    <string name="condition_is_not">is not</string>
+    <string name="condition_greater_than">greater than</string>
+    <string name="condition_less_than">less than</string>
+    <string name="condition_in_list">in list</string>
+    <string name="condition_not_in_list">not in list</string>
+    <string name="condition_between">between</string>
 
     <!-- Report filter option - filter report results by person -->
     <string name="add_person_filter">Add person filter</string>
@@ -348,21 +335,46 @@
     <string name="repo_loading_status_failed_noconnection">No connection or peer</string>
     <string name="repo_loading_status_failed_connection_error">Connection error</string>
 
-    <!-- The Creative Commons CC BY license as per https://creativecommons.org/licenses/ -->
+    <!--
+    The Creative Commons CC BY license as per https://creativecommons.org/licenses/by/4.0/ .
+    Please see the bottom of the link for some of the official translations available for this title.
+    -->
     <string name="licence_type_cc_by">CC BY</string>
-    <!-- The Creative Commons CC BY SA license as per https://creativecommons.org/licenses/ -->
+    <!--
+    The Creative Commons CC BY SA license as per https://creativecommons.org/licenses/by-sa/4.0/
+    Please see the bottom of the link for some of the official translations available for this title.
+    -->
     <string name="licence_type_cc_by_sa">CC BY SA</string>
-    <!-- The Creative Commons CC BY SA NC license as per https://creativecommons.org/licenses/ -->
+
+    <!--
+    The Creative Commons BY-NC-SA license as per  https://creativecommons.org/licenses/by-nc-sa/4.0/
+    Please see the bottom of the link for some of the official translations available for this title.
+    -->
     <string name="licence_type_cc_by_sa_nc">CC BY SA NC</string>
-    <!-- The Creative Commons CC BY NC license as per https://creativecommons.org/licenses/ -->
+    <!--
+    The Creative Commons CC BY NC license as per https://creativecommons.org/licenses/by-nc/4.0/
+    Please see the bottom of the link for some of the official translations available for this title.
+     -->
     <string name="licence_type_cc_by_nc">CC BY NC</string>
-    <!-- The Creative Commons CC BY NC SA license as per https://creativecommons.org/licenses/ -->
+    <!--
+    The Creative Commons CC BY SA NC license as per https://creativecommons.org/licenses/by-nc-sa/4.0/
+    Please see the bottom of the link for some of the official translations available for this title.
+    -->
     <string name="licence_type_cc_by_nc_sa">CC BY NC SA</string>
-    <!-- Public domain license e.g. the copyright has effectively been waived -->
+
+    <!--
+    Public domain license e.g. the copyright owner gives away all permissions to allow anyone
+    to freely copy and make their own modified copies of the work.
+    -->
     <string name="licence_type_public_domain">Public Domain</string>
     <!-- All rights reserved license -->
     <string name="licence_type_all_rights">All Rights Reserved</string>
 
+    <!-- Creative Commons CC0 license (e.g. public domain). When an author uses this license for
+    their work it gives anyone full permission to copy, remix, modify etc. for any purpose with
+    no restrictions and no requirement for credit or attribution. See:
+    https://creativecommons.org/share-your-work/public-domain/cc0
+    -->
     <string name="license_type_cc_0">CC0</string>
 
     <string name="syncing">Syncing..</string>
@@ -382,6 +394,7 @@
     <string name="mark_all">Mark all</string>
     <string name="mark_all_present">Mark all present</string>
     <string name="mark_all_absent">Mark all absent</string>
+    <!-- Present as in physically here, the opposite of absent -->
     <string name="present">Present</string>
     <string name="absent">Absent</string>
     <string name="attendance_report">Attendance report</string>
@@ -441,8 +454,34 @@
     <string name="sort_by_name">Sort by name</string>
     <string name="sort_by_name_asc">name (ascending)</string>
     <string name="sort_by_name_desc">name (descending)</string>
-    <string name="date_enroll">Date enrolled</string>
+    <string name="date_enroll">Date enroled</string>
     <string name="date_left">Date left</string>
+    <string name="enroled">Enroled</string>
+    <string name="class_enrolment">Class enrolment</string>
+    <string name="graduated">Graduated</string>
+    <string name="dropped_out">Dropped out</string>
+    <string name="moved">Moved</string>
+    <string name="new_leaving_reason">New enrolment result reason</string>
+    <string name="edit_leaving_reason">Edit enrolment result reason</string>
+    <string name="edit_enrolment">Edit enrolment</string>
+    <string name="new_enrolment">New enrolment</string>
+    <string name="select_leaving_reason">Select leaving reason</string>
+    <string name="add_leaving_reason">Add new leaving reason</string>
+    <string name="leaving_reason">Leaving reason</string>
+    <string name="leaving_reasons">Leaving reasons</string>
+    <string name="leaving_reason_manage">Add, remove and modify leaving reasons used when a student leaves a class</string>
+    <string name="view_profile">View profile</string>
+    <string name="class_enrolment_outcome">Class enrolment outcome</string>
+    <string name="class_enrolment_leaving">Class enrolment reason for leaving</string>
+    <string name="in_progress">In progress</string>
+    <string name="outcome">Outcome</string>
+    <!-- used to show the enrolments in 1 class by person: e.g Ahmed's enrolment in Class A -->
+    <string name="person_enrolment_in_class">%1$s enrolments in %2$s</string>
+    <string name="enrolment">Enrolment</string>
+    <string name="error_start_date_before_clazz_date">Enrolment cannot start before class start date</string>
+    <string name="error_start_date_before_previous_enrolment_date">New enrolment must be after the end of the last enrolment for this person %1$s</string>
+    <!-- Present as in the current period of time -->
+    <string name="time_present">present</string>
 
     <!--Ascending: used in the context of a sort order -->
     <string name="ascending">Ascending</string>
@@ -487,13 +526,22 @@
     <string name="all">All</string>
     <string name="holiday_calendars">Holiday calendars</string>
     <string name="holiday_calendars_desc">Add, remove and modify holiday calendars</string>
+    <!--
+    Social Emotional Learning (SEL) question set
+    -->
     <string name="sel_question_set">SEL Question set</string>
+    <!--
+    Manage Social Emotional Learning (SEL) questions
+    -->
     <string name="sel_question_set_desc">Manage SEL questions</string>
     <string name="users">Users</string>
     <string name="nomination">Nomination</string>
     <string name="active">Active</string>
     <string name="class_id">Class ID</string>
     <string name="gender_literal" value="306">Gender</string>
+    <!--
+    SEL = Social Emotional Learning
+    -->
     <string name="sel_question_set_to_use">SEL question set to use</string>
     <string name="search">Search</string>
     <string name="attendance_percentage">Attendance percentage:</string>
@@ -542,10 +590,26 @@
     <string name="permission_activity_select">View class activity</string>
     <string name="permission_activity_insert">Take class activity</string>
     <string name="permission_activity_update">Update class activity</string>
+
+    <!--
+    SEL = Social Emotional Learning
+    -->
     <string name="permission_sel_question_select">View SEL questions</string>
+    <!--
+    SEL = Social Emotional Learning
+    -->
     <string name="permission_sel_question_insert">Add SEL questions</string>
+    <!--
+    SEL = Social Emotional Learning
+    -->
     <string name="permission_sel_question_update">Update SEL questions</string>
+    <!--
+    SEL = Social Emotional Learning
+    -->
     <string name="permission_sel_select">View SEL results</string>
+    <!--
+    SEL = Social Emotional Learning
+    -->
     <string name="permission_sel_update">Update SEL results</string>
     <string name="custom_fields">Custom fields</string>
     <string name="custom_field">Custom field</string>
@@ -741,12 +805,9 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="return_only">Return and finish</string>
     <string name="workspace">Workspace</string>
     <string name="organisation">Organisation %1$s</string>
-    <string name="use_public_library">Use public library</string>
-    <string name="access_open_education">Access thousands of open education resources personally</string>
-    <string name="join_existing_workspace">Join existing organization workspace</string>
-    <string name="existing_organisation">Your organization is already using Ustad Mobile</string>
-    <string name="create_organisation">Create new organization workspace</string>
-    <string name="create_workspace_organisation">Create a new workspace for your organization\'s students and teachers on Ustad Mobile</string>
+    <string name="use_public_library_site">Use public library site</string>
+
+    <string name="create_site">Create a new site</string>
     <string name="connect_as_guest">Connect as guest</string>
     <string name="create_account">Create account</string>
 
@@ -848,5 +909,44 @@ Content is provided under license by external content providers. Ustad Mobile, u
     setup a schedule or they want to add a one-off occurence of the class)
     -->
     <string name="add_a_new_occurrence">Add a new occurrence</string>
+
+    <string name="active_classes">Active classes</string>
+
+    <string name="terms_and_policies">Terms and policies</string>
+
+    <string name="manage_site_settings">Manage site settings and policies</string>
+
+    <string name="guest_login_enabled">Guest login enabled</string>
+
+    <string name="registration_allowed">Registration allowed</string>
+
+    <string name="yes">Yes</string>
+
+    <string name="no">No</string>
+
+    <string name="edit_site">Edit site</string>
+
+    <!--Ustad Mobile supports multiple sites. Each site has it's own user accounts, content, classes, schools, etc. -->
+    <string name="site">Site</string>
+
+    <string name="site_link">Site link</string>
+
+    <string name="please_enter_the_linK">Please enter the link for your site provided by your teacher or administrator:</string>
+
+    <string name="or">OR</string>
+
+    <string name="sites_can_be_help_text">Sites can be created for schools, projects, and organizations, etc. Each site can have its\' own users, administrators, content, classes, schools, and more.</string>
+
+    <string name="connect_to_site">Connect to site</string>
+
+    <string name="terms_and_policies_text">Terms and policies text</string>
+
+    <string name="edit_terms_and_policies">Edit terms and policies</string>
+
+    <string name='undo'>Undo</string>
+
+    <string name="video">Video</string>
+
+    <string name="content_editor_create_new_category">New folder</string>
 
 </resources>

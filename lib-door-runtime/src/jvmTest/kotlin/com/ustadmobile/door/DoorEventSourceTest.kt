@@ -32,7 +32,7 @@ class DoorEventSourceTest {
 
         val eventChannel = Channel<DoorServerSentEvent>(Channel.UNLIMITED)
 
-        val testServer = embeddedServer(Netty, 8089) {
+        val testServer = embeddedServer(Netty, 8094) {
             routing {
                 get("subscribe") {
                     call.respondTextWriter(contentType = io.ktor.http.ContentType.Text.EventStream) {
@@ -55,7 +55,7 @@ class DoorEventSourceTest {
 
         val eventListener = mock<DoorEventListener> {}
 
-        val eventSource = DoorEventSource("http://localhost:8089/subscribe", eventListener)
+        val eventSource = DoorEventSource("http://localhost:8094/subscribe", eventListener)
         eventChannel.offer(DoorServerSentEvent("42", "UPDATE", "Hello World"))
         verify(eventListener, timeout(5000)).onMessage(argWhere { it.id == "42" })
 

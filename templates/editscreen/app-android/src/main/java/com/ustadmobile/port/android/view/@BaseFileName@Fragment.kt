@@ -12,7 +12,6 @@ import com.ustadmobile.core.view.@BaseFileName@View
 import com.ustadmobile.lib.db.entities.@Entity@
 import com.ustadmobile.port.android.util.ext.*
 @EditEntity_Import@
-import com.ustadmobile.port.android.view.ext.setEditFragmentTitle
 
 interface @BaseFileName@FragmentEventHandler {
 
@@ -35,7 +34,7 @@ class @BaseFileName@Fragment: UstadEditFragment<@Entity@>(), @BaseFileName@View,
 
         mPresenter = @BaseFileName@Presenter(requireContext(), arguments.toStringMap(), this,
                 viewLifecycleOwner, di)
-        mPresenter?.onCreate(navController.currentBackStackEntrySavedStateMap())
+        mPresenter?.onCreate(backStackSavedState)
 
         return rootView
     }
@@ -45,10 +44,6 @@ class @BaseFileName@Fragment: UstadEditFragment<@Entity@>(), @BaseFileName@View,
         mBinding = null
         mPresenter = null
         entity = null
-    }
-
-    override fun onResume() {
-        super.onResume()
     }
 
     override var entity: @EditEntity@? = null

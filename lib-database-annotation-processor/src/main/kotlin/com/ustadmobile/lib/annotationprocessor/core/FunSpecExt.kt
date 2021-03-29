@@ -4,9 +4,7 @@ import androidx.room.Query
 import androidx.room.Delete
 import androidx.room.Update
 import androidx.room.Insert
-import com.squareup.kotlinpoet.ClassName
-import com.squareup.kotlinpoet.FunSpec
-import com.squareup.kotlinpoet.asClassName
+import com.squareup.kotlinpoet.*
 import javax.annotation.processing.ProcessingEnvironment
 import javax.lang.model.element.TypeElement
 
@@ -28,6 +26,10 @@ fun <A : Annotation> FunSpec.hasAnyAnnotation(vararg annotationsClasses: Class<o
     }
 }
 
+fun <A: Annotation> FunSpec.getAnnotationSpec(annotationClass: Class<A>): AnnotationSpec? {
+    return annotations.firstOrNull { it.className.canonicalName == annotationClass.canonicalName }
+}
+
 /**
  * Where this function represents a DAO function with a query, get the query SQL
  */
@@ -40,6 +42,27 @@ fun FunSpec.daoQuerySql() = annotations.daoQuerySql()
 fun FunSpec.isQueryWithSyncableResults(processingEnv: ProcessingEnvironment) =
         hasAnnotation(Query::class.java) &&
         returnType?.hasSyncableEntities(processingEnv) == true
+
+/**
+ * Shorthand to check if this FunSpec is annotated with @Query and is a query that will
+ * modify the database (e.g. it runs UPDATE, DELETE, or INSERT)
+ */
+val FunSpec.isAQueryThatModifiesTables: Boolean
+    get() = hasAnnotation(Query::class.java) && daoQuerySql().isSQLAModifyingQuery()
+
+/**
+ * Where this FunSpec represents a DAO annotated by with @Query, this function will determine
+ * what entities (if any) it modifies.
+ */
+fun FunSpec.getDaoFunEntityModifiedByQuery(allKnownEntityTypesMap: Map<String, TypeElement>): ClassName? {
+    val modifiedEntityName = findEntityModifiedByQuery(daoQuerySql(), allKnownEntityTypesMap.keys.toList())
+    if(modifiedEntityName != null) {
+        return allKnownEntityTypesMap[modifiedEntityName]?.asClassName()
+    }else {
+        return null
+    }
+}
+
 
 /**
  * Gets a list of the syncable entities that are used in the given FunSpec where this is a DAO
@@ -70,3 +93,33 @@ fun FunSpec.daoFunSyncableEntityTypes(processingEnv: ProcessingEnvironment,
         return listOf()
     }
 }
+
+//Shorthand to check if this function is suspended
+val FunSpec.isSuspended: Boolean
+    get() = KModifier.SUSPEND in modifiers
+
+
+/**
+ * Shorthand to check if this function has an actual return type
+ */
+val FunSpec.hasReturnType: Boolean
+    get() = returnType != null && returnType != UNIT
+
+/**
+ * Shorthand to get the type of entity component type for an update, insert, or delete function. This
+ * will unwrap list or arrays to give the actual component (singular) type name
+ */
+val FunSpec.entityParamComponentType: TypeName
+    get() = parameters.first().type.unwrapListOrArrayComponentType()
+
+
+/**
+ * Shorthand to make the function non-abstract
+ */
+fun FunSpec.Builder.removeAbstractModifier(): FunSpec.Builder {
+    if(KModifier.ABSTRACT in modifiers)
+        modifiers.remove(KModifier.ABSTRACT)
+
+    return this
+}
+

@@ -30,8 +30,8 @@
  */
 package com.ustadmobile.core.tincan
 
-import org.kmp.io.KMPPullParser
-import org.kmp.io.KMPXmlParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
 import kotlin.jvm.JvmOverloads
 
 /**
@@ -64,7 +64,7 @@ class TinCanXML {
         val PARSE_POPULATE_ACTIVITIES = 1
 
         @JvmOverloads
-        fun loadFromXML(xpp: KMPXmlParser, parseFlags: Int = 0): TinCanXML {
+        fun loadFromXML(xpp: XmlPullParser, parseFlags: Int = 0): TinCanXML {
             val tcxml = TinCanXML()
             var activity: Activity? = null
             var evtType = xpp.getEventType()
@@ -76,18 +76,18 @@ class TinCanXML {
             var extVal: String
 
             do {
-                if (evtType == KMPPullParser.START_TAG && xpp.getName() != null) {
+                if (evtType == XmlPullParserConstants.START_TAG && xpp.getName() != null) {
                     tagName = xpp.getName()!!
 
                     if (!inExtensions) {
                         if (tagName == "activity") {
                             activity = Activity(xpp.getAttributeValue(null, "id")!!,
                                     xpp.getAttributeValue(null, "type")!!)
-                        } else if (tagName == "launch" && xpp.next() == KMPPullParser.TEXT) {
+                        } else if (tagName == "launch" && xpp.next() == XmlPullParserConstants.TEXT) {
                             activity!!.launchUrl = xpp.getText()
-                        } else if (tagName == "name" && xpp.next() == KMPPullParser.TEXT) {
+                        } else if (tagName == "name" && xpp.next() == XmlPullParserConstants.TEXT) {
                             activity!!.name = xpp.getText()
-                        } else if (tagName == "description" && xpp.next() == KMPPullParser.TEXT) {
+                        } else if (tagName == "description" && xpp.next() == XmlPullParserConstants.TEXT) {
                             activity!!.desc = xpp.getText()
                         } else if (xpp.getName() == "extensions") {
                             inExtensions = true
@@ -95,7 +95,7 @@ class TinCanXML {
                     } else {
                         if (tagName == "extension") {
                             extKey = xpp.getAttributeValue(null, "key")!!
-                            extVal = if (xpp.next() == KMPPullParser.TEXT) {
+                            extVal = if (xpp.next() == XmlPullParserConstants.TEXT) {
                                 xpp.getText()?: ""
                             } else {
                                 ""
@@ -103,7 +103,7 @@ class TinCanXML {
                             activity!!.setExtension(extKey, extVal)
                         }
                     }
-                } else if (evtType == KMPPullParser.END_TAG) {
+                } else if (evtType == XmlPullParserConstants.END_TAG) {
                     if (xpp.getName() != null) {
                         if (xpp.getName() == "activity") {
                             if (activity!!.launchUrl != null) {
@@ -121,7 +121,7 @@ class TinCanXML {
                 }
 
                 evtType = xpp.next()
-            } while (evtType != KMPPullParser.END_DOCUMENT)
+            } while (evtType != XmlPullParserConstants.END_DOCUMENT)
 
             return tcxml
         }

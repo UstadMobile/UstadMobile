@@ -1,8 +1,6 @@
 package com.ustadmobile.sharedse.network
 
 import com.ustadmobile.sharedse.io.ByteBufferSe
-import kotlinx.serialization.stringFromUtf8Bytes
-import kotlinx.serialization.toUtf8Bytes
 
 /**
  * Class which defines WiFi Direct group in a cross platform way.
@@ -32,17 +30,17 @@ open class WiFiDirectGroupBle {
         ipAddress = NetworkManagerBleCommon.convertIpAddressToString(ipInt)
         val ssidAndPassphraseArr = ByteArray(buffer.remaining())
         buffer.get(ssidAndPassphraseArr, 0, buffer.remaining())
-        val ssidAndPassphrase = stringFromUtf8Bytes(ssidAndPassphraseArr).split("|")
+        val ssidAndPassphrase = ssidAndPassphraseArr.decodeToString().split("|")
         ssid = ssidAndPassphrase[0]
         passphrase = ssidAndPassphrase[1]
     }
 
     fun toBytes(): ByteArray {
         val string = ("$ssid|$passphrase")
-        val buffer = ByteBufferSe.allocate(string.toUtf8Bytes().size + 4 + 2)
+        val buffer = ByteBufferSe.allocate(string.encodeToByteArray().size + 4 + 2)
                 .putInt(NetworkManagerBleCommon.convertIpAddressToInteger(ipAddress!!))
                 .putChar(port!!.toChar())
-                .put(string.toUtf8Bytes())
+                .put(string.encodeToByteArray())
 
         return buffer.array()
     }

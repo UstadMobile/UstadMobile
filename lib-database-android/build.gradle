@@ -29,7 +29,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 18
+        minSdkVersion 21
         targetSdkVersion 29
         versionCode 1
         versionName "1.0"
@@ -45,25 +45,6 @@ android {
         }
     }
 
-    //We only have an additional flaovr so that the test variant can target the higher api required to run Room testing
-    flavorDimensions "api"
-
-    productFlavors {
-        /**
-         * This dimension if the default that should be used by all dependencies
-         */
-        api18 {
-            dimension "api"
-        }
-
-        /**
-         * This dimension is only here because of Room's migration tester requirements
-         */
-        api21 {
-            dimension "api"
-            minSdkVersion 21
-        }
-    }
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -101,8 +82,7 @@ dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
     implementation project(":lib-database-entities")
-    implementation project(':lib-door-runtime')
-    implementation project(":lib-database-annotations")
+    implementation "com.ustadmobile.door:door-runtime:$version_door"
     implementation project(':lib-util')
 
     //Kotlin 
@@ -117,18 +97,17 @@ dependencies {
 
     //ViewModel and LiveData
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$version_androidx_lifecycle"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
+    implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
 
     //Room persistence
     implementation "androidx.room:room-runtime:$version_android_room"
     implementation "androidx.room:room-ktx:$version_android_room"
     kapt "androidx.room:room-compiler:$version_android_room"
-    //compileOnly  "androidx.room:room-compiler:$version_android_room"
 
 
     //Logging
-    implementation "com.github.aakira:napier-android:$version_napier"
+    implementation "com.github.aakira:napier:$version_napier"
 
 
 

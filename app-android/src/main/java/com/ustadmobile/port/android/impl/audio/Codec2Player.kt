@@ -5,7 +5,6 @@ import android.media.AudioManager
 import android.media.AudioTrack
 import com.ustadmobile.codec2.Codec2
 import com.ustadmobile.codec2.Codec2Decoder
-import com.ustadmobile.core.util.UMIOUtils
 import java.io.IOException
 import java.io.InputStream
 import java.util.concurrent.atomic.AtomicBoolean
@@ -56,7 +55,7 @@ class Codec2Player(private val inStream: InputStream, private val pos: Long) : R
         } finally {
             track?.release()
             codec2?.destroy()
-            UMIOUtils.closeInputStream(inStream)
+            inStream?.close()
         }
 
     }

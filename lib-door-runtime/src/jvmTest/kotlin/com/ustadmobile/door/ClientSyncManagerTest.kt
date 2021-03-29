@@ -1,5 +1,7 @@
 package com.ustadmobile.door
 
+import com.github.aakira.napier.DebugAntilog
+import com.github.aakira.napier.Napier
 import com.nhaarman.mockitokotlin2.*
 import com.ustadmobile.door.DoorDatabaseRepository.Companion.STATUS_CONNECTED
 import com.ustadmobile.door.daos.ISyncHelperEntitiesDao
@@ -30,9 +32,16 @@ import io.ktor.application.call
 import io.ktor.application.install
 import io.ktor.routing.get
 import io.ktor.routing.routing
+import org.junit.Before
 
 
 class ClientSyncManagerTest {
+
+    @Before
+    fun setup() {
+        Napier.takeLogarithm()
+        Napier.base(DebugAntilog())
+    }
 
     @Test
     fun givenValidRepo_whenRepoChanges_thenShouldUpdateStatusTableAndCallSync() {
@@ -86,11 +95,12 @@ class ClientSyncManagerTest {
             on { findTablesToSync() }.thenReturn(listOf())
         }
 
-        val mockRepo = mock<DoorDatabaseSyncRepository> {
+        val mockRepo = mock<DoorDatabaseSyncRepository>() {
             on { tableIdMap }.thenReturn(mapOf("Example" to exampleTableId))
             on { endpoint }.thenReturn("http://localhost:8089/")
             on { clientId }.thenReturn(57)
             on { syncHelperEntitiesDao }.thenReturn(mockSyncHelperEntitiesDao)
+            on { dbPath }.thenReturn("ExampleDatabase")
         }
 
         val mockServerSyncHelperEntitiesDao = mock<ISyncHelperEntitiesDao> {
@@ -125,11 +135,11 @@ class ClientSyncManagerTest {
             }
 
             routing {
-                get("ExampleDatabaseSyncDao/_subscribe") {
+                get("ExampleDatabase/UpdateNotification/update-events") {
                     call.respondUpdateNotifications(mockServerRepo)
                 }
 
-                get("ExampleDatabaseSyncDao/_deleteNotification") {
+                get("ExampleDatabase/UpdateNotification/update-ack") {
                     call.respondUpdateNotificationReceived(mockServerRepo)
                 }
             }

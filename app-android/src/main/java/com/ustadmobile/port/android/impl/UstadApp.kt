@@ -6,6 +6,8 @@ import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
+import com.squareup.picasso.OkHttp3Downloader
+import com.squareup.picasso.Picasso
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -22,7 +24,6 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.db.UmAppDatabase.Companion.getInstance
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_DOWNLOAD_ENABLED
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.core.schedule.ClazzLogCreatorManager
@@ -44,13 +45,18 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.*
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
-import com.ustadmobile.sharedse.network.containeruploader.ContainerUploaderCommonJvm
+import com.ustadmobile.sharedse.network.containeruploader.ContainerUploadManagerCommonJvm
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.newSingleThreadContext
 import com.ustadmobile.core.db.UmAppDatabase_AddUriMapping
+import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
+import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
+import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
+import io.ktor.client.*
 import io.ktor.client.features.json.*
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
@@ -59,6 +65,7 @@ import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParser
 import org.xmlpull.v1.XmlPullParserFactory
 import org.xmlpull.v1.XmlSerializer
+import java.io.File
 
 import java.util.concurrent.TimeUnit
 
@@ -84,8 +91,13 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
-            instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(applicationContext,
-                    context.url, "", defaultHttpClient(), useClientSyncManager = true).also {
+            val attachmentFilters = listOf(
+                    ImageResizeAttachmentFilter("PersonPicture", 1280, 1280))
+            val attachmentDir = File(applicationContext.filesDir.siteDataSubDir(context),
+                    UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
+            instance<UmAppDatabase>(tag = TAG_DB).asRepository(applicationContext,
+                    context.url, "", defaultHttpClient(), useClientSyncManager = true,
+                    attachmentFilters = attachmentFilters, attachmentsDir = attachmentDir.absolutePath).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
             }
         }
@@ -144,7 +156,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
             ContentEntryOpener(di, context)
         }
 
-        bind<ContainerUploaderCommon>() with singleton { ContainerUploaderCommonJvm(di) }
+        bind<ContainerUploadManager>() with scoped(EndpointScope.Default).singleton {
+            ContainerUploadManagerCommonJvm(di, context)
+        }
 
         bind<ContentImportManager>() with scoped(EndpointScope.Default).singleton{
             ContentImportManagerImplAndroid(listOf(EpubTypePluginCommonJvm(),
@@ -177,12 +191,14 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<EmbeddedHTTPD>().listeningPort
         }
 
-        bind<XmlPullParserFactory>() with singleton { XmlPullParserFactory.newInstance().also {
-            it.isNamespaceAware = true
-        }}
+        bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
+            XmlPullParserFactory.newInstance().also {
+                it.isNamespaceAware = true
+            }
+        }
 
-        bind<XmlPullParser>() with provider {
-            instance<XmlPullParserFactory>().newPullParser()
+        bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
+            XmlPullParserFactory.newInstance()
         }
 
         bind<XmlSerializer>() with provider {
@@ -203,6 +219,13 @@ open class UstadApp : BaseUstadApp(), DIAware {
             }
         }
 
+        bind<HttpClient>() with singleton {
+            defaultHttpClient()
+        }
+
+        bind<DestinationProvider>() with singleton {
+            ViewNameToDestMap()
+        }
 
         registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 
@@ -212,6 +235,10 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<BleGattServer>()
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
+
+            Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
+                    .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
+                    .build())
         }
     }
 
@@ -223,8 +250,6 @@ open class UstadApp : BaseUstadApp(), DIAware {
         super.onCreate()
         UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
         Napier.base(DebugAntilog())
-        initPicasso(applicationContext)
-
     }
 
     override fun attachBaseContext(base: Context) {
