@@ -52,10 +52,10 @@ class OnBoardingActivity : UstadBaseActivity(), OnBoardingView, AdapterView.OnIt
                                      val layoutResId: Int, val drawableResId: Int) {
         SCREEN_1(R.string.onboarding_no_internet_headline,
                 R.string.onboarding_no_internet_subheadline,
-                R.layout.onboard_screen_view, R.drawable.downloading_data),
+                R.layout.onboard_screen_view, R.drawable.art_onboarding1),
         SCREEN_2(R.string.onboarding_offline_sharing,
                 R.string.onboarding_offline_sharing_subheading,
-                R.layout.onboard_screen_view, R.drawable.sharing_data)
+                R.layout.onboard_screen_view, R.drawable.art_onboarding2)
     }
 
 
