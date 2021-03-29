@@ -263,7 +263,6 @@ class ReportFilterEditPresenter(context: Any,
     companion object {
 
         val genderMap = PersonConstants.GENDER_MESSAGE_ID_MAP
-        val genderMapString = PersonConstants.GENDER_MESSAGE_ID_MAP_STRING
 
     }
 
