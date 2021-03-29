@@ -88,17 +88,16 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                 WHERE statementVerbUid = StatementEntity.statementVerbUid LIMIT 1) """
 
     var queryType = 0
-    if (reportSeriesYAxis == TOTAL_ATTENDANCE || reportSeriesYAxis == TOTAL_ABSENCES ||
-            reportSeriesYAxis == TOTAL_LATES || reportSeriesYAxis == TOTAL_CLASSES ||
-            reportSeriesYAxis == PERCENTAGE_STUDENTS_ATTENDED ||
-            reportSeriesYAxis == PERCENTAGE_STUDENTS_ATTENDED_OR_LATE ||
-            reportSeriesYAxis == NUMBER_UNIQUE_STUDENTS_ATTENDING) {
-        queryType = ATTENDANCE_QUERY
-    } else if (reportSeriesYAxis == TOTAL_DURATION || reportSeriesYAxis == AVERAGE_DURATION ||
-            reportSeriesYAxis == INTERACTIONS_RECORDED || reportSeriesYAxis == NUMBER_ACTIVE_USERS ||
-            reportSeriesYAxis == AVERAGE_USAGE_TIME_PER_USER || reportSeriesYAxis == NUMBER_OF_STUDENTS_COMPLETED_CONTENT ||
-            reportSeriesYAxis == PERCENT_OF_STUDENTS_COMPLETED_CONTENT) {
-        queryType = STATEMENT_QUERY
+    when (reportSeriesYAxis) {
+        TOTAL_ATTENDANCE, TOTAL_ABSENCES, TOTAL_LATES, TOTAL_CLASSES, PERCENTAGE_STUDENTS_ATTENDED,
+        PERCENTAGE_STUDENTS_ATTENDED_OR_LATE, NUMBER_UNIQUE_STUDENTS_ATTENDING -> {
+            queryType = ATTENDANCE_QUERY
+        }
+        TOTAL_DURATION, AVERAGE_DURATION, INTERACTIONS_RECORDED, NUMBER_ACTIVE_USERS,
+        AVERAGE_USAGE_TIME_PER_USER, NUMBER_OF_STUDENTS_COMPLETED_CONTENT,
+        PERCENT_OF_STUDENTS_COMPLETED_CONTENT, NUMBER_SESSIONS -> {
+            queryType = STATEMENT_QUERY
+        }
     }
 
 
