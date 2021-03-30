@@ -12,6 +12,7 @@ import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.Serializable
 import kotlin.js.JsName
+import com.ustadmobile.core.db.dao.StatementDao.Companion as StatementDao
 
 @Dao
 @Repository
@@ -53,6 +54,102 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             statementLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
             WHERE statementUid = :uid""")
     abstract fun updateProgress(uid: Long, progress: Int)
+
+
+    @Query("""SELECT Person.*, 
+        
+         (SELECT COUNT(DISTINCT StatementEntity.contextRegistration) 
+         FROM StatementEntity WHERE Person.personUid = StatementEntity.statementPersonUid 
+         AND statementContentEntryUid = :contentEntryUid) AS attempts, 
+         
+         (SELECT MAX(extensionProgress) FROM StatementEntity WHERE 
+         Person.personUid = StatementEntity.statementPersonUid 
+         AND statementContentEntryUid = :contentEntryUid) as progress, 
+         
+         (SELECT MAX(resultScoreScaled * 100) FROM StatementEntity WHERE 
+         Person.personUid = StatementEntity.statementPersonUid 
+         AND statementContentEntryUid = :contentEntryUid and contentEntryRoot) as score,
+          
+         (SELECT MIN(timestamp) FROM StatementEntity WHERE 
+         Person.personUid = StatementEntity.statementPersonUid 
+         AND statementContentEntryUid = :contentEntryUid) as startDate,
+         
+          (SELECT MAX(timestamp) FROM StatementEntity WHERE 
+         Person.personUid = StatementEntity.statementPersonUid 
+         AND statementContentEntryUid = :contentEntryUid) as endDate,
+         
+          (SELECT SUM(resultDuration) FROM StatementEntity WHERE 
+         Person.personUid = StatementEntity.statementPersonUid 
+         AND statementContentEntryUid = :contentEntryUid) as duration
+         
+         
+         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+          WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
+         AND PersonGroupMember.groupMemberActive  
+         AND Person.personUid IN (SELECT statementPersonUid FROM StatementEntity WHERE 
+         statementContentEntryUid = :contentEntryUid) 
+         AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
+         GROUP BY Person.personUid 
+         ORDER BY CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames
+                WHEN $SORT_LAST_NAME_ASC THEN Person.lastName
+                ELSE ''
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_FIRST_NAME_DESC THEN Person.firstNames
+                WHEN $SORT_LAST_NAME_DESC THEN Person.lastName
+                ELSE ''
+            END DESC,
+            CASE(:sortOrder)
+                WHEN $SORT_LAST_ACTIVE_ASC THEN endDate 
+                ELSE 0
+            END ASC,
+            CASE(:sortOrder)
+                WHEN $SORT_LAST_ACTIVE_DESC then endDate
+                ELSE 0
+            END DESC
+         """)
+    abstract fun findPersonsWithContentEntryAttempts(contentEntryUid: Long, accountPersonUid: Long,
+                                                     searchText: String, sortOrder: Int)
+            : DataSource.Factory<Int, PersonWithStatementDisplay>
+
+    @Query("""SELECT Person.*, 
+            
+         (SELECT MIN(timestamp) FROM StatementEntity WHERE 
+         StatementEntity.statementPersonUid = :personUid AND 
+         statementContentEntryUid = :contentEntryUid 
+         GROUP BY contextRegistration) as startDate 
+         
+         (SELECT MAX(resultSuccess) FROM StatementEntity WHERE 
+         StatementEntity.statementPersonUid = :personUid AND 
+         statementContentEntryUid = :contentEntryUid  and contentEntryRoot 
+         GROUP BY contextRegistration) as resultSuccess 
+         
+         (SELECT SUM(CASE(resultCompletion AS INTEGER)) > 0 from StatementEntity WHERE 
+        StatementEntity.statementPersonUid = :personUid AND 
+         statementContentEntryUid = :contentEntryUid  and contentEntryRoot 
+         GROUP BY contextRegistration) as resultComplete
+     
+         (SELECT SUM(resultDuration) FROM StatementEntity WHERE 
+         StatementEntity.statementPersonUid = :personUid AND 
+         statementContentEntryUid = :contentEntryUid GROUP BY contextRegistration) as duration 
+         
+         (SELECT contextRegistration FROM StatementEntity WHERE 
+         StatementEntity.statementPersonUid = :personUid AND 
+         statementContentEntryUid = :contentEntryUid GROUP BY contextRegistration) as contextRegistration
+         
+         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+          WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
+         AND PersonGroupMember.groupMemberActive  
+         AND Person.personUid IN (SELECT statementPersonUid FROM StatementEntity WHERE 
+         statementContentEntryUid = :contentEntryUid AND statementPersonUid = :personUid) 
+         GROUP BY Person.personUid 
+         ORDER BY startDate DESC
+         """)
+    abstract fun findSessionsForPerson(contentEntryUid: Long, accountPersonUid: Long, personUid: Long)
+            : DataSource.Factory<Int, PersonWithSessionsDisplay>
+
+
 
     @Serializable
     data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")

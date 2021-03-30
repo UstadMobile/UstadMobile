@@ -320,3 +320,14 @@ fun TextView.setDuration(duration: Long){
     text = durationString
 
 }
+
+
+@BindingAdapter("isContentComplete")
+fun TextView.setContentComplete(person: PersonWithSessionsDisplay){
+    text = if(person.resultComplete){
+        if(person.resultSuccess.toByte() == StatementEntity.RESULT_SUCCESS)
+            context.getString(R.string.passed) else context.getString(R.string.failed)
+    }else{
+        context.getString(R.string.incomplete)
+    } + "-"
+}

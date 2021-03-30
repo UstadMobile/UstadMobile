@@ -46,7 +46,7 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
     }
 
     private fun updateListOnView() {
-        view.list = repo.personDao.findPersonsWithContentEntryAttempts(contentEntryUid,
+        view.list = repo.statementDao.findPersonsWithContentEntryAttempts(contentEntryUid,
                 mLoggedInPersonUid, searchText.toQueryLikeParam(),
                 selectedSortOption?.flag ?: StatementDao.SORT_FIRST_NAME_ASC)
     }
@@ -62,8 +62,9 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
     }
 
     fun onClickPersonWithStatementDisplay(personWithStatementDisplay: PersonWithStatementDisplay) {
-       /* systemImpl.go(LeavingReasonEditView.VIEW_NAME,
-                    mapOf(UstadView.ARG_ENTITY_UID to leavingReason.leavingReasonUid.toString()), context)*/
+ systemImpl.go(LeavingReasonEditView.VIEW_NAME,
+                    mapOf(UstadView.ARG_ENTITY_UID to leavingReason.leavingReasonUid.toString()), context)
+
     }
 
     companion object {

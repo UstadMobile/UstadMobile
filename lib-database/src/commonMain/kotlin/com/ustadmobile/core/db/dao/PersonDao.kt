@@ -256,63 +256,6 @@ abstract class PersonDao : BaseDao<Person> {
                                            accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): List<Person>
 
 
-    @Query("""SELECT Person.*, 
-        
-         (SELECT COUNT(DISTINCT StatementEntity.contextRegistration) 
-         FROM StatementEntity WHERE Person.personUid = StatementEntity.statementPersonUid 
-         AND statementContentEntryUid = :contentEntryUid) AS attempts, 
-         
-         (SELECT MAX(extensionProgress) FROM StatementEntity WHERE 
-         Person.personUid = StatementEntity.statementPersonUid 
-         AND statementContentEntryUid = :contentEntryUid) as progress, 
-         
-         (SELECT MAX(resultScoreScaled * 100) FROM StatementEntity WHERE 
-         Person.personUid = StatementEntity.statementPersonUid 
-         AND statementContentEntryUid = :contentEntryUid and contentEntryRoot) as score,
-          
-         (SELECT MIN(timestamp) FROM StatementEntity WHERE 
-         Person.personUid = StatementEntity.statementPersonUid 
-         AND statementContentEntryUid = :contentEntryUid) as startDate,
-         
-          (SELECT MAX(timestamp) FROM StatementEntity WHERE 
-         Person.personUid = StatementEntity.statementPersonUid 
-         AND statementContentEntryUid = :contentEntryUid) as endDate,
-         
-          (SELECT SUM(resultDuration) FROM StatementEntity WHERE 
-         Person.personUid = StatementEntity.statementPersonUid 
-         AND statementContentEntryUid = :contentEntryUid) as duration
-         
-         
-         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
-          WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
-         AND PersonGroupMember.groupMemberActive  
-         AND Person.personUid IN (SELECT statementPersonUid FROM StatementEntity WHERE 
-         statementContentEntryUid = :contentEntryUid) 
-         AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
-         GROUP BY Person.personUid 
-         ORDER BY CASE(:sortOrder)
-                WHEN ${StatementDao.SORT_FIRST_NAME_ASC} THEN Person.firstNames
-                WHEN ${StatementDao.SORT_LAST_NAME_ASC} THEN Person.lastName
-                ELSE ''
-            END ASC,
-            CASE(:sortOrder)
-                WHEN ${StatementDao.SORT_FIRST_NAME_DESC} THEN Person.firstNames
-                WHEN ${StatementDao.SORT_LAST_NAME_DESC} THEN Person.lastName
-                ELSE ''
-            END DESC,
-            CASE(:sortOrder)
-                WHEN ${StatementDao.SORT_LAST_ACTIVE_ASC} THEN endDate 
-                ELSE 0
-            END ASC,
-            CASE(:sortOrder)
-                WHEN ${StatementDao.SORT_LAST_ACTIVE_DESC} then endDate
-                ELSE 0
-            END DESC
-         """)
-    abstract fun findPersonsWithContentEntryAttempts(contentEntryUid: Long, accountPersonUid: Long,
-                                                    searchText: String, sortOrder: Int)
-                                    : DataSource.Factory<Int, PersonWithStatementDisplay>
-
 
     @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")
     abstract fun findByUidWithDisplayDetailsLive(personUid: Long): DoorLiveData<PersonWithDisplayDetails?>
