@@ -94,6 +94,7 @@
     <string name="failed">Failed</string>
     <string name="passed">Passed</string>
     <string name="success">Success</string>
+    <string name="incomplete">Incomplete</string>
     <string name="completed">Completed</string>
     <string name="select_subtitle_video">Select Subtitle Language</string>
     <string name="no_subtitle">No Subtitles</string>
