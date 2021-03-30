@@ -16,6 +16,7 @@ pluginManagement {
 
 include ':app-android',
         ':app-ktor-server',
+        ':app-react',
         ':lib-test-common',
         ':core',
         ':sharedse',
