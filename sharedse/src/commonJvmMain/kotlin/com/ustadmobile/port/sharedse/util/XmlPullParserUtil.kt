@@ -1,9 +1,8 @@
 package com.ustadmobile.port.sharedse.util
 
-import com.ustadmobile.lib.util.UMUtil
-import org.kmp.io.KMPPullParser
-import org.xmlpull.v1.XmlPullParser
-import org.xmlpull.v1.XmlSerializer
+import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
+import com.ustadmobile.xmlpullparserkmp.XmlSerializer
 
 /**
  * Pass XML through from an XmlPullParser to an XmlSerializer. This will not call startDocument
@@ -57,20 +56,20 @@ fun passXmlThrough(xpp: XmlPullParser, xs: XmlSerializer,
     var evtType = xpp.getEventType()
     var lastEvent = -1
     var tagName: String
-    while (evtType != XmlPullParser.END_DOCUMENT) {
+    while (evtType != XmlPullParserConstants.END_DOCUMENT) {
         if (filter != null && !filter.beforePassthrough(evtType, xpp, xs))
             return
 
         when (evtType) {
-            XmlPullParser.DOCDECL -> {
+            XmlPullParserConstants.DOCDECL -> {
                 xs.docdecl(xpp.getText().toString())
             }
 
-            XmlPullParser.ENTITY_REF -> {
+            XmlPullParserConstants.ENTITY_REF -> {
                 xs.entityRef(xpp.getName())
             }
 
-            XmlPullParser.START_TAG -> {
+            XmlPullParserConstants.START_TAG -> {
                 if(xpp.getNamespace() != null)
                     xs.setPrefix(xpp.getPrefix(), xpp.getNamespace())
 
@@ -80,11 +79,11 @@ fun passXmlThrough(xpp: XmlPullParser, xs: XmlSerializer,
                             xpp.getAttributeName(i).toString(), xpp.getAttributeValue(i).toString())
                 }
             }
-            XmlPullParser.TEXT -> xs.text(xpp.getText().toString())
-            XmlPullParser.END_TAG -> {
+            XmlPullParserConstants.TEXT -> xs.text(xpp.getText().toString())
+            XmlPullParserConstants.END_TAG -> {
                 tagName = xpp.getName().toString()
 
-                if (lastEvent == KMPPullParser.START_TAG
+                if (lastEvent == XmlPullParserConstants.START_TAG
                         && seperateEndTagRequiredElements != null
                         && tagName in seperateEndTagRequiredElements) {
                     xs.text(" ")

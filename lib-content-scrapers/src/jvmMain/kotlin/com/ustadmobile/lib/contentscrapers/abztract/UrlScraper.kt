@@ -94,7 +94,7 @@ class UrlScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long
             val params = scrapeQueueItem?.scrapeRun?.conversionParams
             var conversionParams = mapOf<String, String>()
             if(params != null){
-                conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+                conversionParams = Json.decodeFromString(MapSerializer(String.serializer(), String.serializer()), params)
             }
             val container = contentImportManager.importFileToContainer(file.path, metadata.mimeType,
                     fileEntry.contentEntryUid, containerFolder.path, conversionParams){

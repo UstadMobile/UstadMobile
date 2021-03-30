@@ -1,6 +1,6 @@
 package com.ustadmobile.core.util.ext
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.view.UstadListView
 
 /**

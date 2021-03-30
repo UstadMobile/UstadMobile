@@ -1,10 +1,10 @@
 package com.ustadmobile.core.util
 
 import com.google.gson.Gson
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.mock
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.lib.db.entities.ContentEntry
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -36,7 +36,8 @@ class DefaultOneToManyjoinEditHelperTest {
         }
 
         val joinEditHelper1 = DefaultOneToManyJoinEditHelper<ContentEntry>(ContentEntry::contentEntryUid,
-            "statename", ContentEntry.serializer().list, ContentEntry.serializer().list,
+            "statename", ListSerializer(ContentEntry.serializer()),
+            ListSerializer(ContentEntry.serializer()),
             mockEditPresenter, ContentEntry::class) { contentEntryUid = it}
 
         joinEditHelper1.onEditResult(testEntity)
@@ -46,7 +47,8 @@ class DefaultOneToManyjoinEditHelperTest {
         joinEditHelper1.onSaveState(saveMap)
 
         val joinEditHelper2 = DefaultOneToManyJoinEditHelper<ContentEntry>(ContentEntry::contentEntryUid,
-                "statename", ContentEntry.serializer().list, ContentEntry.serializer().list,
+                "statename", ListSerializer(ContentEntry.serializer()),
+                ListSerializer(ContentEntry.serializer()),
                 mockEditPresenter, ContentEntry::class) { contentEntryUid = it}
 
         joinEditHelper2.onLoadFromJsonSavedState(saveMap)
@@ -59,7 +61,8 @@ class DefaultOneToManyjoinEditHelperTest {
     @Test
     fun givenEmptyList_whenSavedThenRestored_shouldMatch() {
         val joinEditHelper1 = DefaultOneToManyJoinEditHelper<ContentEntry>(ContentEntry::contentEntryUid,
-                "statename", ContentEntry.serializer().list, ContentEntry.serializer().list,
+                "statename", ListSerializer(ContentEntry.serializer()),
+                ListSerializer(ContentEntry.serializer()),
                 mockEditPresenter, ContentEntry::class) { contentEntryUid = it}
 
 
@@ -68,7 +71,8 @@ class DefaultOneToManyjoinEditHelperTest {
         joinEditHelper1.onSaveState(saveMap)
 
         val joinEditHelper2 = DefaultOneToManyJoinEditHelper<ContentEntry>(ContentEntry::contentEntryUid,
-                "statename", ContentEntry.serializer().list, ContentEntry.serializer().list,
+                "statename", ListSerializer(ContentEntry.serializer()),
+                ListSerializer(ContentEntry.serializer()),
                 mockEditPresenter, ContentEntry::class) { contentEntryUid = it}
 
         joinEditHelper2.onLoadFromJsonSavedState(saveMap)

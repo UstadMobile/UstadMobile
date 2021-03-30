@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.folder
 
-import com.nhaarman.mockitokotlin2.spy
+import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase

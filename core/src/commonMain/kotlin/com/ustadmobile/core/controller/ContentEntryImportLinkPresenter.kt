@@ -3,11 +3,12 @@ package com.ustadmobile.core.controller
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.impl.dumpException
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryImportLinkView
 import com.ustadmobile.door.doorMainDispatcher
+import io.ktor.client.*
 import io.ktor.client.call.receive
+import io.ktor.client.features.*
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.url
@@ -23,7 +24,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
 
     val accountManager: UstadAccountManager by instance()
 
-    private val currentHttpClient = defaultHttpClient()
+    private val currentHttpClient: HttpClient by instance()
 
     fun handleClickDone(link: String) {
         GlobalScope.launch(doorMainDispatcher()) {
@@ -34,6 +35,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
                     url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
                             "/import/validateLink/"))
                     parameter("url", link)
+                    expectSuccess = false
                 }.execute() {
 
                     val status = it.status

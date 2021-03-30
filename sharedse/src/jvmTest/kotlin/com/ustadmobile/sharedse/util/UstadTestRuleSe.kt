@@ -2,7 +2,7 @@ package com.ustadmobile.sharedse.util
 
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
-import com.nhaarman.mockitokotlin2.spy
+import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager

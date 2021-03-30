@@ -20,7 +20,7 @@ import com.ustadmobile.lib.util.copyOnWriteListOf
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -34,8 +34,9 @@ class ClazzLogEditAttendancePresenter(context: Any,
         get() = PersistenceMode.DB
 
     private val attendanceRecordOneToManyJoinHelper = DefaultOneToManyJoinEditHelper(ClazzLogAttendanceRecord::clazzLogAttendanceRecordUid,
-            "state_ClazzLogAttendanceRecord_list", ClazzLogAttendanceRecordWithPerson.serializer().list,
-            ClazzLogAttendanceRecordWithPerson.serializer().list, this,
+            "state_ClazzLogAttendanceRecord_list",
+            ListSerializer(ClazzLogAttendanceRecordWithPerson.serializer()),
+            ListSerializer(ClazzLogAttendanceRecordWithPerson.serializer()), this,
             ClazzLogAttendanceRecordWithPerson::class) { clazzLogAttendanceRecordUid = it }
 
     private var currentClazzLogUid: Long = 0

@@ -4,7 +4,7 @@ import android.view.MenuItem
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.test.espresso.Espresso.onIdle
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.*
 
 /**
  * Convenience function that will run the given code block on a fragment and return the result as a

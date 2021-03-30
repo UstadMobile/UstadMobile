@@ -9,6 +9,9 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.port.android.generated.MessageIDMap
 import com.ustadmobile.test.port.android.util.getApplicationDi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.DIAware
@@ -30,7 +33,12 @@ class SystemImplTestNavHostRule  : TestWatcher() {
     override fun starting(description: Description?) {
         navController = TestNavHostController(ApplicationProvider.getApplicationContext())
         (navController as TestNavHostController).setViewModelStore(ViewModelStore())
-        navController.setGraph(R.navigation.mobile_navigation)
+        runBlocking {
+            withContext(Dispatchers.Main.immediate) {
+                navController.setGraph(R.navigation.mobile_navigation)
+            }
+        }
+
         val di = getApplicationDi()
         impl = di.direct.instance()
         impl.navController = navController

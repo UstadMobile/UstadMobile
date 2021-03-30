@@ -1,7 +1,7 @@
 package com.ustadmobile.core.network.containerfetcher
 
 import com.github.aakira.napier.Napier
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.mock
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
@@ -107,7 +107,7 @@ class ContainerFetcherJobHttpUrlConnection2Test {
         //Create a mock web server that will serve the concatenated data
         mockWebServer = MockWebServer()
         dispatcher = ConcatenatedResponse2Dispatcher(serverDb)
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
         mockWebServer.start()
 
         clientDi = DI {

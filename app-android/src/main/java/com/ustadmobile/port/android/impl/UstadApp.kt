@@ -54,6 +54,7 @@ import com.ustadmobile.core.impl.*
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTTP_PORT
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
+import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import io.ktor.client.*
 import io.ktor.client.features.json.*
@@ -190,12 +191,14 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<EmbeddedHTTPD>().listeningPort
         }
 
-        bind<XmlPullParserFactory>() with singleton { XmlPullParserFactory.newInstance().also {
-            it.isNamespaceAware = true
-        }}
+        bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
+            XmlPullParserFactory.newInstance().also {
+                it.isNamespaceAware = true
+            }
+        }
 
-        bind<XmlPullParser>() with provider {
-            instance<XmlPullParserFactory>().newPullParser()
+        bind<XmlPullParserFactory>(tag = DiTag.XPP_FACTORY_NSUNAWARE) with singleton {
+            XmlPullParserFactory.newInstance()
         }
 
         bind<XmlSerializer>() with provider {
@@ -233,14 +236,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<NetworkManagerBle>()
             instance<EmbeddedHTTPD>()
 
-            val downloader = if(Build.VERSION.SDK_INT >= 21) {
-                OkHttp3Downloader(instance<OkHttpClient>())
-            }else {
-                PicassoUrlConnectionDownloader()
-            }
-
             Picasso.setSingletonInstance(Picasso.Builder(applicationContext)
-                    .downloader(downloader)
+                    .downloader(OkHttp3Downloader(instance<OkHttpClient>()))
                     .build())
         }
     }

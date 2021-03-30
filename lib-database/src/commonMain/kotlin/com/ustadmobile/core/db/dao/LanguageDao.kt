@@ -6,8 +6,6 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.lib.db.entities.Person
 import kotlin.js.JsName
