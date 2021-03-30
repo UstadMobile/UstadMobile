@@ -5,7 +5,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 class ReportSeries{
 
-    var reportSeriesUid: Long = 0
+    var reportSeriesUid: Int = 0
 
     var reportSeriesName: String? = null
 

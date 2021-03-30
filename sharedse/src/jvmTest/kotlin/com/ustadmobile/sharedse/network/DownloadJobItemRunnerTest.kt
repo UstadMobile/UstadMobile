@@ -2,7 +2,7 @@ package com.ustadmobile.sharedse.network
 
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -24,6 +24,7 @@ import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTED_LOCAL
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTING_LOCAL
@@ -159,7 +160,7 @@ class DownloadJobItemRunnerTest {
 
         override fun dispatch(request: RecordedRequest): MockResponse {
             return when {
-                (endpointPrefix != "") && !request.requestUrl.encodedPath().startsWith(endpointPrefix) -> {
+                (endpointPrefix != "") && !request.requestUrl!!.encodedPath.startsWith(endpointPrefix) -> {
                     MockResponse()
                             .setResponseCode(404)
                             .addHeader("Content-Type", "text/plain")
@@ -304,7 +305,7 @@ class DownloadJobItemRunnerTest {
         webServerTmpDir = temporaryFolder.newFolder("webServerTmpDir")
         webServerTmpContentEntryFile = File(webServerTmpDir, "" + TEST_CONTENT_ENTRY_FILE_UID)
 
-        extractTestResourceToFile(TEST_FILE_RESOURCE_PATH, webServerTmpContentEntryFile)
+        javaClass.getResourceAsStream(TEST_FILE_RESOURCE_PATH).writeToFile(webServerTmpContentEntryFile)
 
         containerTmpDir = temporaryFolder.newFolder("containerTmpDir")
 
@@ -353,7 +354,7 @@ class DownloadJobItemRunnerTest {
     @Test
     fun givenDownload_whenRun_shouldDownloadAndComplete() {
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container))
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container)
 
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
@@ -388,9 +389,9 @@ class DownloadJobItemRunnerTest {
     @Test
     fun givenDownloadStarted_whenFailsOnce_shouldRetryAndComplete() {
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 numTimesToFail.set(1)
-            })
+            }
 
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
@@ -418,9 +419,9 @@ class DownloadJobItemRunnerTest {
     @Test
     fun givenDownloadStarted_whenFailsExceedMaxAttempts_shouldStopAndSetStatusToFailed() {
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 numTimesToFail.set(10)
-            })
+            }
 
             val item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
@@ -442,11 +443,11 @@ class DownloadJobItemRunnerTest {
     fun givenDownloadUnmeteredConnectivityOnly_whenConnectivitySwitchesToMetered_shouldStopAndSetStatusToQueued() {
         val item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 //set speed to 512kbps (period unit by default is milliseconds)
                 throttleBytesPerPeriod = (8 * 1000)
                 throttlePeriod = 1000
-            })
+            }
 
             val queuedStatusLatch = CountDownLatch(1)
             whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).thenAnswer{
@@ -482,11 +483,11 @@ class DownloadJobItemRunnerTest {
     @Test
     fun givenDownloadStarted_whenJobIsStopped_shouldStopAndSetStatus() {
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 //set speed to 512kbps (period unit by default is milliseconds)
                 throttleBytesPerPeriod = (8 * 1000)
                 throttlePeriod = 1000
-            })
+            }
 
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
@@ -526,11 +527,11 @@ class DownloadJobItemRunnerTest {
     @Test
     fun givenDownloadJobItemRunnerStartedAndStopped_whenNextJobItemRunnerRuns_shouldFinishAndContentShouldMatch() {
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 //set speed to 1Mbps (period unit by default is milliseconds)
                 throttleBytesPerPeriod = (128 * 1000)
                 throttlePeriod = 1000
-            })
+            }
 
             val item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
             val jobItemRunner1 = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
@@ -585,11 +586,11 @@ class DownloadJobItemRunnerTest {
         var item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
         var statusAfterWaitingForDownload = -1
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 //set speed to 1Mbps (period unit by default is milliseconds)
                 throttleBytesPerPeriod = (128 * 1000)
                 throttlePeriod = 1000
-            })
+            }
 
 
             clientDb.downloadJobDao.setMeteredConnectionAllowedByJobUidSync(
@@ -631,11 +632,11 @@ class DownloadJobItemRunnerTest {
                 downloadJobItem.djiUid)!!
 
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 //set speed to 1Mbps (period unit by default is milliseconds)
                 throttleBytesPerPeriod = (128 * 1000)
                 throttlePeriod = 1000
-            })
+            }
 
 
             val jobItemRunner = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
@@ -677,9 +678,9 @@ class DownloadJobItemRunnerTest {
 
             peerMockDispatcher  = ContainerDownloadDispatcher(serverDb, container,
                     endpointPrefix = "/${UMURLEncoder.encodeUTF8(cloudEndPoint)}/")
-            peerMockWebServer.setDispatcher(peerMockDispatcher)
+            peerMockWebServer.dispatcher = peerMockDispatcher!!
 
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container))
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container)
 
             mockLocalAvailabilityManager.stub {
                 onBlocking { findBestLocalNodeForContentEntryDownload(any()) }.thenReturn(networkNode)

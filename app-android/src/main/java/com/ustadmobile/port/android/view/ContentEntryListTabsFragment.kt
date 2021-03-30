@@ -30,21 +30,28 @@ class ContentEntryListTabsFragment : UstadBaseFragment(), ContentEntryListTabsVi
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val rootView = inflater.inflate(R.layout.fragment_contententry_tabs, container, false)
 
-        val mTabLayout: TabLayout = rootView.findViewById(R.id.tabs)
-        val mPager: ViewPager = rootView.findViewById(R.id.home_contententry_viewpager)
-
-        //Unfortunately if we dont use a Handler here then the first tab will not show up on first load
-        Handler().post {
-            val defArgs = "${ContentEntryList2View.VIEW_NAME}?${ARG_PARENT_ENTRY_UID}=" +
-                    "${arguments?.get(ARG_PARENT_ENTRY_UID).toString()}&$ARG_CONTENT_FILTER="
-
-            mPager.adapter = ContentEntryTabsPagerAdapter(childFragmentManager,
-                    listOf("$defArgs$ARG_LIBRARIES_CONTENT", "$defArgs$ARG_DOWNLOADED_CONTENT"),
-                    listOf(getString(R.string.libraries), getString(R.string.downloaded)))
-            mTabLayout.setupWithViewPager(mPager)
-        }
 
         return rootView
     }
 
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+
+        val mTabLayout: TabLayout = view.findViewById(R.id.tabs)
+        val mPager: ViewPager = view.findViewById(R.id.home_contententry_viewpager)
+
+        //Unfortunately if we dont use a Handler here then the first tab will not show up on first load
+        //As of Kotlin1.4, this actually seems to cause a crash.
+        //Handler().post {
+        val defArgs = "${ContentEntryList2View.VIEW_NAME}?${ARG_PARENT_ENTRY_UID}=" +
+                "${arguments?.get(ARG_PARENT_ENTRY_UID).toString()}&$ARG_CONTENT_FILTER="
+
+        mPager.adapter = ContentEntryTabsPagerAdapter(childFragmentManager,
+            listOf("$defArgs$ARG_LIBRARIES_CONTENT", "$defArgs$ARG_DOWNLOADED_CONTENT"),
+            listOf(getString(R.string.libraries), getString(R.string.downloaded)))
+        mTabLayout.setupWithViewPager(mPager)
+        //}
+    }
 }

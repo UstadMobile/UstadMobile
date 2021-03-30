@@ -4,7 +4,7 @@ package com.ustadmobile.core.controller
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLifecycleOwner

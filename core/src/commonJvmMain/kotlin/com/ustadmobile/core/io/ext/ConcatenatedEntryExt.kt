@@ -3,6 +3,7 @@ package com.ustadmobile.core.io.ext
 import com.ustadmobile.core.io.ConcatenatedEntry
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import java.nio.Buffer
 
 /**
  * Serialize this ConcatenatedEntry to a ByteArray that can be written to a stream.
@@ -17,7 +18,11 @@ fun ConcatenatedEntry.toBytes(): ByteArray {
             .putLong(lastModified)
             .put(md5)
 
-    byteBuffer.rewind()
+    //When Java 11 compiles it and we run the JVMTest with Java8 this seems to cause a very
+    // weird nosuchmethod exception. Apparently because it used to be final.
+    // as per https://stackoverflow.com/questions/61267495/exception-in-thread-main-java-lang-nosuchmethoderror-java-nio-bytebuffer-flip
+    // We therefor need to do this cast.
+    (byteBuffer as Buffer).rewind()
     return ByteArray(ConcatenatedEntry.SIZE).also {
         byteBuffer.get(it, 0, it.size)
     }

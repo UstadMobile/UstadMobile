@@ -5,10 +5,8 @@
  */
 package com.ustadmobile.core.tincan
 
-import com.ustadmobile.core.impl.UMLog
-import kotlinx.serialization.json.JsonException
 import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.json
+import kotlinx.serialization.json.JsonPrimitive
 
 import kotlin.jvm.JvmOverloads
 
@@ -47,10 +45,7 @@ class Activity @JvmOverloads constructor(id: String, internal var aType: String,
      * Returns a minimal xAPI statement which references the ID of this activity
      * @return
      */
-    val activityJSON: JsonObject?
-        get() {
-            return json { "id" to id}
-        }
+    val activityJSON: JsonObject =JsonObject(mapOf("id" to JsonPrimitive(id)))
 
     init {
         this.id = id

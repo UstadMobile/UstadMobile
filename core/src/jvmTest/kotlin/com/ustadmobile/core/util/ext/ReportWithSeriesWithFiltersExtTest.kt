@@ -1,6 +1,6 @@
 package com.ustadmobile.core.util.ext
 
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.mock
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase

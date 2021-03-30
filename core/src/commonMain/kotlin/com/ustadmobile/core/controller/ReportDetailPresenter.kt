@@ -13,7 +13,7 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.coroutines.*
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -46,7 +46,8 @@ class ReportDetailPresenter(context: Any,
 
 
         val series = if (!report.reportSeries.isNullOrEmpty()) {
-            safeParseList(di, ReportSeries.serializer().list,
+            safeParseList(di,
+                ListSerializer(ReportSeries.serializer()),
                     ReportSeries::class, report.reportSeries ?: "")
         } else {
             listOf()

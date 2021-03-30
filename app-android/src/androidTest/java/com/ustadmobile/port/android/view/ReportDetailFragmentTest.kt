@@ -17,7 +17,7 @@ import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.*
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Rule
@@ -101,7 +101,8 @@ class ReportDetailFragmentTest(val report: Report) : TestCase() {
                             reportSeriesName = "Total duration"
 
                         })
-                        reportSeries = Json.stringify(ReportSeries.serializer().list,
+                        reportSeries = Json.encodeToString(
+                            ListSerializer(ReportSeries.serializer()),
                                 reportSeriesWithFiltersList ?: listOf())
                     })
         }

@@ -19,7 +19,7 @@ android {
 
     defaultConfig {
         minSdkVersion 21
-        targetSdkVersion 29
+        targetSdkVersion 30
         missingDimensionStrategy 'api', 'api18'
     }
 }
@@ -66,42 +66,28 @@ kotlin {
             dependencies {
                 implementation project(":core")
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-common:$version_coroutines"
+                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.soywiz.korlibs.klock:klock:$version_klock"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-json:$version_ktor"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-common:$version_kotlinx_serialization"
+                implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
                 implementation "com.github.aakira:napier:$version_napier"
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
-                compileOnly project(":lib-door-runtime")
+                compileOnly "com.ustadmobile.door:door-runtime:$version_door"
                 compileOnly project(":lib-util")
             }
         }
 
-        /*
-        jsMain {
-            dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-js:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core-js:$version_coroutines"
-                implementation "com.soywiz.korlibs.klock:klock-js:$version_klock"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:$version_kotlinx_serialization"
-                implementation "io.ktor:ktor-client-js:$version_ktor"
-                implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
-                implementation "com.github.aakira:napier-js:$version_napier"
-            }
-        }
-        */
         commonJvmMain {
             dependencies {
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
-                implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$version_kotlinx_serialization"
 
                 compileOnly project(":lib-database-entities")
                 compileOnly project(":lib-database")
-                compileOnly project(":lib-door-runtime")
+                compileOnly "com.ustadmobile.door:door-runtime:$version_door"
                 compileOnly project(":lib-util")
             }
         }
@@ -114,25 +100,20 @@ kotlin {
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "io.ktor:ktor-gson:$version_ktor"
 
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
-                implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "com.soywiz.korlibs.klock:klock-jvm:$version_klock"
                 implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
                 implementation "org.xerial:sqlite-jdbc:$version_sqlite_jdbc"
-                implementation "com.github.aakira:napier-jvm:$version_napier"
             }
         }
 
         androidMain {
             dependsOn commonJvmMain
             dependencies {
-                implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$version_coroutines"
                 implementation "com.soywiz.korlibs.klock:klock-android:$version_klock"
                 implementation project(":lib-database-android")
                 implementation "androidx.room:room-runtime:$version_android_room"
-                implementation "com.github.aakira:napier-android:$version_napier"
             }
         }
 

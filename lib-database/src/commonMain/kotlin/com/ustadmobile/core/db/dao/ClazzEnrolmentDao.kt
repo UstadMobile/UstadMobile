@@ -7,12 +7,9 @@ import androidx.room.Query
 import androidx.room.Update
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ClazzLogAttendanceRecord.Companion.STATUS_ATTENDED
 
-@UmDao(inheritPermissionFrom = ClazzDao::class, inheritPermissionForeignKey = "clazzEnrolmentClazzUid",
-        inheritPermissionJoinedPrimaryKey = "clazzUid")
 @Repository
 @Dao
 abstract class ClazzEnrolmentDao : BaseDao<ClazzEnrolment> {

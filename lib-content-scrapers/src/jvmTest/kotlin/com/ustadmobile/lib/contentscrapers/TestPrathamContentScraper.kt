@@ -1,9 +1,9 @@
 package com.ustadmobile.lib.contentscrapers
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.doReturn
-import com.nhaarman.mockitokotlin2.spy
-import com.nhaarman.mockitokotlin2.whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
@@ -27,6 +27,8 @@ import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
 import okio.Okio
+import okio.buffer
+import okio.source
 import org.apache.commons.io.IOUtils
 import org.jsoup.Jsoup
 import org.junit.Assert
@@ -82,12 +84,12 @@ class TestPrathamContentScraper {
     internal val dispatcher: Dispatcher = object : Dispatcher() {
         @Throws(InterruptedException::class)
         override fun dispatch(request: RecordedRequest): MockResponse {
-
+            val requestPath = request.path ?: ""
             try {
 
-                if (request.path.contains("json")) {
+                if (requestPath.contains("json")) {
 
-                    val fileName = request.path.substring(5)
+                    val fileName = requestPath.substring(5)
                     val body = IOUtils.toString(javaClass.getResourceAsStream(fileName), UTF_ENCODING)
                     val response = MockResponse().setResponseCode(200)
                     response.setHeader("ETag", UTF_ENCODING.hashCode())
@@ -96,18 +98,18 @@ class TestPrathamContentScraper {
 
                     return response
 
-                } else if (request.path.contains("content")) {
+                } else if (requestPath.contains("content")) {
 
-                    val fileLocation = request.path.substring(8)
+                    val fileLocation = requestPath.substring(8)
                     val videoIn = javaClass.getResourceAsStream(fileLocation)
-                    val source = Okio.buffer(Okio.source(videoIn))
+                    val source = videoIn.source().buffer()
                     val buffer = Buffer()
                     source.readAll(buffer)
 
                     val response = MockResponse().setResponseCode(200)
-                    response.setHeader("ETag", (buffer.size().toString() + UTF_ENCODING).hashCode())
+                    response.setHeader("ETag", (buffer.size.toString() + UTF_ENCODING).hashCode())
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
                 }
@@ -129,13 +131,17 @@ class TestPrathamContentScraper {
         val containerDir = Files.createTempDirectory("container").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val scraper = spy(IndexPrathamContentScraper())
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamonebook.txt").url()).`when`(scraper).generatePrathamUrl("1")
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamlist.txt").url()).`when`(scraper).generatePrathamUrl("2")
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamempty.txt").url()).`when`(scraper).generatePrathamUrl("3")
-        doReturn(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.zip").url()).`when`(scraper).generatePrathamEPubFileUrl(Mockito.anyString())
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamonebook.txt")
+            .toUrl()).`when`(scraper).generatePrathamUrl("1")
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamlist.txt")
+            .toUrl()).`when`(scraper).generatePrathamUrl("2")
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/pratham/prathamempty.txt")
+            .toUrl()).`when`(scraper).generatePrathamUrl("3")
+        doReturn(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/pratham/24620-a-book-for-puchku.zip")
+            .toUrl()).`when`(scraper).generatePrathamEPubFileUrl(Mockito.anyString())
         doReturn("").`when`(scraper).loginPratham()
 
         scraper.findContent(tmpDir, containerDir)
@@ -157,15 +163,25 @@ class TestPrathamContentScraper {
         val containerDir = Files.createTempDirectory("container").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val scraper = spy(AsbScraper())
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt").url()).whenever(scraper).generateURL()
-        doReturn(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/africanbooks/asb18187.epub").url()).whenever(scraper).generateEPubUrl(any(), Mockito.anyString())
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt").url()).`when`(scraper).generatePublishUrl(any(), Mockito.anyString())
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt").url()).`when`(scraper).generateMakeUrl(any(), Mockito.anyString())
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/asbreader.txt").url().toString()).`when`(scraper).generateReaderUrl(any(), Mockito.anyString())
-        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/asburl.txt").url().toString()).`when`(scraper).africanStoryBookUrl
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt")
+            .toUrl()).whenever(scraper).generateURL()
+        doReturn(mockWebServer.url("/content/com/ustadmobile/lib/contentscrapers/africanbooks/asb18187.epub")
+            .toUrl()).whenever(scraper).generateEPubUrl(any(), Mockito.anyString())
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt")
+            .toUrl()).`when`(scraper).generatePublishUrl(any(), Mockito.anyString())
+        doReturn(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/abslist.txt")
+            .toUrl()).`when`(scraper).generateMakeUrl(any(), Mockito.anyString())
+        doReturn(
+            mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/asbreader.txt")
+                .toUrl()
+                .toString()).`when`(scraper).generateReaderUrl(any(), Mockito.anyString())
+        doReturn(
+            mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/africanbooks/asburl.txt")
+                .toUrl()
+                .toString()).`when`(scraper).africanStoryBookUrl
 
         scraper.findContent(tmpDir, containerDir)
 
@@ -183,7 +199,7 @@ class TestPrathamContentScraper {
         val containerDir = Files.createTempDirectory("container").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val scraper = DdlContentScraper(0, 0, 0, endpoint, di)
         scraper.scrapeUrl(mockWebServer.url("json/com/ustadmobile/lib/contentscrapers/ddl/ddlcontent.txt").toString())

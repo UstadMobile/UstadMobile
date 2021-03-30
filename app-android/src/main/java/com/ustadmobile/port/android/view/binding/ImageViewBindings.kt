@@ -1,16 +1,13 @@
 package com.ustadmobile.port.android.view.binding
 
 import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.view.View
 import android.widget.ImageView
 import androidx.activity.ComponentActivity
-import androidx.activity.result.ActivityResultRegistry
 import androidx.core.content.ContextCompat
 import androidx.databinding.BindingAdapter
 import androidx.databinding.InverseBindingAdapter
 import androidx.databinding.InverseBindingListener
-import androidx.lifecycle.findViewTreeLifecycleOwner
 import com.squareup.picasso.Picasso
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.account.UstadAccountManager
@@ -23,15 +20,6 @@ import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.*
 import org.kodein.di.*
-
-class ImageViewLifecycleObserver2(view: ImageView, registry: ActivityResultRegistry, inverseBindingListener: InverseBindingListener)
-    : ViewActivityLauncherLifecycleObserver<ImageView>(view, registry, inverseBindingListener) {
-
-    override fun onPictureTakenOrSelected(pictureUri: Uri?) {
-        view.setImageFilePath(pictureUri?.toString(),null)
-        inverseBindingListener?.onChange()
-    }
-}
 
 @BindingAdapter(value=["imageUri", "fallbackDrawable"], requireAll = false)
 fun ImageView.setImageFilePath(imageFilePath: String?, fallbackDrawable: Drawable?) {
@@ -52,13 +40,22 @@ fun ImageView.setImageFilePath(imageFilePath: String?, fallbackDrawable: Drawabl
 
 @BindingAdapter("imageUriAttrChanged")
 fun ImageView.getImageFilePath(inverseBindingListener: InverseBindingListener) {
-    val activity = context.getActivityContext() as ComponentActivity
-    val imageViewLifecycleObserver = ImageViewLifecycleObserver2(this,
-            activity.activityResultRegistry, inverseBindingListener)
-    findViewTreeLifecycleOwner()?.lifecycle?.addObserver(imageViewLifecycleObserver)
+    setTag(R.id.tag_imageview_inversebindinglistener, inverseBindingListener)
+    updateImageViewLifecycleObserver()
+}
 
-    setOnClickListener {
-        imageViewLifecycleObserver.showOptionsDialog()
+@BindingAdapter("imageViewLifecycleObserver")
+fun ImageView.setImageViewLifecycleObserver(imageViewLifecycleObserver: ImageViewLifecycleObserver2) {
+    setTag(R.id.tag_imageviewlifecycleobserver, imageViewLifecycleObserver)
+    updateImageViewLifecycleObserver()
+}
+
+private fun ImageView.updateImageViewLifecycleObserver() {
+    val lifecycleObserver = getTag(R.id.tag_imageviewlifecycleobserver) as? ImageViewLifecycleObserver2
+    val inverseBindingListener = getTag(R.id.tag_imageview_inversebindinglistener) as? InverseBindingListener
+    if(lifecycleObserver != null && inverseBindingListener != null) {
+        lifecycleObserver.view = this
+        lifecycleObserver.inverseBindingListener = inverseBindingListener
     }
 }
 

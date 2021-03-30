@@ -55,7 +55,7 @@ class SiteEnterLinkFragmentTest : TestCase(){
 
         init{
 
-            val site = Json.stringify(Site.serializer(), Site().apply {
+            val site = Json.encodeToString(Site.serializer(), Site().apply {
                 siteName = "Dummy workspace"
                 registrationAllowed = true
                 guestLogin = true

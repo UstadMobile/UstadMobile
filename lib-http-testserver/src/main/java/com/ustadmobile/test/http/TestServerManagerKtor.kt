@@ -29,6 +29,7 @@ import java.util.*
 import javax.naming.InitialContext
 import com.ustadmobile.util.test.ReverseProxyDispatcher
 import io.ktor.server.engine.ApplicationEngineEnvironment
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import java.net.InetAddress
 
 val umRestServerInstances = mutableMapOf<Int, TestApplicationHolder>()
@@ -104,10 +105,9 @@ fun Application.testServerManager() {
             umRestServer.start()
             val token = UUID.randomUUID().toString()
 
-            val appServerHttpUrl: HttpUrl = HttpUrl.parse("http://$proxyHost:$appPort/")!!
-            val mockDispatcher = ReverseProxyDispatcher(appServerHttpUrl)
+            val mockDispatcher = ReverseProxyDispatcher("http://$proxyHost:$appPort/".toHttpUrl())
             val mockWebServer = MockWebServer()
-            mockWebServer.setDispatcher(mockDispatcher)
+            mockWebServer.dispatcher = mockDispatcher
             mockWebServer.start(InetAddress.getByName(proxyHost), proxyPort)
 
 
