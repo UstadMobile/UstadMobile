@@ -1,7 +1,7 @@
 
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ClazzWorkContentJoinDao
 import com.ustadmobile.core.db.dao.ClazzWorkDao

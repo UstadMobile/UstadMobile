@@ -5,7 +5,7 @@ import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.ReportDetailView
 import com.ustadmobile.core.view.ReportEditView
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -24,7 +24,7 @@ import com.ustadmobile.lib.db.entities.ReportSeries
 import com.ustadmobile.lib.db.entities.ReportWithSeriesWithFilters
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -111,10 +111,12 @@ class ReportDetailPresenterTest {
             xAxis = Report.MONTH
             fromDate = DateTime(2019, 4, 10).unixMillisLong
             toDate = DateTime(2019, 6, 11).unixMillisLong
-            reportSeries = Json.stringify(ReportSeries.serializer().list, reportSeriesList)
+            reportSeries = Json.encodeToString(ListSerializer(ReportSeries.serializer()),
+                reportSeriesList)
         }
 
-        val presenterArgs = mapOf(ARG_ENTITY_JSON to Json.stringify(ReportWithSeriesWithFilters.serializer(), testEntity))
+        val presenterArgs = mapOf(ARG_ENTITY_JSON to
+                Json.encodeToString(ReportWithSeriesWithFilters.serializer(), testEntity))
         val presenter = ReportDetailPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
 

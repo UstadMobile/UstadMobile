@@ -52,7 +52,7 @@ object ContentEntryEditScreen : KScreen<ContentEntryEditScreen>() {
         val expectedUri = Uri.fromFile(testFile)
 
         val registry = object : ActivityResultRegistry() {
-            override fun <I, O> invoke(
+            override fun <I, O> onLaunch(
                     requestCode: Int,
                     contract: ActivityResultContract<I, O>,
                     input: I,

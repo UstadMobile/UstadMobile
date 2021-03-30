@@ -4,14 +4,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.db.entities.CustomField
 import com.ustadmobile.lib.db.entities.CustomFieldValue
 
-@UmDao(insertPermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN,
-        updatePermissionCondition = RoleDao.SELECT_ACCOUNT_IS_ADMIN)
-@UmRepository
 @Dao
 abstract class CustomFieldValueDao : BaseDao<CustomFieldValue> {
 

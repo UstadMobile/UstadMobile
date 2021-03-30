@@ -14,7 +14,6 @@ import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 
 
 class HarContainer(val containerUid: Long, val entry: ContentEntry,
@@ -28,7 +27,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
     var interceptors: MutableMap<HarInterceptor, String?> = mutableMapOf()
     val startingUrlDeferred = CompletableDeferred<String>()
 
-    val json = Json(JsonConfiguration(ignoreUnknownKeys = true))
+    val json = Json { ignoreUnknownKeys = true }
 
     init {
 
@@ -46,7 +45,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
             var harExtra = HarExtra()
             if(harExtraEntry != null){
                 val data = harExtraEntry.containerEntryFile?.getStringFromContainerEntry() ?: throw Exception()
-                harExtra = json.parse(HarExtra.serializer(), data)
+                harExtra = json.decodeFromString(HarExtra.serializer(), data)
             }
 
             regexList = harExtra.regexes
@@ -62,7 +61,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
             }
 
 
-            val harContent = json.parse(Har.serializer(), harContentData)
+            val harContent = json.decodeFromString(Har.serializer(), harContentData)
 
             val entries = harContent.log.entries
 

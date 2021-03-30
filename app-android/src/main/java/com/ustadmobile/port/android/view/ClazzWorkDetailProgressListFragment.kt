@@ -7,7 +7,7 @@ import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.ClazzMemberListPresenter
 import com.ustadmobile.core.controller.ClazzWorkDetailProgressListPresenter
@@ -53,7 +53,7 @@ class ClazzWorkDetailProgressListFragment : UstadListViewFragment<ClazzEnrolment
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(onClickSort = this,
                 sortOrderOption = mPresenter?.sortOptions?.get(0))
 
-        mMergeRecyclerViewAdapter = MergeAdapter(mUstadListHeaderRecyclerViewAdapter,
+        mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,
                 metricsRecyclerAdapter, mDataRecyclerViewAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
 

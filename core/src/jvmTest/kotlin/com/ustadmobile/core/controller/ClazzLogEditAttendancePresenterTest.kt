@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.hours
 import com.ustadmobile.core.db.UmAppDatabase

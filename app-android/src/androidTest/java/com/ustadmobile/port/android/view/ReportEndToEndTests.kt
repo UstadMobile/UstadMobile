@@ -20,7 +20,7 @@ import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
 import org.junit.Before
 import org.junit.Rule
@@ -106,7 +106,8 @@ class ReportEndToEndTests : TestCase() {
             ReportEditScreen {
 
                 val reportOnForm = Report.FIXED_TEMPLATES[0]
-                val listOfSeries = Json.parse(ReportSeries.serializer().list, reportOnForm.reportSeries!!)
+                val listOfSeries = Json.decodeFromString(ListSerializer(ReportSeries.serializer()),
+                    reportOnForm.reportSeries!!)
 
                 fillFields(updatedReport = reportToCreate,
                         reportOnForm = ReportWithSeriesWithFilters(reportOnForm, listOfSeries),

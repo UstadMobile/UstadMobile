@@ -5,12 +5,10 @@ import androidx.room.Query
 import com.ustadmobile.core.db.JobStatus.NOT_QUEUED
 import com.ustadmobile.core.db.JobStatus.QUEUED
 import com.ustadmobile.door.DoorLiveData
-import com.ustadmobile.lib.database.annotation.UmDao
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_UNMETERED
 import com.ustadmobile.lib.db.entities.ContainerImportJob
 
-@UmDao
 @Dao
 abstract class ContainerImportJobDao : BaseDao<ContainerImportJob> {
 

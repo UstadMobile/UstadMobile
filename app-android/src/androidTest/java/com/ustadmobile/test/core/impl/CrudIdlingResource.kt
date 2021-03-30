@@ -12,7 +12,7 @@ import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.testing.FragmentScenario
 import androidx.lifecycle.Lifecycle
 import androidx.paging.PagedListAdapter
-import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import androidx.test.core.app.ActivityScenario
 import androidx.test.espresso.IdlingResource
@@ -86,7 +86,8 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
             wasNotIdle = false
         } else {
             wasNotIdle = true
-            val fragmentScenarioVal = fragmentScenario
+            @Suppress("UNCHECKED_CAST")
+            val fragmentScenarioVal: FragmentScenario<Fragment>? = fragmentScenario as? FragmentScenario<Fragment>
             val activityScenarioVal = activityScenario
 
             if(fragmentScenarioVal != null) {
@@ -96,6 +97,7 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
                             isIdleNow
                         }
                     }, 16)
+
                 }
             }else if(activityScenarioVal != null) {
                 activityScenarioVal.onActivity {
@@ -116,12 +118,13 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
 
     fun getFragments(): List<Fragment> {
         val fragments = mutableListOf<Fragment>()
-        fragmentScenario?.onFragment {
+        @Suppress("UNCHECKED_CAST")
+        (fragmentScenario as? FragmentScenario<Fragment>)?.onFragment {
             fragments += it.flattenHierachy()
         }
 
         activityScenario?.onActivity {
-            val activityFragments = (it as? FragmentActivity)?.supportFragmentManager
+            var activityFragments = (it as? FragmentActivity)?.supportFragmentManager
                     ?.fragments ?: listOf()
             activityFragments += activityFragments.flatMap { it.flattenHierachy() }
         }
@@ -174,7 +177,7 @@ class CrudIdlingResource : IdlingResource, ScenarioIdlingResource {
 
         val adapterVal = adapter ?: return false
 
-        val adapters = if(adapterVal is MergeAdapter) adapterVal.adapters else listOf(adapterVal)
+        val adapters = if(adapterVal is ConcatAdapter) adapterVal.adapters else listOf(adapterVal)
         return adapters.all { it.isIdle() }
     }
 

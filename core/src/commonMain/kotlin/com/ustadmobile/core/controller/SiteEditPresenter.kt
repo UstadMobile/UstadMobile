@@ -16,7 +16,7 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.door.ext.onRepoWithFallbackToDb
 import com.ustadmobile.lib.db.entities.SiteTerms
 import com.ustadmobile.lib.db.entities.SiteTermsWithLanguage
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 
 
 class SiteEditPresenter(context: Any,
@@ -29,8 +29,8 @@ class SiteEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
     val siteTermsOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<SiteTermsWithLanguage>(SiteTerms::sTermsUid,
-            "state_SiteTerms_list", SiteTerms.serializer().list,
-            SiteTermsWithLanguage.serializer().list, this, SiteTermsWithLanguage::class) {
+            "state_SiteTerms_list", ListSerializer(SiteTerms.serializer()),
+            ListSerializer(SiteTermsWithLanguage.serializer()), this, SiteTermsWithLanguage::class) {
         sTermsUid = it
     }
 

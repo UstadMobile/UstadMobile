@@ -28,7 +28,7 @@ import java.util.HashMap
 import java.util.zip.ZipFile
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
-import org.kmp.io.KMPPullParserException
+import org.xmlpull.v1.XmlPullParserFactory
 import java.util.function.Consumer
 
 
@@ -74,7 +74,6 @@ class TestShrinkerUtils {
 
 
     @Test
-    @Throws(IOException::class, KMPPullParserException::class)
     fun givenValidEpub_whenShrunk_shouldConvertAllImagesToWebPAndOutsourceStylesheets() {
 
         ShrinkerUtil.shrinkEpub(firstepub!!)
@@ -83,15 +82,19 @@ class TestShrinkerUtils {
         val ocfDoc = OcfDocument()
         val ocfFile = File(tmpTest, Paths.get("META-INF", "container.xml").toString())
         val ocfFileInputStream = FileInputStream(ocfFile)
-        val ocfParser = UstadMobileSystemImpl.instance
-                .newPullParser(ocfFileInputStream)
+        val xppFactory = XmlPullParserFactory.newInstance()
+
+        val ocfParser = xppFactory.newPullParser().also {
+            it.setInput(ocfFileInputStream, "UTF-8")
+        }
         ocfDoc.loadFromParser(ocfParser)
 
         val opfFile = File(tmpTest, ocfDoc.getRootFiles()[0].fullPath!!)
         val document = OpfDocument()
         val opfFileInputStream = FileInputStream(opfFile)
-        val xmlPullParser = UstadMobileSystemImpl.instance
-                .newPullParser(opfFileInputStream)
+        val xmlPullParser = xppFactory.newPullParser().also {
+            it.setInput(opfFileInputStream, "UTF-8")
+        }
         document.loadFromOPF(xmlPullParser)
 
         var countWebp = 0

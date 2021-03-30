@@ -57,7 +57,7 @@ class DataBindingIdlingResource : IdlingResource, ScenarioIdlingResource {
 
     override fun isIdleNow(): Boolean {
         val idle = !getBindings().any { it.hasPendingBindings() }
-        @Suppress("LiftReturnOrAssignment")
+        @Suppress("LiftReturnOrAssignment", "UNCHECKED_CAST")
         if (idle) {
             if (wasNotIdle) {
                 // notify observers to avoid espresso race detector
@@ -66,7 +66,7 @@ class DataBindingIdlingResource : IdlingResource, ScenarioIdlingResource {
             wasNotIdle = false
         } else {
             wasNotIdle = true
-            val fragmentScenarioVal = fragmentScenario
+            val fragmentScenarioVal = fragmentScenario as? FragmentScenario<Fragment>
             val activityScenarioVal = activityScenario
 
             if(fragmentScenarioVal != null) {
@@ -102,7 +102,7 @@ class DataBindingIdlingResource : IdlingResource, ScenarioIdlingResource {
      */
     private fun getBindings(): List<ViewDataBinding> {
         val bindings = mutableListOf<ViewDataBinding>()
-        fragmentScenario?.onFragment { fragment ->
+        (fragmentScenario as? FragmentScenario<Fragment>)?.onFragment { fragment ->
             bindings += fragment.viewBindings()
         }
 
