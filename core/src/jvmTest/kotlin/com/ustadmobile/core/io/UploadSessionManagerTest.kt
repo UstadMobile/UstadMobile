@@ -1,8 +1,8 @@
 package com.ustadmobile.core.io
 
-import com.nhaarman.mockitokotlin2.any
-import com.nhaarman.mockitokotlin2.mock
-import com.nhaarman.mockitokotlin2.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.verify
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import org.junit.Before

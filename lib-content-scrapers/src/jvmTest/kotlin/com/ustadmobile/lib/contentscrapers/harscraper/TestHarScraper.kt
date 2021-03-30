@@ -1,7 +1,7 @@
 package com.ustadmobile.lib.contentscrapers.harscraper
 
 import com.google.gson.GsonBuilder
-import com.nhaarman.mockitokotlin2.spy
+import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.contentformats.har.HarRegexPair
@@ -88,7 +88,7 @@ class TestHarScraper {
 
         dispatcher = ResourceDispatcher(RESOURCE_PATH)
         mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         entry = ContentEntry()
         entry.leaf = true
@@ -189,7 +189,7 @@ class TestHarScraper {
             it.request.url.contains("pic_trull.jpg")
         }
 
-        Assert.assertEquals("regex was found and removed",  "http://localhost:${url.port()}/pic_trull.jpg?style=abc.css", entry!!.request.url)
+        Assert.assertEquals("regex was found and removed",  "http://localhost:${url.port}/pic_trull.jpg?style=abc.css", entry!!.request.url)
 
         scraper.close()
 

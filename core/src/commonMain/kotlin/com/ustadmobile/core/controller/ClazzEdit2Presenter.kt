@@ -22,7 +22,7 @@ import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -35,8 +35,8 @@ class ClazzEdit2Presenter(context: Any,
 
     private val scheduleOneToManyJoinEditHelper
             = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid,
-            ARG_SAVEDSTATE_SCHEDULES, Schedule.serializer().list,
-            Schedule.serializer().list, this, Schedule::class) {scheduleUid = it}
+            ARG_SAVEDSTATE_SCHEDULES, ListSerializer(Schedule.serializer()),
+            ListSerializer(Schedule.serializer()), this, Schedule::class) {scheduleUid = it}
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB

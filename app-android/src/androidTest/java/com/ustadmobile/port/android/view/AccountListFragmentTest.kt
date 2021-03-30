@@ -371,7 +371,7 @@ class AccountListFragmentTest : TestCase() {
         impl.setAppPref(UstadAccountManager.ACCOUNTS_PREFKEY, null, context)
 
         impl.setAppPref(UstadAccountManager.ACCOUNTS_PREFKEY,
-                Json.stringify(UstadAccounts.serializer(), storedAccounts), context)
+                Json.encodeToString(UstadAccounts.serializer(), storedAccounts), context)
     }
 
 

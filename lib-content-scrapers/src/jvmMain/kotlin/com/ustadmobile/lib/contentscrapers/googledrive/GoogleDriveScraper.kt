@@ -133,7 +133,8 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     val params = scrapeQueueItem?.scrapeRun?.conversionParams
                     var conversionParams = mapOf<String, String>()
                     if(params != null){
-                        conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+                        conversionParams = Json.decodeFromString(
+                            MapSerializer(String.serializer(), String.serializer()), params)
                     }
                     contentImportManager.importFileToContainer(contentFile.path, metadata.mimeType,
                             fileEntry.contentEntryUid, containerFolder.path, conversionParams){

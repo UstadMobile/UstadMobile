@@ -11,10 +11,6 @@ import androidx.annotation.RequiresApi
 import androidx.annotation.VisibleForTesting
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.port.sharedse.impl.http.BleHttpRequest
-import com.ustadmobile.port.sharedse.impl.http.BleHttpResponse
-import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.port.sharedse.impl.http.asBleHttpResponse
 import com.ustadmobile.port.sharedse.util.AsyncServiceManager
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.BLE_CHARACTERISTICS
 import fi.iki.elonen.NanoHTTPD
@@ -22,8 +18,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.toUtf8Bytes
 import org.kodein.di.DI
 import org.kodein.di.instance
 import java.util.*
@@ -265,30 +259,6 @@ class BleGattServer
     fun canDeviceAdvertise(): Boolean {
         return Build.VERSION.SDK_INT > NetworkManagerBle.BLE_ADVERTISE_MIN_SDK_VERSION &&
                 bluetoothManager.adapter != null && bluetoothManager.adapter.isMultipleAdvertisementSupported
-    }
-
-    override fun handleHttpRequest(bleMessageReceived: BleMessage, clientDeviceAddr: String): BleMessage {
-        val bleRequest = Json.parse(BleHttpRequest.serializer(), String(bleMessageReceived.payload!!))
-        UMLog.l(UMLog.DEBUG, 691,
-                "BLEGattServer: Request ID# ${bleMessageReceived.messageId} " +
-                        "Received bleRequest ${bleRequest.reqUri} ")
-
-        val httpd: EmbeddedHTTPD by di.instance()
-
-        //TODO: this should be in try-catch
-        val response = httpd.serve(bleRequest)
-                ?: NanoHTTPD.newFixedLengthResponse(NanoHTTPD.Response.Status.NOT_FOUND, "text/plain", "not found")
-        val bleResponse = response.asBleHttpResponse()
-
-        val bleResponseStr = Json.stringify(BleHttpResponse.serializer(), bleResponse)
-        val payload = bleResponseStr.toUtf8Bytes()
-        UMLog.l(UMLog.DEBUG, 691,
-                "BLEGattServer: Sending response ID# ${bleMessageReceived.messageId} ${bleRequest.reqUri} " +
-                        "(${bleResponse.statusCode}) \n==Content Body: Message payload.size = ${payload.size} bytes==${bleResponse.body}\n\n")
-
-        return BleMessage(BleMessage.MESSAGE_TYPE_HTTP,
-                BleMessage.getNextMessageIdForReceiver(clientDeviceAddr),
-                payload)
     }
 
     companion object {

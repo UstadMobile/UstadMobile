@@ -7,7 +7,7 @@ import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemClazzEnrolmentListBinding
@@ -138,7 +138,7 @@ class ClazzEnrolmentListFragment(): UstadListViewFragment<ClazzEnrolment, ClazzE
         }
         mUstadListHeaderRecyclerViewAdapter = ListHeaderRecyclerViewAdapter(this)
 
-        mMergeRecyclerViewAdapter = MergeAdapter(profileHeaderAdapter,clazzHeaderAdapter,
+        mMergeRecyclerViewAdapter = ConcatAdapter(profileHeaderAdapter,clazzHeaderAdapter,
                 enrolmentAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter
 

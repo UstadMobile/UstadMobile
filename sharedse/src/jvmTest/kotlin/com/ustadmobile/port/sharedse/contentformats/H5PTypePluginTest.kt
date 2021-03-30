@@ -19,8 +19,8 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
-import org.kmp.io.KMPXmlParser
 import org.kodein.di.*
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.util.zip.GZIPInputStream
 import java.util.zip.ZipFile
@@ -129,7 +129,7 @@ class H5PTypePluginTest {
             Assert.assertNotNull(tinCanEntry)
 
             val file = File(tinCanEntry!!.containerEntryFile!!.cefPath)
-            val xpp = KMPXmlParser()
+            val xpp = XmlPullParserFactory.newInstance().newPullParser()
             xpp.setInput(GZIPInputStream(file.inputStream()), "UTF-8")
             val tinCanXml = TinCanXML.loadFromXML(xpp)
 

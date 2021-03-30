@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.SiteEnterLinkView
 import com.ustadmobile.lib.db.entities.Site
@@ -67,7 +67,7 @@ class SiteEnterLinkPresenterTest {
 
     @Test
     fun givenValidWorkSpaceLink_whenCheckedAndIsValid_shouldAllowToGoToNextScreen() {
-        val workSpace = Json.stringify(Site.serializer(), Site().apply {
+        val workSpace = Json.encodeToString(Site.serializer(), Site().apply {
                     siteName = "Dummy site"
                     registrationAllowed = true
                     guestLogin = true

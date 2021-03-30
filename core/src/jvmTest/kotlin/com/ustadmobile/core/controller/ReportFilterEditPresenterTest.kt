@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.generated.locale.MessageID
@@ -64,7 +64,8 @@ class ReportFilterEditPresenterTest {
             reportFilterSeriesUid = 1
         }
 
-        val presenterArgs = mapOf(UstadEditView.ARG_ENTITY_JSON to Json.stringify(ReportFilter.serializer(), reportFilter))
+        val presenterArgs = mapOf(
+            UstadEditView.ARG_ENTITY_JSON to Json.encodeToString(ReportFilter.serializer(), reportFilter))
         val presenter = ReportFilterEditPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
@@ -87,7 +88,8 @@ class ReportFilterEditPresenterTest {
             reportFilterSeriesUid = 1
         }
 
-        val presenterArgs = mapOf(UstadEditView.ARG_ENTITY_JSON to Json.stringify(ReportFilter.serializer(), reportFilter))
+        val presenterArgs = mapOf(UstadEditView.ARG_ENTITY_JSON to
+                Json.encodeToString(ReportFilter.serializer(), reportFilter))
         val presenter = ReportFilterEditPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
@@ -96,7 +98,7 @@ class ReportFilterEditPresenterTest {
         initialEntity.reportFilterField = ReportFilter.FIELD_PERSON_GENDER
         initialEntity.reportFilterCondition = ReportFilter.CONDITION_IS_NOT
         initialEntity.reportFilterDropDownValue = Person.GENDER_MALE
-        initialEntity.reportFilterUid = 1L
+        initialEntity.reportFilterUid = 1
 
         presenter.handleClickSave(initialEntity)
 

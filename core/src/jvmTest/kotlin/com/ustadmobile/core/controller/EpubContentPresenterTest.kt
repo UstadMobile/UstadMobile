@@ -1,6 +1,6 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
@@ -76,16 +76,6 @@ class EpubContentPresenterTest {
             import(ustadTestRule.diModule)
             bind<XapiStatementEndpoint>() with singleton { mockStatementEndpoint }
 
-            bind<XmlPullParserFactory>() with singleton {
-                XmlPullParserFactory.newInstance().also {
-                    it.isNamespaceAware = true
-                }
-            }
-
-            bind<XmlPullParser>() with provider {
-                instance<XmlPullParserFactory>().newPullParser()
-            }
-
             bind<XmlSerializer>() with provider {
                 KXmlSerializer()
             }
@@ -127,7 +117,10 @@ class EpubContentPresenterTest {
         //opf var is used when running assertions
         val opfIn = db.containerEntryDao.openEntryInputStream(epubContainer.containerUid, "OEBPS/package.opf")!!
         opf = OpfDocument()
-        opf.loadFromOPF(UstadMobileSystemImpl.instance.newPullParser(opfIn, "UTF-8"))
+        val xpp = XmlPullParserFactory.newInstance().newPullParser().also {
+            it.setInput(opfIn, "UTF-8")
+        }
+        opf.loadFromOPF(xpp)
         opfIn.close()
     }
 
@@ -224,7 +217,7 @@ class EpubContentPresenterTest {
         presenter.onCreate(args)
         presenter.onStart()
 
-        verify(mockEpubView, timeout(15000)).tableOfContents = any()
+        verify(mockEpubView, timeout(15000 )).tableOfContents = any()
 
         presenter.handlePageChanged(1)
         verify(mockEpubView).windowTitle = "Page 2" //the title as specified in test.epub's OPF for this file

@@ -1,9 +1,9 @@
 package com.ustadmobile.core.util
 
-import kotlinx.io.InputStream
+import java.io.InputStream
 
 actual fun getAssetFromResource(path: String, context: Any): InputStream? {
-    return Any::class.java.getResourceAsStream(path)
+    return context.javaClass.getResourceAsStream(path)
 }
 
 

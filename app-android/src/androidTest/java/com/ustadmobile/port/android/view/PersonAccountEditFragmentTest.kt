@@ -71,7 +71,7 @@ class PersonAccountEditFragmentTest : TestCase(){
             mockWebServer.enqueue(MockResponse()
                     .setResponseCode(responseCode)
                     .setHeader("Content-Type", "application/json")
-                    .setBody(Buffer().write(Json.stringify(UmAccount.serializer(),
+                    .setBody(Buffer().write(Json.encodeToString(UmAccount.serializer(),
                             UmAccount(0L)).toByteArray())))
         }else{
             mockWebServer.enqueue(MockResponse()
