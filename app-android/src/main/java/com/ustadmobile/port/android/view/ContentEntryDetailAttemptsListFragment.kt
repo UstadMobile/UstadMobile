@@ -76,7 +76,7 @@ class ContentEntryDetailAttemptsListFragment(): UstadListViewFragment<PersonWith
     }
 
     override val displayTypeRepo: Any?
-        get() = dbRepo?.personDao
+        get() = dbRepo?.statementDao
 
     companion object {
         val DIFF_CALLBACK: DiffUtil.ItemCallback<PersonWithStatementDisplay> = object
