@@ -117,13 +117,6 @@ kotlin {
 
     sourceSets {
 
-        all {
-            languageSettings {
-                useExperimentalAnnotation('kotlinx.serialization.InternalSerializationApi')
-                useExperimentalAnnotation('kotlin.ExperimentalStdlibApi')
-            }
-        }
-
         commonMain {
             dependencies {
                 implementation project(":core")
