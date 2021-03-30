@@ -34,14 +34,12 @@ class ReportFilterEditPresenter(context: Any,
         get() = PersistenceMode.JSON
 
     enum class FieldOption(val optionVal: Int, val messageId: Int) {
-        PERSON_GENDER(ReportFilter.FIELD_PERSON_GENDER, MessageID.field_person_gender),
-        PERSON_AGE(ReportFilter.FIELD_PERSON_AGE, MessageID.field_person_age),
-        CONTENT_COMPLETION(ReportFilter.FIELD_CONTENT_COMPLETION, MessageID.field_content_completion),
-        CONTENT_ENTRY(ReportFilter.FIELD_CONTENT_ENTRY, MessageID.field_content_entry),
-        CONTENT_PROGRESS(ReportFilter.FIELD_CONTENT_PROGRESS, MessageID.field_content_progress),
-        ATTENDANCE_PERCENTAGE(ReportFilter.FIELD_ATTENDANCE_PERCENTAGE, MessageID.field_attendance_percentage),
-        ENROLMENT_OUTCOME(ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME, MessageID.class_enrolment_outcome),
-        ENROLMENT_LEAVING_REASON(ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON, MessageID.class_enrolment_leaving)
+        LE_GENDER(ReportFilter.FIELD_LE_GENDER, MessageID.gender_literal),
+        SALE_AMOUNT(ReportFilter.FIELD_SALE_AMOUNT, MessageID.sales_total_afs),
+        LOCATION(ReportFilter.FIELD_LOCATION, MessageID.province),
+        CATEGORY(ReportFilter.FIELD_CATEGORY, MessageID.category),
+        LE(ReportFilter.FIELD_LE, MessageID.le)
+
     }
 
     class FieldMessageIdOption(day: FieldOption, context: Any)
@@ -143,7 +141,41 @@ class ReportFilterEditPresenter(context: Any,
                     uidAndLabelOneToManyHelper.liveList.sendValue(reasons)
                 }
 
+            }else if (entity.reportFilterField == ReportFilter.FIELD_LE) {
+                if (entity.reportFilterValue != null && entity.reportFilterValue?.isNotEmpty() == true) {
+                    val entries = withTimeoutOrNull(2000) {
+                        db.personDao.getPeopleFromUids(
+                                entity.reportFilterValue?.split(", ")
+                                        ?.map { it.toLong() }
+                                        ?: listOf())
+                    } ?: listOf()
+                    uidAndLabelOneToManyHelper.liveList.sendValue(entries)
+
+                }
+            }else if (entity.reportFilterField == ReportFilter.FIELD_LOCATION) {
+                if (entity.reportFilterValue != null && entity.reportFilterValue?.isNotEmpty() == true) {
+                    val entries = withTimeoutOrNull(2000) {
+                        db.locationDao.getLocationsFromUids(
+                                entity.reportFilterValue?.split(", ")
+                                        ?.map { it.toLong() }
+                                        ?: listOf())
+                    } ?: listOf()
+                    uidAndLabelOneToManyHelper.liveList.sendValue(entries)
+
+                }
+            }else if (entity.reportFilterField == ReportFilter.FIELD_CATEGORY) {
+                if (entity.reportFilterValue != null && entity.reportFilterValue?.isNotEmpty() == true) {
+                    val entries = withTimeoutOrNull(2000) {
+                        db.categoryDao.getCategoriesFromUids(
+                                entity.reportFilterValue?.split(", ")
+                                        ?.map { it.toLong() }
+                                        ?: listOf())
+                    } ?: listOf()
+                    uidAndLabelOneToManyHelper.liveList.sendValue(entries)
+
+                }
             }
+
             uidhelperDeferred.complete(true)
         }
 
@@ -153,7 +185,7 @@ class ReportFilterEditPresenter(context: Any,
 
     fun handleFieldOptionSelected(fieldOption: IdOption) {
         when (fieldOption.optionId) {
-            ReportFilter.FIELD_PERSON_GENDER -> {
+            ReportFilter.FIELD_LE_GENDER -> {
 
                 view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
                         ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
@@ -163,47 +195,39 @@ class ReportFilterEditPresenter(context: Any,
                         .map { MessageIdOption(it.value, context, it.key) }
             }
 
-            ReportFilter.FIELD_PERSON_AGE -> {
+            ReportFilter.FIELD_SALE_AMOUNT -> {
 
                 view.conditionsOptions = listOf(ConditionOption.GREATER_THAN_CONDITION,
                         ConditionOption.LESS_THAN_CONDITION, ConditionOption.BETWEEN_CONDITION).map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.INTEGER
 
             }
-            ReportFilter.FIELD_CONTENT_COMPLETION -> {
 
-                view.conditionsOptions = listOf(ConditionOption.IS_CONDITION).map { ConditionMessageIdOption(it, context) }
-                view.valueType = FilterValueType.DROPDOWN
-                view.dropDownValueOptions = ContentCompletionStatusOption.values()
-                        .map { ContentCompletionStatusMessageIdOption(it, context) }
-            }
-            ReportFilter.FIELD_CONTENT_ENTRY -> {
+            ReportFilter.FIELD_LOCATION  -> {
 
                 view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
                         ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.LIST
-                view.createNewFilter = systemImpl.getString(MessageID.add_content_filter, context)
+                view.createNewFilter = systemImpl.getString(MessageID.locations, context)
 
             }
-            ReportFilter.FIELD_ATTENDANCE_PERCENTAGE, ReportFilter.FIELD_CONTENT_PROGRESS -> {
+            ReportFilter.FIELD_CATEGORY  -> {
 
-                view.conditionsOptions = listOf(ConditionOption.BETWEEN_CONDITION)
-                        .map { ConditionMessageIdOption(it, context) }
-                view.valueType = FilterValueType.BETWEEN
-            }
-            ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME -> {
-                view.conditionsOptions = listOf(ConditionOption.IS_CONDITION,
-                        ConditionOption.IS_NOT_CONDITION).map { ConditionMessageIdOption(it, context) }
-                view.valueType = FilterValueType.DROPDOWN
-                view.dropDownValueOptions = OUTCOME_TO_MESSAGE_ID_MAP.map {
-                    MessageIdOption(it.value, context, it.key) }
-            }
-            ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON -> {
                 view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
                         ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context) }
                 view.valueType = FilterValueType.LIST
-                view.createNewFilter = systemImpl.getString(MessageID.add_leaving_reason, context)
+                view.createNewFilter = systemImpl.getString(MessageID.categories, context)
+
             }
+            ReportFilter.FIELD_LE  -> {
+
+                view.conditionsOptions = listOf(ConditionOption.IN_LIST_CONDITION,
+                        ConditionOption.NOT_IN_LIST_CONDITION).map { ConditionMessageIdOption(it, context) }
+                view.valueType = FilterValueType.LIST
+                view.createNewFilter = systemImpl.getString(MessageID.le, context)
+
+            }
+
         }
 
     }
@@ -224,7 +248,10 @@ class ReportFilterEditPresenter(context: Any,
         super.onSaveInstanceState(savedState)
         val entityVal = entity
         if (entityVal?.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY ||
-                entityVal?.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON) {
+                entityVal?.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON ||
+                entityVal?.reportFilterField == ReportFilter.FIELD_LE ||
+                entityVal?.reportFilterField == ReportFilter.FIELD_LOCATION ||
+                entityVal?.reportFilterField == ReportFilter.FIELD_CATEGORY ){
             entityVal.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
                     ?.joinToString { it.uid.toString() }
         }
@@ -245,7 +272,10 @@ class ReportFilterEditPresenter(context: Any,
             view.conditionsErrorText = null
         }
         if (entity.reportFilterField == ReportFilter.FIELD_CONTENT_ENTRY ||
-                entity.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON) {
+                entity.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON ||
+                entity.reportFilterField == ReportFilter.FIELD_LE ||
+                entity.reportFilterField == ReportFilter.FIELD_CATEGORY ||
+                entity.reportFilterField == ReportFilter.FIELD_LOCATION ) {
             entity.reportFilterValue = uidAndLabelOneToManyHelper.liveList.getValue()
                     ?.joinToString { it.uid.toString() }
         }

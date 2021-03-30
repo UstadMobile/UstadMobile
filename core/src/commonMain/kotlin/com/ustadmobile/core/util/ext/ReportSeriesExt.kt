@@ -162,30 +162,26 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
 
             when(filter.reportFilterField){
 
-                ReportFilter.FIELD_PERSON_AGE -> {
+                ReportFilter.FIELD_SALE_AMOUNT -> {
 
-                    var filterString = "Person.dateOfBirth "
-                    val age = filter.reportFilterValue?.toInt() ?: 13
-                    val betweenAgeX = filter.reportFilterValueBetweenX?.toInt() ?: 13
-                    val betweenAgeY = filter.reportFilterValueBetweenY?.toInt() ?: 18
-                    val now = DateTime.now()
-                    val dateTimeAgeNow = now - age.years
-                    val dateTimeAgeX = now - betweenAgeX.years
-                    val dateTimeAgeY = now - betweenAgeY.years
+                    var filterString = " (SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) -  (Sale.saleDiscount) "
+                    val amount = filter.reportFilterValue?.toInt() ?: 0
+                    val betweenX = filter.reportFilterValueBetweenX?.toInt() ?: 0
+                    val betweenY = filter.reportFilterValueBetweenY?.toInt() ?: 0
+
                     filterString += handleCondition(filter.reportFilterCondition)
                     when(filter.reportFilterCondition){
-                        ReportFilter.CONDITION_GREATER_THAN -> filterString += "${dateTimeAgeNow.dateDayStart.unixMillisLong} "
-                        ReportFilter.CONDITION_LESS_THAN -> filterString += "${dateTimeAgeNow.dateDayStart.unixMillisLong} "
+                        ReportFilter.CONDITION_GREATER_THAN -> filterString += "${amount} "
+                        ReportFilter.CONDITION_LESS_THAN -> filterString += "${amount} "
                         ReportFilter.CONDITION_BETWEEN -> {
-                            filterString += """ ${dateTimeAgeX.dateDayStart.unixMillisLong} 
-                                AND ${dateTimeAgeY.dateDayStart.unixMillisDouble} """
+                            filterString += """ ${betweenX} AND ${betweenY} """
                         }
                     }
                     whereList.add(filterString)
                 }
-                ReportFilter.FIELD_PERSON_GENDER ->{
+                ReportFilter.FIELD_LE_GENDER ->{
 
-                    var filterString = "Person.gender "
+                    var filterString = "SaleLE.gender "
                     filterString += handleCondition(filter.reportFilterCondition)
                     filterString += "${filter.reportFilterDropDownValue} "
                     whereList += (filterString)
@@ -202,51 +198,31 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                     whereList += (filterString)
 
                 }
-                ReportFilter.FIELD_CONTENT_ENTRY ->{
+                ReportFilter.FIELD_LOCATION ->{
 
-                    var filterString = "StatementEntity.statementContentEntryUid "
+                    var filterString = "Location.locationUid "
                     filterString += handleCondition(filter.reportFilterCondition)
                     filterString += "(${filter.reportFilterValue}) "
                     whereList += (filterString)
 
                 }
-                ReportFilter.FIELD_ATTENDANCE_PERCENTAGE ->{
+                ReportFilter.FIELD_LE ->{
 
-                    var filterString = """(SELECT ((CAST(COUNT(DISTINCT CASE WHEN 
-            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
-            THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) 
-            AS REAL) / MAX(COUNT(ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) as attendance FROM ClazzLogAttendanceRecord) """
-                    filterString += handleCondition(filter.reportFilterCondition)
-                    filterString += """ ${filter.reportFilterValueBetweenX} 
-                        AND ${filter.reportFilterValueBetweenY} """
-                    whereList += (filterString)
-
-                }
-                ReportFilter.FIELD_CONTENT_PROGRESS -> {
-
-                    var filterString = "StatementEntity.extensionProgress "
-                    filterString += handleCondition(filter.reportFilterCondition)
-                    filterString += """ ${filter.reportFilterValueBetweenX} 
-                        AND ${filter.reportFilterValueBetweenY} """
-                    whereList += (filterString)
-
-                }
-                ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON -> {
-
-                    var filterString = "ClazzEnrolment.clazzEnrolmentLeavingReasonUid "
+                    var filterString = "SaleLE.personUid "
                     filterString += handleCondition(filter.reportFilterCondition)
                     filterString += "(${filter.reportFilterValue}) "
                     whereList += (filterString)
 
                 }
-                ReportFilter.FIELD_CLAZZ_ENROLMENT_OUTCOME -> {
+                ReportFilter.FIELD_CATEGORY ->{
 
-                    var filterString = "ClazzEnrolment.clazzEnrolmentOutcome "
+                    var filterString = "Category.categoryUid "
                     filterString += handleCondition(filter.reportFilterCondition)
-                    filterString += "${filter.reportFilterDropDownValue} "
+                    filterString += "(${filter.reportFilterValue}) "
                     whereList += (filterString)
 
                 }
+
             }
         }
         if (report.reportDateRangeSelection != 0) {

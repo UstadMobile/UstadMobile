@@ -9,7 +9,7 @@ open class ReportFilter {
 
     var reportFilterSeriesUid: Long = 0
 
-    var reportFilterField: Int = FIELD_PERSON_GENDER
+    var reportFilterField: Int = FIELD_LE_GENDER
 
     var reportFilterCondition: Int = 0
 
@@ -52,6 +52,17 @@ open class ReportFilter {
         const val CONDITION_IN_LIST = 206
 
         const val CONDITION_NOT_IN_LIST = 207
+
+        const val FIELD_SALE_AMOUNT = 208
+
+        const val FIELD_LOCATION = 209
+
+        const val FIELD_CATEGORY = 210
+
+        const val FIELD_LE_GENDER = 211
+
+        const val FIELD_LE = 212
+
 
     }
 

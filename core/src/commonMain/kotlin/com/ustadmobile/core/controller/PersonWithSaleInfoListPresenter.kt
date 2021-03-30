@@ -87,14 +87,6 @@ class PersonWithSaleInfoListPresenter(context: Any, arguments: Map<String, Strin
                 context)
     }
 
-//    override fun handleClickSortOrder(sortOption: MessageIdOption) {
-//        val sortOrder = (sortOption as? PersonWithSaleInfoListSortOption)?.sortOrder ?: return
-//        if(sortOrder != currentSortOrder) {
-//            currentSortOrder = sortOrder
-//            updateListOnView()
-//        }
-//    }
-
     override fun onClickPersonWithSaleInfo(personWithSaleInfo: PersonWithSaleInfo) {
         systemImpl.go(PersonDetailView.VIEW_NAME,
                 mapOf(UstadView.ARG_ENTITY_UID to personWithSaleInfo.personUid.toString()),

@@ -213,6 +213,35 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
                 labelName = entry.title
             })
         }
+        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                Person::class.java) {
+            val entry = it.firstOrNull() ?: return@observeResult
+
+            mPresenter?.handleAddOrEditUidAndLabel(UidAndLabel().apply {
+                uid = entry.personUid
+                labelName = entry.fullName()
+            })
+        }
+
+        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                Location::class.java) {
+            val entry = it.firstOrNull() ?: return@observeResult
+
+            mPresenter?.handleAddOrEditUidAndLabel(UidAndLabel().apply {
+                uid = entry.locationUid
+                labelName = entry.locationTitle
+            })
+        }
+
+        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(this,
+                Category::class.java) {
+            val entry = it.firstOrNull() ?: return@observeResult
+
+            mPresenter?.handleAddOrEditUidAndLabel(UidAndLabel().apply {
+                uid = entry.categoryUid
+                labelName = entry.categoryName
+            })
+        }
 
         findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(this,
                 LeavingReason::class.java) {
@@ -269,6 +298,13 @@ class ReportFilterEditFragment : UstadEditFragment<ReportFilter>(), ReportFilter
                             UstadView.ARG_PARENT_ENTRY_UID to UstadView.MASTER_SERVER_ROOT_ENTRY_UID.toString()))
         }else if(entity?.reportFilterField == ReportFilter.FIELD_CLAZZ_ENROLMENT_LEAVING_REASON){
             navigateToPickEntityFromList(LeavingReason::class.java, R.id.leaving_reason_list)
+        }else if(entity?.reportFilterField == ReportFilter.FIELD_LE){
+            navigateToPickEntityFromList(Person::class.java, R.id.person_list_dest,
+                bundleOf(UstadView.ARG_FILTER_PERSON_LE to "true"))
+        }else if(entity?.reportFilterField == ReportFilter.FIELD_LOCATION){
+            navigateToPickEntityFromList(Location::class.java, R.id.location_list_dest)
+        }else if(entity?.reportFilterField == ReportFilter.FIELD_CATEGORY){
+            navigateToPickEntityFromList(Category::class.java, R.id.category_list_dest)
         }
     }
 
