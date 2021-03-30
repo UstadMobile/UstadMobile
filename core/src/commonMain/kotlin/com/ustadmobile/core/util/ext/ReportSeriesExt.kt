@@ -61,7 +61,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         TOTAL_CLASSES -> """COUNT(DISTINCT ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid) As yAxis, """
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> """COUNT(DISTINCT CASE WHEN 
             ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN
-            StatementEntity.statementPersonUid ELSE NULL END) As yAxis, """.trimMargin()
+            ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid ELSE NULL END) As yAxis, """.trimMargin()
         NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """COUNT(DISTINCT CASE WHEN (StatementEntity.resultCompletion 
             AND StatementEntity.contentEntryRoot AND StatementEntity.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
             THEN StatementEntity.statementPersonUid ELSE NULL END) as yAxis, """.trimMargin()
