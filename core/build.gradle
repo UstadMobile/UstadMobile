@@ -1,3 +1,6 @@
+import groovy.json.JsonBuilder
+import org.json.JSONObject
+
 import java.util.concurrent.atomic.AtomicInteger
 
 plugins {
@@ -7,10 +10,8 @@ plugins {
     id 'com.android.library'
     id 'kotlin-android-extensions'
     id 'maven-publish'
+    id 'com.github.eerohele.saxon-gradle'
 }
-
-group rootProject.group
-version rootProject.version
 
 
 android {
@@ -53,6 +54,7 @@ targetCompatibility = '1.8'
 
 group rootProject.group
 version rootProject.version
+def reactLocaleOutPath = "${rootDir.absolutePath}/app-react/src/main/resources/"
 
 // workaround for https://youtrack.jetbrains.com/issue/KT-27170
 configurations {
@@ -247,6 +249,52 @@ task prepareLocale {
     }
 }
 
+task prepareLocalization{
+    Map<String, Integer> messageIds = new HashMap<>()
+    AtomicInteger messageIdGenerator = new AtomicInteger(2000)
+    def fileJsonObject = new JSONObject()
+    File outFile = project.file("${reactLocaleOutPath}localization.json")
+
+    if(!outFile.getParentFile().exists()) {
+        outFile.getParentFile().mkdirs()
+    }
+
+    rootProject.fileTree(dir: "core/locale/main").each() { File file ->
+        def localeCode = "en"
+        def contentJsonObject = new JSONObject()
+
+        def pathString = file.absolutePath.substring(file.absolutePath.lastIndexOf("values"))
+        if(pathString.split("-").size() > 1){
+            localeCode = file.getParent().substring(file.getParent().lastIndexOf("-") + 1)
+        }
+
+        def xmlDoc = new XmlSlurper().parseText(file.getText("UTF-8"))
+        def value = 0
+        xmlDoc.string.each() { str ->
+            String msgName = str.@name
+            String msgValue = str
+            if (!messageIds.containsKey(msgName)) {
+                if (str.attributes().get("value") != null) {
+                    value = new Integer(str.attributes().get("value"))
+                } else {
+                    value = new Integer(messageIdGenerator.getAndIncrement())
+                }
+                messageIds.put(msgName, value as Integer)
+            }else{
+                value = messageIds.get(msgName)
+            }
+
+            msgValue = msgValue.replace("\n","").replace("\\", "\\\\").replace("\"","\\\"")
+            contentJsonObject.put("$value",msgValue)
+        }
+        fileJsonObject.put(localeCode, contentJsonObject)
+    }
+
+    FileWriter jsonFile = new FileWriter(outFile.absolutePath)
+    jsonFile.write(fileJsonObject.toString(4))
+    jsonFile.flush()
+}
+
 tasks.whenTaskAdded { task ->
     if (task.name == "compileTestKotlinJvm") {
         task.dependsOn(copyTestResources)
@@ -258,7 +306,7 @@ tasks.whenTaskAdded { task ->
 }
 
 gradle.projectsEvaluated {
-    preBuild.dependsOn(prepareLocale)
+    preBuild.dependsOn(prepareLocale, prepareLocalization)
 }
 
 publishing {

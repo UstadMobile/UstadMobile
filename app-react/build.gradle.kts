@@ -3,9 +3,6 @@ plugins {
     id ("org.jetbrains.kotlin.js")
 }
 
-val group = rootProject.group
-val version = rootProject.version
-
 repositories {
     jcenter()
     mavenCentral()

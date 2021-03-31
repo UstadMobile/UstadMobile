@@ -24,6 +24,7 @@ buildscript {
         classpath "org.jetbrains.kotlinx:atomicfu-gradle-plugin:$atomicfu_version"
         classpath "com.github.jengelman.gradle.plugins:shadow:$version_shadow"
         classpath "com.gradle:gradle-enterprise-gradle-plugin:3.1.1"
+        classpath "gradle.plugin.com.github.eerohele:saxon-gradle:0.9.0-beta1"
         classpath "com.github.ben-manes:gradle-versions-plugin:$version_gradle_versions_plugin"
 
         // NOTE: Do not place your application dependencies here; they belong
@@ -84,11 +85,11 @@ ext {
     version_door = "0.0.4"
     version_xmlpullparserkmp = '0.0.8'
 
-    version_kotlin_react = "17.0.1-pre.145-kotlin-1.4.30"
-    version_kotlin_react_router_dom = "5.2.0-pre.145-kotlin-1.4.30"
-    version_kotlin_styled = "5.2.1-pre.145-kotlin-1.4.30"
-    version_kotlin_redux = "4.0.5-pre.145-kotlin-1.4.30"
-    version_kotlin_react_redux = "7.2.2-pre.145-kotlin-1.4.30"
+    version_kotlin_react = "17.0.1-pre.148-kotlin-1.4.30"
+    version_kotlin_react_router_dom = "5.2.0-pre.148-kotlin-1.4.30"
+    version_kotlin_styled = "5.2.1-pre.148-kotlin-1.4.30"
+    version_kotlin_redux = "4.0.5-pre.148-kotlin-1.4.30"
+    version_kotlin_react_redux = "7.2.2-pre.148-kotlin-1.4.30"
     version_muirwik_components = "0.6.7"
 
     version_gradle_buildconfig_plugin = "1.1.7"
