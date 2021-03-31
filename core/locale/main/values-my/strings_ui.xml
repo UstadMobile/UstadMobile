@@ -4,4 +4,23 @@
     <string name="err_registering_new_user">မှားယွင်းနေသည်အသုံးပြုသူအသစ်မှတ်ပုံတင်:</string>
     <string name="error">အမှား</string>
     <string name="register_empty_fields">အားလုံးလိုအပ်သောကွက်လပ်များကိုဖြည့်စွက်ပေးပါ</string>
+    <string name="confirm_delete_message">ဤကိရိယာကိုသင်၏ကိရိယာမှဖျက်လိုကြောင်းသေချာပါသလား။\?</string>
+    <string name="wrong_user_pass_combo">အသုံးပြုသူအမည်/လျှို့ဝှက်နံပါတ်မမှန်ပါ.</string>
+    <string name="login_network_error">ကွန်ယက်အမှား - ကျေးဇူးပြု၍ အွန်လိုင်းတွင်စစ်ဆေးပါ.</string>
+    <string name="cancel">ပယ်ဖျက်ပါ</string>
+    <string name="app_name">ဆရာ မိုဘိုင်</string>
+    <string name="register_incorrect_email">မှားအီးမေးလ်လိပ်စာ</string>
+    <string name="group_activity">အုပ်စု
+\nလှုပ်ရှားမှု</string>
+    <string name="select_group_members">အဖွဲ့ ၀ င်များရွေးချယ်ပါ</string>
+    <string name="download">ဒေါင်းလုပ်</string>
+    <string name="downloaded" value="81">ဒေါင်းလုပ်</string>
+    <string name="recycled">ပြန်လည်အသုံးပြု</string>
+    <string name="libraries">စာကြည့်တိုက်များ</string>
+    <string name="pause_download">ဒေါင်းလုပ်ခေတ္တရပ်နားပါ</string>
+    <string name="ok">ရလား</string>
+    <string name="confirm">အတည်ပြုပါ</string>
+    <string name="canceled">ဖျက်သိမ်းခဲ့သည်</string>
+    <string name="delete">ဖျက်ပါ</string>
+    <string name="deleted">ဖျက်လိုက်သည်</string>
 </resources>
