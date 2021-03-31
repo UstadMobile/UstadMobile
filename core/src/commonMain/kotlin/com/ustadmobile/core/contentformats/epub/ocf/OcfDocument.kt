@@ -31,8 +31,8 @@
 
 package com.ustadmobile.core.contentformats.epub.ocf
 
-import org.kmp.io.KMPPullParser
-import org.kmp.io.KMPXmlParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
 
 
 /**
@@ -50,19 +50,19 @@ class OcfDocument {
     }
 
 
-    fun loadFromParser(xpp: KMPXmlParser) {
+    fun loadFromParser(xpp: XmlPullParser) {
         var evtType: Int
 
         do {
             evtType = xpp.next()
-            if (evtType == KMPPullParser.START_TAG) {
+            if (evtType == XmlPullParserConstants.START_TAG) {
                 if (ROOTFILETAG == xpp.getName()) {
                     val fullPath = xpp.getAttributeValue(null, "full-path")
                     val mediaType = xpp.getAttributeValue(null, "media-type")
                     rootFiles.add(OcfRootFile(fullPath, mediaType))
                 }
             }
-        } while (evtType != KMPPullParser.END_DOCUMENT)
+        } while (evtType != XmlPullParserConstants.END_DOCUMENT)
     }
 
     fun getRootFiles(): List<OcfRootFile> {

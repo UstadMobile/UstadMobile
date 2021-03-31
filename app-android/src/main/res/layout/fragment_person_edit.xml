@@ -20,6 +20,9 @@
             name="personPictureUri"
             type="String" />
 
+        <variable
+            name="imageViewLifecycleObserver"
+            type="com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2" />
 
         <variable
             name="loading"
@@ -103,6 +106,7 @@
                 android:layout_marginTop="@dimen/dimen_8dp"
                 app:civ_circle_background_color="?colorSecondary"
                 app:imageUri="@={personPicture.personPictureUri}"
+                app:imageViewLifecycleObserver="@{imageViewLifecycleObserver}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />

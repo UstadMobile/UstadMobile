@@ -78,9 +78,8 @@
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1" />
             </com.google.android.material.textfield.TextInputLayout>
 
-            <com.google.android.material.progressindicator.ProgressIndicator
+            <com.google.android.material.progressindicator.CircularProgressIndicator
                 android:id="@+id/progressBar"
-                style="@style/Widget.MaterialComponents.ProgressIndicator.Circular.Indeterminate"
                 app:indicatorColor="?colorPrimary"
                 app:trackColor="@color/primaryLightVariantColor"
                 android:layout_marginStart="@dimen/dimen_8dp"

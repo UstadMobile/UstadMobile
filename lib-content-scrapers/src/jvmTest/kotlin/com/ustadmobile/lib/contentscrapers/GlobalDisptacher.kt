@@ -5,6 +5,8 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
 import okio.Okio
+import okio.buffer
+import okio.source
 import org.apache.commons.io.IOUtils
 import java.io.File
 import java.io.IOException
@@ -15,10 +17,10 @@ val globalDisptacher: Dispatcher = object : Dispatcher() {
     override fun dispatch(request: RecordedRequest): MockResponse {
 
         try {
+            val requestPath = request.path ?: ""
+            if (requestPath.contains("json")) {
 
-            if (request.path.contains("json")) {
-
-                val fileName = request.path.substringAfter("json")
+                val fileName = requestPath.substringAfter("json")
 
                 val data = javaClass.getResourceAsStream(fileName)
                         ?: return MockResponse().setResponseCode(404)
@@ -30,22 +32,22 @@ val globalDisptacher: Dispatcher = object : Dispatcher() {
 
                 return response
 
-            } else if (request.path.contains("content")) {
+            } else if (requestPath.contains("content")) {
 
-                val fileLocation = request.path.substringAfter("content")
+                val fileLocation = requestPath.substringAfter("content")
                 val videoIn = javaClass.getResourceAsStream(fileLocation)
                         ?: return MockResponse().setResponseCode(404)
-                val source = Okio.buffer(Okio.source(videoIn))
+                val source =  videoIn.source().buffer()
                 val buffer = Buffer()
                 source.readAll(buffer)
 
                 val mimeType = Files.probeContentType(File(fileLocation).toPath())
 
                 val response = MockResponse().setResponseCode(200)
-                response.setHeader("ETag", (buffer.size().toString() + "ABC").hashCode())
+                response.setHeader("ETag", (buffer.size.toString() + "ABC").hashCode())
                 response.setHeader("Content-Type", mimeType)
                 if (!request.method.equals("HEAD", ignoreCase = true))
-                    response.body = buffer
+                    response.setBody(buffer)
 
                 return response
 

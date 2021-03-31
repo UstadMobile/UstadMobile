@@ -2,8 +2,8 @@ package com.ustadmobile.port.android.view
 
 import android.os.Bundle
 import android.view.*
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.MergeAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.ItemPersonListItemBinding
@@ -113,7 +113,7 @@ class PersonListFragment() : UstadListViewFragment<Person, PersonWithDisplayDeta
                 onClickSort = this, sortOrderOption = mPresenter?.sortOptions?.get(0))
 
         mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
-        mMergeRecyclerViewAdapter = MergeAdapter(mUstadListHeaderRecyclerViewAdapter,
+        mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,
                 inviteWithLinkRecyclerViewAdapter,
                 mDataRecyclerViewAdapter , mListStatusAdapter)
         mDataBinding?.fragmentListRecyclerview?.adapter = mMergeRecyclerViewAdapter

@@ -14,8 +14,8 @@ import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_TARGET
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_TITLE
 import com.ustadmobile.core.contentformats.opds.OpdsEntry.Companion.ATTR_UPDATED
 import com.ustadmobile.core.util.UMCalendarUtil
-import org.kmp.io.KMPPullParser
-import org.kmp.io.KMPXmlParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
 
 class OpdsFeed {
 
@@ -32,13 +32,13 @@ class OpdsFeed {
     var entryList: MutableList<OpdsEntry> = mutableListOf()
 
 
-    fun loadFromParser(xpp: KMPXmlParser) {
+    fun loadFromParser(xpp: XmlPullParser) {
 
         var evtType = xpp.getEventType()
 
         do {
 
-            if (evtType == KMPPullParser.START_TAG) {
+            if (evtType == XmlPullParserConstants.START_TAG) {
                 var name = xpp.getName()
                 when (name) {
                     TAG_ID -> id = xpp.nextText()!!
@@ -47,9 +47,9 @@ class OpdsFeed {
                         updated = UMCalendarUtil.parseOpdsDate(xpp.nextText()!!)
                     }
                     TAG_ENTRY -> {
-                        var entry = OpdsEntry()
+                        val entry = OpdsEntry()
                         do {
-                            if (evtType == KMPPullParser.START_TAG) {
+                            if (evtType == XmlPullParserConstants.START_TAG) {
                                 name = xpp.getName()
                                 when (name) {
                                     ATTR_ID -> entry.id = xpp.nextText()!!
@@ -80,7 +80,7 @@ class OpdsFeed {
                             }
                             evtType = xpp.next()
 
-                        } while (!(evtType == KMPPullParser.END_TAG && xpp.getName() == "entry"))
+                        } while (!(evtType == XmlPullParserConstants.END_TAG && xpp.getName() == "entry"))
 
                         entryList.add(entry)
 
@@ -96,12 +96,12 @@ class OpdsFeed {
 
             evtType = xpp.next()
 
-        } while (evtType != KMPPullParser.END_DOCUMENT)
+        } while (evtType != XmlPullParserConstants.END_DOCUMENT)
 
 
     }
 
-    private fun createLink(xpp: KMPXmlParser): OpdsLink {
+    private fun createLink(xpp: XmlPullParser): OpdsLink {
         val link = OpdsLink()
         link.href = xpp.getAttributeValue(null, OpdsLink.ATTR_HREF)!!
         link.rel = xpp.getAttributeValue(null, OpdsLink.ATTR_REL)!!

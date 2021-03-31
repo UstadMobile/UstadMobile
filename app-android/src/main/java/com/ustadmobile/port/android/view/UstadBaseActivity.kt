@@ -171,8 +171,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
         }
-        //bind to the LRS forwarding service
-        instance.handleActivityCreate(this, savedInstanceState)
         super.onCreate(savedInstanceState)
         localeOnCreate = instance.getDisplayedLocale(this)
 

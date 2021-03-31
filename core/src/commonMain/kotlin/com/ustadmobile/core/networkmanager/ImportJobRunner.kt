@@ -68,7 +68,7 @@ class ImportJobRunner(private val containerImportJob: ContainerImportJob, privat
         val params = containerImportJob.cijConversionParams
         var conversionParams: Map<String, String> = mapOf()
         if(params != null){
-            conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+            conversionParams = Json.decodeFromString(MapSerializer(String.serializer(), String.serializer()), params)
         }
 
         val importProgressUpdateJob = GlobalScope.async { progressUpdater() }

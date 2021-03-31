@@ -18,7 +18,9 @@ import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
 import com.ustadmobile.util.test.ext.insertClazzLogs
 import com.ustadmobile.util.test.ext.insertTestClazzAndMembers
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import org.junit.After
 import org.junit.Assert
 import org.junit.Rule
@@ -94,9 +96,6 @@ class ClazzLogListAttendanceFragmentTest : TestCase() {
     fun givenListOfRecordedClazzLogs_whenCreated_thenGraphShouldShow() {
 
         init {
-
-            systemImplNavRule.navController.setGraph(R.navigation.mobile_navigation)
-
             val testClazz = Clazz("Test Clazz").apply {
                 clazzTimeZone = "Asia/Dubai"
                 clazzUid = dbRule.repo.clazzDao.insert(this)

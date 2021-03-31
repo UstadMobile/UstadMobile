@@ -36,9 +36,11 @@ import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.createTempFileForDestination
 import com.ustadmobile.port.android.view.PersonAccountEditFragment.Companion.USERNAME_FILTER
+import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
+import kotlinx.coroutines.runBlocking
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.File
@@ -284,6 +286,8 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             field = value
         }
 
+    private var imageViewLifecycleObserver: ImageViewLifecycleObserver2? = null
+
     override fun navigateToNextDestination(account: UmAccount?, nextDestination: String) {
         val navController = findNavController()
         val destinationProvider: DestinationProvider = di.direct.instance()
@@ -325,12 +329,21 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
     }
 
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+
+        imageViewLifecycleObserver = ImageViewLifecycleObserver2(
+            requireActivity().activityResultRegistry,null, 1).also {
+            lifecycle.addObserver(it)
+        }
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         val rootView: View
         mBinding = FragmentPersonEditBinding.inflate(inflater, container, false).also {
             rootView = it.root
+            it.imageViewLifecycleObserver = imageViewLifecycleObserver
             it.clazzlistRecyclerview.layoutManager = LinearLayoutManager(requireContext())
             it.rolesAndPermissionsRv.layoutManager = LinearLayoutManager(requireContext())
             it.isAdmin = canDelegatePermissions?:false
@@ -352,10 +365,10 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 requireContext().getString(R.string.add_role_permission)).apply {
             newItemVisible = true
         }
-        mBinding?.clazzlistRecyclerview?.adapter = MergeAdapter(clazzEnrolmentWithClazzRecyclerAdapter,
+        mBinding?.clazzlistRecyclerview?.adapter = ConcatAdapter(clazzEnrolmentWithClazzRecyclerAdapter,
                 clazzMemberUstadListHeaderRecyclerViewAdapter)
 
-        mBinding?.rolesAndPermissionsRv?.adapter = MergeAdapter(rolesAndPermissionRecyclerAdapter,
+        mBinding?.rolesAndPermissionsRv?.adapter = ConcatAdapter(rolesAndPermissionRecyclerAdapter,
                 rolesAndPermissionUstadListHeaderRecyclerViewAdapter)
 
         mBinding?.usernameText?.addTextChangedListener(ClearErrorTextWatcher {

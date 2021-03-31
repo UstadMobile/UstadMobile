@@ -15,8 +15,12 @@ import com.ustadmobile.lib.db.entities.ContainerImportJob
 import com.ustadmobile.lib.db.entities.ContentEntry
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -91,7 +95,11 @@ open class ContentImportManagerImpl(val contentPlugins: List<ContentTypePlugin>,
             this.cijMimeType = metadata.mimeType
             this.cijContainerBaseDir = containerBaseDir
             this.cijJobStatus = JobStatus.QUEUED
-            this.cijConversionParams = Json.stringify(JsonObject.serializer(), conversionParams.convertToJsonObject())
+            //This used to use encodeToString(JsonObject), but there is a bug that makes this crash
+            //when obfuscation is enabled.
+            //Previously: Json.encodeToString(JsonObject.serializer(), conversionParams.convertToJsonObject())
+            this.cijConversionParams = Json.encodeToString(
+                MapSerializer(String.serializer(), String.serializer()), conversionParams)
             cijUid = db.containerImportJobDao.insertAsync(this)
         }
     }

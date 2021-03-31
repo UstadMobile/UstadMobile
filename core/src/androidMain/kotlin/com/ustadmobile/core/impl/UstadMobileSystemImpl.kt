@@ -122,13 +122,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         }
     }
 
-
-    fun handleActivityCreate(mContext: Activity, savedInstanceState: Bundle?) {
-        init(mContext)
-    }
-
-
-
     /**
      * Simple async task to handle getting the setup file
      * Param 0 = boolean - true to zip, false otherwise
@@ -219,10 +212,10 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             //Note: default could be set using style as per https://stackoverflow.com/questions/50482095/how-do-i-define-default-animations-for-navigation-actions
             val options = navOptions {
                 anim {
-                    enter = androidx.navigation.ui.R.anim.fragment_open_enter
-                    exit = androidx.navigation.ui.R.anim.fragment_close_exit
-                    popEnter = androidx.navigation.ui.R.anim.fragment_open_enter
-                    popExit = androidx.navigation.ui.R.anim.fragment_close_exit
+                    enter = android.R.anim.slide_in_left
+                    exit = android.R.anim.slide_out_right
+                    popEnter = android.R.anim.slide_in_left
+                    popExit = android.R.anim.slide_out_right
                 }
 
                 val popUpToViewName = ustadGoOptions.popUpToViewName

@@ -72,7 +72,7 @@ class SiteDetailFragment: UstadDetailFragment<Site>(), SiteDetailView, Workspace
 
     private var mSiteTermsRecyclerViewAdapter: SiteTermsRecyclerViewAdapter? = null
 
-    private var mMergeAdapter: MergeAdapter? = null
+    private var mMergeAdapter: ConcatAdapter? = null
 
     override var entity: Site? = null
         set(value) {
@@ -129,7 +129,7 @@ class SiteDetailFragment: UstadDetailFragment<Site>(), SiteDetailView, Workspace
                 requireContext().getString(R.string.terms_and_policies)).also  {
                     it.visible = true
         }
-        mMergeAdapter = MergeAdapter(siteRecyclerViewAdapter, termsHeaderRecyclerViewAdapter,
+        mMergeAdapter = ConcatAdapter(siteRecyclerViewAdapter, termsHeaderRecyclerViewAdapter,
                 mSiteTermsRecyclerViewAdapter)
 
         mBinding?.fragmentListRecyclerview?.apply {

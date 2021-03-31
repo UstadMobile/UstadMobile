@@ -3,9 +3,7 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.SyncResult
-import com.ustadmobile.lib.database.annotation.UmRepository
 
-@UmRepository
 @Dao
 abstract class SyncResultDao : BaseDao<SyncResult> {
 

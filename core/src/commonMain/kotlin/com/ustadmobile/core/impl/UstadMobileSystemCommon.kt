@@ -4,9 +4,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView
-import kotlinx.io.InputStream
-import org.kmp.io.KMPSerializerParser
-import org.kmp.io.KMPXmlParser
 import kotlin.js.JsName
 import kotlin.jvm.JvmOverloads
 
@@ -15,17 +12,8 @@ import kotlin.jvm.JvmOverloads
  */
 abstract class UstadMobileSystemCommon {
 
-    /**
-     * Returns whether or not the init method has already been run
-     *
-     * @return true if init has been called with a first context used to load certain resources,
-     * false otherwise
-     */
-    private var isInitialized: Boolean = false
-
     //for testing purpose only
     var networkManager: Any? = null
-
 
     /**
      * The currently active locale
@@ -55,20 +43,6 @@ abstract class UstadMobileSystemCommon {
      * The last destination that was called via the go method. This is used for testing purposes.
      */
     internal var lastDestination: LastGoToDest? = null
-
-    /**
-     * Do any required startup operations: init will be called on creation
-     *
-     * This must make the shared content directory if it does not already exist
-     */
-    open fun init(context: Any) {
-        UMLog.l(UMLog.DEBUG, 519, null)
-        //We don't need to do init again
-        if (isInitialized) {
-            return
-        }
-        isInitialized = true
-    }
 
     /**
      * Wrapper to retrieve preference keys from the system Manifest.
@@ -288,44 +262,6 @@ abstract class UstadMobileSystemCommon {
         return listOf(LOCALE_USE_SYSTEM to getString(MessageID.use_device_language, context)) +
                 availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
     }
-
-
-    /**
-     * Make a new instance of an XmlPullParser (e.g. Kxml).  This is added as a
-     * method in the implementation instead of using the factory API because
-     * it enables the J2ME version to use the minimal jar
-     *
-     * @return A new default options XmlPullParser
-     */
-
-    open fun newPullParser(): KMPXmlParser {
-        return KMPXmlParser()
-    }
-
-    /**
-     * Make a new instance of an XmlSerializer (org.xmlpull.v1.XmlSerializer)
-     *
-     * @return New instance of an XML Serializer
-     */
-    open fun newXMLSerializer(): KMPSerializerParser {
-        return KMPSerializerParser()
-    }
-
-    /**
-     * Make a new XmlPullParser from a given inputstream
-     * @param in InputStream to read from
-     * @param encoding Encoding to be used e.g. UTF-8
-     *
-     * @return a new XmlPullParser with set with the given inputstream
-     */
-    @JvmOverloads
-    fun newPullParser(`in`: InputStream, encoding: String = UstadMobileConstants.UTF8): KMPXmlParser {
-        UMLog.l(UMLog.DEBUG, 523, encoding)
-        val xpp = newPullParser()
-        xpp.setInput(`in`, encoding)
-        return xpp
-    }
-
 
     @JsName("getStorageDirAsync")
     abstract suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>

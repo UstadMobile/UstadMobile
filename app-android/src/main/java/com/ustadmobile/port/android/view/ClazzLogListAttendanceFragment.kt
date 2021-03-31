@@ -10,7 +10,7 @@ import android.view.ViewGroup
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.DiffUtil
-import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.Entry
@@ -242,7 +242,7 @@ class ClazzLogListAttendanceFragment(): UstadListViewFragment<ClazzLog, ClazzLog
 
         graphRecyclerViewAdapter = ClazzLogListGraphRecyclerAdapter(mPresenter,
                 clazzTimeZone ?: "UTC", requireContext())
-        mMergeRecyclerViewAdapter = MergeAdapter(graphRecyclerViewAdapter, mDataRecyclerViewAdapter)
+        mMergeRecyclerViewAdapter = ConcatAdapter(graphRecyclerViewAdapter, mDataRecyclerViewAdapter)
         mRecyclerView?.adapter = mMergeRecyclerViewAdapter
 
         return view
