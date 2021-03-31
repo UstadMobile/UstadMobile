@@ -90,6 +90,7 @@ import kotlinx.coroutines.launch
 import org.kodein.di.DI
 import org.kodein.di.instance
 import org.kodein.di.on
+import org.kodein.di.direct
 import kotlin.js.JsName
 import kotlin.jvm.Volatile
 import kotlin.math.max

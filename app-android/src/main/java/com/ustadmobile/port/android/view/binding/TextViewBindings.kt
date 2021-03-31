@@ -301,13 +301,20 @@ fun TextView.setStatementDate(person: PersonWithStatementDisplay){
 
 }
 
-@BindingAdapter("duration")
-fun TextView.setDuration(duration: Long){
+@BindingAdapter("shortDateTime")
+fun TextView.setShortDateTime(time: Long){
+    val dateFormat = DateFormat.getDateFormat(context)
+    val timeFormat = DateFormat.getTimeFormat(context)
+    text = dateFormat.format(time) + " - " + timeFormat.format(time)
+}
+
+@BindingAdapter("durationHoursMins")
+fun TextView.setDurationHoursAndMinutes(duration: Long){
     val hours = TimeUnit.MILLISECONDS.toHours(duration).toInt()
 
     var minutes = TimeUnit.MILLISECONDS.toMinutes(duration)
 
-    var durationString = ""
+    var durationString = " "
 
     if(hours >= 1){
         minutes -= TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(duration))
@@ -321,6 +328,26 @@ fun TextView.setDuration(duration: Long){
 
 }
 
+@BindingAdapter("durationMinsSecs")
+fun TextView.setDurationMinutesAndSeconds(duration: Long){
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(duration).toInt()
+
+    var seconds = TimeUnit.MILLISECONDS.toSeconds(duration)
+
+    var durationString = " "
+
+    if(minutes >= 1){
+        seconds -= TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration))
+        durationString += "${resources.getQuantityString(R.plurals.duration_minutes, minutes, minutes)} "
+    }
+
+    durationString += resources.getQuantityString(R.plurals.duration_seconds,
+            seconds.toInt(), seconds.toInt())
+
+    text = durationString
+
+}
+
 
 @BindingAdapter("isContentComplete")
 fun TextView.setContentComplete(person: PersonWithSessionsDisplay){
@@ -329,5 +356,5 @@ fun TextView.setContentComplete(person: PersonWithSessionsDisplay){
             context.getString(R.string.passed) else context.getString(R.string.failed)
     }else{
         context.getString(R.string.incomplete)
-    } + "-"
+    } + " - "
 }

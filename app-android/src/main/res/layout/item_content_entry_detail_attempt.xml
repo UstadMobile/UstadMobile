@@ -104,7 +104,7 @@
             android:id="@+id/item_person_duration"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            app:duration="@{person.duration}"
+            app:durationHoursMins="@{person.duration}"
             android:visibility="@{person.duration &lt; 60000 ? View.GONE : View.VISIBLE}"
             app:drawableStartCompat="@drawable/ic_baseline_timer_12"
             android:drawablePadding="@dimen/dimen_4dp"

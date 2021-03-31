@@ -68,7 +68,7 @@ class SessionsListFragment(): UstadListViewFragment<PersonWithSessionsDisplay, P
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         super.onCreateOptionsMenu(menu, inflater)
-        menu.findItem(R.id.menu_search).isVisible = true
+        menu.findItem(R.id.menu_search).isVisible = false
     }
 
     override var personWithContentTitle: String? = null

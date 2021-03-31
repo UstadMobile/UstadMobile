@@ -5,22 +5,23 @@
 
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay"/>
+        <import type="com.ustadmobile.lib.db.entities.PersonWithSessionDetailDisplay"/>
         <import type="android.view.View"/>
-        <import type="com.ustadmobile.port.android.view.SessionsListFragment"/>
-        <import type="com.ustadmobile.port.android.view.SessionsListFragment.PersonWithSessionsDisplayListRecyclerAdapter"/>
+        <import type="kotlin.text.StringsKt"/>
+        <import type="com.ustadmobile.port.android.view.SessionDetailListViewFragment"/>
+        <import type="com.ustadmobile.port.android.view.SessionDetailListViewFragment.PersonWithSessionsDetailListRecyclerAdapter"/>
 
         <variable
             name="person"
-            type="PersonWithSessionsDisplay" />
+            type="PersonWithSessionDetailDisplay" />
 
         <variable
             name="presenter"
-            type="com.ustadmobile.core.controller.SessionsListPresenter" />
+            type="com.ustadmobile.core.controller.SessionDetailListPresenter" />
 
         <variable
             name="selectablePagedListAdapter"
-            type="PersonWithSessionsDisplayListRecyclerAdapter" />
+            type="PersonWithSessionsDetailListRecyclerAdapter" />
     </data>
 
 
@@ -34,10 +35,10 @@
         android:background="@drawable/bg_listitem">
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/item_person_success_complete_image"
+            android:id="@+id/item_person_verb_image"
             tools:src="@drawable/ic_account_circle_black_24dp"
-            android:layout_width="@dimen/dimen_24dp"
-            android:layout_height="@dimen/dimen_24dp"
+            android:layout_width="@dimen/dimen_40dp"
+            android:layout_height="@dimen/dimen_40dp"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginBottom="@dimen/dimen_16dp"
             android:layout_marginStart="@dimen/dimen_8dp"
@@ -48,45 +49,73 @@
         <!-- Line 1-->
         <TextView
             android:paddingStart="@dimen/dimen_5dp"
+            android:paddingEnd="@dimen/dimen_5dp"
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-            android:id="@+id/item_person_success_complete"
-            app:isContentComplete="@{person}"
+            android:id="@+id/item_person_verb_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:text="@{person.verbDisplay != null ? StringsKt.capitalize(person.verbDisplay) : person.verbDisplay}"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/item_person_success_complete_image"
+            app:layout_constraintStart_toEndOf="@+id/item_person_verb_image"
             android:layout_marginStart="@dimen/dimen_16dp"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginBottom="@dimen/dimen_16dp"
             android:layout_marginEnd="@dimen/dimen_8dp"
-            tools:text="Passed - "
+            tools:text="Answered"
             />
-
-        <!-- Line 2-->
-        <TextView
-            tools:text="45 mins"
-            android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-            android:id="@+id/item_person_duration"
-            app:durationHoursMins="@{person.duration}"
-            android:layout_width="@dimen/dimen_0dp"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="@dimen/dimen_16dp"
-            app:layout_constraintStart_toEndOf="@+id/item_person_success_complete"
-            app:layout_constraintBottom_toBottomOf="@id/item_person_success_complete"
-            app:layout_constraintEnd_toEndOf="parent" />
-
 
         <TextView
             android:paddingStart="@dimen/dimen_5dp"
             android:paddingEnd="@dimen/dimen_5dp"
-            tools:text="12/12/2021 15;00"
-            android:id="@+id/item_person_start_date_time"
+            tools:text="Did Question 1"
+            android:id="@+id/item_person_object_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            app:shortDateTime="@{person.startDate}"
-            app:layout_constraintStart_toStartOf="@+id/item_person_success_complete"
-            app:layout_constraintTop_toBottomOf="@+id/item_person_success_complete"
+            android:visibility="@{person.objectDisplay != null ? View.VISIBLE : View.GONE}"
+            android:text="@{person.objectDisplay}"
+            app:layout_constraintStart_toStartOf="@+id/item_person_verb_title"
+            app:layout_constraintTop_toBottomOf="@+id/item_person_verb_title"
             app:layout_constraintEnd_toEndOf="parent"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_marginStart="@dimen/dimen_5dp"
+            tools:text="20/12/2021 15:00"
+            android:id="@+id/item_person_start_date_image"
+            android:tint="?colorOnIconTint"
+            app:srcCompat="@drawable/ic_calendar_today_24px_"
+            android:layout_width="12dp"
+            android:layout_height="12dp"
+            app:layout_constraintStart_toStartOf="@+id/item_person_verb_title"
+            app:layout_constraintTop_toBottomOf="@+id/item_person_object_description"
+            app:layout_constraintBottom_toBottomOf="@id/item_person_start_date_time"
+            />
+
+        <TextView
+            android:paddingStart="@dimen/dimen_5dp"
+            android:paddingEnd="@dimen/dimen_5dp"
+            tools:text="20/12/2021 15:00"
+            android:id="@+id/item_person_start_date_time"
+            app:shortDateTime="@{person.timestamp}"
+            app:drawableTint="@color/iconTintColor"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintStart_toEndOf="@+id/item_person_start_date_image"
+            app:layout_constraintTop_toBottomOf="@+id/item_person_object_description"
+            android:layout_marginBottom="@dimen/dimen_16dp" />
+
+
+        <TextView
+            tools:text="1 hour 30 mins"
+            android:id="@+id/item_person_duration"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:drawableStartCompat="@drawable/ic_baseline_timer_12"
+            app:drawableTint="@color/iconTintColor"
+            app:durationMinsSecs="@{person.resultDuration}"
+            android:visibility="@{person.resultDuration &lt; 1000 ? View.GONE : View.VISIBLE}"
+            app:layout_constraintStart_toEndOf="@+id/item_person_start_date_time"
+            app:layout_constraintTop_toBottomOf="@+id/item_person_object_description"
             android:layout_marginBottom="@dimen/dimen_16dp" />
 
 
@@ -98,7 +127,7 @@
             android:visibility="@{person.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
             android:layout_width="12dp"
             android:layout_height="12dp"
-            app:layout_constraintStart_toStartOf="@+id/item_person_start_date_time"
+            app:layout_constraintStart_toStartOf="@+id/item_person_start_date_image"
             app:layout_constraintTop_toBottomOf="@+id/item_person_start_date_time"
             app:layout_constraintBottom_toBottomOf="@id/item_person_progress"
             />
@@ -124,11 +153,12 @@
             android:id="@+id/item_person_score_results"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text='@{"(" + person.resultScore + &quot;/&quot; + person.resultMax + ")"}'
+            android:text='@{"(" + person.resultScoreRaw + &quot;/&quot; + person.resultScoreMax + ")"}'
             android:visibility="@{person.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_progress"
             app:layout_constraintTop_toBottomOf="@+id/item_person_start_date_time"
             android:layout_marginBottom="@dimen/dimen_16dp" />
+
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

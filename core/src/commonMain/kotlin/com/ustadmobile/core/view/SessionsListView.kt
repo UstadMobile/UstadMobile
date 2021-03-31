@@ -9,6 +9,8 @@ interface SessionsListView: UstadListView<PersonWithSessionsDisplay, PersonWithS
 
     companion object {
         const val VIEW_NAME = "PersonWithSessionListView"
+
+        const val ARG_CONTEXT_REGISTRATION = "contextRegistration"
     }
 
 }

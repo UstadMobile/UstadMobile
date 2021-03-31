@@ -188,6 +188,16 @@
         android:label="" />
 
     <fragment
+        android:id="@+id/content_entry_detail_session_list_dest"
+        android:name="com.ustadmobile.port.android.view.SessionsListFragment"
+        android:label="" />
+
+    <fragment
+        android:id="@+id/content_entry_detail_session_detail_list_dest"
+        android:name="com.ustadmobile.port.android.view.SessionDetailListViewFragment"
+        android:label="" />
+
+    <fragment
         android:id="@+id/content_entry_details_dest"
         android:name="com.ustadmobile.port.android.view.ContentEntry2DetailFragment"
         android:label="" />

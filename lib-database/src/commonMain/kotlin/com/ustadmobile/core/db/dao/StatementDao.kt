@@ -113,43 +113,40 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                                                      searchText: String, sortOrder: Int)
             : DataSource.Factory<Int, PersonWithStatementDisplay>
 
-    @Query("""SELECT Person.*, 
-            
-         (SELECT MIN(timestamp) FROM StatementEntity WHERE 
-         StatementEntity.statementPersonUid = :personUid AND 
-         statementContentEntryUid = :contentEntryUid 
-         GROUP BY contextRegistration) as startDate 
-         
-         (SELECT MAX(resultSuccess) FROM StatementEntity WHERE 
-         StatementEntity.statementPersonUid = :personUid AND 
-         statementContentEntryUid = :contentEntryUid  and contentEntryRoot 
-         GROUP BY contextRegistration) as resultSuccess 
-         
-         (SELECT SUM(CASE(resultCompletion AS INTEGER)) > 0 from StatementEntity WHERE 
-        StatementEntity.statementPersonUid = :personUid AND 
-         statementContentEntryUid = :contentEntryUid  and contentEntryRoot 
-         GROUP BY contextRegistration) as resultComplete
-     
-         (SELECT SUM(resultDuration) FROM StatementEntity WHERE 
-         StatementEntity.statementPersonUid = :personUid AND 
-         statementContentEntryUid = :contentEntryUid GROUP BY contextRegistration) as duration 
-         
-         (SELECT contextRegistration FROM StatementEntity WHERE 
-         StatementEntity.statementPersonUid = :personUid AND 
-         statementContentEntryUid = :contentEntryUid GROUP BY contextRegistration) as contextRegistration
-         
-         ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
-          WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
-         AND PersonGroupMember.groupMemberActive  
-         AND Person.personUid IN (SELECT statementPersonUid FROM StatementEntity WHERE 
-         statementContentEntryUid = :contentEntryUid AND statementPersonUid = :personUid) 
-         GROUP BY Person.personUid 
-         ORDER BY startDate DESC
+    @Query("""SELECT MIN(timestamp) as startDate, 
+        MAX(CASE WHEN StatementEntity.resultSuccess AND 
+        StatementEntity.contentEntryRoot THEN 1 ELSE 0 END) as resultSuccess, 
+        SUM(CASE WHEN CAST(resultCompletion AS INTEGER) > 0 AND StatementEntity.contentEntryRoot 
+        THEN 1 ELSE 0 END) as resultComplete, 
+        SUM(resultDuration) as duration, contextRegistration, 
+        MAX(CASE WHEN contentEntryRoot THEN resultScoreRaw ELSE 0 END) as resultScore, 
+        MAX(CASE WHEN contentEntryRoot THEN resultScoreMax ELSE 0 END) as resultMax,
+        MAX(CASE WHEN contentEntryRoot THEN resultScoreScaled ELSE 0 END) as resultScoreScaled  
+        FROM StatementEntity 
+        LEFT JOIN Person ON Person.personUid = StatementEntity.statementPersonUid 
+        WHERE statementContentEntryUid = :contentEntryUid AND statementPersonUid = :personUid 
+        AND :accountPersonUid IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
+        GROUP BY StatementEntity.contextRegistration 
+        ORDER BY startDate DESC
          """)
     abstract fun findSessionsForPerson(contentEntryUid: Long, accountPersonUid: Long, personUid: Long)
             : DataSource.Factory<Int, PersonWithSessionsDisplay>
 
 
+    @Query("""SELECT StatementEntity.*, VerbEntity.*, 
+        verbLangMap.valueLangMap as verbDisplay, xobjectMap.valueLangMap as objectDisplay FROM StatementEntity
+          LEFT JOIN Person ON StatementEntity.statementPersonUid = Person.personUid 
+           LEFT JOIN VerbEntity ON VerbEntity.verbUid = StatementEntity.statementVerbUid 
+           LEFT JOIN XLangMapEntry verbLangMap on verbLangMap.verbLangMapUid = VerbEntity.verbUid
+           LEFT JOIN XLangMapEntry xobjectMap on xobjectMap.objectLangMapUid = StatementEntity.xObjectUid
+          WHERE statementContentEntryUid = :contentEntryUid AND statementPersonUid = :personUid AND 
+         contextRegistration = :contextRegistration AND 
+         :accountPersonUid IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
+         ORDER BY StatementEntity.timestamp DESC
+         """)
+    abstract fun findSessionDetailForPerson(contentEntryUid: Long, accountPersonUid: Long,
+                                            personUid: Long, contextRegistration: String)
+            : DataSource.Factory<Int, PersonWithSessionDetailDisplay>
 
     @Serializable
     data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")

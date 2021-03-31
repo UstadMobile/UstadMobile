@@ -5,6 +5,7 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
+import com.ustadmobile.core.view.SessionsListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.PersonWithStatementDisplay
@@ -62,9 +63,9 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
     }
 
     fun onClickPersonWithStatementDisplay(personWithStatementDisplay: PersonWithStatementDisplay) {
- systemImpl.go(LeavingReasonEditView.VIEW_NAME,
-                    mapOf(UstadView.ARG_ENTITY_UID to leavingReason.leavingReasonUid.toString()), context)
-
+            systemImpl.go(SessionsListView.VIEW_NAME,
+                    arguments.plus(UstadView.ARG_PERSON_UID to
+                            personWithStatementDisplay.personUid.toString()), context)
     }
 
     companion object {
@@ -79,6 +80,5 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
         )
 
     }
-
 
 }

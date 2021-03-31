@@ -3,7 +3,7 @@ package com.ustadmobile.lib.db.entities
 import kotlinx.serialization.Serializable
 
 @Serializable
-class PersonWithSessionsDisplay : Person() {
+class PersonWithSessionsDisplay {
 
     var startDate: Long = 0L
 
@@ -14,5 +14,11 @@ class PersonWithSessionsDisplay : Person() {
     var resultSuccess: Int = 0
 
     var resultComplete: Boolean = false
+
+    var resultScoreScaled: Float = 0f
+
+    var resultMax: Int = 0
+
+    var resultScore: Int = 0
 
 }
