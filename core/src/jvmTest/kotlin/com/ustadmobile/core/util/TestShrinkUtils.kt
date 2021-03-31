@@ -10,6 +10,7 @@ import org.junit.Test
 import org.junit.rules.TemporaryFolder
 
 class TestShrinkUtils {
+/*
 
     @JvmField
     @Rule
@@ -63,5 +64,6 @@ class TestShrinkUtils {
     }
 
 
+*/
 
 }
