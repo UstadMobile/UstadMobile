@@ -688,6 +688,11 @@
         <item quantity="other">%d mins</item>
     </plurals>
 
+    <plurals name="duration_seconds">
+        <item quantity="one">%d sec</item>
+        <item quantity="other">%d secs</item>
+    </plurals>
+
     <!-- Used to indicate that something (e.g. an assigment) has been started -->
     <string name="started">Started</string>
 
