@@ -57,6 +57,8 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.ext.toBundleWithNullableValues
 import com.ustadmobile.core.view.*
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.kodein.di.DI
 import org.kodein.di.android.closestDI
@@ -108,27 +110,13 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             PersonGroupEditView.VIEW_NAME to "${PACKAGE_NAME}PersonGroupEditActivity"
     )
 
-    private abstract class UmCallbackAsyncTask<A, P, R>
-    (protected var umCallback: UmCallback<R>) : AsyncTask<A, P, R>() {
-
-        protected var error: Throwable? = null
-
-        override fun onPostExecute(r: R) {
-            if (error == null) {
-                umCallback.onSuccess(r)
-            } else {
-                umCallback.onFailure(error)
-            }
-        }
-    }
-
     /**
      * Simple async task to handle getting the setup file
      * Param 0 = boolean - true to zip, false otherwise
      */
-    private class GetSetupFileAsyncTask(doneCallback: UmCallback<*>, private val context: Context)
-        : UmCallbackAsyncTask<Boolean, Void, String>(doneCallback as UmCallback<String>) {
-        override fun doInBackground(vararg params: Boolean?): String {
+    private class GetSetupFileAsyncTask(private val zipIt: Boolean,private val context: Context){
+
+       suspend fun getFile(): String {
             val apkFile = File(context.applicationInfo.sourceDir)
             //TODO: replace this with something from appconfig.properties
             val impl = instance
@@ -142,7 +130,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             if (!outDir.isDirectory)
                 outDir.mkdirs()
 
-            if (params[0]!!) {
+            if (zipIt) {
                 var zipOut: ZipOutputStream? = null
                 val outZipFile = File(outDir, "$baseName.zip")
                 try {
@@ -448,12 +436,11 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @param context System context
      * @param zip if true, the app setup file should be delivered within a zip.
-     * @param callback callback to call when complete or if any error occurs.
      */
-    actual override fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>) {
-        val setupFileAsyncTask = GetSetupFileAsyncTask(callback,
-                context as Context)
-        setupFileAsyncTask.execute(zip)
+    actual override suspend fun getAppSetupFile(context: Any, zip: Boolean): Any {
+        val setupFileAsyncTask = GetSetupFileAsyncTask(zip,
+            context as Context)
+       return setupFileAsyncTask.getFile()
     }
 
 

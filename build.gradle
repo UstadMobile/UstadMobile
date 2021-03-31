@@ -40,10 +40,7 @@ allprojects {
     repositories {
         google()
         jcenter()
-
-        maven {
-            url "https://devserver3.ustadmobile.com/maven"
-        }
+        mavenLocal()
 
         maven {
             url "https://devserver3.ustadmobile.com/repo-mvn"
@@ -82,8 +79,8 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 202
 
-    version_door = "0.0.4"
-    version_xmlpullparserkmp = '0.0.8'
+    version_door = "0.0.5"
+    version_xmlpullparserkmp = '0.0.9'
 
     version_kotlin_react = "17.0.1-pre.148-kotlin-1.4.30"
     version_kotlin_react_router_dom = "5.2.0-pre.148-kotlin-1.4.30"

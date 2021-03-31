@@ -77,6 +77,17 @@ kotlin {
 
     android()
 
+    js(LEGACY) {
+        browser {
+            testTask {
+                useKarma {
+                    useChromeHeadless() //change to useChrome to run the actual browser
+                    webpackConfig.cssSupport.enabled = true
+                }
+            }
+        }
+    }
+
     sourceSets {
 
         commonMain {

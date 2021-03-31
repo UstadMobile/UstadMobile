@@ -2,10 +2,12 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
-import io.ktor.client.request.get
-import kotlinx.io.InputStream
-import kotlin.browser.localStorage
-import kotlin.browser.window
+import io.ktor.client.request.*
+import io.ktor.utils.io.charsets.*
+import io.ktor.utils.io.core.*
+import kotlinx.browser.localStorage
+import kotlinx.browser.window
+import kotlin.js.Date
 
 /**
  * SystemImpl provides system methods for tasks such as copying files, reading
@@ -28,21 +30,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         this.stringMap = values
     }
 
-    /**
-     * The main method used to go to a new view. This is implemented at the platform level. On
-     * Android this involves starting a new activity with the arguments being turned into an
-     * Android bundle. On J2ME it creates a new Form and shows it, on iOS it looks up the related
-     * UIViewController.
-     *
-     * @param viewName The name of the view to go to: This should match the view's interface .VIEW_NAME constant
-     * @param args (Optional) Hashtable of arguments for the new view (e.g. catalog/container url etc)
-     * @param context System context object
-     */
-    actual override fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int) {
-        val umContext: dynamic = context
-        //Note:HomeView name has changed
-        umContext.router.navigateByUrl("/Home/$viewName?${UMFileUtil.mapToQueryString(args)}")
-    }
 
     /**
      * Get a string for use in the UI
@@ -79,9 +66,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @param context System context
      * @param zip if true, the app setup file should be delivered within a zip.
-     * @param callback callback to call when complete or if any error occurs.
      */
-    actual override fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>) {
+    actual override suspend fun getAppSetupFile(context: Any, zip: Boolean): Any {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 
@@ -114,9 +100,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @return Build timestamp in ms since epoch
      */
-    actual fun getBuildTimestamp(context: Any): Long {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    actual fun getBuildTimestamp(context: Any): Long = Date().getTime().toLong()
 
     /**
      * Lookup a value from the app runtime configuration. These come from a properties file loaded
@@ -158,9 +142,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @return
      */
-    actual fun getSystemBaseDir(context: Any): String {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    actual fun getSystemBaseDir(context: Any): String = getAppPref("user.dir", context)?: ""
 
     /**
      * Check if the directory is writable
@@ -172,6 +154,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     actual companion object {
+
+        private const val hashPath = "#/"
         /**
          * Get an instance of the system implementation - relies on the platform
          * specific factory method
@@ -182,15 +166,42 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     }
 
     actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
-        TODO("Fix this to avoid using clases no longer available")
-//        val client = defaultHttpClient()
-//        val content = client.get<String>( "${localStorage.getItem("doordb.endpoint.url")}H5PResources/$path")
-//        return content.toByteArray(Charsets.UTF_8)
+        val client = defaultHttpClient()
+        val content = client.get<String>( "${getAppPref("doordb.endpoint.url", context)}H5PResources/$path")
+        return content.toByteArray(Charsets.UTF_8)
     }
 
 
     actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    /**
+     * The main method used to go to a new view. This is implemented at the platform level. On
+     * Android this involves starting a new activity with the arguments being turned into an
+     * Android bundle. On J2ME it creates a new Form and shows it, on iOS it looks up the related
+     * UIViewController.
+     *
+     * @param viewName The name of the view to go to: This should match the view's interface .VIEW_NAME constant
+     * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
+     * @param context System context object
+     */
+    actual override fun go(viewName: String, args: Map<String, String?>, context: Any,
+        flags: Int,
+        ustadGoOptions: UstadGoOptions) {
+        val params = if(args.isEmpty())  "" else "?${UMFileUtil.mapToQueryString(args)}"
+        window.location.assign("$hashPath$viewName$params")
+    }
+
+    actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
+        window.location.replace("$hashPath$popUpToViewName")
+    }
+
+    /**
+     * Open the given link in a browser and/or tab depending on the platform
+     */
+    actual fun openLinkInBrowser(url: String, context: Any) {
+        window.open(url, "_blank")
     }
 
 }

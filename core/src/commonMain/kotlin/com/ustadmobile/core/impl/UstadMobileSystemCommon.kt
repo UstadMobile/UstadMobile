@@ -68,7 +68,7 @@ abstract class UstadMobileSystemCommon {
      */
 
     @JsName("getAppSetupFile")
-    abstract fun getAppSetupFile(context: Any, zip: Boolean, callback: UmCallback<*>)
+    abstract suspend fun getAppSetupFile(context: Any, zip: Boolean): Any
 
 
     /**

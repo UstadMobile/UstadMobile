@@ -1,3 +1,4 @@
+/*
 package com.ustadmobile.lib.contentscrapers.apache
 
 import org.mockito.kotlin.spy
@@ -105,3 +106,4 @@ class TestApacheIndexer {
     }
 
 }
+*/
