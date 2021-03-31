@@ -295,6 +295,32 @@ task prepareLocalization{
     jsonFile.flush()
 }
 
+task prepareAppConfigs{
+    try {
+        File outFile = project.file("${reactLocaleOutPath}appconfig.json")
+        File configFile =  project.file("${rootDir.absolutePath}/core/src/main/assets/" +
+                "com/ustadmobile/core/appconfig.properties")
+        Scanner scanner = new Scanner(configFile)
+        println(configFile.path)
+        def configContent = new JSONObject()
+        while(scanner.hasNextLine()){
+            String line = scanner.nextLine()
+            if(!line.startsWith("#") && !line.isEmpty()){
+                def keyValue = line.split("=")
+                if(keyValue.length > 1){
+                    configContent.put(keyValue[0].replace(" ",""),keyValue[1].replace(" ",""))
+                }
+            }
+        }
+        FileWriter jsonFile = new FileWriter(outFile.absolutePath)
+        jsonFile.write(configContent.toString(4))
+        jsonFile.flush()
+
+    }catch(FileNotFoundException e){
+        e.printStackTrace()
+    }
+}
+
 tasks.whenTaskAdded { task ->
     if (task.name == "compileTestKotlinJvm") {
         task.dependsOn(copyTestResources)
@@ -306,7 +332,7 @@ tasks.whenTaskAdded { task ->
 }
 
 gradle.projectsEvaluated {
-    preBuild.dependsOn(prepareLocale, prepareLocalization)
+    preBuild.dependsOn(prepareLocale, prepareLocalization, prepareAppConfigs)
 }
 
 publishing {
