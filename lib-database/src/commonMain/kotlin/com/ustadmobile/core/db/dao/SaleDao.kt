@@ -54,7 +54,8 @@ abstract class SaleDao : BaseDao<Sale> {
 
         const val FIND_ALL_PEOPLE_WITH_SALEINFO = """
             SELECT 
-                coalesce(SUM((SaleItem.saleItemPricePerPiece) * SaleItem.saleItemQuantity) - SUM(SaleItem.saleItemDiscount), 0) AS totalSale,
+                coalesce(SUM((SaleItem.saleItemPricePerPiece) * SaleItem.saleItemQuantity) - 
+                    (SUM(SaleItem.saleItemDiscount) + SUM(Sale.saleDiscount)), 0) AS totalSale,
                 '' AS topProducts, 
                 0 as personPictureUid ,
                 Person.* 
