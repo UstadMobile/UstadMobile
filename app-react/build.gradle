@@ -1,0 +1,45 @@
+plugins {
+    id 'org.jetbrains.kotlin.js'
+}
+
+group = rootProject.group
+version = rootProject.version
+
+repositories {
+    jcenter()
+    mavenCentral()
+    maven { url 'https://dl.bintray.com/kotlin/kotlin-js-wrappers' }
+}
+
+kotlin {
+    js(LEGACY) {
+        browser {
+            binaries.executable()
+            webpackTask {
+                cssSupport.enabled = true
+            }
+            runTask {
+                cssSupport.enabled = true
+            }
+            testTask {
+                useKarma {
+                    useChromeHeadless()
+                    webpackConfig.cssSupport.enabled = true
+                }
+            }
+        }
+    }
+}
+
+dependencies {
+    testImplementation 'org.jetbrains.kotlin:kotlin-test-js'
+    implementation "org.jetbrains:kotlin-react:$version_kotlin_react"
+    implementation "org.jetbrains:kotlin-react-dom:$version_kotlin_react"
+    implementation "org.jetbrains:kotlin-styled:$version_kotlin_styled"
+    implementation "org.jetbrains:kotlin-react-router-dom:$version_kotlin_react_router_dom"
+    implementation "org.jetbrains:kotlin-redux:$version_kotlin_redux"
+    implementation "org.jetbrains:kotlin-react-redux:$version_kotlin_react_redux"
+    implementation "com.ccfraser.muirwik:muirwik-components:$version_muirwik_components"
+    implementation project(":core")
+    implementation npm("fs-extra","9.0.1")
+}
