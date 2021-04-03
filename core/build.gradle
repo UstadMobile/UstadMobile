@@ -79,6 +79,9 @@ kotlin {
 
     js(LEGACY) {
         browser {
+            dceTask {
+                keep("kotlin.defineModule") //To avoid  e.defineModule is not a function error
+            }
             testTask {
                 useKarma {
                     useChromeHeadless() //change to useChrome to run the actual browser
@@ -208,6 +211,20 @@ kotlin {
             }
         }
 
+        jsMain {
+            dependencies {
+                implementation "io.ktor:ktor-client-js:$version_ktor"
+                implementation "io.ktor:ktor-client-json-js:$version_ktor"
+                implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
+            }
+        }
+
+        jsTest {
+            dependencies {
+                implementation kotlin('test-js')
+            }
+        }
+
     }
 }
 /*
@@ -312,7 +329,6 @@ task prepareAppConfigs{
         File configFile =  project.file("${rootDir.absolutePath}/core/src/main/assets/" +
                 "com/ustadmobile/core/appconfig.properties")
         Scanner scanner = new Scanner(configFile)
-        println(configFile.path)
         def configContent = new JSONObject()
         while(scanner.hasNextLine()){
             String line = scanner.nextLine()
