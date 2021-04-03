@@ -23,4 +23,285 @@
     <string name="canceled">ဖျက်သိမ်းခဲ့သည်</string>
     <string name="delete">ဖျက်ပါ</string>
     <string name="deleted">ဖျက်လိုက်သည်</string>
+    <string name="onboarding_no_internet_headline">အဘယ်သူမျှမကအင်တာနက်\? အဘယ်သူမျှမပြဿနာ။.</string>
+    <string name="onboarding_no_internet_subheadline">ပညာရေးဆိုင်ရာဗီဒီယိုများ, ဆောင်းပါးများနှင့်အပြန်အလှန်စစ်ရေးလေ့ကျင့်ခန်းနောက်ပိုင်းတွင်အသုံးပြုမှုအတွက်ဒေါင်းလုဒ်လုပ်ပါ။.</string>
+    <string name="new_tab">ပြတင်းပေါက်အသစ်တစ်ခုတွင်ပြသခြင်း</string>
+    <string name="save_as_template">တင်းပလိတ်အဖြစ်သိမ်းဆည်းပါ</string>
+    <string name="location_permission_title">တည်နေရာခွင့်ပြုချက်လိုအပ်သည်</string>
+    <string name="location_permission_message">ဒီ app ကိုအနီးအနားမှာအသုံးပြုသူများနှင့်မြန်နှုန်းမြင့်အော့ဖ်လိုင်းခွဲဝေမှုကို enable တည်နေရာခွင့်ပြုချက်လိုအပ်သည်။.</string>
+    <string name="location_permission_details">ဒီအပလီကေးရှင်းသည် Bluetooth နှင့် WiFi ကို သုံး၍ အနီးအနားရှိအခြားသူများကိုရှာဖွေသည်။ အင်တာနက်ကိုမလိုအပ်ဘဲအမြန်နှုန်းဖြင့်အကြောင်းအရာများကိုဒေါင်းလုပ်လုပ်ရန်ထိုအက်ပ်သည်အနီးအနားရှိသုံးစွဲသူများနှင့်ဆက်သွယ်နိုင်သည်။ ဤစကင်ဖတ်စစ်ဆေးမှုရလဒ်များသည်သင်၏တည်နေရာကိုဆုံးဖြတ်ရန်အသုံးပြုနိုင်သောကြောင့်ဤအင်္ဂါရပ်ကိုဖွင့်ရန်တည်နေရာခွင့်ပြုချက်ကိုသင်ပေးရမည်။ ဤအပလီကေးရှင်းသည်ဤစကင်ဖတ်စစ်ဆေးမှု၏ရလဒ်များကိုမသိမ်းဆည်းဘဲသင်၏တည်နေရာကိုမည်သည့်နည်းနှင့်မျှမမှတ်မိပါ။ ဒီအက်ပ်ကို github.com/UstadMobile/UstadMobile မှာလေ့လာနိုင်ပါတယ်</string>
+    <string name="download_wifi_only">ဝိုင်ဖိုင်သာ</string>
+    <string name="download_calculating">ဆက်လက်တွက်ချက်သည်…</string>
+    <string name="download_state_download"><b>ဒေါင်းလုပ်</b> စုစုပေါင်းပစ္စည်းများ၏ %1$s, သူတို့သည်သင်၏ device ကိုသိုလှောင်မှုအပေါ် %2$s စုစုပေါင်းသုံးပါလိမ့်မယ်။.</string>
+    <string name="download_state_downloading"><b>ဒေါင်းလုပ်လက်ရှိလုပ်ဆောင်နေသော</b> စုစုပေါင်းပစ္စည်းများ၏ %1$s, သင်၏စက်သိုလှောင်မှုတွင်စုစုပေါင်း %2$s ကိုအသုံးပြုလိမ့်မည်။.</string>
+    <string name="download_state_downloaded"><b>ဒေါင်းလုပ်ပြီးစီးပါပြီ</b>စုစုပေါင်းပစ္စည်းများ၏ %1$s,သင်၏ကိရိယာသိုလှောင်မှု၏ %2$s ခန့်ကိုအသုံးပြုနေသည်။.</string>
+    <string name="no_app_found">ဖိုင်ဖွင့်ရန်အက်ပလီကေးရှင်းမရှိပါ</string>
+    <string name="multiple_choice">ရွေးချယ်မှုများစွာ</string>
+    <string name="content_type_fill_the_blanks">ကွက်လပ်ဖြည့်ပါ</string>
+    <string name="content_font_12">12မှတ်</string>
+    <string name="content_source_camera">ကင်မရာကိုမှသည်</string>
+    <string name="content_media_message">အဘယ်အရာကိုမီဒီယာအမျိုးအစားကိုသင်ဖမ်းမိဖို့လိုပါသနည်း\?</string>
+    <string name="content_option_page">နယူးစာမျက်နှ</string>
+    <string name="content_add_page">စာမျက်နှာပေါင်းထည့်ပါ</string>
+    <string name="content_update_document_title">ကျေးဇူးပြု၍ မှတ်တမ်းကိုတင်ပါ</string>
+    <string name="content_editor_page_delete_failure_message">ဝမ်းနည်းပါတယ်, သင်ဒီစာမျက်နှာမဖျက်နိုင်ပါ</string>
+    <string name="content_editor_menu_text_formatting">စာသားပုံစံချခြင်း</string>
+    <string name="content_editor_menu_indent">ကုန်အမှာစာ</string>
+    <string name="content_editor_menu_strikesthrough">မှတဆင့်သပိတ်မှောက်</string>
+    <string name="content_editor_menu_align_center">စင်တာ</string>
+    <string name="content_editor_link_text">လင့်ခ်စာသား</string>
+    <string name="content_editor_link_error">လင့်စာသားသို့မဟုတ်ယူနီဖောင်းအရင်းအမြစ်တည်နေရာသည်အချည်းနှီးမဖြစ်နိုင်ပါ, ထပ်ကြိုးစားပါ</string>
+    <string name="permission_camera_title">ကင်မရာနှင့်ဖိုင်ခွင့်ပြုချက်လိုအပ်သည်</string>
+    <string name="permission_camera_message">ဓာတ်ပုံနှင့်ဗီဒီယိုများရိုက်ကူးရန်အတွက်ဤအက်ပ်သည်ကင်မရာနှင့်ဖိုင်ခွင့်ပြုချက်နှစ်ခုလုံးလိုအပ်သည်</string>
+    <string name="file_required_prompt">တင်သွင်းမည့်ဖိုင်ကိုမရွေးပါ၊ ထပ်မံကြိုးစားပါ</string>
+    <string name="content_creation_folder_update_message">ဖိုလ်ဒါကိုအောင်အောင်မြင်မြင်မွမ်းမံခဲ့သည်</string>
+    <string name="supported_files">ထောက်ပံ့သည့်ဖိုင်များ - <b>ဗီဒီယို၊ အသံ၊ အီးစဦးခ၊ XAPI၊ ဇစ်၊ ဇ5ဇ </b></string>
+    <string name="content_entry_export_message">သင်သည်သင်၏ စက်ကိရိယာ ကိုသိုလှောင်မှုမှ %1$s တင်ပို့ဖို့အကြောင်းကိုဖြစ်ကြသည်။ ဆက်လုပ်ချင်ပါသလား\?</string>
+    <string name="score" value="200">ပျမ်းမျှရမှတ်</string>
+    <string name="content_total_duration" value="200">အကြောင်းအရာအသုံးပြုမှု - စုစုပေါင်းကြာချိန်</string>
+    <string name="count_session" value="202">အကြောင်းအရာအသုံးပြုမှု - အစည်းအဝေးအရေအတွက်</string>
+    <string name="number_active_users" value="204">အကြောင်းအရာအသုံးပြုမှု - တက်ကြွအသုံးပြုသူအရေအတွက်က</string>
+    <string name="average_usage_time_per_user" value="205">အကြောင်းအရာအသုံးပြုမှု - အသုံးပြုသူတစ် ဦး လျှင်ပျမ်းမျှအသုံးပြုမှုအချိန်</string>
+    <string name="percent_students_completed" value="207">အကြောင်းအရာအသုံးပြုမှု - အကြောင်းအရာပြီးစီးခဲ့သောကျောင်းသားများ၏ရာခိုင်နှုန်း</string>
+    <string name="total_attendances" value="208">သွားရောက်ရှိနေခြင်း - စုစုပေါင်းတက်ရောက်သူ</string>
+    <string name="total_lates" value="210">သွားရောက်ရှိနေခြင်း - စုစုပေါင်းနှောင်းပိုင်း</string>
+    <string name="percent_students_attended" value="211">သွားရောက်ရှိနေခြင်း - တက်ရောက်ခဲ့သည့်ကျောင်းသားများ၏ရာခိုင်နှုန်းဗမာ</string>
+    <string name="total_number_of_classes" value="213">သွားရောက်ရှိနေခြင်း - အတန်းစုစုပေါင်း</string>
+    <string name="xapi_custom_date" value="303">စိတ်ကြိုက်ရက်စွဲ</string>
+    <string name="last_week_date_range" value="800">ပြီးခဲ့သောအပတ်က</string>
+    <string name="last_three_months_date_range" value="803">နောက်ဆုံးသုံးလ</string>
+    <string name="from">မှ</string>
+    <string name="xapi_options_report_title">အစီရင်ခံစာခေါင်းစဉ်</string>
+    <string name="xapi_options_y_axes">Y-ဝင်ရိုးတန်း</string>
+    <string name="xapi_options_did">လုပ်ခဲ့တယ်</string>
+    <string name="report_filter_edit_field">လယ်ယာ</string>
+    <string name="create_a_new_report">အစီရင်ခံစာသစ်ကိုဖန်တီး</string>
+    <string name="id_verbentity_urlid">ဟုတ်မှန်ခြင်း: %s</string>
+    <string name="field_person_age">ပုဂ္ဂိုလ် အသက်</string>
+    <string name="field_content_entry">အကြောင်းအရာ ဝင်ပေါက်</string>
+    <string name="account">အကောင့်</string>
+    <string name="accounts">အကောင့်များ</string>
+    <string name="share">မျှဝေပါ</string>
+    <string name="send">ပို့ပါ</string>
+    <string name="open">ဖွင့်လှစ်</string>
+    <string name="phone">ဖုန်းကို</string>
+    <string name="exams">စာမေးပွဲများ</string>
+    <string name="add_a_student">ကျောင်းသားတစ်ယောက်ထည့်ပါ</string>
+    <string name="share_application">မျှဝေပါအက်ပလီကေးရှင်း</string>
+    <string name="waiting">စောင့်နေတယ်</string>
+    <string name="queued">တန်းစီထဲမှ</string>
+    <string name="failed">မအောင်မြင်ဘူး</string>
+    <string name="passed">လွန်သွားပြီ</string>
+    <string name="downloading">ဒေါင်းလုပ်ဖြစ်ပျက်</string>
+    <string name="success">အောင်မြင်မှု</string>
+    <string name="select_subtitle_video">စာတန်းထိုးဘာသာစကားကိုရွေးပါ</string>
+    <string name="no_subtitle">အဘယ်သူမျှမစာတန်းထိုးများ</string>
+    <string name="completed">ပြီးစီးခဲ့သည်</string>
+    <string name="import_content">သင့်အကြောင်းအရာများကိုတင်သွင်းပါ</string>
+    <string name="ebook">အီးစာအုပ်</string>
+    <string name="document">စာရွက်စာတမ်း</string>
+    <string name="added">ကဆက်ပြောသည်</string>
+    <string name="underRegistrationAgeError">အသက် ၁၃ နှစ်အောက်ကလေးများကိုကိုယ်ပိုင်မှတ်ပုံတင်ခွင့်မပြုပါ။ ကျေးဇူးပြု၍ သင့်ဆရာအားသင့်ကိုမှတ်ပုံတင်ရန်ပြောပါ။.</string>
+    <string name="error_this_device_doesnt_support_bluetooth_sharing">ဝမ်းနည်းပါတယ်, ဒီကိရိယာကို Bluetooth ကိုကျော်ဖိုင်တွေပေးပို့ခြင်းကိုထောကျပံ့မပေးပါဘူး။.</string>
+    <string name="share_offline_dialog_message">သင်သည်ဤအက်ပလီကေးရှင်းကိုအော့ဖ်လိုင်းမျှဝေနိုင်သည်။ သင်မျှဝေလိုသည့်ကိရိယာပေါ်တွင် -
+\n၁။ ချိန်ညှိချက်များ&gt; ဘလူးတုသ် ချိန်ညှိချက်များကိုဖွင့်ပါ။.
+\n၂။ စက်ပစ္စည်းကိုမြင်နိုင်အောင်လုပ်ပါ။.</string>
+    <string name="content_editor_menu_redo">ဗားရှင်းပြီးနောက်ရွှေ့ပါ</string>
+    <string name="loading">တင်နေသည်</string>
+    <string name="deleting">ဖျက်သည်</string>
+    <string name="processing">လုပ်ဆောင်နေသည်</string>
+    <string name="uploading">တင်ယူသည်</string>
+    <string name="error_opening_file">ဖိုင်ဖွင့်ခြင်းအမှာ:</string>
+    <string name="logout">ထွက်ပေါက်</string>
+    <string name="about">အကြောင်း</string>
+    <string name="download_all">ဒေါင်းလုပ်အားလုံ</string>
+    <string name="next">နောက်တစ်ခု</string>
+    <string name="previous">လွန်ခဲ့သေ</string>
+    <string name="back">နောက်ကျေ</string>
+    <string name="username">အသုံးပြုသူအမည်</string>
+    <string name="password">စကားဝှက်</string>
+    <string name="confirm_password">စကားဝှက်ကိုအတည်ပြုပါ</string>
+    <string name="last_name">နောက်ဆုံးအမည်</string>
+    <string name="first_name">ပထမနာမည်</string>
+    <string name="register_now">ယခုမှတ်ပုံတင်ပါ</string>
+    <string name="new_password">စကားဝှက်အသစ်</string>
+    <string name="phone_memory">ဖုန်းမှတ်ဉာဏ်</string>
+    <string name="memory_card">အချက်အလက်များသိုလှောင်သည့်ကဒ်</string>
+    <string name="device">စက်ကိရိယာ</string>
+    <string name="register">မှတ်ပုံတင်ပါ</string>
+    <string name="phone_number">ဖုန်းနံပါတ်</string>
+    <string name="name">အမည်</string>
+    <string name="description">ဖော်ပြချက်</string>
+    <string name="male">အထီး</string>
+    <string name="female">အမျိုးသမီ</string>
+    <string name="other">အခြား</string>
+    <string name="unset">မအောင်မြင်</string>
+    <string name="settings">ချိန်ညှိချက်များ</string>
+    <string name="language">ဘာသာစကား</string>
+    <string name="add_a_new_language">ဘာသာစကားအသစ်တစ်ခုထည့်ပါ</string>
+    <string name="select_language">ဘာသာစကားရွေးပါ</string>
+    <string name="advanced">အဆင့်မြင့်</string>
+    <string name="optional">မဖြစ်မနေမရ</string>
+    <string name="email">အီးမေးလ်</string>
+    <string name="regcode">ဆိုင်းအပ်ကုဒ်</string>
+    <string name="home">နေအိမ်</string>
+    <string name="attendance">သွားရောက်ရှိနေခြင်း</string>
+    <string name="classes">အတန်းအစား</string>
+    <string name="reports">အစီရင်ခံစာများ</string>
+    <string name="contents">ကေြနပ်သေ</string>
+    <string name="students">ကျောင်းသားများ</string>
+    <string name="forgot_password">စကားဝှက်ကိုမေ့နေပါသလား</string>
+    <string name="notifications">အသိပေးချက်များ</string>
+    <string name="choose_template">တင်းပလိတ်တစ်ခုကိုရွေးပါ</string>
+    <string name="no_video_file_found">ဗွီဒီယိုဖိုင်မရှိပါ</string>
+    <string name="content_from_file">ဖိုင်ကနေ</string>
+    <string name="content_from_link">လင့်ခ်ကနေ</string>
+    <string name="update_content">အကြောင်းအရာပြုပြင်မွမ်းမံ</string>
+    <string name="publicly_accessible">လူသိရှင်ကြားသုံးစွဲနိုင်</string>
+    <string name="title">ခေါင်းစဥ်</string>
+    <string name="licence">လိုင်စင်</string>
+    <string name="interactive">အပြန်အလှန်တုန့်ပြန်သေ</string>
+    <string name="collection">စုဆောင်းမှု</string>
+    <string name="article">ဆောင်းပါး</string>
+    <string name="audio">အသံ</string>
+    <string name="move">ရွှေ့ပါ</string>
+    <string name="hide">ဝှက်ထား</string>
+    <string name="unhide">မဟုတ်ဝှက်</string>
+    <string name="compress">သိပ်</string>
+    <string name="and">နှင့်</string>
+    <string name="share_offline_zip_checkbox_label">တစ်ဦးဇစ်ဖိုင်ထဲမှာပို့ပါ</string>
+    <string name="preparing">ပြင်ဆင်နေသည်</string>
+    <string name="fixed_date">ရက်စွဲသတ်မှတ်သည်</string>
+    <string name="relative_date">ဆွေမျိုးရက်စွဲ</string>
+    <string name="field_required_prompt">ဤကွက်လပ်လိုအပ်ပါသည်</string>
+    <string name="field_password_error_min">စကားဝှက်သည်အနည်းဆုံးစာလုံးရေ ၅ လုံးရှိသင့်သည်</string>
+    <string name="filed_password_no_match">စကားဝှက်မကိုက်ညီပါ၊ ထပ်မံကြိုးစားပါ</string>
+    <string name="update">နောက်ဆုံးသတင်း</string>
+    <string name="profile">ပရိုဖိုင်းကို</string>
+    <string name="dialog_download_from_playstore_ok">ယခုကူးယူပါ (အခမဲ့)</string>
+    <string name="dialog_download_from_playstore_cancel">ကွန်ရက်စာမျက်နှာပေါ်မှာနေပါ</string>
+    <string name="accept">သဘောတူလက်ခံ</string>
+    <string name="also_available_in">ဒါ့အပြင်ရရှိနိုင်အတွက်</string>
+    <string name="created_partnership">နှင့်မိတ်ဖက်လုပ်သည်။:</string>
+    <string name="onboarding_get_started_label">စတင်ပါ</string>
+    <string name="lets_get_started_label">စလိုက်ကြစို့</string>
+    <string name="onboarding_offline_sharing">အော့ဖ်လိုင်းကိုမျှဝေမည်</string>
+    <string name="onboarding_offline_sharing_subheading">အနီးအနားမှာမဆိုအခြားအသုံးပြုသူနှင့်အတူမြင့်မားသောအမြန်နှုန်းမှာဝေမျှမယ်အကြောင်းအရာ။.</string>
+    <string name="download_continue_stacked_label">ဒေါင်းလုပ် ကိုဆက်လုပ်ပါ</string>
+    <string name="download_continue_btn_label">ဆက်လက်</string>
+    <string name="download_downloading_placeholder">ဒေါင်းလုပ်လက်ရှိလုပ်ဆောင်နေသေ %1$s ၏ %2$s</string>
+    <string name="download_summary_title">%1$s တက်ကြွ ဒေါင်းလုပ်</string>
+    <string name="download_cancel_label">ဒေါင်းလုပ်သည်ဖျက်သိမ်းသည်</string>
+    <string name="download_pause_download">ခေတ္တရပ်ဆိုင်</string>
+    <string name="download_storage_option_device">အသုံးပြု %1$s - %2$s အခမဲ့</string>
+    <string name="download_locally_availability">အနီးအနားရှိရရှိနိုင်</string>
+    <string name="download_cloud_availability">မိုဃ်းတိမ်ပေါ်မှာရရှိနိုင်</string>
+    <string name="insufficient_space">ရရှိနိုင်မလုံလောက်သောသိုလှောင်ရန်နေရာ</string>
+    <string name="download_entry_state_paused">ခေတ္တရပ်နားသည်</string>
+    <string name="get_app">လျှောက်လွှာကိုရယူပါ</string>
+    <string name="entry_details_author">စာရေးသူ</string>
+    <string name="entry_details_publisher">ပုံနှိပ်ထုတ်ဝေသူ</string>
+    <string name="entry_details_license">လိုင်စင်:</string>
+    <string name="file_not_found">ဖိုင်ရှာမတွေ့ပါ</string>
+    <string name="preview">တင်ကူးသိမြင်</string>
+    <string name="content_type_multimedia">မာလ်တီမီဒီယာ</string>
+    <string name="content_type">အကြောင်းအရာအမျိုးအစား</string>
+    <string name="link">ဆက်ဆံခြင်း</string>
+    <string name="content_format_paragraph">စာပိုဒ်</string>
+    <string name="content_direction_ltr">ဘယ်မှညာ</string>
+    <string name="content_direction_rtl">ညာဘက်မှလက်ဝဲသို့</string>
+    <string name="content_font_8">8 မှတ်</string>
+    <string name="content_font_10">10မှတ်</string>
+    <string name="content_font_14">14မှတ်</string>
+    <string name="content_font_18">18မှတ်</string>
+    <string name="content_font_24">24မှတ်</string>
+    <string name="content_font_36">36မှတ်</string>
+    <string name="content_insert_options">ထည့်ပါ</string>
+    <string name="content_source_device">ကိရိယာမှ</string>
+    <string name="content_prepare_file">ဖိုင်ပြင်ဆင်နေသည် ...</string>
+    <string name="content_media_photo">ဓာတ်ပုံ</string>
+    <string name="video">ဗွီဒီယို</string>
+    <string name="content_media_title">မီဒီယာအမျိုးအစား</string>
+    <string name="content_blank_page_title">ဗလာစာရွက်</string>
+    <string name="content_blank_doc_click_label">ကလစ်</string>
+    <string name="content_blank_doc_start_label">စတင်တည်းဖြတ်ရန်။.</string>
+    <string name="content_untitled_page">ခေါင်းစဉ်မဲ့စာမျက်နှ</string>
+    <string name="content_untitled_document">ခေါင်းစဉ်မဲ့စာရွက်စာတမ်း</string>
+    <string name="content_update_page_title">စာမျက်နှာအသစ်မွမ်းမံခြင်း</string>
+    <string name="content_action_page_remove">ဖယ်ရှားစာမျက်နှ</string>
+    <string name="content_editor_directionality">လမ်းညွှန်</string>
+    <string name="content_editor_menu_undo">ပြန်လုပ်ရ</string>
+    <string name="content_editor_menu_pages">စာမျက်နှာများ</string>
+    <string name="content_editor_menu_unorderd_list">နံပါတ်စဉ်မပါတဲ့စာရင်း</string>
+    <string name="content_editor_menu_orderd_list">မှာယူထားသောစာရင်း</string>
+    <string name="content_editor_menu_underline">လိုင်းအောက်</string>
+    <string name="content_editor_menu_italic">စာလုံးစောင်း</string>
+    <string name="content_editor_menu_bold">ရဲရင့်သော</string>
+    <string name="content_editor_menu_fontsize">စာလုံးအရွယ်အစား</string>
+    <string name="content_editor_menu_align_left">လက်ဝဲ</string>
+    <string name="content_editor_menu_align_right">မှန်သေ</string>
+    <string name="content_editor_menu_superscript">စူပါဇာတ်ညွှန်း</string>
+    <string name="content_editor_menu_subscript">ခေါင်းစဉ်ခွဲ</string>
+    <string name="content_editor_link_url">ဆက်ဆံခြင်း ယူနီဖောင်းအရင်းအမြစ်တည်နေရာ</string>
+    <string name="content_editor_link_insert">ထည့်ပါ ဆက်ဆံခြင်း</string>
+    <string name="content_editor_link_remove">ဖယ်ရှားလိုက်ပါ ဆက်ဆံခြင်း</string>
+    <string name="content_editor_create_new_import">သွင်းကုန်ဖိုင်</string>
+    <string name="content_editor_create_new_import_link">တင်သွင်း ဆက်ဆံခြင်း</string>
+    <string name="content_editor_create_new_content">အကြောင်းအရာအသစ်ဖန်တီးပါ</string>
+    <string name="content_editor_create_new_category">ဖိုင်တွဲအသစ်</string>
+    <string name="content_editor_create_new_title">အကြောင်းအရာထည့်ပါ</string>
+    <string name="content_creation_storage_option_title">သိုလှောင်မှုရွေးစရာ</string>
+    <string name="content_creation_folder_new_message">ဖိုင်တွဲအသစ်ကိုအောင်မြင်စွာထည့်ပြီးပါပြီ</string>
+    <string name="error_message_load_page">စာမျက်နှာဝန်ပျက်ကွက်</string>
+    <string name="error_message_update_document">မှတ်တမ်းတင်ရန်မအောင်မြင်ပါ</string>
+    <string name="content_editor_save_error">ားယွင်းနေသည်ချွေတာနေစဉ်တွင်, ထပ်မံကြိုးစား</string>
+    <string name="content_entry_export_inprogress">ပို့ကုန်ဆက်လက်</string>
+    <string name="show_hidden_items">ဝှက်ထားသောပစ္စည်းများကိုပြရန်</string>
+    <string name="open_folder">ဖိုင်ကိုဖွင့်</string>
+    <string name="action_hidden">ဝှက်ထား</string>
+    <string name="invalid_register_code">မမှန်ကန်သောမှတ်ပုံတင်နံပါတ်</string>
+    <string name="enter_register_code">မှတ်ပုံတင်နံပါတ်ထည့်ပါ</string>
+    <string name="bar_chart" value="100">ဘားဇယား</string>
+    <string name="line_chart" value="101">လိုင်းဇယား</string>
+    <string name="content_average_duration" value="201">အကြောင်းအရာအသုံးပြုမှု - ရုံးထိုင်အချိန်ကာလ ကိုပျမ်းမျှကြာချိန်</string>
+    <string name="interaction_recorded" value="203">အကြောင်းအရာအသုံးပြုမှု - မှတျတမျးတငျထား အပြန်အလှန်ဆက်သွယ်မှု ကအရေအတွက်</string>
+    <string name="number_students_completed" value="206">အကြောင်းအရာအသုံးပြုမှု - အကြောင်းအရာပြီးစီးခဲ့သောကျောင်းသားများအရေအတွက်</string>
+    <string name="total_absences" value="209">သွားရောက်ရှိနေခြင်း - စုစုပေါင်းမဟုတ်တက်ရောက်ရန်</string>
+    <string name="percent_students_attended_or_late" value="212">သွားရောက်ရှိနေခြင်း - နှောင်းပိုင်းတွင်တက်ရောက်ခဲ့သည်သို့မဟုတ်ခဲ့ကြသည်သောကျောင်းသားများရာခိုင်နှုန်း</string>
+    <string name="number_unique_students_attending" value="214">သွားရောက်ရှိနေခြင်း - တက်ရောက်သူထူးခြားသောကျောင်းသားအရေအတွက်</string>
+    <string name="xapi_day" value="300">နေ့</string>
+    <string name="xapi_week" value="301">သီတင်းပတ်</string>
+    <string name="xapi_month" value="302">လ</string>
+    <string name="xapi_content_entry" value="304">အကြောင်းအရာ ဝင်သွားခြင်း</string>
+    <string name="xapi_clear">ရှင်းလင်းသော</string>
+    <string name="last_two_week_date_range" value="801">နောက်ဆုံးနှစ်ပတ်အတွင်း</string>
+    <string name="last_month_date_range" value="802">ပြီးခဲ့သည့်လက</string>
+    <string name="new_custom_date_range" value="804">နယူးထုံးစံရက်စွဲအကွာအဝေး …</string>
+    <string name="selected_custom_range">စိတ်ကြိုက်အကွာအဝေး: %1$s%</string>
+    <string name="time_range">အချိန်အတိုင်းအတာ</string>
+    <string name="year">ခုနှစ်</string>
+    <string name="done">ပြီးပြီ</string>
+    <string name="xapi_options_general">အထွေထွေ</string>
+    <string name="xapi_options_visual_type">အမြင်အာရုံ အမျိုးအစား</string>
+    <string name="xapi_options_data_set">ဒေတာအစု</string>
+    <string name="xapi_options_series">စီးရီ</string>
+    <string name="xapi_options_axes">ဝင်ရိုးတန်း</string>
+    <string name="xapi_options_x_axes">X-ဝင်ရိုးတန်း</string>
+    <string name="xapi_options_subgroup">အဖွဲ့ခွဲ ဖြင့်</string>
+    <string name="xapi_options_filters">စိစစ်မှုများ</string>
+    <string name="xapi_options_who">မည်သူ</string>
+    <string name="xapi_options_what">မည်သည့်အရာ</string>
+    <string name="xapi_options_when">ထိုအခါ</string>
+    <string name="xapi_options_where">ဘယ်မှာ</string>&gt;
+    <string name="time_range_all">အရာအားလုံး</string>
+    <string name="report_filter_edit_condition">အခြေအနေ</string>
+    <string name="report_filter_edit_values">တန်ဖိုး (များ)</string>
+    <string name="report">အစီရင်ခံစာ</string>
+    <string name="edit_report">အစီရင်ခံစာတည်းဖြတ်ပါ</string>
+    <string name="verb">ကြိယာ</string>
+    <string name="add_a_new_verb">ကြိယာအသစ်တစ်ခုထည့်ပါ</string>
+    <string name="edit_filters">စစ်ထုတ်သည့်အရာများကိုတည်းဖြတ်ပါ</string>
+    <string name="field_person_gender">ပုဂ္ဂိုလ် ကျားမ</string>
+    <string name="field_content_completion">အကြောင်းအရာပြီးစီးမှုအခြေအနေကို</string>
+    <string name="dialog_download_from_playstore_message">အသုံးပြုခွင့် နှင့် ပညာရေးဆိုင်ရာအကြောင်းအရာအော့ဖ်လိုင်းမျှဝေပါ</string>
 </resources>
