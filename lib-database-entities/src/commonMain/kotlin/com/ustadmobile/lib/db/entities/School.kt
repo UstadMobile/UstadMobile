@@ -79,8 +79,7 @@ open class School() {
 
 
     /**
-     * The timezone ID as per https://www.iana.org/time-zones. If null, this means use the School
-     * timezone
+     * The timezone ID as per https://www.iana.org/time-zones.
      */
     var schoolTimeZone: String? = null
 

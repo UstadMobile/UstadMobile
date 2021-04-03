@@ -123,7 +123,7 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     }
 
     if(personGroupUid != null) {
-        val personGroupMember = PersonGroupMember().also {
+        PersonGroupMember().also {
             it.groupMemberPersonUid = personToEnrol.personUid
             it.groupMemberGroupUid = personGroupUid
             it.groupMemberUid = personGroupMemberDao.insertAsync(it)
@@ -164,7 +164,7 @@ suspend fun UmAppDatabase.enrolPersonIntoSchoolAtLocalTimezone(personToEnrol: Pe
     }
 
     if(personGroupUid != null) {
-        val personGroupMember = PersonGroupMember().also {
+        PersonGroupMember().also {
             it.groupMemberPersonUid = personToEnrol.personUid
             it.groupMemberGroupUid = personGroupUid
             it.groupMemberUid = personGroupMemberDao.insertAsync(it)
@@ -226,8 +226,7 @@ suspend fun UmAppDatabase.approvePendingSchoolMember(member: SchoolMember, schoo
 /**
  * Inserts the person, sets its group and groupmember. Does not check if its an update
  */
-suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T,
-                loggedInPerson: Person? = null): T{
+suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T): T{
 
     val groupPerson = PersonGroup().apply {
         groupName = "Person individual group"
@@ -443,7 +442,7 @@ suspend fun UmAppDatabase.enrollPersonToSchool(schoolUid: Long,
         }
 
         if(personGroupUid != null) {
-            val personGroupMember = PersonGroupMember().also {
+            PersonGroupMember().also {
                 it.groupMemberPersonUid = schoolMember.schoolMemberPersonUid
                 it.groupMemberGroupUid = personGroupUid
                 it.groupMemberUid = personGroupMemberDao.insertAsync(it)

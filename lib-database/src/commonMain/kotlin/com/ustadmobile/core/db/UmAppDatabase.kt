@@ -40,6 +40,9 @@ import kotlin.jvm.Volatile
     LearnerGroup::class, LearnerGroupMember::class,
     GroupLearningSession::class,
     SiteTerms::class,
+    NotificationSetting::class,
+    NotificationSettingLastChecked::class,
+    FeedEntry::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -51,7 +54,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 61)
+], version = 62)
 @MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -280,6 +283,10 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val siteDao: SiteDao
 
     abstract val siteTermsDao: SiteTermsDao
+
+    abstract val notificationSettingDao: NotificationSettingDao
+
+    abstract val feedEntryDao: FeedEntryDao
 
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_SYNCDAO

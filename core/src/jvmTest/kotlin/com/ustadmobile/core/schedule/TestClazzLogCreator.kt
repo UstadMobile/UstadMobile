@@ -51,7 +51,7 @@ class TestClazzLogCreator {
 
 
     @Test
-    fun givenClazzWithScheduleInRange_whenCreateClazzLogsCalled_thenShouldCreateClazzLog() {
+    fun givenClazzWithScheduleInRange_whenCreateClazzLogsCalled_thenShouldCreateClazzLogAndReturnNextTimeToCheck() {
         val (testClazz, testClazzSchedule) = createClazzAndSchedule("Test Clazz",
                 timezone = "Asia/Dubai") {
             scheduleDay = Schedule.DAY_FRIDAY
@@ -64,7 +64,7 @@ class TestClazzLogCreator {
         val toTime = fromTime + (1.days.millisecondsLong)
 
         runBlocking {
-            repo.createClazzLogs(fromTime, toTime)
+            val nextRunTime = repo.createClazzLogs(fromTime, toTime, testClazz.clazzUid)
 
             val createdLogs = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime)
@@ -75,6 +75,9 @@ class TestClazzLogCreator {
             Assert.assertEquals("Created log has correctly set schedule uid",
                     createdLogs[0].clazzLogScheduleUid, testClazzSchedule.scheduleUid)
 
+            Assert.assertEquals("Next check time was provided for next week, local midnight",
+                "Thu, 21 May 2020 20:00:00 UTC",
+                DateTime.fromUnix(nextRunTime).format(dateFormat))
         }
     }
 
@@ -102,7 +105,7 @@ class TestClazzLogCreator {
         val fromTime = dateFormat.parse("Thu, 14 May 2020 20:00:00 UTC").utc.unixMillisLong
         val toTime = fromTime + (1.days.millisecondsLong)
         runBlocking {
-            repo.createClazzLogs(fromTime, toTime)
+            repo.createClazzLogs(fromTime, toTime, testClazz.clazzUid)
             val createdLogs = repo.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime)
 
@@ -126,12 +129,12 @@ class TestClazzLogCreator {
         val fromTime = dateFormat.parse("Thu, 14 May 2020 20:00:00 UTC").utc.unixMillisLong
         val toTime = fromTime + (1.days.millisecondsLong)
         runBlocking {
-            repo.createClazzLogs(fromTime, toTime)
+            repo.createClazzLogs(fromTime, toTime, testClazz.clazzUid)
             val numLogsCreatedBefore = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime).size
 
             //Call it again
-            repo.createClazzLogs(fromTime, toTime)
+            repo.createClazzLogs(fromTime, toTime, testClazz.clazzUid)
             val allLogsCreated = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime)
 
@@ -161,7 +164,7 @@ class TestClazzLogCreator {
         val fromTime = dateFormat.parse("Thu, 14 May 2020 20:00:00 UTC").utc.unixMillisLong
         val toTime = fromTime + (1.days.millisecondsLong)
         runBlocking {
-            repo.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
+            repo.createClazzLogs(fromTime, toTime, testClazz.clazzUid)
 
             val createdLogs = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime)
@@ -170,30 +173,6 @@ class TestClazzLogCreator {
             Assert.assertEquals("Log date is as expected", "Fri, 15 May 2020 06:00:00 UTC",
                     DateTime.fromUnix(createdLogs[0].logDate).format(dateFormat))
 
-        }
-    }
-
-    @Test
-    fun givenClazzWithScheduleInRangeAndNotSameLocalDay_whenCreateClazzLogsCalled_thenShouldNotBeCreated() {
-        val (testClazz, testClazzSchedule) = createClazzAndSchedule("Test Clazz",
-                timezone = "Asia/Dubai") {
-            scheduleDay = Schedule.DAY_FRIDAY
-            sceduleStartTime = 10 * 60 * 60 * 1000 //10am
-            scheduleEndTime = 12 * 60 * 60 * 1000
-            scheduleActive = true
-        }
-
-        val fromTime = dateFormat.parse("Thu, 14 May 2020 18:00:00 UTC").utc.unixMillisLong
-        val toTime = fromTime + (1.days.millisecondsLong)
-        runBlocking {
-            repo.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
-
-            val clazzLogsCreated = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
-                    fromTime, toTime)
-
-            Assert.assertEquals("No clazz logs were created because it was not yet the same day " +
-                    "as per the local time for the class",
-                    0, clazzLogsCreated.size)
         }
     }
 
@@ -210,7 +189,7 @@ class TestClazzLogCreator {
         val fromTime = dateFormat.parse("Thu, 14 May 2020 20:00:00 UTC").utc.unixMillisLong
         val toTime = fromTime + (1.days.millisecondsLong)
         runBlocking {
-            repo.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
+            repo.createClazzLogs(fromTime, toTime, testClazz.clazzUid)
 
             testClazzSchedule.apply {
                 sceduleStartTime = 12 * 60 * 60 * 1000 //12pm
@@ -218,7 +197,7 @@ class TestClazzLogCreator {
             }
             repo.scheduleDao.update(testClazzSchedule)
 
-            repo.createClazzLogs(fromTime, toTime, matchLocalFromDay = true)
+            repo.createClazzLogs(fromTime, toTime, testClazz.clazzUid)
 
             val clazzLogsCreated = db.clazzLogDao.findByClazzUidWithinTimeRange(testClazz.clazzUid,
                     fromTime, toTime).partition { it.clazzLogStatusFlag != ClazzLog.STATUS_RESCHEDULED }

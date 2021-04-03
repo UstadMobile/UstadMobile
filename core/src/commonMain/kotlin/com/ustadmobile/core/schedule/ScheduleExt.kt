@@ -29,3 +29,7 @@ fun Schedule.nextOccurence(timezoneName: String, after: Long = getSystemTimeInMi
     return (occurenceDayLocalMidnight.utc + sceduleStartTime.milliseconds + daylightSavingsDelta.milliseconds) until
             (occurenceDayLocalMidnight.utc + scheduleEndTime.milliseconds + daylightSavingsDelta.milliseconds)
 }
+
+fun List<Schedule>.nextOccurence(timezoneName: String, after: Long = getSystemTimeInMillis()): DateTimeRange? {
+    return map { it.nextOccurence(timezoneName, after) }.minByOrNull { it.from.unixMillisLong }
+}

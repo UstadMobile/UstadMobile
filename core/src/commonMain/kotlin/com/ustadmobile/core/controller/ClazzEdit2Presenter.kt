@@ -130,6 +130,8 @@ class ClazzEdit2Presenter(context: Any,
                     accountManager.activeAccount.endpointUrl,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
 
+            //TODO: check notifications for takeattendance reminder and attendancemissednotification
+
             view.loading = false
 
             //Handle the following scenario: PersonEdit (user selects to add an enrolment), ClazzList

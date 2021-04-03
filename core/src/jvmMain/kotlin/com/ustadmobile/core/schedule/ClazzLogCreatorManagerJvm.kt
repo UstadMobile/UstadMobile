@@ -10,8 +10,8 @@ import org.kodein.di.on
 
 class ClazzLogCreatorManagerJvm(override val di : DI): ClazzLogCreatorManager, DIAware {
 
-    override fun requestClazzLogCreation(clazzUidFilter: Long, endpointUrl: String, fromTime: Long, toTime: Long) {
+    override fun requestClazzLogCreation(clazzUid: Long, endpointUrl: String, fromTime: Long, toTime: Long) {
         val db: UmAppDatabase by di.on(Endpoint(endpointUrl)).instance(tag = TAG_DB)
-        db.createClazzLogs(fromTime, toTime, clazzUidFilter, false)
+        db.createClazzLogs(fromTime, toTime, clazzUid)
     }
 }
