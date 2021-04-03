@@ -1,4 +1,4 @@
 package com.ustadmobile.controller
 
-class PreloadComponentPresenter {
+class PreloadPresenter {
 }

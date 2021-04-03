@@ -1,6 +1,7 @@
 package com.ustadmobile.state
 
-interface MainComponentState: UmBaseState {
+interface MainState: UmBaseState {
     var currentView: String
     var responsiveDrawerOpen: Boolean
+    var isRTLSupport: Boolean
 }

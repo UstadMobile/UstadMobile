@@ -1,5 +1,5 @@
 package com.ustadmobile.controller
 
-class MainComponentPresenter {
+class MainPresenter {
     
 }

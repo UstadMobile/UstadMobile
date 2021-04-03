@@ -1,8 +1,6 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.view.UstadView
-
-interface MainComponentView: UstadView {
+interface MainView {
     fun updateDrawerState()
     fun onThemeChange()
 }

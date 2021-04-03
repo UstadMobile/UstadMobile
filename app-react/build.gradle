@@ -14,12 +14,6 @@ repositories {
 kotlin {
     js(LEGACY) {
         browser {
-
-            dceTask {
-                keep("kotlin.defineModule")
-                keep("com.ustadmobile.door.util")
-            }
-
             binaries.executable()
             webpackTask {
                 cssSupport.enabled = true
@@ -46,9 +40,5 @@ dependencies {
     implementation "org.jetbrains:kotlin-redux:$version_kotlin_redux"
     implementation "org.jetbrains:kotlin-react-redux:$version_kotlin_react_redux"
     implementation "com.ccfraser.muirwik:muirwik-components:$version_muirwik_components"
-    implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime-js:0.20.0"
-    implementation "io.ktor:ktor-client-js:$version_ktor"
-    implementation "io.ktor:ktor-client-json-js:$version_ktor"
-    implementation "io.ktor:ktor-client-serialization-js:$version_ktor"
     implementation project(":core")
 }
