@@ -14,10 +14,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
-import com.ustadmobile.lib.db.entities.CustomField
-import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
-import com.ustadmobile.lib.db.entities.StatementEntity
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.*
@@ -276,6 +273,11 @@ fun ImageView.isContentCompleteImage(person: PersonWithSessionsDisplay){
     }
 }
 
+@BindingAdapter("verbIcon")
+fun ImageView.setVerbIcon(verb: String?) {
+    val drawableId = VERB_ICON_MAP[verb ?: ""] ?: android.R.color.transparent
+    setImageDrawable(ContextCompat.getDrawable(context, drawableId))
+}
 
 private val ICON_ID_MAP : Map<Int, Int> by lazy {
     mapOf(CustomField.ICON_PHONE to R.drawable.ic_phone_black_24dp,
@@ -283,6 +285,14 @@ private val ICON_ID_MAP : Map<Int, Int> by lazy {
         CustomField.ICON_CALENDAR to R.drawable.ic_event_black_24dp,
         CustomField.ICON_EMAIL to R.drawable.ic_email_black_24dp,
         CustomField.ICON_ADDRESS to R.drawable.ic_location_pin_24dp)
+}
+
+private val VERB_ICON_MAP: Map<String, Int> by lazy {
+     mapOf(VerbEntity.VERB_COMPLETED_URL to R.drawable.verb_complete,
+     VerbEntity.VERB_PROGRESSED_URL to R.drawable.verb_progress,
+     "http://adlnet.gov/expapi/verbs/attempted" to R.drawable.verb_attempt,
+     "http://adlnet.gov/expapi/verbs/interacted" to R.drawable.verb_interactive,
+     "http://adlnet.gov/expapi/verbs/answered" to R.drawable.verb_answered)
 }
 
 @BindingAdapter("imageResIdInt")

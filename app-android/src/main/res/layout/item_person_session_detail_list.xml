@@ -36,7 +36,9 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_person_verb_image"
-            tools:src="@drawable/ic_account_circle_black_24dp"
+            tools:src="@drawable/verb_answered"
+            app:verbIcon="@{person.verb.urlId}"
+            android:tint="?colorOnIconTint"
             android:layout_width="@dimen/dimen_40dp"
             android:layout_height="@dimen/dimen_40dp"
             android:layout_marginTop="@dimen/dimen_16dp"

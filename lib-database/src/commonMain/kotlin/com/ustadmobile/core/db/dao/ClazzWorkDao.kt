@@ -192,9 +192,15 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                 (
                     (
                         SELECT SUM(ContentEntryProgress.contentEntryProgressProgress) 
-                        FROM ContentEntryProgress WHERE
-                        CAST(ContentEntryProgress.contentEntryProgressActive AS INTEGER) = 1
+                        FROM ClazzWorkContentJoin 
+                        LEFT JOIN ContentEntry ON 
+                        ContentEntry.contentEntryUid = ClazzWorkContentJoin.clazzWorkContentJoinContentUid
+                        LEFT JOIN ContentEntryProgress ON 
+                        ContentEntryProgress.contentEntryProgressContentEntryUid = ContentEntry.contentEntryUid
+                        WHERE CAST(ContentEntryProgress.contentEntryProgressActive AS INTEGER) = 1
                         AND ContentEntryProgress.contentEntryProgressPersonUid = Person.personUid
+                        AND ClazzWorkContentJoin.clazzWorkContentJoinClazzWorkUid = ClazzWork.clazzWorkUid
+                        AND CAST(clazzWorkContentJoinInactive AS INTEGER) = 0
                     ) 
                     /
                     (
