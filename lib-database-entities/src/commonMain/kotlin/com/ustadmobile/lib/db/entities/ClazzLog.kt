@@ -46,6 +46,8 @@ open class ClazzLog()  {
 
     var logDate: Long = 0
 
+    var logDuration: Int = 0
+
     var timeRecorded: Long = 0
 
     var clazzLogDone: Boolean = false

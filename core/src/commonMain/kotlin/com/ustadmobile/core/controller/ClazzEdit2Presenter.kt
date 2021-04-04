@@ -3,6 +3,7 @@ package com.ustadmobile.core.controller
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.notification.NotificationCheckersManager
 import com.ustadmobile.core.schedule.*
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
@@ -24,7 +25,9 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
+import org.kodein.di.on
 
 
 class ClazzEdit2Presenter(context: Any,
@@ -130,7 +133,8 @@ class ClazzEdit2Presenter(context: Any,
                     accountManager.activeAccount.endpointUrl,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
 
-            //TODO: check notifications for takeattendance reminder and attendancemissednotification
+            val notificationCheckersManager: NotificationCheckersManager = di.on(accountManager.activeAccount).direct.instance()
+            notificationCheckersManager.invalidateClazzScheduleRelatedCheckers(entity.clazzUid)
 
             view.loading = false
 

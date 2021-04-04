@@ -2,6 +2,7 @@ package com.ustadmobile.core.notification
 
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.schedule.duration
 import com.ustadmobile.core.schedule.nextOccurence
 import com.ustadmobile.core.view.ClazzLogEditAttendanceView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
@@ -9,6 +10,7 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ClazzEnrolment
 import com.ustadmobile.lib.db.entities.FeedEntry
+import com.ustadmobile.lib.db.entities.NotificationSetting
 import org.kodein.di.DI
 import org.kodein.di.DIAware
 import org.kodein.di.instance
@@ -21,23 +23,21 @@ class TakeAttendanceNotificationChecker(override val di: DI, val siteEndpoint: E
 
     private val db: UmAppDatabase by di.on(siteEndpoint).instance(tag = DoorTag.TAG_DB)
 
-    override suspend fun checkNotification(notificationSettingUid: Long): NotificationCheckResult {
-        val notificationSetting = db.notificationSettingDao.findByUidWithLastCheckedAsync(
-                notificationSettingUid) ?: return NotificationCheckResult(0)
+    override suspend fun checkNotification(notificationSetting: NotificationSetting): NotificationCheckResult {
 
         val startTime = systemTimeInMillis()
 
         val clazzesToNotify = db.notificationSettingDao.findTakeAttendanceClazzesToNotify(
-            notificationSettingUid, systemTimeInMillis() + 10)
+            notificationSetting.nsUid, systemTimeInMillis() + 10)
 
         val feedEntries = clazzesToNotify.map {  clazzLog ->
             FeedEntry().apply {
                 fePersonUid = notificationSetting.nsPersonUid
                 feTitle = "Take attendance - ${clazzLog.clazz?.clazzName}"
-                feViewDest = "${ClazzLogEditAttendanceView.VIEW_NAME}?$ARG_ENTITY_UID=${clazzLog.clazzLogUid}?"
+                feViewDest = "${ClazzLogEditAttendanceView.VIEW_NAME}?$ARG_ENTITY_UID=${clazzLog.clazzLogUid}"
                 feEntityUid = clazzLog.clazzLogUid
-                feNsUid = notificationSettingUid
-                feTimestamp = clazzLog.logDate
+                feNsUid = notificationSetting.nsUid
+                feTimestamp = clazzLog.logDate + clazzLog.logDuration
             }
         }
 
@@ -51,7 +51,7 @@ class TakeAttendanceNotificationChecker(override val di: DI, val siteEndpoint: E
             val schedule = it.schedule
             val timeZone = it.scheduleTimeZone
             if(schedule != null && timeZone != null){
-                schedule.nextOccurence(timeZone, after = startTime)
+                schedule.nextOccurence(timeZone, after = (startTime - schedule.duration))
             }else {
                 null
             }

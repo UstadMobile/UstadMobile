@@ -6,12 +6,13 @@ import com.ustadmobile.door.annotation.LastChangedBy
 import com.ustadmobile.door.annotation.LocalChangeSeqNum
 import com.ustadmobile.door.annotation.MasterChangeSeqNum
 import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.lib.db.entities.NotificationSetting.Companion.TABLE_ID
 
 /**
  * This entity represents a Notification Setting by a particular user.
  */
 @Entity
-@SyncableEntity(tableId = 1077)
+@SyncableEntity(tableId = TABLE_ID)
 open class NotificationSetting {
 
     @PrimaryKey(autoGenerate = true)
@@ -48,6 +49,8 @@ open class NotificationSetting {
     var nsThreshold: Float = 0f
 
     companion object {
+
+        const val TABLE_ID = 271
 
         const val TYPE_TAKE_ATTENDANCE_REMINDER = 1
 

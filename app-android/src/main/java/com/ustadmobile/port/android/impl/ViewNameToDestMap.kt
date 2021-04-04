@@ -11,6 +11,7 @@ import com.ustadmobile.core.view.*
 class ViewNameToDestMap: DestinationProvider {
 
     val destinationMap = mapOf(
+            FeedEntryListView.VIEW_NAME to UstadDestination(R.id.home_feedentrylist_dest),
             ClazzEdit2View.VIEW_NAME to UstadDestination(R.id.clazz_edit_dest,
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             ClazzList2View.VIEW_NAME to UstadDestination(R.id.home_clazzlist_dest),

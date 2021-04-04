@@ -2,6 +2,7 @@ package com.ustadmobile.core.schedule
 
 import android.content.Context
 import androidx.work.Data
+import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
 import com.ustadmobile.door.util.systemTimeInMillis
@@ -24,6 +25,7 @@ class ClazzLogCreatorManagerAndroidImpl(val context: Context): ClazzLogCreatorMa
                 }
                 .setInputData(inputData.build())
                 .build()
-        WorkManager.getInstance(context).enqueue(request)
+        WorkManager.getInstance(context).enqueueUniqueWork(
+            "genclazzlog-$endpointUrl-$clazzUid", ExistingWorkPolicy.REPLACE, request)
     }
 }

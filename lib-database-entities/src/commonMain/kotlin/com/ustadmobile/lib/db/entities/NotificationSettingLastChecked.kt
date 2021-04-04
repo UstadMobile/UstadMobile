@@ -7,10 +7,8 @@ import androidx.room.PrimaryKey
 @Entity
 class NotificationSettingLastChecked {
 
-    @PrimaryKey(autoGenerate = true)
-    var nslcUid: Long = 0
-
-    //foreignkey: notification setting uid
+    //Primary key is the same as the NotificationSetting (allowing easy replacement)
+    @PrimaryKey
     var nslcNsUid: Long = 0
 
     var lastCheckTime: Long = 0

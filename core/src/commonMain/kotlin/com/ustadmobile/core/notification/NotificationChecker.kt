@@ -1,5 +1,7 @@
 package com.ustadmobile.core.notification
 
+import com.ustadmobile.lib.db.entities.NotificationSetting
+
 /**
  * A notification checker runs a check on a given NotificationSetting type (e.g.
  * TakeAttendance, AttendanceNotTaken, ClazzAttendanceThreshold etc). The NotificationSetting
@@ -14,11 +16,11 @@ interface NotificationChecker {
     /**
      * Check the notification given by the UID.
      *
-     * @param notificationSettingUid The NotificationSetting (nsUid) to check
+     * @param notificationSetting The NotificationSetting (nsUid) to check
      *
      * @return NotificationResult specifying at least the time that this should next be checked (or
      * 0 if there is no specific check time).
      */
-    suspend fun checkNotification(notificationSettingUid: Long): NotificationCheckResult
+    suspend fun checkNotification(notificationSetting: NotificationSetting): NotificationCheckResult
 
 }

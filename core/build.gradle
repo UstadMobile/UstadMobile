@@ -177,6 +177,7 @@ kotlin {
                 implementation "androidx.room:room-runtime:$version_android_room"
                 implementation "androidx.paging:paging-runtime:$version_androidx_paging"
                 implementation "androidx.work:work-runtime:$version_android_workmanager"
+                implementation "androidx.work:work-runtime-ktx:$version_android_workmanager"
                 implementation project(":lib-database-android")
                 implementation "org.jsoup:jsoup:$version_jsoup"
                 //Image loading library

@@ -3,6 +3,8 @@ package com.ustadmobile.core.notification
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.schedule.duration
+import com.ustadmobile.core.schedule.nextOccurence
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
@@ -42,6 +44,8 @@ class TakeAttendanceNotificationCheckerTest {
 
     private lateinit var testClazzLog: ClazzLog
 
+    private lateinit var schedule: Schedule
+
     @Before
     fun setup() {
         di = DI {
@@ -63,7 +67,16 @@ class TakeAttendanceNotificationCheckerTest {
 
         testClazz = Clazz().apply {
             clazzName = "Test Clazz"
+            clazzTimeZone = "Asia/Dubai"
             clazzUid = repo.clazzDao.insert(this)
+        }
+
+        schedule = Schedule().apply {
+            scheduleClazzUid = testClazz.clazzUid
+            scheduleDay = Schedule.DAY_MONDAY
+            sceduleStartTime = (9 * 60 * 1000 * 1000)
+            scheduleEndTime = sceduleStartTime + (60 * 1000 * 1000)
+            scheduleUid = repo.scheduleDao.insert(this)
         }
 
         runBlocking {
@@ -92,7 +105,7 @@ class TakeAttendanceNotificationCheckerTest {
             Endpoint(accountManager.activeAccount.endpointUrl))
 
         runBlocking {
-            notificationChecker.checkNotification(testNotificationSetting.nsUid)
+            notificationChecker.checkNotification(testNotificationSetting)
         }
 
         val personFeedEntries = runBlocking {
@@ -112,7 +125,7 @@ class TakeAttendanceNotificationCheckerTest {
             Endpoint(accountManager.activeAccount.endpointUrl))
 
         runBlocking {
-            notificationChecker.checkNotification(testNotificationSetting.nsUid)
+            notificationChecker.checkNotification(testNotificationSetting)
         }
 
         val personFeedEntries = runBlocking {
@@ -125,6 +138,22 @@ class TakeAttendanceNotificationCheckerTest {
             personFeedEntries.count {
                 it.fePersonUid == activePerson.personUid && it.feEntityUid == testClazzLog.clazzLogUid
             })
+    }
+
+    @Test
+    fun givenUpcomingClazz_whenCheckNotificationCalled_thenShouldReturnNextTimeToRun() {
+
+        val notificationChecker = TakeAttendanceNotificationChecker(di,
+            Endpoint(accountManager.activeAccount.endpointUrl))
+
+        val nextRunTime = runBlocking {
+            notificationChecker.checkNotification(testNotificationSetting)
+        }
+
+        val expectedNextRunTime = schedule.nextOccurence(testClazz.clazzTimeZone!!,
+            after = systemTimeInMillis() - schedule.duration)
+        Assert.assertEquals("NextRunTime is the next occurence of the schedule",
+            expectedNextRunTime.to.unixMillisLong, nextRunTime.nextCheckTime)
     }
 
 }

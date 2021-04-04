@@ -65,6 +65,7 @@ fun UmAppDatabase.createClazzLogs(fromTime: Long, toTime: Long, clazzUid: Long) 
         val clazzLogDate = scheduleNextInstance.from.unixMillisLong
         val clazzLog = ClazzLog().apply {
             logDate = clazzLogDate
+            logDuration = scheduleNextInstance.duration.millisecondsInt
             clazzLogClazzUid = clazz.clazzUid
             clazzLogScheduleUid = schedule.scheduleUid
             clazzLogUid = generateUid()

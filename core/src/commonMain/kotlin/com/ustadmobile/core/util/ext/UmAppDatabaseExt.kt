@@ -243,6 +243,12 @@ suspend fun <T: Person> UmAppDatabase.insertPersonAndGroup(entity: T): T{
     personGroupMemberDao.insertAsync(
             PersonGroupMember(entity.personUid, entity.personGroupUid))
 
+    //Create default notification settings
+    notificationSettingDao.insertAsync(NotificationSetting().apply {
+        nsPersonUid = entity.personUid
+        nsType = NotificationSetting.TYPE_TAKE_ATTENDANCE_REMINDER
+    })
+
     return entity
 }
 
