@@ -35,9 +35,11 @@
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_person_success_complete_image"
-            tools:src="@drawable/ic_account_circle_black_24dp"
+            tools:src="@drawable/exo_ic_check"
+            android:tint='?colorOnIconTint'
             android:layout_width="@dimen/dimen_24dp"
             android:layout_height="@dimen/dimen_24dp"
+            app:isContentCompleteImage="@{person}"
             android:layout_marginTop="@dimen/dimen_16dp"
             android:layout_marginBottom="@dimen/dimen_16dp"
             android:layout_marginStart="@dimen/dimen_8dp"
@@ -89,7 +91,7 @@
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="@dimen/dimen_16dp" />
 
-
+GONE
         <androidx.appcompat.widget.AppCompatImageView
             tools:text="20/12/2021 15:00"
             android:id="@+id/item_person_progress_image"

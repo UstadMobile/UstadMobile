@@ -16,6 +16,8 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.CustomField
+import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
+import com.ustadmobile.lib.db.entities.StatementEntity
 import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.*
@@ -261,6 +263,19 @@ private fun ImageView.updateFromImageLookupMap() {
         }
     }
 }
+
+@BindingAdapter("isContentCompleteImage")
+fun ImageView.isContentCompleteImage(person: PersonWithSessionsDisplay){
+    if(person.resultComplete){
+        if(person.resultSuccess.toByte() == StatementEntity.RESULT_SUCCESS)
+            setImageResource(R.drawable.exo_ic_check) else setImageResource(R.drawable.ic_close_black_24dp)
+        visibility = View.VISIBLE
+    }else{
+        context.getString(R.string.incomplete)
+        visibility = View.INVISIBLE
+    }
+}
+
 
 private val ICON_ID_MAP : Map<Int, Int> by lazy {
     mapOf(CustomField.ICON_PHONE to R.drawable.ic_phone_black_24dp,
