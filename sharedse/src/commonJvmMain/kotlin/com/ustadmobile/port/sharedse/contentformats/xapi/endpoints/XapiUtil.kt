@@ -351,7 +351,7 @@ object XapiUtil {
                         statementEntity.resultCompletion)){
             progress = 100
             statusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
-            repo.statementDao.updateProgress(statementEntity.statementContentEntryUid, progress)
+            repo.statementDao.updateProgress(statementEntity.statementUid, progress)
         }
         repo.contentEntryProgressDao.updateProgress(statementEntity.statementContentEntryUid,
                 statementEntity.statementPersonUid, progress, statusFlag)
