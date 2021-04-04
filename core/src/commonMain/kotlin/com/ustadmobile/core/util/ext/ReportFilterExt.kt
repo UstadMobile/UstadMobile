@@ -16,7 +16,7 @@ fun ReportFilter.toDisplayString(context: Any): String {
 
     var valueString = reportFilterValue
     when {
-        ReportFilter.FIELD_PERSON_GENDER == reportFilterField -> {
+        ReportFilter.FIELD_PERSON_GENDER == reportFilterField ||  ReportFilter.FIELD_LE_GENDER == reportFilterField -> {
 
             val selectedOption = ReportFilterEditPresenter.genderMap.entries.find {
                 it.key == reportFilterDropDownValue

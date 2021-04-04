@@ -52,7 +52,7 @@ interface ReportDetailFragmentEventHandler {
     fun onClickAddAsTemplate(report: ReportWithSeriesWithFilters)
 }
 
-class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(), ReportDetailView, ReportDetailFragmentEventHandler {
+class   ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(), ReportDetailView, ReportDetailFragmentEventHandler {
 
     private var mBinding: FragmentReportDetailBinding? = null
 

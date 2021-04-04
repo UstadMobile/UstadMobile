@@ -43,7 +43,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
 			(SUM(SaleItem.saleItemPricePerPiece * SaleItem.saleItemQuantity) - 
 			SUM(Sale.saleDiscount) ) / COUNT(Sale.saleActive)
 			) , 0 ) AS yAxis, """
-        TOTAL_DURATION -> "SUM(StatementEntity.resultDuration) AS yAxis, "
+        TOTAL_DURATION -> " COUNT(Sale.saleActive) AS yAxis,  "
         AVERAGE_DURATION -> """SUM(StatementEntity.resultDuration) / COUNT(DISTINCT 
             StatementEntity.contextRegistration) AS yAxis, """.trimMargin()
         NUMBER_SESSIONS -> "COUNT(DISTINCT StatementEntity.contextRegistration) As yAxis, "
@@ -81,7 +81,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
             AND StatementEntity.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
             THEN StatementEntity.statementPersonUid ELSE NULL END) 
             AS REAL) / MAX(COUNT(DISTINCT StatementEntity.statementPersonUid),1)) * 100) as yAxis, """
-        else -> ""
+        else -> " COUNT(Sale.saleActive) AS yAxis, "
     }
 
 
@@ -271,10 +271,10 @@ private fun groupBy(value: Int, dbType: Int): String {
         Report.DAY -> {
             when (dbType) {
                 DoorDbType.SQLITE -> {
-                    "strftime('%d %m %Y', Sale.saleCreationDate/1000, 'unixepoch') "
+                    "strftime('%d/%m/%Y', Sale.saleCreationDate/1000, 'unixepoch') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "TO_CHAR(TO_TIMESTAMP(Sale.saleCreationDate/1000), 'DD MM YYYY') "
+                    "TO_CHAR(TO_TIMESTAMP(Sale.saleCreationDate/1000), 'DD/MM/YYYY') "
                 }
                 else -> {
                     ""
@@ -285,10 +285,10 @@ private fun groupBy(value: Int, dbType: Int): String {
             when (dbType) {
                 DoorDbType.SQLITE -> {
                     // -5 days to get the date on monday
-                    "strftime('%d %m %Y', Sale.saleCreationDate/1000, 'unixepoch', 'weekday 6', '-5 day') "
+                    "strftime('%d/%m/%Y', Sale.saleCreationDate/1000, 'unixepoch', 'weekday 6', '-5 day') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP(Sale.saleCreationDate/1000))), 'DD MM YYYY') "
+                    "TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP(Sale.saleCreationDate/1000))), 'DD/MM/YYYY') "
                 }
                 else -> {
                     ""
@@ -298,10 +298,10 @@ private fun groupBy(value: Int, dbType: Int): String {
         Report.MONTH -> {
             when (dbType) {
                 DoorDbType.SQLITE -> {
-                    "strftime('%m %Y', Sale.saleCreationDate/1000, 'unixepoch') "
+                    "strftime('%m/%Y', Sale.saleCreationDate/1000, 'unixepoch') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "TO_CHAR(TO_TIMESTAMP(Sale.saleCreationDate/1000), 'MM YYYY') "
+                    "TO_CHAR(TO_TIMESTAMP(Sale.saleCreationDate/1000), 'MM/YYYY') "
                 }
                 else -> {
                     ""

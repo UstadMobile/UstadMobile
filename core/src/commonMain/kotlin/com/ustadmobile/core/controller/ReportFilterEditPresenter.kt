@@ -35,7 +35,7 @@ class ReportFilterEditPresenter(context: Any,
 
     enum class FieldOption(val optionVal: Int, val messageId: Int) {
         LE_GENDER(ReportFilter.FIELD_LE_GENDER, MessageID.gender_literal),
-        SALE_AMOUNT(ReportFilter.FIELD_SALE_AMOUNT, MessageID.sales_total_afs),
+        SALE_AMOUNT(ReportFilter.FIELD_SALE_AMOUNT, MessageID.each_sales_total_afs),
         LOCATION(ReportFilter.FIELD_LOCATION, MessageID.province),
         CATEGORY(ReportFilter.FIELD_CATEGORY, MessageID.category),
         LE(ReportFilter.FIELD_LE, MessageID.le)

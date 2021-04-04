@@ -139,7 +139,7 @@ open class Report {
                         [{
                           "reportSeriesUid": 0,
                           "reportSeriesName": "Series 1",
-                          "reportSeriesYAxis": ${ReportSeries.TOTAL_DURATION},
+                          "reportSeriesYAxis": ${ReportSeries.SALES_TOTAL},
                           "reportSeriesVisualType": ${ReportSeries.BAR_CHART},
                           "reportSeriesSubGroup": $NONE
                         }]
