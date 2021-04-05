@@ -15,8 +15,8 @@ import com.ustadmobile.lib.db.entities.Holiday
  * This function should be called at (or just after) midnight local time (according to the class)
  * timezone.
  *
- * @param fromTime the start time of the range for which clazzlogs will be created
- * @param endTime the end time of the range for which clazzlogs will be created
+ * @param fromTime the start time of the range for which clazzlogs will be created (inclusive)
+ * @param endTime the end time of the range for which clazzlogs will be created (inclusive)
  * @param clazzUid the clazzUid for the Clazz for which ClazzLogs will be created
  *
  * @return the next time that we need to check for clazz log creation. This will be midnight on the
@@ -96,6 +96,6 @@ fun UmAppDatabase.createClazzLogs(fromTime: Long, toTime: Long, clazzUid: Long) 
 
     }
 
-    return clazzSchedules.nextOccurence(effectiveTimeZone, after = toTime)?.from
+    return clazzSchedules.nextOccurence(effectiveTimeZone, after = toTime + 1)?.from
         ?.toLocalMidnight(effectiveTimeZone)?.unixMillisLong ?: 0L
 }
