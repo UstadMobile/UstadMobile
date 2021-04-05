@@ -66,6 +66,16 @@ class VerbEntity() {
 
         const val VERB_FAILED_UID = 10003L
 
+        const val VERB_SATISFIED_URL = "https://w3id.org/xapi/adl/verbs/satisfied"
+
+        const val VERB_ATTEMPTED_URL = "http://adlnet.gov/expapi/verbs/attempted"
+
+        const val VERB_INTERACTED_URL = "http://adlnet.gov/expapi/verbs/interacted"
+
+        const val VERB_ANSWERED_URL = "http://adlnet.gov/expapi/verbs/answered"
+
+
+
         val FIXED_UIDS = mapOf(VERB_PROGRESSED_URL to VERB_PROGRESSED_UID,
                 VERB_COMPLETED_URL to VERB_COMPLETED_UID,
                 VERB_PASSED_URL to VERB_PASSED_UID,

@@ -289,10 +289,12 @@ private val ICON_ID_MAP : Map<Int, Int> by lazy {
 
 private val VERB_ICON_MAP: Map<String, Int> by lazy {
      mapOf(VerbEntity.VERB_COMPLETED_URL to R.drawable.verb_complete,
-     VerbEntity.VERB_PROGRESSED_URL to R.drawable.verb_progress,
-     "http://adlnet.gov/expapi/verbs/attempted" to R.drawable.verb_attempt,
-     "http://adlnet.gov/expapi/verbs/interacted" to R.drawable.verb_interactive,
-     "http://adlnet.gov/expapi/verbs/answered" to R.drawable.verb_answered)
+             VerbEntity.VERB_PROGRESSED_URL to R.drawable.verb_progress,
+             VerbEntity.VERB_ATTEMPTED_URL to R.drawable.verb_attempt,
+             VerbEntity.VERB_INTERACTED_URL to R.drawable.verb_interactive,
+             VerbEntity.VERB_ANSWERED_URL to R.drawable.verb_answered,
+             VerbEntity.VERB_SATISFIED_URL to R.drawable.verb_passed,
+             VerbEntity.VERB_PASSED_URL to R.drawable.verb_passed)
 }
 
 @BindingAdapter("imageResIdInt")
