@@ -8,6 +8,7 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.ContentEntryDetailView
 import com.ustadmobile.core.view.VideoPlayerView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -107,7 +108,7 @@ ContentEntryOpenerTest {
 
             ContentEntryOpener(di, endpoint).openEntry(context, contentEntry.contentEntryUid,
                 true, true, false)
-            verify(impl).go(eq(ContentEntryDetailViewPagerView.VIEW_NAME), any(), eq(context), any())
+            verify(impl).go(eq(ContentEntryDetailView.VIEW_NAME), any(), eq(context), any())
         }
     }
 
