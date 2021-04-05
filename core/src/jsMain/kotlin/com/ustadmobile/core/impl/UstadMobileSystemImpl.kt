@@ -2,7 +2,6 @@ package com.ustadmobile.core.impl
 
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.UMFileUtil
-import io.ktor.client.features.json.serializer.*
 import io.ktor.client.request.*
 import io.ktor.utils.io.charsets.*
 import io.ktor.utils.io.core.*
@@ -164,10 +163,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
          * @return A singleton instance
          */
         actual var instance: UstadMobileSystemImpl =  UstadMobileSystemImpl()
-    }
-
-    fun registerDefaultSerializer(){
-        println(KotlinxSerializer::class)
     }
 
     actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {

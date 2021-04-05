@@ -1,41 +1,51 @@
 package com.ustadmobile.util
 
-import com.ccfraser.muirwik.components.spacingUnits
 import kotlinx.css.*
-import kotlinx.css.properties.Transforms
-import kotlinx.css.properties.transform
 import styled.StyleSheet
 
+/**
+ * Responsible for styling HTML elements, to customize particular
+ * element just check the defined style constants.
+ * They are named as per component
+ */
 object UmStyles: StyleSheet("ComponentStyles", isStatic = true) {
 
-    val rootDiv by css {
+    val appContainer by css {
+        flexGrow = 1.0
+        width = 100.pct
+        zIndex = 1
+        overflow = Overflow.hidden
+        position = Position.relative
+        display = Display.flex
+    }
+
+    val preloadComponentCenteredDiv by css{
+        height = 200.px
+        width = 200.px
+        left = LinearDimension("50%")
+        top = LinearDimension("50%")
+        marginLeft = (-100).px
+        marginTop = (-50).px
+        position =  Position.fixed
+    }
+
+    val preloadComponentProgressBar by css {
+        width = 200.px
+        marginTop = 140.px
+        position = Position.absolute
+    }
+
+    val preloadComponentCenteredImage by css{
+        width = 180.px
+        marginLeft = 10.px
+        position = Position.absolute
+    }
+
+
+    val mainComponentRootDiv by css {
         overflow = Overflow.hidden
         position = Position.relative
         display = Display.flex
         width = 100.pct
-    }
-
-    val listRoot by css {
-        //display = Display.inlineFlex
-        padding(1.spacingUnits)
-    }
-
-
-    val buttonMargin by css {
-        position = Position.fixed
-        bottom = 16.px
-        right = 16.px
-
-    }
-
-    val textField by css {
-        marginLeft = 1.spacingUnits
-        marginRight = 1.spacingUnits
-    }
-
-    val preloadingDiv by css {
-        position =  Position.fixed
-        left = 50.pc
-        top = 50.pc
     }
 }

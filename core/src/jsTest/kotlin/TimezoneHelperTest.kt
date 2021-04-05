@@ -1,6 +1,6 @@
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.getRawTimezoneOffset
 import com.ustadmobile.core.schedule.getTimezoneOffset
+import com.ustadmobile.core.util.defaultJsonSerializer
 import kotlin.js.Date
 import kotlin.test.BeforeTest
 import kotlin.test.Test
@@ -9,7 +9,7 @@ import kotlin.test.assertEquals
 class TimezoneHelperTest {
     @BeforeTest
     fun init(){
-        UstadMobileSystemImpl.instance.registerDefaultSerializer()
+        defaultJsonSerializer()
     }
 
     @Test

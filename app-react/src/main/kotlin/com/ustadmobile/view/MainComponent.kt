@@ -13,7 +13,8 @@ import com.ustadmobile.util.Constants.drawerWidth
 import com.ustadmobile.util.Constants.fullWidth
 import com.ustadmobile.util.Constants.placeHolderImage
 import com.ustadmobile.util.Constants.zeroPx
-import com.ustadmobile.util.UmStyles.rootDiv
+import com.ustadmobile.util.UmStyles.appContainer
+import com.ustadmobile.util.UmStyles.mainComponentRootDiv
 import kotlinext.js.jsObject
 import kotlinx.css.*
 import react.RBuilder
@@ -44,18 +45,12 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, MainState>(pro
         themeContext.Consumer { theme ->
             styledDiv {
                 css {
-                    flexGrow = 1.0
-                    width = 100.pct
-                    zIndex = 1
-                    overflow = Overflow.hidden
-                    position = Position.relative
-                    display = Display.flex
+                    +appContainer
                     backgroundColor = Color(theme.palette.background.paper)
                 }
 
                 styledDiv {
-
-                    css { +rootDiv }
+                    css { +mainComponentRootDiv }
 
                     mAppBar(position = MAppBarPosition.absolute) {
                         css {
@@ -104,7 +99,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, MainState>(pro
                         }
                     }
 
-                    // Main content area
+                    // Main content area, this div holds the contents
                     styledDiv {
                         css {
                             height = LinearDimension.fillAvailable
@@ -207,14 +202,8 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, MainState>(pro
         }
     }
 
-
-    override fun onThemeChange() {
-        props.onThemeChange()
-    }
-
 }
 
-fun RBuilder.initMainComponent(initialView: String, onThemeChange: () -> Unit) = child(MainComponent::class){
+fun RBuilder.initMainComponent(initialView: String) = child(MainComponent::class){
     attrs.initialView = initialView
-    attrs.onThemeChange = onThemeChange
 }
