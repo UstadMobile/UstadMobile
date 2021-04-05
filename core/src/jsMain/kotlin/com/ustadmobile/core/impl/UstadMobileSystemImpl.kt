@@ -18,15 +18,14 @@ import kotlin.js.Date
  */
 actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
-    @JsName("stringMap")
-    private var stringMap : Any = Any()
+    private var stringMap : Map<Int,String> = mapOf()
 
 
     /**
      * Load all strings to be used in the app
      */
     @JsName("setLocaleStrings")
-    fun setLocaleStrings(values : Any){
+    fun setLocaleStrings(values : Map<Int,String>){
         this.stringMap = values
     }
 

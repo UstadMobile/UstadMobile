@@ -1,16 +1,19 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.view.UstadView
 import com.ccfraser.muirwik.components.mSnackbar
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.view.UstadView
 import kotlinx.coroutines.Runnable
 import react.RBuilder
 import react.RComponent
 import react.RProps
 import react.RState
 
-open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props), UstadView  {
+open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props), UstadView {
 
     private var builder: RBuilder? = null
+
+    val systemImpl =  UstadMobileSystemImpl.instance
 
     override fun RBuilder.render() {
         builder = this
