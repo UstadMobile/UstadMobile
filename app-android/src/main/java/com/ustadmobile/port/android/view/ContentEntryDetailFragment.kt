@@ -10,7 +10,7 @@ import androidx.fragment.app.FragmentPagerAdapter
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntryDetailViewpagerBinding
-import com.ustadmobile.core.controller.ContentEntryDetailViewPagerPresenter
+import com.ustadmobile.core.controller.ContentEntryDetailPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
@@ -20,11 +20,11 @@ import com.ustadmobile.port.android.view.util.ViewNameListFragmentPagerAdapter
 import kotlinx.android.synthetic.main.appbar_material_tabs_fixed.view.*
 
 
-class ContentEntryDetailViewPagerFragment: UstadDetailFragment<ContentEntry>(), ContentEntryDetailViewPagerView {
+class ContentEntryDetailFragment: UstadDetailFragment<ContentEntry>(), ContentEntryDetailView {
 
     private var mBinding: FragmentContentEntryDetailViewpagerBinding? = null
 
-    private var mPresenter: ContentEntryDetailViewPagerPresenter? = null
+    private var mPresenter: ContentEntryDetailPresenter? = null
 
     private var mPagerAdapter: ViewNameListFragmentPagerAdapter? = null
 
@@ -69,7 +69,7 @@ class ContentEntryDetailViewPagerFragment: UstadDetailFragment<ContentEntry>(), 
             it.root.tabs.tabGravity = TabLayout.GRAVITY_FILL
         }
 
-        mPresenter = ContentEntryDetailViewPagerPresenter(requireContext(), arguments.toStringMap(),
+        mPresenter = ContentEntryDetailPresenter(requireContext(), arguments.toStringMap(),
                 this, di, viewLifecycleOwner)
 
         return rootView

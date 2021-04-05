@@ -238,7 +238,7 @@ class ContentEntryDetailOverviewFragmentTest : TestCase() {
         }
 
         assertEquals("After clicking on item, it navigates to translated detail view",
-                R.id.content_entry_detail_viewpager_dest, systemImplNavRule.navController.currentDestination?.id)
+                R.id.content_entry_detail_dest, systemImplNavRule.navController.currentDestination?.id)
 
     }
 

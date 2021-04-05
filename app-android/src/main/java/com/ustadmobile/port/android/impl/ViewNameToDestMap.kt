@@ -46,7 +46,7 @@ class ViewNameToDestMap: DestinationProvider {
             ContentEntryListTabsView.VIEW_NAME to UstadDestination(R.id.home_content_dest),
             ContentEntryList2View.VIEW_NAME to UstadDestination(R.id.content_entry_list_dest),
             ContentEntryDetailOverviewView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_overview_dest),
-            ContentEntryDetailViewPagerView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_viewpager_dest),
+            ContentEntryDetailView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_dest),
             ContentEntryDetailAttemptsListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_attempt_dest),
             SessionsListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_session_list_dest),
             SessionDetailListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_session_detail_list_dest),

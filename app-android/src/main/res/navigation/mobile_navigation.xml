@@ -178,8 +178,8 @@
         android:label="@string/select_language" />
 
     <fragment
-        android:id="@+id/content_entry_detail_viewpager_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntryDetailViewPagerFragment"
+        android:id="@+id/content_entry_detail_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryDetailFragment"
         android:label="" />
 
     <fragment

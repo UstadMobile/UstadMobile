@@ -152,7 +152,7 @@ class ContentEntryDetailOverviewPresenter(context: Any,
     }
 
     fun handleOnTranslationClicked(entryUid: Long) {
-        systemImpl.go(ContentEntryDetailViewPagerView.VIEW_NAME, mapOf(ARG_ENTITY_UID to entryUid.toString()), context)
+        systemImpl.go(ContentEntryDetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to entryUid.toString()), context)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {

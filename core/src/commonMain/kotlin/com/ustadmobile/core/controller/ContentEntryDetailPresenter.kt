@@ -10,10 +10,10 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
 import org.kodein.di.DI
 
-class ContentEntryDetailViewPagerPresenter(context: Any,
-                                           arguments: Map<String, String>, view: ContentEntryDetailViewPagerView, di: DI,
-                                           lifecycleOwner: DoorLifecycleOwner)
-    : UstadDetailPresenter<ContentEntryDetailViewPagerView, ContentEntry>(context, arguments, view, di, lifecycleOwner) {
+class ContentEntryDetailPresenter(context: Any,
+                                  arguments: Map<String, String>, view: ContentEntryDetailView, di: DI,
+                                  lifecycleOwner: DoorLifecycleOwner)
+    : UstadDetailPresenter<ContentEntryDetailView, ContentEntry>(context, arguments, view, di, lifecycleOwner) {
 
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
