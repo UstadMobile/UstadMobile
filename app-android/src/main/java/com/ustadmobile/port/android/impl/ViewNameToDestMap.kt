@@ -45,7 +45,7 @@ class ViewNameToDestMap: DestinationProvider {
                     actionBarScrollBehavior = SCROLL_FLAG_NO_SCROLL),
             ContentEntryListTabsView.VIEW_NAME to UstadDestination(R.id.home_content_dest),
             ContentEntryList2View.VIEW_NAME to UstadDestination(R.id.content_entry_list_dest),
-            ContentEntry2DetailView.VIEW_NAME to UstadDestination(R.id.content_entry_details_dest),
+            ContentEntryDetailOverviewView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_overview_dest),
             ContentEntryDetailViewPagerView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_viewpager_dest),
             ContentEntryDetailAttemptsListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_attempt_dest),
             SessionsListView.VIEW_NAME to UstadDestination(R.id.content_entry_detail_session_list_dest),

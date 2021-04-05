@@ -4,7 +4,7 @@ import androidx.paging.DataSource
 import com.ustadmobile.lib.db.entities.*
 
 
-interface ContentEntry2DetailView: UstadDetailView<ContentEntryWithMostRecentContainer> {
+interface ContentEntryDetailOverviewView: UstadDetailView<ContentEntryWithMostRecentContainer> {
 
     var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>?
 
@@ -21,7 +21,7 @@ interface ContentEntry2DetailView: UstadDetailView<ContentEntryWithMostRecentCon
 
     companion object {
 
-        const val VIEW_NAME = "ContentEntryDetailView"
+        const val VIEW_NAME = "ContentEntryDetailOverviewView"
     }
 
 }

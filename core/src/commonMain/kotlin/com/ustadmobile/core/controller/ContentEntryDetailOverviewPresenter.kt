@@ -28,11 +28,11 @@ import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 
-class ContentEntry2DetailPresenter(context: Any,
-                                   arguments: Map<String, String>, view: ContentEntry2DetailView,
-                                   di: DI, lifecycleOwner: DoorLifecycleOwner)
+class ContentEntryDetailOverviewPresenter(context: Any,
+                                          arguments: Map<String, String>, view: ContentEntryDetailOverviewView,
+                                          di: DI, lifecycleOwner: DoorLifecycleOwner)
 
-    : UstadDetailPresenter<ContentEntry2DetailView, ContentEntryWithMostRecentContainer>(context,
+    : UstadDetailPresenter<ContentEntryDetailOverviewView, ContentEntryWithMostRecentContainer>(context,
         arguments, view, di, lifecycleOwner) {
 
     private val isDownloadEnabled: Boolean by di.instance<Boolean>(tag = TAG_DOWNLOAD_ENABLED)
@@ -61,7 +61,7 @@ class ContentEntry2DetailPresenter(context: Any,
         containerDownloadManager?.also {
             GlobalScope.launch(doorMainDispatcher()) {
                 downloadJobItemLiveData = it.getDownloadJobItemByContentEntryUid(contentEntryUid).apply {
-                    observeWithLifecycleOwner(lifecycleOwner, this@ContentEntry2DetailPresenter::onDownloadJobItemChanged)
+                    observeWithLifecycleOwner(lifecycleOwner, this@ContentEntryDetailOverviewPresenter::onDownloadJobItemChanged)
                 }
             }
         }

@@ -5,7 +5,6 @@ import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.Clazz
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.*
@@ -57,7 +56,7 @@ class ContentEntryDetailViewPagerPresenter(context: Any,
     private suspend fun setupTabs() {
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
         GlobalScope.launch(doorMainDispatcher()) {
-            view.tabs = listOf("${ContentEntry2DetailView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid",
+            view.tabs = listOf("${ContentEntryDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid",
             "${ContentEntryDetailAttemptsListView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
         }
     }

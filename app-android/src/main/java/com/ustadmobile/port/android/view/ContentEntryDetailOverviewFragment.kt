@@ -16,14 +16,13 @@ import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentContentEntry2DetailBinding
 import com.toughra.ustadmobile.databinding.ItemEntryTranslationBinding
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.controller.ContentEntry2DetailPresenter
+import com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.*
-import com.ustadmobile.core.view.ContentEntry2DetailView
-import com.ustadmobile.core.view.EditButtonMode
+import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.door.ext.asRepositoryLiveData
 import com.ustadmobile.lib.db.entities.ContentEntryProgress
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoinWithLanguage
@@ -41,11 +40,11 @@ interface ContentEntryDetailFragmentEventHandler {
     fun handleOnClickDeleteButton()
 }
 
-class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecentContainer>(), ContentEntry2DetailView, ContentEntryDetailFragmentEventHandler{
+class ContentEntryDetailOverviewFragment: UstadDetailFragment<ContentEntryWithMostRecentContainer>(), ContentEntryDetailOverviewView, ContentEntryDetailFragmentEventHandler{
 
     private var mBinding: FragmentContentEntry2DetailBinding? = null
 
-    private var mPresenter: ContentEntry2DetailPresenter? = null
+    private var mPresenter: ContentEntryDetailOverviewPresenter? = null
 
     private var currentDownloadJobItemStatus: Int = -1
 
@@ -172,7 +171,7 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
         }
 
     class AvailableTranslationRecyclerAdapter(var activityEventHandler: ContentEntryDetailFragmentEventHandler?,
-                                              var presenter: ContentEntry2DetailPresenter?):
+                                              var presenter: ContentEntryDetailOverviewPresenter?):
             ListAdapter<ContentEntryRelatedEntryJoinWithLanguage, AvailableTranslationRecyclerAdapter.TranslationViewHolder>(DIFF_CALLBACK_ENTRY_LANGUAGE_JOIN) {
 
         class TranslationViewHolder(val binding: ItemEntryTranslationBinding): RecyclerView.ViewHolder(binding.root)
@@ -207,7 +206,7 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        mPresenter = ContentEntry2DetailPresenter(requireContext(), arguments.toStringMap(), this,
+        mPresenter = ContentEntryDetailOverviewPresenter(requireContext(), arguments.toStringMap(), this,
                 di, viewLifecycleOwner)
 
         val flexboxLayoutManager = FlexboxLayoutManager(requireContext())

@@ -9,9 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentPagerAdapter
 import com.google.android.material.tabs.TabLayout
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.FragmentClazzDetailBinding
 import com.toughra.ustadmobile.databinding.FragmentContentEntryDetailViewpagerBinding
-import com.ustadmobile.core.controller.ClazzDetailPresenter
 import com.ustadmobile.core.controller.ContentEntryDetailViewPagerPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.util.ext.toNullableStringMap
@@ -103,12 +101,12 @@ class ContentEntryDetailViewPagerFragment: UstadDetailFragment<ContentEntry>(), 
 
     companion object {
         val viewNameToFragmentMap = mapOf<String, Class<out Fragment>>(
-                ContentEntry2DetailView.VIEW_NAME to ContentEntry2DetailFragment::class.java,
+                ContentEntryDetailOverviewView.VIEW_NAME to ContentEntryDetailOverviewFragment::class.java,
                 ContentEntryDetailAttemptsListView.VIEW_NAME to ContentEntryDetailAttemptsListFragment::class.java
         )
 
         val viewNameToTitleMap = mapOf(
-                ContentEntry2DetailView.VIEW_NAME to R.string.overview,
+                ContentEntryDetailOverviewView.VIEW_NAME to R.string.overview,
                 ContentEntryDetailAttemptsListView.VIEW_NAME to R.string.attempts
         )
 

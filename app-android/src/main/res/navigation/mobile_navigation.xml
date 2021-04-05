@@ -198,8 +198,8 @@
         android:label="" />
 
     <fragment
-        android:id="@+id/content_entry_details_dest"
-        android:name="com.ustadmobile.port.android.view.ContentEntry2DetailFragment"
+        android:id="@+id/content_entry_detail_overview_dest"
+        android:name="com.ustadmobile.port.android.view.ContentEntryDetailOverviewFragment"
         android:label="" />
     <fragment
         android:id="@+id/clazzwork_detail_progress_list"

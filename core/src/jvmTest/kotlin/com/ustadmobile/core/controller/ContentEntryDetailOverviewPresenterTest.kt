@@ -10,7 +10,7 @@ import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadMana
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
-import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -29,13 +29,13 @@ import org.kodein.di.instance
 import org.kodein.di.singleton
 import java.lang.Thread.sleep
 
-class ContentEntry2DetailPresenterTest {
+class ContentEntryDetailOverviewPresenterTest {
 
     @JvmField
     @Rule
     var ustadTestRule = UstadTestRule()
 
-    private lateinit var mockView: ContentEntry2DetailView
+    private lateinit var mockView: ContentEntryDetailOverviewView
 
     private lateinit var context: Any
 
@@ -94,7 +94,7 @@ class ContentEntry2DetailPresenterTest {
 
     @Test
     fun givenContentEntryExists_whenLaunched_thenShouldShowContentEntryAndMonitorAvailability(){
-        val presenter = ContentEntry2DetailPresenter(context,
+        val presenter = ContentEntryDetailOverviewPresenter(context,
                 presenterArgs!!, mockView, di, mockLifecycleOwner)
 
         presenter.onCreate(null)
@@ -115,7 +115,7 @@ class ContentEntry2DetailPresenterTest {
 
     @Test
     fun givenContentEntryExists_whenHandleOnClickEditCalled_thenSystemImplGoToEditViewIsCalled(){
-        val presenter = ContentEntry2DetailPresenter(context,
+        val presenter = ContentEntryDetailOverviewPresenter(context,
                 presenterArgs!!, mockView, di, mockLifecycleOwner)
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
