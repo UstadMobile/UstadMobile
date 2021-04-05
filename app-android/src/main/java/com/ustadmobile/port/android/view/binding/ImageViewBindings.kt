@@ -294,7 +294,8 @@ private val VERB_ICON_MAP: Map<String, Int> by lazy {
              VerbEntity.VERB_INTERACTED_URL to R.drawable.verb_interactive,
              VerbEntity.VERB_ANSWERED_URL to R.drawable.verb_answered,
              VerbEntity.VERB_SATISFIED_URL to R.drawable.verb_passed,
-             VerbEntity.VERB_PASSED_URL to R.drawable.verb_passed)
+             VerbEntity.VERB_PASSED_URL to R.drawable.verb_passed,
+             VerbEntity.VERB_FAILED_URL to R.drawable.verb_failed)
 }
 
 @BindingAdapter("imageResIdInt")
