@@ -8,7 +8,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveDbInstance
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.test.ext.insertTestStatements
+import com.ustadmobile.util.test.ext.insertTestStatementsForReports
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -57,7 +57,7 @@ class ReportWithSeriesWithFiltersExtTest {
                 firstNames = "Bob"
                 lastName = "Jones"
             })
-            repo.insertTestStatements()
+            repo.insertTestStatementsForReports()
         }
     }
 

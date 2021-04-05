@@ -90,8 +90,7 @@
             app:layout_constraintTop_toBottomOf="@+id/item_person_success_complete"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="@dimen/dimen_16dp" />
-
-GONE
+        
         <androidx.appcompat.widget.AppCompatImageView
             tools:text="20/12/2021 15:00"
             android:id="@+id/item_person_progress_image"

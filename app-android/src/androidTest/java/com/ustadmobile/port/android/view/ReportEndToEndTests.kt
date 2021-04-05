@@ -18,7 +18,7 @@ import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.screen.*
 import com.ustadmobile.test.port.android.util.waitUntilWithActivityScenario
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.util.test.ext.insertTestStatements
+import com.ustadmobile.util.test.ext.insertTestStatementsForReports
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.json.Json
@@ -53,7 +53,7 @@ class ReportEndToEndTests : TestCase() {
                 personUid = 42
             })
             dbRule.repo.reportDao.initPreloadedTemplates()
-            dbRule.repo.insertTestStatements()
+            dbRule.repo.insertTestStatementsForReports()
         }
     }
 
