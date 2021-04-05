@@ -4,7 +4,7 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class PersonWithSessionDetailDisplay : StatementEntity() {
+class StatementWithSessionDetailDisplay : StatementEntity() {
 
     @Embedded
     var verb: VerbEntity? = null

@@ -1,9 +1,9 @@
 package com.ustadmobile.core.view
 
-import com.ustadmobile.lib.db.entities.PersonWithSessionDetailDisplay
+import com.ustadmobile.lib.db.entities.StatementWithSessionDetailDisplay
 
 
-interface SessionDetailListView: UstadListView<PersonWithSessionDetailDisplay, PersonWithSessionDetailDisplay> {
+interface SessionDetailListView: UstadListView<StatementWithSessionDetailDisplay, StatementWithSessionDetailDisplay> {
 
     var personWithContentTitle: String?
 

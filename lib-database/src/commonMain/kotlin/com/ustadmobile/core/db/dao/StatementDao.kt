@@ -12,7 +12,6 @@ import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.*
 import kotlinx.serialization.Serializable
 import kotlin.js.JsName
-import com.ustadmobile.core.db.dao.StatementDao.Companion as StatementDao
 
 @Dao
 @Repository
@@ -146,7 +145,7 @@ abstract class StatementDao : BaseDao<StatementEntity> {
          """)
     abstract fun findSessionDetailForPerson(contentEntryUid: Long, accountPersonUid: Long,
                                             personUid: Long, contextRegistration: String)
-            : DataSource.Factory<Int, PersonWithSessionDetailDisplay>
+            : DataSource.Factory<Int, StatementWithSessionDetailDisplay>
 
     @Serializable
     data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")

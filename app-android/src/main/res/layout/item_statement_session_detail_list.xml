@@ -5,15 +5,15 @@
 
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.PersonWithSessionDetailDisplay"/>
+        <import type="com.ustadmobile.lib.db.entities.StatementWithSessionDetailDisplay"/>
         <import type="android.view.View"/>
         <import type="kotlin.text.StringsKt"/>
         <import type="com.ustadmobile.port.android.view.SessionDetailListViewFragment"/>
-        <import type="com.ustadmobile.port.android.view.SessionDetailListViewFragment.PersonWithSessionsDetailListRecyclerAdapter"/>
+        <import type="com.ustadmobile.port.android.view.SessionDetailListViewFragment.StatementWithSessionsDetailListRecyclerAdapter"/>
 
         <variable
-            name="person"
-            type="PersonWithSessionDetailDisplay" />
+            name="statement"
+            type="StatementWithSessionDetailDisplay" />
 
         <variable
             name="presenter"
@@ -21,7 +21,7 @@
 
         <variable
             name="selectablePagedListAdapter"
-            type="PersonWithSessionsDetailListRecyclerAdapter" />
+            type="StatementWithSessionsDetailListRecyclerAdapter" />
     </data>
 
 
@@ -30,14 +30,14 @@
         android:layout_height="wrap_content"
         android:paddingBottom="@dimen/dimen_16dp"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
-        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, person)}"
-        app:onSelectableItemClicked="@{() -> presenter.onClickPersonWithSessionDisplay(person)}"
+        app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, statement)}"
+        app:onSelectableItemClicked="@{() -> presenter.onClickStatementWithSessionDisplay(statement)}"
         android:background="@drawable/bg_listitem">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_person_verb_image"
             tools:src="@drawable/verb_answered"
-            app:verbIcon="@{person.verb.urlId}"
+            app:verbIcon="@{statement.verb.urlId}"
             android:tint="?colorOnIconTint"
             android:layout_width="@dimen/dimen_40dp"
             android:layout_height="@dimen/dimen_40dp"
@@ -56,7 +56,7 @@
             android:id="@+id/item_person_verb_title"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{person.verbDisplay != null ? StringsKt.capitalize(person.verbDisplay) : person.verbDisplay}"
+            android:text="@{statement.verbDisplay != null ? StringsKt.capitalize(statement.verbDisplay) : statement.verbDisplay}"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@+id/item_person_verb_image"
             android:layout_marginStart="@dimen/dimen_16dp"
@@ -73,8 +73,8 @@
             android:id="@+id/item_person_object_description"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:visibility="@{person.objectDisplay != null ? View.VISIBLE : View.GONE}"
-            android:text="@{person.objectDisplay}"
+            android:visibility="@{statement.objectDisplay != null ? View.VISIBLE : View.GONE}"
+            android:text="@{statement.objectDisplay}"
             app:layout_constraintStart_toStartOf="@+id/item_person_verb_title"
             app:layout_constraintTop_toBottomOf="@+id/item_person_verb_title"
             app:layout_constraintEnd_toEndOf="parent"
@@ -98,7 +98,7 @@
             android:paddingEnd="@dimen/dimen_5dp"
             tools:text="20/12/2021 15:00"
             android:id="@+id/item_person_start_date_time"
-            app:shortDateTime="@{person.timestamp}"
+            app:shortDateTime="@{statement.timestamp}"
             app:drawableTint="@color/iconTintColor"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -114,8 +114,8 @@
             android:layout_height="wrap_content"
             app:drawableStartCompat="@drawable/ic_baseline_timer_12"
             app:drawableTint="@color/iconTintColor"
-            app:durationMinsSecs="@{person.resultDuration}"
-            android:visibility="@{person.resultDuration &lt; 1000 ? View.GONE : View.VISIBLE}"
+            app:durationMinsSecs="@{statement.resultDuration}"
+            android:visibility="@{statement.resultDuration &lt; 1000 ? View.GONE : View.VISIBLE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_start_date_time"
             app:layout_constraintTop_toBottomOf="@+id/item_person_object_description"
             android:layout_marginBottom="@dimen/dimen_16dp" />
@@ -126,7 +126,7 @@
             android:id="@+id/item_person_progress_image"
             android:tint="?colorOnIconTint"
             app:srcCompat="@drawable/exo_ic_check"
-            android:visibility="@{person.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            android:visibility="@{statement.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
             android:layout_width="12dp"
             android:layout_height="12dp"
             app:layout_constraintStart_toStartOf="@+id/item_person_start_date_image"
@@ -141,8 +141,8 @@
             android:id="@+id/item_person_progress"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@{@string/percentage_score((int)(person.resultScoreScaled * 100))}"
-            android:visibility="@{person.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            android:text="@{@string/percentage_score((int)(statement.resultScoreScaled * 100))}"
+            android:visibility="@{statement.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_progress_image"
             app:layout_constraintTop_toBottomOf="@+id/item_person_start_date_time"
             android:layout_marginBottom="@dimen/dimen_16dp" />
@@ -155,8 +155,8 @@
             android:id="@+id/item_person_score_results"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text='@{"(" + person.resultScoreRaw + &quot;/&quot; + person.resultScoreMax + ")"}'
-            android:visibility="@{person.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
+            android:text='@{"(" + statement.resultScoreRaw + &quot;/&quot; + statement.resultScoreMax + ")"}'
+            android:visibility="@{statement.resultScoreScaled == 0 ? View.GONE : View.VISIBLE}"
             app:layout_constraintStart_toEndOf="@+id/item_person_progress"
             app:layout_constraintTop_toBottomOf="@+id/item_person_start_date_time"
             android:layout_marginBottom="@dimen/dimen_16dp" />

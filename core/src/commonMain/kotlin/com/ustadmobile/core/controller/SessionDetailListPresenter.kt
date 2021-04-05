@@ -6,7 +6,7 @@ import com.ustadmobile.core.view.SessionsListView.Companion.ARG_CONTEXT_REGISTRA
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.lib.db.entities.PersonWithSessionDetailDisplay
+import com.ustadmobile.lib.db.entities.StatementWithSessionDetailDisplay
 import com.ustadmobile.lib.db.entities.UmAccount
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -15,7 +15,7 @@ import org.kodein.di.DI
 class SessionDetailListPresenter(context: Any, arguments: Map<String, String>,
                             view: SessionDetailListView,
                             di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<SessionDetailListView, PersonWithSessionDetailDisplay>(
+    : UstadListPresenter<SessionDetailListView, StatementWithSessionDetailDisplay>(
         context, arguments, view, di, lifecycleOwner) {
 
     private var contentEntryUid: Long = 0L
@@ -59,7 +59,7 @@ class SessionDetailListPresenter(context: Any, arguments: Map<String, String>,
 
     }
 
-    fun onClickPersonWithSessionDisplay(personWithStatementDisplay: PersonWithSessionDetailDisplay) {
+    fun onClickStatementWithSessionDisplay(statementWithStatementDisplay: StatementWithSessionDetailDisplay) {
 
     }
 
