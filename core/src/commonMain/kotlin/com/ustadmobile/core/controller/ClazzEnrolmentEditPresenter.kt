@@ -81,7 +81,7 @@ class ClazzEnrolmentEditPresenter(context: Any,
         val clazzEnrolment = db.onRepoWithFallbackToDb(2000) {
             it.takeIf { entityUid != 0L }?.clazzEnrolmentDao?.findEnrolmentWithLeavingReason(entityUid)
         } ?: ClazzEnrolmentWithLeavingReason().apply {
-            val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
+            val clazzTimeZone = clazzWithSchoolVal?.effectiveTimeZone ?: "UTC"
             val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
             clazzEnrolmentDateJoined = joinTime
             clazzEnrolmentPersonUid = selectedPerson

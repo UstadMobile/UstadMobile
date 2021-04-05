@@ -4,12 +4,12 @@ import androidx.room.Embedded
 import kotlinx.serialization.Serializable
 
 @Serializable
-class ClazzWithHolidayCalendarAndSchool: Clazz() {
+class ClazzWithHolidayCalendarAndSchool: ClazzWithSchool() {
 
     @Embedded
     var holidayCalendar: HolidayCalendar? = null
 
-    @Embedded
-    var school: School? = null
+//    @Embedded
+//    var school: School? = null
 
 }

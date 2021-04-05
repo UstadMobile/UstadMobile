@@ -55,6 +55,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTT
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.core.notification.NotificationCheckersManager
+import com.ustadmobile.core.notification.setupNotificationCheckerSyncListener
+import com.ustadmobile.core.schedule.setupScheduleSyncListener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import io.ktor.client.*
@@ -99,6 +101,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
                     context.url, "", defaultHttpClient(), useClientSyncManager = true,
                     attachmentFilters = attachmentFilters, attachmentsDir = attachmentDir.absolutePath).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
+                it.setupScheduleSyncListener(context, di)
+                it.setupNotificationCheckerSyncListener(context, di)
             }
         }
 

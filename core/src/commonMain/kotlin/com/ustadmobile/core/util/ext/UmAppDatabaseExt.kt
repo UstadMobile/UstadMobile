@@ -55,7 +55,7 @@ suspend fun UmAppDatabase.createPersonGroupAndMemberWithEnrolment(entity: ClazzE
     val clazzWithSchoolVal = clazzDao.getClazzWithSchool(entity.clazzEnrolmentClazzUid)
     ?: throw IllegalArgumentException("Class does not exist")
 
-    val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
+    val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone
     entity.clazzEnrolmentDateJoined = DateTime(entity.clazzEnrolmentDateJoined)
             .toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
     if(entity.clazzEnrolmentDateLeft != Long.MAX_VALUE){
@@ -103,7 +103,7 @@ suspend fun UmAppDatabase.enrolPersonIntoClazzAtLocalTimezone(personToEnrol: Per
     val clazzWithSchoolVal = clazzWithSchool ?: clazzDao.getClazzWithSchool(clazzUid)
         ?: throw IllegalArgumentException("Class does not exist")
 
-    val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone()
+    val clazzTimeZone = clazzWithSchoolVal.effectiveTimeZone
     val joinTime = DateTime.now().toOffsetByTimezone(clazzTimeZone).localMidnight.utc.unixMillisLong
     val clazzMember = ClazzEnrolmentWithPerson().apply {
         clazzEnrolmentPersonUid = personToEnrol.personUid

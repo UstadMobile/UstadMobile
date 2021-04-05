@@ -37,6 +37,10 @@ import io.ktor.request.header
 import io.ktor.routing.Routing
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
+import org.quartz.Scheduler
+import org.quartz.SchedulerFactory
+import org.quartz.impl.StdScheduler
+import org.quartz.impl.StdSchedulerFactory
 import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
@@ -189,6 +193,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 //Get the container dir so that any old directories (build/storage etc) are moved if required
                 di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
             }
+
+            //instance<Scheduler>().start()
         }
     }
 

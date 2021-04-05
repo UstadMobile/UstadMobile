@@ -74,6 +74,8 @@ kotlin {
 
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
+                implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
+
             }
         }
 

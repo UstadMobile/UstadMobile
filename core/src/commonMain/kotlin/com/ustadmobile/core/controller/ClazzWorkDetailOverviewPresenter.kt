@@ -43,7 +43,7 @@ class ClazzWorkDetailOverviewPresenter(context: Any,
             db.clazzDao.getClazzWithSchool(clazzWorkWithSubmission.clazzWorkClazzUid)
         } ?: ClazzWithSchool()
 
-        view.timeZone = clazzWithSchool.effectiveTimeZone()
+        view.timeZone = clazzWithSchool.effectiveTimeZone
 
         val loggedInPerson = withTimeoutOrNull(2000){
             db.personDao.findByUidAsync(loggedInPersonUid)

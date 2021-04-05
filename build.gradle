@@ -81,7 +81,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 202
 
-    version_door = "0.0.4"
+    version_door = "0.0.5"
     version_xmlpullparserkmp = '0.0.8'
 
     version_gradle_buildconfig_plugin = "1.1.7"
@@ -132,6 +132,7 @@ ext {
     version_browser_proxy = "2.1.5"
     version_logback = "1.0.13"
     version_kodein_di = "7.4.0"
+    version_quartz_scheduler = "2.3.2"
 
 
     /**

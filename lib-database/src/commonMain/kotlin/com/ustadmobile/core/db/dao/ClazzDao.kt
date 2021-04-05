@@ -191,6 +191,14 @@ abstract class ClazzDao : BaseDao<Clazz>, OneToManyJoinDao<Clazz> {
     @Query("SELECT Clazz.*, School.* FROM Clazz LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid WHERE clazz.clazzUid = :clazzUid")
     abstract suspend fun getClazzWithSchool(clazzUid: Long): ClazzWithSchool?
 
+    @Query("""
+        SELECT Clazz.*, School.*
+          FROM Clazz
+     LEFT JOIN School ON School.schoolUid = Clazz.clazzSchoolUid
+         WHERE Clazz.clazzUid IN (:clazzUidList)
+    """)
+    abstract suspend fun getClazzesWithSchool(clazzUidList: List<Long>): List<ClazzWithSchool>
+
     companion object {
 
         const val SORT_CLAZZNAME_ASC = 1
