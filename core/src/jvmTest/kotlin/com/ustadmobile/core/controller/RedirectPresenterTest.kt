@@ -46,7 +46,7 @@ class RedirectPresenterTest {
     }
 
     @Test
-    fun givenAppLaunched_whenUserHasLoggedInBefore_thenShouldNavigateContentList() {
+    fun givenAppLaunched_whenUserHasLoggedInBefore_thenShouldNavigateFeedList() {
         whenever(impl.getAppPref(eq(Login2Presenter.PREFKEY_USER_LOGGED_IN), eq("false"), any())).thenReturn("true")
         mPresenter = RedirectPresenter(context, mapOf(),
                 mockedView, di)
