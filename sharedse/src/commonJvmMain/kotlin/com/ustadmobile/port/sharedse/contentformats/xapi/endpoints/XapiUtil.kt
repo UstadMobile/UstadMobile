@@ -312,7 +312,11 @@ object XapiUtil {
                 statementEntity.resultCompletion = statementResult.completion
                 statementEntity.resultDuration = statementResult.duration?.let { parse8601Duration(it) } ?: 0L
                 statementEntity.resultResponse = statementResult.response
-                statementEntity.resultSuccess = if(statementResult.success) StatementEntity.RESULT_SUCCESS else StatementEntity.RESULT_FAILURE
+                statementEntity.resultSuccess = if(statementResult.success != null) {
+                    if(statementResult.success) StatementEntity.RESULT_SUCCESS else StatementEntity.RESULT_FAILURE
+                }else{
+                    StatementEntity.RESULT_UNSET
+                }
 
                 val resultScore = statementResult.score
                 if (resultScore != null) {

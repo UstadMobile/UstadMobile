@@ -113,8 +113,8 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             : DataSource.Factory<Int, PersonWithStatementDisplay>
 
     @Query("""SELECT MIN(timestamp) as startDate, 
-        MAX(CASE WHEN StatementEntity.resultSuccess AND 
-        StatementEntity.contentEntryRoot THEN 1 ELSE 0 END) as resultSuccess, 
+        MAX(CASE WHEN StatementEntity.resultSuccess > 0 AND 
+        StatementEntity.contentEntryRoot THEN StatementEntity.resultSuccess ELSE 0 END) as resultSuccess, 
         SUM(CASE WHEN CAST(resultCompletion AS INTEGER) > 0 AND StatementEntity.contentEntryRoot 
         THEN 1 ELSE 0 END) as resultComplete, 
         SUM(resultDuration) as duration, contextRegistration, 

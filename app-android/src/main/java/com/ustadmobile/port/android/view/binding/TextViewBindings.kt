@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
+import android.view.View
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
@@ -352,8 +353,19 @@ fun TextView.setDurationMinutesAndSeconds(duration: Long){
 @BindingAdapter("isContentComplete")
 fun TextView.setContentComplete(person: PersonWithSessionsDisplay){
     text = if(person.resultComplete){
-        if(person.resultSuccess.toByte() == StatementEntity.RESULT_SUCCESS)
-            context.getString(R.string.passed) else context.getString(R.string.failed)
+        when(person.resultSuccess){
+            StatementEntity.RESULT_SUCCESS -> {
+                context.getString(R.string.passed)
+            }
+            StatementEntity.RESULT_FAILURE -> {
+                context.getString(R.string.failed)
+            }
+            StatementEntity.RESULT_UNSET ->{
+                context.getString(R.string.completed)
+            }else ->{
+                ""
+            }
+        }
     }else{
         context.getString(R.string.incomplete)
     } + " - "

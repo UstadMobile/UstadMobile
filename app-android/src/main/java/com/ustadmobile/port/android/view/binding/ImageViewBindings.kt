@@ -264,10 +264,22 @@ private fun ImageView.updateFromImageLookupMap() {
 @BindingAdapter("isContentCompleteImage")
 fun ImageView.isContentCompleteImage(person: PersonWithSessionsDisplay){
     if(person.resultComplete){
-        if(person.resultSuccess.toByte() == StatementEntity.RESULT_SUCCESS)
-            setImageResource(R.drawable.exo_ic_check) else setImageResource(R.drawable.ic_close_black_24dp)
-        visibility = View.VISIBLE
+        when(person.resultSuccess){
+            StatementEntity.RESULT_SUCCESS -> {
+                setImageResource(R.drawable.exo_ic_check)
+                visibility = View.VISIBLE
+            }
+            StatementEntity.RESULT_FAILURE -> {
+                setImageResource(R.drawable.ic_close_black_24dp)
+                visibility = View.VISIBLE
+            }
+            StatementEntity.RESULT_UNSET ->{
+                setImageDrawable(null)
+                visibility = View.INVISIBLE
+            }
+        }
     }else{
+        setImageDrawable(null)
         context.getString(R.string.incomplete)
         visibility = View.INVISIBLE
     }

@@ -11,7 +11,7 @@ class PersonWithSessionsDisplay {
 
     var duration: Long = 0
 
-    var resultSuccess: Int = 0
+    var resultSuccess: Byte = StatementEntity.RESULT_UNSET
 
     var resultComplete: Boolean = false
 
