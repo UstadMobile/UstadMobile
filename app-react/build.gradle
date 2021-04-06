@@ -42,5 +42,6 @@ dependencies {
     implementation "com.ccfraser.muirwik:muirwik-components:$version_muirwik_components"
     implementation project(":core")
     implementation project(":lib-util")
+    implementation project(":lib-database-entities")
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
 }

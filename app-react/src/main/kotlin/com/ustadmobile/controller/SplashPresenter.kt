@@ -5,6 +5,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.util.UmUtil
 import com.ustadmobile.util.UmUtil.loadLocalFiles
 import com.ustadmobile.view.SplashView
+import com.ustadmobile.view.SplashView.Companion.LOADED_TAG
 import kotlinx.browser.window
 
 class SplashPresenter(private val view: SplashView){
@@ -23,11 +24,12 @@ class SplashPresenter(private val view: SplashView){
         locale = if(locale.isEmpty()) "en" else locale.split("_").first()
         console.log(locale)
         localization[locale]?.let { impl.setLocaleStrings(it) }
-
-        timerId= window.setTimeout({
+        val loaded = (impl.getAppPref(LOADED_TAG, this)?:"false").toBoolean()
+        timerId = window.setTimeout({
             view.appName = impl.getString(MessageID.app_name,this)
             view.showMainComponent()
-        }, 4000)
+            impl.setAppPref(LOADED_TAG,"true", this)
+        }, if(loaded) 2000 else 5000)
     }
 
     fun onDestroy() {

@@ -4,6 +4,7 @@ import com.ustadmobile.util.UmTheme
 import com.ustadmobile.view.showPreload
 import kotlinx.browser.document
 import kotlinx.browser.window
+import org.kodein.di.DI
 import react.dom.render
 
 fun main() {

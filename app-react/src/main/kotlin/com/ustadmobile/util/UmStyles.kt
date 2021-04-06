@@ -1,6 +1,14 @@
 package com.ustadmobile.util
 
+import com.ccfraser.muirwik.components.spacingUnits
+import com.ccfraser.muirwik.components.styles.Breakpoint
+import com.ccfraser.muirwik.components.styles.Theme
+import com.ccfraser.muirwik.components.styles.up
+import kotlinx.browser.window
 import kotlinx.css.*
+import kotlinx.css.properties.Timing
+import kotlinx.css.properties.Transition
+import kotlinx.css.properties.ms
 import styled.StyleSheet
 
 /**
@@ -47,5 +55,54 @@ object UmStyles: StyleSheet("ComponentStyles", isStatic = true) {
         position = Position.relative
         display = Display.flex
         width = 100.pct
+    }
+
+    val mainComponentContentArea by css {
+        height = LinearDimension.fillAvailable
+        flexGrow = 1.0
+        minWidth = 0.px
+    }
+
+    val mainComponentSearchIcon by css {
+        width = 9.spacingUnits
+        height = 100.pct
+        position = Position.absolute
+        pointerEvents = PointerEvents.none
+        display = Display.flex
+        alignItems = Align.center
+        justifyContent = JustifyContent.center
+    }
+
+    val mainComponentSearch by css {
+        val theme = window.asDynamic().theme as Theme
+        position = Position.relative
+        borderRadius = theme.shape.borderRadius.px
+        backgroundColor = Color(fade(theme.palette.common.white, 0.15))
+        hover {
+            backgroundColor = Color(fade(theme.palette.common.white, 0.25))
+        }
+        marginLeft = 0.px
+        marginRight = 30.px
+        width = 100.pct
+        media(theme.breakpoints.up(Breakpoint.sm)) {
+            marginLeft = 1.spacingUnits
+            width = LinearDimension.auto
+        }
+    }
+
+    val mainComponentInputSearch by css {
+        val theme = window.asDynamic().theme as Theme
+        paddingTop = 1.spacingUnits
+        paddingRight = 1.spacingUnits
+        paddingBottom = 1.spacingUnits
+        paddingLeft = 10.spacingUnits
+        transition += Transition("width", theme.transitions.duration.standard.ms, Timing.easeInOut, 0.ms)
+        width = 100.pct
+        media(theme.breakpoints.up(Breakpoint.sm)) {
+            width = 120.px
+            focus {
+                width = 300.px
+            }
+        }
     }
 }

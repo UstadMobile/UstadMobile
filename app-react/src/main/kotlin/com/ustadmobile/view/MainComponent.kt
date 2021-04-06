@@ -1,42 +1,64 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.controller.MainPresenter
 import com.ccfraser.muirwik.components.*
 import com.ccfraser.muirwik.components.button.mIconButton
+import com.ccfraser.muirwik.components.input.mInput
+import com.ccfraser.muirwik.components.list.mList
+import com.ccfraser.muirwik.components.list.mListItemWithIcon
 import com.ccfraser.muirwik.components.styles.Breakpoint
 import com.ccfraser.muirwik.components.styles.down
 import com.ccfraser.muirwik.components.styles.up
-import com.ustadmobile.props.MainProps
-import com.ustadmobile.state.MainState
-import com.ustadmobile.util.Constants.appName
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.util.Constants.drawerWidth
 import com.ustadmobile.util.Constants.fullWidth
 import com.ustadmobile.util.Constants.placeHolderImage
 import com.ustadmobile.util.Constants.zeroPx
+import com.ustadmobile.util.UmRouting.destinationList
+import com.ustadmobile.util.UmRouting.findDestination
+import com.ustadmobile.util.UmRouting.umRouter
+import com.ustadmobile.util.UmStyles
 import com.ustadmobile.util.UmStyles.appContainer
+import com.ustadmobile.util.UmStyles.mainComponentContentArea
 import com.ustadmobile.util.UmStyles.mainComponentRootDiv
+import com.ustadmobile.util.UmStyles.mainComponentSearch
+import com.ustadmobile.util.UmStyles.mainComponentSearchIcon
 import kotlinext.js.jsObject
 import kotlinx.css.*
+import org.kodein.di.instance
 import react.RBuilder
-import react.router.dom.hashRouter
-import react.router.dom.switch
+import react.RProps
+import react.RState
 import react.setState
 import styled.StyleSheet
 import styled.css
 import styled.styledDiv
 
-class MainComponent(props: MainProps): UmBaseComponent<MainProps, MainState>(props), MainView{
+interface MainProps: RProps {
+    var initialView: String
+}
 
-    private lateinit var mPresenter: MainPresenter
+class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props){
 
-    override fun componentDidMount() {
-        console.log("Component mounted")
-        mPresenter = MainPresenter()
-    }
+    private var activeAccount: UmAccount? = null
 
-    override fun MainState.init(props: MainProps) {
-        responsiveDrawerOpen = false
-        currentView = ""
+    private var currentTile: String = ""
+
+    private var responsiveDrawerOpen: Boolean = false
+
+    private var isRTLSupport: Boolean = false
+
+    private var showSearch: Boolean = false
+
+    private val impl : UstadMobileSystemImpl by instance()
+
+    override fun componentWillMount() {
+        val dest = findDestination(props.initialView)
+        setState {
+            currentTile = dest?.let { impl.getString(it.labelId, this) }.toString()
+            responsiveDrawerOpen = true
+            showSearch = dest?.showSearch?:false
+        }
     }
 
     override fun RBuilder.render() {
@@ -55,27 +77,49 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, MainState>(pro
                     mAppBar(position = MAppBarPosition.absolute) {
                         css {
                             position = Position.absolute
-                            marginLeft = if(state.isRTLSupport) 0.px else drawerWidth
+                            marginLeft = if(isRTLSupport) 0.px else drawerWidth
                             media(theme.breakpoints.up(Breakpoint.md)) {
-                                width = fullWidth - if(state.isRTLSupport) zeroPx else drawerWidth
+                                width = fullWidth - if(isRTLSupport) zeroPx else drawerWidth
                             }
                         }
 
                         mToolbar {
                             mHidden(mdUp = true, implementation = MHiddenImplementation.css) {
                                 mIconButton("menu", color = MColor.inherit, onClick = {
-                                    //have handle click here
+                                    setState {
+                                        responsiveDrawerOpen = !responsiveDrawerOpen
+                                    }
                                 })
                             }
 
-                            mToolbarTitle(state.currentView)
+                            mToolbarTitle(currentTile)
+
+
+                           if(showSearch){
+                               styledDiv {
+                                   css(mainComponentSearch)
+                                   styledDiv {
+                                       css(mainComponentSearchIcon)
+                                       mIcon("search")
+                                   }
+                                   val inputProps = object: RProps {
+                                       val className = "${UmStyles.name}-mainComponentInputSearch"
+                                   }
+                                   mInput(placeholder = "Search...", disableUnderline = true) {
+                                       attrs.inputProps = inputProps
+                                       css {
+                                           color = Color.inherit
+                                       }
+                                   }
+                               }
+                           }
 
                             mAvatar {
                                 attrs{
                                     src = placeHolderImage
                                     sizes = "large"
                                 }
-                                +"${appName.subSequence(0,1)}"
+                                +"${activeAccount?.firstName?.first()}"
                             }
                         }
                     }
@@ -86,25 +130,25 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, MainState>(pro
                         "100%"; minHeight = "100vh"
                     }
                     mHidden(mdUp = true) {
-                        mDrawer(state.responsiveDrawerOpen, MDrawerAnchor.left, MDrawerVariant.temporary, paperProps = p,
+                        mDrawer(responsiveDrawerOpen, MDrawerAnchor.left, MDrawerVariant.temporary, paperProps = p,
                             onClose = { setState { responsiveDrawerOpen = !responsiveDrawerOpen }}) {
                             appBarSpacer()
-                            //drawerItems()
+                            drawerItems()
                         }
                     }
+
                     mHidden(smDown = true, implementation = MHiddenImplementation.css) {
                         mDrawer(true, MDrawerAnchor.left, MDrawerVariant.permanent, paperProps = p) {
                             appBarSpacer()
-                            //drawerItems()
+                            drawerItems()
                         }
                     }
+
 
                     // Main content area, this div holds the contents
                     styledDiv {
                         css {
-                            height = LinearDimension.fillAvailable
-                            flexGrow = 1.0
-                            minWidth = 0.px
+                            +mainComponentContentArea
                             backgroundColor = Color(theme.palette.background.default)
                         }
                         appBarSpacer()
@@ -121,15 +165,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, MainState>(pro
                                 padding(2.spacingUnits)
                                 backgroundColor = Color(theme.palette.background.default)
                             }
-                            hashRouter {
-                                switch{
-                                    //route("/", ContentComponent::class, exact = true)
-                                    //route("/Schools", SchoolsComponent::class, exact = true)
-                                    //route("/Content", ContentComponent::class, exact = true)
-                                    //route("/ContentDetails", ContentDetailsComponent::class, exact = true)
-                                    //route("/ContentEdit", ContentEditComponent::class, exact = true)
-                                }
-                            }
+                            umRouter()
                         }
                     }
                 }
@@ -137,7 +173,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, MainState>(pro
         }
     }
 
-    /*private fun RBuilder.drawerItems(fullWidth: Boolean = false) {
+    private fun RBuilder.drawerItems(fullWidth: Boolean = false) {
         themeContext.Consumer { theme ->
             mList {
                 css {
@@ -145,42 +181,20 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, MainState>(pro
                     width = if (fullWidth) LinearDimension.auto else drawerWidth
                 }
 
-                listOf(
-                    MenuItem("library_books","content"),
-                    MenuItem("school","schools"),
-                    MenuItem("format_textdirection_r_to_l","direction"),
-                    MenuItem("language","language"),
-                    MenuItem("lightbulb","theme")
-                ).forEachIndexed { index, item ->
-                    mListItemWithIcon(item.icon, state.translations[item.label], divider = index == 2, onClick = {
-                        if(index < 2){
+                destinationList.filter { it.icon != null }.forEach { item ->
+                    item.icon?.let {
+                        mListItemWithIcon(it, impl.getString(item.labelId, this), divider = item.divider , onClick = {
                             setState {
-                                currentView = translations[item.label]
+                                showSearch = item.showSearch
+                                currentTile = impl.getString(item.labelId, this)
                             }
-                            val sub = item.label.subSequence(0,1).toString()
-                            systemImpl.go(item.label.replaceFirst(sub, sub.toUpperCase()))
-                        }else {
-                            setState{
-                                when (index) {
-                                    2 -> {
-                                        isRTLSupport = !isRTLSupport
-                                        document.getElementById("root")?.setAttribute("dir",if(isRTLSupport) "rtl" else "ltr")
-                                    }
-                                    3 -> {
-                                        currentLocale = if(currentLocale == "en-US") "sw-Tz" else "en-US"
-                                        translations = AppUtils.getTranslations(currentLocale)
-                                    }
-                                    else -> {
-                                        mPresenter.handleThemeChange()
-                                    }
-                                }
-                            }
-                        }
-                    })
+                            impl.go(item.view, mapOf(),this)
+                        })
+                    }
                 }
             }
         }
-    }*/
+    }
 
     private fun RBuilder.appBarSpacer() {
         themeContext.Consumer { theme ->
@@ -195,13 +209,6 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, MainState>(pro
             mDivider {  }
         }
     }
-
-    override fun updateDrawerState() {
-        setState {
-            responsiveDrawerOpen = !responsiveDrawerOpen
-        }
-    }
-
 }
 
 fun RBuilder.initMainComponent(initialView: String) = child(MainComponent::class){

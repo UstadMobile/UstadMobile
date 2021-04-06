@@ -5,8 +5,6 @@ import kotlinx.css.px
 
 object Constants {
 
-    val appName = "UstadMobile"
-
     val drawerWidth = 240.px
 
     val zeroPx = 0.px

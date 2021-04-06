@@ -4,8 +4,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView
-import kotlin.js.JsName
-import kotlin.jvm.JvmOverloads
 
 /**
  * Class has all the shared function across all supported platforms
@@ -55,7 +53,6 @@ abstract class UstadMobileSystemCommon {
      *
      * @return The value of the manifest preference key if found, null otherwise
      */
-    @JsName("getManifestPreference")
     abstract fun getManifestPreference(key: String, context: Any): String?
 
 
@@ -66,8 +63,6 @@ abstract class UstadMobileSystemCommon {
      * @param zip if true, the app setup file should be delivered within a zip.
      * @param callback callback to call when complete or if any error occurs.
      */
-
-    @JsName("getAppSetupFile")
     abstract suspend fun getAppSetupFile(context: Any, zip: Boolean): Any
 
 
@@ -82,7 +77,6 @@ abstract class UstadMobileSystemCommon {
      *
      * @return The value of the key if found, if not, the default value provided
      */
-    @JsName("getAppConfigString")
     abstract fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
 
 
@@ -156,7 +150,6 @@ abstract class UstadMobileSystemCommon {
      * @param args (Optional) Hahstable of arguments for the new view (e.g. catalog/container url etc)
      * @param context System context object
      */
-    @JsName("go")
     abstract fun go(viewName: String, args: Map<String, String?>, context: Any, flags: Int,
                     ustadGoOptions: UstadGoOptions)
 
@@ -165,10 +158,8 @@ abstract class UstadMobileSystemCommon {
      *
      * @return The currently active locale code, or a blank "" string meaning the locale is the system default.
      */
-    @JsName("getLocale")
     open fun getLocale(context: Any) = getAppPref(PREFKEY_LOCALE, LOCALE_USE_SYSTEM, context)
 
-    @JsName("setLocale")
     fun setLocale(locale: String, context: Any) = setAppPref(PREFKEY_LOCALE, locale, context)
 
 
@@ -178,7 +169,6 @@ abstract class UstadMobileSystemCommon {
      * @param key preference key as a string
      * @return value of that preference
      */
-    @JsName("getAppPref")
     abstract fun getAppPref(key: String, context: Any): String?
 
     /**
@@ -206,7 +196,6 @@ abstract class UstadMobileSystemCommon {
      *
      * @return System locale
      */
-    @JsName("getSystemLocale")
     abstract fun getSystemLocale(context: Any): String
 
 
@@ -230,13 +219,11 @@ abstract class UstadMobileSystemCommon {
     /**
      * Get a string for use in the UI using a constant int from MessageID
      */
-    @JsName("getString")
     abstract fun getString(messageCode: Int, context: Any): String
 
     /**
      * Get list of all UI supported languages
      */
-    @JsName("getAllUiLanguage")
     @Deprecated("Use getAllUiLanguagesList instead")
     open fun getAllUiLanguage(context: Any): Map<String, String> {
         val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
@@ -252,18 +239,14 @@ abstract class UstadMobileSystemCommon {
      *
      * @param context
      */
-    @JsName("getAllUiLanguagesList")
     open fun getAllUiLanguagesList(context: Any): List<Pair<String, String>> {
         val languagesConfigVal = getAppConfigString(AppConfig.KEY_SUPPORTED_LANGUAGES,
                 "", context) ?: throw IllegalStateException("No SUPPORTED LANGUAGES IN APPCONFIG!")
         val availableLangs = languagesConfigVal.split(",").sorted()
-
-
         return listOf(LOCALE_USE_SYSTEM to getString(MessageID.use_device_language, context)) +
                 availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
     }
 
-    @JsName("getStorageDirAsync")
     abstract suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
 
     /**
@@ -374,7 +357,6 @@ abstract class UstadMobileSystemCommon {
         /**
          * The preference key where we save a string for the user's locale preference
          */
-        @JsName("PREFKEY_LOCALE")
         const val PREFKEY_LOCALE = "locale"
 
 
