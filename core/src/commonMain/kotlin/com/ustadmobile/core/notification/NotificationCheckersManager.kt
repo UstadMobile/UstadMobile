@@ -58,6 +58,10 @@ class NotificationCheckersManager(val endpoint: Endpoint, override val di: DI,
 
     companion object {
 
+        const val INPUT_SITE_URL = "siteUrl"
+
+        const val INPUT_NOTIFICATION_SETTING_UID = "nsUid"
+
         private fun defaultNotificationCheckers(di: DI, endpoint: Endpoint) = mapOf(
             NotificationSetting.TYPE_TAKE_ATTENDANCE_REMINDER to TakeAttendanceNotificationChecker(di, endpoint)
         )

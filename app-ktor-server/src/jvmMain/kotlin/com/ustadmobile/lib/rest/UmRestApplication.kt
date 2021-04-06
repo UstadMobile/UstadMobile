@@ -13,6 +13,8 @@ import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.io.UploadSessionManager
 import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.notification.setupNotificationCheckerSyncListener
+import com.ustadmobile.core.schedule.setupScheduleSyncListener
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.asRepository
@@ -37,6 +39,8 @@ import io.ktor.request.header
 import io.ktor.routing.Routing
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
+import org.quartz.Job
+import org.quartz.JobExecutionContext
 import org.quartz.Scheduler
 import org.quartz.SchedulerFactory
 import org.quartz.impl.StdScheduler
@@ -44,6 +48,7 @@ import org.quartz.impl.StdSchedulerFactory
 import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
+import javax.sql.DataSource
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -162,6 +167,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
             repo.preload()
             db.ktorInitDbWithRepo(repo, instance<File>(tag = TAG_CONTEXT_DATA_ROOT).absolutePath)
+            repo.setupNotificationCheckerSyncListener(context, di)
+            repo.setupScheduleSyncListener(context, di)
             repo
         }
 
@@ -180,6 +187,13 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             UploadSessionManager(context, di)
         }
 
+        bind<Scheduler>() with singleton {
+            InitialContext().initQuartzDb("java:/comp/env/jdbc/quartzds")
+            StdSchedulerFactory.getDefaultScheduler().also {
+                it.context.put("di", di)
+            }
+        }
+
         registerContextTranslator { call: ApplicationCall ->
             if(dbMode == CONF_DBMODE_SINGLETON) {
                 Endpoint("localhost")
@@ -194,7 +208,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
             }
 
-            //instance<Scheduler>().start()
+            instance<Scheduler>().start()
         }
     }
 

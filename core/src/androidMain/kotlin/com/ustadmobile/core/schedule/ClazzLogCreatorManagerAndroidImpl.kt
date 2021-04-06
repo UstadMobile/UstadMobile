@@ -5,24 +5,23 @@ import androidx.work.Data
 import androidx.work.ExistingWorkPolicy
 import androidx.work.OneTimeWorkRequest
 import androidx.work.WorkManager
-import com.ustadmobile.door.util.systemTimeInMillis
-import java.util.concurrent.TimeUnit
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_CLAZZUID
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_ENDPOINTURL
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_FROMTIME
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_TOTIME
+import com.ustadmobile.core.util.ext.setInitialDelayIfLater
 
 class ClazzLogCreatorManagerAndroidImpl(val context: Context): ClazzLogCreatorManager {
 
     override fun requestClazzLogCreation(clazzUid: Long, endpointUrl: String, fromTime: Long, toTime: Long) {
         val inputData = Data.Builder()
-                .putLong(ClazzLogScheduleWorker.INPUT_CLAZZUID, clazzUid)
-                .putString(ClazzLogScheduleWorker.INPUT_ENDPOINTURL, endpointUrl)
-                .putLong(ClazzLogScheduleWorker.INPUT_FROMTIME, fromTime)
-                .putLong(ClazzLogScheduleWorker.INPUT_TOTIME, toTime)
+                .putLong(INPUT_CLAZZUID, clazzUid)
+                .putString(INPUT_ENDPOINTURL, endpointUrl)
+                .putLong(INPUT_FROMTIME, fromTime)
+                .putLong(INPUT_TOTIME, toTime)
 
         val request = OneTimeWorkRequest.Builder(ClazzLogScheduleWorker::class.java)
-                .apply {
-                    val timeUntilStart = fromTime - systemTimeInMillis()
-                    if(timeUntilStart > 0)
-                        setInitialDelay(timeUntilStart, TimeUnit.MILLISECONDS)
-                }
+                .setInitialDelayIfLater(fromTime)
                 .setInputData(inputData.build())
                 .build()
         WorkManager.getInstance(context).enqueueUniqueWork(

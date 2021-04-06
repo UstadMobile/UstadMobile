@@ -4,6 +4,8 @@ import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.ustadmobile.core.account.Endpoint
+import com.ustadmobile.core.notification.NotificationCheckersManager.Companion.INPUT_NOTIFICATION_SETTING_UID
+import com.ustadmobile.core.notification.NotificationCheckersManager.Companion.INPUT_SITE_URL
 import org.kodein.di.DI
 import org.kodein.di.android.di
 import org.kodein.di.instance
@@ -22,9 +24,5 @@ class NotificationCheckerWorker(appContext: Context, val params: WorkerParameter
         return Result.success()
     }
 
-    companion object {
-        const val INPUT_SITE_URL = "siteUrl"
-        const val INPUT_NOTIFICATION_SETTING_UID = "nsUid"
-    }
 
 }

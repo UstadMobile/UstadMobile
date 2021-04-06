@@ -7,6 +7,11 @@ import com.soywiz.klock.hours
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.DAY_IN_MS
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_CLAZZUID
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_ENDPOINTURL
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_FROMTIME
+import com.ustadmobile.core.schedule.ClazzLogCreatorManager.Companion.INPUT_TOTIME
 import org.kodein.di.DI
 import org.kodein.di.android.di
 import org.kodein.di.direct
@@ -28,24 +33,9 @@ class ClazzLogScheduleWorker(context: Context, workerParams: WorkerParameters) :
         val clazzLogCreatorManager: ClazzLogCreatorManager = di.direct.instance()
         if(nextRunTime > 0)
             clazzLogCreatorManager.requestClazzLogCreation(clazzUid, endpoint, nextRunTime,
-                nextRunTime + DAY_IN_MS)
+                (nextRunTime + DAY_IN_MS) - 1)
 
         return Result.success()
     }
 
-    companion object {
-
-
-        const val DAY_IN_MS = (1000 * 60 * 60 * 24)
-
-        const val INPUT_ENDPOINTURL = "dbName"
-
-        const val INPUT_FROMTIME = "fromTime"
-
-        const val INPUT_TOTIME = "toTime"
-
-        const val INPUT_CLAZZUID = "clazzUidFilter"
-
-
-    }
 }
