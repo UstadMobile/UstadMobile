@@ -174,10 +174,12 @@ class LearnerGroupEndToEndTest : TestCase() {
                     }
                 }
             }
-            MainScreen{
-                toolBarTitle{
-                    hasDescendant { withText("Hello World Example") }
-                    isDisplayed()
+            flakySafely {
+                MainScreen {
+                    toolBarTitle {
+                        hasDescendant { withText("Hello World Example") }
+                        isDisplayed()
+                    }
                 }
             }
             XapiContentScreen{
