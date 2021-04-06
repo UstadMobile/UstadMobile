@@ -312,8 +312,9 @@ object XapiUtil {
                 statementEntity.resultCompletion = statementResult.completion
                 statementEntity.resultDuration = statementResult.duration?.let { parse8601Duration(it) } ?: 0L
                 statementEntity.resultResponse = statementResult.response
-                statementEntity.resultSuccess = if(statementResult.success != null) {
-                    if(statementResult.success) StatementEntity.RESULT_SUCCESS else StatementEntity.RESULT_FAILURE
+                var success = statementResult.success
+                statementEntity.resultSuccess = if(success != null) {
+                    if(success) StatementEntity.RESULT_SUCCESS else StatementEntity.RESULT_FAILURE
                 }else{
                     StatementEntity.RESULT_UNSET
                 }
