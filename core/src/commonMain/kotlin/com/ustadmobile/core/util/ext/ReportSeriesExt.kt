@@ -300,6 +300,20 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
 
     }
 
+    when(queryType){
+        ATTENDANCE_QUERY -> {
+            sql += """
+                GROUP BY ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
+            """.trimIndent()
+        }
+        STATEMENT_QUERY -> {
+            sql += """
+                GROUP BY StatementEntity.statementUid
+            """.trimMargin()
+        }
+    }
+
+
     sql += ") AS ResultSource "
 
 
