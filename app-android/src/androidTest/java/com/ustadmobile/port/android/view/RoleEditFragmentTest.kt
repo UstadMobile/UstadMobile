@@ -1,6 +1,7 @@
 package com.ustadmobile.port.android.view
 
 import androidx.core.os.bundleOf
+import androidx.fragment.app.testing.FragmentScenario
 import androidx.fragment.app.testing.launchFragmentInContainer
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
@@ -25,7 +26,7 @@ import org.junit.Assert
 import org.junit.Rule
 import org.junit.Test
 
-@AdbScreenRecord("Class edit screen tests")
+@AdbScreenRecord("Role edit screen tests")
 class RoleEditFragmentTest : TestCase() {
 
     @JvmField
@@ -50,27 +51,22 @@ class RoleEditFragmentTest : TestCase() {
     val crudIdlingResourceRule =
             ScenarioIdlingResourceRule(CrudIdlingResource())
 
-    
+    lateinit var fragmentScenario: FragmentScenario<RoleEditFragment>
 
 
     @AdbScreenRecord("When a new Role is filled, it should save to the Database")
     @Test
     fun givenNoRolePresentYet_whenFilledInAndSaveClicked_thenShouldSaveToDatabase() {
         init {
-
-        }.run {
-
-
-
-            val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
+            fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App) {
                 RoleEditFragment().also {
                     it.installNavController(systemImplNavRule.navController)
                     it.arguments = bundleOf()
                 }
             }
+        }.run {
 
-
-            val currentEntity = fragmentScenario.waitUntilLetOnFragment { it.entity }
+            fragmentScenario.waitUntilLetOnFragment { it.entity }
 
             val formVals = Role().apply {
                 roleName = "Role C"
@@ -81,7 +77,13 @@ class RoleEditFragmentTest : TestCase() {
 
             RoleEditScreen {
 
-                fillFields(fragmentScenario, formVals, currentEntity)
+                editNameLayout {
+                    edit {
+                        clearText()
+                        replaceText(formVals.roleName!!)
+                        hasText(formVals.roleName!!)
+                    }
+                }
 
                 val repo = dbRule.repo as DoorDatabaseSyncRepository
                 repo.clientId
@@ -89,7 +91,7 @@ class RoleEditFragmentTest : TestCase() {
 
                 flakySafely(timeoutMs = 10000, intervalMs = 1000) {
                     val roles = dbRule.db.roleDao.findAllActiveRolesLive().waitUntilWithFragmentScenario(fragmentScenario) {
-                        it.isNotEmpty()
+                        it.isNotEmpty() && it[0].roleName == "Role C"
                     }
 
                     Assert.assertEquals("Role data set", "Role C", roles!!.first().roleName)
@@ -101,37 +103,42 @@ class RoleEditFragmentTest : TestCase() {
 
     }
 
-    //@Test
+    @Test
     fun givenRoleExists_whenOpenedUpdatedAndSaveClicked_thenShouldBeUpdatedOnDatabase() {
 
+        val existingRole = Role().apply {
+            roleName = "Role D"
+            roleUid = dbRule.repo.roleDao.insert(this)
+        }
         init {
+
+            fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
+                    fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingRole.roleUid)) {
+                RoleEditFragment().also {
+                    it.installNavController(systemImplNavRule.navController)
+                }
+            }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
+                    .withScenarioIdlingResourceRule(crudIdlingResourceRule)
 
         }.run {
 
             RoleEditScreen {
 
-                val existingRole = Role().apply {
-                    roleName = "Role D"
-                    roleUid = dbRule.db.roleDao.insert(this)
-                }
-
-                val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
-                        fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to existingRole.roleUid)) {
-                    RoleEditFragment().also {
-                        it.installNavController(systemImplNavRule.navController)
-                    }
-                }.withScenarioIdlingResourceRule(dataBindingIdlingResourceRule)
-                        .withScenarioIdlingResourceRule(crudIdlingResourceRule)
-
-
                 //Freeze and serialize the value as it was first shown to the user
-                var entityLoadedByFragment = fragmentScenario.waitUntilLetOnFragment { it.entity }
+                val entityLoadedByFragment = fragmentScenario.waitUntilLetOnFragment { it.entity }
                 val entityLoadedJson = defaultGson().toJson(entityLoadedByFragment)
                 val newRoleValues = defaultGson().fromJson(entityLoadedJson, Role::class.java).apply {
                     roleName = "Role E"
                 }
 
-                fillFields(fragmentScenario, newRoleValues, entityLoadedByFragment)
+                editNameLayout {
+                    edit {
+                        hasText(existingRole.roleName!!)
+                        clearText()
+                        replaceText(newRoleValues.roleName!!)
+                        hasText(newRoleValues.roleName!!)
+                    }
+                }
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
