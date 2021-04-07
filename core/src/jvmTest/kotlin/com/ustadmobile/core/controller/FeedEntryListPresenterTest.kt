@@ -1,17 +1,27 @@
 
 package com.ustadmobile.core.controller
 
+import com.ustadmobile.core.account.UstadAccountManager
+import com.ustadmobile.core.db.UmAppDatabase
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import com.ustadmobile.core.view.FeedEntryListView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.core.db.dao.FeedEntryDao
+import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.core.util.activeRepoInstance
+import com.ustadmobile.core.util.directActiveDbInstance
+import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.lib.db.entities.FeedEntry
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import org.junit.Assert
+import org.kodein.di.DI
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.mockito.kotlin.*
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
@@ -20,14 +30,9 @@ import org.junit.Assert
  */
 class FeedEntryListPresenterTest {
 
-    /*
     @JvmField
     @Rule
-    var systemImplRule = SystemImplRule()
-
-    @JvmField
-    @Rule
-    var clientDbRule = UmAppDatabaseClientRule(useDbAsRepo = true)
+    var ustadTestRule = UstadTestRule()
 
     private lateinit var mockView: FeedEntryListView
 
@@ -37,6 +42,14 @@ class FeedEntryListPresenterTest {
 
     private lateinit var repoFeedEntryDaoSpy: FeedEntryDao
 
+    private lateinit var di: DI
+
+    private lateinit var db: UmAppDatabase
+
+    private lateinit var repo: UmAppDatabase
+
+    private lateinit var accountManager: UstadAccountManager
+
     @Before
     fun setup() {
         mockView = mock { }
@@ -44,58 +57,40 @@ class FeedEntryListPresenterTest {
             on { currentState }.thenReturn(DoorLifecycleObserver.RESUMED)
         }
         context = Any()
-        repoFeedEntryDaoSpy = spy(clientDbRule.db.feedEntryDao)
-        whenever(clientDbRule.db.feedEntryDao).thenReturn(repoFeedEntryDaoSpy)
+
+        di = DI {
+            import(ustadTestRule.diModule)
+        }
+
+        accountManager = di.direct.instance()
+
+        db = di.directActiveDbInstance()
+        repo = di.directActiveRepoInstance()
+
+        repoFeedEntryDaoSpy = spy(db.feedEntryDao)
+        whenever(db.feedEntryDao).thenReturn(repoFeedEntryDaoSpy)
 
         //TODO: insert any entities required for all tests
     }
 
     @Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
-        //TODO: insert any entities that are used only in this test
-        val testEntity = FeedEntry().apply {
+        FeedEntry().apply {
             //set variables here
-            feedEntryUid = clientDbRule.db.feedEntryDao.insert(this)
+            db.feedEntryDao.insertList(listOf(this))
         }
 
-        //TODO: add any arguments required for the presenter here e.g.
-        // FeedEntryListView.ARG_SOME_FILTER to "filterValue"
-        val presenterArgs = mapOf<String,String>()
-        val presenter = FeedEntryListPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
+        val presenter = FeedEntryListPresenter(context, mapOf(), mockView, di,
+            mockLifecycleOwner)
         presenter.onCreate(null)
 
         //eg. verify the correct DAO method was called and was set on the view
-        verify(repoFeedEntryDaoSpy, timeout(5000)).findByFeedEntryUidAsFactory()
+        verify(repoFeedEntryDaoSpy, timeout(5000)).findByPersonUidAsDataSource(
+            accountManager.activeAccount.personUid)
         verify(mockView, timeout(5000)).list = any()
-
+        verify(repoFeedEntryDaoSpy, timeout(5000)).getFeedSummary(
+            accountManager.activeAccount.personUid)
         //TODO: verify any other properties that the presenter should set on the view
     }
 
-    @Test
-    fun givenPresenterCreatedInBrowseMode_whenOnClickEntryCalled_thenShouldGoToDetailView() {
-        val presenterArgs = mapOf<String,String>()
-        val testEntity = FeedEntry().apply {
-            //set variables here
-            feedEntryUid = clientDbRule.db.feedEntryDao.insert(this)
-        }
-        val presenter = FeedEntryListPresenter(context,
-                presenterArgs, mockView, mockLifecycleOwner,
-                systemImplRule.systemImpl, clientDbRule.db, clientDbRule.repo,
-                clientDbRule.accountLiveData)
-        presenter.onCreate(null)
-        mockView.waitForListToBeSet()
-
-
-        presenter.handleClickEntry(testEntity)
-
-
-        verify(systemImplRule.systemImpl, timeout(5000)).go(eq(FeedEntryDetailView.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to testEntity.feedEntryUid.toString())), any())
-    }
-
-    //TODO: Add tests for other scenarios the presenter is expected to handle - e.g. different filters, etc.
-    */
 }

@@ -16,6 +16,7 @@ class FeedEntryListPresenter(context: Any, arguments: Map<String, String>, view:
         super.onCreate(savedState)
         updateListOnView()
         feedEntryItemListener.listViewMode = mListMode
+        view.summaryStats = db.feedEntryDao.getFeedSummary(accountManager.activeAccount.personUid)
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {

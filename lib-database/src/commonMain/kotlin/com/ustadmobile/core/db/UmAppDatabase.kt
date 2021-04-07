@@ -16,7 +16,6 @@ import kotlin.jvm.Volatile
 @Database(entities = [NetworkNode::class, DownloadJobItemHistory::class,
     ClazzLog::class, ClazzLogAttendanceRecord::class,
     Schedule::class, DateRange::class, HolidayCalendar::class, Holiday::class,
-    ScheduledCheck::class,
     AuditLog::class, CustomField::class, CustomFieldValue::class, CustomFieldValueOption::class,
     Person::class, DownloadJob::class, DownloadJobItem::class, DownloadJobItemParentChildJoin::class,
     Clazz::class, ClazzEnrolment::class, LeavingReason::class, PersonCustomFieldValue::class,
@@ -238,8 +237,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val customFieldValueOptionDao: CustomFieldValueOptionDao
 
     abstract val scheduleDao: ScheduleDao
-
-    abstract val scheduledCheckDao: ScheduledCheckDao
 
     abstract val holidayCalendarDao: HolidayCalendarDao
     abstract val holidayDao: HolidayDao

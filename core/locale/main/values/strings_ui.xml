@@ -949,4 +949,8 @@ Content is provided under license by external content providers. Ustad Mobile, u
 
     <string name="content_editor_create_new_category">New folder</string>
 
+    <string name="content_pieces_completed">Content pieces completed</string>
+
+    <string name="content_usage_duration">Content usage duration</string>
+
 </resources>
