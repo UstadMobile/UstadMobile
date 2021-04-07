@@ -35,9 +35,14 @@ kotlin {
     }
 
     sourceSets {
+        //This adds a common DAO. It must be in the source so the annotation processor can see
+        // parameter names etc.
+        doorDao {
+
+        }
+
         commonMain {
-            //Add the SyncHelperEntitiesDao
-            kotlin.srcDir("../lib-door-runtime/src/commonMain/resources/daos")
+            dependsOn doorDao
 
             dependencies {
                 implementation kotlin('stdlib-common')
@@ -51,6 +56,8 @@ kotlin {
  
             }
         }
+
+
 
         jvmMain {
             dependencies {
