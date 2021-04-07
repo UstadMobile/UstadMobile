@@ -2,7 +2,7 @@
 import org.apache.tools.ant.filters.*
 
 buildscript {
-    ext.version_kotlin = '1.4.31'
+    ext.version_kotlin = '1.4.32'
     ext.version_shadow = "5.2.0"
     ext.version_gradle_versions_plugin = "0.28.0"
     ext.atomicfu_version = '0.15.2'
@@ -81,7 +81,7 @@ ext {
     ustadVersion = project.version
     ustadVersionCode = 202
 
-    version_door = "0.0.4"
+    version_door = "0.0.5"
     version_xmlpullparserkmp = '0.0.8'
 
     version_gradle_buildconfig_plugin = "1.1.7"
@@ -90,7 +90,7 @@ ext {
     version_kotlinx_serialization = "1.1.0"
     version_klock = "2.0.7"
     version_kmp = "0.0.2"
-    version_ktor = "1.5.2"
+    version_ktor = "1.5.3"
     version_coroutines = "1.4.3"
     version_atomicfu = "0.15.2"
     version_krypto = "1.0.1"
@@ -100,9 +100,7 @@ ext {
     version_kxml = "2.3.0"
     version_json = "20160212"
 
-    //3.12.6 is the latest (backport) OKHttp version that still supports Android 4
-    // see https://medium.com/square-corner-blog/okhttp-3-13-requires-android-5-818bb78d07ce
-    version_okhttp = "3.12.6"
+    version_okhttp = "4.9.0"
     version_commons_io = "2.6"
     version_gson = "2.8.6"
     version_apache_commons_cli = "1.4"

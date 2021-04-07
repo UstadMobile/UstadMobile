@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit
  *  https://github.com/ktorio/ktor/issues/1708
  */
 
-private val OK_HTTP_MIN_SDKVERSION = 50
+private val OK_HTTP_MIN_SDKVERSION = 21
 
 private val okHttpClient = if(Build.VERSION.SDK_INT >= OK_HTTP_MIN_SDKVERSION) {
     OkHttpClient.Builder()
