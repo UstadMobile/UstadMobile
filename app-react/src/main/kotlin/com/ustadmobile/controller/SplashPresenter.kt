@@ -2,8 +2,7 @@ package com.ustadmobile.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.util.UmUtil
-import com.ustadmobile.util.UmUtil.loadLocalFiles
+import com.ustadmobile.util.UmReactUtil.loadLocalFiles
 import com.ustadmobile.view.SplashView
 import com.ustadmobile.view.SplashView.Companion.LOADED_TAG
 import kotlinx.browser.window

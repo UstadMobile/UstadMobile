@@ -4,7 +4,7 @@ import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlin.js.Promise
 
-object UmUtil {
+object UmReactUtil {
 
     /**
      * Check if the device theme setting is current on dark mode.
@@ -21,4 +21,6 @@ object UmUtil {
             .invoke(data)
             .map { entry -> entry[0] as String to entry[1] }.toMap() as T
     }
+
+    val queryParams: String = window.location.hash
 }

@@ -1,11 +1,9 @@
 package com.ustadmobile.util
 
-import com.ccfraser.muirwik.components.Colors
 import com.ccfraser.muirwik.components.styles.Theme
 import com.ccfraser.muirwik.components.styles.ThemeOptions
 import com.ccfraser.muirwik.components.styles.createMuiTheme
-import com.ustadmobile.util.UmUtil.isDarkModeEnabled
-import kotlinx.css.Color
+import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 
 /**
  * Responsible for styling the app by customizing theme colors,

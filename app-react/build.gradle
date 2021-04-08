@@ -43,5 +43,6 @@ dependencies {
     implementation project(":core")
     implementation project(":lib-util")
     implementation project(":lib-database-entities")
+    implementation "com.ustadmobile.door:room-annotations:$version_door"
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
 }
