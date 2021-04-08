@@ -8,20 +8,25 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
-import react.RBuilder
-import react.RProps
-import react.RState
+import com.ustadmobile.util.UmViewMergerHelper
+import react.*
+import styled.styledDiv
 
 abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<RProps,RState>(mProps),
     UstadListView<RT, DT>, OnSortOptionSelected {
 
     protected abstract val displayTypeRepo: Any?
 
+    protected val viewMergerHelper = UmViewMergerHelper()
+
     protected abstract val listPresenter: UstadListPresenter<*, in DT>?
 
     override fun RBuilder.render() {
-        TODO("Not yet implemented")
+        styledDiv {
+            viewMergerHelper.getViews()
+        }
     }
+
 
     override var list: DataSource.Factory<Int, DT>?
         get() = TODO("Not yet implemented")
