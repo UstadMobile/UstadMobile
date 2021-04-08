@@ -130,6 +130,7 @@ ext {
     version_browser_proxy = "2.1.5"
     version_logback = "1.0.13"
     version_kodein_di = "7.4.0"
+    version_netty_tcnative = "2.0.38.Final"
 
 
     /**
