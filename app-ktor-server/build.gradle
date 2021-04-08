@@ -1,10 +1,8 @@
 
 plugins {
     id 'application'
-    id 'war'
     id 'org.jetbrains.kotlin.multiplatform'
     id 'maven-publish'
-    //TODO: This should be defined by a variable, which might need to ome from settings.gradle
     id 'com.github.johnrengelman.shadow'
     id 'kotlinx-serialization'
     id 'com.github.psxpaul.execfork' version '0.1.13'
@@ -114,6 +112,7 @@ shadowJar {
     manifest {
         attributes 'Main-Class': mainClassName
     }
+    archiveBaseName = "ustad-server"
 
     def target = kotlin.targets.jvm
     from target.compilations.main.output

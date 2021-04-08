@@ -14,7 +14,7 @@ $ sudo -u ustad -s
 $ mkdir /home/ustad/server
 
 # Copy the server JAR
-$ cp /my/Download/app-ktor-server-all.jar /home/ustad/app-ktor-server-all.jar
+$ cp /my/Download/ustad-server-all.jar /home/ustad/ustad-server-all.jar
 
 # Install java (on Ubuntu)
 $ apt-get install openjdk-8-jre
@@ -41,7 +41,12 @@ openssl pkcs12 -export -out /etc/letsencrypt/live/$DOMAIN/keystore.p12 -inkey /e
 keytool -importkeystore -alias $ALIAS -destkeystore /etc/letsencrypt/live/$DOMAIN/keystore.jks -srcstoretype PKCS12 -srckeystore /etc/letsencrypt/live/$DOMAIN/keystore.p12
 ```
 
-## Configure the server
+## Configure the server:
+
+Unzip the example config file and edit it as required:
+```
+unzip ustad-server-all.jar application.conf
+```
 
 Edit the server config file as required:
 ```
@@ -55,6 +60,14 @@ ktor {
         }
     }
 }
+```
+
+## Run the server
+
+Run the server using the Java command:
+
+```
+java -jar ustad-server-all.jar -config=application.conf
 ```
 
 ## Configure Apache HTTP Proxy (optional)
