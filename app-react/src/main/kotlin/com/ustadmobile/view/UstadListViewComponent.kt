@@ -12,7 +12,7 @@ import react.RBuilder
 import react.RProps
 import react.RState
 
-abstract class UstadListViewComponent<RT, DT>(private val mProps: RProps) : UmBaseComponent<RProps,RState>(mProps),
+abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<RProps,RState>(mProps),
     UstadListView<RT, DT>, OnSortOptionSelected {
 
     protected abstract val displayTypeRepo: Any?

@@ -8,11 +8,11 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 import com.ustadmobile.util.UmStyles.appContainer
 import com.ustadmobile.util.UmStyles.preloadComponentCenteredDiv
 import com.ustadmobile.util.UmStyles.preloadComponentCenteredImage
 import com.ustadmobile.util.UmStyles.preloadComponentProgressBar
-import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 import kotlinx.browser.document
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -27,7 +27,7 @@ import styled.css
 import styled.styledDiv
 import styled.styledImg
 
-class UmAppComponent (props: RProps): UmBaseComponent<RProps, RState>(props), SplashView {
+class SplashComponent (props: RProps): UmBaseComponent<RProps, RState>(props), SplashView {
 
     private lateinit var mPresenter: SplashPresenter
 
@@ -50,7 +50,7 @@ class UmAppComponent (props: RProps): UmBaseComponent<RProps, RState>(props), Sp
         }
     }
 
-    override fun componentWillMount() {
+    override fun componentDidMount() {
         val umDi = DI.lazy { import(diModule)}
         js("window.di = umDi")
         mPresenter = SplashPresenter(this)
@@ -58,6 +58,7 @@ class UmAppComponent (props: RProps): UmBaseComponent<RProps, RState>(props), Sp
             mPresenter.handleResourceLoading()
         }
     }
+
 
     override var appName: String? = null
         set(value) {
@@ -110,5 +111,5 @@ class UmAppComponent (props: RProps): UmBaseComponent<RProps, RState>(props), Sp
     }
 }
 
-fun RBuilder.showPreload() = child(UmAppComponent::class) {}
+fun RBuilder.showPreload() = child(SplashComponent::class) {}
 

@@ -45,4 +45,5 @@ dependencies {
     implementation project(":lib-database-entities")
     implementation "com.ustadmobile.door:room-annotations:$version_door"
     implementation "org.kodein.di:kodein-di:$version_kodein_di"
+    implementation "com.ustadmobile.door:door-runtime:$version_door"
 }

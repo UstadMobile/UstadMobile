@@ -24,15 +24,16 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         get() = mPresenter
 
     override fun componentWillMount() {
-        //mPresenter = ContentEntryList2Presenter(this, UMFileUtil.parseURLQueryString(queryParams), this,di,this)
-        //mPresenter.onCreate(mapOf())
+        super.componentWillMount()
+        mPresenter = ContentEntryList2Presenter(this,
+            UMFileUtil.parseURLQueryString(queryParams), this,di,this)
+        mPresenter.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
         styledDiv {
             +"Entry List"
         }
-        console.log(UMFileUtil.parseURLQueryString(queryParams))
     }
 
     override val displayTypeRepo: Any?
@@ -61,4 +62,9 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
     override var sortOptions: List<MessageIdOption>?
         get() = TODO("Not yet implemented")
         set(value) {}
+
+    override fun componentWillUnmount() {
+        super.componentWillUnmount()
+        mPresenter.onDestroy()
+    }
 }
