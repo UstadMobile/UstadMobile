@@ -2,6 +2,7 @@ package com.ustadmobile.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.util.UmReactUtil
 import com.ustadmobile.util.UmReactUtil.loadLocalFiles
 import com.ustadmobile.view.SplashView
 import com.ustadmobile.view.SplashView.Companion.LOADED_TAG
@@ -16,12 +17,13 @@ class SplashPresenter(private val view: SplashView){
     suspend fun handleResourceLoading() {
         val appConfigs = loadLocalFiles<HashMap<String, String>>("appconfig.json")
         val localization = loadLocalFiles<HashMap<String, HashMap<Int, String>>>("localization.json")
+        val testData = UmReactUtil.loadListFromFiles<List<Any>>("entries.json")
+        js("window.testData = testData")
         appConfigs.forEach {
             impl.setAppPref(it.key, it.value, this)
         }
         var locale = impl.getLocale(this)
         locale = if(locale.isEmpty()) "en" else locale.split("_").first()
-        console.log(locale)
         localization[locale]?.let { impl.setLocaleStrings(it) }
         val loaded = (impl.getAppPref(LOADED_TAG, this)?:"false").toBoolean()
         timerId = window.setTimeout({

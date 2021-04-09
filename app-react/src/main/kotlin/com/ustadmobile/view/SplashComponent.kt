@@ -77,23 +77,20 @@ class SplashComponent (props: RProps): UmBaseComponent<RProps, RState>(props), S
         themeContext.Consumer { theme ->
             js("window.theme = theme")
             styledDiv {
-                css {
-                    +appContainer
-                }
-
+                css (appContainer)
                 if (showMainComponent) {
                     initMainComponent(ContentEntryList2View.VIEW_NAME)
                 } else {
                     styledDiv {
-                        css { +preloadComponentCenteredDiv }
+                        css(preloadComponentCenteredDiv)
                         styledImg {
-                            css {+preloadComponentCenteredImage}
+                            css (preloadComponentCenteredImage)
                             attrs{
                                 src = "assets/${if(isDarkModeEnabled()) "logo.png" else "logo.png"}"
                             }
                         }
                         mLinearProgress {
-                            css{+preloadComponentProgressBar}
+                            css(preloadComponentProgressBar)
                             attrs {
                                 color = if(isDarkModeEnabled()) MLinearProgressColor.secondary
                                 else MLinearProgressColor.primary

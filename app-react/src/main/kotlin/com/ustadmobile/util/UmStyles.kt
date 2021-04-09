@@ -105,4 +105,32 @@ object UmStyles: StyleSheet("ComponentStyles", isStatic = true) {
             }
         }
     }
+
+    val listContainer by css {
+        //display = Display.inlineFlex
+        padding(1.spacingUnits)
+    }
+
+    val horizontalList by css {
+        width = LinearDimension.auto
+        backgroundColor = Color((window.asDynamic().theme as Theme).palette.background.paper)
+    }
+
+    val listCreateNewContainer by css {
+        padding = "10px"
+    }
+
+    val listItemCreateNewDiv by css {
+        display = Display.inlineFlex
+    }
+
+    val listCreateNewIcon by css {
+        fontSize = LinearDimension("2em")
+        marginTop = 19.px
+    }
+
+    val listCreateNewLabel by css{
+        fontSize = LinearDimension("1.2em")
+        fontWeight = FontWeight("400")
+    }
 }

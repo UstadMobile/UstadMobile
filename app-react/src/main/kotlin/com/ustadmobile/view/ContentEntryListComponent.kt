@@ -1,5 +1,8 @@
 package com.ustadmobile.view
 
+import com.ccfraser.muirwik.components.list.mListItemIcon
+import com.ccfraser.muirwik.components.list.mListItemText
+import com.ccfraser.muirwik.components.mTypography
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
@@ -9,9 +12,15 @@ import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.util.UmReactUtil.queryParams
+import kotlinx.css.RuleSet
+import kotlinx.css.marginRight
+import kotlinx.css.px
 import react.RBuilder
 import react.RProps
-import styled.styledDiv
+import react.ReactElement
+import react.dom.span
+import styled.css
+import styled.styledImg
 
 interface EntryListProps: RProps
 
@@ -32,12 +41,46 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
     }
 
     override fun RBuilder.render() {
-        viewMergerHelper.addView(styledDiv { +"Header" })
-        viewMergerHelper.addView(styledDiv { +"Footer" })
+        renderViews()
+    }
+
+    override fun RBuilder.renderListItem(item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer): MutableList<ReactElement>? {
+        val builder = RBuilder()
+        return mutableListOf(
+            styledImg {
+                css { marginRight = 20.px }
+                attrs{
+                    src = item.thumbnailUrl.toString()
+                    width = "100px"
+                }},
+            mListItemText(
+                builder.span {+"${item.title}"},
+                builder.span { mTypography(item.description) })
+        )
+    }
+
+    override fun RBuilder.renderHeaderView(): ReactElement? {
+        return null
+    }
+
+    override fun handleClickEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
+        mPresenter.onClickContentEntry(entry)
+    }
+
+
+    override fun componentWillUnmount() {
+        super.componentWillUnmount()
+        mPresenter.onDestroy()
     }
 
     override val displayTypeRepo: Any?
         get() = TODO("Not yet implemented")
+
+
+    override fun styleList(): RuleSet? {
+        return null
+    }
+
 
     override fun showContentEntryAddOptions(parentEntryUid: Long) {
         TODO("Not yet implemented")
@@ -62,11 +105,6 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
     override var sortOptions: List<MessageIdOption>?
         get() = TODO("Not yet implemented")
         set(value) {}
-
-    override fun componentWillUnmount() {
-        super.componentWillUnmount()
-        mPresenter.onDestroy()
-    }
 
     companion object {
         val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(

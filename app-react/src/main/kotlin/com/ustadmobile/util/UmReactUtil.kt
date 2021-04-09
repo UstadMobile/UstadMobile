@@ -22,5 +22,13 @@ object UmReactUtil {
             .map { entry -> entry[0] as String to entry[1] }.toMap() as T
     }
 
+    suspend fun <T> loadListFromFiles(fileName: String) : T{
+        val res = (window.fetch(fileName) as Promise<dynamic>).await()
+        val data = (res.json() as Promise<T>).await()
+        return (js("Object.entries") as (dynamic) -> Array<Array<T?>>)
+            .invoke(data)
+            .map { entry -> entry[1] }.toList() as T
+    }
+
     val queryParams: String = window.location.hash
 }
