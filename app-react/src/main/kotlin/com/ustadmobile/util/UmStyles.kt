@@ -27,6 +27,17 @@ object UmStyles: StyleSheet("ComponentStyles", isStatic = true) {
         display = Display.flex
     }
 
+    val fab by css{
+        position = Position.fixed
+        right = 15.px
+        bottom = 15.px
+        zIndex = 99999
+    }
+
+    val progressIndicator by css {
+        width = LinearDimension("100%")
+    }
+
     val preloadComponentCenteredDiv by css{
         height = 200.px
         width = 200.px

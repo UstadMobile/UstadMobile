@@ -1,6 +1,7 @@
 package com.ustadmobile.view
 
 import com.ccfraser.muirwik.components.*
+import com.ccfraser.muirwik.components.button.mFab
 import com.ccfraser.muirwik.components.button.mIconButton
 import com.ccfraser.muirwik.components.input.mInput
 import com.ccfraser.muirwik.components.list.mList
@@ -8,17 +9,21 @@ import com.ccfraser.muirwik.components.list.mListItemWithIcon
 import com.ccfraser.muirwik.components.styles.Breakpoint
 import com.ccfraser.muirwik.components.styles.down
 import com.ccfraser.muirwik.components.styles.up
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.model.statemanager.UmAppState
 import com.ustadmobile.util.Constants.drawerWidth
 import com.ustadmobile.util.Constants.fullWidth
 import com.ustadmobile.util.Constants.placeHolderImage
 import com.ustadmobile.util.Constants.zeroPx
+import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.UmRouting.destinationList
 import com.ustadmobile.util.UmRouting.findDestination
 import com.ustadmobile.util.UmRouting.umRouter
 import com.ustadmobile.util.UmStyles
 import com.ustadmobile.util.UmStyles.appContainer
+import com.ustadmobile.util.UmStyles.fab
 import com.ustadmobile.util.UmStyles.mainComponentContentArea
 import com.ustadmobile.util.UmStyles.mainComponentRootDiv
 import com.ustadmobile.util.UmStyles.mainComponentSearch
@@ -38,6 +43,7 @@ interface MainProps: RProps {
     var initialView: String
 }
 
+
 class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props){
 
     private var activeAccount: UmAccount? = null
@@ -50,7 +56,14 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     private var showSearch: Boolean = false
 
+    private var showFab: Boolean = false
+
+    private var fabIcon: String = "edit"
+
+    private var fabLabel: String = ""
+
     private val impl : UstadMobileSystemImpl by instance()
+
 
     override fun componentWillMount() {
         val dest = findDestination(props.initialView)
@@ -59,6 +72,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
             responsiveDrawerOpen = true
             showSearch = dest?.showSearch?:false
         }
+        StateManager.subscribe(stateChangeListener)
     }
 
     override fun RBuilder.render() {
@@ -74,6 +88,14 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                 styledDiv {
                     css { +mainComponentRootDiv }
 
+                    /*//Loading indicator
+                    mLinearProgress {
+                        css(progressIndicator)
+                        attrs {
+                            color = if(UmReactUtil.isDarkModeEnabled()) MLinearProgressColor.secondary
+                            else MLinearProgressColor.primary
+                        }
+                    }*/
                     mAppBar(position = MAppBarPosition.absolute) {
                         css {
                             position = Position.absolute
@@ -144,7 +166,6 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                         }
                     }
 
-
                     // Main content area, this div holds the contents
                     styledDiv {
                         css {
@@ -168,8 +189,23 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                             umRouter()
                         }
                     }
+
+                    if(showFab){
+                        mFab(fabIcon, fabLabel.toUpperCase(), color = MColor.secondary) {
+                            css(fab)
+                        }
+                    }
                 }
+
             }
+        }
+    }
+
+    private val stateChangeListener : (UmAppState) -> Unit = {
+        setState {
+            showFab = it.state.showFab
+            fabLabel = impl.getString(if(it.state.isDetailScreen) MessageID.edit else MessageID.content , this)
+            fabIcon = if(it.state.isDetailScreen) "edit" else "add"
         }
     }
 

@@ -1,6 +1,5 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.list.mListItemIcon
 import com.ccfraser.muirwik.components.list.mListItemText
 import com.ccfraser.muirwik.components.mTypography
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
@@ -11,6 +10,8 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
+import com.ustadmobile.model.statemanager.UmAppBar
+import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.UmReactUtil.queryParams
 import kotlinx.css.RuleSet
 import kotlinx.css.marginRight
@@ -94,9 +95,12 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         TODO("Not yet implemented")
     }
 
-    override var title: String?
-        get() = TODO("Not yet implemented")
-        set(value) {}
+    override var title: String? = null
+        get() = field
+        set(value) {
+            field = value
+            StateManager.dispatch(UmAppBar(title = value))
+        }
 
     override var editOptionVisible: Boolean
         get() = TODO("Not yet implemented")

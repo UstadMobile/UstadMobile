@@ -37,7 +37,7 @@ object UmRouting {
             switch{
                 route("/", destinationList.first().component, exact = true)
                 destinationList.forEach {
-                    route("/${it.view}", it.component, exact = true)
+                    route("/${it.view}", it.component, exact = false)
                 }
             }
         }

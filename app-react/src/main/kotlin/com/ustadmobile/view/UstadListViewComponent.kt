@@ -10,13 +10,14 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
+import com.ustadmobile.model.statemanager.UmFab
+import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.UmStyles
 import com.ustadmobile.util.UmStyles.horizontalList
 import com.ustadmobile.util.UmStyles.listContainer
 import com.ustadmobile.util.UmStyles.listCreateNewContainer
 import com.ustadmobile.util.UmStyles.listCreateNewLabel
 import com.ustadmobile.util.UmStyles.listItemCreateNewDiv
-import com.ustadmobile.util.UmViewMergerHelper
 import kotlinx.browser.window
 import kotlinx.css.RuleSet
 import react.RBuilder
@@ -31,8 +32,6 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
     UstadListView<RT, DT>, OnSortOptionSelected {
 
     protected abstract val displayTypeRepo: Any?
-
-    protected val viewMergerHelper = UmViewMergerHelper()
 
     protected abstract val listPresenter: UstadListPresenter<*, in DT>?
 
@@ -53,7 +52,9 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
                         alignItems = MListItemAlignItems.flexStart
                         button = true
                         divider = true
-                        onClick = { listPresenter?.handleClickCreateNewFab() }
+                        onClick = {
+                            StateManager.dispatch(UmFab(showFab = true, isDetailScreen = false))
+                            listPresenter?.handleClickCreateNewFab() }
                     }
                     renderHeaderView() ?: styledDiv {
                         css(listItemCreateNewDiv)
