@@ -647,7 +647,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
         statementContentEntryUid = khanclass1.contentEntryUid
         resultSuccess = StatementEntity.RESULT_FAILURE
         timestamp = DateTime(2019, 6, 11).unixMillisLong
-        statementId = randomUuid()
+        statementId = randomUuid().toString()
         contentEntryRoot = true
         statementUid = statementDao.insert(this)
     }

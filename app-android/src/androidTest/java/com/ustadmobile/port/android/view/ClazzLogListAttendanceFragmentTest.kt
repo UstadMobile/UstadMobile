@@ -43,11 +43,6 @@ class ClazzLogListAttendanceFragmentTest : TestCase() {
     @Rule
     val dbRule = UmAppDatabaseAndroidClientRule(account = UmAccount(7L, "bond", "", "http://localhost"))
 
-    @After
-    fun tearDown() {
-        UstadMobileSystemImpl.instance.navController = null
-    }
-
     @AdbScreenRecord("Given class is scheduled, when user clicks on a day then should navigate to record attendance")
     @Test
     fun givenClazzUidWithExistingLog_whenClickOnClazzLog_thenShouldNavigateToClazzEditAttendance() {
