@@ -359,10 +359,10 @@ private fun groupBy(value: Int, queryType: Int, dbType: Int): String {
             }
             when (dbType) {
                 DoorDbType.SQLITE -> {
-                    "strftime('%d %m %Y', $field/1000, 'unixepoch') "
+                    "strftime('%d/%m/%Y', $field/1000, 'unixepoch') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "TO_CHAR(TO_TIMESTAMP($field/1000), 'DD MM YYYY') "
+                    "TO_CHAR(TO_TIMESTAMP($field/1000), 'DD/MM/YYYY') "
                 }
                 else -> {
                     ""
@@ -386,10 +386,10 @@ private fun groupBy(value: Int, queryType: Int, dbType: Int): String {
             when (dbType) {
                 DoorDbType.SQLITE -> {
                     // -5 days to get the date on monday
-                    "strftime('%d %m %Y', $field/1000, 'unixepoch', 'weekday 6', '-5 day') "
+                    "strftime('%d/%m/%Y', $field/1000, 'unixepoch', 'weekday 6', '-5 day') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP($field/1000))), 'DD MM YYYY') "
+                    "TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP($field/1000))), 'DD/MM/YYYY') "
                 }
                 else -> {
                     ""
@@ -412,10 +412,10 @@ private fun groupBy(value: Int, queryType: Int, dbType: Int): String {
 
             when (dbType) {
                 DoorDbType.SQLITE -> {
-                    "strftime('%m %Y', $field/1000, 'unixepoch') "
+                    "strftime('%m/%Y', $field/1000, 'unixepoch') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "TO_CHAR(TO_TIMESTAMP($field/1000), 'MM YYYY') "
+                    "TO_CHAR(TO_TIMESTAMP($field/1000), 'MM/YYYY') "
                 }
                 else -> {
                     ""
