@@ -89,8 +89,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
     val tmpRootDir = Files.createTempDirectory("upload").toFile()
 
-    val autoCreateDb = environment.config.propertyOrNull("ktor.ustad.autocreatedb")?.getString()?.toBoolean() ?: false
-    println("auto create = $autoCreateDb")
     val dbMode = dbModeOverride ?:
         environment.config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
     val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
@@ -138,10 +136,15 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             val dbHostName = context.identifier(dbMode, singletonDbName)
             val appConfig = environment.config
             InitialContext().bindHostDatabase(dbHostName, Properties().apply {
-                setProperty("driver", appConfig.property("ktor.database.driver").getString())
-                setProperty("url", appConfig.property("ktor.database.url").getString())
-                setProperty("user", appConfig.property("ktor.database.user").getString())
-                setProperty("password", appConfig.property("ktor.database.password").getString())
+                setProperty("driver",
+                    appConfig.propertyOrNull("ktor.database.driver")?.getString() ?: "org.sqlite.JDBC")
+                setProperty("url",
+                    appConfig.propertyOrNull("ktor.database.url")?.getString()
+                        ?: "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+                setProperty("user",
+                    appConfig.propertyOrNull("ktor.database.user")?.getString() ?: "")
+                setProperty("password",
+                    appConfig.propertyOrNull("ktor.database.password")?.getString() ?: "")
             })
 
             UmAppDatabase.getInstance(Any(), dbHostName)

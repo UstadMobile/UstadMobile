@@ -28,7 +28,6 @@ import org.junit.Assert.*
 import org.kodein.di.*
 import org.kodein.di.ktor.di
 
-@ExperimentalStdlibApi
 class DownloadJobPreparerTest {
 
     @JvmField

@@ -22,7 +22,6 @@ import org.junit.Test
 
 
 @AdbScreenRecord("Workspace screen Test")
-@ExperimentalStdlibApi
 class SiteEnterLinkFragmentTest : TestCase(){
 
     @JvmField
