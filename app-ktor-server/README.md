@@ -22,7 +22,7 @@ cp src/jvmMain/resources/application.conf ./
 
 ```
 cd app-ktor-server
-java -jar build/libs/app-ktor-server-all.jar
+java -jar build/libs/ustad-server-all.jar -config=application.conf
 ```
 
 The port can be set using the command line as per KTOR server standard options, see
@@ -31,3 +31,4 @@ The port can be set using the command line as per KTOR server standard options, 
 The application can be debugged using the same as any other standalone JAR using JWDP. In Android
 Studio or IntelliJ, Go to  run, debug, configurations and then add a "remote" configuration.
 
+See [INSTALL.md](../INSTALL.md) for recommendations on production configuration.
