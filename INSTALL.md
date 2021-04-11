@@ -87,8 +87,10 @@ ktor {
         # database url here.
         url = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000"
 
-        user =
-        password =
+        # Enter the Postgres database username and password here if using Postgres. If using SQLite,
+        # these can be left blank
+        user = ""
+        password = ""
     }
 
     security {
