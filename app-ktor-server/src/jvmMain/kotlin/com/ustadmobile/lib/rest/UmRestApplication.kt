@@ -18,8 +18,8 @@ import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
+import com.ustadmobile.lib.rest.ext.bindHostDatabase
 import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
@@ -39,6 +39,7 @@ import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
 import java.io.File
 import java.nio.file.Files
+import java.util.*
 import javax.naming.InitialContext
 
 const val TAG_UPLOAD_DIR = 10
@@ -134,14 +135,16 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<Gson>() with singleton { Gson() }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
-            val dbName = context.identifier(dbMode, singletonDbName)
+            val dbHostName = context.identifier(dbMode, singletonDbName)
+            val appConfig = environment.config
+            InitialContext().bindHostDatabase(dbHostName, Properties().apply {
+                setProperty("driver", appConfig.property("ktor.database.driver").getString())
+                setProperty("url", appConfig.property("ktor.database.url").getString())
+                setProperty("user", appConfig.property("ktor.database.user").getString())
+                setProperty("password", appConfig.property("ktor.database.password").getString())
+            })
 
-            if(autoCreateDb) {
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName,
-                        isPrimary = true, sqliteDir = instance(tag = TAG_CONTEXT_DATA_ROOT))
-            }
-
-            UmAppDatabase.getInstance(Any(), dbName)
+            UmAppDatabase.getInstance(Any(), dbHostName)
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {
