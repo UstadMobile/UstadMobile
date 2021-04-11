@@ -1,7 +1,6 @@
 
 package com.ustadmobile.core.controller
-
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -10,13 +9,10 @@ import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.LanguageEditView
 import com.ustadmobile.core.view.LanguageListView
-import com.ustadmobile.core.view.LeavingReasonEditView
-import com.ustadmobile.core.view.LeavingReasonListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.lib.db.entities.Language
-import com.ustadmobile.lib.db.entities.LeavingReason
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
