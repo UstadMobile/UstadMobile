@@ -2,7 +2,7 @@
 
 The Ustad Mobile server runs as a standalone Java JAR file (powered by KTOR and Netty) It. can be
 connected to an SQLite or PostgreSQL database. It is recommended to use Apache or Nginx as a proxy.
-The server should run fine on any JVM platform, but has been tested on most extensively on Linux
+The server should run fine on any JVM platform, but has been tested most extensively on Linux
 (Ubuntu 20.04).
 
 ## Create a user, directory, and copy files
@@ -20,11 +20,13 @@ $ cp /my/Download/ustad-server-all.jar /home/ustad/ustad-server-all.jar
 $ apt-get install openjdk-8-jre
 ```
 
-## Install HTTPS Certificate
+## Install HTTPS Certificate (recommended)
 
-It is strongly recommended to use https and HTTP2. Install a certificate for your server using
-[EFF Certbot](https://certbot.eff.org/). Request a certificate as follows (turn off any server
-running on port 80 when requesting the certificate).
+It is strongly recommended to use https and HTTP2 in production. Install a certificate for your
+server using [EFF Certbot](https://certbot.eff.org/).
+
+Request a certificate as follows if a certificate has not already been generated. Turn off any
+ server running on port 80 when requesting the certificate.
 
 ```
 export DOMAIN=mydomain.com
@@ -48,15 +50,56 @@ Unzip the example config file and edit it as required:
 unzip ustad-server-all.jar application.conf
 ```
 
-Edit the server config file as required:
+Edit the server config file as required to enable HTTPS/SSL and set the database url:
 ```
 ktor {
+    deployment {
+        port = 8087
+
+        # Uncomment this to enable SSL. If this is enabled, a certificate must be provided (see
+        # security section below)
+        sslPort = 8889
+
+    }
+
+    application {
+        modules = [ com.ustadmobile.lib.rest.UmRestApplicationKt.umRestApplication ]
+    }
+
+    ustad {
+        # dbmode can be singleton or virtualhost .  If the dbmode is virtualhost, then multiple
+        # instances can run using the same server.
+        dbmode = singleton
+        datadir = data
+    }
+
+    database {
+        #Change to org.postgresql.Driver to use Postgres. Postgres is recommended for production
+        #use
+        driver = "org.sqlite.JDBC"
+
+        # If you are using the virtualhost dbmode, then you will need to add the (hostname)
+        # variable to the database url e.g.
+        #   url=jdbc:postgres:///ustad_(hostname)
+        # Any non alphanumeric characters in hostname (e.g. ., -, etc) will be replaced with _
+        #
+        # If you are simply running a single instance (e.g. no virtual hosting), just enter the JDBC
+        # database url here.
+        url = "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000"
+
+        user =
+        password =
+    }
+
     security {
+        # It is strongly recommended to configure SSL here so the app can use HTTP2. See INSTALL.md
+        # for instructions. This applies even when the app is used behind a reverse proxy (because
+        # HTTP2 defacto requires SSL).
         ssl {
-            keyStore = /etc/letsencrypt/live/mydomain.com/keystore.jks
-            keyAlias = myalias
-            keyStorePassword = password
-            privateKeyPassword = password
+             keyStore = /etc/letsencrypt/live/mydomain.com/keystore.jks
+             keyAlias = myalias
+             keyStorePassword = password
+             privateKeyPassword = password
         }
     }
 }
@@ -94,3 +137,5 @@ RequestReadTimeout body=10,MinRate=1000
 
 Open the Ustad app, and enter the address of your site. The admin password will be saved to
 data/singleton/admin.txt
+
+You can now login to the app with the username admin and the password contained in admin.txt
