@@ -8,13 +8,15 @@ Supported content formats:
 * [EPUB content](http://idpf.org/epub): Anything you can do with HTML5 can be in EPUB (video,
    interactive quizzes, etc).
 * [Experience API](http://www.tincanapi.com): TinCan API Zip file (containing tincan.xml)
+* [H5P](https://www.h5p.org): H5P interactive content
 * MP4, WEBM video
 
 Ustad Mobile is licensed under the AGPLv3 license: please see the LICENSE file for details.
 
-## Installing (self-hosting)
+## Installing on a server (self-hosting)
 
-See [INSTALL.md](INSTALL.md)
+See [app-ktor-server](app-ktor-server/) for instructions on building the server JAR. Then see
+[INSTALL.md](INSTALL.md) for instructions on running the server.
 
 ## Contributing
 
@@ -42,6 +44,7 @@ This multi-module Gradle project built using Kotlin Multiplatform. It builds for
 Code is contained (mostly) in the following modules:
 * [core](core/) : Contains presenters, view interfaces, and core business logic.
 * [sharedse](sharedse/): Contains implementation for operating systems with a disk
+* [app-ktor-server](app-ktor-server/): Contains the HTTP rest server (implemented using KTOR)
 * [app-android](app-android/): Contains Android implementation, forms the basis of the app in
   app-android-launcher but can also be used as a library in other apps.
 * [app-android-launcher/](app-android-launcher/): Standalone app launcher that uses app-android.
