@@ -170,7 +170,7 @@ class ContentEntryEdit2Presenter(context: Any,
 
                             client = defaultHttpClient().post<HttpStatement>() {
                                 url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
-                                        "/import/downloadLink/"))
+                                        "/import/downloadLink"))
                                 parameter("parentUid", parentEntryUid)
                                 parameter("scraperType", view.entryMetaData?.scraperType)
                                 parameter("url", view.entryMetaData?.uri)
