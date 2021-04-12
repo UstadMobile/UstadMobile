@@ -9,7 +9,7 @@ import com.toughra.ustadmobile.R
 import com.ustadmobile.port.android.view.StatementListViewFragment
 import org.hamcrest.Matcher
 
-object SessionDetailListScreen : KScreen<SessionDetailListScreen>() {
+object StatementListScreen : KScreen<StatementListScreen>() {
 
     override val layoutId: Int?
         get() = R.layout.fragment_list
