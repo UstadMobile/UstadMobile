@@ -45,21 +45,6 @@ abstract class UstadMobileSystemCommon {
     internal var lastDestination: LastGoToDest? = null
 
     /**
-     * Wrapper to retrieve preference keys from the system Manifest.
-     *
-     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
-     * On J2ME: uses the jad file
-     *
-     * @param key The key to lookup
-     * @param context System context object
-     *
-     * @return The value of the manifest preference key if found, null otherwise
-     */
-    @JsName("getManifestPreference")
-    abstract fun getManifestPreference(key: String, context: Any): String?
-
-
-    /**
      * Return absolute path of the application setup file. Asynchronous.
      *
      * @param context System context
@@ -73,8 +58,7 @@ abstract class UstadMobileSystemCommon {
 
     /**
      * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder, the path of which is set by the manifest preference
-     * com.sutadmobile.core.appconfig .
+     * from the assets folder.
      *
      * @param key The config key to lookup
      * @param defaultVal The default value to return if the key is not found
@@ -84,23 +68,6 @@ abstract class UstadMobileSystemCommon {
      */
     @JsName("getAppConfigString")
     abstract fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
-
-
-    /**
-     * Wrapper to retrieve preference keys from the system Manifest.
-     *
-     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
-     *
-     * @param key The key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context System context object
-     *
-     * @return The value of the manifest preference key if found, otherwise the default value
-     */
-    open fun getManifestPreference(key: String, defaultVal: String, context: Any): String {
-        val `val` = getManifestPreference(key, context)
-        return `val` ?: defaultVal
-    }
 
 
     /**
@@ -349,10 +316,6 @@ abstract class UstadMobileSystemCommon {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context)
     }
 
-    fun scheduleChecks(context: Any) {
-
-    }
-
 
     companion object {
         private val MIME_TYPES = mapOf("image/jpg" to "jpg", "image/jpg" to "jpg",
@@ -394,11 +357,6 @@ abstract class UstadMobileSystemCommon {
         const val SHARED_RESOURCE = 4
 
         const val ARG_REFERRER = "ref"
-
-        /**
-         * As per Android Intent.FLAG_ACTIVITY_SINGLE_TOP
-         */
-        const val GO_FLAG_SINGLE_TOP = 536870912
 
         /**
          * As per Android Intent.FLAG_CLEAR_TOP

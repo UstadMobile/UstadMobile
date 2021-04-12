@@ -39,6 +39,8 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
 
     private val contentEntryOpener: ContentEntryOpener by di.on(accountManager.activeAccount).instance()
 
+    private val systemImpl: UstadMobileSystemImpl by di.instance()
+
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
@@ -63,8 +65,8 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
 
             } catch (e: Exception) {
                 view.runOnUiThread(Runnable {
-                    view.showSnackBar(UstadMobileSystemImpl.instance
-                            .getString(MessageID.error_opening_file, context))
+                    view.showSnackBar(
+                        systemImpl.getString(MessageID.error_opening_file, context))
                 })
             }
         }
@@ -72,8 +74,6 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
 
     @JsName("handleUrlLinkToContentEntry")
     fun handleUrlLinkToContentEntry(sourceUrl: String) {
-        val impl = UstadMobileSystemImpl.instance
-
         val dest = sourceUrl.replace("content-detail?",
                 ContentEntryDetailView.VIEW_NAME + "?")
         val params = UMFileUtil.parseURLQueryString(dest)
@@ -88,7 +88,7 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
                             noIframe = arguments[ARG_NO_IFRAMES]?.toBoolean() ?: false)
                 } catch (e: Exception) {
                     if (e is NoAppFoundException) {
-                        view.showErrorWithAction(impl.getString(MessageID.no_app_found, context),
+                        view.showErrorWithAction(systemImpl.getString(MessageID.no_app_found, context),
                                 MessageID.get_app,
                                 e.mimeType ?: "")
                     } else {

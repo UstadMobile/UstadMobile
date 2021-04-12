@@ -41,8 +41,6 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
 
     private var mPresenter: PersonDetailPresenter? = null
 
-    private var canManageAccount: Boolean = false
-
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
@@ -92,15 +90,13 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
     override var changePasswordVisible: Boolean = false
         set(value) {
             field = value
-            mBinding?.changePasswordVisibility = if(value && canManageAccount)
-                View.VISIBLE else View.GONE
+            mBinding?.changePasswordVisibility = if(value) View.VISIBLE else View.GONE
         }
 
     override var showCreateAccountVisible: Boolean = false
         set(value) {
             field = value
-            mBinding?.createAccountVisibility = if(value && canManageAccount)
-                View.VISIBLE else View.GONE
+            mBinding?.createAccountVisibility = if(value) View.VISIBLE else View.GONE
         }
 
     private var clazzesLiveData: LiveData<PagedList<ClazzEnrolmentWithClazzAndAttendance>>? = null
@@ -122,8 +118,6 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
         val rootView: View
 
         val impl: UstadMobileSystemImpl by instance()
-        canManageAccount = impl.getAppConfigBoolean(AppConfig.KEY_ALLOW_ACCOUNT_MANAGEMENT,
-                requireContext())
         clazzEnrolmentWithClazzRecyclerAdapter = ClazzEnrolmentWithClazzRecyclerAdapter(
             null)
         rolesAndPermissionsRecyclerAdapter = EntityRoleRecyclerAdapter(false, this)
