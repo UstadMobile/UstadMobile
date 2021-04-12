@@ -7,7 +7,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.util.KmpUuid
