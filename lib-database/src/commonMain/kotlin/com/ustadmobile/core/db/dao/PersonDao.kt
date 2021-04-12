@@ -9,7 +9,6 @@ import androidx.room.Update
 import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.door.util.KmpUuid
 import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword

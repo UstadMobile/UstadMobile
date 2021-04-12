@@ -9,7 +9,7 @@ import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.door.util.KmpUuid
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -63,7 +63,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
         containerEntryDao = db.containerEntryDao
         containerDao = db.containerDao
         contentEntryDao = db.contentEntryDao
-        contextRegistration = KmpUuid.randomUUID().toString()
+        contextRegistration = randomUuid().toString()
 
         entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()

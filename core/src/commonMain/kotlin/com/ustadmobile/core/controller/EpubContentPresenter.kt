@@ -78,7 +78,7 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.ContainerMounter.Companion.FILTER_MODE_EPUB
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
-import com.ustadmobile.door.util.KmpUuid
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
@@ -145,7 +145,7 @@ class EpubContentPresenter(context: Any,
         super.onCreate(savedState)
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 100
         contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
-        contextRegistration = KmpUuid.randomUUID().toString()
+        contextRegistration = randomUuid().toString()
         view.progressValue = -1
         view.progressVisible = true
         mountedEndpoint = accountManager.activeAccount.endpointUrl
