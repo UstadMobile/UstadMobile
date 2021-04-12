@@ -13,23 +13,22 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.model.statemanager.GlobalStateSlice
 import com.ustadmobile.model.statemanager.HashState
-import com.ustadmobile.util.Constants.drawerWidth
-import com.ustadmobile.util.Constants.fullWidth
-import com.ustadmobile.util.Constants.placeHolderImage
-import com.ustadmobile.util.Constants.zeroPx
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.appContainer
 import com.ustadmobile.util.CssStyleManager.fab
 import com.ustadmobile.util.CssStyleManager.mainComponentContentArea
-import com.ustadmobile.util.CssStyleManager.mainComponentRootDiv
+import com.ustadmobile.util.CssStyleManager.mainComponentContainer
 import com.ustadmobile.util.CssStyleManager.mainComponentSearch
 import com.ustadmobile.util.CssStyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.RouteManager.destinationList
 import com.ustadmobile.util.RouteManager.findDestination
-import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.RouteManager.getPathName
-import com.ustadmobile.util.RouteManager.createRoutes
+import com.ustadmobile.util.RouteManager.renderRoutes
 import com.ustadmobile.util.StateManager
+import com.ustadmobile.util.UmReactUtil.drawerWidth
+import com.ustadmobile.util.UmReactUtil.fullWidth
+import com.ustadmobile.util.UmReactUtil.placeHolderImage
+import com.ustadmobile.util.UmReactUtil.zeroPx
 import kotlinext.js.jsObject
 import kotlinx.browser.window
 import kotlinx.css.*
@@ -40,7 +39,6 @@ import react.RBuilder
 import react.RProps
 import react.RState
 import react.setState
-import styled.StyleSheet
 import styled.css
 import styled.styledDiv
 
@@ -115,7 +113,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                 }
 
                 styledDiv {
-                    css { +mainComponentRootDiv }
+                    css { +mainComponentContainer }
 
                     /*//Loading indicator
                     mLinearProgress {
@@ -184,14 +182,14 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                         mDrawer(responsiveDrawerOpen, MDrawerAnchor.left, MDrawerVariant.temporary, paperProps = p,
                             onClose = { setState { responsiveDrawerOpen = !responsiveDrawerOpen }}) {
                             appBarSpacer()
-                            drawerItems()
+                            renderDrawerItems()
                         }
                     }
 
                     mHidden(smDown = true, implementation = MHiddenImplementation.css) {
                         mDrawer(true, MDrawerAnchor.left, MDrawerVariant.permanent, paperProps = p) {
                             appBarSpacer()
-                            drawerItems()
+                            renderDrawerItems()
                         }
                     }
 
@@ -215,7 +213,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                                 padding(2.spacingUnits)
                                 backgroundColor = Color(theme.palette.background.default)
                             }
-                            createRoutes()
+                            renderRoutes()
                         }
                     }
 
@@ -233,22 +231,22 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
         }
     }
 
-    private fun RBuilder.drawerItems(fullWidth: Boolean = false) {
+    private fun RBuilder.renderDrawerItems(fullWidth: Boolean = false) {
         themeContext.Consumer { theme ->
             mList {
                 css {
                     backgroundColor = Color(theme.palette.background.paper)
                     width = if (fullWidth) LinearDimension.auto else drawerWidth
                 }
-
-                destinationList.filter { it.icon != null }.forEach { item ->
-                    item.icon?.let {
-                        mListItemWithIcon(it, impl.getString(item.labelId, this), divider = item.divider , onClick = {
+                destinationList.filter { it.icon != null }.forEach { destination ->
+                    destination.icon?.let {
+                        mListItemWithIcon(it, impl.getString(destination.labelId, this),
+                            divider = destination.divider , onClick = {
                             setState {
-                                showSearch = item.showSearch
-                                currentTile = impl.getString(item.labelId, this)
+                                showSearch = destination.showSearch
+                                currentTile = impl.getString(destination.labelId, this)
                             }
-                            impl.go(item.view, mapOf(),this)
+                            impl.go(destination.view, destination.args,this)
                         })
                     }
                 }
@@ -258,13 +256,10 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     private fun RBuilder.appBarSpacer() {
         themeContext.Consumer { theme ->
-            val themeStyles = object : StyleSheet("ComponentStyles", isStatic = true) {
-                val toolbar by css {
+            styledDiv {
+                css{
                     toolbarJsCssToPartialCss(theme.mixins.toolbar)
                 }
-            }
-            styledDiv {
-                css(themeStyles.toolbar)
             }
             mDivider {  }
         }

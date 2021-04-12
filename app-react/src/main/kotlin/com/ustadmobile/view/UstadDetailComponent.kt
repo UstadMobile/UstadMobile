@@ -16,6 +16,8 @@ abstract class UstadDetailComponent<T: Any>(mProps: RProps) : UmBaseComponent<RP
 
     abstract val detailPresenter: UstadDetailPresenter<*, *>?
 
+    override fun componentDidMount() {}
+
     override var editButtonMode: EditButtonMode = EditButtonMode.GONE
         get() = field
         set(value) {
@@ -24,6 +26,7 @@ abstract class UstadDetailComponent<T: Any>(mProps: RProps) : UmBaseComponent<RP
                 label = systemImpl.getString(MessageID.edit, this),
                     icon = "edit", onClick = ::onFabClick))
         }
+
 
     private fun onFabClick(event: Event){
         detailPresenter?.handleClickEdit()

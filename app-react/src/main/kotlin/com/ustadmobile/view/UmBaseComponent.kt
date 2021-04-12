@@ -6,6 +6,8 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.model.statemanager.AppBarState
+import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.StateManager.getCurrentState
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Runnable
@@ -27,7 +29,7 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
 
     private val lifecycleStatus = atomic(0)
 
-    override fun componentWillMount() {
+    override fun componentDidMount() {
         for(observer in lifecycleObservers){
             observer.onStart(this)
         }
@@ -43,7 +45,7 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
         get() = field
         set(value) {
             field = value
-            //StateManager.dispatch(UmAppBar(loading = loading))
+            StateManager.dispatch(AppBarState(loading = loading))
         }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {

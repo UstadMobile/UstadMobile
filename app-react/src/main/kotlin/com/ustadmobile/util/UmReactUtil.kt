@@ -1,10 +1,21 @@
 package com.ustadmobile.util
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import kotlinx.browser.window
 import kotlinx.coroutines.await
+import kotlinx.css.pct
+import kotlinx.css.px
 import kotlin.js.Promise
 
 object UmReactUtil {
+
+    val drawerWidth = 240.px
+
+    val zeroPx = 0.px
+
+    var fullWidth = 100.pct
+
+    var placeHolderImage = "https://www.openhost.co.za/download/bootmin/img/avatar_lg.jpg"
 
     /**
      * Check if the device theme setting is current on dark mode.
@@ -14,7 +25,7 @@ object UmReactUtil {
         return window.matchMedia("(prefers-color-scheme: dark)").matches
     }
 
-    suspend fun <T> loadLocalFiles(fileName: String) : T{
+    suspend fun <T> loadMapFromLocalFile(fileName: String) : T{
         val res = (window.fetch(fileName) as Promise<dynamic>).await()
         val data = (res.json() as Promise<dynamic>).await()
         return (js("Object.entries") as (dynamic) -> Array<Array<Any?>>)
@@ -28,5 +39,9 @@ object UmReactUtil {
         return (js("Object.entries") as (dynamic) -> Array<Array<T?>>)
             .invoke(data)
             .map { entry -> entry[1] }.toList() as T
+    }
+
+    fun formatString(id: Int,text: String?,impl: UstadMobileSystemImpl,separator: String? = ":"): String{
+        return "${impl.getString(id,this)}$separator $text"
     }
 }

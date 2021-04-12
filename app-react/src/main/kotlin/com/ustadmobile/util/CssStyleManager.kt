@@ -20,6 +20,10 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
 
     private val theme = StateManager.getCurrentState().theme!!
 
+    val defaultMarginTop  by css{
+        marginTop = 16.px
+    }
+
     val appContainer by css {
         flexGrow = 1.0
         width = 100.pct
@@ -117,7 +121,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         }
     }
 
-    val listContainer by css {
+    val ustadListViewComponentContainer by css {
         //display = Display.inlineFlex
         padding(1.spacingUnits)
     }
@@ -159,8 +163,25 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     }
 
     val entryDetailComponentEntryImage by css {
-        width = LinearDimension("40%")
+        width = LinearDimension("100%")
         height = LinearDimension.initial
+    }
+
+    val entryDetailComponentEntryImageAndButtonContainer by css {
+        width = LinearDimension("40%")
+        display = Display.flex
         marginRight = LinearDimension("3%")
+        flexDirection = FlexDirection.column
+    }
+
+    val entryDetailComponentEntryExtraInfo by css {
+        width = LinearDimension("57%")
+        flexDirection = FlexDirection.column
+    }
+
+    val entryDetailComponentLanguageList by css{
+        display = Display.flex
+        justifyContent = JustifyContent.start
+        flexWrap = FlexWrap.wrap
     }
 }

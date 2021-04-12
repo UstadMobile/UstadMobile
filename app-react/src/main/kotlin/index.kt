@@ -13,7 +13,7 @@ fun main() {
     window.onload = {
         render(document.getElementById("root")) {
             provider(StateManager.createStore()){
-                mThemeProvider(ThemeManager.getUmTheme()) {
+                mThemeProvider(ThemeManager.createAppTheme()) {
                     showPreload()
                 }
             }

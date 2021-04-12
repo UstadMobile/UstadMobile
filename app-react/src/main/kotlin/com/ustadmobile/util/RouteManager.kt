@@ -3,9 +3,12 @@ package com.ustadmobile.util
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.model.UmReactDestination
 import com.ustadmobile.view.ContentEntryDetailComponent
 import com.ustadmobile.view.ContentEntryListComponent
+import com.ustadmobile.view.PlaceHolderComponent
 import kotlinx.browser.window
 import org.w3c.dom.url.URL
 import react.RBuilder
@@ -19,21 +22,20 @@ import react.router.dom.switch
  */
 object RouteManager {
 
-    private var queryParts = window.location.hash.split("?")
-
     val destinationList = listOf(
         UmReactDestination("library_books", MessageID.content, ContentEntryList2View.VIEW_NAME,
-            ContentEntryListComponent::class, true),
+            ContentEntryListComponent::class, true,
+            args = mapOf(ARG_PARENT_ENTRY_UID to MASTER_SERVER_ROOT_ENTRY_UID.toString())),
         UmReactDestination("school", MessageID.schools,SchoolListView.VIEW_NAME,
-            ContentEntryDetailComponent::class),
-        UmReactDestination("people", MessageID.classes,SchoolListView.VIEW_NAME,
-            ContentEntryDetailComponent::class),
+            PlaceHolderComponent::class),
+        UmReactDestination("people", MessageID.classes,ClazzList2View.VIEW_NAME,
+            PlaceHolderComponent::class),
         UmReactDestination("person", MessageID.people, PersonListView.VIEW_NAME,
-            ContentEntryDetailComponent::class),
+            PlaceHolderComponent::class),
         UmReactDestination("pie_chart", MessageID.reports, ReportListView.VIEW_NAME,
-            ContentEntryDetailComponent::class, divider = true),
+            PlaceHolderComponent::class, divider = true),
         UmReactDestination("settings", MessageID.settings, SettingsView.VIEW_NAME,
-            ContentEntryDetailComponent::class),
+            PlaceHolderComponent::class),
         UmReactDestination( labelId= MessageID.accounts, view = AccountListView.VIEW_NAME,
              component = ContentEntryDetailComponent::class),
         UmReactDestination(view = ContentEntry2DetailView.VIEW_NAME,
@@ -68,7 +70,7 @@ object RouteManager {
     /**
      * Create routes based on all defined destinations
      */
-    fun RBuilder.createRoutes() {
+    fun RBuilder.renderRoutes() {
         hashRouter {
             switch{
                 destinationList.forEach {

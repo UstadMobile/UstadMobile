@@ -7,13 +7,14 @@ import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
+import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.model.statemanager.GlobalStateSlice
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.horizontalList
-import com.ustadmobile.util.CssStyleManager.listContainer
+import com.ustadmobile.util.CssStyleManager.ustadListViewComponentContainer
 import com.ustadmobile.util.CssStyleManager.listCreateNewContainer
 import com.ustadmobile.util.CssStyleManager.listCreateNewLabel
 import com.ustadmobile.util.CssStyleManager.listItemCreateNewDiv
@@ -31,50 +32,41 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
 
     protected abstract val listPresenter: UstadListPresenter<*, in DT>?
 
-    private var viewContainerToBeRendered: ReactElement? = null
+    private val stateChangeListener: (GlobalStateSlice) -> Unit
+        get() = {
+            if(it.state.view == ContentEntryList2View.VIEW_NAME){
+                onComponentRefreshed()
+            }
+        }
 
-    protected abstract val stateChangeListener : (GlobalStateSlice) -> Unit
 
-    override fun componentWillMount() {
+    override fun componentDidMount() {
         StateManager.subscribe(stateChangeListener)
     }
 
     override fun RBuilder.render() {
-        viewContainerToBeRendered
-    }
-
-    protected fun RBuilder.renderViews(){
-        viewContainerToBeRendered = styledDiv {
-            css(listContainer)
+        styledDiv {
+            css(ustadListViewComponentContainer)
             mList {
-                css(styleList() ?: horizontalList)
+                css{ +(styleList() ?: horizontalList) }
                 mListItem {
                     css(listCreateNewContainer)
                     attrs {
                         alignItems = MListItemAlignItems.flexStart
                         button = true
                         divider = true
-                        onClick = {
-                            listPresenter?.handleClickCreateNewFab() }
+                        onClick = { listPresenter?.handleClickCreateNewFab() }
                     }
-                    renderHeaderView() ?: styledDiv {
-                        css(listItemCreateNewDiv)
-                        mListItemIcon("add","${CssStyleManager.name}-listCreateNewIcon")
-                        styledP {
-                            css(listCreateNewLabel)
-                            +systemImpl.getString(MessageID.add_new, this)
-                        }
-                    }
+                    renderHeaderView()
                 }
+
                 getData(0,9).forEach { entry ->
                     mListItem {
                         attrs {
                             alignItems = MListItemAlignItems.flexStart
                             button = true
                             divider = true
-                            onClick = {
-                                handleClickEntry(entry)}
-                        }
+                            onClick = { handleClickEntry(entry)} }
                         renderListItem(entry)
                     }
                 }
@@ -82,14 +74,24 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
         }
     }
 
+    open fun RBuilder.renderListItem(item: DT){}
 
-    abstract fun RBuilder.renderListItem(item: DT): MutableList<ReactElement>?
-
-    abstract fun RBuilder.renderHeaderView(): ReactElement?
+    open fun RBuilder.renderHeaderView(){
+        styledDiv {
+            css(listItemCreateNewDiv)
+            mListItemIcon("add","${CssStyleManager.name}-listCreateNewIcon")
+            styledP {
+                css(listCreateNewLabel)
+                +systemImpl.getString(MessageID.add_new, this)
+            }
+        }
+    }
 
     abstract fun handleClickEntry(entry: DT)
 
     abstract fun styleList(): RuleSet?
+
+    abstract fun onComponentRefreshed()
 
     abstract fun getData(offset: Int, limit: Int): List<DT>
 
@@ -101,7 +103,7 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
     override var selectionOptions: List<SelectionOption>? = null
         get() = field
         set(value) {
-            //Handle section option stuffs here
+            //Handle selection option stuffs here
             field = value
         }
 
