@@ -76,7 +76,9 @@ import java.util.concurrent.TimeUnit
 open class UstadApp : BaseUstadApp(), DIAware {
 
     val diModule = DI.Module("UstadApp-Android") {
-        bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl.instance }
+        bind<UstadMobileSystemImpl>() with singleton {
+            UstadMobileSystemImpl.instance
+        }
 
         bind<UstadAccountManager>() with singleton {
             UstadAccountManager(instance(), applicationContext, di)
@@ -248,7 +250,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
     override fun onCreate() {
         super.onCreate()
-        UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
+        val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+        systemImpl.messageIdMap = MessageIDMap.ID_MAP
         Napier.base(DebugAntilog())
     }
 

@@ -135,30 +135,7 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
     override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
 
 
-    /**
-     * Wrapper to retrieve preference keys from the system Manifest.
-     *
-     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
-     * On J2ME: uses the jad file
-     *
-     * @param key The key to lookup
-     * @param context System context object
-     *
-     * @return The value of the manifest preference key if found, null otherwise
-     */
-    override fun getManifestPreference(key: String, context: Any): String?
-
-
     fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?)
-
-    suspend fun getAssetAsync(context: Any, path: String): ByteArray
-
-    /**
-     * Returns the system base directory to work from
-     *
-     * @return
-     */
-    fun getSystemBaseDir(context: Any): String
 
 
     /**
@@ -183,6 +160,7 @@ expect open class UstadMobileSystemImpl : UstadMobileSystemCommon {
          * @return A singleton instance
          */
         @JvmStatic
+        @Deprecated("This static property should not be used! We should access it through DI")
         var instance: UstadMobileSystemImpl
     }
 }

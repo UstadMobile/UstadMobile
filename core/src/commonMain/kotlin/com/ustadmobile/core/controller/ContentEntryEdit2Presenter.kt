@@ -7,7 +7,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.util.ext.convertToJsonObject
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -19,6 +18,7 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
@@ -128,7 +128,7 @@ class ContentEntryEdit2Presenter(context: Any,
 
                     if (entity.entryId == null) {
                         entity.entryId = accountManager.activeAccount.endpointUrl +
-                                "${entity.contentEntryUid}/${UMUUID.randomUUID()}"
+                                "${entity.contentEntryUid}/${randomUuid()}"
                         repo.contentEntryDao.updateAsync(entity)
                     }
                     val contentEntryJoin = ContentEntryParentChildJoin().apply {
