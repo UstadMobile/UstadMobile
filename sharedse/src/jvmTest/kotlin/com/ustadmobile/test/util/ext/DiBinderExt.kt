@@ -24,7 +24,7 @@ fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMod
     bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope).singleton {
         spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository(Any(),
                 if(clientMode) { context.url } else { "http://localhost/dummy" },
-                "", defaultHttpClient(), null))
+                "", instance(), null))
     }
 
 }

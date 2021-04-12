@@ -17,6 +17,10 @@ import com.ustadmobile.lib.db.entities.DownloadJobItem
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.sharedse.network.ext.addTestChildDownload
 import com.ustadmobile.sharedse.network.ext.addTestRootDownload
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
 import org.junit.Assert
@@ -68,8 +72,16 @@ class ContainerDownloadManagerTest {
                 })
             }
 
+            bind<HttpClient>() with singleton {
+                HttpClient(OkHttp) {
+                    install(JsonFeature)
+                    install(HttpTimeout)
+                }
+            }
+
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
+                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(
+                    Any(), context.url, "", instance(), null))
             }
 
             bind<ContainerDownloadRunner>() with factory {

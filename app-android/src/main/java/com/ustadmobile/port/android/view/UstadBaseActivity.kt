@@ -53,8 +53,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
 
     override val di by di()
 
-    private var baseController: UstadBaseController<*>? = null
-
     /**
      * Get the toolbar that's used for the support action bar
      *
@@ -65,14 +63,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
     protected lateinit var baseProgressBar: ProgressBar
 
     private var localeOnCreate: String? = null
-
-    /**
-     * Can be used to check if the activity has been started.
-     *
-     * @return true if the activity is started. false if it has not been started yet, or it was started, but has since stopped
-     */
-    var isStarted = false
-        private set
 
     lateinit var appUpdateManager: AppUpdateManager
 
@@ -229,21 +219,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
         umToolbar = findViewById<View>(toolbarID) as Toolbar
         setSupportActionBar(umToolbar)
         supportActionBar?.setHomeButtonEnabled(true)
-    }
-
-    protected fun setBaseController(baseController: UstadBaseController<*>) {
-        this.baseController = baseController
-    }
-
-
-    public override fun onStart() {
-        isStarted = true
-        super.onStart()
-    }
-
-    public override fun onStop() {
-        isStarted = false
-        super.onStop()
     }
 
     public override fun onDestroy() {

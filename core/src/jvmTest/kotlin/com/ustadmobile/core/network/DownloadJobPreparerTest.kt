@@ -9,7 +9,6 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.networkmanager.DownloadJobPreparer
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DoorDatabaseRepository
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.DownloadJob
@@ -19,6 +18,7 @@ import com.ustadmobile.sharedse.network.ContainerDownloadManagerImpl
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.sharedse.network.insertTestContentEntries
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
+import io.ktor.client.*
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
@@ -52,14 +52,16 @@ class DownloadJobPreparerTest {
     @Before
     fun setup(){
         Napier.baseDebugIfNotEnabled()
-        serverDb = UmAppDatabase.getInstance(Any())
-        serverDb.clearAllTables()
-        serverRepo = serverDb.asRepository(Any(), "http://localhost/dummy",
-            "", defaultHttpClient())
 
         di = DI {
             import(ustadTestRule.diModule)
         }
+
+        val httpClient: HttpClient = di.direct.instance()
+        serverDb = UmAppDatabase.getInstance(Any())
+        serverDb.clearAllTables()
+        serverRepo = serverDb.asRepository(Any(), "http://localhost/dummy",
+            "", httpClient)
 
         accountManager = di.direct.instance()
         accountManager.activeAccount = UmAccount(0, "guest", "",

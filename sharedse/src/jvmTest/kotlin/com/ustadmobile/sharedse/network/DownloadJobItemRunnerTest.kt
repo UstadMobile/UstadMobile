@@ -40,12 +40,17 @@ import com.ustadmobile.util.commontest.ext.mockResponseForConcatenatedFiles2Requ
 import com.ustadmobile.util.test.ReverseProxyDispatcher
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import com.ustadmobile.util.test.extractTestResourceToFile
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import io.ktor.server.engine.ApplicationEngine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.*
+import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.*
 import org.junit.*
 import org.junit.rules.TemporaryFolder
@@ -247,7 +252,8 @@ class DownloadJobItemRunnerTest {
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
+                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(
+                    Any(), context.url, "", instance(), null))
             }
 
             bind<ContainerDownloadManager>() with scoped(endpointScope).singleton {
@@ -269,6 +275,37 @@ class DownloadJobItemRunnerTest {
             bind<Gson>() with singleton { Gson() }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+
+            bind<OkHttpClient>() with singleton {
+                OkHttpClient.Builder()
+                    .dispatcher(okhttp3.Dispatcher().also {
+                        it.maxRequests = 30
+                        it.maxRequestsPerHost = 10
+                    })
+                    .retryOnConnectionFailure(true)
+                    .connectTimeout(45, TimeUnit.SECONDS)
+                    .readTimeout(45, TimeUnit.SECONDS)
+                    .build()
+            }
+
+            bind<HttpClient>() with singleton {
+                HttpClient(OkHttp) {
+
+                    install(JsonFeature) {
+                        serializer = GsonSerializer()
+                    }
+                    install(HttpTimeout)
+
+                    val dispatcher = okhttp3.Dispatcher()
+                    dispatcher.maxRequests = 30
+                    dispatcher.maxRequestsPerHost = 10
+
+                    engine {
+                        preconfigured = instance()
+                    }
+
+                }
+            }
         }
 
 
@@ -290,8 +327,10 @@ class DownloadJobItemRunnerTest {
             it.clearAllTables()
         }
 
+        //this can be shared as needed
+        val httpClient: HttpClient= clientDi.direct.instance()
         serverRepo = serverDb.asRepository(context, "http://localhost/dummy", "",
-            defaultHttpClient())
+            httpClient)
 
         mockLocalAvailabilityManager = clientDi.on(accountManager.activeAccount).direct.instance()
 

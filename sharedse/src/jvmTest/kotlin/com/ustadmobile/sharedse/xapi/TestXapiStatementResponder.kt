@@ -31,6 +31,10 @@ import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -74,6 +78,14 @@ class TestXapiStatementResponder {
                 builder.registerTypeAdapter(ContextActivity::class.java, ContextDeserializer())
                 builder.create()
             }
+
+            bind<HttpClient>() with singleton {
+                HttpClient(OkHttp) {
+                    install(JsonFeature)
+                    install(HttpTimeout)
+                }
+            }
+
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_DB) with scoped(endpointScope!!).singleton {
                 val dbName = sanitizeDbNameFromUrl(context.url)
                 InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName)
@@ -84,7 +96,8 @@ class TestXapiStatementResponder {
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
+                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(
+                    Any(), context.url, "", instance(), null))
             }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }

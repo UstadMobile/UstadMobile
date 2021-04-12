@@ -9,6 +9,7 @@ import com.ustadmobile.lib.db.entities.ContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.parseRangeRequestHeader
+import io.ktor.client.*
 import io.ktor.utils.io.errors.*
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.GlobalScope
@@ -18,7 +19,9 @@ import kotlinx.serialization.json.Json
 
 class HarContainer(val containerUid: Long, val entry: ContentEntry,
                    val umAccount: UmAccount?, val db: UmAppDatabase,
-                   val context: Any, val localHttp: String, var block: (sourceUrl: String) -> Unit) {
+                   val context: Any, val localHttp: String,
+                   val httpClient: HttpClient,
+                   var block: (sourceUrl: String) -> Unit) {
 
     lateinit var startingUrl: String
     private val linkPatterns = mutableMapOf<Regex, String>()
@@ -54,7 +57,7 @@ class HarContainer(val containerUid: Long, val entry: ContentEntry,
             }
 
             interceptors[RecorderInterceptor()] = null
-            interceptors[KhanProgressTracker()] = null
+            interceptors[KhanProgressTracker(httpClient)] = null
             harExtra.interceptors?.forEach {
                 val key = interceptorMap[it.name] ?: return@forEach
                 interceptors[key] = it.jsonArgs

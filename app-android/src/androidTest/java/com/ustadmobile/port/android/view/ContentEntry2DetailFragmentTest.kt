@@ -28,6 +28,7 @@ import com.ustadmobile.port.android.screen.ContentEntryDetailScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.*
 import com.ustadmobile.util.test.ext.insertContentEntryWithTranslations
+import io.ktor.client.*
 import io.ktor.client.request.get
 import io.ktor.client.request.header
 import io.ktor.client.request.parameter
@@ -41,6 +42,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
 import org.kodein.di.DIAware
+import org.kodein.di.direct
 import org.kodein.di.instance
 
 class ContentEntry2DetailFragmentTest : TestCase() {
@@ -247,6 +249,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
     //@Test
     @UmAppDatabaseServerRequiredTest
     fun givenContentEntryOnServer_whenDownloadClicked_shouldCompleteDownloadAndShowOpenButton() {
+        val httpClient: HttpClient = di.direct.instance()
         val testEntry = ContentEntryWithLanguage().apply {
             title = "Server Title"
             description = "Dummy description"
@@ -254,7 +257,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
         }
 
         val uid = runBlocking {
-            defaultHttpClient().post<String>("${dbRule.endpointUrl}UmAppDatabase/ContentEntryDao/insert") {
+            httpClient.post<String>("${dbRule.endpointUrl}UmAppDatabase/ContentEntryDao/insert") {
                 header(HttpHeaders.ContentType, ContentType.Application.Json)
                 dbVersionHeader(dbRule.db)
                 body = testEntry
@@ -262,7 +265,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
         }.toLong()
 
         val containerUid = runBlocking {
-            defaultHttpClient().get<String>("${dbRule.endpointUrl}UmContainer/addContainer") {
+            httpClient.get<String>("${dbRule.endpointUrl}UmContainer/addContainer") {
                 parameter("entryUid", uid)
                 parameter("type", "epub")
                 parameter("resource", "test.epub")

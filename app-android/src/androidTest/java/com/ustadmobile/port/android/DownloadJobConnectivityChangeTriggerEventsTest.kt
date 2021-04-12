@@ -10,12 +10,18 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.DownloadJob
 import com.ustadmobile.lib.db.entities.DownloadJobItem
+import io.ktor.client.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
+import org.kodein.di.DI
+import org.kodein.di.DIAware
+import org.kodein.di.android.di
+import org.kodein.di.direct
+import org.kodein.di.instance
 import java.util.concurrent.atomic.AtomicInteger
 
 class DownloadJobConnectivityChangeTriggerEventsTest {
@@ -53,12 +59,14 @@ class DownloadJobConnectivityChangeTriggerEventsTest {
     fun setUp(){
 
         context = InstrumentationRegistry.getInstrumentation().context
+        val di: DI = (context.applicationContext as DIAware).di
+        val httpClient: HttpClient = di.direct.instance()
 
         umAppDatabase = UmAppDatabase.getInstance(context)
         umAppDatabase.clearAllTables()
 
         repo = umAppDatabase.asRepository(context, "http://localhost/dummy", "",
-            defaultHttpClient(), null)
+            httpClient, null)
 
         entry = ContentEntry("title 2", "title 2", leaf = true, publik = true)
         entry.contentEntryUid = repo.contentEntryDao.insert(entry)
