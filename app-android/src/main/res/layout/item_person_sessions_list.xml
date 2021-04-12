@@ -7,8 +7,8 @@
     <data>
         <import type="com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay"/>
         <import type="android.view.View"/>
-        <import type="com.ustadmobile.port.android.view.SessionsListFragment"/>
-        <import type="com.ustadmobile.port.android.view.SessionsListFragment.PersonWithSessionsDisplayListRecyclerAdapter"/>
+        <import type="com.ustadmobile.port.android.view.SessionListFragment"/>
+        <import type="com.ustadmobile.port.android.view.SessionListFragment.PersonWithSessionsDisplayListRecyclerAdapter"/>
 
         <variable
             name="person"
@@ -16,7 +16,7 @@
 
         <variable
             name="presenter"
-            type="com.ustadmobile.core.controller.SessionsListPresenter" />
+            type="com.ustadmobile.core.controller.SessionListPresenter" />
 
         <variable
             name="selectablePagedListAdapter"

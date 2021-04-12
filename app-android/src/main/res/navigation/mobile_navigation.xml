@@ -189,12 +189,12 @@
 
     <fragment
         android:id="@+id/content_entry_detail_session_list_dest"
-        android:name="com.ustadmobile.port.android.view.SessionsListFragment"
+        android:name="com.ustadmobile.port.android.view.SessionListFragment"
         android:label="" />
 
     <fragment
         android:id="@+id/content_entry_detail_session_detail_list_dest"
-        android:name="com.ustadmobile.port.android.view.SessionDetailListViewFragment"
+        android:name="com.ustadmobile.port.android.view.StatementListViewFragment"
         android:label="" />
 
     <fragment

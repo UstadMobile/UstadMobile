@@ -56,7 +56,7 @@ class SessionsListFragmentTest : TestCase()  {
             val fragmentScenario = launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                     fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to 1000L.toString(),
                             UstadView.ARG_PERSON_UID to 1000L.toString())) {
-                SessionsListFragment().also {
+                SessionListFragment().also {
                     it.installNavController(systemImplNavRule.navController)
                 }
             }

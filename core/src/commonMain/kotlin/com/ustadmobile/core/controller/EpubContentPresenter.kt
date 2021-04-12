@@ -79,6 +79,7 @@ import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.ContainerMounter.Companion.FILTER_MODE_EPUB
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.util.KmpUuid
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
@@ -132,7 +133,7 @@ class EpubContentPresenter(context: Any,
 
     var mCurrentPage: Int = 0
 
-    var contextRegistration: String? = null
+    lateinit var contextRegistration: String
 
     private val pageTitles = mutableMapOf<Int, String?>()
 
@@ -145,7 +146,7 @@ class EpubContentPresenter(context: Any,
         super.onCreate(savedState)
         val containerUid = arguments[UstadView.ARG_CONTAINER_UID]?.toLong() ?: 100
         contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
-        contextRegistration = UMUUID.randomUUID().toString()
+        contextRegistration = KmpUuid.randomUUID().toString()
         view.progressValue = -1
         view.progressVisible = true
         mountedEndpoint = accountManager.activeAccount.endpointUrl
@@ -168,12 +169,11 @@ class EpubContentPresenter(context: Any,
             return //no one is really logged in
 
         GlobalScope.launch {
-            val registration = contextRegistration ?: UMUUID.randomUUID().toString()
             val contentEntry =  db.contentEntryDao.findByUid(contentEntryUid) ?: return@launch
             val progress = ((maxPageReached + 1) * 100) / max(linearSpineUrls.size, 1)
             xapiStatementEndpoint.storeProgressStatement(
                     accountManager.activeAccount,
-                    contentEntry, progress, duration, registration)
+                    contentEntry, progress, duration, contextRegistration)
         }
 
     }

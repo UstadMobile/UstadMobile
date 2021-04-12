@@ -57,13 +57,14 @@ abstract class StatementDao : BaseDao<StatementEntity> {
 
     @Query("""
         SELECT ResultSource.personUid, ResultSource.firstNames, ResultSource.lastName,
-        COUNT(DISTINCT(ResultSource.contextRegistration)) AS attempts, 
-        MIN(ResultSource.timestamp) AS startDate, 
-        MAX(ResultSource.timestamp) AS endDate, 
-        SUM(ResultSource.resultDuration) AS duration, 
-        MAX(CASE WHEN ResultSource.contentEntryRoot 
-                 THEN ResultSource.resultScoreScaled * 100 ELSE 0 END) AS score, 
-        MAX(ResultSource.extensionProgress) AS progress 
+            COUNT(DISTINCT(ResultSource.contextRegistration)) AS attempts, 
+            MIN(ResultSource.timestamp) AS startDate, 
+            MAX(ResultSource.timestamp) AS endDate, 
+            SUM(ResultSource.resultDuration) AS duration, 
+            MAX(CASE WHEN ResultSource.contentEntryRoot 
+                THEN ResultSource.resultScoreScaled * 100 
+                ELSE 0 END) AS score, 
+            MAX(ResultSource.extensionProgress) AS progress 
         
          FROM (SELECT Person.personUid, Person.firstNames, Person.lastName, 
             StatementEntity.contextRegistration, StatementEntity.timestamp, 
@@ -71,11 +72,12 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             StatementEntity.contentEntryRoot, StatementEntity.extensionProgress
         
          ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
-             LEFT JOIN StatementEntity ON StatementEntity.statementPersonUid = Person.personUid 
-             WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
-                AND PersonGroupMember.groupMemberActive  
-                AND statementContentEntryUid = :contentEntryUid
-                AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
+             LEFT JOIN StatementEntity 
+                ON StatementEntity.statementPersonUid = Person.personUid 
+                    WHERE PersonGroupMember.groupMemberPersonUid = :accountPersonUid 
+                        AND PersonGroupMember.groupMemberActive  
+                        AND statementContentEntryUid = :contentEntryUid
+                        AND Person.firstNames || ' ' || Person.lastName LIKE :searchText 
              GROUP BY StatementEntity.statementUid) AS ResultSource 
          GROUP BY ResultSource.personUid 
          ORDER BY CASE(:sortOrder) 
@@ -99,21 +101,34 @@ abstract class StatementDao : BaseDao<StatementEntity> {
          """)
     abstract fun findPersonsWithContentEntryAttempts(contentEntryUid: Long, accountPersonUid: Long,
                                                      searchText: String, sortOrder: Int)
-            : DataSource.Factory<Int, PersonWithStatementDisplay>
+            : DataSource.Factory<Int, PersonWithAttemptsSummary>
 
-    @Query("""SELECT MIN(timestamp) as startDate, 
-        MAX(CASE WHEN StatementEntity.resultSuccess > 0 AND 
-        StatementEntity.contentEntryRoot THEN StatementEntity.resultSuccess ELSE 0 END) as resultSuccess, 
-        SUM(CASE WHEN CAST(resultCompletion AS INTEGER) > 0 AND StatementEntity.contentEntryRoot 
-        THEN 1 ELSE 0 END) as resultComplete, 
-        SUM(resultDuration) as duration, contextRegistration, 
-        MAX(CASE WHEN contentEntryRoot THEN resultScoreRaw ELSE 0 END) as resultScore, 
-        MAX(CASE WHEN contentEntryRoot THEN resultScoreMax ELSE 0 END) as resultMax,
-        MAX(CASE WHEN contentEntryRoot THEN resultScoreScaled ELSE 0 END) as resultScoreScaled  
+    @Query("""
+        SELECT MIN(timestamp) AS startDate, 
+            MAX(CASE 
+                    WHEN StatementEntity.resultSuccess > 0 
+                    AND StatementEntity.contentEntryRoot 
+                    THEN StatementEntity.resultSuccess 
+                    ELSE 0 END) AS resultSuccess, 
+            SUM(CASE 
+                     WHEN CAST(resultCompletion AS INTEGER) > 0 
+                     AND StatementEntity.contentEntryRoot 
+                     THEN 1 
+                     ELSE 0 END) AS resultComplete, 
+            SUM(resultDuration) AS duration, contextRegistration, 
+            MAX(CASE WHEN contentEntryRoot 
+                     THEN resultScoreRaw ELSE 0 END) AS resultScore, 
+            MAX(CASE WHEN contentEntryRoot 
+                     THEN resultScoreMax ELSE 0 END) AS resultMax,
+            MAX(CASE WHEN contentEntryRoot 
+                     THEN resultScoreScaled ELSE 0 END) AS resultScoreScaled  
         FROM StatementEntity 
-        LEFT JOIN Person ON Person.personUid = StatementEntity.statementPersonUid 
-        WHERE statementContentEntryUid = :contentEntryUid AND statementPersonUid = :personUid 
-        AND :accountPersonUid IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
+            LEFT JOIN Person 
+                ON Person.personUid = StatementEntity.statementPersonUid 
+        WHERE statementContentEntryUid = :contentEntryUid   
+            AND statementPersonUid = :personUid 
+            AND :accountPersonUid 
+                IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
         GROUP BY StatementEntity.contextRegistration 
         ORDER BY startDate DESC
          """)
@@ -121,15 +136,24 @@ abstract class StatementDao : BaseDao<StatementEntity> {
             : DataSource.Factory<Int, PersonWithSessionsDisplay>
 
 
-    @Query("""SELECT StatementEntity.*, VerbEntity.*, 
-        verbLangMap.valueLangMap as verbDisplay, xobjectMap.valueLangMap as objectDisplay FROM StatementEntity
-          LEFT JOIN Person ON StatementEntity.statementPersonUid = Person.personUid 
-           LEFT JOIN VerbEntity ON VerbEntity.verbUid = StatementEntity.statementVerbUid 
-           LEFT JOIN XLangMapEntry verbLangMap on verbLangMap.verbLangMapUid = VerbEntity.verbUid
-           LEFT JOIN XLangMapEntry xobjectMap on xobjectMap.objectLangMapUid = StatementEntity.xObjectUid
-          WHERE statementContentEntryUid = :contentEntryUid AND statementPersonUid = :personUid AND 
-         contextRegistration = :contextRegistration AND 
-         :accountPersonUid IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
+    @Query("""
+        SELECT StatementEntity.*, VerbEntity.*, 
+            verbLangMap.valueLangMap AS verbDisplay, 
+            xobjectMap.valueLangMap AS objectDisplay 
+        FROM StatementEntity
+                LEFT JOIN Person 
+                    ON StatementEntity.statementPersonUid = Person.personUid 
+                LEFT JOIN VerbEntity 
+                    ON VerbEntity.verbUid = StatementEntity.statementVerbUid 
+                LEFT JOIN XLangMapEntry verbLangMap 
+                    ON verbLangMap.verbLangMapUid = VerbEntity.verbUid
+                LEFT JOIN XLangMapEntry xobjectMap 
+                    ON xobjectMap.objectLangMapUid = StatementEntity.xObjectUid
+         WHERE statementContentEntryUid = :contentEntryUid 
+            AND statementPersonUid = :personUid 
+            AND contextRegistration = :contextRegistration 
+            AND :accountPersonUid 
+                IN (${PersonDao.ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION}) 
          ORDER BY StatementEntity.timestamp DESC
          """)
     abstract fun findSessionDetailForPerson(contentEntryUid: Long, accountPersonUid: Long,

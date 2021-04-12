@@ -8,8 +8,8 @@
         <import type="com.ustadmobile.lib.db.entities.StatementWithSessionDetailDisplay"/>
         <import type="android.view.View"/>
         <import type="kotlin.text.StringsKt"/>
-        <import type="com.ustadmobile.port.android.view.SessionDetailListViewFragment"/>
-        <import type="com.ustadmobile.port.android.view.SessionDetailListViewFragment.StatementWithSessionsDetailListRecyclerAdapter"/>
+        <import type="com.ustadmobile.port.android.view.StatementListViewFragment"/>
+        <import type="com.ustadmobile.port.android.view.StatementListViewFragment.StatementWithSessionsDetailListRecyclerAdapter"/>
 
         <variable
             name="statement"
@@ -17,7 +17,7 @@
 
         <variable
             name="presenter"
-            type="com.ustadmobile.core.controller.SessionDetailListPresenter" />
+            type="com.ustadmobile.core.controller.StatementListPresenter" />
 
         <variable
             name="selectablePagedListAdapter"
@@ -31,13 +31,13 @@
         android:paddingBottom="@dimen/dimen_16dp"
         app:selectableViewHelper="@{selectablePagedListAdapter}"
         app:onSelectedStateChanged="@{(view) -> selectablePagedListAdapter.onItemSelectedChanged(view, statement)}"
-        app:onSelectableItemClicked="@{() -> presenter.onClickStatementWithSessionDisplay(statement)}"
         android:background="@drawable/bg_listitem">
 
         <androidx.appcompat.widget.AppCompatImageView
             android:id="@+id/item_person_verb_image"
             tools:src="@drawable/verb_answered"
-            app:verbIcon="@{statement.verb.urlId}"
+            app:imageLookupKey="@{(int) statement.statementVerbUid}"
+            app:imageLookupMap="@{StatementListViewFragment.VERB_ICON_MAP}"
             android:tint="?colorOnIconTint"
             android:layout_width="@dimen/dimen_40dp"
             android:layout_height="@dimen/dimen_40dp"

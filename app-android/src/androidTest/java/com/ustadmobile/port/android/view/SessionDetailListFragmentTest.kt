@@ -6,7 +6,7 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.view.SessionsListView
+import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.port.android.screen.SessionDetailListScreen
@@ -56,8 +56,8 @@ class SessionDetailListFragmentTest : TestCase()  {
             launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                     fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to 1000L.toString(),
                             UstadView.ARG_PERSON_UID to 1000L.toString(),
-                            SessionsListView.ARG_CONTEXT_REGISTRATION to "abc")) {
-                SessionDetailListViewFragment().also {
+                            SessionListView.ARG_CONTEXT_REGISTRATION to "abc")) {
+                StatementListViewFragment().also {
                     it.installNavController(systemImplNavRule.navController)
                 }
             }

@@ -3,7 +3,7 @@ package com.ustadmobile.lib.db.entities
 import kotlinx.serialization.Serializable
 
 @Serializable
-class PersonWithStatementDisplay {
+class PersonWithAttemptsSummary {
 
     var personUid: Long = 0
 

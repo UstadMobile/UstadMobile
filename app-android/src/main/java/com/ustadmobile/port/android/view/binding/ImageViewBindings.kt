@@ -257,7 +257,11 @@ private fun ImageView.updateFromImageLookupMap() {
         if(resToUse != null && resToUse != currentImageRes) {
             setImageResource(resToUse)
             setTag(R.id.tag_imagelookup_key, resToUse)
+        }else{
+            setImageDrawable(null)
         }
+    }else{
+        setImageDrawable(null)
     }
 }
 
@@ -285,29 +289,12 @@ fun ImageView.isContentCompleteImage(person: PersonWithSessionsDisplay){
     }
 }
 
-@BindingAdapter("verbIcon")
-fun ImageView.setVerbIcon(verb: String?) {
-    val drawableId = VERB_ICON_MAP[verb ?: ""] ?: android.R.color.transparent
-    setImageDrawable(ContextCompat.getDrawable(context, drawableId))
-}
-
 private val ICON_ID_MAP : Map<Int, Int> by lazy {
     mapOf(CustomField.ICON_PHONE to R.drawable.ic_phone_black_24dp,
         CustomField.ICON_PERSON to R.drawable.ic_person_black_24dp,
         CustomField.ICON_CALENDAR to R.drawable.ic_event_black_24dp,
         CustomField.ICON_EMAIL to R.drawable.ic_email_black_24dp,
         CustomField.ICON_ADDRESS to R.drawable.ic_location_pin_24dp)
-}
-
-private val VERB_ICON_MAP: Map<String, Int> by lazy {
-     mapOf(VerbEntity.VERB_COMPLETED_URL to R.drawable.verb_complete,
-             VerbEntity.VERB_PROGRESSED_URL to R.drawable.verb_progress,
-             VerbEntity.VERB_ATTEMPTED_URL to R.drawable.verb_attempt,
-             VerbEntity.VERB_INTERACTED_URL to R.drawable.verb_interactive,
-             VerbEntity.VERB_ANSWERED_URL to R.drawable.verb_answered,
-             VerbEntity.VERB_SATISFIED_URL to R.drawable.verb_passed,
-             VerbEntity.VERB_PASSED_URL to R.drawable.verb_passed,
-             VerbEntity.VERB_FAILED_URL to R.drawable.verb_failed)
 }
 
 @BindingAdapter("imageResIdInt")

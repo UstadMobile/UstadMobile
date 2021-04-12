@@ -3,7 +3,7 @@ package com.ustadmobile.core.view
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
 
 
-interface SessionsListView: UstadListView<PersonWithSessionsDisplay, PersonWithSessionsDisplay> {
+interface SessionListView: UstadListView<PersonWithSessionsDisplay, PersonWithSessionsDisplay> {
 
     var personWithContentTitle: String?
 

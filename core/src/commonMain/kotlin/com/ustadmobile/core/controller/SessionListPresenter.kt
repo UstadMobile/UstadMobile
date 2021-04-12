@@ -1,8 +1,7 @@
 package com.ustadmobile.core.controller
 
-import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.view.SessionDetailListView
-import com.ustadmobile.core.view.SessionsListView
+import com.ustadmobile.core.view.StatementListView
+import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -12,10 +11,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
-class SessionsListPresenter(context: Any, arguments: Map<String, String>,
-                            view: SessionsListView,
-                            di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<SessionsListView, PersonWithSessionsDisplay>(
+class SessionListPresenter(context: Any, arguments: Map<String, String>,
+                           view: SessionListView,
+                           di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<SessionListView, PersonWithSessionsDisplay>(
         context, arguments, view, di, lifecycleOwner) {
 
     private var contentEntryUid: Long = 0L
@@ -27,7 +26,7 @@ class SessionsListPresenter(context: Any, arguments: Map<String, String>,
 
     override suspend fun onLoadFromDb() {
         super.onLoadFromDb()
-        contentEntryUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
+        contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
         selectedPersonUid = arguments[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
         mLoggedInPersonUid = accountManager.activeAccount.personUid
         GlobalScope.launch(doorMainDispatcher()) {
@@ -52,8 +51,10 @@ class SessionsListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     fun onClickPersonWithSessionDisplay(personWithStatementDisplay: PersonWithSessionsDisplay) {
-        systemImpl.go(SessionDetailListView.VIEW_NAME,
-                arguments.plus(SessionsListView.ARG_CONTEXT_REGISTRATION to
+        systemImpl.go(StatementListView.VIEW_NAME,
+                mapOf(UstadView.ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
+                        UstadView.ARG_PERSON_UID to selectedPersonUid.toString(),
+                        SessionListView.ARG_CONTEXT_REGISTRATION to
                         personWithStatementDisplay.contextRegistration), context)
     }
 

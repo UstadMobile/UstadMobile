@@ -28,15 +28,13 @@ class ContentEntryDetailPresenter(context: Any,
 
         val entityJsonStr = bundle[UstadEditView.ARG_ENTITY_JSON]
         var editEntity: ContentEntry? = null
-        if(entityJsonStr != null) {
-            editEntity = safeParse(di,  ContentEntry.serializer(), entityJsonStr)
-        }else {
+        if (entityJsonStr != null) {
+            editEntity = safeParse(di, ContentEntry.serializer(), entityJsonStr)
+        } else {
             editEntity = ContentEntry()
         }
 
-        GlobalScope.launch {
-            setupTabs()
-        }
+        setupTabs()
 
         return editEntity
     }
@@ -53,15 +51,11 @@ class ContentEntryDetailPresenter(context: Any,
     }
 
 
-    private suspend fun setupTabs() {
+    private fun setupTabs() {
         val entityUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0L
-        GlobalScope.launch(doorMainDispatcher()) {
-            view.tabs = listOf("${ContentEntryDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid",
-            "${ContentEntryDetailAttemptsListView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
-        }
+        view.tabs = listOf("${ContentEntryDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid",
+                "${ContentEntryDetailAttemptsListView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$entityUid")
     }
-
-
 
 
 }

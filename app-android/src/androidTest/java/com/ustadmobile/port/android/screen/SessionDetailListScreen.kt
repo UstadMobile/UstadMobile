@@ -6,7 +6,7 @@ import com.agoda.kakao.recycler.KRecyclerView
 import com.agoda.kakao.text.KTextView
 import com.kaspersky.kaspresso.screens.KScreen
 import com.toughra.ustadmobile.R
-import com.ustadmobile.port.android.view.SessionDetailListViewFragment
+import com.ustadmobile.port.android.view.StatementListViewFragment
 import org.hamcrest.Matcher
 
 object SessionDetailListScreen : KScreen<SessionDetailListScreen>() {
@@ -14,7 +14,7 @@ object SessionDetailListScreen : KScreen<SessionDetailListScreen>() {
     override val layoutId: Int?
         get() = R.layout.fragment_list
     override val viewClass: Class<*>?
-        get() = SessionDetailListViewFragment::class.java
+        get() = StatementListViewFragment::class.java
 
     val recycler: KRecyclerView = KRecyclerView({
         withId(R.id.fragment_list_recyclerview)

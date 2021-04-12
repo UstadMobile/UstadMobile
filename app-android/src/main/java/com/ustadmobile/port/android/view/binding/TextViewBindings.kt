@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
-import android.view.View
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
@@ -286,7 +285,7 @@ fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
 }
 
 @BindingAdapter("statementDate")
-fun TextView.setStatementDate(person: PersonWithStatementDisplay){
+fun TextView.setStatementDate(person: PersonWithAttemptsSummary){
     val dateFormatter = DateFormat.getDateFormat(context)
     var statementDate = dateFormatter.format(person.startDate)
 

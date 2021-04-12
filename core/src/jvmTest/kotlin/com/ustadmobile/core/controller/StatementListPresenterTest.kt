@@ -3,36 +3,31 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.StatementDao
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
-import com.ustadmobile.core.util.ext.waitForListToBeSet
-import com.ustadmobile.core.view.SessionDetailListView
-import com.ustadmobile.core.view.SessionsListView
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.StatementListView
+import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.kodein.di.DI
-import org.kodein.di.instance
 import org.mockito.kotlin.*
 
 /**
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
  */
 
-class SessionDetailListPresenterTest {
+class StatementListPresenterTest {
 
     @JvmField
     @Rule
     var ustadTestRule = UstadTestRule()
 
-    private lateinit var mockView: SessionDetailListView
+    private lateinit var mockView: StatementListView
 
     private lateinit var context: Any
 
@@ -64,8 +59,8 @@ class SessionDetailListPresenterTest {
         val presenterArgs = mutableMapOf<String,String>()
         presenterArgs[ARG_ENTITY_UID] = 1000L.toString()
         presenterArgs[ARG_PERSON_UID] = 1000L.toString()
-        presenterArgs[SessionsListView.ARG_CONTEXT_REGISTRATION] = "abc"
-        val presenter = SessionDetailListPresenter(context,
+        presenterArgs[SessionListView.ARG_CONTEXT_REGISTRATION] = "abc"
+        val presenter = StatementListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 

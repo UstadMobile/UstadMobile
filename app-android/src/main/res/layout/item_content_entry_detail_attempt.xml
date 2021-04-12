@@ -5,7 +5,7 @@
 
 
     <data>
-        <import type="com.ustadmobile.lib.db.entities.PersonWithStatementDisplay"/>
+        <import type="com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary"/>
         <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
         <import type="android.view.View"/>
         <import type="com.ustadmobile.port.android.view.ContentEntryDetailAttemptsListFragment"/>
@@ -13,7 +13,7 @@
 
         <variable
             name="person"
-            type="PersonWithStatementDisplay" />
+            type="PersonWithAttemptsSummary" />
 
         <variable
             name="presenter"

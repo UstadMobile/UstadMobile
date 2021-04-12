@@ -5,29 +5,26 @@ import android.view.*
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
-import com.toughra.ustadmobile.databinding.ItemContentEntryDetailAttemptBinding
 import com.toughra.ustadmobile.databinding.ItemPersonSessionsListBinding
-import com.ustadmobile.core.controller.ContentEntryDetailAttemptsListPresenter
-import com.ustadmobile.core.controller.SessionsListPresenter
+import com.ustadmobile.core.controller.SessionListPresenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.util.ext.toStringMap
-import com.ustadmobile.core.view.SessionsListView
+import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.lib.db.entities.PersonWithSessionsDisplay
-import com.ustadmobile.lib.db.entities.PersonWithStatementDisplay
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
-class SessionsListFragment(): UstadListViewFragment<PersonWithSessionsDisplay, PersonWithSessionsDisplay>(),
-        SessionsListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
+class SessionListFragment(): UstadListViewFragment<PersonWithSessionsDisplay, PersonWithSessionsDisplay>(),
+        SessionListView, MessageIdSpinner.OnMessageIdOptionSelectedListener, View.OnClickListener{
 
-    private var mPresenter: SessionsListPresenter? = null
+    private var mPresenter: SessionListPresenter? = null
 
     override val listPresenter: UstadListPresenter<*, in PersonWithSessionsDisplay>?
         get() = mPresenter
 
-    class PersonWithSessionsDisplayListRecyclerAdapter(var presenter: SessionsListPresenter?): SelectablePagedListAdapter<PersonWithSessionsDisplay, PersonWithSessionsDisplayListRecyclerAdapter.PersonWithSessionDisplayListViewHolder>(DIFF_CALLBACK) {
+    class PersonWithSessionsDisplayListRecyclerAdapter(var presenter: SessionListPresenter?): SelectablePagedListAdapter<PersonWithSessionsDisplay, PersonWithSessionsDisplayListRecyclerAdapter.PersonWithSessionDisplayListViewHolder>(DIFF_CALLBACK) {
 
         class PersonWithSessionDisplayListViewHolder(val itemBinding: ItemPersonSessionsListBinding): RecyclerView.ViewHolder(itemBinding.root)
 
@@ -53,7 +50,7 @@ class SessionsListFragment(): UstadListViewFragment<PersonWithSessionsDisplay, P
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         val view = super.onCreateView(inflater, container, savedInstanceState)
-        mPresenter = SessionsListPresenter(requireContext(), arguments.toStringMap(),
+        mPresenter = SessionListPresenter(requireContext(), arguments.toStringMap(),
                 this, di, viewLifecycleOwner)
 
         mDataRecyclerViewAdapter = PersonWithSessionsDisplayListRecyclerAdapter(mPresenter)

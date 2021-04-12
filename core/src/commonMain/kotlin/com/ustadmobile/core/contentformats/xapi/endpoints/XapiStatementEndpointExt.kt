@@ -20,13 +20,6 @@ fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: Cont
             this.display = mapOf("en-US" to if (progress == 100) "satisfied" else "progressed")
         }
         this.context = XContext().apply {
-            contextActivities = ContextActivity().apply {
-                parent = listOf(XObject().apply {
-                    id = UMFileUtil.joinPaths(account.endpointUrl,
-                            "/contentEntryUid/${entry.contentEntryUid}")
-                    objectType = "Activity"
-                })
-            }
             registration = contextRegistration
         }
         this.result = Result().apply {

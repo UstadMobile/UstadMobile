@@ -7,8 +7,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.waitForListToBeSet
-import com.ustadmobile.core.view.SessionDetailListView
-import com.ustadmobile.core.view.SessionsListView
+import com.ustadmobile.core.view.StatementListView
+import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
@@ -26,13 +26,13 @@ import org.mockito.kotlin.*
  * The Presenter test for list items is generally intended to be a sanity check on the underlying code.
  */
 
-class SessionsListPresenterTest {
+class SessionListPresenterTest {
 
     @JvmField
     @Rule
     var ustadTestRule = UstadTestRule()
 
-    private lateinit var mockView: SessionsListView
+    private lateinit var mockView: SessionListView
 
     private lateinit var context: Any
 
@@ -64,7 +64,7 @@ class SessionsListPresenterTest {
         val presenterArgs = mutableMapOf<String,String>()
         presenterArgs[ARG_ENTITY_UID] = 1000L.toString()
         presenterArgs[ARG_PERSON_UID] = 1000L.toString()
-        val presenter = SessionsListPresenter(context,
+        val presenter = SessionListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
 
@@ -82,7 +82,7 @@ class SessionsListPresenterTest {
         val presenterArgs = mutableMapOf<String,String>()
         presenterArgs[ARG_ENTITY_UID] = 1000L.toString()
         presenterArgs[ARG_PERSON_UID] = 1000L.toString()
-        val presenter = SessionsListPresenter(context,
+        val presenter = SessionListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
@@ -94,10 +94,10 @@ class SessionsListPresenterTest {
             resultComplete = true
         })
 
-        verify(systemImpl, timeout(5000)).go(eq(SessionDetailListView.VIEW_NAME),
+        verify(systemImpl, timeout(5000)).go(eq(StatementListView.VIEW_NAME),
                 eq(mapOf(ARG_ENTITY_UID to 1000L.toString(),
                         UstadView.ARG_PERSON_UID  to 1000L.toString(),
-                SessionsListView.ARG_CONTEXT_REGISTRATION to "abc")), any())
+                SessionListView.ARG_CONTEXT_REGISTRATION to "abc")), any())
     }
 
 }

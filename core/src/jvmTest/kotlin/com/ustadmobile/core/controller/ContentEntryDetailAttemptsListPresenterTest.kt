@@ -8,12 +8,12 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
-import com.ustadmobile.core.view.SessionsListView
+import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.PersonWithStatementDisplay
+import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -84,14 +84,14 @@ class ContentEntryDetailAttemptsListPresenterTest {
         presenter.onCreate(null)
         mockView.waitForListToBeSet()
 
-        presenter.onClickPersonWithStatementDisplay(PersonWithStatementDisplay().apply {
+        presenter.onClickPersonWithStatementDisplay(PersonWithAttemptsSummary().apply {
             attempts = 2
             progress = 100
             personUid = 1000L
             duration = 1000
         })
 
-        verify(systemImpl, timeout(5000)).go(eq(SessionsListView.VIEW_NAME),
+        verify(systemImpl, timeout(5000)).go(eq(SessionListView.VIEW_NAME),
                 eq(mapOf(ARG_ENTITY_UID to 1000L.toString(),
                         UstadView.ARG_PERSON_UID  to 1000L.toString())), any())
     }

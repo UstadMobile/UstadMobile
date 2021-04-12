@@ -5,17 +5,17 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
-import com.ustadmobile.core.view.SessionsListView
+import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.PersonWithStatementDisplay
+import com.ustadmobile.lib.db.entities.PersonWithAttemptsSummary
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
 class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<String, String>,
                                               view: ContentEntryDetailAttemptsListView,
                                               di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<ContentEntryDetailAttemptsListView, PersonWithStatementDisplay>(
+    : UstadListPresenter<ContentEntryDetailAttemptsListView, PersonWithAttemptsSummary>(
         context, arguments, view, di, lifecycleOwner), OnSortOptionSelected, OnSearchSubmitted {
 
     private var contentEntryUid: Long = 0L
@@ -62,10 +62,11 @@ class ContentEntryDetailAttemptsListPresenter(context: Any, arguments: Map<Strin
 
     }
 
-    fun onClickPersonWithStatementDisplay(personWithStatementDisplay: PersonWithStatementDisplay) {
-            systemImpl.go(SessionsListView.VIEW_NAME,
-                    arguments.plus(UstadView.ARG_PERSON_UID to
-                            personWithStatementDisplay.personUid.toString()), context)
+    fun onClickPersonWithStatementDisplay(personWithAttemptsSummary: PersonWithAttemptsSummary) {
+            systemImpl.go(SessionListView.VIEW_NAME,
+                    mapOf(UstadView.ARG_CONTENT_ENTRY_UID to contentEntryUid.toString(),
+                            UstadView.ARG_PERSON_UID to
+                                    personWithAttemptsSummary.personUid.toString()), context)
     }
 
     companion object {

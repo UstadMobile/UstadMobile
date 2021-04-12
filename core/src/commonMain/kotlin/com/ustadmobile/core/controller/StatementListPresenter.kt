@@ -1,8 +1,8 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.view.SessionDetailListView
-import com.ustadmobile.core.view.SessionsListView.Companion.ARG_CONTEXT_REGISTRATION
+import com.ustadmobile.core.view.StatementListView
+import com.ustadmobile.core.view.SessionListView.Companion.ARG_CONTEXT_REGISTRATION
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
@@ -12,10 +12,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
-class SessionDetailListPresenter(context: Any, arguments: Map<String, String>,
-                            view: SessionDetailListView,
-                            di: DI, lifecycleOwner: DoorLifecycleOwner)
-    : UstadListPresenter<SessionDetailListView, StatementWithSessionDetailDisplay>(
+class StatementListPresenter(context: Any, arguments: Map<String, String>,
+                             view: StatementListView,
+                             di: DI, lifecycleOwner: DoorLifecycleOwner)
+    : UstadListPresenter<StatementListView, StatementWithSessionDetailDisplay>(
         context, arguments, view, di, lifecycleOwner) {
 
     private var contentEntryUid: Long = 0L
@@ -28,7 +28,7 @@ class SessionDetailListPresenter(context: Any, arguments: Map<String, String>,
 
     override suspend fun onLoadFromDb() {
         super.onLoadFromDb()
-        contentEntryUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: 0
+        contentEntryUid = arguments[UstadView.ARG_CONTENT_ENTRY_UID]?.toLong() ?: 0
         selectedPersonUid = arguments[UstadView.ARG_PERSON_UID]?.toLong() ?: 0
         selectedSession = arguments[ARG_CONTEXT_REGISTRATION] ?: ""
         mLoggedInPersonUid = accountManager.activeAccount.personUid
@@ -56,10 +56,6 @@ class SessionDetailListPresenter(context: Any, arguments: Map<String, String>,
     }
 
     override fun handleClickCreateNewFab() {
-
-    }
-
-    fun onClickStatementWithSessionDisplay(statementWithStatementDisplay: StatementWithSessionDetailDisplay) {
 
     }
 
