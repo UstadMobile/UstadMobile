@@ -82,7 +82,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
 
     actual override suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir> {
         val dirList = ArrayList<UMStorageDir>()
-        val systemBaseDir = getSystemBaseDir(context)
+        val systemBaseDir = System.getProperty("user.dir")
         val contentDirName = getContentDirName(context)
 
         dirList.add(UMStorageDir(systemBaseDir, getString(MessageID.device, context),
@@ -196,8 +196,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
      */
     actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?{
         if (appConfig == null) {
-            val appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
-                    "/com/ustadmobile/core/appconfig.properties", context)
+            val appPrefResource = "/com/ustadmobile/core/appconfig.properties"
             appConfig = Properties()
             var prefIn: InputStream? = null
 
@@ -217,26 +216,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
 
     actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?){
 
-    }
-
-    actual fun getSystemBaseDir(context: Any): String{
-        return System.getProperty("user.dir")
-    }
-
-
-    /**
-     * Wrapper to retrieve preference keys from the system Manifest.
-     *
-     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
-     * On J2ME: uses the jad file
-     *
-     * @param key The key to lookup
-     * @param context System context object
-     *
-     * @return The value of the manifest preference key if found, null otherwise
-     */
-    actual override fun getManifestPreference(key: String, context: Any): String? {
-        return null
     }
 
     /**
@@ -275,26 +254,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon(){
          */
         @JvmStatic
         actual var instance: UstadMobileSystemImpl = UstadMobileSystemImpl()
-    }
-
-    actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
-        var inStream = null as InputStream?
-        try {
-            inStream = this::class.java.getResourceAsStream(path)
-            if(inStream != null) {
-                return inStream.readBytes()
-            }
-
-            // we might be running in tests
-            val resDir = File(System.getProperty("user.dir"), "src/main/assets")
-            inStream = FileInputStream(File(resDir, path))
-            return inStream.readBytes()
-        }catch(e: IOException) {
-            e.printStackTrace()
-            throw IOException("Could not find resource: $path")
-        }finally {
-            inStream?.close()
-        }
     }
 
     /**

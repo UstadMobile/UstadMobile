@@ -117,31 +117,10 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         return  value ?: defaultVal
     }
 
-    /**
-     * Wrapper to retrieve preference keys from the system Manifest.
-     *
-     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
-     * On J2ME: uses the jad file
-     *
-     * @param key The key to lookup
-     * @param context System context object
-     *
-     * @return The value of the manifest preference key if found, null otherwise
-     */
-    actual override fun getManifestPreference(key: String, context: Any): String? {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
     actual fun openFileInDefaultViewer(context: Any, path: String, mimeType: String?) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
-
-    /**
-     * Returns the system base directory to work from
-     *
-     * @return
-     */
-    actual fun getSystemBaseDir(context: Any): String = getAppPref("user.dir", context)?: ""
 
     /**
      * Check if the directory is writable
@@ -162,12 +141,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
          * @return A singleton instance
          */
         actual var instance: UstadMobileSystemImpl =  UstadMobileSystemImpl()
-    }
-
-    actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
-        val client = defaultHttpClient()
-        val content = client.get<String>( "${getAppPref("doordb.endpoint.url", context)}H5PResources/$path")
-        return content.toByteArray(Charsets.UTF_8)
     }
 
 

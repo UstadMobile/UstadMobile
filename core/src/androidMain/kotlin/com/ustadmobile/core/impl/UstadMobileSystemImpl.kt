@@ -455,7 +455,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
      *
      * @return The value of the manifest preference key if found, null otherwise
      */
-    actual override fun getManifestPreference(key: String, context: Any): String? {
+    fun getManifestPreference(key: String, context: Any): String? {
         try {
             val ctx = context as Context
             val ai2 = ctx.packageManager.getApplicationInfo(ctx.packageName,
@@ -484,7 +484,7 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
     actual override fun getAppConfigString(key: String, defaultVal: String?, context: Any): String? {
         if (appConfig == null) {
             val appPrefResource = getManifestPreference("com.ustadmobile.core.appconfig",
-                    "com/ustadmobile/core/appconfig.properties", context)
+                    context) ?: "com/ustadmobile/core/appconfig.properties"
             appConfig = Properties()
             var prefIn: InputStream? = null
 
@@ -554,16 +554,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         return appPreferences!!
     }
 
-    /**
-     * Returns the system base directory to work from
-     *
-     * @return
-     */
-    actual fun getSystemBaseDir(context: Any): String {
-        return File(Environment.getExternalStorageDirectory(), getContentDirName(context))
-                .absolutePath
-    }
-
 
     /**
      * Check if the directory is writable
@@ -590,15 +580,6 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
             canWriteFiles = testFile.delete()
         }
         return canWriteFiles
-    }
-
-    actual suspend fun getAssetAsync(context: Any, path: String): ByteArray {
-        var path = path
-        if (path.startsWith("/")) {
-            path = path.substring(1)
-        }
-
-        return ((context as Context).assets.open(path)).readBytes()
     }
 
     /**

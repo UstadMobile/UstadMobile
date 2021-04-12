@@ -18,8 +18,8 @@ import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
 import com.ustadmobile.door.ext.DoorTag
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
+import com.ustadmobile.lib.rest.ext.bindHostDatabase
 import com.ustadmobile.lib.rest.ext.ktorInitDbWithRepo
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
@@ -39,6 +39,7 @@ import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
 import java.io.File
 import java.nio.file.Files
+import java.util.*
 import javax.naming.InitialContext
 
 const val TAG_UPLOAD_DIR = 10
@@ -88,8 +89,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
     val tmpRootDir = Files.createTempDirectory("upload").toFile()
 
-    val autoCreateDb = environment.config.propertyOrNull("ktor.ustad.autocreatedb")?.getString()?.toBoolean() ?: false
-    println("auto create = $autoCreateDb")
     val dbMode = dbModeOverride ?:
         environment.config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
     val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
@@ -134,14 +133,21 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         bind<Gson>() with singleton { Gson() }
 
         bind<UmAppDatabase>(tag = DoorTag.TAG_DB) with scoped(EndpointScope.Default).singleton {
-            val dbName = context.identifier(dbMode, singletonDbName)
+            val dbHostName = context.identifier(dbMode, singletonDbName)
+            val appConfig = environment.config
+            InitialContext().bindHostDatabase(dbHostName, Properties().apply {
+                setProperty("driver",
+                    appConfig.propertyOrNull("ktor.database.driver")?.getString() ?: "org.sqlite.JDBC")
+                setProperty("url",
+                    appConfig.propertyOrNull("ktor.database.url")?.getString()
+                        ?: "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+                setProperty("user",
+                    appConfig.propertyOrNull("ktor.database.user")?.getString() ?: "")
+                setProperty("password",
+                    appConfig.propertyOrNull("ktor.database.password")?.getString() ?: "")
+            })
 
-            if(autoCreateDb) {
-                InitialContext().bindNewSqliteDataSourceIfNotExisting(dbName,
-                        isPrimary = true, sqliteDir = instance(tag = TAG_CONTEXT_DATA_ROOT))
-            }
-
-            UmAppDatabase.getInstance(Any(), dbName)
+            UmAppDatabase.getInstance(Any(), dbHostName)
         }
 
         bind<ServerUpdateNotificationManager>() with scoped(EndpointScope.Default).singleton {

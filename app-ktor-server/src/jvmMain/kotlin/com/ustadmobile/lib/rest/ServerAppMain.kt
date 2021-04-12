@@ -22,6 +22,8 @@ class ServerAppMain {
         @JvmStatic
         fun main(args: Array<String>) {
             embeddedServer(Netty, commandLineEnvironment(args)) {
+                requestReadTimeoutSeconds = 600
+                responseWriteTimeoutSeconds = 600
                 httpServerCodec= {
                     HttpServerCodec(MAX_INITIAL_LINE_LENGTH, MAX_HEADER_SIZE, MAX_CHUNK_SIZE)
                 }

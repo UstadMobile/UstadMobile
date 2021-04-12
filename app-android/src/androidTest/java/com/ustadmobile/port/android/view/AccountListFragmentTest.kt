@@ -37,7 +37,6 @@ import org.kodein.di.instance
 
 
 @AdbScreenRecord("Account List Tests")
-@ExperimentalStdlibApi
 class AccountListFragmentTest : TestCase() {
 
     @JvmField

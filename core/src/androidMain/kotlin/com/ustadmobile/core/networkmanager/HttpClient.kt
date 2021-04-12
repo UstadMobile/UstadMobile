@@ -18,20 +18,15 @@ import java.util.concurrent.TimeUnit
  *  https://github.com/ktorio/ktor/issues/1708
  */
 
-private val OK_HTTP_MIN_SDKVERSION = 21
-
-private val okHttpClient = if(Build.VERSION.SDK_INT >= OK_HTTP_MIN_SDKVERSION) {
-    OkHttpClient.Builder()
+private val okHttpClient = OkHttpClient.Builder()
             .dispatcher(Dispatcher().also {
                 it.maxRequests = 30
                 it.maxRequestsPerHost = 10
             })
+            .retryOnConnectionFailure(true)
             .connectTimeout(45, TimeUnit.SECONDS)
             .readTimeout(45, TimeUnit.SECONDS)
             .build()
-}else {
-    null
-}
 
 private val defaultGsonSerializer = GsonSerializer()
 
@@ -39,28 +34,23 @@ private val defaultGson: Gson by lazy {Gson()}
 
 fun defaultGson() = defaultGson
 
-private val httpClient = if(Build.VERSION.SDK_INT < OK_HTTP_MIN_SDKVERSION) {
-    HttpClient(Android) {
-        install(JsonFeature)
-        install(HttpTimeout)
+private val httpClient = HttpClient(OkHttp) {
+
+    install(JsonFeature) {
+        serializer = defaultGsonSerializer
     }
-}else {
-    HttpClient(OkHttp) {
-        install(JsonFeature) {
-            serializer = defaultGsonSerializer
-        }
-        install(HttpTimeout)
+    install(HttpTimeout)
 
-        val dispatcher = Dispatcher()
-        dispatcher.maxRequests = 30
-        dispatcher.maxRequestsPerHost = 10
+    val dispatcher = Dispatcher()
+    dispatcher.maxRequests = 30
+    dispatcher.maxRequestsPerHost = 10
 
-        engine {
-            preconfigured = okHttpClient!!
-        }
-
+    engine {
+        preconfigured = okHttpClient
     }
+
 }
+
 
 actual fun defaultHttpClient() = httpClient
 

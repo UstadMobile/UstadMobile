@@ -69,7 +69,6 @@ import java.util.*
  * Once all information is found, use the groupType to identify the scraper to use.
  *//*
 
-@ExperimentalStdlibApi
 class IndexCategoryCK12Content @Throws(IOException::class)
 constructor(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: File,
             val contentType: String, val scrapeQueueItemUid: Int, val runId: Int) : Runnable {

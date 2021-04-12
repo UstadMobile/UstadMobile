@@ -40,8 +40,7 @@ android {
     }
 
     kotlinOptions {
-        // Setup the Kotlin compiler options for the 'main' compilation:
-        jvmTarget = "$version_kotlin_jvmTarget"
+        jvmTarget = "1.8"
     }
 
     packagingOptions {

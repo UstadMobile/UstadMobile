@@ -68,7 +68,6 @@ import java.util.concurrent.TimeUnit
 
 
 // TODO tests are disabled until jenkins are create its own server
-@ExperimentalStdlibApi
 //@RunWith(AndroidJUnit4::class)
 //@LargeTest
 class DownloadDialogAndNotificationEspressoTest {
