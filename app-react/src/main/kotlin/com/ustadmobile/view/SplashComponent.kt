@@ -8,11 +8,16 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
+import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
-import com.ustadmobile.util.UmStyles.appContainer
-import com.ustadmobile.util.UmStyles.preloadComponentCenteredDiv
-import com.ustadmobile.util.UmStyles.preloadComponentCenteredImage
-import com.ustadmobile.util.UmStyles.preloadComponentProgressBar
+import com.ustadmobile.util.CssStyleManager.appContainer
+import com.ustadmobile.util.CssStyleManager.preloadComponentCenteredDiv
+import com.ustadmobile.util.CssStyleManager.preloadComponentCenteredImage
+import com.ustadmobile.util.CssStyleManager.preloadComponentProgressBar
+import com.ustadmobile.util.RouteManager
+import com.ustadmobile.util.RouteManager.getArgs
 import kotlinx.browser.document
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -33,26 +38,9 @@ class SplashComponent (props: RProps): UmBaseComponent<RProps, RState>(props), S
 
     private var showMainComponent: Boolean = false
 
-    private val diModule = DI.Module("UstadApp-React"){
 
-        bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl.instance }
-
-        bind<UstadAccountManager>() with singleton {
-            UstadAccountManager(instance(), this, di)
-        }
-
-        constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with true
-
-        bind<CoroutineDispatcher>(tag = UstadMobileSystemCommon.TAG_MAIN_COROUTINE_CONTEXT) with singleton { Dispatchers.Main }
-
-        bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
-            ContentEntryOpener(di, context)
-        }
-    }
 
     override fun componentDidMount() {
-        val umDi = DI.lazy { import(diModule)}
-        js("window.di = umDi")
         mPresenter = SplashPresenter(this)
         GlobalScope.launch(Dispatchers.Main) {
             mPresenter.handleResourceLoading()
@@ -79,7 +67,12 @@ class SplashComponent (props: RProps): UmBaseComponent<RProps, RState>(props), S
             styledDiv {
                 css (appContainer)
                 if (showMainComponent) {
-                    initMainComponent(ContentEntryList2View.VIEW_NAME)
+                    val mArgs =  mutableMapOf<String,String>()
+                    mArgs.putAll(getArgs())
+                    if(mArgs.isEmpty()){
+                        mArgs[ARG_PARENT_ENTRY_UID] = MASTER_SERVER_ROOT_ENTRY_UID.toString()
+                    }
+                    initMainComponent(ContentEntryList2View.VIEW_NAME, mArgs)
                 } else {
                     styledDiv {
                         css(preloadComponentCenteredDiv)

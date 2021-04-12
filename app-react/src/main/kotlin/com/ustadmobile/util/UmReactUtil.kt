@@ -29,6 +29,4 @@ object UmReactUtil {
             .invoke(data)
             .map { entry -> entry[1] }.toList() as T
     }
-
-    val queryParams: String = window.location.hash
 }

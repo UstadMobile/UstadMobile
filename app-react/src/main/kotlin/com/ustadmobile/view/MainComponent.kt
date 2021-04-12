@@ -9,28 +9,33 @@ import com.ccfraser.muirwik.components.list.mListItemWithIcon
 import com.ccfraser.muirwik.components.styles.Breakpoint
 import com.ccfraser.muirwik.components.styles.down
 import com.ccfraser.muirwik.components.styles.up
-import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.model.statemanager.UmAppState
+import com.ustadmobile.model.statemanager.GlobalStateSlice
+import com.ustadmobile.model.statemanager.HashState
 import com.ustadmobile.util.Constants.drawerWidth
 import com.ustadmobile.util.Constants.fullWidth
 import com.ustadmobile.util.Constants.placeHolderImage
 import com.ustadmobile.util.Constants.zeroPx
+import com.ustadmobile.util.CssStyleManager
+import com.ustadmobile.util.CssStyleManager.appContainer
+import com.ustadmobile.util.CssStyleManager.fab
+import com.ustadmobile.util.CssStyleManager.mainComponentContentArea
+import com.ustadmobile.util.CssStyleManager.mainComponentRootDiv
+import com.ustadmobile.util.CssStyleManager.mainComponentSearch
+import com.ustadmobile.util.CssStyleManager.mainComponentSearchIcon
+import com.ustadmobile.util.RouteManager.destinationList
+import com.ustadmobile.util.RouteManager.findDestination
+import com.ustadmobile.util.RouteManager.getArgs
+import com.ustadmobile.util.RouteManager.getPathName
+import com.ustadmobile.util.RouteManager.createRoutes
 import com.ustadmobile.util.StateManager
-import com.ustadmobile.util.UmRouting.destinationList
-import com.ustadmobile.util.UmRouting.findDestination
-import com.ustadmobile.util.UmRouting.umRouter
-import com.ustadmobile.util.UmStyles
-import com.ustadmobile.util.UmStyles.appContainer
-import com.ustadmobile.util.UmStyles.fab
-import com.ustadmobile.util.UmStyles.mainComponentContentArea
-import com.ustadmobile.util.UmStyles.mainComponentRootDiv
-import com.ustadmobile.util.UmStyles.mainComponentSearch
-import com.ustadmobile.util.UmStyles.mainComponentSearchIcon
 import kotlinext.js.jsObject
+import kotlinx.browser.window
 import kotlinx.css.*
 import org.kodein.di.instance
+import org.w3c.dom.HashChangeEvent
+import org.w3c.dom.events.Event
 import react.RBuilder
 import react.RProps
 import react.RState
@@ -40,7 +45,7 @@ import styled.css
 import styled.styledDiv
 
 interface MainProps: RProps {
-    var initialView: String
+    var viewToDisplay: String?
 }
 
 
@@ -58,26 +63,50 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     private var showFab: Boolean = false
 
-    private var fabIcon: String = "edit"
+    private var fabIcon: String = ""
 
     private var fabLabel: String = ""
 
+    private var onClickFx:(Event)-> Unit = {}
+
+    private lateinit var currentView: String
+
     private val impl : UstadMobileSystemImpl by instance()
 
+    private var hashChangeListener: (HashChangeEvent) -> Unit  = {
+        val oldViewName = getPathName(it.oldURL)
+        val newViewName = getPathName(it.newURL)
+        if(oldViewName == newViewName){
+            StateManager.dispatch(HashState(newViewName))
+        }
+    }
+
+    private var stateChangeListener : (GlobalStateSlice) -> Unit = {
+        setState {
+            showFab = it.state.showFab
+            fabLabel = it.state.fabLabel
+            fabIcon = it.state.fabIcon
+            onClickFx = it.state.onClick
+        }
+    }
+
+    override fun RState.init(props: MainProps) {
+        currentView = (props.viewToDisplay?: getPathName())
+    }
 
     override fun componentWillMount() {
-        val dest = findDestination(props.initialView)
+        val dest = findDestination(currentView)
         setState {
             currentTile = dest?.let { impl.getString(it.labelId, this) }.toString()
             responsiveDrawerOpen = true
             showSearch = dest?.showSearch?:false
         }
+        window.onhashchange = hashChangeListener
         StateManager.subscribe(stateChangeListener)
     }
 
     override fun RBuilder.render() {
         mCssBaseline()
-
         themeContext.Consumer { theme ->
             styledDiv {
                 css {
@@ -125,7 +154,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                                        mIcon("search")
                                    }
                                    val inputProps = object: RProps {
-                                       val className = "${UmStyles.name}-mainComponentInputSearch"
+                                       val className = "${CssStyleManager.name}-mainComponentInputSearch"
                                    }
                                    mInput(placeholder = "Search...", disableUnderline = true) {
                                        attrs.inputProps = inputProps
@@ -186,26 +215,21 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                                 padding(2.spacingUnits)
                                 backgroundColor = Color(theme.palette.background.default)
                             }
-                            umRouter()
+                            createRoutes()
                         }
                     }
 
                     if(showFab){
                         mFab(fabIcon, fabLabel.toUpperCase(), color = MColor.secondary) {
                             css(fab)
+                            attrs {
+                                onClick = onClickFx
+                            }
                         }
                     }
                 }
 
             }
-        }
-    }
-
-    private val stateChangeListener : (UmAppState) -> Unit = {
-        setState {
-            showFab = it.state.showFab
-            fabLabel = impl.getString(if(it.state.isDetailScreen) MessageID.edit else MessageID.content , this)
-            fabIcon = if(it.state.isDetailScreen) "edit" else "add"
         }
     }
 
@@ -245,8 +269,15 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
             mDivider {  }
         }
     }
+
+    override fun componentWillUnmount() {
+        hashChangeListener = {}
+        stateChangeListener = {}
+    }
 }
 
-fun RBuilder.initMainComponent(initialView: String) = child(MainComponent::class){
-    attrs.initialView = initialView
+fun RBuilder.initMainComponent(mView: String, args: Map<String,String>) = child(MainComponent::class){
+    attrs.viewToDisplay = mView
+    val destination = findDestination(getPathName())?.view?:mView
+    UstadMobileSystemImpl.instance.go(destination, args, this)
 }

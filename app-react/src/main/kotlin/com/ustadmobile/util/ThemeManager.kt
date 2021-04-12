@@ -9,7 +9,7 @@ import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
  * Responsible for styling the app by customizing theme colors,
  * To have custom colors just change primary and secondary main colors
  */
-object UmTheme {
+object ThemeManager {
 
     private val themeOptions: ThemeOptions = js("({palette: { type: 'placeholder'," +
             " primary: {main: 'placeholder'}, secondary: {main: 'placeholder'}}})")
