@@ -2,8 +2,9 @@ package com.ustadmobile.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.lib.db.entities.Language
 import com.ustadmobile.util.UmReactUtil
-import com.ustadmobile.util.UmReactUtil.loadLocalFiles
+import com.ustadmobile.util.UmReactUtil.loadMapFromLocalFile
 import com.ustadmobile.view.SplashView
 import com.ustadmobile.view.SplashView.Companion.LOADED_TAG
 import kotlinx.browser.window
@@ -15,10 +16,12 @@ class SplashPresenter(private val view: SplashView){
     private val impl = UstadMobileSystemImpl.instance
 
     suspend fun handleResourceLoading() {
-        val appConfigs = loadLocalFiles<HashMap<String, String>>("appconfig.json")
-        val localization = loadLocalFiles<HashMap<String, HashMap<Int, String>>>("localization.json")
-        val testData = UmReactUtil.loadListFromFiles<List<Any>>("entries.json")
-        js("window.testData = testData")
+        val appConfigs = loadMapFromLocalFile<HashMap<String, String>>("appconfig.json")
+        val localization = loadMapFromLocalFile<HashMap<String, HashMap<Int, String>>>("localization.json")
+        val entries = UmReactUtil.loadListFromFiles<List<Any>>("entries.json")
+        val languages = UmReactUtil.loadListFromFiles<List<Language>>("languages.json")
+        js("window.entries = entries")
+        js("window.languages = languages")
         appConfigs.forEach {
             impl.setAppPref(it.key, it.value, this)
         }

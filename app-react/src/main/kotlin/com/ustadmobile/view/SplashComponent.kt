@@ -39,15 +39,13 @@ class SplashComponent (props: RProps): UmBaseComponent<RProps, RState>(props), S
 
     private var showMainComponent: Boolean = false
 
-
-
     override fun componentDidMount() {
+        super.componentDidMount()
         mPresenter = SplashPresenter(this)
         GlobalScope.launch(Dispatchers.Main) {
             mPresenter.handleResourceLoading()
         }
     }
-
 
     override var appName: String? = null
         set(value) {
