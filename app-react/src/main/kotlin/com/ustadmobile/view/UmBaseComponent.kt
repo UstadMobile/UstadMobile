@@ -6,10 +6,8 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
-import com.ustadmobile.model.statemanager.UmAppBar
-import com.ustadmobile.util.StateManager
+import com.ustadmobile.util.StateManager.getCurrentState
 import kotlinx.atomicfu.atomic
-import kotlinx.browser.window
 import kotlinx.coroutines.Runnable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -57,7 +55,7 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
     }
 
     override val di: DI
-        get() = window.asDynamic().di as DI
+        get() = getCurrentState().di
 
     override val currentState: Int
         get() = lifecycleStatus.value

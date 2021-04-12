@@ -6,13 +6,16 @@ import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
-import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.ContentEntryList2View.Companion.VIEW_NAME
+import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.model.statemanager.UmAppBar
+import com.ustadmobile.model.statemanager.GlobalStateSlice
+import com.ustadmobile.model.statemanager.AppBarState
+import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.StateManager
-import com.ustadmobile.util.UmReactUtil.queryParams
+import kotlinx.browser.window
 import kotlinx.css.RuleSet
 import kotlinx.css.marginRight
 import kotlinx.css.px
@@ -34,11 +37,21 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
     override val listPresenter: UstadListPresenter<*, in ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
         get() = mPresenter
 
+    override val stateChangeListener: (GlobalStateSlice) -> Unit
+        get() = {
+            if(it.state.view == VIEW_NAME){
+                console.log("Refresh presenter now")
+            }
+        }
+
+
+
     override fun componentWillMount() {
         super.componentWillMount()
+        console.log("Moounted real")
         mPresenter = ContentEntryList2Presenter(this,
-            UMFileUtil.parseURLQueryString(queryParams), this,di,this)
-        mPresenter.onCreate(mapOf())
+            getArgs(), this,di,this)
+        //mPresenter.onCreate(mapOf())
     }
 
     override fun RBuilder.render() {
@@ -54,9 +67,10 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
                     src = item.thumbnailUrl.toString()
                     width = "100px"
                 }},
-            mListItemText(
-                builder.span {+"${item.title}"},
-                builder.span { mTypography(item.description) })
+            mListItemText( builder.span {+item.title!! }, builder.span {
+                mTypography(item.description)
+            })
+
         )
     }
 
@@ -82,6 +96,15 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         return null
     }
 
+    override fun getData(
+        offset: Int,
+        limit: Int
+    ): List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer> {
+        return (window.asDynamic().testData as List<ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>)
+            .filter {it.entryId.toString() == getArgs()[ARG_PARENT_ENTRY_UID]
+            }
+    }
+
 
     override fun showContentEntryAddOptions(parentEntryUid: Long) {
         TODO("Not yet implemented")
@@ -99,7 +122,7 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         get() = field
         set(value) {
             field = value
-            StateManager.dispatch(UmAppBar(title = value))
+            StateManager.dispatch(AppBarState(title = value))
         }
 
     override var editOptionVisible: Boolean
@@ -111,7 +134,7 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         set(value) {}
 
     companion object {
-        val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
+       val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
             ContentEntry.TYPE_EBOOK to "",
             ContentEntry.TYPE_VIDEO to "",
             ContentEntry.TYPE_DOCUMENT to "",

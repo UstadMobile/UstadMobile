@@ -10,20 +10,16 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.ListViewAddMode
 import com.ustadmobile.core.view.SelectionOption
 import com.ustadmobile.core.view.UstadListView
-import com.ustadmobile.model.statemanager.UmFab
+import com.ustadmobile.model.statemanager.GlobalStateSlice
+import com.ustadmobile.util.CssStyleManager
+import com.ustadmobile.util.CssStyleManager.horizontalList
+import com.ustadmobile.util.CssStyleManager.listContainer
+import com.ustadmobile.util.CssStyleManager.listCreateNewContainer
+import com.ustadmobile.util.CssStyleManager.listCreateNewLabel
+import com.ustadmobile.util.CssStyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StateManager
-import com.ustadmobile.util.UmStyles
-import com.ustadmobile.util.UmStyles.horizontalList
-import com.ustadmobile.util.UmStyles.listContainer
-import com.ustadmobile.util.UmStyles.listCreateNewContainer
-import com.ustadmobile.util.UmStyles.listCreateNewLabel
-import com.ustadmobile.util.UmStyles.listItemCreateNewDiv
-import kotlinx.browser.window
 import kotlinx.css.RuleSet
-import react.RBuilder
-import react.RProps
-import react.RState
-import react.ReactElement
+import react.*
 import styled.css
 import styled.styledDiv
 import styled.styledP
@@ -36,6 +32,12 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
     protected abstract val listPresenter: UstadListPresenter<*, in DT>?
 
     private var viewContainerToBeRendered: ReactElement? = null
+
+    protected abstract val stateChangeListener : (GlobalStateSlice) -> Unit
+
+    override fun componentWillMount() {
+        StateManager.subscribe(stateChangeListener)
+    }
 
     override fun RBuilder.render() {
         viewContainerToBeRendered
@@ -53,12 +55,11 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
                         button = true
                         divider = true
                         onClick = {
-                            StateManager.dispatch(UmFab(showFab = true, isDetailScreen = false))
                             listPresenter?.handleClickCreateNewFab() }
                     }
                     renderHeaderView() ?: styledDiv {
                         css(listItemCreateNewDiv)
-                        mListItemIcon("add","${UmStyles.name}-listCreateNewIcon")
+                        mListItemIcon("add","${CssStyleManager.name}-listCreateNewIcon")
                         styledP {
                             css(listCreateNewLabel)
                             +systemImpl.getString(MessageID.add_new, this)
@@ -90,13 +91,12 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
 
     abstract fun styleList(): RuleSet?
 
+    abstract fun getData(offset: Int, limit: Int): List<DT>
+
     override var list: DataSource.Factory<Int, DT>?
         get() = TODO("Not yet implemented")
         set(value) {}
 
-    fun getData(offset: Int, limit: Int): List<DT> {
-        return window.asDynamic().testData as List<DT>
-    }
 
     override var selectionOptions: List<SelectionOption>? = null
         get() = field

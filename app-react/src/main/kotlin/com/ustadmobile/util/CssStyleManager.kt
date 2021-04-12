@@ -16,7 +16,7 @@ import styled.StyleSheet
  * element just check the defined style constants.
  * They are named as per component
  */
-object UmStyles: StyleSheet("ComponentStyles", isStatic = true) {
+object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
 
     val appContainer by css {
         flexGrow = 1.0
