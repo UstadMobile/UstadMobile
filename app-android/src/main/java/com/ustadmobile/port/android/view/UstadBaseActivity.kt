@@ -33,6 +33,7 @@ import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
+import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
 import org.acra.ACRA
@@ -279,23 +280,17 @@ abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotificatio
     }
 
 
-    //The devMinApi21 flavor has SDK Min 21, but other flavors have a lower SDK
-    @SuppressLint("ObsoleteSdkInt")
     override fun attachBaseContext(newBase: Context) {
         val res = newBase.resources
         val config = res.configuration
-        val languageSetting = systemImpl.getLocale(newBase)
+        val languageSetting = newBase.getUstadLocaleSetting()
 
-        if (Build.VERSION.SDK_INT >= 17) {
-            val locale = if (languageSetting == UstadMobileSystemCommon.LOCALE_USE_SYSTEM)
-                Locale.getDefault()
-            else
-                Locale(languageSetting)
-            config.setLocale(locale)
-            super.attachBaseContext(newBase.createConfigurationContext(config))
-        } else {
-            super.attachBaseContext(newBase)
-        }
+        val locale = if (languageSetting == UstadMobileSystemCommon.LOCALE_USE_SYSTEM)
+            Locale.getDefault()
+        else
+            Locale(languageSetting)
+        config.setLocale(locale)
+        super.attachBaseContext(newBase.createConfigurationContext(config))
     }
 
 
