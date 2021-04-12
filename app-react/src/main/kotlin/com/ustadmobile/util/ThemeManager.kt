@@ -6,7 +6,8 @@ import com.ccfraser.muirwik.components.styles.createMuiTheme
 import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 
 /**
- * Responsible for styling the app by customizing theme colors,
+ * Responsible for styling the app by customizing theme colors.
+ *
  * To have custom colors just change primary and secondary main colors
  */
 object ThemeManager {
@@ -14,14 +15,14 @@ object ThemeManager {
     private val themeOptions: ThemeOptions = js("({palette: { type: 'placeholder'," +
             " primary: {main: 'placeholder'}, secondary: {main: 'placeholder'}}})")
 
-    const val primaryColor = "#00796b"
+    private const val primaryColor = "#00796b"
 
-    const val secondaryColor = "#ff9800"
+    private const val secondaryColor = "#ff9800"
 
     /**
-     * Create app theme
+     * Create a theme to be used applied to the app
      */
-    fun getUmTheme(): Theme {
+    fun createAppTheme(): Theme {
         themeOptions.palette?.type = if (isDarkModeEnabled()) "dark" else "light"
         themeOptions.palette?.primary.main = if(isDarkModeEnabled()) primaryColor else primaryColor
         themeOptions.palette?.secondary.main = secondaryColor

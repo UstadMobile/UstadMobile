@@ -13,11 +13,25 @@ import org.kodein.di.*
 import redux.*
 import kotlin.reflect.KProperty1
 
-
+/**
+ * State management which uses Redux to manage state of an app. With Redux app states can be
+ * accessed on all app components.
+ *
+ * To listen for state change, call subscribe() and pass your functional listener, this listener
+ * will be invoked when state changes.
+ * To change state, call dispatch() and pass your state to be changed
+ *
+ * In here we have a GlobalState which holds all state that can be changed by any component within
+ * the app. Like FAB visibility, Title, FAB label, FAB icon and etc.
+ *
+ * We have also, different state action as per element to be changed, check under
+ * com.ustadmobile.model.statemanager for all state actions.
+ */
 object StateManager{
 
     private data class UmDi(var di: DI): RAction
 
+    //App theme state action
     data class UmTheme(var theme: Theme): RAction
 
     private lateinit var stateStore: Store<GlobalStateSlice, RAction, WrapperAction>
@@ -44,6 +58,9 @@ object StateManager{
         }
     }
 
+    /**
+     * Functions which determines state changes from actions and act accordingly
+     */
     private fun reducer(state: GlobalState = GlobalState(), action: RAction): GlobalState {
         return when (action) {
             is AppBarState -> state.copy(title = action.title)
@@ -56,16 +73,30 @@ object StateManager{
         }
     }
 
+    /**
+     * Update a particular state
+     * @param action state action to be changed
+     */
     fun dispatch(action: RAction){
         stateStore.dispatch(action)
     }
 
+    /**
+     * Listen for state changes event
+     * @param mListener functional listen which will be invoked when state changes
+     */
     fun subscribe(mListener: (GlobalStateSlice)-> Unit){
         stateStore.subscribe { mListener(stateStore.getState()) }
     }
 
+    /**
+     * Get current state of an app
+     */
     fun getCurrentState() = stateStore.getState().state
 
+    /**
+     * Create redux app state store which store and manage all states.
+     */
     fun createStore() : Store<GlobalStateSlice,RAction, WrapperAction>{
         stateStore = createStore(combineReducersInferred(
             mapOf(GlobalStateSlice::state to StateManager::reducer)),
