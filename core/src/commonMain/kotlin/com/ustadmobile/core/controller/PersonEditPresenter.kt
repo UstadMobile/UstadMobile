@@ -244,7 +244,7 @@ class PersonEditPresenter(context: Any,
             } else {
                 //Create/Update person group
                 if(entity.personUid == 0L) {
-                    val personWithGroup = repo.insertPersonAndGroup(entity, loggedInPerson)
+                    val personWithGroup = repo.insertPersonAndGroup(entity)
                     entity.personGroupUid = personWithGroup.personGroupUid
                     entity.personUid = personWithGroup.personUid
                 }else {

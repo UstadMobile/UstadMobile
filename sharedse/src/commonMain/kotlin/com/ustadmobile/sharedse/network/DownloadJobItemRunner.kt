@@ -218,20 +218,12 @@ class DownloadJobItemRunner
     }
 
 
-    suspend override fun download(): Deferred<Int> {
+    override suspend fun download(): Deferred<Int> {
         if(downloadCalled) {
             throw IllegalStateException("Can only call download() once on DownloadJobItemRunner!")
         }
 
-        //val containerDownloadManagerVal = containerDownloadManager
         downloadManagerHolderRef = containerDownloadManager.getDownloadJobItemHolderRef(downloadItem.djiUid)
-//
-//                if(containerDownloadManagerVal is ContainerDownloadManagerImpl) {
-//            containerDownloadManagerVal.getDownloadJobItemHolder(downloadItem.djiUid)
-//        }else {
-//            null
-//        }
-
         downloadCalled = true
 
         startTime = getSystemTimeInMillis()

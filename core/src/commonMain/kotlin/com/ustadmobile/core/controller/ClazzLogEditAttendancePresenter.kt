@@ -83,7 +83,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
             db.takeIf { clazzLog.clazzLogClazzUid != 0L }?.clazzDao?.getClazzWithSchool(clazzLog.clazzLogClazzUid)
         } ?: ClazzWithSchool()
 
-        view.clazzLogTimezone = clazzWithSchool.effectiveTimeZone()
+        view.clazzLogTimezone = clazzWithSchool.effectiveTimeZone
 
         //Find all those who are members of the class at the corresponding class schedule.
         val clazzMembersAtTime = db.clazzEnrolmentDao.getAllClazzEnrolledAtTimeAsync(

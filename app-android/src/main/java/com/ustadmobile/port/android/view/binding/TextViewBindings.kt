@@ -3,6 +3,7 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
+import android.text.format.DateUtils
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
@@ -280,4 +281,9 @@ fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
             entityRole.entityRoleScopeName + scopeType
     text = fullText
 
+}
+
+@BindingAdapter("elapsedMillis")
+fun TextView.setElapsedTime(elapsedMillis: Long) {
+    text = DateUtils.formatElapsedTime(elapsedMillis / 1000)
 }

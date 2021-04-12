@@ -56,7 +56,7 @@ class ClazzLogEditPresenter(context: Any,
 
         GlobalScope.launch(doorMainDispatcher()) {
             val timeZone = db.clazzDao.getClazzWithSchool(editEntity.clazzLogClazzUid)
-                    .effectiveTimeZone()
+                    ?.effectiveTimeZone ?: "UTC"
             val localMidnight = DateTime(editEntity.logDate).toLocalMidnight(timeZone).unixMillisLong
             view.date = localMidnight
             view.time = editEntity.logDate - localMidnight
@@ -94,7 +94,7 @@ class ClazzLogEditPresenter(context: Any,
 
         GlobalScope.launch(doorMainDispatcher()) {
             val effectiveTimeZone = db.clazzDao.getClazzWithSchool(entity.clazzLogClazzUid)
-                    ?.effectiveTimeZone() ?: "UTC"
+                    ?.effectiveTimeZone ?: "UTC"
 
             entity.logDate = DateTime(view.date).toOffsetByTimezone(effectiveTimeZone)
                     .localMidnight.utc.unixMillisLong + view.time

@@ -308,6 +308,9 @@ abstract class PersonDao : BaseDao<Person> {
 
         const val ENTITY_PERSONS_WITH_SELECT_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
+        //checkPermissionForSelf = 0 means that there is no need to check permissions if the
+        // accountUid is equal to the personUid. E.g. users have access to their own learning records.
+        // This is not always ths case - e.g. checking for delegation permission (which is restricted)
         const val ENTITY_PERSONS_WITH_PERMISSION_PARAM = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :checkPermissionForSelf $ENTITY_PERSONS_WITH_PERMISSION_PT2  :permission $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days

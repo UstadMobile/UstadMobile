@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.Observer
 import androidx.paging.DataSource
+import androidx.paging.LivePagedListBuilder
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.ConcatAdapter
@@ -275,15 +276,23 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         }
 
     override var list: DataSource.Factory<Int, DT>? = null
-        get() = field
         set(value) {
+            field = value
             currentLiveData?.removeObserver(this)
-            val displayTypeRepoVal = displayTypeRepo ?: return
-            currentLiveData = value?.asRepositoryLiveData(displayTypeRepoVal)
+            val displayTypeRepoVal = displayTypeRepo
+            currentLiveData = if(displayTypeRepoVal != null) {
+                value?.asRepositoryLiveData(displayTypeRepoVal)
+            }else if(value != null) {
+                LivePagedListBuilder(value, 20).build()
+            }else {
+                return
+            }
+
             mListStatusAdapter?.repositoryLoadStatus = currentLiveData?.repoLoadingStatus
             mListStatusAdapter?.pagedListLiveData = currentLiveData
             currentLiveData?.observe(viewLifecycleOwner, this)
-            field = value
+
+
         }
 
     override fun onChanged(t: PagedList<DT>?) {

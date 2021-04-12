@@ -9,10 +9,11 @@ import com.ustadmobile.door.annotation.SyncableEntity
 import kotlinx.serialization.Serializable
 
 /**
- * Represents one session (e.g. day) in the class log book. This is related to attendance records, but
- * could also be related to behavior logs etc. in the future.
+ * Represents one session where a class is expected to happen (e.g. an occurence of the class). It
+ * is created either by ClazzLogCreator according to a preset schedule for the class, or by the user
+ * manually. This is linked to attendance records (ClazzLogAttendanceRecord). It could also be related
+ * to any other item that is related to an occurence of the class (e.g. behavior logs).
  */
-
 @SyncableEntity(tableId = ClazzLog.TABLE_ID,
     notifyOnUpdate = [
         """
@@ -44,6 +45,8 @@ open class ClazzLog()  {
     var clazzLogClazzUid: Long = 0
 
     var logDate: Long = 0
+
+    var logDuration: Int = 0
 
     var timeRecorded: Long = 0
 

@@ -95,7 +95,7 @@ class ClazzWorkEditPresenter(context: Any,
             db.clazzDao.getClazzWithSchool(clazzWork.clazzWorkClazzUid)
         }?: ClazzWithSchool()
 
-        view.timeZone = clazzWithSchool.effectiveTimeZone()
+        view.timeZone = clazzWithSchool.effectiveTimeZone
 
         val loggedInPersonUid = accountManager.activeAccount.personUid
 
@@ -140,7 +140,7 @@ class ClazzWorkEditPresenter(context: Any,
                 db.clazzDao.getClazzWithSchool(editEntity.clazzWorkClazzUid)
             } ?: ClazzWithSchool()
 
-            view.timeZone = clazzWithSchool.effectiveTimeZone()
+            view.timeZone = clazzWithSchool.effectiveTimeZone
         }
 
         view.clazzWorkQuizQuestionsAndOptions = questionAndOptionsEditHelper.liveList
