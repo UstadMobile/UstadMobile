@@ -18,6 +18,7 @@ import com.ustadmobile.util.CssStyleManager.preloadComponentCenteredImage
 import com.ustadmobile.util.CssStyleManager.preloadComponentProgressBar
 import com.ustadmobile.util.RouteManager
 import com.ustadmobile.util.RouteManager.getArgs
+import com.ustadmobile.util.StateManager
 import kotlinx.browser.document
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -63,7 +64,7 @@ class SplashComponent (props: RProps): UmBaseComponent<RProps, RState>(props), S
     override fun RBuilder.render() {
         mCssBaseline()
         themeContext.Consumer { theme ->
-            js("window.theme = theme")
+            StateManager.dispatch(StateManager.UmTheme(theme))
             styledDiv {
                 css (appContainer)
                 if (showMainComponent) {

@@ -1,5 +1,6 @@
 package com.ustadmobile.util
 
+import com.ccfraser.muirwik.components.styles.Theme
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
@@ -16,6 +17,8 @@ import kotlin.reflect.KProperty1
 object StateManager{
 
     private data class UmDi(var di: DI): RAction
+
+    data class UmTheme(var theme: Theme): RAction
 
     private lateinit var stateStore: Store<GlobalStateSlice, RAction, WrapperAction>
 
@@ -48,6 +51,7 @@ object StateManager{
                 fabLabel = action.label, fabIcon = action.icon)
             is UmDi -> state.copy(di = action.di)
             is HashState -> state.copy(view = action.view)
+            is UmTheme -> state.copy(theme = action.theme)
             else -> state
         }
     }

@@ -18,6 +18,8 @@ import styled.StyleSheet
  */
 object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
 
+    private val theme = StateManager.getCurrentState().theme!!
+
     val appContainer by css {
         flexGrow = 1.0
         width = 100.pct
@@ -61,7 +63,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     }
 
 
-    val mainComponentRootDiv by css {
+    val mainComponentContainer by css {
         overflow = Overflow.hidden
         position = Position.relative
         display = Display.flex
@@ -85,7 +87,6 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     }
 
     val mainComponentSearch by css {
-        val theme = window.asDynamic().theme as Theme
         position = Position.relative
         borderRadius = theme.shape.borderRadius.px
         backgroundColor = Color(fade(theme.palette.common.white, 0.15))
@@ -102,7 +103,6 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     }
 
     val mainComponentInputSearch by css {
-        val theme = window.asDynamic().theme as Theme
         paddingTop = 1.spacingUnits
         paddingRight = 1.spacingUnits
         paddingBottom = 1.spacingUnits
@@ -122,9 +122,16 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         padding(1.spacingUnits)
     }
 
+    val entryListItemContainer by css {
+        width = LinearDimension.auto
+        display = Display.flex
+        flexDirection = FlexDirection.row
+    }
+
+
     val horizontalList by css {
         width = LinearDimension.auto
-        backgroundColor = Color((window.asDynamic().theme as Theme).palette.background.paper)
+        backgroundColor = Color(theme.palette.background.paper)
     }
 
     val listCreateNewContainer by css {
@@ -143,5 +150,17 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     val listCreateNewLabel by css{
         fontSize = LinearDimension("1.2em")
         fontWeight = FontWeight("400")
+    }
+
+    val entryDetailComponentContainer by css {
+        width = LinearDimension.auto
+        display = Display.flex
+        flexDirection = FlexDirection.row
+    }
+
+    val entryDetailComponentEntryImage by css {
+        width = LinearDimension("40%")
+        height = LinearDimension.initial
+        marginRight = LinearDimension("3%")
     }
 }
