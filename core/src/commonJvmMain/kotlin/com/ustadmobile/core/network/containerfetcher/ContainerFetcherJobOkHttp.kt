@@ -21,10 +21,17 @@ import com.ustadmobile.core.io.ext.readAndSaveToDir
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.core.util.ext.distinctMd5sSortedAsJoinedQueryParam
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.Response
+import okhttp3.internal.closeQuietly
+import okhttp3.internal.headersContentLength
 
-class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest2,
-                                            val listener: ContainerFetcherListener2?,
-                                            override val di: DI): DIAware {
+class ContainerFetcherJobOkHttp(val request: ContainerFetcherRequest2,
+                                val listener: ContainerFetcherListener2?,
+                                override val di: DI): DIAware {
 
     private val totalDownloadSize = AtomicLong(0L)
 
@@ -33,12 +40,6 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
     private val db: UmAppDatabase by di.on(Endpoint(request.siteUrl)).instance(tag = DoorTag.TAG_DB)
 
     private var startTime: Long = 0
-
-    private fun HttpURLConnection.requireContentLength(): Long {
-        val headerVal = getHeaderField("content-length")
-                ?: throw IllegalStateException("requireContentLength: no content-length header")
-        return headerVal.toLong()
-    }
 
     private val logPrefix: String by lazy {
         "ContainerDownloaderJobHttpUrlConnection2 @${this.doorIdentityHashCode}"
@@ -58,7 +59,7 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
 
         startTime = System.currentTimeMillis()
         var downloadStatus = 0
-        var urlConnection: HttpURLConnection? = null
+        var httpResponse: Response? = null
         var inStream: ConcatenatedInputStream2? = null
 
         //We always download in md5sum (hex) alphabetical order, such that a partial download will
@@ -79,42 +80,39 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
             //check and see if the first file is already here
             val inputUrl = "${request.mirrorUrl}/${ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2}/download"
             Napier.d("$logPrefix Download ${md5sToDownload.size} container files $inputUrl -> ${request.destDirUri}")
-            val localConnectionOpener : LocalURLConnectionOpener? = di.direct.instanceOrNull()
-            val url = URL(inputUrl)
-            urlConnection = localConnectionOpener?.openLocalConnection(url)
-                    ?: url.openConnection() as HttpURLConnection
+
+            val requestBuilder = Request.Builder()
+                .url(inputUrl)
 
             if(firstFilePartPresent) {
                 val startFrom = firstFile.length() + firstFileHeader.length()
                 Napier.d("$logPrefix partial download from $startFrom")
-                urlConnection.addRequestProperty("range", "bytes=${startFrom}-")
+                requestBuilder.addHeader("range", "bytes=${startFrom}-")
             }
 
 
-            urlConnection.doOutput = true
-            urlConnection.requestMethod = "POST"
+            requestBuilder.method("POST",
+                request.entriesToDownload.distinctMd5sSortedAsJoinedQueryParam().toRequestBody(
+                    "application/json".toMediaType()))
 
-            urlConnection.outputStream.use {
-                it.write(request.entriesToDownload.distinctMd5sSortedAsJoinedQueryParam().toByteArray())
-                it.flush()
-            }
-
-
+            val okHttpClient: OkHttpClient = di.direct.instance()
+            httpResponse = okHttpClient.newCall(requestBuilder.build()).execute()
+            val httpBody = httpResponse.body ?: throw IllegalStateException("HTTP response has no body!")
             inStream = ConcatenatedInputStream2(if(firstFilePartPresent) {
                 //If the first file exists, we must read the contents of it's header, then the payload,
                 //so that the checuksum will match
 
                 //checking if this might be causing an issue due to reading from a file that is appended to...
                 val inputStreamList = listOf(FileInputStream(firstFileHeader),
-                        FileInputStream(firstFile), urlConnection.inputStream)
+                        FileInputStream(firstFile), httpBody.byteStream())
 
                 SequenceInputStream(Collections.enumeration(inputStreamList))
             }else {
-                urlConnection.inputStream
+                httpBody.byteStream()
             })
 
             val bytesToSkipWriting = firstFile.length() + firstFileHeader.length()
-            totalDownloadSize.set((firstFile.length() + firstFileHeader.length()) + urlConnection.requireContentLength())
+            totalDownloadSize.set((firstFile.length() + firstFileHeader.length()) + httpResponse.headersContentLength())
 
             val readAndSaveResult = inStream.readAndSaveToDir(destDirFile, destDirFile, db,
                     bytesSoFar, request.entriesToDownload, md5ExpectedList, logPrefix)
@@ -131,8 +129,9 @@ class ContainerFetcherJobHttpUrlConnection2(val request: ContainerFetcherRequest
         }catch(e: Exception) {
             Napier.e("$logPrefix exception downloading", e)
         }finally {
-            inStream?.close()
             progressUpdaterJob.cancel()
+            httpResponse?.closeQuietly()
+            inStream?.closeQuietly()
             listener?.onProgress(request, bytesSoFar.get(), totalDownloadSize.get())
         }
 

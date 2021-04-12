@@ -22,11 +22,11 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
-import java.io.StringReader
 import javax.naming.InitialContext
 
 fun DI.onActiveAccount(): DI {
@@ -60,12 +60,21 @@ class UstadTestRule: TestWatcher() {
 
     lateinit var httpClient: HttpClient
 
+    lateinit var okHttpClient: OkHttpClient
+
     override fun starting(description: Description?) {
         endpointScope = EndpointScope()
         systemImplSpy = spy(UstadMobileSystemImpl.instance)
+
+        okHttpClient = OkHttpClient.Builder().build()
+
         httpClient = HttpClient(OkHttp) {
             install(JsonFeature)
             install(HttpTimeout)
+
+            engine {
+                preconfigured = okHttpClient
+            }
         }
 
         diModule = DI.Module("UstadTestRule") {
@@ -90,6 +99,10 @@ class UstadTestRule: TestWatcher() {
 
             bind<Gson>() with singleton {
                 Gson()
+            }
+
+            bind<OkHttpClient>() with singleton {
+                okHttpClient
             }
 
             bind<HttpClient>() with singleton {

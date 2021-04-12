@@ -6,7 +6,6 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.DoorObserver

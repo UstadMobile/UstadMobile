@@ -8,7 +8,6 @@ import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import com.ustadmobile.sharedse.util.UstadTestRule

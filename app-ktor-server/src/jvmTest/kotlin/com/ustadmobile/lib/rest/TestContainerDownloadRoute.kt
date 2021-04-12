@@ -5,7 +5,6 @@ import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag
