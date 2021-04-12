@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.StatementListView
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -62,7 +63,7 @@ class SessionListPresenterTest {
     @Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         val presenterArgs = mutableMapOf<String,String>()
-        presenterArgs[ARG_ENTITY_UID] = 1000L.toString()
+        presenterArgs[ARG_CONTENT_ENTRY_UID] = 1000L.toString()
         presenterArgs[ARG_PERSON_UID] = 1000L.toString()
         val presenter = SessionListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
@@ -80,7 +81,7 @@ class SessionListPresenterTest {
         val systemImpl: UstadMobileSystemImpl by di.instance()
 
         val presenterArgs = mutableMapOf<String,String>()
-        presenterArgs[ARG_ENTITY_UID] = 1000L.toString()
+        presenterArgs[ARG_CONTENT_ENTRY_UID] = 1000L.toString()
         presenterArgs[ARG_PERSON_UID] = 1000L.toString()
         val presenter = SessionListPresenter(context,
                 presenterArgs, mockView, di, mockLifecycleOwner)
@@ -95,7 +96,7 @@ class SessionListPresenterTest {
         })
 
         verify(systemImpl, timeout(5000)).go(eq(StatementListView.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to 1000L.toString(),
+                eq(mapOf(ARG_CONTENT_ENTRY_UID to 1000L.toString(),
                         UstadView.ARG_PERSON_UID  to 1000L.toString(),
                 SessionListView.ARG_CONTEXT_REGISTRATION to "abc")), any())
     }

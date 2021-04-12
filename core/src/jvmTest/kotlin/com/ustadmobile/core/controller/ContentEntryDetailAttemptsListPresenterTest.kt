@@ -10,6 +10,7 @@ import com.ustadmobile.core.util.ext.waitForListToBeSet
 import com.ustadmobile.core.view.ContentEntryDetailAttemptsListView
 import com.ustadmobile.core.view.SessionListView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
@@ -92,7 +93,7 @@ class ContentEntryDetailAttemptsListPresenterTest {
         })
 
         verify(systemImpl, timeout(5000)).go(eq(SessionListView.VIEW_NAME),
-                eq(mapOf(ARG_ENTITY_UID to 1000L.toString(),
+                eq(mapOf(ARG_CONTENT_ENTRY_UID to 1000L.toString(),
                         UstadView.ARG_PERSON_UID  to 1000L.toString())), any())
     }
 

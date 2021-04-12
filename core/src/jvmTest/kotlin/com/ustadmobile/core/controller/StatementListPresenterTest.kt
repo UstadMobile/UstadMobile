@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.StatementListView
 import com.ustadmobile.core.view.SessionListView
+import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PERSON_UID
 import com.ustadmobile.door.DoorLifecycleObserver
@@ -57,7 +58,7 @@ class StatementListPresenterTest {
     @Test
     fun givenPresenterNotYetCreated_whenOnCreateCalled_thenShouldQueryDatabaseAndSetOnView() {
         val presenterArgs = mutableMapOf<String,String>()
-        presenterArgs[ARG_ENTITY_UID] = 1000L.toString()
+        presenterArgs[ARG_CONTENT_ENTRY_UID] = 1000L.toString()
         presenterArgs[ARG_PERSON_UID] = 1000L.toString()
         presenterArgs[SessionListView.ARG_CONTEXT_REGISTRATION] = "abc"
         val presenter = StatementListPresenter(context,
