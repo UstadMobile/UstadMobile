@@ -49,7 +49,7 @@ class ProductDetailPresenter(context: Any,
         //3.TransactionList
         view.transactionList = repo.inventoryItemDao.getProductTransactionDetail(productUid, loggedInPersonUid)
 
-        //4. Pictures TODO
+        //4. Pictures
         view.pictureList = repo.productDao.findAllProductPictures(productUid)
 
         return productWithCount

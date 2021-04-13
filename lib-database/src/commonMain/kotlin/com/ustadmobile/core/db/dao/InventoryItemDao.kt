@@ -12,6 +12,7 @@ import com.ustadmobile.lib.db.entities.PersonWithInventory
 import com.ustadmobile.lib.db.entities.PersonWithInventoryCount
 import com.ustadmobile.lib.db.entities.PersonWithInventoryItemAndStock
 import com.ustadmobile.lib.db.entities.InventoryTransactionDetail
+import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.door.annotation.Repository
 
 @Repository
@@ -155,12 +156,15 @@ abstract class InventoryItemDao : BaseDao<InventoryItem> {
             LEFT JOIN Person AS WE ON WE.personUid = PersonGroupMember.groupMemberPersonUid
              LEFT JOIN Person AS LE ON LE.personUid = :leUid
             LEFT JOIN Product ON Product.productUid = :productUid
-            
+            LEFT JOIN Person AS PLE ON PLE.personUid = Product.productPersonAdded
             WHERE 
             CAST(LE.active AS INTEGER) = 1 
-            AND ( PersonGroupMember.groupMemberGroupUid = LE.personWeGroupUid
-             OR CAST(LE.admin AS INTEGER) = 1 )
-             AND WE.personGoldoziType = 2
+            AND ( 
+            PersonGroupMember.groupMemberGroupUid = LE.personWeGroupUid
+            OR CASE WHEN  
+                CAST(LE.admin AS INTEGER) = 1 THEN PersonGroupMember.groupMemberGroupUid = PLE.personWeGroupUid ELSE 0 END
+            )
+             AND WE.personGoldoziType = ${Person.GOLDOZI_TYPE_PRODUCER}
             
             AND CAST(WE.active AS INTEGER) = 1  
             GROUP BY(WE.personUid)  

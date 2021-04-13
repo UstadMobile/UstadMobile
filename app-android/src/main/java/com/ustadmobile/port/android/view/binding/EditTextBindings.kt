@@ -131,6 +131,29 @@ fun getRealValueInt(et: TextView): Int {
 }
 
 
+@BindingAdapter("dontShowZeroFloat")
+fun TextInputEditText.setValueIfZeroFloat(value: Float){
+    if(value == 0F){
+        setText("")
+    }else{
+        setText(value.toString())
+    }
+}
+
+@InverseBindingAdapter(attribute = "dontShowZeroFloat")
+fun getValueIfZeroFloat(et: TextView): Float {
+    if(et.text != null && et.text.toString().isNotEmpty()){
+            return et.text.toString().toFloat()?:0F
+    }else{
+        return 0F
+    }
+}
+
+@BindingAdapter("dontShowZeroFloatAttrChanged")
+fun EditText.setDontShowZeroListener(inverseBindingListener: InverseBindingListener) {
+    addTextChangedListener{inverseBindingListener.onChange() }
+}
+
 @BindingAdapter("seekCountET")
 fun EditText.setInventoryCount(value: Int){
     setText(value.toString())

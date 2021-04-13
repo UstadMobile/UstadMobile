@@ -2,18 +2,20 @@
 package com.ustadmobile.port.android.view
 
 
+import android.content.Context
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemCategorychipBinding
 import com.ustadmobile.core.controller.CategoryChipListener
+import com.ustadmobile.core.impl.UMAndroidUtil
 import com.ustadmobile.lib.db.entities.Category
 import com.ustadmobile.port.android.view.ext.setSelectedIfInList
 import com.ustadmobile.port.android.view.util.SelectablePagedListAdapter
 
 
-class CategoryChipRecyclerAdapter(var itemListener: CategoryChipListener?)
+class CategoryChipRecyclerAdapter(var itemListener: CategoryChipListener?, val context: Context)
     : SelectablePagedListAdapter<Category,
         CategoryChipRecyclerAdapter.InventoryTransactionDetailHolder>(DIFF_CALLBACK) {
 
@@ -24,6 +26,7 @@ class CategoryChipRecyclerAdapter(var itemListener: CategoryChipListener?)
         val itemBinding = ItemCategorychipBinding.inflate(
                 LayoutInflater.from(parent.context), parent, false)
         itemBinding.itemListener = itemListener
+        itemBinding.locale = UMAndroidUtil.getCurrentLocale(context)
         return InventoryTransactionDetailHolder(itemBinding)
     }
 

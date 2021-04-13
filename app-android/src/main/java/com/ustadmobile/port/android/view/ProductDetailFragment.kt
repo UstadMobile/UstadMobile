@@ -153,7 +153,7 @@ class ProductDetailFragment: UstadDetailFragment<ProductWithInventoryCount>(), P
                               savedInstanceState: Bundle?): View? {
         val rootView: View
 
-        categoriesRecyclerAdapter = CategoryChipRecyclerAdapter(this)
+        categoriesRecyclerAdapter = CategoryChipRecyclerAdapter(this, requireContext())
         stockRecyclerAdapter = PersonWithInventoryCountRecyclerAdapter(this)
         historyRecyclerAdapter = InventoryTransactionDetailRecyclerAdapter(this)
         picturesRecyclerAdapter = ProductImageRecyclerAdapter(this)

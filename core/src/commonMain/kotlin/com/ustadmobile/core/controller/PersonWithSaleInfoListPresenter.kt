@@ -1,4 +1,4 @@
-package com.ustadmobile.core.controller
+    package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
@@ -76,8 +76,8 @@ class PersonWithSaleInfoListPresenter(context: Any, arguments: Map<String, Strin
 
     private fun updateListOnView() {
         val loggedInPersonUid = accountManager.activeAccount.personUid
-        view.list = repo.saleDao.findAllPersonWithSaleInfo(loggedInPersonUid,
-            view.checkedFilterOptionChip?.optionId?:SaleDao.FILTER_ALL,
+        val optionId = view.checkedFilterOptionChip?.optionId?:SaleDao.FILTER_ALL
+        view.list = repo.saleDao.findAllPersonWithSaleInfo(loggedInPersonUid, optionId,
                 searchText.toQueryLikeParam())
     }
 

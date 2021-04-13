@@ -222,7 +222,7 @@
                 app:layout_constraintTop_toBottomOf="@+id/fragment_product_edit_desc_pashto_til">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:text="@={`` + product.productBasePrice}"
+                    app:dontShowZeroFloat="@={product.productBasePrice}"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:inputType="@{InputType.TYPE_CLASS_NUMBER}"

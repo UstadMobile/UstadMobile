@@ -208,7 +208,7 @@ abstract class PersonDao : BaseDao<Person> {
         AND (:filterProducer = 0 OR Person.personGoldoziType = ${Person.GOLDOZI_TYPE_PRODUCER})
         AND (:filterCustomer = 0 OR Person.personGoldoziType = ${Person.GOLDOZI_TYPE_CUSTOMER})
         AND ( CAST(Person.admin AS INTEGER) = 0 OR CAST(LE.admin AS INTEGER) = 1) 
-        AND Person.personCreatedBy = :leUid
+        AND (Person.personCreatedBy = :leUid OR CAST(LE.admin AS INTEGER) = 1)
          GROUP BY Person.personUid
          ORDER BY CASE(:sortOrder)
                 WHEN $SORT_FIRST_NAME_ASC THEN Person.firstNames

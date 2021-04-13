@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
@@ -52,8 +53,10 @@ class ProductListPresenter(context: Any, arguments: Map<String, String>, view: P
             var filterIdOption: MutableList<ListFilterIdOption> = mutableListOf()
             filterIdOption.add(ListFilterIdOption(systemImpl.getString(MessageID.all, context),0))
             var index = 1
+            val locale = systemImpl.getSystemLocale(context)
             for(everyCategory in categories){
-                filterIdOption.add(ListFilterIdOption(everyCategory.categoryName?:"",
+                filterIdOption.add(ListFilterIdOption(
+                        everyCategory.getNameLocale(locale)?:"",
                         index))
 
                 categoryMap[index] = everyCategory.categoryUid

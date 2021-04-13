@@ -54,9 +54,9 @@ open class Category() {
 
     fun getNameLocale(locale: String): String{
         var categoryNameLocale : String?
-        if(locale.equals("fa")){
+        if(locale.toLowerCase().startsWith("fa")){
             categoryNameLocale = categoryNameDari
-        }else if(locale.equals("ps")){
+        }else if(locale.toLowerCase().startsWith("ps")){
             categoryNameLocale = categoryNamePashto
         }else{
             categoryNameLocale = categoryName
@@ -89,9 +89,9 @@ open class Category() {
 
     fun getDescLocale(locale: String): String{
         var categoryDescLocale : String?
-        if(locale.equals("fa")){
+        if(locale.toLowerCase().startsWith("fa")){
             categoryDescLocale = categoryDescDari
-        }else if(locale.equals("ps")){
+        }else if(locale.toLowerCase().startsWith("ps")){
             categoryDescLocale = categoryDescPashto
         }else{
             categoryDescLocale = categoryDesc

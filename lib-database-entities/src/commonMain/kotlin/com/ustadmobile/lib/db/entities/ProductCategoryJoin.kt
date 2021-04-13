@@ -12,7 +12,8 @@ import kotlinx.serialization.Serializable
 @Entity
 @SyncableEntity(tableId = PRODUCT_CATEGORY_JOIN_TABLE_ID)
 @Serializable
-open class ProductCategoryJoin() {
+open class
+ProductCategoryJoin() {
 
     @PrimaryKey(autoGenerate = true)
     var productCategoryJoinUid: Long = 0
