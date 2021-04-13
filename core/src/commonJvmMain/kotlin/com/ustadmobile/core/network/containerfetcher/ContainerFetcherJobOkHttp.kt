@@ -12,7 +12,6 @@ import com.ustadmobile.door.ext.doorIdentityHashCode
 import kotlinx.coroutines.*
 import org.kodein.di.*
 import java.io.*
-import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
 import java.util.concurrent.atomic.AtomicLong
@@ -42,7 +41,7 @@ class ContainerFetcherJobOkHttp(val request: ContainerFetcherRequest2,
     private var startTime: Long = 0
 
     private val logPrefix: String by lazy {
-        "ContainerDownloaderJobHttpUrlConnection2 @${this.doorIdentityHashCode}"
+        "ContainerDownloaderJobOkHttp @${this.doorIdentityHashCode}"
     }
 
     suspend fun progressUpdater() = coroutineScope {
