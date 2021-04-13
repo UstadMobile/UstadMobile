@@ -3,7 +3,6 @@ package com.ustadmobile.port.android
 import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
