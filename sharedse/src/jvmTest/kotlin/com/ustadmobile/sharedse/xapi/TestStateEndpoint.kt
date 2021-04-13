@@ -18,10 +18,11 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil
 import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
+import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
 import java.nio.file.Files
@@ -48,10 +49,16 @@ class TestStateEndpoint {
     @Rule
     val temporaryFolder = TemporaryFolder()
 
+    private lateinit var httpClient: HttpClient
+
     @Before
     fun setup() {
         val endpointScope = EndpointScope()
         val endpointUrl = Endpoint("http://localhost:8087/")
+        httpClient = HttpClient(OkHttp){
+            install(JsonFeature)
+            install(HttpTimeout)
+        }
         di = DI {
             bindDbAndRepoWithEndpoint(endpointScope, clientMode = true)
             bind<Gson>() with singleton {
@@ -64,6 +71,10 @@ class TestStateEndpoint {
             bind<XapiStateEndpoint>() with singleton {
                 XapiStateEndpointImpl(endpointUrl, di)
             }
+
+            bind<HttpClient>() with singleton {
+                httpClient
+            }
         }
 
         gson = di.direct.instance()
@@ -72,6 +83,10 @@ class TestStateEndpoint {
 
     }
 
+    @After
+    fun tearDown() {
+        httpClient.close()
+    }
 
     @Test
     fun givenStateObject_checkExistsInDb() {

@@ -5,7 +5,6 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.openEntryInputStream
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
@@ -18,13 +17,13 @@ import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Compani
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import org.junit.*
 import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.io.IOException
@@ -41,6 +40,8 @@ class MountedContainerResponderTest {
 
 //    private lateinit var containerManager: ContainerManager
 
+    private lateinit var httpClient: HttpClient
+
     @JvmField
     @Rule
     var temporaryFolder = TemporaryFolder()
@@ -51,8 +52,13 @@ class MountedContainerResponderTest {
         containerTmpDir = temporaryFolder.newFolder("TestMountedContainerResponder-containerTmp")
 
         db = UmAppDatabase.getInstance(Any())
+        httpClient = HttpClient(OkHttp) {
+            install(JsonFeature)
+            install(HttpTimeout)
+        }
+
         repo = db.asRepository(Any(), "http://localhost/dummy", "",
-                defaultHttpClient())
+                httpClient)
         db.clearAllTables()
 
         container = Container()
@@ -72,6 +78,11 @@ class MountedContainerResponderTest {
             repo.addFileToContainer(container.containerUid, tmpFiles[1].toDoorUri(),
                     "subfolder/test file2.png", containerAddOptions)
         }
+    }
+
+    @After
+    fun tearDown() {
+        httpClient.close()
     }
 
     //Test handling of file names when url encoding is required

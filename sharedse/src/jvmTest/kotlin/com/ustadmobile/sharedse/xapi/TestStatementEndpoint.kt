@@ -20,6 +20,10 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
 import com.ustadmobile.util.test.checkJndiSetup
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -49,6 +53,8 @@ class TestStatementEndpoint {
 
     private lateinit var di: DI
 
+    private lateinit var httpClient: HttpClient
+
     val context = Any()
 
     @JvmField
@@ -60,8 +66,18 @@ class TestStatementEndpoint {
         checkJndiSetup()
         val endpointScope = EndpointScope()
         val endpointUrl = Endpoint("http://localhost:8087/")
+
+        httpClient = HttpClient(OkHttp){
+            install(JsonFeature)
+            install(HttpTimeout)
+        }
+
         di = DI {
             bindDbAndRepoWithEndpoint(endpointScope, clientMode = true)
+
+            bind<HttpClient>() with singleton {
+                httpClient
+            }
 
             bind<Gson>() with singleton {
                 val builder = GsonBuilder()
@@ -78,6 +94,10 @@ class TestStatementEndpoint {
         gson = di.direct.instance()
         repo = di.on(endpointUrl).direct.instance(tag = UmAppDatabase.TAG_REPO)
         endpoint = di.on(endpointUrl).direct.instance()
+    }
+
+    fun tearDown() {
+        httpClient.close()
     }
 
     @Test

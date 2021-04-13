@@ -17,7 +17,6 @@ import com.ustadmobile.core.io.UploadSessionParams
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.networkmanager.ContainerUploadManager
 import com.ustadmobile.core.networkmanager.ImportJobRunner
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
@@ -40,6 +39,7 @@ import org.kodein.di.ktor.DIFeature
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.application.*
+import io.ktor.client.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.request.*
@@ -90,10 +90,6 @@ class ImportJobRunnerTest {
 
     @Before
     fun setup() {
-        serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase").build()
-        serverDb.clearAllTables()
-        serverRepo = spy(serverDb.asRepository(Any(), "http://localhost/dummy",
-                "", defaultHttpClient(), null))
 
         val endpointScope = EndpointScope()
 
@@ -109,6 +105,13 @@ class ImportJobRunnerTest {
                         context, this.context, di)
             }
         }
+
+        val httpClient: HttpClient = di.direct.instance()
+        serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase").build()
+        serverDb.clearAllTables()
+        serverRepo = spy(serverDb.asRepository(Any(), "http://localhost/dummy",
+            "", httpClient, null))
+
 
         server = embeddedServer(Netty, port = defaultPort) {
             install(ContentNegotiation) {

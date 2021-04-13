@@ -13,7 +13,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
@@ -24,6 +23,10 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStatementEndpointImpl
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
@@ -58,11 +61,16 @@ class UstadTestRule: TestWatcher() {
 
     lateinit var diModule: DI.Module
 
-    class SomeDiThing(di: DI)
+    lateinit var httpClient: HttpClient
 
     override fun starting(description: Description?) {
         endpointScope = EndpointScope()
         systemImplSpy = spy(UstadMobileSystemImpl.instance)
+        httpClient = HttpClient(OkHttp) {
+            install(JsonFeature)
+            install(HttpTimeout)
+        }
+
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
@@ -75,8 +83,13 @@ class UstadTestRule: TestWatcher() {
                 })
             }
 
+            bind<HttpClient>() with singleton{
+                httpClient
+            }
+
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope!!).singleton {
-                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
+                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(Any(), context.url,
+                    "", instance(), null))
             }
 
             bind<ContainerMounter>() with singleton { EmbeddedHTTPD(0, di).also { it.start() } }
@@ -95,6 +108,7 @@ class UstadTestRule: TestWatcher() {
 
     override fun finished(description: Description?) {
         UstadMobileSystemImpl.instance.clearPrefs()
+        httpClient.close()
 
     }
 

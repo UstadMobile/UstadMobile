@@ -5,10 +5,13 @@ import com.soywiz.klock.DateTime
 import com.soywiz.klock.days
 import com.soywiz.klock.parse
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.test.checkJndiSetup
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Assert.assertEquals
@@ -21,6 +24,8 @@ class TestClazzLogCreator {
 
     private lateinit var repo: UmAppDatabase
 
+    private lateinit var httpClient : HttpClient
+
     val dateFormat = DateFormat("EEE, dd MMM yyyy HH:mm:ss z")
 
     @Before
@@ -29,8 +34,13 @@ class TestClazzLogCreator {
         db = UmAppDatabase.Companion.getInstance(Any())
         db.clearAllTables()
 
+        httpClient = HttpClient(OkHttp) {
+            install(JsonFeature)
+            install(HttpTimeout)
+        }
+
         repo = db.asRepository(Any(), "http://localhost/dummy", "",
-                defaultHttpClient(), null)
+                httpClient, null)
     }
 
     private fun createClazzAndSchedule(clazzName: String, holidayCalendarUid: Long = 0,

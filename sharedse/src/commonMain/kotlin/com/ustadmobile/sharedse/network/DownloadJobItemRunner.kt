@@ -11,7 +11,6 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_CORO
 import com.ustadmobile.core.network.containerfetcher.AbstractContainerFetcherListener2
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherRequest2
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.core.util.UMFileUtil
@@ -38,10 +37,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
-import org.kodein.di.on
+import org.kodein.di.*
 
 data class DownloadJobItemRunnerDIArgs(val endpoint: Endpoint, val downloadJobItem: DownloadJobItem)
 
@@ -328,7 +324,7 @@ class DownloadJobItemRunner
                     }
 
                     downloadEndpoint = endpointUrl
-                    currentHttpClient = defaultHttpClient()
+                    currentHttpClient = di.direct.instance()
                 } else {
                     if (networkNodeToUse.groupSsid == null
                             || connectivityStatusVal?.connectivityState != ConnectivityStatus.STATE_CONNECTED_LOCAL
@@ -343,7 +339,7 @@ class DownloadJobItemRunner
                     }
 
                     downloadEndpoint = currentNetworkNode!!.endpointUrl!!
-                    currentHttpClient = networkManager.localHttpClient ?: defaultHttpClient()
+                    currentHttpClient = networkManager.localHttpClient ?: di.direct.instance()
                 }
 
                 history.url = downloadEndpoint
