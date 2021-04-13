@@ -94,7 +94,7 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
                 }
 
                 mTypography(systemImpl.getString(MessageID.description,this),
-                    variant = MTypographyVariant.caption, gutterBottom = true)
+                    variant = MTypographyVariant.caption, paragraph = true)
 
                 mTypography(entity.description, paragraph = true)
 

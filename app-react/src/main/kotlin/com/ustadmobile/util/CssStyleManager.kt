@@ -20,10 +20,6 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
 
     private val theme = StateManager.getCurrentState().theme!!
 
-    val defaultMarginTop  by css{
-        marginTop = 16.px
-    }
-
     val appContainer by css {
         flexGrow = 1.0
         width = 100.pct
@@ -31,6 +27,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         overflow = Overflow.hidden
         position = Position.relative
         display = Display.flex
+        flexDirection = FlexDirection.column
     }
 
     val fab by css{
@@ -38,6 +35,10 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         right = 15.px
         bottom = 15.px
         zIndex = 99999
+    }
+
+    val defaultMarginTop  by css{
+        marginTop = 16.px
     }
 
     val progressIndicator by css {

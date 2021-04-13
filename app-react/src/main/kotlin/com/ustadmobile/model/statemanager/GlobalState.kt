@@ -10,4 +10,4 @@ import org.w3c.dom.events.Event
 data class GlobalState(var title: String? = "",var view:String? = null,
                        var showFab: Boolean = false, var fabLabel: String = "",
                        var fabIcon: String = "", var onClick:(Event) -> Unit = {},
-                       var di: DI = DI.lazy {}, var theme: Theme? = null)
+                       var di: DI = DI.lazy {}, var theme: Theme? = null, var loading: Boolean = false)

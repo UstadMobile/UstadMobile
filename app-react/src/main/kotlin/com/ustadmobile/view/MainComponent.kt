@@ -20,6 +20,7 @@ import com.ustadmobile.util.CssStyleManager.mainComponentContentArea
 import com.ustadmobile.util.CssStyleManager.mainComponentContainer
 import com.ustadmobile.util.CssStyleManager.mainComponentSearch
 import com.ustadmobile.util.CssStyleManager.mainComponentSearchIcon
+import com.ustadmobile.util.CssStyleManager.progressIndicator
 import com.ustadmobile.util.RouteManager.destinationList
 import com.ustadmobile.util.RouteManager.findDestination
 import com.ustadmobile.util.RouteManager.getPathName
@@ -27,6 +28,7 @@ import com.ustadmobile.util.RouteManager.renderRoutes
 import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.UmReactUtil.drawerWidth
 import com.ustadmobile.util.UmReactUtil.fullWidth
+import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 import com.ustadmobile.util.UmReactUtil.placeHolderImage
 import com.ustadmobile.util.UmReactUtil.zeroPx
 import kotlinext.js.jsObject
@@ -85,6 +87,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
             fabLabel = it.state.fabLabel
             fabIcon = it.state.fabIcon
             onClickFx = it.state.onClick
+            loading = it.state.loading
         }
     }
 
@@ -112,17 +115,20 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                     backgroundColor = Color(theme.palette.background.paper)
                 }
 
-                styledDiv {
-                    css { +mainComponentContainer }
 
-                    /*//Loading indicator
+                //Loading indicator
+                if(loading){
                     mLinearProgress {
                         css(progressIndicator)
                         attrs {
-                            color = if(UmReactUtil.isDarkModeEnabled()) MLinearProgressColor.secondary
+                            color = if(isDarkModeEnabled()) MLinearProgressColor.secondary
                             else MLinearProgressColor.primary
                         }
-                    }*/
+                    }
+                }
+
+                styledDiv {
+                    css { +mainComponentContainer }
                     mAppBar(position = MAppBarPosition.absolute) {
                         css {
                             position = Position.absolute

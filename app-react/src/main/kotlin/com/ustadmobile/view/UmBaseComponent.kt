@@ -45,7 +45,7 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
         get() = field
         set(value) {
             field = value
-            StateManager.dispatch(AppBarState(loading = loading))
+            StateManager.dispatch(AppBarState(loading = value))
         }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
