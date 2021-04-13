@@ -4,10 +4,8 @@ import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMUUID
 import com.ustadmobile.core.util.ext.convertToJsonObject
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
@@ -19,9 +17,11 @@ import com.ustadmobile.core.view.UstadView.Companion.ARG_LEAF
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryParentChildJoin
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
+import io.ktor.client.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.GlobalScope
@@ -30,6 +30,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import org.kodein.di.DI
+import org.kodein.di.instance
 import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
@@ -42,6 +43,8 @@ class ContentEntryEdit2Presenter(context: Any,
 
     private val contentImportManager: ContentImportManager?
             by on(accountManager.activeAccount).instanceOrNull<ContentImportManager>()
+
+    private val httpClient: HttpClient by di.instance()
 
     enum class LicenceOptions(val optionVal: Int, val messageId: Int) {
         LICENSE_TYPE_CC_BY(ContentEntry.LICENSE_TYPE_CC_BY, MessageID.licence_type_cc_by),
@@ -128,7 +131,7 @@ class ContentEntryEdit2Presenter(context: Any,
 
                     if (entity.entryId == null) {
                         entity.entryId = accountManager.activeAccount.endpointUrl +
-                                "${entity.contentEntryUid}/${UMUUID.randomUUID()}"
+                                "${entity.contentEntryUid}/${randomUuid()}"
                         repo.contentEntryDao.updateAsync(entity)
                     }
                     val contentEntryJoin = ContentEntryParentChildJoin().apply {
@@ -167,8 +170,7 @@ class ContentEntryEdit2Presenter(context: Any,
 
                         var client: HttpResponse? = null
                         try {
-
-                            client = defaultHttpClient().post<HttpStatement>() {
+                            client = httpClient.post<HttpStatement>() {
                                 url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
                                         "/import/downloadLink/"))
                                 parameter("parentUid", parentEntryUid)

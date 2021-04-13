@@ -4,7 +4,7 @@ import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.readAndSaveToDir
-import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobHttpUrlConnection2
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobOkHttp
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.base64EncodedToHexString
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
@@ -13,7 +13,6 @@ import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import kotlinx.coroutines.*
-import kotlinx.serialization.Serializable
 import org.kodein.di.*
 import java.io.*
 import java.util.*
@@ -96,9 +95,9 @@ class UploadSession(val sessionUuid: String,
         md5sExpected = entriesRequired.distinctMds5sSorted()
 
         firstFile = File(uploadWorkDir,
-                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_PART}")
+                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobOkHttp.SUFFIX_PART}")
         firstFileHeader = File(uploadWorkDir,
-                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobHttpUrlConnection2.SUFFIX_HEADER}")
+                "${md5sExpected.first().base64EncodedToHexString()}${ContainerFetcherJobOkHttp.SUFFIX_HEADER}")
 
         startFromByte = if(firstFile.exists() && firstFileHeader.exists())
             firstFile.length() + firstFileHeader.length()

@@ -8,12 +8,14 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.account.UstadAccountManager.Companion.ACCOUNTS_PREFKEY
 import com.ustadmobile.core.account.UstadAccounts
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.ext.userAtServer
 import com.ustadmobile.door.DoorDatabaseSyncRepository
 import com.ustadmobile.lib.db.entities.PersonWithAccount
 import com.ustadmobile.lib.db.entities.UmAccount
 import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import okhttp3.mockwebserver.MockResponse
@@ -75,7 +77,10 @@ class UstadAccountManagerTest {
             }
 
             bind<HttpClient>() with singleton {
-                defaultHttpClient()
+                HttpClient(OkHttp) {
+                    install(JsonFeature)
+                    install(HttpTimeout)
+                }
             }
 
             bind<Gson>() with singleton {

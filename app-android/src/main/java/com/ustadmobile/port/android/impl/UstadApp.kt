@@ -57,6 +57,8 @@ import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
@@ -76,7 +78,9 @@ import java.util.concurrent.TimeUnit
 open class UstadApp : BaseUstadApp(), DIAware {
 
     val diModule = DI.Module("UstadApp-Android") {
-        bind<UstadMobileSystemImpl>() with singleton { UstadMobileSystemImpl.instance }
+        bind<UstadMobileSystemImpl>() with singleton {
+            UstadMobileSystemImpl.instance
+        }
 
         bind<UstadAccountManager>() with singleton {
             UstadAccountManager(instance(), applicationContext, di)
@@ -96,7 +100,7 @@ open class UstadApp : BaseUstadApp(), DIAware {
             val attachmentDir = File(applicationContext.filesDir.siteDataSubDir(context),
                     UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
             instance<UmAppDatabase>(tag = TAG_DB).asRepository(applicationContext,
-                    context.url, "", defaultHttpClient(), useClientSyncManager = true,
+                    context.url, "", instance(), useClientSyncManager = true,
                     attachmentFilters = attachmentFilters, attachmentsDir = attachmentDir.absolutePath).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
             }
@@ -205,22 +209,34 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<XmlPullParserFactory>().newSerializer()
         }
 
-        //OKHttp does not work on versions below 5.0
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            bind<OkHttpClient>() with singleton {
-                OkHttpClient.Builder()
-                        .dispatcher(Dispatcher().also {
-                            it.maxRequests = 30
-                            it.maxRequestsPerHost = 10
-                        })
-                        .connectTimeout(45, TimeUnit.SECONDS)
-                        .readTimeout(45, TimeUnit.SECONDS)
-                        .build()
-            }
+        bind<OkHttpClient>() with singleton {
+            OkHttpClient.Builder()
+                    .dispatcher(Dispatcher().also {
+                        it.maxRequests = 30
+                        it.maxRequestsPerHost = 10
+                    })
+                    .connectTimeout(45, TimeUnit.SECONDS)
+                    .readTimeout(45, TimeUnit.SECONDS)
+                    .build()
         }
 
         bind<HttpClient>() with singleton {
-            defaultHttpClient()
+            HttpClient(OkHttp) {
+
+                install(JsonFeature) {
+                    serializer = GsonSerializer()
+                }
+                install(HttpTimeout)
+
+                val dispatcher = Dispatcher()
+                dispatcher.maxRequests = 30
+                dispatcher.maxRequestsPerHost = 10
+
+                engine {
+                    preconfigured = instance()
+                }
+
+            }
         }
 
         bind<DestinationProvider>() with singleton {
@@ -248,7 +264,8 @@ open class UstadApp : BaseUstadApp(), DIAware {
 
     override fun onCreate() {
         super.onCreate()
-        UstadMobileSystemImpl.instance.messageIdMap = MessageIDMap.ID_MAP
+        val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+        systemImpl.messageIdMap = MessageIDMap.ID_MAP
         Napier.base(DebugAntilog())
     }
 

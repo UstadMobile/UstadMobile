@@ -1,11 +1,8 @@
-import groovy.xml.XmlUtil
 
 plugins {
     id 'application'
-    id 'war'
     id 'org.jetbrains.kotlin.multiplatform'
     id 'maven-publish'
-    //TODO: This should be defined by a variable, which might need to ome from settings.gradle
     id 'com.github.johnrengelman.shadow'
     id 'kotlinx-serialization'
     id 'com.github.psxpaul.execfork' version '0.1.13'
@@ -27,6 +24,14 @@ kotlin {
     }
 
     sourceSets {
+
+        commonMain {
+            dependencies {
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "io.ktor:ktor-io:$version_ktor"
+            }
+        }
 
         jvmMain {
 
@@ -74,6 +79,7 @@ kotlin {
 
                 implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$version_kotlin"
 
+                implementation "io.netty:netty-tcnative-boringssl-static:$version_netty_tcnative"
             }
         }
 
@@ -90,8 +96,6 @@ kotlin {
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
 
-                implementation "io.ktor:ktor-client-core:$version_ktor"
-                implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
 
@@ -107,13 +111,6 @@ kotlin {
     }
 }
 
-def angularDestinationPath = "$buildDir/generated/source/angular/"
-
-configurations {
-    servletRuntime.extendsFrom runtime
-    standaloneRuntime.extendsFrom runtime
-}
-
 mainClassName = 'com.ustadmobile.lib.rest.ServerAppMain'
 
 // This task will generate your fat JAR and put it in the ./build/libs/ directory
@@ -121,6 +118,7 @@ shadowJar {
     manifest {
         attributes 'Main-Class': mainClassName
     }
+    archiveBaseName = "ustad-server"
 
     def target = kotlin.targets.jvm
     from target.compilations.main.output
@@ -128,90 +126,6 @@ shadowJar {
     configurations = [runtimeClasspath]
 }
 
-sourceSets {
-    main.resources.srcDirs += [angularDestinationPath]
-}
-
-
-war {
-    classpath configurations.servletRuntime
-}
-
-/**
- * Add welcome file to web.xml to be used as a default file to be opened
- */
-task addWelcomeFileToWebXml {
-    doLast {
-        def xmlFile = project.file("src/main/webapp/WEB-INF/web.xml")
-        def webXml = new XmlParser().parse(xmlFile)
-        def exists = false
-        webXml.value().each {
-            if (it.toString().contains("welcome-file-list")) {
-                exists = true
-                return
-            }
-        }
-
-        if (!exists) {
-            def welcome = webXml.appendNode("welcome-file-list")
-            welcome.appendNode("welcome-file", "en/index.html")
-            xmlFile.withWriter { out ->
-                XmlUtil.serialize(webXml, out)
-            }
-        } else {
-            println("Welcome file already added")
-        }
-    }
-}
-
-/**
- * Create a production jar with angular static files
- */
-task prodModeJar(type: Jar) {
-    from sourceSets.main.allSource
-}
-
-
-/**
- * Create a development jar file without angular static files
- */
-task devModJar(type: Jar) {
-    from sourceSets.main.allSource
-}
-
-task appRun(type: JavaExec) {
-    classpath = files("$buildDir/libs/app-ktor-server-all.jar")
-    main = 'io.ktor.server.netty.EngineMain'
-    args '-port=8087', '-config=server.conf'
-}
-
-task appRunDebug(type: JavaExec) {
-    classpath = files("$buildDir/libs/app-ktor-server-all.jar")
-    main = 'io.ktor.server.netty.EngineMain'
-    args '-port=8087', '-config=devmode.conf'
-    jvmArgs '-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5005'
-}
-
-task appRunDevMode(type: JavaExec) {
-    classpath = files("$buildDir/libs/app-ktor-server-all.jar")
-    main = 'io.ktor.server.netty.EngineMain'
-    args = ['-port=8087', "-config=$projectDir/devserver-application.conf"]
-}
-
-task testWebAppRunFork(type: com.github.psxpaul.task.JavaExecFork) {
-    outputs.upToDateWhen { false }
-    classpath = sourceSets.test.runtimeClasspath
-    main = 'io.ktor.server.netty.EngineMain'
-    args = ['-port=8087', "-config=$projectDir/devserver-application.conf"]
-    waitForPort = 8087
-    workingDir = "$projectDir/"
-    standardOutput = "$projectDir/build/tmp/daemon.log"
-    errorOutput = "$projectDir/build/tmp/daemon-error.log"
-}
-
-appRun.dependsOn(shadowJar)
-appRunDebug.dependsOn(shadowJar)
-appRunDevMode.dependsOn(shadowJar)
 
 sourceCompatibility = "8"
 targetCompatibility = "8"

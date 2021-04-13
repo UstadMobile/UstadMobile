@@ -29,6 +29,11 @@ import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.extractTestResourceToFile
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -55,12 +60,20 @@ class TestXapiStateResponder {
 
     }.type
 
+    private lateinit var httpClient: HttpClient
+
     @Before
     @Throws(IOException::class)
     fun setup() {
         checkJndiSetup()
         val endpointScope = EndpointScope()
         val systemImplSpy = spy(UstadMobileSystemImpl.instance)
+
+        httpClient = HttpClient(OkHttp){
+            install(JsonFeature)
+            install(HttpTimeout)
+        }
+
         di = DI {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
@@ -79,6 +92,10 @@ class TestXapiStateResponder {
             bind<XapiStateEndpoint>() with scoped(endpointScope).singleton {
                 XapiStateEndpointImpl(context, di)
             }
+
+            bind<HttpClient>() with singleton {
+                httpClient
+            }
         }
 
         accountManager = di.direct.instance()
@@ -87,6 +104,11 @@ class TestXapiStateResponder {
         mockUriResource = mock<RouterNanoHTTPD.UriResource> {
             on { initParameter(0, DI::class.java) }.thenReturn(di)
         }
+    }
+
+    @After
+    fun tearDown() {
+        httpClient.close()
     }
 
     @Test

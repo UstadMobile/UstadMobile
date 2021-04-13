@@ -23,6 +23,9 @@ class ReportSeries{
 
         const val LINE_GRAPH = 101
 
+        const val STATEMENT_QUERY = 100
+
+        const val ATTENDANCE_QUERY = 101
 
         const val TOTAL_DURATION = 200
 

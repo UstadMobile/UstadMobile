@@ -7,15 +7,12 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
-import com.ustadmobile.core.io.ext.generateConcatenatedFilesResponse2
 import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
 import com.ustadmobile.core.io.ext.toKmpUriString
 import com.ustadmobile.core.util.UstadTestRule
-import com.ustadmobile.core.util.ext.base64StringToByteArray
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
-import com.ustadmobile.door.ext.toHexString
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
@@ -24,21 +21,17 @@ import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import io.ktor.client.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.*
-import okio.Buffer
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
 import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
-import java.io.*
 import java.util.concurrent.atomic.AtomicInteger
 
-class ContainerFetcherJobHttpUrlConnection2Test {
+class ContainerFetcherJobOkHttpTest {
 
 
     class ConcatenatedResponse2Dispatcher(private val db: UmAppDatabase) : Dispatcher(){
@@ -133,7 +126,7 @@ class ContainerFetcherJobHttpUrlConnection2Test {
             downloadDestDir.toKmpUriString())
 
         val mockListener = mock<ContainerFetcherListener2> { }
-        val downloaderJob = ContainerFetcherJobHttpUrlConnection2(request,
+        val downloaderJob = ContainerFetcherJobOkHttp(request,
             mockListener, clientDi)
 
         val result = runBlocking { downloaderJob.download() }
@@ -174,7 +167,7 @@ class ContainerFetcherJobHttpUrlConnection2Test {
 
                 val request = ContainerFetcherRequest2(entriesToDownload, siteUrl, siteUrl,
                         downloadDestDir.toKmpUriString())
-                val downloaderJob = ContainerFetcherJobHttpUrlConnection2(request,
+                val downloaderJob = ContainerFetcherJobOkHttp(request,
                         mockListener, clientDi)
                 val result = runBlocking { downloaderJob.download() }
                 results.add(result)
@@ -185,6 +178,7 @@ class ContainerFetcherJobHttpUrlConnection2Test {
 
         }
 
+        serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
         Assert.assertEquals("First result returned paused",
                 0, results[0])
         Assert.assertEquals("Second result completed",
@@ -194,9 +188,6 @@ class ContainerFetcherJobHttpUrlConnection2Test {
         val mockRequest2 = mockWebServer.takeRequest()
         Assert.assertNotNull("Second request included partial response request",
                 mockRequest2.getHeader("range"))
-
-
-        serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
     }
 
 

@@ -10,6 +10,7 @@ import com.ustadmobile.core.db.dao.PersonAuthDao.Companion.ENCRYPTED_PASS_PREFIX
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.util.KmpUuid
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.authenticateEncryptedPassword
 import com.ustadmobile.lib.util.encryptPassword
@@ -123,7 +124,7 @@ abstract class PersonDao : BaseDao<Person> {
     private fun createAndInsertAccessToken(personUid: Long, username: String): UmAccount {
         val accessToken = AccessToken(personUid,
                 getSystemTimeInMillis() + SESSION_LENGTH)
-        accessToken.token = KmpUuid.randomUUID().toString()
+        accessToken.token = randomUuid().toString()
 
         insertAccessToken(accessToken)
         return UmAccount(personUid, username, accessToken.token, "")

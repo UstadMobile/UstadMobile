@@ -59,13 +59,15 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
 
     val repo: UmAppDatabase by on(accountManager.activeAccount).instance(tag = UmAppDatabase.TAG_REPO)
 
+    private val systemImpl: UstadMobileSystemImpl by di.instance()
+
     @JsName("handleMountChunk")
     abstract suspend fun handleMountChunk()
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
 
-        var entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
+        val entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
 
         GlobalScope.launch {
@@ -76,8 +78,8 @@ abstract class WebChunkPresenterCommon(context: Any, arguments: Map<String, Stri
                 })
             } catch (e: Exception) {
                 view.runOnUiThread(Runnable {
-                    view.showSnackBar(UstadMobileSystemImpl.instance
-                            .getString(MessageID.error_opening_file, context))
+                    view.showSnackBar(
+                        systemImpl.getString(MessageID.error_opening_file, context))
                 })
             }
 
