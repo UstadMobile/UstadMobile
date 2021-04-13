@@ -80,7 +80,6 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
     override var fieldsEnabled: Boolean = true
 
     override var entity: PersonWithAccount? = null
-        get() = field
         set(value) {
             field = value
             mBinding?.person = value
@@ -106,14 +105,16 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
+                              savedInstanceState: Bundle?): View? {
         val rootView: View
-        mBinding = FragmentPersonAccountEditBinding.inflate(inflater, container, false).also {
+        mBinding = FragmentPersonAccountEditBinding.inflate(inflater, container,
+            false).also {
             rootView = it.root
         }
 
-        mPresenter = PersonAccountEditPresenter(requireContext(), arguments.toStringMap(), this,
-                di, viewLifecycleOwner)
+        mPresenter = PersonAccountEditPresenter(requireContext(), arguments.toStringMap(),
+            this, di, viewLifecycleOwner)
 
         mBinding?.currentPasswordText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.currentPasswordError = null
@@ -121,11 +122,13 @@ class PersonAccountEditFragment: UstadEditFragment<PersonWithAccount>(), PersonA
 
         mBinding?.newPasswordText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.passwordError = null
+            mBinding?.passwordConfirmError = null
         })
 
 
         mBinding?.confirmPasswordText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.passwordConfirmError = null
+            mBinding?.passwordError = null
         })
 
         mBinding?.accountUsernameText?.addTextChangedListener(ClearErrorTextWatcher {

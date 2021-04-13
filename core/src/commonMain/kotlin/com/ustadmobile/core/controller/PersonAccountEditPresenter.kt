@@ -97,15 +97,19 @@ class PersonAccountEditPresenter(context: Any,
 
                 view.usernameError = if(entity.username.isNullOrEmpty())
                     requiredFieldMessage else null
+                view.noPasswordMatchError = if(entity.confirmedPassword != entity.newPassword
+                    && !entity.confirmedPassword.isNullOrEmpty() && !entity.newPassword.isNullOrEmpty())
+                    impl.getString(MessageID.filed_password_no_match, context) else null
+
                 view.currentPasswordError = if(entity.currentPassword.isNullOrEmpty()
                         && !activeUserHasPasswordResetPermission && !createAccount)
                     requiredFieldMessage else null
                 view.newPasswordError = if(entity.newPassword.isNullOrEmpty())
-                    requiredFieldMessage else null
+                    requiredFieldMessage else view.newPasswordError
                 view.confirmedPasswordError = if(entity.confirmedPassword.isNullOrEmpty())
-                    requiredFieldMessage else null
-                view.noPasswordMatchError = if(entity.confirmedPassword != entity.newPassword)
-                    impl.getString(MessageID.filed_password_no_match, context) else null
+                    requiredFieldMessage else view.confirmedPasswordError
+
+
                 return@launch
             }
             try{
