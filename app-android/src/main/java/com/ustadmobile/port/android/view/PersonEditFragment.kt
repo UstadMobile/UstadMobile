@@ -224,6 +224,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         }
         get() = mBinding?.usernameError
 
+    override var emailError: String?
+        set(value){
+            mBinding?.emailError = value
+        }
+        get()= mBinding?.emailError
+
     override var firstNamesFieldError: String?
         set(value) {
             mBinding?.firstNamesError = value
@@ -397,6 +403,9 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
 
         mBinding?.birthdayText?.addTextChangedListener(ClearErrorTextWatcher {
             mBinding?.dateOfBirthFieldError = null
+        })
+        mBinding?.emailText?.addTextChangedListener(ClearErrorTextWatcher{
+            mBinding?.emailError = null
         })
 
         mBinding?.usernameText?.filters = arrayOf(USERNAME_FILTER)

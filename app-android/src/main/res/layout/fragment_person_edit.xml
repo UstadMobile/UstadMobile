@@ -82,6 +82,10 @@
             name="dateOfBirthFieldError"
             type="String" />
 
+        <variable
+            name="emailError"
+            type="String" />
+
 
 
 
@@ -267,6 +271,8 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
+                app:errorText="@{emailError}"
+                app:errorEnabled="@{emailError != null}"
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"

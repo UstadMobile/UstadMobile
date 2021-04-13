@@ -24,6 +24,8 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var passwordError: String?
 
+    var emailError: String?
+
     var confirmError: String?
 
     var dateOfBirthError: String?
