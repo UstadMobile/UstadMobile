@@ -11,6 +11,7 @@ import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -89,8 +90,8 @@ class UstadTestRule: TestWatcher() {
             }
 
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope!!).singleton {
-                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "",
-                    instance(), null))
+                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(
+                    Any(), context.url, instance(), instance())))
             }
 
             bind<NetworkManagerBle>() with singleton { mock<NetworkManagerBle> { } }

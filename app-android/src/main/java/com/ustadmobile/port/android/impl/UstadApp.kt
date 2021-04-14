@@ -55,6 +55,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTT
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
@@ -95,15 +96,13 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
-            val attachmentFilters = listOf(
-                    ImageResizeAttachmentFilter("PersonPicture", 1280, 1280))
-            val attachmentDir = File(applicationContext.filesDir.siteDataSubDir(context),
-                    UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
-            instance<UmAppDatabase>(tag = TAG_DB).asRepository(applicationContext,
-                    context.url, "", instance(), useClientSyncManager = true,
-                    attachmentFilters = attachmentFilters, attachmentsDir = attachmentDir.absolutePath).also {
-                (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
-            }
+            instance<UmAppDatabase>().asRepository(repositoryConfig(applicationContext, context.url,
+                instance(), instance()) {
+                attachmentsDir = File(applicationContext.filesDir.siteDataSubDir(this@singleton.context),
+                    UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
+                useClientSyncManager = true
+                attachmentFilters += ImageResizeAttachmentFilter("PersonPicture", 1280, 1280)
+            })
         }
 
         bind<EmbeddedHTTPD>() with singleton {

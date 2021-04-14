@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.test.platform.app.InstrumentationRegistry
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.DoorObserver
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.ConnectivityStatus
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -13,6 +14,7 @@ import io.ktor.client.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
 import org.junit.Assert.assertEquals
 import org.junit.Before
 import org.junit.Test
@@ -60,12 +62,13 @@ class DownloadJobConnectivityChangeTriggerEventsTest {
         context = InstrumentationRegistry.getInstrumentation().context
         val di: DI = (context.applicationContext as DIAware).di
         val httpClient: HttpClient = di.direct.instance()
+        val okHttpClient: OkHttpClient = di.direct.instance()
 
         umAppDatabase = UmAppDatabase.getInstance(context)
         umAppDatabase.clearAllTables()
 
-        repo = umAppDatabase.asRepository(context, "http://localhost/dummy", "",
-            httpClient, null)
+        repo = umAppDatabase.asRepository(repositoryConfig(context, "http://localhost/dummy",
+            httpClient, okHttpClient))
 
         entry = ContentEntry("title 2", "title 2", leaf = true, publik = true)
         entry.contentEntryUid = repo.contentEntryDao.insert(entry)

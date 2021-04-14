@@ -10,6 +10,7 @@ import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
 import com.ustadmobile.core.io.ext.toContainerEntryWithMd5
 import com.ustadmobile.core.io.ext.toKmpUriString
 import com.ustadmobile.core.util.UstadTestRule
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
@@ -19,9 +20,11 @@ import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
 import com.ustadmobile.util.commontest.ext.mockResponseForConcatenatedFiles2Request
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.*
 import org.junit.*
 import org.junit.rules.TemporaryFolder
@@ -58,6 +61,8 @@ class ContainerFetcherJobOkHttpTest {
 
     private lateinit var serverHttpClient: HttpClient
 
+    private lateinit var serverOkHttpClient: OkHttpClient
+
     private lateinit var container: Container
 
     private lateinit var clientDi: DI
@@ -73,16 +78,20 @@ class ContainerFetcherJobOkHttpTest {
     @Before
     fun setup() {
         Napier.baseDebugIfNotEnabled()
-        serverHttpClient = HttpClient() {
+        serverOkHttpClient = OkHttpClient()
+        serverHttpClient = HttpClient(OkHttp) {
             install(JsonFeature)
             install(HttpTimeout)
+            engine {
+                preconfigured = serverOkHttpClient
+            }
         }
 
         serverDb = UmAppDatabase.getInstance(Any(), "UmAppDatabase").also {
             it.clearAllTables()
         }
-        serverRepo = serverDb.asRepository(Any(), "http://localhost/dummy", "",
-            serverHttpClient, null)
+        serverRepo = serverDb.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
+            serverHttpClient, serverOkHttpClient))
 
         container = Container().apply {
             containerUid = serverRepo.containerDao.insert(this)
@@ -111,6 +120,7 @@ class ContainerFetcherJobOkHttpTest {
     @After
     fun shutdown() {
         mockWebServer.shutdown()
+        serverHttpClient.close()
     }
 
     @Test

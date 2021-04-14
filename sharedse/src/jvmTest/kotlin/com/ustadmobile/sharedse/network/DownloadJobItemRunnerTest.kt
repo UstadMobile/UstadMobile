@@ -19,6 +19,7 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
@@ -251,8 +252,8 @@ class DownloadJobItemRunnerTest {
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(
-                    Any(), context.url, "", instance(), null))
+                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(), context.url,
+                    instance(), instance())))
             }
 
             bind<ContainerDownloadManager>() with scoped(endpointScope).singleton {
@@ -328,8 +329,8 @@ class DownloadJobItemRunnerTest {
 
         //this can be shared as needed
         val httpClient: HttpClient= clientDi.direct.instance()
-        serverRepo = serverDb.asRepository(context, "http://localhost/dummy", "",
-            httpClient)
+        serverRepo = serverDb.asRepository(repositoryConfig(context, "http://localhost/dummy",
+            httpClient, clientDi.direct.instance()))
 
         mockLocalAvailabilityManager = clientDi.on(accountManager.activeAccount).direct.instance()
 

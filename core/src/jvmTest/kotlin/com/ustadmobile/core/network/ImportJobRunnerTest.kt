@@ -22,6 +22,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.ext.distinctMds5sSorted
 import com.ustadmobile.door.DatabaseBuilder
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_DB
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
@@ -40,6 +41,8 @@ import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.application.*
 import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.json.*
 import io.ktor.features.*
 import io.ktor.http.*
 import io.ktor.request.*
@@ -47,6 +50,7 @@ import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.*
@@ -109,9 +113,8 @@ class ImportJobRunnerTest {
         val httpClient: HttpClient = di.direct.instance()
         serverDb = DatabaseBuilder.databaseBuilder(Any(), UmAppDatabase::class, "UmAppDatabase").build()
         serverDb.clearAllTables()
-        serverRepo = spy(serverDb.asRepository(Any(), "http://localhost/dummy",
-            "", httpClient, null))
-
+        serverRepo = spy(serverDb.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
+            httpClient, di.direct.instance())))
 
         server = embeddedServer(Netty, port = defaultPort) {
             install(ContentNegotiation) {
@@ -136,6 +139,19 @@ class ImportJobRunnerTest {
 
                 bind<UploadSessionManager>() with scoped(serverEndpointScope).singleton {
                     UploadSessionManager(context, di)
+                }
+
+                bind<OkHttpClient>() with singleton {
+                    OkHttpClient()
+                }
+
+                bind<HttpClient>() with singleton {
+                    HttpClient(OkHttp) {
+                        install(JsonFeature)
+                        engine {
+                            preconfigured = instance()
+                        }
+                    }
                 }
 
 

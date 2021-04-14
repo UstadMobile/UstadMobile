@@ -22,6 +22,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
@@ -51,13 +52,19 @@ class TestStateEndpoint {
 
     private lateinit var httpClient: HttpClient
 
+    private lateinit var okHttpClient: OkHttpClient
+
     @Before
     fun setup() {
         val endpointScope = EndpointScope()
         val endpointUrl = Endpoint("http://localhost:8087/")
+        okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp){
             install(JsonFeature)
             install(HttpTimeout)
+            engine {
+                preconfigured = okHttpClient
+            }
         }
         di = DI {
             bindDbAndRepoWithEndpoint(endpointScope, clientMode = true)
@@ -70,6 +77,10 @@ class TestStateEndpoint {
             }
             bind<XapiStateEndpoint>() with singleton {
                 XapiStateEndpointImpl(endpointUrl, di)
+            }
+
+            bind<OkHttpClient>() with singleton {
+                okHttpClient
             }
 
             bind<HttpClient>() with singleton {
