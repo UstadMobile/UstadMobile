@@ -416,13 +416,17 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
             return
         }
 
-        val nextDownload = appDb.downloadJobItemDao.findNextDownloadJobItems2(1,
-                currentConnectivityStatus?.connectivityState ?: ConnectivityStatus.STATE_DISCONNECTED)
-        if(nextDownload.isNotEmpty()) {
-            val containerDownloader: ContainerDownloadRunner = di.direct.instance(
-                    arg = DownloadJobItemRunnerDIArgs(endpoint, nextDownload[0]))
+        val activeUids = activeDownloads.map { it.key }
+        val filterByConnectivityStatus = currentConnectivityStatus?.connectivityState
+            ?: ConnectivityStatus.STATE_DISCONNECTED
+        val nextDownloads = appDb.downloadJobItemDao.findNextDownloadJobItems2(1,
+            filterByConnectivityStatus, activeUids)
 
-            activeDownloads[nextDownload[0].djiUid] = ActiveContainerDownload(nextDownload[0],
+        if(nextDownloads.isNotEmpty()) {
+            val containerDownloader: ContainerDownloadRunner = di.direct.instance(
+                    arg = DownloadJobItemRunnerDIArgs(endpoint, nextDownloads[0]))
+
+            activeDownloads[nextDownloads[0].djiUid] = ActiveContainerDownload(nextDownloads[0],
                     containerDownloader)
             GlobalScope.launch(Dispatchers.IO) {
                 containerDownloader.download()

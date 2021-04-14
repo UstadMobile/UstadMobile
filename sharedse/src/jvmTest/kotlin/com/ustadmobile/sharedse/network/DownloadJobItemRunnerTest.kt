@@ -282,9 +282,6 @@ class DownloadJobItemRunnerTest {
                         it.maxRequests = 30
                         it.maxRequestsPerHost = 10
                     })
-                    .retryOnConnectionFailure(true)
-                    .connectTimeout(45, TimeUnit.SECONDS)
-                    .readTimeout(45, TimeUnit.SECONDS)
                     .build()
             }
 
