@@ -42,14 +42,14 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     }
 
     val progressIndicator by css {
-        width = LinearDimension("100%")
+        width = 100.pc
     }
 
     val preloadComponentCenteredDiv by css{
         height = 200.px
         width = 200.px
-        left = LinearDimension("50%")
-        top = LinearDimension("50%")
+        left = 50.pc
+        top = 50.pc
         marginLeft = (-100).px
         marginTop = (-50).px
         position =  Position.fixed
@@ -123,7 +123,8 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     }
 
     val ustadListViewComponentContainer by css {
-        //display = Display.inlineFlex
+        display = Display.inlineFlex
+        flexDirection = FlexDirection.column
         padding(1.spacingUnits)
     }
 
@@ -131,6 +132,18 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         width = LinearDimension.auto
         display = Display.flex
         flexDirection = FlexDirection.row
+    }
+
+    val entryListItemImage by css{
+        marginRight = 20.px
+        width = (8.5).pc
+        height = 150.px
+    }
+
+    val entryListItemInfo by css {
+        width = LinearDimension.auto
+        display = Display.flex
+        flexDirection = FlexDirection.column
     }
 
 

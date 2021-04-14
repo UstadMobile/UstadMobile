@@ -1,32 +1,26 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.MTypographyVariant
-import com.ccfraser.muirwik.components.list.mListItemText
-import com.ccfraser.muirwik.components.mTypography
-import com.ccfraser.muirwik.components.variant
+import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.ContentEntryList2View.Companion.VIEW_NAME
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
-import com.ustadmobile.model.statemanager.GlobalStateSlice
 import com.ustadmobile.model.statemanager.AppBarState
 import com.ustadmobile.util.CssStyleManager.entryListItemContainer
+import com.ustadmobile.util.CssStyleManager.entryListItemImage
+import com.ustadmobile.util.CssStyleManager.entryListItemInfo
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.StateManager
 import kotlinx.browser.window
 import kotlinx.css.*
 import react.RBuilder
 import react.RProps
-import react.ReactElement
-import react.dom.span
 import styled.css
 import styled.styledDiv
-import styled.styledH1
 import styled.styledImg
 
 interface EntryListProps: RProps
@@ -55,18 +49,32 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         styledDiv {
             css(entryListItemContainer)
             styledImg {
-                css { marginRight = 20.px }
+                css { +entryListItemImage }
                 attrs{
                     src = item.thumbnailUrl.toString()
-                    width = "100px"
                 }}
             styledDiv {
+                css{+entryListItemInfo}
                 mTypography(item.title,variant = MTypographyVariant.h6){
                     css {
                         marginBottom = LinearDimension("10px")
                     }
                 }
-                mTypography(item.description, variant = MTypographyVariant.body2)
+                mTypography(item.description, variant = MTypographyVariant.body1, paragraph = true)
+
+                mGridContainer(spacing= MGridSpacing.spacing1){
+                    val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag]?:0
+                    val icon = CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag]?:""
+                    mGridItem {
+                        mIcon(icon, fontSize = MIconFontSize.small)
+                    }
+
+                    mGridItem {
+                        mTypography(
+                            systemImpl.getString(messageId, this),
+                            variant = MTypographyVariant.body2, gutterBottom = true)
+                    }
+                }
             }
         }
     }
@@ -128,13 +136,13 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
 
     companion object {
        val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
-            ContentEntry.TYPE_EBOOK to "",
-            ContentEntry.TYPE_VIDEO to "",
-            ContentEntry.TYPE_DOCUMENT to "",
-            ContentEntry.TYPE_ARTICLE to "",
-            ContentEntry.TYPE_COLLECTION to "",
-            ContentEntry.TYPE_INTERACTIVE_EXERCISE to "",
-            ContentEntry.TYPE_AUDIO to ""
+            ContentEntry.TYPE_EBOOK to "book",
+            ContentEntry.TYPE_VIDEO to "smart_display",
+            ContentEntry.TYPE_DOCUMENT to "description",
+            ContentEntry.TYPE_ARTICLE to "article",
+            ContentEntry.TYPE_COLLECTION to "collections",
+            ContentEntry.TYPE_INTERACTIVE_EXERCISE to "touch_app",
+            ContentEntry.TYPE_AUDIO to "audiotrack"
         )
 
         val CONTENT_ENTRY_TYPE_LABEL_MAP = mapOf(

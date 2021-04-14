@@ -19,7 +19,10 @@ import com.ustadmobile.util.CssStyleManager.listCreateNewContainer
 import com.ustadmobile.util.CssStyleManager.listCreateNewLabel
 import com.ustadmobile.util.CssStyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StateManager
+import kotlinx.css.LinearDimension
 import kotlinx.css.RuleSet
+import kotlinx.css.margin
+import kotlinx.css.px
 import react.*
 import styled.css
 import styled.styledDiv
@@ -47,6 +50,12 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
     override fun RBuilder.render() {
         styledDiv {
             css(ustadListViewComponentContainer)
+            styledDiv {
+                css{
+                    margin = "16px"
+                }
+                renderOptions()
+            }
             mList {
                 css{ +(styleList() ?: horizontalList) }
                 mListItem {
@@ -85,6 +94,10 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
                 +systemImpl.getString(MessageID.add_new, this)
             }
         }
+    }
+
+    open fun RBuilder.renderOptions(){
+
     }
 
     abstract fun handleClickEntry(entry: DT)
@@ -142,8 +155,7 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
 
     companion object {
 
-        val SELECTION_ICONS_MAP =
-            mapOf(SelectionOption.EDIT to "edit",
+        val SELECTION_ICONS_MAP = mapOf(SelectionOption.EDIT to "edit",
                 SelectionOption.DELETE to "delete",
                 SelectionOption.MOVE to "drive_file_move",
                 SelectionOption.HIDE to "visibility",
