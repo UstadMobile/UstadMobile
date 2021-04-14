@@ -96,13 +96,15 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
-            instance<UmAppDatabase>().asRepository(repositoryConfig(applicationContext, context.url,
+            instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(applicationContext, context.url,
                 instance(), instance()) {
                 attachmentsDir = File(applicationContext.filesDir.siteDataSubDir(this@singleton.context),
                     UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
                 useClientSyncManager = true
                 attachmentFilters += ImageResizeAttachmentFilter("PersonPicture", 1280, 1280)
-            })
+            }).also {
+                (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
+            }
         }
 
         bind<EmbeddedHTTPD>() with singleton {
