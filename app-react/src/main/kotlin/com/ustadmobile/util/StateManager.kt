@@ -59,15 +59,17 @@ object StateManager{
     }
 
     /**
-     * Functions which determines state changes from actions and act accordingly
+     * Function which determines state changes from actions and act accordingly
      */
     private fun reducer(state: GlobalState = GlobalState(), action: RAction): GlobalState {
+        state.type = action
         return when (action) {
-            is AppBarState -> state.copy(title = action.title)
+            is AppBarState -> state.copy(title = if(action.title.isNullOrBlank()) state.title
+                else action.title, searchQuery = if(action.searchQuery.isNullOrBlank())
+                    state.searchQuery else action.searchQuery, loading = action.loading)
             is FabState -> state.copy(showFab = action.visible, onClick = action.onClick,
                 fabLabel = action.label, fabIcon = action.icon)
             is UmDi -> state.copy(di = action.di)
-            is HashState -> state.copy(view = action.view)
             is UmTheme -> state.copy(theme = action.theme)
             else -> state
         }

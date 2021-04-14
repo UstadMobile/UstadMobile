@@ -17,13 +17,14 @@ import com.ustadmobile.util.CssStyleManager.entryDetailComponentContainer
 import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryExtraInfo
 import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryImage
 import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryImageAndButtonContainer
-import com.ustadmobile.util.CssStyleManager.entryDetailComponentLanguageList
+import com.ustadmobile.util.CssStyleManager.chipSet
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.UmReactUtil.formatString
 import kotlinx.browser.window
 import kotlinx.css.margin
 import react.RBuilder
 import react.RProps
+import react.setState
 import styled.css
 import styled.styledDiv
 import styled.styledImg
@@ -38,75 +39,84 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
         mPresenter = ContentEntry2DetailPresenter(this,getArgs(),
             this,di,this)
         //mPresenter.onCreate(mapOf())
+
+        //remove this when database is ready
+        window.setTimeout({
+            setState {
+                entity = (window.asDynamic().entries as List<ContentEntryWithMostRecentContainer>).first {
+                    it.contentEntryUid.toString() == getArgs()[UstadView.ARG_ENTITY_UID]
+                }
+            }
+            showSnackBar("Hello there")
+        }, 1000)
     }
 
     override fun RBuilder.render() {
-        //change this
-        val entity = (window.asDynamic().entries as List<ContentEntryWithMostRecentContainer>).first {
-            it.contentEntryUid.toString() == getArgs()[UstadView.ARG_ENTITY_UID]
-        }
 
         val languages = window.asDynamic().languages as List<Language>
+        if(entity != null){
+            styledDiv{
+                css{+entryDetailComponentContainer}
 
-        styledDiv{
-            css{+entryDetailComponentContainer}
-
-            styledDiv {
-                css{+entryDetailComponentEntryImageAndButtonContainer}
-                styledImg {
-                    css{+entryDetailComponentEntryImage}
-                    attrs{
-                        src = entity.thumbnailUrl.toString()
-                    }
-                }
-
-                mButton(systemImpl.getString(MessageID.open, this), size = MButtonSize.large
-                ,color = MColor.secondary,variant = MButtonVariant.contained, onClick = {
-                        mPresenter.handleOnClickOpenDownloadButton() }){
-                    css { +defaultMarginTop}
-                }
-            }
-
-            styledDiv {
-                css { +entryDetailComponentEntryExtraInfo }
-
-                mTypography(entity.title, variant = MTypographyVariant.h4, gutterBottom = true)
-
-                mTypography( formatString(MessageID.entry_details_author,entity.author,systemImpl),
-                    variant = MTypographyVariant.h6, gutterBottom = true)
-
-                 styledDiv {
-                    css{+entryDetailComponentContainer}
-                    mGridContainer(spacing= MGridSpacing.spacing10){
-
-                        mGridItem {
-                            mTypography(
-                                formatString(MessageID.entry_details_publisher,entity.publisher,systemImpl),
-                                variant = MTypographyVariant.subtitle1, gutterBottom = true)
-                        }
-
-                        mGridItem {
-                            mTypography(
-                                formatString(MessageID.entry_details_license,entity.licenseName,systemImpl,""),
-                                variant = MTypographyVariant.subtitle1, gutterBottom = true)
-                        }
-                    }
-                }
-
-                mTypography(systemImpl.getString(MessageID.description,this),
-                    variant = MTypographyVariant.caption, paragraph = true)
-
-                mTypography(entity.description, paragraph = true)
-
-                mTypography(systemImpl.getString(MessageID.also_available_in, this),
-                    variant = MTypographyVariant.caption, paragraph = true
-                )
                 styledDiv {
-                    css{+entryDetailComponentLanguageList}
-                    languages.forEach { language ->
-                        mChip("${language.name}", onClick = {
-                            mPresenter.handleOnTranslationClicked(language.langUid) }) {
-                            css { margin(1.spacingUnits) }
+                    css{+entryDetailComponentEntryImageAndButtonContainer}
+                    styledImg {
+                        css{+entryDetailComponentEntryImage}
+                        attrs{
+                            src = entity?.thumbnailUrl.toString()
+                        }
+                    }
+
+                    mButton(systemImpl.getString(MessageID.open, this), size = MButtonSize.large
+                        ,color = MColor.secondary,variant = MButtonVariant.contained, onClick = {
+                            mPresenter.handleOnClickOpenDownloadButton() }){
+                        css { +defaultMarginTop}
+                    }
+                }
+
+                styledDiv {
+                    css { +entryDetailComponentEntryExtraInfo }
+
+                    mTypography(entity?.title, variant = MTypographyVariant.h4, gutterBottom = true)
+
+                    mTypography( formatString(MessageID.entry_details_author,entity?.author,systemImpl),
+                        variant = MTypographyVariant.h6, gutterBottom = true)
+
+                    styledDiv {
+                        css{+entryDetailComponentContainer}
+                        mGridContainer(spacing= MGridSpacing.spacing10){
+
+                            mGridItem {
+                                mTypography(
+                                    formatString(MessageID.entry_details_publisher,
+                                        entity?.publisher,systemImpl),
+                                    variant = MTypographyVariant.subtitle1, gutterBottom = true)
+                            }
+
+                            mGridItem {
+                                mTypography(
+                                    formatString(MessageID.entry_details_license,
+                                        entity?.licenseName,systemImpl,""),
+                                    variant = MTypographyVariant.subtitle1, gutterBottom = true)
+                            }
+                        }
+                    }
+
+                    mTypography(systemImpl.getString(MessageID.description,this),
+                        variant = MTypographyVariant.caption, paragraph = true)
+
+                    mTypography(entity?.description, paragraph = true)
+
+                    mTypography(systemImpl.getString(MessageID.also_available_in, this),
+                        variant = MTypographyVariant.caption, paragraph = true
+                    )
+                    styledDiv {
+                        css{+chipSet}
+                        languages.forEach { language ->
+                            mChip("${language.name}", onClick = {
+                                mPresenter.handleOnTranslationClicked(language.langUid) }) {
+                                css { margin(1.spacingUnits) }
+                            }
                         }
                     }
                 }
@@ -118,9 +128,11 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
 
-    override var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>?
-        get() = TODO("Not yet implemented")
-        set(value) {}
+    override var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null
+        get() = field
+        set(value) {
+            field = value
+        }
 
     override fun showDownloadDialog(args: Map<String, String>) {
         TODO("Not yet implemented")

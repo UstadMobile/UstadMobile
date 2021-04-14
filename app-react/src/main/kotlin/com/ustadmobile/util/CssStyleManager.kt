@@ -193,7 +193,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         flexDirection = FlexDirection.column
     }
 
-    val entryDetailComponentLanguageList by css{
+    val chipSet by css{
         display = Display.flex
         justifyContent = JustifyContent.start
         flexWrap = FlexWrap.wrap

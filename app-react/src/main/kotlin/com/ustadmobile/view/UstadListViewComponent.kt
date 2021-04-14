@@ -1,17 +1,17 @@
 package com.ustadmobile.view
 
 import androidx.paging.DataSource
+import com.ccfraser.muirwik.components.MChipColor
 import com.ccfraser.muirwik.components.list.*
+import com.ccfraser.muirwik.components.mChip
+import com.ccfraser.muirwik.components.spacingUnits
 import com.ustadmobile.core.controller.OnSortOptionSelected
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.ListViewAddMode
-import com.ustadmobile.core.view.SelectionOption
-import com.ustadmobile.core.view.UstadListView
-import com.ustadmobile.model.statemanager.GlobalStateSlice
+import com.ustadmobile.core.view.*
+import com.ustadmobile.model.statemanager.FabState
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.horizontalList
 import com.ustadmobile.util.CssStyleManager.ustadListViewComponentContainer
@@ -19,10 +19,9 @@ import com.ustadmobile.util.CssStyleManager.listCreateNewContainer
 import com.ustadmobile.util.CssStyleManager.listCreateNewLabel
 import com.ustadmobile.util.CssStyleManager.listItemCreateNewDiv
 import com.ustadmobile.util.StateManager
-import kotlinx.css.LinearDimension
 import kotlinx.css.RuleSet
 import kotlinx.css.margin
-import kotlinx.css.px
+import org.w3c.dom.events.Event
 import react.*
 import styled.css
 import styled.styledDiv
@@ -35,27 +34,27 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
 
     protected abstract val listPresenter: UstadListPresenter<*, in DT>?
 
-    private val stateChangeListener: (GlobalStateSlice) -> Unit
-        get() = {
-            if(it.state.view == ContentEntryList2View.VIEW_NAME){
-                onComponentRefreshed()
-            }
-        }
+    private lateinit var fabState: FabState
 
+    private var showCreateNewItem:Boolean = false
 
     override fun componentDidMount() {
-        StateManager.subscribe(stateChangeListener)
+        fabState = FabState(label = systemImpl.getString(MessageID.content, this),
+            icon = "add", onClick = ::onFabClick)
     }
 
     override fun RBuilder.render() {
         styledDiv {
             css(ustadListViewComponentContainer)
+
             styledDiv {
                 css{
                     margin = "16px"
                 }
-                renderOptions()
+
+                renderFilters()
             }
+
             mList {
                 css{ +(styleList() ?: horizontalList) }
                 mListItem {
@@ -66,7 +65,9 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
                         divider = true
                         onClick = { listPresenter?.handleClickCreateNewFab() }
                     }
-                    renderHeaderView()
+                    if(showCreateNewItem){
+                        renderHeaderView()
+                    }
                 }
 
                 getData(0,9).forEach { entry ->
@@ -96,47 +97,72 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
         }
     }
 
-    open fun RBuilder.renderOptions(){
-
+    private fun RBuilder.renderFilters(){
+        if(!listFilterOptionChips.isNullOrEmpty()){
+            styledDiv {
+                css{ CssStyleManager.chipSet }
+                listFilterOptionChips?.forEach { chip ->
+                    val mColor = if(chip == checkedFilterOptionChip) MChipColor.primary
+                    else MChipColor.default
+                    mChip(chip.description, color = mColor,onClick = {
+                        setState { checkedFilterOptionChip = chip }
+                        listPresenter?.onListFilterOptionSelected(chip)
+                    }) {
+                        css { margin(1.spacingUnits) }
+                    }
+                }
+                if(checkedFilterOptionChip == null)
+                    checkedFilterOptionChip = listFilterOptionChips?.firstOrNull()
+            }
+        }
     }
 
     abstract fun handleClickEntry(entry: DT)
 
     abstract fun styleList(): RuleSet?
 
-    abstract fun onComponentRefreshed()
 
     abstract fun getData(offset: Int, limit: Int): List<DT>
 
-    override var list: DataSource.Factory<Int, DT>?
-        get() = TODO("Not yet implemented")
-        set(value) {}
+    override var list: DataSource.Factory<Int, DT>? = null
+        get() = field
+        set(value) {
+            field = value
+        }
 
 
     override var selectionOptions: List<SelectionOption>? = null
         get() = field
         set(value) {
             //Handle selection option stuffs here
-            field = value
+            setState { field = value }
         }
 
     override var addMode: ListViewAddMode = ListViewAddMode.NONE
         get() = field
         set(value) {
             //Handle adding mode stufss here
+            showCreateNewItem = value == ListViewAddMode.FIRST_ITEM
+            if(value == ListViewAddMode.FAB){
+                fabState.visible = value == ListViewAddMode.FAB
+                StateManager.dispatch(fabState)
+            }
             field = value
         }
 
     override var listFilterOptionChips: List<ListFilterIdOption>? = null
+        get() = field
         set(value) {
             //handle filter options here
-            field = value
+            setState {
+                field = value
+            }
         }
 
     override var checkedFilterOptionChip: ListFilterIdOption? = null
         get() = field
         set(value) {
-            field = value
+            setState { field = value }
             //handle checked filter options here
         }
 
@@ -151,6 +177,10 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         //handle showing snackbar
+    }
+
+    private fun onFabClick(event: Event){
+        listPresenter?.handleClickCreateNewFab()
     }
 
     companion object {

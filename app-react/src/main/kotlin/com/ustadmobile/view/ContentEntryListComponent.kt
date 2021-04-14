@@ -4,6 +4,7 @@ import com.ccfraser.muirwik.components.*
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
@@ -39,10 +40,12 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         mPresenter = ContentEntryList2Presenter(this,
             getArgs(), this,di,this)
         //mPresenter.onCreate(mapOf())
-    }
 
-    override fun onComponentRefreshed() {
-        console.log("Component refreshed")
+        //remove this
+        window.setTimeout({
+            listFilterOptionChips = listOf(ListFilterIdOption("Filter 1", 0),
+                ListFilterIdOption("Filter 2", 1))
+        }, 1000)
     }
 
     override fun RBuilder.renderListItem(item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
@@ -79,9 +82,7 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         }
     }
 
-    override fun RBuilder.renderHeaderView() {
-        styledDiv {  }
-    }
+    override fun RBuilder.renderHeaderView() {}
 
     override fun handleClickEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         mPresenter.onClickContentEntry(entry)

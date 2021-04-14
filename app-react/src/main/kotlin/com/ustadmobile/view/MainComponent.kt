@@ -11,13 +11,14 @@ import com.ccfraser.muirwik.components.styles.down
 import com.ccfraser.muirwik.components.styles.up
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.model.statemanager.AppBarState
+import com.ustadmobile.model.statemanager.FabState
 import com.ustadmobile.model.statemanager.GlobalStateSlice
-import com.ustadmobile.model.statemanager.HashState
 import com.ustadmobile.util.CssStyleManager
 import com.ustadmobile.util.CssStyleManager.appContainer
 import com.ustadmobile.util.CssStyleManager.fab
-import com.ustadmobile.util.CssStyleManager.mainComponentContentArea
 import com.ustadmobile.util.CssStyleManager.mainComponentContainer
+import com.ustadmobile.util.CssStyleManager.mainComponentContentArea
 import com.ustadmobile.util.CssStyleManager.mainComponentSearch
 import com.ustadmobile.util.CssStyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.CssStyleManager.progressIndicator
@@ -32,10 +33,8 @@ import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 import com.ustadmobile.util.UmReactUtil.placeHolderImage
 import com.ustadmobile.util.UmReactUtil.zeroPx
 import kotlinext.js.jsObject
-import kotlinx.browser.window
 import kotlinx.css.*
 import org.kodein.di.instance
-import org.w3c.dom.HashChangeEvent
 import org.w3c.dom.events.Event
 import react.RBuilder
 import react.RProps
@@ -73,21 +72,16 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     private val impl : UstadMobileSystemImpl by instance()
 
-    private var hashChangeListener: (HashChangeEvent) -> Unit  = {
-        val oldViewName = getPathName(it.oldURL)
-        val newViewName = getPathName(it.newURL)
-        if(oldViewName == newViewName){
-            StateManager.dispatch(HashState(newViewName))
-        }
-    }
-
     private var stateChangeListener : (GlobalStateSlice) -> Unit = {
         setState {
-            showFab = it.state.showFab
-            fabLabel = it.state.fabLabel
-            fabIcon = it.state.fabIcon
-            onClickFx = it.state.onClick
-            loading = it.state.loading
+            if(it.state.type is FabState){
+                showFab = it.state.showFab
+                fabLabel = it.state.fabLabel
+                fabIcon = it.state.fabIcon
+                onClickFx = it.state.onClick
+            }else if(it.state.type is AppBarState){
+                loading = it.state.loading
+            }
         }
     }
 
@@ -95,14 +89,14 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
         currentView = (props.viewToDisplay?: getPathName())
     }
 
-    override fun componentWillMount() {
+    override fun componentDidMount() {
+        super.componentDidMount()
         val dest = findDestination(currentView)
         setState {
             currentTile = dest?.let { impl.getString(it.labelId, this) }.toString()
             responsiveDrawerOpen = true
             showSearch = dest?.showSearch?:false
         }
-        window.onhashchange = hashChangeListener
         StateManager.subscribe(stateChangeListener)
     }
 
@@ -237,6 +231,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
         }
     }
 
+
     private fun RBuilder.renderDrawerItems(fullWidth: Boolean = false) {
         themeContext.Consumer { theme ->
             mList {
@@ -272,7 +267,6 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
     }
 
     override fun componentWillUnmount() {
-        hashChangeListener = {}
         stateChangeListener = {}
     }
 }
