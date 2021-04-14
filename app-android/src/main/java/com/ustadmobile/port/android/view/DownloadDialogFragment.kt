@@ -20,6 +20,7 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.instance
@@ -88,7 +89,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
                 this@DownloadDialogFragment, di, this).also {
             it.onCreate(null)
 
-            GlobalScope.launch {
+            GlobalScope.launch(Dispatchers.Main) {
                 showStorageOptions()
             }
         }
