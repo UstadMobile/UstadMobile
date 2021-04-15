@@ -1,31 +1,33 @@
 package com.ustadmobile.view
 
 import androidx.paging.DataSource
-import com.ccfraser.muirwik.components.MChipColor
+import com.ccfraser.muirwik.components.*
 import com.ccfraser.muirwik.components.list.*
-import com.ccfraser.muirwik.components.mChip
-import com.ccfraser.muirwik.components.spacingUnits
 import com.ustadmobile.core.controller.OnSortOptionSelected
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
+import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.view.*
+import com.ustadmobile.core.view.ListViewAddMode
+import com.ustadmobile.core.view.SelectionOption
+import com.ustadmobile.core.view.UstadListView
 import com.ustadmobile.model.statemanager.FabState
 import com.ustadmobile.util.CssStyleManager
+import com.ustadmobile.util.CssStyleManager.contentEntryListEditOptions
 import com.ustadmobile.util.CssStyleManager.horizontalList
-import com.ustadmobile.util.CssStyleManager.ustadListViewComponentContainer
 import com.ustadmobile.util.CssStyleManager.listCreateNewContainer
-import com.ustadmobile.util.CssStyleManager.listCreateNewLabel
 import com.ustadmobile.util.CssStyleManager.listItemCreateNewDiv
+import com.ustadmobile.util.CssStyleManager.ustadListViewComponentContainer
 import com.ustadmobile.util.StateManager
-import kotlinx.css.RuleSet
-import kotlinx.css.margin
+import kotlinx.css.*
 import org.w3c.dom.events.Event
-import react.*
+import react.RBuilder
+import react.RProps
+import react.RState
+import react.setState
 import styled.css
 import styled.styledDiv
-import styled.styledP
 
 abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<RProps,RState>(mProps),
     UstadListView<RT, DT>, OnSortOptionSelected {
@@ -36,11 +38,13 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
 
     private lateinit var fabState: FabState
 
-    private var showCreateNewItem:Boolean = false
+    protected var showCreateNewItem:Boolean = false
 
     override fun componentDidMount() {
+        super.componentDidMount()
         fabState = FabState(label = systemImpl.getString(MessageID.content, this),
             icon = "add", onClick = ::onFabClick)
+        searchManager?.searchListener = listPresenter
     }
 
     override fun RBuilder.render() {
@@ -50,25 +54,31 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
             styledDiv {
                 css{
                     margin = "16px"
+                    display = if(listFilterOptionChips.isNullOrEmpty())
+                        Display.none else Display.block
                 }
-
-                renderFilters()
+                if(!listFilterOptionChips.isNullOrEmpty()){
+                    renderFilters()
+                }
             }
+
+            renderEditOptions()
 
             mList {
                 css{ +(styleList() ?: horizontalList) }
-                mListItem {
-                    css(listCreateNewContainer)
-                    attrs {
-                        alignItems = MListItemAlignItems.flexStart
-                        button = true
-                        divider = true
-                        onClick = { listPresenter?.handleClickCreateNewFab() }
-                    }
-                    if(showCreateNewItem){
+                if(showCreateNewItem){
+                    mListItem {
+                        css(listCreateNewContainer)
+                        attrs {
+                            alignItems = MListItemAlignItems.flexStart
+                            button = true
+                            divider = true
+                            onClick = { listPresenter?.handleClickCreateNewFab() }
+                        }
                         renderHeaderView()
                     }
                 }
+
 
                 getData(0,9).forEach { entry ->
                     mListItem {
@@ -82,6 +92,7 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
                 }
             }
         }
+        renderAddEntryOptions()
     }
 
     open fun RBuilder.renderListItem(item: DT){}
@@ -90,30 +101,30 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
         styledDiv {
             css(listItemCreateNewDiv)
             mListItemIcon("add","${CssStyleManager.name}-listCreateNewIcon")
-            styledP {
-                css(listCreateNewLabel)
+            mTypography(variant = MTypographyVariant.button) {
+                css{
+                    marginTop = 3.px
+                }
                 +systemImpl.getString(MessageID.add_new, this)
             }
         }
     }
 
     private fun RBuilder.renderFilters(){
-        if(!listFilterOptionChips.isNullOrEmpty()){
-            styledDiv {
-                css{ CssStyleManager.chipSet }
-                listFilterOptionChips?.forEach { chip ->
-                    val mColor = if(chip == checkedFilterOptionChip) MChipColor.primary
-                    else MChipColor.default
-                    mChip(chip.description, color = mColor,onClick = {
-                        setState { checkedFilterOptionChip = chip }
-                        listPresenter?.onListFilterOptionSelected(chip)
-                    }) {
-                        css { margin(1.spacingUnits) }
-                    }
+        styledDiv {
+            css{ +CssStyleManager.chipSet}
+            listFilterOptionChips?.forEach { chip ->
+                val mColor = if(chip == checkedFilterOptionChip) MChipColor.primary
+                else MChipColor.default
+                mChip(chip.description, color = mColor,onClick = {
+                    setState { checkedFilterOptionChip = chip }
+                    listPresenter?.onListFilterOptionSelected(chip)
+                }) {
+                    css { margin(1.spacingUnits) }
                 }
-                if(checkedFilterOptionChip == null)
-                    checkedFilterOptionChip = listFilterOptionChips?.firstOrNull()
             }
+            if(checkedFilterOptionChip == null)
+                checkedFilterOptionChip = listFilterOptionChips?.firstOrNull()
         }
     }
 
@@ -123,6 +134,10 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
 
 
     abstract fun getData(offset: Int, limit: Int): List<DT>
+
+    abstract fun RBuilder.renderAddEntryOptions()
+
+    abstract fun RBuilder.renderEditOptions()
 
     override var list: DataSource.Factory<Int, DT>? = null
         get() = field
@@ -136,6 +151,12 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
         set(value) {
             //Handle selection option stuffs here
             setState { field = value }
+        }
+
+    override var sortOptions: List<MessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
         }
 
     override var addMode: ListViewAddMode = ListViewAddMode.NONE
@@ -182,6 +203,7 @@ abstract class UstadListViewComponent<RT, DT>(mProps: RProps) : UmBaseComponent<
     private fun onFabClick(event: Event){
         listPresenter?.handleClickCreateNewFab()
     }
+
 
     companion object {
 

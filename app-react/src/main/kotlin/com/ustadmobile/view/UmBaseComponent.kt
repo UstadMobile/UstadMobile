@@ -7,10 +7,10 @@ import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.model.statemanager.AppBarState
+import com.ustadmobile.util.SearchManager
 import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.StateManager.getCurrentState
 import kotlinx.atomicfu.atomic
-import kotlinx.browser.document
 import kotlinx.coroutines.Runnable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
@@ -22,7 +22,7 @@ import react.RState
 open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props),
     UstadView, DIAware, DoorLifecycleOwner {
 
-    private var builder: RBuilder? = null
+    protected var builder: RBuilder? = null
 
     private val lifecycleObservers: MutableList<DoorLifecycleObserver> = concurrentSafeListOf()
 
@@ -30,17 +30,15 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
 
     private val lifecycleStatus = atomic(0)
 
+    protected var searchManager: SearchManager? = null
+
 
     override fun componentDidMount() {
         for(observer in lifecycleObservers){
             observer.onStart(this)
         }
         lifecycleStatus.value = DoorLifecycleObserver.STARTED
-        val searchInput = document.getElementsByName("input").item(0)
-        searchInput?.addEventListener("onChange", {
-            console.log(it)
-        })
-        //StateManager.subscribe (searchChangeListener)
+        searchManager = SearchManager("um-search")
     }
 
     open fun onSearchSubmitted(text:String){
@@ -86,6 +84,7 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
             observer.onStop(this)
         }
         lifecycleStatus.value = DoorLifecycleObserver.STOPPED
+        searchManager?.onDestroy()
     }
 
 

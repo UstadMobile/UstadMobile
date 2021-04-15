@@ -153,6 +153,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                                    }
                                    val inputProps = object: RProps {
                                        val className = "${CssStyleManager.name}-mainComponentInputSearch"
+                                       val id = "um-search"
                                    }
                                    mInput(placeholder = "Search...", disableUnderline = true) {
                                        attrs.inputProps = inputProps

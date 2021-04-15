@@ -48,8 +48,8 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
     val preloadComponentCenteredDiv by css{
         height = 200.px
         width = 200.px
-        left = 50.pc
-        top = 50.pc
+        left = LinearDimension("50%")
+        top = LinearDimension("50%")
         marginLeft = (-100).px
         marginTop = (-50).px
         position =  Position.fixed
@@ -140,6 +140,12 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         height = 150.px
     }
 
+    val contentEntryListEditOptions by css{
+        display = Display.flex
+        flexDirection = FlexDirection.row
+        margin = "10px 0px 10px 80%"
+    }
+
     val entryListItemInfo by css {
         width = LinearDimension.auto
         display = Display.flex
@@ -156,19 +162,26 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         padding = "10px"
     }
 
+    val contentEntryListAvatar by css {
+        height = 3.spacingUnits
+        width = 3.spacingUnits
+    }
+
+    val contentEntryListIcon by css {
+        fontSize = LinearDimension("0.65em")
+        marginBottom = 4.px
+    }
+
     val listItemCreateNewDiv by css {
         display = Display.inlineFlex
+        marginLeft = 16.px
     }
 
     val listCreateNewIcon by css {
-        fontSize = LinearDimension("2em")
-        marginTop = 19.px
+        fontSize = LinearDimension("2.5em")
+        marginTop = 5.px
     }
 
-    val listCreateNewLabel by css{
-        fontSize = LinearDimension("1.2em")
-        fontWeight = FontWeight("400")
-    }
 
     val entryDetailComponentContainer by css {
         width = LinearDimension.auto
@@ -198,4 +211,5 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         justifyContent = JustifyContent.start
         flexWrap = FlexWrap.wrap
     }
+
 }

@@ -2,29 +2,20 @@ package com.ustadmobile.view
 
 import com.ccfraser.muirwik.components.*
 import com.ustadmobile.controller.SplashPresenter
-import com.ustadmobile.core.account.EndpointScope
-import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.view.ContentEntryList2View
-import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
-import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 import com.ustadmobile.util.CssStyleManager.appContainer
 import com.ustadmobile.util.CssStyleManager.preloadComponentCenteredDiv
 import com.ustadmobile.util.CssStyleManager.preloadComponentCenteredImage
 import com.ustadmobile.util.CssStyleManager.preloadComponentProgressBar
-import com.ustadmobile.util.RouteManager
 import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.StateManager
+import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 import kotlinx.browser.document
-import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.kodein.di.*
 import react.RBuilder
 import react.RProps
 import react.RState
@@ -40,7 +31,6 @@ class SplashComponent (props: RProps): UmBaseComponent<RProps, RState>(props), S
     private var showMainComponent: Boolean = false
 
     override fun componentDidMount() {
-        super.componentDidMount()
         mPresenter = SplashPresenter(this)
         GlobalScope.launch(Dispatchers.Main) {
             mPresenter.handleResourceLoading()

@@ -98,6 +98,7 @@ abstract class UstadListPresenter<V: UstadListView<RT, *>, RT>(context: Any, arg
     override fun onClickSort(sortOption: SortOrderOption) {
         selectedSortOption = sortOption
     }
+
     override fun onSearchSubmitted(text: String?) {
 
     }

@@ -1,16 +1,29 @@
 package com.ustadmobile.view
 
 import com.ccfraser.muirwik.components.*
+import com.ccfraser.muirwik.components.button.mButton
+import com.ccfraser.muirwik.components.button.mIconButton
+import com.ccfraser.muirwik.components.dialog.mDialog
+import com.ccfraser.muirwik.components.dialog.mDialogActions
+import com.ccfraser.muirwik.components.dialog.mDialogContent
+import com.ccfraser.muirwik.components.list.mList
+import com.ccfraser.muirwik.components.list.mListItem
+import com.ccfraser.muirwik.components.list.mListItemAvatar
+import com.ccfraser.muirwik.components.list.mListItemText
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryList2View
+import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.model.statemanager.AppBarState
+import com.ustadmobile.util.CssStyleManager
+import com.ustadmobile.util.CssStyleManager.contentEntryListEditOptions
 import com.ustadmobile.util.CssStyleManager.entryListItemContainer
 import com.ustadmobile.util.CssStyleManager.entryListItemImage
 import com.ustadmobile.util.CssStyleManager.entryListItemInfo
@@ -20,6 +33,7 @@ import kotlinx.browser.window
 import kotlinx.css.*
 import react.RBuilder
 import react.RProps
+import react.setState
 import styled.css
 import styled.styledDiv
 import styled.styledImg
@@ -32,20 +46,32 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
 
     private lateinit var mPresenter: ContentEntryList2Presenter
 
+    private var showAddEntryOptions = false
+
+    private var mParentEntryUid:Long = 0
+
     override val listPresenter: UstadListPresenter<*, in ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
         get() = mPresenter
 
+
+    override var title: String? = null
+        get() = field
+        set(value) {
+            field = value
+            StateManager.dispatch(AppBarState(title = value))
+        }
+
+    override var editOptionVisible: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+        }
+
     override fun componentDidMount() {
-        super.componentDidMount()
         mPresenter = ContentEntryList2Presenter(this,
             getArgs(), this,di,this)
         //mPresenter.onCreate(mapOf())
-
-        //remove this
-        window.setTimeout({
-            listFilterOptionChips = listOf(ListFilterIdOption("Filter 1", 0),
-                ListFilterIdOption("Filter 2", 1))
-        }, 1000)
+        super.componentDidMount()
     }
 
     override fun RBuilder.renderListItem(item: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
@@ -69,7 +95,11 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
                     val messageId = CONTENT_ENTRY_TYPE_LABEL_MAP[item.contentTypeFlag]?:0
                     val icon = CONTENT_ENTRY_TYPE_ICON_MAP[item.contentTypeFlag]?:""
                     mGridItem {
-                        mIcon(icon, fontSize = MIconFontSize.small)
+                        mAvatar(className = "${CssStyleManager.name}-contentEntryListAvatar") {
+                            mIcon(icon, className= "${CssStyleManager.name}-contentEntryListIcon"){
+                                css{marginTop = 4.px}
+                            }
+                        }
                     }
 
                     mGridItem {
@@ -82,17 +112,10 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         }
     }
 
-    override fun RBuilder.renderHeaderView() {}
-
     override fun handleClickEntry(entry: ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer) {
         mPresenter.onClickContentEntry(entry)
     }
 
-
-    override fun componentWillUnmount() {
-        super.componentWillUnmount()
-        mPresenter.onDestroy()
-    }
 
     override val displayTypeRepo: Any?
         get() = TODO("Not yet implemented")
@@ -109,7 +132,56 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
 
 
     override fun showContentEntryAddOptions(parentEntryUid: Long) {
-        TODO("Not yet implemented")
+        setState {
+            mParentEntryUid = parentEntryUid
+            showAddEntryOptions = true
+        }
+    }
+
+    override fun RBuilder.renderAddEntryOptions() {
+        mDialog(showAddEntryOptions, onClose = { _, _ -> setState { showAddEntryOptions = false}}) {
+            mDialogContent {
+                css { width = 25.pc }
+                styledDiv {
+                    css {
+                        width = LinearDimension("100%")
+                    }
+                    mList {
+                        mListItem(button = true, onClick = {
+                            handleAddEntryOptionClicked(false) }) {
+                            mListItemAvatar {
+                                mAvatar {
+                                    mIcon("create_new_folder")
+                                }
+                            }
+                            mListItemText(primary = systemImpl.getString(
+                                MessageID.content_editor_create_new_category,this))
+                        }
+
+                        mListItem(button = true, onClick = {
+                            handleAddEntryOptionClicked(true) }) {
+                            mListItemAvatar {
+                                mAvatar {
+                                    mIcon("exit_to_app")
+                                }
+                            }
+                            mListItemText(primary = systemImpl.getString(
+                                MessageID.import_content,this))
+                        }
+                    }
+                }
+            }
+
+            mDialogActions {
+                mButton(systemImpl.getString(MessageID.cancel,this), color = MColor.primary, onClick = { setState {showAddEntryOptions = false}})
+            }
+        }
+    }
+
+    private fun handleAddEntryOptionClicked(contentType: Boolean){
+        systemImpl.go(ContentEntryEdit2View.VIEW_NAME,mapOf(
+            ARG_PARENT_ENTRY_UID to mParentEntryUid.toString(),
+            UstadView.ARG_LEAF to contentType.toString()),this)
     }
 
     override fun showDownloadDialog(args: Map<String, String>) {
@@ -120,20 +192,35 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
         TODO("Not yet implemented")
     }
 
-    override var title: String? = null
-        get() = field
-        set(value) {
-            field = value
-            StateManager.dispatch(AppBarState(title = value))
+
+    override fun RBuilder.renderEditOptions() {
+        styledDiv {
+            css{
+                +contentEntryListEditOptions
+                display = if(editOptionVisible)
+                    Display.block else Display.none
+            }
+            mGridContainer(spacing= MGridSpacing.spacing3){
+                mGridItem {
+                    mIconButton("edit", color = MColor.default,onClick = {
+                        mPresenter.handleClickEditFolder()
+                    })
+                }
+
+                mGridItem {
+                    mIconButton("visibility", color = MColor.default, onClick = {
+                        mPresenter.handleClickShowHiddenItems()
+                    })
+                }
+            }
         }
+    }
 
-    override var editOptionVisible: Boolean
-        get() = TODO("Not yet implemented")
-        set(value) {}
 
-    override var sortOptions: List<MessageIdOption>?
-        get() = TODO("Not yet implemented")
-        set(value) {}
+    override fun componentWillUnmount() {
+        super.componentWillUnmount()
+        mPresenter.onDestroy()
+    }
 
     companion object {
        val CONTENT_ENTRY_TYPE_ICON_MAP = mapOf(
