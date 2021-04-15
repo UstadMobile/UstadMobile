@@ -61,4 +61,8 @@ abstract class ContainerDownloadManager {
 
     abstract suspend fun getDownloadJobItemHolderRef(jobItemUid: Int): Any?
 
+    abstract fun addContainerDownloadListener(listener: ContainerDownloadListener)
+
+    abstract fun removeContainerDownloadListener(listener: ContainerDownloadListener)
+
 }

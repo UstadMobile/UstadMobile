@@ -31,7 +31,7 @@ import com.ustadmobile.lib.db.entities.DownloadJob
 import kotlinx.coroutines.*
 import org.kodein.di.*
 import org.kodein.di.android.di
-import java.lang.IllegalArgumentException
+import kotlin.IllegalArgumentException
 
 /**
  * This services monitors the download job statuses and act accordingly
@@ -92,10 +92,9 @@ class DownloadNotificationService : Service(), DIAware {
                         .setGroup(NOTIFICATION_GROUP_KEY)
             }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                builder.setSmallIcon(R.drawable.ic_file_download_white_24dp)
-                        .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-            }
+            builder.setSmallIcon(R.drawable.ic_file_download_white_24dp)
+                    .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
+
 
             return builder
         }
@@ -134,6 +133,12 @@ class DownloadNotificationService : Service(), DIAware {
                     0, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT)
             return NotificationCompat.Action(0, actionLabel, actionPendingIntent)
         }
+
+        protected fun cancel() {
+            mNotificationManager.cancel(notificationId)
+            checkIfCompleteAfterDelay()
+        }
+
     }
 
     inner class DownloadJobNotificationHolder(val downloadJobUid: Int, endpoint: Endpoint,
@@ -190,10 +195,9 @@ class DownloadNotificationService : Service(), DIAware {
                 summaryNotificationHolder?.updateSummary()
 
                 if(t.djStatus >= JobStatus.COMPLETE_MIN) {
-                    activeDownloadJobNotifications.remove(this)
-                    mNotificationManager.cancel(notificationId)
                     downloadJobLiveData.removeObserver(this)
-                    checkIfCompleteAfterDelay()
+                    activeDownloadJobNotifications.remove(this)
+                    cancel()
                 }
             }
         }
@@ -268,8 +272,7 @@ class DownloadNotificationService : Service(), DIAware {
                 if(t.cijJobStatus >= JobStatus.COMPLETE_MIN) {
                     activeImportJobNotifications.remove(this)
                     mNotificationManager.cancel(notificationId)
-                    importJobLiveData.removeObserver(this)
-                    checkIfCompleteAfterDelay()
+                    cancel()
                 }
             }
         }
@@ -348,13 +351,13 @@ class DownloadNotificationService : Service(), DIAware {
         if (intentAction == null)
             return START_STICKY
 
-        var foregroundNotificationHolder = null as NotificationHolder2?
 
-        if (intentAction in listOf(ACTION_DOWNLOADJOBITEM_STARTED, ACTION_PREPARE_DOWNLOAD, ACTION_PREPARE_IMPORT) && !foregroundActive) {
-            if (canCreateGroupedNotification()) {
-                summaryNotificationHolder = SummaryNotificationHolder()
-                foregroundNotificationHolder = summaryNotificationHolder
-            }
+        var foregroundNotificationHolder: NotificationHolder2? = summaryNotificationHolder
+
+        //If summary notification holder is null, and it can be created, we need to create it.
+        if (summaryNotificationHolder == null && canCreateGroupedNotification()){
+            summaryNotificationHolder = SummaryNotificationHolder()
+            foregroundNotificationHolder = summaryNotificationHolder
         }
 
         val downloadJobUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBUID) ?: -1
@@ -362,6 +365,8 @@ class DownloadNotificationService : Service(), DIAware {
         val downloadJobItemUid = intentExtras?.getInt(EXTRA_DOWNLOADJOBITEMUID) ?: -1
         val endpointUrl = intentExtras?.getString(EXTRA_ENDPOINT)
         val endpoint: Endpoint? = if(endpointUrl != null) Endpoint(endpointUrl) else null
+        var createdNotificationHolder: NotificationHolder2? = null
+
 
         when (intentAction) {
             ACTION_PREPARE_DOWNLOAD -> {
@@ -386,30 +391,17 @@ class DownloadNotificationService : Service(), DIAware {
                     containerDownloadManager.enqueue(downloadJobUid)
                 }
 
-
-                if (!foregroundActive && foregroundNotificationHolder == null) {
-                    UMLog.l(UMLog.DEBUG, 0, "DownloadNotification: offered preparer notification as foreground holder")
-                    foregroundNotificationHolder = downloadJobNotificationHolder
-                } else {
-                    UMLog.l(UMLog.DEBUG, 0, "DownloadNotification: preparer to doNotify")
-                    downloadJobNotificationHolder.doNotify()
-                }
+                createdNotificationHolder = downloadJobNotificationHolder
             }
 
             ACTION_DOWNLOADJOBITEM_STARTED -> {
-//                var downloadJobNotificationHolder = activeDownloadJobNotifications
-//                        .firstOrNull { it.downloadJobUid == downloadJobUid }
-//                if (downloadJobNotificationHolder == null) {
-//                    downloadJobNotificationHolder = DownloadJobNotificationHolder(downloadJobUid)
-//                    activeDownloadJobNotifications.add(downloadJobNotificationHolder)
-//                }
-//
-//                if (!foregroundActive && foregroundNotificationHolder == null) {
-//                    foregroundNotificationHolder = downloadJobNotificationHolder
-//                } else {
-//                    UMLog.l(UMLog.DEBUG, 0, "DownloadNotification: Starting notification for new download: $downloadJobUid")
-//                    downloadJobNotificationHolder.doNotify()
-//                }
+                val endpointVal = endpoint ?: throw IllegalArgumentException("DownloadNotificationService: ACTION_DOWNLOADJOBITEM_STARTED intent without endpoint")
+                val downloadJobNotificationHolder = activeDownloadJobNotifications
+                    .firstOrNull {it.downloadJobUid == downloadJobUid }
+                    ?: DownloadJobNotificationHolder(downloadJobUid, endpointVal).also {
+                        activeDownloadJobNotifications.add(it)
+                    }
+                createdNotificationHolder = downloadJobNotificationHolder
             }
 
             ACTION_PAUSE_DOWNLOAD -> {
@@ -428,12 +420,7 @@ class DownloadNotificationService : Service(), DIAware {
                 val endpointVal = endpoint ?: throw IllegalArgumentException("ACTION_DELETE_DOWNLOAD requires EXTRA_ENDPOINT")
                 var deleteNotificationHolder = DeleteNotificationHolder(downloadJobItemUid, endpointVal)
                 activeDeleteJobNotifications.add(deleteNotificationHolder)
-
-                if (!foregroundActive && foregroundNotificationHolder == null) {
-                    foregroundNotificationHolder = deleteNotificationHolder
-                } else {
-                    deleteNotificationHolder.doNotify()
-                }
+                createdNotificationHolder = deleteNotificationHolder
 
                 GlobalScope.async {
                     val containerDownloadManager: ContainerDownloadManager by on(endpointVal).instance()
@@ -452,21 +439,17 @@ class DownloadNotificationService : Service(), DIAware {
 
                 val importNotificationHolder = ImportJobNotificationHolder(importJobUid, endpointVal)
                 activeImportJobNotifications.add(importNotificationHolder)
-
-                if (!foregroundActive && foregroundNotificationHolder == null) {
-                    foregroundNotificationHolder = importNotificationHolder
-                } else {
-                    importNotificationHolder.doNotify()
-                }
+                createdNotificationHolder = importNotificationHolder
             }
         }
 
-        if (!foregroundActive && foregroundNotificationHolder != null) {
-            UMLog.l(UMLog.DEBUG, 0, "DownloadNotification: startForeground using $foregroundNotificationHolder")
+        if(!foregroundActive && foregroundNotificationHolder != null) {
             startForeground(foregroundNotificationHolder.notificationId,
-                    foregroundNotificationHolder.build())
+                foregroundNotificationHolder.build())
+            foregroundActive = true
+        }else {
+            createdNotificationHolder?.doNotify()
         }
-
 
         return START_STICKY
     }

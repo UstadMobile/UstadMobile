@@ -23,9 +23,10 @@ import com.ustadmobile.door.DoorObserver
 import org.kodein.di.*
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.door.doorMainDispatcher
-import com.ustadmobile.sharedse.io.FileSe
-
+import com.ustadmobile.door.ext.concurrentSafeListOf
+import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadListener
 import com.ustadmobile.lib.util.getSystemTimeInMillis
+import com.ustadmobile.sharedse.io.FileSe
 
 /**
  * This class manages a download queue for a given endpoint.
@@ -215,6 +216,8 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
     private val activeDownloads: MutableMap<Int, ActiveContainerDownload> = ConcurrentHashMap()
 
     val maxNumConcurrentDownloads = 1
+
+    private val downloadListeners = concurrentSafeListOf<ContainerDownloadListener>()
 
     init {
         GlobalScope.launch(doorMainDispatcher()) {
@@ -419,17 +422,20 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         val activeUids = activeDownloads.map { it.key }
         val filterByConnectivityStatus = currentConnectivityStatus?.connectivityState
             ?: ConnectivityStatus.STATE_DISCONNECTED
-        val nextDownloads = appDb.downloadJobItemDao.findNextDownloadJobItems2(1,
-            filterByConnectivityStatus, activeUids)
+        val nextDownload = appDb.downloadJobItemDao.findNextDownloadJobItems2(1,
+            filterByConnectivityStatus, activeUids).firstOrNull()
 
-        if(nextDownloads.isNotEmpty()) {
+        if(nextDownload != null) {
             val containerDownloader: ContainerDownloadRunner = di.direct.instance(
-                    arg = DownloadJobItemRunnerDIArgs(endpoint, nextDownloads[0]))
+                    arg = DownloadJobItemRunnerDIArgs(endpoint, nextDownload))
 
-            activeDownloads[nextDownloads[0].djiUid] = ActiveContainerDownload(nextDownloads[0],
+            activeDownloads[nextDownload.djiUid] = ActiveContainerDownload(nextDownload,
                     containerDownloader)
             GlobalScope.launch(Dispatchers.IO) {
                 containerDownloader.download()
+                downloadListeners.forEach {
+                    it.onDownloadStarted(this@ContainerDownloadManagerImpl, nextDownload)
+                }
             }
         }else {
             onQueueEmpty()
@@ -502,9 +508,9 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
     }
 
     override suspend fun pause(downloadJobId: Int) = withContext(singleThreadContext){
-        updateWaitingAndActiveStatuses(downloadJobId, JobStatus.PAUSED, {
+        updateWaitingAndActiveStatuses(downloadJobId, JobStatus.PAUSED) {
             GlobalScope.launch { pause() }
-        })
+        }
         commit()
     }
 
@@ -540,4 +546,13 @@ class ContainerDownloadManagerImpl(private val singleThreadContext: CoroutineCon
         currentConnectivityStatus = status
         checkQueue()
     }
+
+    override fun addContainerDownloadListener(listener: ContainerDownloadListener) {
+        downloadListeners += listener
+    }
+
+    override fun removeContainerDownloadListener(listener: ContainerDownloadListener) {
+        downloadListeners -= listener
+    }
+
 }
