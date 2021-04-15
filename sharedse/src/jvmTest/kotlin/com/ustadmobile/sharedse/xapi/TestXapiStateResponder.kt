@@ -33,6 +33,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import okhttp3.OkHttpClient
 import org.junit.After
 import org.junit.Assert
 import org.junit.Before
@@ -62,6 +63,8 @@ class TestXapiStateResponder {
 
     private lateinit var httpClient: HttpClient
 
+    private lateinit var okHttpClient: OkHttpClient
+
     @Before
     @Throws(IOException::class)
     fun setup() {
@@ -69,9 +72,14 @@ class TestXapiStateResponder {
         val endpointScope = EndpointScope()
         val systemImplSpy = spy(UstadMobileSystemImpl.instance)
 
+        okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp){
             install(JsonFeature)
             install(HttpTimeout)
+
+            engine {
+                preconfigured = okHttpClient
+            }
         }
 
         di = DI {
@@ -95,6 +103,10 @@ class TestXapiStateResponder {
 
             bind<HttpClient>() with singleton {
                 httpClient
+            }
+
+            bind<OkHttpClient>() with singleton {
+                okHttpClient
             }
         }
 

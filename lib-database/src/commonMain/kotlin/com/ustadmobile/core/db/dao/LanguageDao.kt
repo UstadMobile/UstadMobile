@@ -1,13 +1,13 @@
 package com.ustadmobile.core.db.dao
 
 import androidx.paging.DataSource
-import androidx.room.Dao
-import androidx.room.Insert
-import androidx.room.Query
-import androidx.room.Update
+import androidx.room.*
+import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.LeavingReason
 import com.ustadmobile.lib.db.entities.Person
+import com.ustadmobile.lib.db.entities.Report
 import kotlin.js.JsName
 
 @Dao
@@ -21,17 +21,24 @@ abstract class LanguageDao : BaseDao<Language> {
     @Query("""
         SELECT Language.* 
         FROM Language
-        WHERE :searchText IS NULL OR name LIKE :searchText
+        WHERE name LIKE :searchText
         ORDER BY CASE(:sortOrder)
-            WHEN $SORT_LANGNAME_ASC THEN Language.name
+            WHEN $SORT_LANGNAME_ASC THEN Language.name 
+            WHEN $SORT_TWO_LETTER_ASC THEN Language.iso_639_1_standard 
+            WHEN $SORT_THREE_LETTER_ASC THEN Language.iso_639_2_standard 
             ELSE ''
         END ASC,
         CASE(:sortOrder)
-            WHEN $SORT_LANGNAME_DESC THEN Language.name
+            WHEN $SORT_LANGNAME_DESC THEN Language.name 
+            WHEN $SORT_TWO_LETTER_DESC THEN Language.iso_639_1_standard 
+            WHEN $SORT_THREE_LETTER_DESC THEN Language.iso_639_2_standard 
             ELSE ''
         END DESC
     """)
-    abstract fun findLanguagesAsSource(sortOrder: Int, searchText: String?): DataSource.Factory<Int, Language>
+    abstract fun findLanguagesAsSource(sortOrder: Int, searchText: String): DataSource.Factory<Int, Language>
+
+    @Query("""SELECT * FROM Language""")
+    abstract fun findLanguagesList(): List<Language>
 
     @Query("SELECT * FROM Language WHERE name = :name LIMIT 1")
     abstract fun findByName(name: String): Language?
@@ -54,11 +61,48 @@ abstract class LanguageDao : BaseDao<Language> {
     @Query("SELECT *  FROM LANGUAGE where langUid = :primaryLanguageUid LIMIT 1")
     abstract fun findByUid(primaryLanguageUid: Long): Language?
 
+    @Query("SELECT *  FROM LANGUAGE where langUid = :primaryLanguageUid LIMIT 1")
+    abstract suspend fun findByUidAsync(primaryLanguageUid: Long): Language?
+
+    @Update
+    abstract suspend fun updateAsync(entity: Language): Int
+
+    @Query("SELECT * FROM LANGUAGE")
+    abstract fun findAllLanguageLive(): DoorLiveData<List<Language>>
+
+    @JsName("findByUidList")
+    @Query("SELECT langUid FROM LANGUAGE WHERE langUid IN (:uidList)")
+    abstract fun findByUidList(uidList: List<Long>): List<Long>
+
+
+    @Query("""UPDATE Language SET languageActive = :toggleVisibility, 
+                langLastChangedBy = (SELECT nodeClientId FROM SyncNode LIMIT 1) 
+                WHERE langUid IN (:selectedItem)""")
+    abstract suspend fun toggleVisibilityLanguage(toggleVisibility: Boolean, selectedItem: List<Long>)
+
+    @JsName("replaceList")
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    abstract fun replaceList(entityList: List<Language>)
+
+    fun initPreloadedLanguages() {
+        val uidsInserted = findByUidList(Language.FIXED_LANGUAGES.map { it.langUid })
+        val templateListToInsert = Language.FIXED_LANGUAGES.filter { it.langUid !in uidsInserted }
+        replaceList(templateListToInsert)
+    }
+
     companion object  {
 
         const val SORT_LANGNAME_ASC = 1
 
         const val SORT_LANGNAME_DESC = 2
+
+        const val SORT_TWO_LETTER_ASC = 3
+
+        const val SORT_TWO_LETTER_DESC = 4
+
+        const val SORT_THREE_LETTER_ASC = 5
+
+        const val SORT_THREE_LETTER_DESC = 6
 
     }
 }

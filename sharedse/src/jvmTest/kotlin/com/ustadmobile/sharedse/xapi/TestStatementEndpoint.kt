@@ -24,6 +24,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
 import io.ktor.client.features.json.*
+import okhttp3.OkHttpClient
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -55,6 +56,8 @@ class TestStatementEndpoint {
 
     private lateinit var httpClient: HttpClient
 
+    private lateinit var okHttpClient: OkHttpClient
+
     val context = Any()
 
     @JvmField
@@ -67,9 +70,13 @@ class TestStatementEndpoint {
         val endpointScope = EndpointScope()
         val endpointUrl = Endpoint("http://localhost:8087/")
 
+        okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp){
             install(JsonFeature)
             install(HttpTimeout)
+            engine {
+                preconfigured = okHttpClient
+            }
         }
 
         di = DI {
@@ -77,6 +84,10 @@ class TestStatementEndpoint {
 
             bind<HttpClient>() with singleton {
                 httpClient
+            }
+
+            bind<OkHttpClient>() with singleton {
+                okHttpClient
             }
 
             bind<Gson>() with singleton {

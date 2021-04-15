@@ -5,6 +5,7 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.openEntryInputStream
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
@@ -23,6 +24,7 @@ import io.ktor.client.features.json.*
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import java.io.File
@@ -42,6 +44,8 @@ class MountedContainerResponderTest {
 
     private lateinit var httpClient: HttpClient
 
+    private lateinit var okHttpClient: OkHttpClient
+
     @JvmField
     @Rule
     var temporaryFolder = TemporaryFolder()
@@ -52,13 +56,17 @@ class MountedContainerResponderTest {
         containerTmpDir = temporaryFolder.newFolder("TestMountedContainerResponder-containerTmp")
 
         db = UmAppDatabase.getInstance(Any())
+        okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp) {
             install(JsonFeature)
             install(HttpTimeout)
+            engine {
+                preconfigured = okHttpClient
+            }
         }
 
-        repo = db.asRepository(Any(), "http://localhost/dummy", "",
-                httpClient)
+        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
+            httpClient, okHttpClient))
         db.clearAllTables()
 
         container = Container()

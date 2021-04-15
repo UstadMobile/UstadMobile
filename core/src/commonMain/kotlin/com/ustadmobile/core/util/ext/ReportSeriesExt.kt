@@ -32,60 +32,48 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
     val paramList = mutableListOf<Any>()
 
     var sql = "SELECT " + when (reportSeriesYAxis) {
-        TOTAL_DURATION -> "SUM(StatementEntity.resultDuration) AS yAxis, "
-        AVERAGE_DURATION -> """SUM(StatementEntity.resultDuration) / COUNT(DISTINCT 
-            StatementEntity.contextRegistration) AS yAxis, """.trimMargin()
-        NUMBER_SESSIONS -> "COUNT(DISTINCT StatementEntity.contextRegistration) As yAxis, "
-        INTERACTIONS_RECORDED -> "COUNT(StatementEntity.statementId) AS yAxis, "
-        NUMBER_ACTIVE_USERS -> """COUNT(DISTINCT StatementEntity.statementPersonUid) As yAxis, """
-        AVERAGE_USAGE_TIME_PER_USER -> """SUM(StatementEntity.resultDuration) / COUNT(DISTINCT 
-            StatementEntity.statementPersonUid) As yAxis, """.trimMargin()
+        TOTAL_DURATION -> "SUM(ResultSource.resultDuration) AS yAxis, "
+        AVERAGE_DURATION -> """SUM(ResultSource.resultDuration) / COUNT(DISTINCT 
+            ResultSource.contextRegistration) AS yAxis, """.trimMargin()
+        NUMBER_SESSIONS -> "COUNT(DISTINCT ResultSource.contextRegistration) As yAxis, "
+        INTERACTIONS_RECORDED -> "COUNT(ResultSource.statementId) AS yAxis, "
+        NUMBER_ACTIVE_USERS -> """COUNT(DISTINCT ResultSource.statementPersonUid) As yAxis, """
+        AVERAGE_USAGE_TIME_PER_USER -> """SUM(ResultSource.resultDuration) / COUNT(DISTINCT 
+            ResultSource.statementPersonUid) As yAxis, """.trimMargin()
         TOTAL_ATTENDANCE -> """COUNT(DISTINCT CASE WHEN 
-            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
-            THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) As yAxis, """
+            ResultSource.attendanceStatus = $STATUS_ATTENDED 
+            THEN ResultSource.clazzLogAttendanceRecordUid ELSE NULL END) As yAxis, """
         TOTAL_ABSENCES -> """COUNT(DISTINCT CASE WHEN 
-            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ABSENT 
-            THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) As yAxis, """
+            ResultSource.attendanceStatus = $STATUS_ABSENT 
+            THEN ResultSource.clazzLogAttendanceRecordUid ELSE NULL END) As yAxis, """
         TOTAL_LATES -> """COUNT(DISTINCT CASE WHEN 
-            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_PARTIAL 
-            THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) As yAxis, """
+            ResultSource.attendanceStatus = $STATUS_PARTIAL 
+            THEN ResultSource.clazzLogAttendanceRecordUid ELSE NULL END) As yAxis, """
         PERCENTAGE_STUDENTS_ATTENDED -> """((CAST(COUNT(DISTINCT CASE WHEN 
-            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
-            THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) 
-            AS REAL) / MAX(COUNT(DISTINCT ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100)  as yAxis, """.trimMargin()
+            ResultSource.attendanceStatus = $STATUS_ATTENDED 
+            THEN ResultSource.clazzLogAttendanceRecordUid ELSE NULL END) 
+            AS REAL) / MAX(COUNT(DISTINCT ResultSource.clazzLogAttendanceRecordUid),1)) * 100)  as yAxis, """.trimMargin()
         PERCENTAGE_STUDENTS_ATTENDED_OR_LATE -> """((CAST(COUNT(DISTINCT CASE WHEN 
-            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED 
-            OR ClazzLogAttendanceRecord.attendanceStatus = $STATUS_PARTIAL 
-            THEN ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid ELSE NULL END) 
-            AS REAL) / MAX(COUNT(DISTINCT ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid),1)) * 100) as yAxis, """.trimMargin()
-        TOTAL_CLASSES -> """COUNT(DISTINCT ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid) As yAxis, """
+            ResultSource.attendanceStatus = $STATUS_ATTENDED 
+            OR ResultSource.attendanceStatus = $STATUS_PARTIAL 
+            THEN ResultSource.clazzLogAttendanceRecordUid ELSE NULL END) 
+            AS REAL) / MAX(COUNT(DISTINCT ResultSource.clazzLogAttendanceRecordUid),1)) * 100) as yAxis, """.trimMargin()
+        TOTAL_CLASSES -> """COUNT(DISTINCT ResultSource.clazzLogAttendanceRecordClazzLogUid) As yAxis, """
         NUMBER_UNIQUE_STUDENTS_ATTENDING -> """COUNT(DISTINCT CASE WHEN 
-            ClazzLogAttendanceRecord.attendanceStatus = $STATUS_ATTENDED THEN
-            ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid ELSE NULL END) As yAxis, """.trimMargin()
-        NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """COUNT(DISTINCT CASE WHEN (StatementEntity.resultCompletion 
-            AND StatementEntity.contentEntryRoot AND StatementEntity.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
-            THEN StatementEntity.statementPersonUid ELSE NULL END) as yAxis, """.trimMargin()
+            ResultSource.attendanceStatus = $STATUS_ATTENDED THEN
+            ResultSource.clazzLogAttendanceRecordPersonUid ELSE NULL END) As yAxis, """.trimMargin()
+        NUMBER_OF_STUDENTS_COMPLETED_CONTENT -> """COUNT(DISTINCT CASE WHEN (ResultSource.resultCompletion 
+            AND ResultSource.contentEntryRoot AND ResultSource.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
+            THEN ResultSource.statementPersonUid ELSE NULL END) as yAxis, """.trimMargin()
         PERCENT_OF_STUDENTS_COMPLETED_CONTENT -> """((CAST(COUNT(DISTINCT CASE WHEN 
-            (StatementEntity.resultCompletion AND StatementEntity.contentEntryRoot 
-            AND StatementEntity.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
-            THEN StatementEntity.statementPersonUid ELSE NULL END) 
-            AS REAL) / MAX(COUNT(DISTINCT StatementEntity.statementPersonUid),1)) * 100) as yAxis, """
+            (ResultSource.resultCompletion AND ResultSource.contentEntryRoot 
+            AND ResultSource.statementVerbUid = ${VerbEntity.VERB_COMPLETED_UID})
+            THEN ResultSource.statementPersonUid ELSE NULL END) 
+            AS REAL) / MAX(COUNT(DISTINCT ResultSource.statementPersonUid),1)) * 100) as yAxis, """
         else -> ""
     }
 
-    val personPermission = """${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} 
-        ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
-         """.replace(":accountPersonUid", "?")
-    paramList.add(accountPersonUid)
-    paramList.add(accountPersonUid)
 
-
-    var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 
-                $personPermission LEFT JOIN StatementEntity ON 
-                StatementEntity.statementPersonUid = Person.personUid 
-                LEFT JOIN XLangMapEntry ON XLangMapEntry.statementLangMapUid = 
-                (SELECT statementLangMapUid FROM XLangMapEntry 
-                WHERE statementVerbUid = StatementEntity.statementVerbUid LIMIT 1) """
 
     var queryType = 0
     when (reportSeriesYAxis) {
@@ -100,14 +88,12 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
         }
     }
 
-
     sql += groupBy(report.xAxis, queryType, dbType) + "AS xAxis "
     if (reportSeriesSubGroup != 0) {
         sql += " , " + groupBy(reportSeriesSubGroup, queryType, dbType) + "AS subgroup "
     }
 
-    sql += personPermission
-
+    sql += "FROM (SELECT "
 
     val filterFieldList = reportSeriesFilters?.map { it.reportFilterField }
 
@@ -121,20 +107,67 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
                 it == ReportFilter.FIELD_CONTENT_COMPLETION
     } ?: false
 
+    val addEnrolmentJoin = report.xAxis == Report.ENROLMENT_OUTCOME || reportSeriesSubGroup == Report.ENROLMENT_OUTCOME
+            || report.xAxis == Report.ENROLMENT_LEAVING_REASON || reportSeriesSubGroup == Report.ENROLMENT_LEAVING_REASON
+            || report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS || hasFilterEnrolment
+
+    val addClassJoin = report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS
+
+    val addEntryJoin =  hasFilterStatement || report.xAxis == Report.CONTENT_ENTRY ||
+            reportSeriesSubGroup == Report.CONTENT_ENTRY
+
+    if(addEnrolmentJoin){
+        sql += "ClazzEnrolment.clazzEnrolmentOutcome, ClazzEnrolment.clazzEnrolmentLeavingReasonUid, "
+        if(addClassJoin){
+            sql += "Clazz.clazzUid, "
+        }
+    }
+
+    if(addEntryJoin && queryType != STATEMENT_QUERY){
+        sql += "StatementEntity.*, "
+    }
+
+    when(queryType){
+        ATTENDANCE_QUERY -> {
+            sql += """
+               ClazzLogAttendanceRecord.*, ClazzLog.logDate, Person.* 
+            """.trimIndent()
+        }
+        STATEMENT_QUERY -> {
+            sql += """
+                StatementEntity.* , Person.* 
+            """.trimMargin()
+        }
+    }
+
+
+    val personPermission = """${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT1} 
+        ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} ${Person.FROM_PERSONGROUPMEMBER_JOIN_PERSON_WITH_PERMISSION_PT2}
+         """.replace(":accountPersonUid", "?")
+    paramList.add(accountPersonUid)
+    paramList.add(accountPersonUid)
+
+    var sqlList = """SELECT  Person.* , XLangMapEntry.* ,StatementEntity.* 
+                $personPermission LEFT JOIN StatementEntity ON 
+                StatementEntity.statementPersonUid = Person.personUid 
+                LEFT JOIN XLangMapEntry ON XLangMapEntry.statementLangMapUid = 
+                (SELECT statementLangMapUid FROM XLangMapEntry 
+                WHERE statementVerbUid = StatementEntity.statementVerbUid LIMIT 1) """
+
+    sql += personPermission
+
+
     if(queryType == ATTENDANCE_QUERY){
         sql += """LEFT JOIN ClazzLogAttendanceRecord ON
             Person.personUid  = ClazzLogAttendanceRecord.clazzLogAttendanceRecordPersonUid 
             LEFT JOIN ClazzLog ON ClazzLogAttendanceRecord.clazzLogAttendanceRecordClazzLogUid = ClazzLog.clazzLogUid """.trimMargin()
     }
 
-    if (queryType == STATEMENT_QUERY || hasFilterStatement || report.xAxis == Report.CONTENT_ENTRY ||
-            reportSeriesSubGroup == Report.CONTENT_ENTRY) {
+    if (addEntryJoin || queryType == STATEMENT_QUERY) {
         sql += """LEFT JOIN StatementEntity ON Person.personUid = StatementEntity.statementPersonUid """
     }
 
-    if (report.xAxis == Report.ENROLMENT_OUTCOME || reportSeriesSubGroup == Report.ENROLMENT_OUTCOME
-            || report.xAxis == Report.ENROLMENT_LEAVING_REASON || reportSeriesSubGroup == Report.ENROLMENT_LEAVING_REASON
-            || report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS || hasFilterEnrolment) {
+    if (addEnrolmentJoin) {
 
         val joinEnrolment = """LEFT JOIN ClazzEnrolment ON 
                     Person.personUid = ClazzEnrolment.clazzEnrolmentPersonUid """.trimMargin()
@@ -143,7 +176,7 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
             sqlList += joinEnrolment
         }
 
-        if (report.xAxis == Report.CLASS || reportSeriesSubGroup == Report.CLASS) {
+        if (addClassJoin) {
 
             sql += if (queryType == ATTENDANCE_QUERY) {
                 "LEFT JOIN Clazz ON ClazzLog.clazzLogClazzUid = Clazz.clazzUid "
@@ -267,6 +300,22 @@ fun ReportSeries.toSql(report: Report, accountPersonUid: Long, dbType: Int): Que
 
     }
 
+    when(queryType){
+        ATTENDANCE_QUERY -> {
+            sql += """
+                GROUP BY ClazzLogAttendanceRecord.clazzLogAttendanceRecordUid
+            """.trimIndent()
+        }
+        STATEMENT_QUERY -> {
+            sql += """
+                GROUP BY StatementEntity.statementUid
+            """.trimMargin()
+        }
+    }
+
+
+    sql += ") AS ResultSource "
+
 
     sql += " GROUP BY xAxis "
     if (reportSeriesSubGroup != 0) {
@@ -299,10 +348,10 @@ private fun groupBy(value: Int, queryType: Int, dbType: Int): String {
 
             val field = when(queryType){
                 STATEMENT_QUERY -> {
-                    "StatementEntity.timestamp"
+                    "ResultSource.timestamp"
                 }
                 ATTENDANCE_QUERY -> {
-                    "ClazzLog.logDate"
+                    "ResultSource.logDate"
                 }
                 else ->{
                     ""
@@ -310,10 +359,10 @@ private fun groupBy(value: Int, queryType: Int, dbType: Int): String {
             }
             when (dbType) {
                 DoorDbType.SQLITE -> {
-                    "strftime('%d %m %Y', $field/1000, 'unixepoch') "
+                    "strftime('%d/%m/%Y', $field/1000, 'unixepoch') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "TO_CHAR(TO_TIMESTAMP($field/1000), 'DD MM YYYY') "
+                    "TO_CHAR(TO_TIMESTAMP($field/1000), 'DD/MM/YYYY') "
                 }
                 else -> {
                     ""
@@ -324,10 +373,10 @@ private fun groupBy(value: Int, queryType: Int, dbType: Int): String {
 
             val field = when(queryType){
                 STATEMENT_QUERY -> {
-                    "StatementEntity.timestamp"
+                    "ResultSource.timestamp"
                 }
                 ATTENDANCE_QUERY -> {
-                    "ClazzLog.logDate"
+                    "ResultSource.logDate"
                 }
                 else ->{
                     ""
@@ -337,10 +386,10 @@ private fun groupBy(value: Int, queryType: Int, dbType: Int): String {
             when (dbType) {
                 DoorDbType.SQLITE -> {
                     // -5 days to get the date on monday
-                    "strftime('%d %m %Y', $field/1000, 'unixepoch', 'weekday 6', '-5 day') "
+                    "strftime('%d/%m/%Y', $field/1000, 'unixepoch', 'weekday 6', '-5 day') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP($field/1000))), 'DD MM YYYY') "
+                    "TO_CHAR(DATE(DATE_TRUNC('week', TO_TIMESTAMP($field/1000))), 'DD/MM/YYYY') "
                 }
                 else -> {
                     ""
@@ -351,10 +400,10 @@ private fun groupBy(value: Int, queryType: Int, dbType: Int): String {
 
             val field = when(queryType){
                 STATEMENT_QUERY -> {
-                    "StatementEntity.timestamp"
+                    "ResultSource.timestamp"
                 }
                 ATTENDANCE_QUERY -> {
-                    "ClazzLog.logDate"
+                    "ResultSource.logDate"
                 }
                 else ->{
                     ""
@@ -363,21 +412,21 @@ private fun groupBy(value: Int, queryType: Int, dbType: Int): String {
 
             when (dbType) {
                 DoorDbType.SQLITE -> {
-                    "strftime('%m %Y', $field/1000, 'unixepoch') "
+                    "strftime('%m/%Y', $field/1000, 'unixepoch') "
                 }
                 DoorDbType.POSTGRES -> {
-                    "TO_CHAR(TO_TIMESTAMP($field/1000), 'MM YYYY') "
+                    "TO_CHAR(TO_TIMESTAMP($field/1000), 'MM/YYYY') "
                 }
                 else -> {
                     ""
                 }
             }
         }
-        Report.CONTENT_ENTRY -> "StatementEntity.statementContentEntryUid "
-        Report.GENDER -> "Person.gender "
-        Report.CLASS -> "Clazz.clazzUid "
-        Report.ENROLMENT_OUTCOME -> "ClazzEnrolment.clazzEnrolmentOutcome "
-        Report.ENROLMENT_LEAVING_REASON -> "ClazzEnrolment.clazzEnrolmentLeavingReasonUid "
+        Report.CONTENT_ENTRY -> "ResultSource.statementContentEntryUid "
+        Report.GENDER -> "ResultSource.gender "
+        Report.CLASS -> "ResultSource.clazzUid "
+        Report.ENROLMENT_OUTCOME -> "ResultSource.clazzEnrolmentOutcome "
+        Report.ENROLMENT_LEAVING_REASON -> "ResultSource.clazzEnrolmentLeavingReasonUid "
         else -> ""
     }
 }

@@ -6,6 +6,7 @@ import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.toDoorUri
@@ -24,6 +25,7 @@ import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.bind
@@ -55,6 +57,8 @@ class TestContainerDownloadRoute {
 
     lateinit var httpClient: HttpClient
 
+    lateinit var okHttpClient: OkHttpClient
+
     @Before
     fun setup() {
         //make the data path if needed (UmRestApplication does this in di onReady)
@@ -66,14 +70,22 @@ class TestContainerDownloadRoute {
         db = DatabaseBuilder.databaseBuilder(Any() ,UmAppDatabase::class, "UmAppDatabase").build()
         db.clearAllTables()
         val attachmentsDir = temporaryFolder.newFolder()
+
+        okHttpClient = OkHttpClient()
+
         httpClient = HttpClient(OkHttp) {
             install(JsonFeature)
             install(HttpTimeout)
+            engine {
+                preconfigured = okHttpClient
+            }
         }
 
-        repo = db.asRepository(Any(), "http://localhost/",
-                "", httpClient, attachmentsDir.absolutePath,
-                null, false)
+        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/", httpClient,
+            okHttpClient) {
+            this.attachmentsDir = attachmentsDir.absolutePath
+        })
+
         server = embeddedServer(Netty, port = 8097) {
             install(ContentNegotiation) {
                 gson {

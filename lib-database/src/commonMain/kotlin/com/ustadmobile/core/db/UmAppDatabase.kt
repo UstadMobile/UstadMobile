@@ -51,7 +51,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 61)
+], version = 62)
 @MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -86,6 +86,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         verbDao.initPreloadedVerbs()
         reportDao.initPreloadedTemplates()
         leavingReasonDao.initPreloadedLeavingReasons()
+        languageDao.initPreloadedLanguages()
     }
 
     @JsName("networkNodeDao")
@@ -4209,9 +4210,27 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         }
 
+        val MIGRATION_61_62 = object : DoorMigration(61, 62) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                database.execSQL("""ALTER TABLE Language 
+                        ADD COLUMN languageActive INTEGER DEFAULT 1 NOT NULL""".trimMargin())
+
+                if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("""UPDATE Language SET languageActive = true 
+                        WHERE languageActive is NULL""".trimMargin())
+
+                }
 
 
-        private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
+            }
+        }
+
+
+
+
+                    private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
             builder.addMigrations(MIGRATION_32_33, MIGRATION_33_34, MIGRATION_33_34, MIGRATION_34_35,
                     MIGRATION_35_36, MIGRATION_36_37, MIGRATION_37_38, MIGRATION_38_39,
@@ -4220,7 +4239,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_47_48, MIGRATION_48_49, MIGRATION_49_50, MIGRATION_50_51,
                     MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
-                    MIGRATION_59_60, MIGRATION_60_61)
+                    MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62)
 
 
 

@@ -39,6 +39,8 @@ interface ContentEntryDetailFragmentEventHandler {
     fun handleOnClickOpenDownloadButton()
 
     fun handleOnClickDeleteButton()
+
+    fun handleOnClickManageDownloadButton()
 }
 
 class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecentContainer>(), ContentEntry2DetailView, ContentEntryDetailFragmentEventHandler{
@@ -104,6 +106,10 @@ class ContentEntry2DetailFragment: UstadDetailFragment<ContentEntryWithMostRecen
                 .setNegativeButton(R.string.cancel) { dialog, _ ->  dialog.cancel() }
                 .setMessage(R.string.confirm_delete_message)
                 .show()
+    }
+
+    override fun handleOnClickManageDownloadButton() {
+        mPresenter?.handleOnClickManageDownload()
     }
 
     override var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null

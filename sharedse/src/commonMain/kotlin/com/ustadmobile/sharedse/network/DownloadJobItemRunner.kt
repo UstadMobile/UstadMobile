@@ -18,6 +18,7 @@ import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
+import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCONNECTED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
@@ -211,6 +212,7 @@ class DownloadJobItemRunner
                 networkManager.releaseWifiLock(downloadWiFiLock)
             }
         }
+        Napier.d({"${mkLogPrefix()} stop complete"})
     }
 
 
@@ -344,7 +346,7 @@ class DownloadJobItemRunner
 
                 history.url = downloadEndpoint
 
-                UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
+                Napier.i(mkLogPrefix() +
                         " starting download from " + downloadEndpoint + " FromCloud=" + isFromCloud +
                         " Attempts remaining= " + attemptsRemaining)
                 downloadStartTime = getSystemTimeInMillis()
@@ -401,8 +403,10 @@ class DownloadJobItemRunner
                 }
             }catch(e: Exception) {
                 Napier.e({"${mkLogPrefix()} exception in download attempt"}, e)
-                if(coroutineContext.isActive)
+                if(coroutineContext.isActive) {
+                    Napier.e({"${mkLogPrefix()} waiting for retry"}, e)
                     delay(retryDelay)
+                }
             }finally {
 
             }
@@ -551,7 +555,7 @@ class DownloadJobItemRunner
 
 
     private fun mkLogPrefix(): String {
-        return "DownloadJobItem #" + downloadItem.djiUid + ":"
+        return "DownloadJobItem #" + downloadItem.djiUid + " (${this.doorIdentityHashCode}) :"
     }
 
     companion object {

@@ -1,12 +1,18 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.LanguageDao
+import com.ustadmobile.core.db.dao.ReportDao
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.view.LanguageListView
+import com.ustadmobile.core.util.ext.toQueryLikeParam
+import com.ustadmobile.core.view.*
 import com.ustadmobile.door.DoorLifecycleOwner
+import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.lib.db.entities.Language
+import com.ustadmobile.lib.db.entities.Report
 import com.ustadmobile.lib.db.entities.UmAccount
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.kodein.di.DI
 
 class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: LanguageListView,
@@ -18,14 +24,12 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
 
     private var searchText: String? = null
 
-    private var currentSortOrder: Int = LanguageDao.SORT_LANGNAME_ASC
-
     override val sortOptions: List<SortOrderOption>
         get() = SORT_OPTIONS
 
 
     override fun onClickSort(sortOption: SortOrderOption) {
-        currentSortOrder = sortOption.flag
+        super.onClickSort(sortOption)
         getAndSetList()
     }
 
@@ -36,7 +40,7 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
-        return false
+        return true
     }
 
     override fun onSearchSubmitted(text: String?) {
@@ -45,20 +49,55 @@ class LanguageListPresenter(context: Any, arguments: Map<String, String>, view: 
     }
 
     private fun getAndSetList() {
-        view.list = repo.languageDao.findLanguagesAsSource(currentSortOrder, searchText)
+        view.list = repo.languageDao.findLanguagesAsSource(
+                selectedSortOption?.flag ?: LanguageDao.SORT_LANGNAME_ASC,
+                searchText.toQueryLikeParam())
     }
 
 
     override fun handleClickEntry(entry: Language) {
-        view.finishWithResult(listOf(entry))
+        when(mListMode) {
+            ListViewMode.PICKER -> view.finishWithResult(listOf(entry))
+            ListViewMode.BROWSER -> systemImpl.go(LanguageEditView.VIEW_NAME,
+                    mapOf(UstadView.ARG_ENTITY_UID to entry.langUid.toString()), context)
+        }
     }
 
-    override fun handleClickCreateNewFab() {}
+    override fun handleClickCreateNewFab() {
+        systemImpl.go(LanguageEditView.VIEW_NAME, mapOf(), context)
+    }
+
+    override suspend fun onCheckListSelectionOptions(account: UmAccount?): List<SelectionOption> {
+        return listOf(SelectionOption.HIDE)
+    }
+
+    override fun handleClickSelectionOption(selectedItem: List<Language>, option: SelectionOption) {
+        GlobalScope.launch(doorMainDispatcher()) {
+            when (option) {
+                SelectionOption.HIDE -> {
+                    repo.languageDao.toggleVisibilityLanguage(true,
+                            selectedItem.map { it.langUid })
+                    view.showSnackBar(systemImpl.getString(MessageID.action_hidden, context), {
+
+                        GlobalScope.launch(doorMainDispatcher()){
+                            repo.languageDao.toggleVisibilityLanguage(false,
+                                    selectedItem.map { it.langUid })
+                        }
+
+                    }, MessageID.undo)
+                }
+            }
+        }
+    }
 
     companion object {
         val SORT_OPTIONS = listOf(
                 SortOrderOption(MessageID.name, LanguageDao.SORT_LANGNAME_ASC, true),
-                SortOrderOption(MessageID.name, LanguageDao.SORT_LANGNAME_DESC, false))
+                SortOrderOption(MessageID.name, LanguageDao.SORT_LANGNAME_DESC, false),
+                SortOrderOption(MessageID.two_letter_code, LanguageDao.SORT_TWO_LETTER_ASC, true),
+                SortOrderOption(MessageID.two_letter_code, LanguageDao.SORT_TWO_LETTER_DESC, false),
+                SortOrderOption(MessageID.three_letter_code, LanguageDao.SORT_THREE_LETTER_ASC, true),
+                SortOrderOption(MessageID.three_letter_code, LanguageDao.SORT_THREE_LETTER_DESC, false))
     }
 
 }
