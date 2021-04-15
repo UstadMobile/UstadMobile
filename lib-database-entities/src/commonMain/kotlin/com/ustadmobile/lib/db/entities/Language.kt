@@ -34,6 +34,8 @@ class Language() {
     //Language Type - we are only normally interested in "L"
     var Language_Type: String? = null
 
+    var languageActive: Boolean = true
+
     @LocalChangeSeqNum
     var langLocalChangeSeqNum: Long = 0
 
@@ -46,6 +48,7 @@ class Language() {
     override fun toString(): String {
         return name.toString()
     }
+
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -73,5 +76,99 @@ class Language() {
     companion object {
 
         const val TABLE_ID = 13
+
+        const val ENGLISH_LANG_UID = 10000L
+
+        const val ARABIC_LANG_UID = 10001L
+
+        const val BENGALI_LANG_UID = 10002L
+
+        const val BURMESE_LANG_UID = 10003L
+
+        const val KINYARWANDA_LANG_UID = 10004L
+
+        const val NEPALI_LANG_UID = 10005L
+
+        const val PASHTO_LANG_UID = 10006L
+
+        const val PERSIAN_LANG_UID = 10007L
+
+        const val RUSSIAN_LANG_UID = 10008L
+
+        const val TAJIK_LANG_UID = 10009L
+
+        val FIXED_LANGUAGES = listOf(
+                Language().apply{
+                    name = "English"
+                    langUid = ENGLISH_LANG_UID
+                    iso_639_1_standard = "en"
+                    iso_639_2_standard = "eng"
+                    iso_639_3_standard = "eng"
+                },
+                Language().apply{
+                    name = "العربية"
+                    langUid = ARABIC_LANG_UID
+                    iso_639_1_standard = "ar"
+                    iso_639_2_standard = "ara"
+                    iso_639_3_standard = "ara"
+                },
+                Language().apply{
+                    name = "বাংলা"
+                    langUid = BENGALI_LANG_UID
+                    iso_639_1_standard = "bn"
+                    iso_639_2_standard = "ben"
+                    iso_639_3_standard = "ben"
+                },
+                Language().apply{
+                    name = "မြန်မာ"
+                    langUid = BURMESE_LANG_UID
+                    iso_639_1_standard = "my"
+                    iso_639_2_standard = "bur"
+                    iso_639_3_standard = "mya"
+                },
+                Language().apply{
+                    name = "Ikinyarwanda"
+                    langUid = KINYARWANDA_LANG_UID
+                    iso_639_1_standard = "rw"
+                    iso_639_2_standard = "kin"
+                    iso_639_3_standard = "kin"
+                },
+                Language().apply{
+                    name = "नेपाली"
+                    langUid = NEPALI_LANG_UID
+                    iso_639_1_standard = "ne"
+                    iso_639_2_standard = "nep"
+                    iso_639_3_standard = "nep"
+                },
+                Language().apply{
+                    name = "پښتو"
+                    langUid = PASHTO_LANG_UID
+                    iso_639_1_standard = "ps"
+                    iso_639_2_standard = "pus"
+                    iso_639_3_standard = "pus"
+                },
+                Language().apply{
+                    name = "فارسی"
+                    langUid = PERSIAN_LANG_UID
+                    iso_639_1_standard = "fa"
+                    iso_639_2_standard = "per"
+                    iso_639_3_standard = "fas"
+                },
+                Language().apply{
+                    name = "русский"
+                    langUid = RUSSIAN_LANG_UID
+                    iso_639_1_standard = "ru"
+                    iso_639_2_standard = "rus"
+                    iso_639_3_standard = "rus"
+                },
+                Language().apply{
+                    name = "Тоҷикӣ"
+                    langUid = TAJIK_LANG_UID
+                    iso_639_1_standard = "tg"
+                    iso_639_2_standard = "tgk"
+                    iso_639_3_standard = "tgk"
+                }
+        )
+
     }
 }

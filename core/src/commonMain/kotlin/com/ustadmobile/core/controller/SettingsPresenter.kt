@@ -30,6 +30,7 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>, view: Sett
             // TODO check permission
             view.holidayCalendarVisible = true
             view.reasonLeavingVisible = true
+            view.langListVisible = true
         }
 
     }
@@ -52,6 +53,10 @@ class SettingsPresenter(context: Any, arguments: Map<String, String>, view: Sett
 
     fun handleClickLeavingReason(){
         impl.go(LeavingReasonListView.VIEW_NAME, mapOf(), context)
+    }
+
+    fun handleClickLangList(){
+        impl.go(LanguageListView.VIEW_NAME, mapOf(), context)
     }
 
 }
