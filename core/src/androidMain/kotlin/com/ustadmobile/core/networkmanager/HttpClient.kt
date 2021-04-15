@@ -1,56 +1,10 @@
 package com.ustadmobile.core.networkmanager
 
-import android.os.Build
 import com.google.gson.Gson
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.android.Android
-import io.ktor.client.engine.okhttp.OkHttp
-import io.ktor.client.features.*
-import io.ktor.client.features.json.GsonSerializer
-import io.ktor.client.features.json.JsonFeature
-import okhttp3.Dispatcher
-import okhttp3.OkHttpClient
-import java.util.concurrent.TimeUnit
-
-/**
- * Note: OKHttp Ktor default configuration since 1.3.1 could cause a problem:
- * See "Sporadic OkHttp errors after upgrading to ktor 1.3.1"
- *  https://github.com/ktorio/ktor/issues/1708
- */
-
-private val okHttpClient = OkHttpClient.Builder()
-            .dispatcher(Dispatcher().also {
-                it.maxRequests = 30
-                it.maxRequestsPerHost = 10
-            })
-            .retryOnConnectionFailure(true)
-            .connectTimeout(45, TimeUnit.SECONDS)
-            .readTimeout(45, TimeUnit.SECONDS)
-            .build()
-
-private val defaultGsonSerializer = GsonSerializer()
 
 private val defaultGson: Gson by lazy {Gson()}
 
+@Deprecated("Should use DI, not this!")
 fun defaultGson() = defaultGson
 
-private val httpClient = HttpClient(OkHttp) {
-
-    install(JsonFeature) {
-        serializer = defaultGsonSerializer
-    }
-    install(HttpTimeout)
-
-    val dispatcher = Dispatcher()
-    dispatcher.maxRequests = 30
-    dispatcher.maxRequestsPerHost = 10
-
-    engine {
-        preconfigured = okHttpClient
-    }
-
-}
-
-
-actual fun defaultHttpClient() = httpClient
 

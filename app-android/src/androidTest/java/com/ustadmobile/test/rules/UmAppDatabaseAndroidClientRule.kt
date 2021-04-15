@@ -3,12 +3,12 @@ package com.ustadmobile.test.rules
 import androidx.test.core.app.ApplicationProvider.getApplicationContext
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.port.android.impl.BaseUstadApp
 import com.ustadmobile.port.android.impl.UstadApp
+import io.ktor.client.*
 import io.ktor.client.request.get
 import kotlinx.coroutines.runBlocking
 import org.junit.rules.TestWatcher
@@ -39,12 +39,13 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
 
     override fun starting(description: Description) {
         val di = (getApplicationContext<BaseUstadApp>() as UstadApp).di
+        val httpClient: HttpClient = di.direct.instance()
 
         if(description.getAnnotation(UmAppDatabaseServerRequiredTest::class.java) != null) {
             val controlServerUrlVal = controlServerUrl ?: throw IllegalStateException(
                     "${description.methodName} annotated as requiring a server but controlServerUrl not specified")
             val controlServerUrlUrlObj = URL(controlServerUrl)
-            appDbServer = runBlocking { defaultHttpClient().get<Pair<Int, String>>("$controlServerUrlVal/servers/newServer") }
+            appDbServer = runBlocking { httpClient.get<Pair<Int, String>>("$controlServerUrlVal/servers/newServer") }
             endpointUrl = "${controlServerUrlUrlObj.protocol}://${controlServerUrlUrlObj.host}:${appDbServer?.first}/"
             account.endpointUrl = endpointUrl!!
         }
@@ -60,8 +61,10 @@ class UmAppDatabaseAndroidClientRule(val account: UmAccount = UmAccount(42, "the
 
     override fun finished(description: Description?) {
         super.finished(description)
+        val di = (getApplicationContext<BaseUstadApp>() as UstadApp).di
+        val httpClient: HttpClient = di.direct.instance()
         appDbServer?.also { server ->
-            runBlocking { defaultHttpClient().get<Unit>("$controlServerUrl/servers/close/${server.first}") }
+            runBlocking { httpClient.get<Unit>("$controlServerUrl/servers/close/${server.first}") }
             endpointUrl = null
             appDbServer = null
         }

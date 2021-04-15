@@ -3,7 +3,8 @@ package com.ustadmobile.test.util.ext
 import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
@@ -22,9 +23,9 @@ fun DI.Builder.bindDbAndRepoWithEndpoint(endpointScope: EndpointScope, clientMod
     }
 
     bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope).singleton {
-        spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository(Any(),
-                if(clientMode) { context.url } else { "http://localhost/dummy" },
-                "", defaultHttpClient(), null))
+        val endpointUrl = if(clientMode) { context.url } else { "http://localhost/dummy" }
+        val db = instance<UmAppDatabase>(tag = TAG_DB)
+        spy(db.asRepository(repositoryConfig(Any(), endpointUrl, instance(), instance())))
     }
 
 }

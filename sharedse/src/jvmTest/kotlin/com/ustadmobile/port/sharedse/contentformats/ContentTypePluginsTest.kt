@@ -8,11 +8,13 @@ import com.ustadmobile.core.catalog.contenttype.EpubTypePluginCommonJvm
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe.copyInputStreamToFile
 import com.ustadmobile.sharedse.util.UstadTestRule
+import io.ktor.client.*
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Rule
@@ -37,6 +39,10 @@ class ContentTypePluginsTest {
     @Rule
     var temporaryFolder = TemporaryFolder()
 
+    private lateinit var httpClient: HttpClient
+
+    private lateinit var okHttpClient: OkHttpClient
+
     @Before
     fun setup(){
 
@@ -46,6 +52,10 @@ class ContentTypePluginsTest {
                 ContentImportManagerImpl(listOf(EpubTypePluginCommonJvm()), context, this.context, di)
             }
         }
+
+        okHttpClient = di.direct.instance()
+        httpClient = di.direct.instance()
+
         val accountManager: UstadAccountManager by di.instance()
         contentImportManager =  di.on(accountManager.activeAccount).direct.instance()
 
@@ -59,12 +69,14 @@ class ContentTypePluginsTest {
         val tempEpubFile = temporaryFolder.newFile("imported.epub")
         tempEpubFile.copyInputStreamToFile(inputStream)
 
-        val containerTmpDir = Files.createTempDirectory("containerTmpDir").toFile()
+        val containerTmpDir = temporaryFolder.newFolder("containerTmpDir")
 
         val db = UmAppDatabase.getInstance(context)
         db.clearAllTables()
-        val dbRepo = db.asRepository<UmAppDatabase>(context, "http://localhost/dummy", "",
-                defaultHttpClient(), containerTmpDir.absolutePath)
+        val dbRepo = db.asRepository(repositoryConfig(context, "http://localhost/dummy", httpClient,
+            okHttpClient){
+            attachmentsDir = containerTmpDir.absolutePath
+        })
 
         runBlocking {
             //TODO: Make this more rigorous

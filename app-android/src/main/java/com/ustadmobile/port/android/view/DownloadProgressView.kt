@@ -58,7 +58,6 @@ class DownloadProgressView : LinearLayout, View.OnClickListener {
         progressBar = findViewById(R.id.view_download_progress_progressbar)
         downloadPercentageTextView = findViewById(R.id.view_download_progress_status_percentage_text)
         downloadStatusTextView = findViewById(R.id.view_download_progress_status_text)
-        findViewById<View>(R.id.view_download_progress_stop_button).setOnClickListener(this)
     }
 
     override fun onClick(view: View) {

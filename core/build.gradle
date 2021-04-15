@@ -106,6 +106,7 @@ kotlin {
                 implementation "io.ktor:ktor-client-cio:$version_ktor"
                 implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$version_coroutines"
                 implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:$version_kotlinx_serialization"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
                 compileOnly "net.sf.kxml:kxml2:$version_kxml"
                 compileOnly project(':lib-database')
                 compileOnly project(':lib-database-entities')
@@ -124,6 +125,7 @@ kotlin {
 
             dependencies {
                 implementation "com.google.code.gson:gson:$version_gson"
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
             }
         }
 
@@ -188,6 +190,8 @@ kotlin {
 
                 //dependency injection
                 implementation "org.kodein.di:kodein-di-framework-android-x:$version_kodein_di"
+
+                implementation "com.squareup.okhttp3:okhttp:$version_okhttp"
 
                 implementation "androidx.navigation:navigation-fragment-ktx:$version_android_navigation"
                 implementation "androidx.navigation:navigation-ui-ktx:$version_android_navigation"

@@ -262,6 +262,17 @@ fun TextView.setClazzEnrolmentWithClazzAndOutcome(clazzEnrolment: ClazzEnrolment
     text = "${clazzEnrolment?.clazz?.clazzName} (${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)}) - ${clazzEnrolment?.outcomeToString(context,  UstadMobileSystemImpl.instance)}"
 }
 
+@BindingAdapter("showisolang")
+fun TextView.setIsoLang(language: Language){
+    var isoText = ""
+    if(language.iso_639_1_standard?.isNotEmpty() == true){
+        isoText += language.iso_639_1_standard
+    }
+    if(language.iso_639_2_standard?.isNotEmpty() == true){
+        isoText += "/${language.iso_639_2_standard}"
+    }
+    text = isoText
+}
 
 @BindingAdapter("rolesAndPermissionsText")
 fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){

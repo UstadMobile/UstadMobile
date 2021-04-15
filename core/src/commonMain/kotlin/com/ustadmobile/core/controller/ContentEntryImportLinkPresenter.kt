@@ -33,7 +33,7 @@ class ContentEntryImportLinkPresenter(context: Any, arguments: Map<String, Strin
             try {
                 currentHttpClient.post<HttpStatement>() {
                     url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
-                            "/import/validateLink/"))
+                            "/import/validateLink"))
                     parameter("url", link)
                     expectSuccess = false
                 }.execute() {

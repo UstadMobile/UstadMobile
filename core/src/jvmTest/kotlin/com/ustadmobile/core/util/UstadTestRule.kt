@@ -10,8 +10,8 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_REPO
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.view.ContainerMounter
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.UmAccount
@@ -20,11 +20,14 @@ import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import com.ustadmobile.xmlpullparserkmp.XmlPullParser
 import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
+import okhttp3.OkHttpClient
 import org.junit.rules.TestWatcher
 import org.junit.runner.Description
 import org.kodein.di.*
 import org.xmlpull.v1.XmlPullParserFactory
-import java.io.StringReader
 import javax.naming.InitialContext
 
 fun DI.onActiveAccount(): DI {
@@ -56,9 +59,25 @@ class UstadTestRule: TestWatcher() {
 
     lateinit var diModule: DI.Module
 
+    lateinit var httpClient: HttpClient
+
+    lateinit var okHttpClient: OkHttpClient
+
     override fun starting(description: Description?) {
         endpointScope = EndpointScope()
         systemImplSpy = spy(UstadMobileSystemImpl.instance)
+
+        okHttpClient = OkHttpClient.Builder().build()
+
+        httpClient = HttpClient(OkHttp) {
+            install(JsonFeature)
+            install(HttpTimeout)
+
+            engine {
+                preconfigured = okHttpClient
+            }
+        }
+
         diModule = DI.Module("UstadTestRule") {
             bind<UstadMobileSystemImpl>() with singleton { systemImplSpy!! }
             bind<UstadAccountManager>() with singleton { UstadAccountManager(instance(), Any(), di) }
@@ -71,7 +90,8 @@ class UstadTestRule: TestWatcher() {
             }
 
             bind<UmAppDatabase>(tag = TAG_REPO) with scoped(endpointScope!!).singleton {
-                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
+                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(
+                    Any(), context.url, instance(), instance())))
             }
 
             bind<NetworkManagerBle>() with singleton { mock<NetworkManagerBle> { } }
@@ -82,8 +102,12 @@ class UstadTestRule: TestWatcher() {
                 Gson()
             }
 
+            bind<OkHttpClient>() with singleton {
+                okHttpClient
+            }
+
             bind<HttpClient>() with singleton {
-                defaultHttpClient()
+                httpClient
             }
 
             bind<XmlPullParserFactory>(tag  = DiTag.XPP_FACTORY_NSAWARE) with singleton {
@@ -102,7 +126,7 @@ class UstadTestRule: TestWatcher() {
 
     override fun finished(description: Description?) {
         UstadMobileSystemImpl.instance.clearPrefs()
-
+        httpClient.close()
     }
 
 }

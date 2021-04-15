@@ -18,6 +18,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.launch
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.kodein.di.on
 import kotlin.js.JsName
@@ -56,7 +57,7 @@ abstract class HarContentPresenterCommon(context: Any, arguments: Map<String, St
                 })
 
                 harContainer = HarContainer(containerUid, result, accountManager.activeAccount, db,
-                        context, localHttp) {
+                        context, localHttp, di.direct.instance()) {
                     handleUrlLinkToContentEntry(it)
                 }
                 harContainer.startingUrlDeferred.await()
