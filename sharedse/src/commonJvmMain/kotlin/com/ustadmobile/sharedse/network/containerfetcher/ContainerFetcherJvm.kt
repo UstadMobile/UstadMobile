@@ -5,7 +5,7 @@ import java.util.concurrent.*
 import org.kodein.di.*
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherRequest2
 import com.ustadmobile.core.network.containerfetcher.ContainerFetcherListener2
-import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobHttpUrlConnection2
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherJobOkHttp
 
 class ContainerFetcherJvm(override val di: DI): ContainerFetcher(), DIAware{
 
@@ -15,7 +15,7 @@ class ContainerFetcherJvm(override val di: DI): ContainerFetcher(), DIAware{
 
     override suspend fun enqueue(request: ContainerFetcherRequest2, listener: ContainerFetcherListener2?): Deferred<Int> {
         return GlobalScope.async(coroutineCtx) {
-            ContainerFetcherJobHttpUrlConnection2(request, listener, di).download()
+            ContainerFetcherJobOkHttp(request, listener, di).download()
         }
     }
 }

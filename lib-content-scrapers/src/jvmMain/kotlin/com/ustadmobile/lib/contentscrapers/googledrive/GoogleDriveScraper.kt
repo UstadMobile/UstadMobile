@@ -5,7 +5,6 @@ import com.soywiz.klock.DateFormat
 import com.soywiz.klock.parse
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.contentformats.ContentImportManager
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.ext.alternative
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
@@ -13,6 +12,7 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.SCRAPER_TAG
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
 import com.ustadmobile.lib.contentscrapers.abztract.Scraper
 import com.ustadmobile.lib.db.entities.ContentEntry
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -40,6 +40,8 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
 
     private val contentImportManager: ContentImportManager by di.on(endpoint).instance()
 
+    private val httpClient: HttpClient by di.instance()
+
     override fun scrapeUrl(sourceUrl: String) {
 
         var apiCall = sourceUrl
@@ -54,7 +56,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
         tempDir = Files.createTempDirectory(fileId).toFile()
         runBlocking {
 
-            defaultHttpClient().get<HttpStatement>(apiCall) {
+            httpClient.get<HttpStatement>(apiCall) {
                 parameter("key", googleApiKey)
                 parameter("fields", "id,modifiedTime,name,mimeType,description,thumbnailLink")
             }.execute() { fileResponse ->
@@ -76,7 +78,7 @@ class GoogleDriveScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryU
                     return@execute
                 }
 
-                defaultHttpClient().get<HttpStatement>(apiCall) {
+                httpClient.get<HttpStatement>(apiCall) {
                     parameter("alt", "media")
                     parameter("key", googleApiKey)
                 }.execute() {

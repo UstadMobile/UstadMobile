@@ -55,8 +55,12 @@ import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_LOCAL_HTT
 import com.ustadmobile.core.io.ext.siteDataSubDir
 import com.ustadmobile.core.networkmanager.*
 import com.ustadmobile.core.util.DiTag
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
+import com.ustadmobile.port.android.network.downloadmanager.ContainerDownloadNotificationListener
 import com.ustadmobile.port.android.util.ImageResizeAttachmentFilter
 import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
 import io.ktor.client.features.json.*
 import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
@@ -93,13 +97,13 @@ open class UstadApp : BaseUstadApp(), DIAware {
         }
 
         bind<UmAppDatabase>(tag = TAG_REPO) with scoped(EndpointScope.Default).singleton {
-            val attachmentFilters = listOf(
-                    ImageResizeAttachmentFilter("PersonPicture", 1280, 1280))
-            val attachmentDir = File(applicationContext.filesDir.siteDataSubDir(context),
-                    UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
-            instance<UmAppDatabase>(tag = TAG_DB).asRepository(applicationContext,
-                    context.url, "", defaultHttpClient(), useClientSyncManager = true,
-                    attachmentFilters = attachmentFilters, attachmentsDir = attachmentDir.absolutePath).also {
+            instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(applicationContext, context.url,
+                instance(), instance()) {
+                attachmentsDir = File(applicationContext.filesDir.siteDataSubDir(this@singleton.context),
+                    UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
+                useClientSyncManager = true
+                attachmentFilters += ImageResizeAttachmentFilter("PersonPicture", 1280, 1280)
+            }).also {
                 (it as? DoorDatabaseRepository)?.setupWithNetworkManager(instance())
             }
         }
@@ -129,7 +133,9 @@ open class UstadApp : BaseUstadApp(), DIAware {
         constant(TAG_DOWNLOAD_ENABLED) with true
 
         bind<ContainerDownloadManager>() with scoped(EndpointScope.Default).singleton {
-            ContainerDownloadManagerImpl(endpoint = context, di = di)
+            ContainerDownloadManagerImpl(endpoint = context, di = di).also {
+                it.addContainerDownloadListener(ContainerDownloadNotificationListener(applicationContext, context))
+            }
         }
 
         bind<DownloadPreparationRequester>() with scoped(EndpointScope.Default).singleton {
@@ -207,22 +213,32 @@ open class UstadApp : BaseUstadApp(), DIAware {
             instance<XmlPullParserFactory>().newSerializer()
         }
 
-        //OKHttp does not work on versions below 5.0
-        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            bind<OkHttpClient>() with singleton {
-                OkHttpClient.Builder()
-                        .dispatcher(Dispatcher().also {
-                            it.maxRequests = 30
-                            it.maxRequestsPerHost = 10
-                        })
-                        .connectTimeout(45, TimeUnit.SECONDS)
-                        .readTimeout(45, TimeUnit.SECONDS)
-                        .build()
-            }
+        bind<OkHttpClient>() with singleton {
+            OkHttpClient.Builder()
+                    .dispatcher(Dispatcher().also {
+                        it.maxRequests = 30
+                        it.maxRequestsPerHost = 10
+                    })
+                    .build()
         }
 
         bind<HttpClient>() with singleton {
-            defaultHttpClient()
+            HttpClient(OkHttp) {
+
+                install(JsonFeature) {
+                    serializer = GsonSerializer()
+                }
+                install(HttpTimeout)
+
+                val dispatcher = Dispatcher()
+                dispatcher.maxRequests = 30
+                dispatcher.maxRequestsPerHost = 10
+
+                engine {
+                    preconfigured = instance()
+                }
+
+            }
         }
 
         bind<DestinationProvider>() with singleton {

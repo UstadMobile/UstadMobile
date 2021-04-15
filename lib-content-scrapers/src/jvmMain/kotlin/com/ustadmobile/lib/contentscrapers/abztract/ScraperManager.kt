@@ -7,7 +7,6 @@ import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.LiveDataWorkQueue
 import com.ustadmobile.core.util.ext.requirePostfix
@@ -20,6 +19,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeRun
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -55,6 +55,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
     private val contentImportManager: ContentImportManager by on(endpoint).instance()
 
+    private val httpClient: HttpClient by instance()
 
     private val logPrefix = "[ScraperManager endpoint url: ${endpoint.url}] "
 
@@ -201,7 +202,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     return null
                 }
 
-                val statement = defaultHttpClient().get<HttpStatement>(apiCall) {
+                val statement = httpClient.get<HttpStatement>(apiCall) {
                     parameter("key", apiKey)
                     parameter("fields", "id,modifiedTime,name,mimeType,description,thumbnailLink")
                 }.execute()
@@ -218,7 +219,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
                 Napier.d("$logPrefix mimetype found for google drive link: ${file.mimeType}", tag = SCRAPER_TAG)
 
-                val dataStatement = defaultHttpClient().get<HttpStatement>(apiCall) {
+                val dataStatement = httpClient.get<HttpStatement>(apiCall) {
                     parameter("alt", "media")
                     parameter("key", apiKey)
                 }.execute()

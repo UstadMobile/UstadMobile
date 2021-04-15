@@ -9,9 +9,9 @@ class ReportSeries{
 
     var reportSeriesName: String? = null
 
-    var reportSeriesYAxis: Int = 0
+    var reportSeriesYAxis: Int = TOTAL_DURATION
 
-    var reportSeriesVisualType: Int = 0
+    var reportSeriesVisualType: Int = BAR_CHART
 
     var reportSeriesSubGroup: Int = NONE
 
