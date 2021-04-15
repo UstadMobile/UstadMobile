@@ -23,10 +23,7 @@ import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
 import org.apache.commons.cli.*
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
@@ -226,16 +223,19 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
                 tempDir = Files.createTempDirectory("folder").toFile()
                 tempDir.mkdir()
-                val googleStream = dataStatement.receive<InputStream>()
-                val googleFile = File(tempDir, file.name ?: file.id ?: fileId)
+                var metadata: ImportedContentEntryMetaData?
+                withContext(Dispatchers.IO){
+                    val googleStream = dataStatement.receive<InputStream>()
+                    val googleFile = File(tempDir, file.name ?: file.id ?: fileId)
 
-                FileOutputStream(googleFile).use {
-                    googleStream.copyTo(it)
-                    it.flush()
+                    FileOutputStream(googleFile).use {
+                        googleStream.copyTo(it)
+                        it.flush()
+                    }
+                    stream.close()
+                    metadata = contentImportManager.extractMetadata(googleFile.path)
                 }
-                stream.close()
 
-                val metadata = contentImportManager.extractMetadata(googleFile.path)
                 metadata?.scraperType = ScraperTypes.GOOGLE_DRIVE_SCRAPE
                 metadata?.uri = apiCall
                 metadata?.contentEntry?.sourceUrl = apiCall

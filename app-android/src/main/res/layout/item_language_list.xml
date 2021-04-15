@@ -53,7 +53,7 @@
             app:layout_constraintTop_toBottomOf="@+id/line1_text"
             app:layout_constraintEnd_toEndOf="parent"
             tools:text="en / eng"
-            android:text="@{language.iso_639_1_standard + &quot;/&quot; + language.iso_639_2_standard}"
+            app:showisolang="@{language}"
             android:layout_marginBottom="16dp"
             />
 
