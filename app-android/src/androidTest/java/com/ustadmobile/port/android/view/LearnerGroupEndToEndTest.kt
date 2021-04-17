@@ -17,7 +17,7 @@ import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
-import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
@@ -102,7 +102,7 @@ class LearnerGroupEndToEndTest : TestCase() {
             val context = ApplicationProvider.getApplicationContext<Context>()
             val launchIntent = Intent(context, MainActivity::class.java).also {
                 it.putExtra(UstadView.ARG_NEXT,
-                        "${ContentEntry2DetailView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=1")
+                        "${ContentEntryDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=1")
             }
             activityScenario = launchActivity(intent = launchIntent)
         }.run {
@@ -174,10 +174,12 @@ class LearnerGroupEndToEndTest : TestCase() {
                     }
                 }
             }
-            MainScreen{
-                toolBarTitle{
-                    hasDescendant { withText("Hello World Example") }
-                    isDisplayed()
+            flakySafely {
+                MainScreen {
+                    toolBarTitle {
+                        hasDescendant { withText("Hello World Example") }
+                        isDisplayed()
+                    }
                 }
             }
             XapiContentScreen{

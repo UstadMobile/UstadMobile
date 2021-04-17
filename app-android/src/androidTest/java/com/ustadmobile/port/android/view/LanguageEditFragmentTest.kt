@@ -118,7 +118,7 @@ class LanguageEditFragmentTest : TestCase(){
                     languageTitleInput {
                         edit {
                             clearText()
-                            replaceText("Italian")
+                            typeText("Italian")
                             hasText("Italian")
                         }
                     }

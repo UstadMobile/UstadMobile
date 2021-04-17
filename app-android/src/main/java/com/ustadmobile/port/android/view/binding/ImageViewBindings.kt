@@ -14,8 +14,7 @@ import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.door.ext.resolveAttachmentAndroidUri
-import com.ustadmobile.lib.db.entities.ContentEntryProgress
-import com.ustadmobile.lib.db.entities.CustomField
+import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.port.android.util.ext.getActivityContext
 import com.ustadmobile.port.android.view.util.ForeignKeyAttachmentUriAdapter
 import kotlinx.coroutines.*
@@ -258,7 +257,35 @@ private fun ImageView.updateFromImageLookupMap() {
         if(resToUse != null && resToUse != currentImageRes) {
             setImageResource(resToUse)
             setTag(R.id.tag_imagelookup_key, resToUse)
+        }else{
+            setImageDrawable(null)
         }
+    }else{
+        setImageDrawable(null)
+    }
+}
+
+@BindingAdapter("isContentCompleteImage")
+fun ImageView.isContentCompleteImage(person: PersonWithSessionsDisplay){
+    if(person.resultComplete){
+        when(person.resultSuccess){
+            StatementEntity.RESULT_SUCCESS -> {
+                setImageResource(R.drawable.exo_ic_check)
+                visibility = View.VISIBLE
+            }
+            StatementEntity.RESULT_FAILURE -> {
+                setImageResource(R.drawable.ic_close_black_24dp)
+                visibility = View.VISIBLE
+            }
+            StatementEntity.RESULT_UNSET ->{
+                setImageDrawable(null)
+                visibility = View.INVISIBLE
+            }
+        }
+    }else{
+        setImageDrawable(null)
+        context.getString(R.string.incomplete)
+        visibility = View.INVISIBLE
     }
 }
 

@@ -10,14 +10,13 @@ import androidx.test.espresso.Espresso.onView
 import androidx.test.espresso.action.ViewActions.click
 import androidx.test.espresso.assertion.ViewAssertions.matches
 import androidx.test.espresso.matcher.ViewMatchers.*
-import androidx.test.rule.GrantPermissionRule
 import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.BuildConfig
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.ext.dbVersionHeader
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -44,7 +43,7 @@ import org.kodein.di.DIAware
 import org.kodein.di.direct
 import org.kodein.di.instance
 
-class ContentEntry2DetailFragmentTest : TestCase() {
+class ContentEntryDetailOverviewFragmentTest : TestCase() {
 
     @JvmField
     @Rule
@@ -94,7 +93,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
 
             launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                     fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
-                ContentEntry2DetailFragment().also { fragment ->
+                ContentEntryDetailOverviewFragment().also { fragment ->
                     fragment.installNavController(systemImplNavRule.navController)
                 }
             }
@@ -139,7 +138,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
 
             launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                     fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
-                ContentEntry2DetailFragment().also { fragment ->
+                ContentEntryDetailOverviewFragment().also { fragment ->
                     fragment.installNavController(systemImplNavRule.navController)
                 }
             }
@@ -182,7 +181,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
 
             launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                     fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry!!.contentEntryUid)) {
-                ContentEntry2DetailFragment().also { fragment ->
+                ContentEntryDetailOverviewFragment().also { fragment ->
                     fragment.installNavController(systemImplNavRule.navController)
                 }
             }
@@ -222,7 +221,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
 
         launchFragmentInContainer(themeResId = R.style.UmTheme_App,
                 fragmentArgs = bundleOf(UstadView.ARG_ENTITY_UID to testEntry.contentEntryUid)) {
-            ContentEntry2DetailFragment().also { fragment ->
+            ContentEntryDetailOverviewFragment().also { fragment ->
                 fragment.installNavController(systemImplNavRule.navController)
             }
         }
@@ -240,7 +239,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
         }
 
         assertEquals("After clicking on item, it navigates to translated detail view",
-                R.id.content_entry_details_dest, systemImplNavRule.navController.currentDestination?.id)
+                R.id.content_entry_detail_dest, systemImplNavRule.navController.currentDestination?.id)
 
     }
 
@@ -273,7 +272,7 @@ class ContentEntry2DetailFragmentTest : TestCase() {
 
         val context = ApplicationProvider.getApplicationContext<Context>()
         val launchIntent = Intent(context, MainActivity::class.java).also {
-            it.putExtra(UstadView.ARG_NEXT, "${ContentEntry2DetailView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$uid")
+            it.putExtra(UstadView.ARG_NEXT, "${ContentEntryDetailOverviewView.VIEW_NAME}?${UstadView.ARG_ENTITY_UID}=$uid")
         }
 
 

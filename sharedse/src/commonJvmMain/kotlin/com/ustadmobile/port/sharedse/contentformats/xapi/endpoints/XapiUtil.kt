@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import com.neovisionaries.i18n.CountryCode
 import com.neovisionaries.i18n.LanguageCode
 import com.ustadmobile.core.contentformats.xapi.*
+import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.*
 import com.ustadmobile.core.util.UMCalendarUtil
 import com.ustadmobile.lib.db.entities.*
@@ -311,7 +312,12 @@ object XapiUtil {
                 statementEntity.resultCompletion = statementResult.completion
                 statementEntity.resultDuration = statementResult.duration?.let { parse8601Duration(it) } ?: 0L
                 statementEntity.resultResponse = statementResult.response
-                statementEntity.resultSuccess = if(statementResult.success) StatementEntity.RESULT_SUCCESS else StatementEntity.RESULT_FAILURE
+                var success = statementResult.success
+                statementEntity.resultSuccess = if(success != null) {
+                    if(success) StatementEntity.RESULT_SUCCESS else StatementEntity.RESULT_FAILURE
+                }else{
+                    StatementEntity.RESULT_UNSET
+                }
 
                 val resultScore = statementResult.score
                 if (resultScore != null) {
@@ -342,7 +348,7 @@ object XapiUtil {
         return statementEntity
     }
 
-    fun insertOrUpdateEntryProgress(statementEntity: StatementEntity, progressDao: ContentEntryProgressDao, verbEntity: VerbEntity) {
+    fun insertOrUpdateEntryProgress(statementEntity: StatementEntity, repo: UmAppDatabase, verbEntity: VerbEntity) {
         var statusFlag = getStatusFlag(verbEntity.urlId)
         var progress  = statementEntity.extensionProgress
         if(progress == 0 &&
@@ -350,10 +356,12 @@ object XapiUtil {
                         statementEntity.resultCompletion)){
             progress = 100
             statusFlag = ContentEntryProgress.CONTENT_ENTRY_PROGRESS_FLAG_COMPLETED
+            repo.statementDao.updateProgress(statementEntity.statementUid, progress)
         }
-        progressDao.updateProgress(statementEntity.statementContentEntryUid,
+        repo.contentEntryProgressDao.updateProgress(statementEntity.statementContentEntryUid,
                 statementEntity.statementPersonUid, progress, statusFlag)
     }
+
 
     private fun getStatusFlag(id: String?): Int {
         return statusFlagMap[id] ?: 0

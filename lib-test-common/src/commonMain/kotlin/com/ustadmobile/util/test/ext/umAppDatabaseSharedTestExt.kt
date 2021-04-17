@@ -434,7 +434,138 @@ suspend fun UmAppDatabase.insertContentEntryWithParentChildJoinAndMostRecentCont
 }
 
 
-suspend fun UmAppDatabase.insertTestStatements() {
+suspend fun UmAppDatabase.insertStatementForSessions(){
+
+    val entry = ContentEntry().apply {
+        title = "English Quiz"
+        leaf = true
+        contentEntryUid = 1000
+        entryId = "Quiz"
+        contentEntryDao.insert(this)
+    }
+
+    verbDao.initPreloadedVerbs()
+
+    val completedLangMap = XLangMapEntry(VerbEntity.VERB_COMPLETED_UID, 0,
+            0, 0, "Completed")
+    completedLangMap.languageLangMapUid = xLangMapEntryDao.insert(completedLangMap)
+
+    val progressLangMap = XLangMapEntry(VerbEntity.VERB_PROGRESSED_UID, 0,
+            0, 0, "Progressed")
+    progressLangMap.languageLangMapUid = xLangMapEntryDao.insert(progressLangMap)
+
+    val firstObject = XObjectEntity().apply {
+        objectId = "hello"
+        objectContentEntryUid = entry.contentEntryUid
+        xObjectUid =  xObjectDao.insert(this)
+    }
+
+    val objectLangMap = XLangMapEntry(0, firstObject.xObjectUid,
+            0, 0, "Quiz 1")
+    objectLangMap.languageLangMapUid = xLangMapEntryDao.insert(objectLangMap)
+
+
+
+    val personJohn = Person().apply {
+        firstNames = "John"
+        lastName = "Doe"
+        personUid = 1000
+        personDao.insert(this)
+    }
+
+    val personJane = Person().apply {
+        firstNames = "Jane"
+        lastName = "Teacher"
+        admin = true
+        personUid = personDao.insert(this)
+    }
+
+
+
+    val session1 =  randomUuid().toString()
+    val sessionToTest = "abc"
+
+    StatementEntity().apply {
+        statementPersonUid = personJohn.personUid
+        resultDuration = 2400000
+        resultCompletion = false
+        resultScoreScaled = 0.4f
+        resultScoreMax = 5
+        resultScoreRaw = 2
+        resultScoreMin = 0
+        contextRegistration = session1
+        statementVerbUid = VerbEntity.VERB_COMPLETED_UID
+        xObjectUid = firstObject.xObjectUid
+        statementContentEntryUid = entry.contentEntryUid
+        resultSuccess = StatementEntity.RESULT_FAILURE
+        timestamp = DateTime(2019, 6, 11, 23, 30, 0).unixMillisLong
+        extensionProgress = 100
+        statementId = randomUuid().toString()
+        contentEntryRoot = true
+        statementUid = statementDao.insert(this)
+    }
+
+    StatementEntity().apply {
+        statementPersonUid = personJohn.personUid
+        resultDuration = 2060090
+        resultCompletion = true
+        resultScoreScaled = 1f
+        resultScoreMax = 5
+        resultScoreRaw = 5
+        resultScoreMin = 0
+        contextRegistration = sessionToTest
+        statementVerbUid = VerbEntity.VERB_COMPLETED_UID
+        xObjectUid = firstObject.xObjectUid
+        statementContentEntryUid = entry.contentEntryUid
+        resultSuccess = StatementEntity.RESULT_SUCCESS
+        timestamp = DateTime(2019, 6, 12, 20, 30, 0).unixMillisLong
+        extensionProgress = 100
+        statementId = randomUuid().toString()
+        contentEntryRoot = true
+        statementUid = statementDao.insert(this)
+    }
+
+    for(i in 0..9){
+        StatementEntity().apply {
+            statementPersonUid = personJohn.personUid
+            resultDuration = Random.nextLong(23000, 180000)
+            resultCompletion = false
+            contextRegistration = sessionToTest
+            statementVerbUid = VerbEntity.VERB_PROGRESSED_UID
+            xObjectUid = firstObject.xObjectUid
+            statementContentEntryUid = entry.contentEntryUid
+            statementId = randomUuid().toString()
+            resultSuccess = StatementEntity.RESULT_SUCCESS
+            extensionProgress = 1 * 10
+            timestamp = DateTime(2019, 6, 11).unixMillisLong
+            statementUid = statementDao.insert(this)
+        }
+
+
+        StatementEntity().apply {
+            statementPersonUid = personJane.personUid
+            resultDuration = Random.nextLong(23000, 180000)
+            resultCompletion = false
+            contextRegistration =  if(Random.nextBoolean()) session1 else sessionToTest
+            statementVerbUid = VerbEntity.VERB_PROGRESSED_UID
+            xObjectUid = firstObject.xObjectUid
+            statementContentEntryUid = entry.contentEntryUid
+            statementId = randomUuid().toString()
+            resultSuccess = StatementEntity.RESULT_SUCCESS
+            extensionProgress = 1 * 10
+            timestamp = DateTime(2019, 6, 11).unixMillisLong
+            statementUid = statementDao.insert(this)
+        }
+    }
+
+
+
+}
+
+
+
+
+suspend fun UmAppDatabase.insertTestStatementsForReports() {
 
     val firstPerson = Person().apply {
         firstNames = "Bobb"
@@ -657,7 +788,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
         resultDuration = 7200000
         resultScoreScaled = 100f
         resultCompletion = true
-        contextRegistration = randomUuid().toString()
+        contextRegistration =randomUuid().toString()
         statementVerbUid = passedVerb.verbUid
         xObjectUid = firstObject.xObjectUid
         statementContentEntryUid = khanclass1.contentEntryUid
@@ -668,7 +799,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
         statementUid = statementDao.insert(this)
     }
 
-    val commonSessionForSecondPerson = randomUuid().toString()
+    val commonSessionForSecondPerson =randomUuid().toString()
 
     StatementEntity().apply {
         statementPersonUid = secondPerson.personUid
@@ -687,7 +818,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
     }
     
 
-    val commonSession = randomUuid().toString()
+    val commonSession =randomUuid().toString()
     StatementEntity().apply {
         statementPersonUid = thirdPerson.personUid
         resultDuration = 120000
@@ -767,7 +898,7 @@ suspend fun UmAppDatabase.insertTestStatements() {
             statementVerbUid = completedVerb.verbUid
             xObjectUid = thirdObject.xObjectUid
             statementContentEntryUid = khanclass1.contentEntryUid
-            statementId = randomUuid().toString()
+            statementId =randomUuid().toString()
             resultSuccess = StatementEntity.RESULT_SUCCESS
             timestamp = DateTime(2019, 6, 11).unixMillisLong
             statementUid = statementDao.insert(this)

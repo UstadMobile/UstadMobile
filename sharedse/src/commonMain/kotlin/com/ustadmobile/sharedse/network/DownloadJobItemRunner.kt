@@ -373,29 +373,33 @@ class DownloadJobItemRunner
                 val fetchStartTime = getSystemTimeInMillis()
                 Napier.d({"Requesting fetch download $timeSinceStart ms after start"})
 
-                val containerRequest = ContainerFetcherRequest2(
+                if(containerEntriesPartition.entriesWithoutMatchingFile.isNotEmpty()) {
+                    val containerRequest = ContainerFetcherRequest2(
                         containerEntriesPartition.entriesWithoutMatchingFile, siteUrl = endpointUrl,
                         mirrorUrl =  downloadEndpoint,
                         destDirUri = destinationDir ?: throw IllegalStateException("Null destination dir"))
-                var jobDeferred: Deferred<Int>? = null
-                downloadStatusLock.withLock {
-                    Napier.d({"${mkLogPrefix()} enqueuing download URL=$downloadEndpoint fileDest=" +
-                            destTmpFile.getAbsolutePath()})
-                    jobDeferred = containerFetcher.enqueue(containerRequest,
+                    var jobDeferred: Deferred<Int>? = null
+                    downloadStatusLock.withLock {
+                        Napier.d({"${mkLogPrefix()} enqueuing download URL=$downloadEndpoint fileDest=" +
+                                destTmpFile.getAbsolutePath()})
+                        jobDeferred = containerFetcher.enqueue(containerRequest,
                             object: AbstractContainerFetcherListener2() {
                                 override fun onProgress(request: ContainerFetcherRequest2,
                                                         bytesDownloaded: Long, contentLength: Long) {
                                     GlobalScope.launch {
                                         downloadItem.downloadedSoFar = existingEntriesBytesDownloaded + bytesDownloaded
                                         containerDownloadManager.handleDownloadJobItemUpdated(
-                                                DownloadJobItem(downloadItem))
+                                            DownloadJobItem(downloadItem))
                                     }
                                 }
                             })
-                    Napier.d({"${mkLogPrefix()} download queued"})
-                    currentDownloadAttempt.value = jobDeferred
+                        Napier.d({"${mkLogPrefix()} download queued"})
+                        currentDownloadAttempt.value = jobDeferred
+                    }
+                    downloadAttemptStatus = jobDeferred?.await() ?: JobStatus.FAILED
+                }else {
+                    downloadAttemptStatus = JobStatus.COMPLETE
                 }
-                downloadAttemptStatus = jobDeferred?.await() ?: JobStatus.FAILED
 
                 Napier.d({"Fetch over in ${getSystemTimeInMillis() - fetchStartTime}ms status=$downloadAttemptStatus"})
                 if(downloadAttemptStatus == JobStatus.COMPLETE) {

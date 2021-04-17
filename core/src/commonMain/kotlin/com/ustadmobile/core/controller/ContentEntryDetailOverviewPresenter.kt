@@ -12,10 +12,7 @@ import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.ContentEntryOpener
 import com.ustadmobile.core.util.ext.observeWithLifecycleOwner
-import com.ustadmobile.core.view.ContentEntry2DetailView
-import com.ustadmobile.core.view.ContentEntryEdit2View
-import com.ustadmobile.core.view.LearnerGroupMemberListView
-import com.ustadmobile.core.view.Login2View
+import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_CONTENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_ENTITY_UID
 import com.ustadmobile.core.view.UstadView.Companion.ARG_LEARNER_GROUP_UID
@@ -31,11 +28,11 @@ import org.kodein.di.instanceOrNull
 import org.kodein.di.on
 
 
-class ContentEntry2DetailPresenter(context: Any,
-                                   arguments: Map<String, String>, view: ContentEntry2DetailView,
-                                   di: DI, lifecycleOwner: DoorLifecycleOwner)
+class ContentEntryDetailOverviewPresenter(context: Any,
+                                          arguments: Map<String, String>, view: ContentEntryDetailOverviewView,
+                                          di: DI, lifecycleOwner: DoorLifecycleOwner)
 
-    : UstadDetailPresenter<ContentEntry2DetailView, ContentEntryWithMostRecentContainer>(context,
+    : UstadDetailPresenter<ContentEntryDetailOverviewView, ContentEntryWithMostRecentContainer>(context,
         arguments, view, di, lifecycleOwner) {
 
     private val isDownloadEnabled: Boolean by di.instance<Boolean>(tag = TAG_DOWNLOAD_ENABLED)
@@ -64,7 +61,7 @@ class ContentEntry2DetailPresenter(context: Any,
         containerDownloadManager?.also {
             GlobalScope.launch(doorMainDispatcher()) {
                 downloadJobItemLiveData = it.getDownloadJobItemByContentEntryUid(contentEntryUid).apply {
-                    observeWithLifecycleOwner(lifecycleOwner, this@ContentEntry2DetailPresenter::onDownloadJobItemChanged)
+                    observeWithLifecycleOwner(lifecycleOwner, this@ContentEntryDetailOverviewPresenter::onDownloadJobItemChanged)
                 }
             }
         }
@@ -160,7 +157,7 @@ class ContentEntry2DetailPresenter(context: Any,
     }
 
     fun handleOnTranslationClicked(entryUid: Long) {
-        systemImpl.go(ContentEntry2DetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to entryUid.toString()), context)
+        systemImpl.go(ContentEntryDetailView.VIEW_NAME, mapOf(ARG_ENTITY_UID to entryUid.toString()), context)
     }
 
     override suspend fun onCheckEditPermission(account: UmAccount?): Boolean {
