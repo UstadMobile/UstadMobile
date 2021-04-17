@@ -11,7 +11,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationCompat.GROUP_ALERT_SUMMARY
 import androidx.core.app.NotificationManagerCompat
 import com.github.aakira.napier.Napier
-import com.ustadmobile.core.R
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
@@ -32,9 +31,11 @@ import kotlinx.coroutines.*
 import org.kodein.di.*
 import org.kodein.di.android.di
 import kotlin.IllegalArgumentException
+import com.ustadmobile.core.R
 
 /**
- * This services monitors the download job statuses and act accordingly
+ * This services monitors the download job statuses and displays progress to the user. When pending
+ * jobs are complete, the service will stop and the notification will disappear.
  */
 class DownloadNotificationService : Service(), DIAware {
 
@@ -58,27 +59,23 @@ class DownloadNotificationService : Service(), DIAware {
 
     private val activeImportJobNotifications: MutableList<ImportJobNotificationHolder> = copyOnWriteListOf()
 
-    open inner class NotificationHolder2(var contentTitle: String, var contentText: String,
+    abstract inner class NotificationHolder2(var contentTitle: String, var contentText: String,
                                          val notificationId: Int = notificationIdRef.incrementAndGet()) {
 
-        val builder: NotificationCompat.Builder
-
-        init {
-            builder = createNotificationBuilder()
-        }
+        private val intent = Intent()
+        private val mNotificationPendingIntent : PendingIntent = PendingIntent.getActivity(
+            this@DownloadNotificationService, 0, intent, 0)
+        private val startTime = System.currentTimeMillis()
 
         /**
          * Setup the notificationcompat.builde rwith common options required for all notifications we are using
          */
-        private fun createNotificationBuilder(): NotificationCompat.Builder {
-            val intent = Intent()
-            val mNotificationPendingIntent = PendingIntent.getActivity(
-                    this@DownloadNotificationService, 0, intent, 0)
+        protected fun createNotificationBuilder(): NotificationCompat.Builder {
             val builder = NotificationCompat.Builder(this@DownloadNotificationService,
                     NOTIFICATION_CHANNEL_ID)
             builder.setPriority(NotificationCompat.PRIORITY_LOW)
                     .setCategory(NotificationCompat.CATEGORY_PROGRESS)
-                    .setWhen(System.currentTimeMillis())
+                    .setWhen(startTime)
                     //TODO: set the color
                     //.setColor(ContextCompat.getColor(this, R.color.primary))
                     .setOngoing(true)
@@ -99,21 +96,23 @@ class DownloadNotificationService : Service(), DIAware {
             return builder
         }
 
+        /**
+         * Child classes must implement this themselves to return a notification. This should build
+         * a new notification object using the createNotificationBuilder function.
+         */
+        abstract fun build(): Notification
 
-        internal fun build(): Notification {
-            val notification = builder.build()
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                notification.defaults = 0
-                notification.sound = null
-            }
-
-            return notification
-        }
-
+        @Suppress("DEPRECATION")
         internal fun doNotify() {
             UMLog.l(UMLog.DEBUG, 0, "DownloadNotification: holder $this sending notification: ")
-            mNotificationManager.notify(notificationId, build())
-
+            val notification = build().apply {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    //this older version is not using a notification channel
+                    defaults = 0
+                    sound = null
+                }
+            }
+            mNotificationManager.notify(notificationId, notification)
         }
 
         /**
@@ -123,6 +122,7 @@ class DownloadNotificationService : Service(), DIAware {
          * @param actionLabel button label text
          * @return constructed action button
          */
+        @Deprecated("Use addDownloadAction extension function")
         internal fun createAction(downloadJobId: Int, actionTag: String,
                                   actionLabel: String): NotificationCompat.Action {
             val actionIntent = Intent(this@DownloadNotificationService,
@@ -134,39 +134,42 @@ class DownloadNotificationService : Service(), DIAware {
             return NotificationCompat.Action(0, actionLabel, actionPendingIntent)
         }
 
-        protected fun cancel() {
+        fun NotificationCompat.Builder.addDownloadAction(downloadJobId: Int, endpoint: String,
+                                                                actionTag: String, actionLabel: String) : NotificationCompat.Builder{
+            val actionIntent = Intent(this@DownloadNotificationService,
+                DownloadNotificationService::class.java)
+            actionIntent.putExtra(EXTRA_DOWNLOADJOBUID, downloadJobId)
+            actionIntent.putExtra(EXTRA_ENDPOINT, endpoint)
+            actionIntent.action = actionTag
+            val actionPendingIntent = PendingIntent.getService(this@DownloadNotificationService,
+                0, actionIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            addAction(NotificationCompat.Action(0, actionLabel, actionPendingIntent))
+            return this
+        }
+
+        internal open fun cancel() {
             mNotificationManager.cancel(notificationId)
             checkIfCompleteAfterDelay()
         }
 
     }
 
-    inner class DownloadJobNotificationHolder(val downloadJobUid: Int, endpoint: Endpoint,
+    inner class DownloadJobNotificationHolder(val downloadJobUid: Int, private val endpoint: Endpoint,
                                               notifyAfterInit: Boolean = true) : NotificationHolder2(
             impl.getString(MessageID.loading, applicationContext),
             impl.getString(MessageID.waiting, applicationContext)), DoorObserver<DownloadJob?> {
 
         var bytesSoFar: Long = 0
         var totalBytes: Long = 0
+        var status: Int = 0
 
         lateinit var downloadJobLiveData: DoorLiveData<DownloadJob?>
 
         init {
-            builder.setProgress(MAX_PROGRESS_VALUE, 0, false)
-                    .addAction(createAction(downloadJobUid,
-                            ACTION_CANCEL_DOWNLOAD, impl.getString(MessageID.download_cancel_label,
-                            applicationContext)))
-                    .addAction(createAction(downloadJobUid,
-                            ACTION_PAUSE_DOWNLOAD, impl.getString(MessageID.download_pause_download,
-                            applicationContext)))
-                    .setContentTitle(contentTitle)
-                    .setContentText(contentText)
-
             GlobalScope.launch(Dispatchers.Main) {
                 val db: UmAppDatabase = on(endpoint).direct.instance(tag = TAG_DB)
                 val downloadJobTitleInDb = db.downloadJobDao.getEntryTitleByJobUidAsync(downloadJobUid)
                         ?: ""
-                builder.setContentTitle(downloadJobTitleInDb)
                 contentTitle = downloadJobTitleInDb
                 if (notifyAfterInit)
                     doNotify()
@@ -181,25 +184,49 @@ class DownloadNotificationService : Service(), DIAware {
             if(t != null) {
                 bytesSoFar = t.bytesDownloadedSoFar
                 totalBytes = t.totalBytesToDownload
+                status = t.djStatus
 
 
-                val progress = (bytesSoFar.toDouble() / totalBytes * 100).toInt()
-                builder.setProgress(MAX_PROGRESS_VALUE, progress, false)
                 contentText = String.format(impl.getString(
                         MessageID.download_downloading_placeholder, this@DownloadNotificationService),
                         UMFileUtil.formatFileSize(bytesSoFar),
                         UMFileUtil.formatFileSize(totalBytes))
-                builder.setContentText(contentText)
 
                 doNotify()
                 summaryNotificationHolder?.updateSummary()
 
                 if(t.djStatus >= JobStatus.COMPLETE_MIN) {
-                    downloadJobLiveData.removeObserver(this)
-                    activeDownloadJobNotifications.remove(this)
                     cancel()
                 }
             }
+        }
+
+        override fun build(): Notification {
+            val progress = (bytesSoFar.toDouble() / totalBytes * 100).toInt()
+            val systemImpl: UstadMobileSystemImpl = di.direct.instance()
+            val context = this@DownloadNotificationService
+            return createNotificationBuilder()
+                .setContentTitle(contentTitle)
+                .setContentText(contentText)
+                .setProgress(MAX_PROGRESS_VALUE, progress, false)
+                .apply {
+                    if(status == JobStatus.PAUSED) {
+                        addDownloadAction(downloadJobUid, endpoint.url, ACTION_RESUME_DOWNLOAD,
+                            systemImpl.getString(MessageID.download_continue_btn_label, context))
+                    }else {
+                        addDownloadAction(downloadJobUid, endpoint.url, ACTION_PAUSE_DOWNLOAD,
+                            systemImpl.getString(MessageID.download_pause_download, context))
+                    }
+                }
+                .addDownloadAction(downloadJobUid, endpoint.url, ACTION_CANCEL_DOWNLOAD,
+                    systemImpl.getString(MessageID.cancel, context))
+                .build()
+        }
+
+        override fun cancel() {
+            downloadJobLiveData.removeObserver(this)
+            activeDownloadJobNotifications.remove(this)
+            super.cancel()
         }
     }
 
@@ -207,18 +234,27 @@ class DownloadNotificationService : Service(), DIAware {
         : NotificationHolder2(impl.getString(MessageID.deleting, applicationContext),
             impl.getString(MessageID.deleting, applicationContext)) {
 
-        init {
-            builder.setContentTitle(contentTitle)
-                    .setContentText(contentText)
+        internal var progress: Int = 0
 
+        init {
             GlobalScope.launch {
                 val db: UmAppDatabase = on(endpoint).direct.instance(tag = TAG_DB)
                 val downloadJobTitleInDb = db.downloadJobItemDao.getEntryTitleByDownloadJobItemUidAsync(downloadJobItemUid) ?: ""
-                builder.setContentTitle(downloadJobTitleInDb)
                 contentTitle = downloadJobTitleInDb
                 doNotify()
-
             }
+        }
+
+        override fun build(): Notification {
+            return createNotificationBuilder()
+                .setProgress(MAX_PROGRESS_VALUE, progress, false)
+                .setContentTitle(contentTitle)
+                .build()
+        }
+
+        override fun cancel() {
+            activeDeleteJobNotifications.remove(this)
+            super.cancel()
         }
     }
 
@@ -232,14 +268,10 @@ class DownloadNotificationService : Service(), DIAware {
         lateinit var importJobLiveData: DoorLiveData<ContainerImportJob?>
 
         init {
-            builder.setContentTitle(contentTitle)
-                    .setContentText(contentText)
-
             GlobalScope.launch(Dispatchers.Main) {
                 val db: UmAppDatabase = on(endpoint).direct.instance(tag = TAG_DB)
                 val importJobTitleEntry = db.containerImportJobDao.getTitleOfEntry(importJobUid)
                         ?: ""
-                builder.setContentTitle(importJobTitleEntry)
                 contentTitle = importJobTitleEntry
                 doNotify()
 
@@ -254,10 +286,6 @@ class DownloadNotificationService : Service(), DIAware {
                 bytesSoFar = t.cijBytesSoFar
                 totalBytes = t.cijContentLength
 
-                val progress = (bytesSoFar.toDouble() / totalBytes * 100).toInt()
-                Napier.d(tag = "NotificationService", message = "container import changed new progress: $progress")
-                builder.setProgress(MAX_PROGRESS_VALUE, progress, false)
-
                 contentText = if(t.cijImportCompleted) impl.getString(
                         MessageID.uploading, this@DownloadNotificationService)
                 else
@@ -265,7 +293,6 @@ class DownloadNotificationService : Service(), DIAware {
                             MessageID.processing, this@DownloadNotificationService)
 
                 Napier.d(tag = "NotificationService", message = "container import changed desc is $contentText")
-                builder.setContentText(contentText)
 
                 doNotify()
 
@@ -276,19 +303,21 @@ class DownloadNotificationService : Service(), DIAware {
                 }
             }
         }
+
+        override fun build(): Notification {
+            val progress = (bytesSoFar.toDouble() / totalBytes * 100).toInt()
+            return createNotificationBuilder()
+                .setContentTitle(contentTitle)
+                .setContentText(contentText)
+                .setProgress(MAX_PROGRESS_VALUE, progress, false)
+                .build()
+        }
     }
 
 
     inner class SummaryNotificationHolder() : NotificationHolder2(
             impl.getString(MessageID.downloading, applicationContext),
             impl.getString(MessageID.downloading, applicationContext)) {
-        init {
-            val inboxStyle = NotificationCompat.InboxStyle()
-                    .setBigContentTitle(contentTitle)
-                    .setSummaryText(contentText)
-            builder.setGroupSummary(true)
-                    .setStyle(inboxStyle)
-        }
 
         fun updateSummary() {
             val totalBytes = activeDownloadJobNotifications.fold(0L, { count, jobNotification ->
@@ -308,8 +337,13 @@ class DownloadNotificationService : Service(), DIAware {
                     UMFileUtil.formatFileSize(bytesSoFar),
                     UMFileUtil.formatFileSize(totalBytes))
 
+            doNotify()
+        }
 
-            builder.setStyle(NotificationCompat.InboxStyle()
+        override fun build(): Notification {
+            return createNotificationBuilder()
+                .setGroupSummary(true)
+                .setStyle(NotificationCompat.InboxStyle()
                     .setBigContentTitle(contentTitle)
                     .setSummaryText(contentText)
                     .also { inboxStyle ->
@@ -317,8 +351,7 @@ class DownloadNotificationService : Service(), DIAware {
                             inboxStyle.addLine("${it.contentTitle} - ${it.contentText}")
                         }
                     })
-
-            doNotify()
+                .build()
         }
 
     }
@@ -405,35 +438,45 @@ class DownloadNotificationService : Service(), DIAware {
             }
 
             ACTION_PAUSE_DOWNLOAD -> {
+                val endpointVal = endpoint ?: throw IllegalArgumentException("DownloadNotificationService: ACTION_PAUSEDOWNLOAD intent without endpoint")
                 GlobalScope.launch {
-                    //networkManagerDeferred.await().containerDownloadManager.pause(downloadJobUid)
+                    val containerDownloadManager: ContainerDownloadManager = di.on(endpointVal).direct.instance()
+                    containerDownloadManager.pause(downloadJobUid)
+                }
+            }
+
+            ACTION_RESUME_DOWNLOAD -> {
+                val endpointVal = endpoint ?: throw IllegalArgumentException("DownloadNotificationService: ACTION_RESUME_DOWNLOAD intent without endpoint")
+                GlobalScope.launch {
+                    val containerDownloadManager: ContainerDownloadManager = di.on(endpointVal).direct.instance()
+                    containerDownloadManager.enqueue(downloadJobUid)
                 }
             }
 
             ACTION_CANCEL_DOWNLOAD -> {
+                val endpointVal = endpoint ?: throw IllegalArgumentException("DownloadNotificationService: ACTION_CANCEL_DOWNLOAD intent without endpoint")
                 GlobalScope.launch {
-                    //networkManagerDeferred.await().containerDownloadManager.cancel(downloadJobUid)
+                    val containerDownloadManager: ContainerDownloadManager = di.on(endpointVal).direct.instance()
+                    containerDownloadManager.cancel(downloadJobUid)
                 }
             }
 
             ACTION_DELETE_DOWNLOAD -> {
                 val endpointVal = endpoint ?: throw IllegalArgumentException("ACTION_DELETE_DOWNLOAD requires EXTRA_ENDPOINT")
-                var deleteNotificationHolder = DeleteNotificationHolder(downloadJobItemUid, endpointVal)
+                val deleteNotificationHolder = DeleteNotificationHolder(downloadJobItemUid, endpointVal)
                 activeDeleteJobNotifications.add(deleteNotificationHolder)
                 createdNotificationHolder = deleteNotificationHolder
 
-                GlobalScope.async {
+                GlobalScope.launch {
                     val containerDownloadManager: ContainerDownloadManager by on(endpointVal).instance()
-                    containerDownloadManager.deleteDownloadJobItem(downloadJobItemUid){
-                        deleteNotificationHolder.builder.setProgress(MAX_PROGRESS_VALUE, it, false)
+                    containerDownloadManager.deleteDownloadJobItem(downloadJobItemUid){ progress ->
+                        deleteNotificationHolder.progress = progress
                         deleteNotificationHolder.doNotify()
                     }
-                    activeDeleteJobNotifications.remove(deleteNotificationHolder)
-                    mNotificationManager.cancel(deleteNotificationHolder.notificationId)
-                    checkIfCompleteAfterDelay()
+                    deleteNotificationHolder.cancel()
                 }
-
             }
+
             ACTION_PREPARE_IMPORT ->{
                 val endpointVal = endpoint ?: throw IllegalArgumentException("ACTION_PREPARE_IMPORT requires EXTRA_ENDPOINT")
 
@@ -489,12 +532,6 @@ class DownloadNotificationService : Service(), DIAware {
         }
     }
 
-
-    @ExperimentalCoroutinesApi
-    override fun onDestroy() {
-        super.onDestroy()
-    }
-
     private fun canCreateGroupedNotification(): Boolean {
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
     }
@@ -502,6 +539,8 @@ class DownloadNotificationService : Service(), DIAware {
     companion object {
 
         const val ACTION_PAUSE_DOWNLOAD = "ACTION_PAUSE_DOWNLOAD"
+
+        const val ACTION_RESUME_DOWNLOAD = "ACTION_RESUME_DOWNLOAD"
 
         const val ACTION_CANCEL_DOWNLOAD = "ACTION_CANCEL_DOWNLOAD"
 
