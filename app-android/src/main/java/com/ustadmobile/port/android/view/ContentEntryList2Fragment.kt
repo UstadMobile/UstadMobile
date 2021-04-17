@@ -1,6 +1,5 @@
 package com.ustadmobile.port.android.view
 
-import android.Manifest
 import android.os.Bundle
 import android.view.*
 import androidx.core.os.bundleOf

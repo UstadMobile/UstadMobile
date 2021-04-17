@@ -1,12 +1,12 @@
 package com.ustadmobile.view
 
-import com.ccfraser.muirwik.components.mSnackbar
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleObserver
 import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.ext.concurrentSafeListOf
 import com.ustadmobile.model.statemanager.AppBarState
+import com.ustadmobile.model.statemanager.SnackBarState
 import com.ustadmobile.util.SearchManager
 import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.StateManager.getCurrentState
@@ -14,24 +14,21 @@ import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.Runnable
 import org.kodein.di.DI
 import org.kodein.di.DIAware
-import react.RBuilder
-import react.RComponent
-import react.RProps
-import react.RState
+import org.kodein.di.instance
+import react.*
 
 open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(props),
     UstadView, DIAware, DoorLifecycleOwner {
 
-    protected var builder: RBuilder? = null
-
     private val lifecycleObservers: MutableList<DoorLifecycleObserver> = concurrentSafeListOf()
 
-    val systemImpl =  UstadMobileSystemImpl.instance
+    val systemImpl : UstadMobileSystemImpl by instance()
+
+    val umTheme : StateManager.UmTheme by instance()
 
     private val lifecycleStatus = atomic(0)
 
     protected var searchManager: SearchManager? = null
-
 
     override fun componentDidMount() {
         for(observer in lifecycleObservers){
@@ -41,24 +38,20 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
         searchManager = SearchManager("um-search")
     }
 
-    open fun onSearchSubmitted(text:String){
-        console.log(text)
-    }
-
     override fun RBuilder.render() {
-        builder = this
         lifecycleStatus.value = DoorLifecycleObserver.CREATED
     }
 
     override var loading: Boolean = false
         get() = field
         set(value) {
-            field = value
             StateManager.dispatch(AppBarState(loading = value))
+            setState { field = value }
         }
 
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
-        builder?.mSnackbar (message = message)
+        StateManager.dispatch(SnackBarState(message,
+            systemImpl.getString(actionMessageId, this)) { action() })
     }
 
     override fun runOnUiThread(r: Runnable?) {
@@ -86,6 +79,4 @@ open class UmBaseComponent <P: RProps,S: RState>(props: P): RComponent<P, S>(pro
         lifecycleStatus.value = DoorLifecycleObserver.STOPPED
         searchManager?.onDestroy()
     }
-
-
 }

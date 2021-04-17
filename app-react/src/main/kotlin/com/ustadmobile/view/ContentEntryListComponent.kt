@@ -10,20 +10,21 @@ import com.ccfraser.muirwik.components.list.mList
 import com.ccfraser.muirwik.components.list.mListItem
 import com.ccfraser.muirwik.components.list.mListItemAvatar
 import com.ccfraser.muirwik.components.list.mListItemText
+import com.ccfraser.muirwik.components.menu.mMenu
+import com.ccfraser.muirwik.components.menu.mMenuItem
 import com.ustadmobile.core.controller.ContentEntryList2Presenter
 import com.ustadmobile.core.controller.UstadListPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.ListFilterIdOption
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.view.ContentEntryEdit2View
 import com.ustadmobile.core.view.ContentEntryList2View
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.lib.db.entities.ContentEntry
+import com.ustadmobile.lib.db.entities.ContentEntryWithMostRecentContainer
 import com.ustadmobile.lib.db.entities.ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer
 import com.ustadmobile.model.statemanager.AppBarState
 import com.ustadmobile.util.CssStyleManager
-import com.ustadmobile.util.CssStyleManager.contentEntryListEditOptions
 import com.ustadmobile.util.CssStyleManager.entryListItemContainer
 import com.ustadmobile.util.CssStyleManager.entryListItemImage
 import com.ustadmobile.util.CssStyleManager.entryListItemInfo
@@ -31,6 +32,7 @@ import com.ustadmobile.util.RouteManager.getArgs
 import com.ustadmobile.util.StateManager
 import kotlinx.browser.window
 import kotlinx.css.*
+import org.w3c.dom.Node
 import react.RBuilder
 import react.RProps
 import react.setState
@@ -50,6 +52,10 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
 
     private var mParentEntryUid:Long = 0
 
+    private var showingEditOptions = false
+
+    private var anchorElement: Node? = null
+
     override val listPresenter: UstadListPresenter<*, in ContentEntryWithParentChildJoinAndStatusAndMostRecentContainer>?
         get() = mPresenter
 
@@ -57,14 +63,15 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
     override var title: String? = null
         get() = field
         set(value) {
-            field = value
             StateManager.dispatch(AppBarState(title = value))
+            setState { field = value }
         }
 
     override var editOptionVisible: Boolean = false
         get() = field
         set(value) {
-            field = value
+            showEditOptionsMenu = value
+            setState { field = value }
         }
 
     override fun componentDidMount() {
@@ -189,29 +196,32 @@ class ContentEntryListComponent(props: EntryListProps): UstadListViewComponent<C
     }
 
     override fun showMoveEntriesFolderPicker(selectedContentEntryParentChildJoinUids: String) {
-        TODO("Not yet implemented")
+        //implement moving entries from one folder to another
     }
 
 
-    override fun RBuilder.renderEditOptions() {
-        styledDiv {
+    override fun RBuilder.renderEditOptionMenu() {
+        mGridItem {
             css{
-                +contentEntryListEditOptions
-                display = if(editOptionVisible)
-                    Display.block else Display.none
+                display = if(editOptionVisible) Display.block else Display.none
             }
-            mGridContainer(spacing= MGridSpacing.spacing3){
-                mGridItem {
-                    mIconButton("edit", color = MColor.default,onClick = {
-                        mPresenter.handleClickEditFolder()
-                    })
+            mIconButton("more_vert", color = MColor.default, onClick = {
+                val target =  it.currentTarget
+                setState {
+                    showingEditOptions = true; anchorElement = target.asDynamic()
                 }
+            })
+        }
 
-                mGridItem {
-                    mIconButton("visibility", color = MColor.default, onClick = {
-                        mPresenter.handleClickShowHiddenItems()
-                    })
-                }
+        styledDiv{
+            mMenu(showingEditOptions, anchorElement = anchorElement,
+                onClose = { _, _ -> setState { showingEditOptions = false; anchorElement = null}}) {
+                mMenuItem(systemImpl.getString(MessageID.edit, this), onClick = {
+                    mPresenter.handleClickEditFolder()
+                })
+                mMenuItem(systemImpl.getString(MessageID.show_hidden_items, this), onClick = {
+                    mPresenter.handleClickShowHiddenItems()
+                })
             }
         }
     }

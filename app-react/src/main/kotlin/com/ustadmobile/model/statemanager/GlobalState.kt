@@ -10,6 +10,9 @@ import redux.RAction
  */
 data class GlobalState(var title: String? = "", var showFab: Boolean = false,
                        var fabLabel: String = "", var fabIcon: String = "",
-                       var onClick:(Event) -> Unit = {}, var di: DI = DI.lazy {},
+                       var onFabClicked:(Event) -> Unit = {}, var di: DI = DI.lazy {},
                        var theme: Theme? = null, var loading: Boolean = false,
-                       var searchQuery: String ? = null, var type: RAction? = null)
+                       var snackBarMessage: String ? = null, var type: RAction? = null,
+                       var snackBarActionLabel: String? = null,
+                       var onSnackActionClicked:(Event) -> Unit = {}
+)

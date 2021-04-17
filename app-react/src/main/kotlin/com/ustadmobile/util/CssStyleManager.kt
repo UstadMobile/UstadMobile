@@ -91,6 +91,12 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         justifyContent = JustifyContent.center
     }
 
+    val mainComponentErrorPaper by css{
+        padding(2.spacingUnits)
+        marginBottom = 2.spacingUnits
+        color = Color.red
+    }
+
     val mainComponentSearch by css {
         position = Position.relative
         borderRadius = theme.shape.borderRadius.px
@@ -140,10 +146,10 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         height = 150.px
     }
 
-    val contentEntryListEditOptions by css{
+    val contentEntryListExtraOptions by css{
         display = Display.flex
         flexDirection = FlexDirection.row
-        margin = "10px 0px 10px 80%"
+        marginBottom = 6.px
     }
 
     val entryListItemInfo by css {

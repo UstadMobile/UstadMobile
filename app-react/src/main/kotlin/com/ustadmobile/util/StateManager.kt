@@ -51,6 +51,10 @@ object StateManager{
 
         constant(UstadMobileSystemCommon.TAG_DOWNLOAD_ENABLED) with true
 
+        bind<UmTheme>() with singleton{
+            UmTheme(getCurrentState().theme!!)
+        }
+
         bind<CoroutineDispatcher>(tag = UstadMobileSystemCommon.TAG_MAIN_COROUTINE_CONTEXT) with singleton { Dispatchers.Main }
 
         bind<ContentEntryOpener>() with scoped(EndpointScope.Default).singleton {
@@ -65,12 +69,13 @@ object StateManager{
         state.type = action
         return when (action) {
             is AppBarState -> state.copy(title = if(action.title.isNullOrBlank()) state.title
-                else action.title, searchQuery = if(action.searchQuery.isNullOrBlank())
-                    state.searchQuery else action.searchQuery, loading = action.loading)
-            is FabState -> state.copy(showFab = action.visible, onClick = action.onClick,
+                else action.title, loading = action.loading)
+            is FabState -> state.copy(showFab = action.visible, onFabClicked = action.onClick,
                 fabLabel = action.label, fabIcon = action.icon)
             is UmDi -> state.copy(di = action.di)
             is UmTheme -> state.copy(theme = action.theme)
+            is SnackBarState -> state.copy(snackBarActionLabel = action.actionLabel,
+                snackBarMessage = action.message, onFabClicked = action.onClick)
             else -> state
         }
     }

@@ -12,14 +12,14 @@ import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.view.ContentEntry2DetailView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
+import com.ustadmobile.util.CssStyleManager.chipSet
 import com.ustadmobile.util.CssStyleManager.defaultMarginTop
 import com.ustadmobile.util.CssStyleManager.entryDetailComponentContainer
 import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryExtraInfo
 import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryImage
 import com.ustadmobile.util.CssStyleManager.entryDetailComponentEntryImageAndButtonContainer
-import com.ustadmobile.util.CssStyleManager.chipSet
 import com.ustadmobile.util.RouteManager.getArgs
-import com.ustadmobile.util.UmReactUtil.formatString
+import com.ustadmobile.util.ext.joinString
 import kotlinx.browser.window
 import kotlinx.css.margin
 import react.RBuilder
@@ -34,6 +34,42 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
 
     private lateinit var mPresenter: ContentEntry2DetailPresenter
 
+    override val detailPresenter: UstadDetailPresenter<*, *>?
+        get() = mPresenter
+
+    override var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null
+        get() = field
+        set(value) {
+            field = value
+        }
+
+    override var downloadJobItem: DownloadJobItem? = null
+        get() = field
+        set(value) {
+            //handle download job
+            field = value
+        }
+
+    override var contentEntryProgress: ContentEntryProgress? = null
+        get() = field
+        set(value) {
+            //handle progress
+            field = value
+        }
+
+    override var locallyAvailable: Boolean = false
+        get() = field
+        set(value) {
+            //handle locally available on web
+            field = value
+        }
+
+    override var entity: ContentEntryWithMostRecentContainer? = null
+        get() = field
+        set(value) {
+            field = value
+        }
+
     override fun componentDidMount() {
         super.componentDidMount()
         mPresenter = ContentEntry2DetailPresenter(this,getArgs(),
@@ -47,9 +83,9 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
                     it.contentEntryUid.toString() == getArgs()[UstadView.ARG_ENTITY_UID]
                 }
             }
-            showSnackBar("Hello there")
         }, 1000)
     }
+
 
     override fun RBuilder.render() {
 
@@ -79,7 +115,11 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
 
                     mTypography(entity?.title, variant = MTypographyVariant.h4, gutterBottom = true)
 
-                    mTypography( formatString(MessageID.entry_details_author,entity?.author,systemImpl),
+                    mTypography(
+                        entity?.author?.let {
+                            systemImpl.getString(MessageID.entry_details_author, this)
+                                .joinString(it)
+                        },
                         variant = MTypographyVariant.h6, gutterBottom = true)
 
                     styledDiv {
@@ -88,15 +128,18 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
 
                             mGridItem {
                                 mTypography(
-                                    formatString(MessageID.entry_details_publisher,
-                                        entity?.publisher,systemImpl),
+                                    entity?.publisher?.let {
+                                        systemImpl.getString(MessageID.entry_details_publisher,this)
+                                            .joinString(":",it) },
                                     variant = MTypographyVariant.subtitle1, gutterBottom = true)
                             }
 
                             mGridItem {
                                 mTypography(
-                                    formatString(MessageID.entry_details_license,
-                                        entity?.licenseName,systemImpl,""),
+                                    entity?.licenseName?.let {
+                                        systemImpl.getString(MessageID.entry_details_license,this)
+                                            .joinString(it)
+                                    },
                                     variant = MTypographyVariant.subtitle1, gutterBottom = true)
                             }
                         }
@@ -125,36 +168,9 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
 
     }
 
-    override val detailPresenter: UstadDetailPresenter<*, *>?
-        get() = mPresenter
-
-    override var availableTranslationsList: DataSource.Factory<Int, ContentEntryRelatedEntryJoinWithLanguage>? = null
-        get() = field
-        set(value) {
-            field = value
-        }
-
     override fun showDownloadDialog(args: Map<String, String>) {
         TODO("Not yet implemented")
     }
-
-    override var downloadJobItem: DownloadJobItem?
-        get() = TODO("Not yet implemented")
-        set(value) {}
-
-    override var contentEntryProgress: ContentEntryProgress?
-        get() = TODO("Not yet implemented")
-        set(value) {}
-
-    override var locallyAvailable: Boolean
-        get() = TODO("Not yet implemented")
-        set(value) {}
-
-    override var entity: ContentEntryWithMostRecentContainer? = null
-        get() = field
-        set(value) {
-            field = value
-        }
 
     override fun onClickSort(sortOption: SortOrderOption) {
         TODO("Not yet implemented")

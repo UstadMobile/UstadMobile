@@ -5,6 +5,7 @@ import kotlinx.browser.window
 import kotlinx.coroutines.await
 import kotlinx.css.pct
 import kotlinx.css.px
+import react.RErrorInfo
 import kotlin.js.Promise
 
 object UmReactUtil {
@@ -39,9 +40,5 @@ object UmReactUtil {
         return (js("Object.entries") as (dynamic) -> Array<Array<T?>>)
             .invoke(data)
             .map { entry -> entry[1] }.toList() as T
-    }
-
-    fun formatString(id: Int,text: String?,impl: UstadMobileSystemImpl,separator: String? = ":"): String{
-        return "${impl.getString(id,this)}$separator $text"
     }
 }
