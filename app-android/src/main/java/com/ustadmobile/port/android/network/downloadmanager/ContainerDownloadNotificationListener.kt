@@ -21,7 +21,7 @@ class ContainerDownloadNotificationListener(val appContext: Context, val endpoin
     ) {
         val startIntent = Intent(appContext, DownloadNotificationService::class.java).apply {
             action = DownloadNotificationService.ACTION_DOWNLOADJOBITEM_STARTED
-            putExtra(DownloadNotificationService.EXTRA_DOWNLOADJOBUID, downloadJobItem.djiUid)
+            putExtra(DownloadNotificationService.EXTRA_DOWNLOADJOBUID, downloadJobItem.djiDjUid)
             putExtra(DownloadNotificationService.EXTRA_ENDPOINT, endpoint.url)
         }
 

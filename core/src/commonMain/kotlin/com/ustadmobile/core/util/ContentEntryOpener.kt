@@ -87,7 +87,7 @@ class ContentEntryOpener(override val di: DI, val endpoint: Endpoint) : DIAware 
             }
 
             goToContentEntryDetailViewIfNotDownloaded -> {
-                systemImpl.go(ContentEntry2DetailView.VIEW_NAME,
+                systemImpl.go(ContentEntryDetailView.VIEW_NAME,
                         mapOf(ARG_ENTITY_UID to contentEntryUid.toString()), context, goToOptions)
             }
 

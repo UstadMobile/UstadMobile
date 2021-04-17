@@ -248,6 +248,7 @@ abstract class PersonDao : BaseDao<Person> {
                                            accountPersonUid: Long, sortOrder: Int, searchText: String? = "%"): List<Person>
 
 
+
     @Query("SELECT Person.* FROM Person WHERE Person.personUid = :personUid")
     abstract fun findByUidWithDisplayDetailsLive(personUid: Long): DoorLiveData<PersonWithDisplayDetails?>
 
@@ -307,6 +308,9 @@ abstract class PersonDao : BaseDao<Person> {
         const val ENTITY_PERSONS_WITH_PERMISSION_PARAM = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 :checkPermissionForSelf $ENTITY_PERSONS_WITH_PERMISSION_PT2  :permission $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
+
+        const val ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
+
 
     }
 
