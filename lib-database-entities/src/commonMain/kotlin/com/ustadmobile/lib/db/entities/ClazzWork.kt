@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ClazzWork.Companion.CLAZZ_WORK_TABLE_ID
 import kotlinx.serialization.Serializable
 
@@ -70,8 +67,11 @@ open class ClazzWork {
     @LastChangedBy
     var clazzWorkLastChangedBy: Int = 0
 
+    @LastChangedTime
+    var clazzWorkLct: Long = 0
 
-        constructor(){
+
+    constructor(){
         clazzWorkActive = true
     }
 

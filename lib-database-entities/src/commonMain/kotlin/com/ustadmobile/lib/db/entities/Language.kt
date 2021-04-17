@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Language.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
@@ -44,6 +41,9 @@ class Language() {
 
     @LastChangedBy
     var langLastChangedBy: Int = 0
+
+    @LastChangedTime
+    var langLct: Long = 0
 
     override fun toString(): String {
         return name.toString()

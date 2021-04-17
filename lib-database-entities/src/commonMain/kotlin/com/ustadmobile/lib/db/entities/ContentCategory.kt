@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ContentCategory.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
@@ -40,6 +37,9 @@ class ContentCategory() {
 
     @LastChangedBy
     var contentCategoryLastChangedBy: Int = 0
+
+    @LastChangedTime
+    var contentCategoryLct: Long = 0
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

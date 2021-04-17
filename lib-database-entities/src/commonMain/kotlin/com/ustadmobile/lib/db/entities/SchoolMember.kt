@@ -4,10 +4,7 @@ import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 /**
@@ -217,6 +214,9 @@ open class SchoolMember {
 
     @LastChangedBy
     var schoolMemberLastChangedBy: Int = 0
+
+    @LastChangedTime
+    var schoolMemberLct: Long = 0
 
 
     constructor(){

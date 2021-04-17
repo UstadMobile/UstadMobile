@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 
@@ -52,6 +49,9 @@ data class CustomField(
 
         @LastChangedBy
         var customFieldLCB: Int = 0,
+
+        @LastChangedTime
+        var customFieldLct: Long = 0,
 
         var customFieldInputType: Int = 0x00000001
 
