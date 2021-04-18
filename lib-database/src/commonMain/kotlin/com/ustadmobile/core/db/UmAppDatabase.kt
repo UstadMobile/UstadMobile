@@ -4212,18 +4212,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         val MIGRATION_61_62 = object : DoorMigration(61, 62) {
             override fun migrate(database: DoorSqlDatabase) {
-
-                database.execSQL("""ALTER TABLE Language 
-                        ADD COLUMN languageActive INTEGER DEFAULT 1 NOT NULL""".trimMargin())
-
                 if (database.dbType() == DoorDbType.POSTGRES) {
-
-                    database.execSQL("""UPDATE Language SET languageActive = true 
-                        WHERE languageActive is NULL""".trimMargin())
-
+                    database.execSQL("""ALTER TABLE Language 
+                        ADD COLUMN languageActive BOOL DEFAULT FALSE NOT NULL""")
+                    database.execSQL("""UPDATE Language SET languageActive = true""")
+                }else {
+                    database.execSQL("""ALTER TABLE Language 
+                        ADD COLUMN languageActive INTEGER DEFAULT 0 NOT NULL""")
                 }
-
-
             }
         }
 
