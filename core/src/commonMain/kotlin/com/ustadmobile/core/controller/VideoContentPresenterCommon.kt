@@ -1,17 +1,15 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.contentformats.xapi.*
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.contentformats.xapi.endpoints.storeProgressStatement
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ContainerDao
 import com.ustadmobile.core.db.dao.ContainerEntryDao
 import com.ustadmobile.core.db.dao.ContentEntryDao
-import com.ustadmobile.core.util.UMIOUtils
-import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.door.doorMainDispatcher
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.door.util.systemTimeInMillis
 import com.ustadmobile.lib.db.entities.ContainerEntryWithContainerEntryFile
 import com.ustadmobile.lib.db.entities.ContentEntry
@@ -41,6 +39,8 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
 
     var timeVideoPlayed = 0L
 
+    lateinit var contextRegistration: String
+
     internal lateinit var contentEntryDao: ContentEntryDao
     internal lateinit var containerDao: ContainerDao
     internal lateinit var containerEntryDao: ContainerEntryDao
@@ -63,6 +63,7 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
         containerEntryDao = db.containerEntryDao
         containerDao = db.containerDao
         contentEntryDao = db.contentEntryDao
+        contextRegistration = randomUuid().toString()
 
         entryUuid = arguments.getValue(UstadView.ARG_CONTENT_ENTRY_UID).toLong()
         containerUid = arguments.getValue(UstadView.ARG_CONTAINER_UID).toLong()
@@ -109,8 +110,9 @@ abstract class VideoContentPresenterCommon(context: Any, arguments: Map<String, 
             repo.contentEntryProgressDao.updateProgress(entryUuid, accountManager.activeAccount.personUid, progress, flag)
 
             entry?.also {
-                statementEndpoint.storeProgressStatement(accountManager.activeAccount, it, progress,
-                        playerPlayedVideoDuration)
+                statementEndpoint.storeProgressStatement(
+                        accountManager.activeAccount, it, progress,
+                        playerPlayedVideoDuration,contextRegistration)
             }
         }
     }

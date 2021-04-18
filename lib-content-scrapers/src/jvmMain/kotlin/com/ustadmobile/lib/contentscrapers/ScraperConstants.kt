@@ -23,7 +23,6 @@ object ScraperConstants {
     const val REGULAR_ARABIC_FONT_LINK = "/com/ustadmobile/lib/contentscrapers/edraak/DroidNaskh-Regular.woff2"
     const val BOLD_ARABIC_FONT_LINK = "/com/ustadmobile/lib/contentscrapers/edraak/DroidNaskh-Bold.woff2"
     const val CIRCULAR_CSS_LINK = "/com/ustadmobile/lib/contentscrapers/ck12/css-circular-prog-bar.css"
-    const val LANGUAGE_LIST_LOCATION = "/com/ustadmobile/lib/contentscrapers/iso_639_3.json"
     const val CIRCULAR_CSS_NAME = "css-circular-prog-bar.css"
     const val TIMER_PATH = "/com/ustadmobile/lib/contentscrapers/ck12/timer.svg"
     const val TIMER_NAME = "timer.svg"

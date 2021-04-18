@@ -1,10 +1,11 @@
 package com.ustadmobile.core.contentformats.scorm
 
 
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
 import org.junit.Assert
 import org.junit.Test
-import org.kmp.io.KMPPullParserException
-import java.io.IOException
+import org.xmlpull.v1.XmlPullParserFactory
 
 /**
  * Created by mike on 1/6/18.
@@ -13,10 +14,13 @@ import java.io.IOException
 class TestScormManifest {
 
     @Test
-    @Throws(IOException::class, KMPPullParserException::class)
     fun testParseScormManifest() {
         val scormManifest = ScormManifest()
-        scormManifest.loadFromInputStream(javaClass.getResourceAsStream(SCORM_MANIFEST_RESOURCE))
+        val xpp = XmlPullParserFactory.newInstance().newPullParser()
+        val inStream = javaClass.getResourceAsStream(SCORM_MANIFEST_RESOURCE)
+        xpp.setFeature(XmlPullParserConstants.FEATURE_PROCESS_NAMESPACES, true)
+        xpp.setInput(inStream, "UTF-8")
+        scormManifest.loadFromXpp(xpp)
         Assert.assertEquals("Loaded identifier", "com.scorm.manifesttemplates.scorm12",
                 scormManifest.identifier)
         Assert.assertEquals("Got default organization", "B0",

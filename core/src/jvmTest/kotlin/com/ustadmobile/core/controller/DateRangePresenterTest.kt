@@ -2,7 +2,7 @@
 package com.ustadmobile.core.controller
 
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl

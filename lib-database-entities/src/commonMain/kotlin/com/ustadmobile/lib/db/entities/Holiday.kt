@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.Holiday.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
@@ -29,6 +26,9 @@ class Holiday() {
 
     @LastChangedBy
     var holLastModBy: Int = 0
+
+    @LastChangedTime
+    var holLct: Long = 0
 
     var holActive: Boolean = true
 

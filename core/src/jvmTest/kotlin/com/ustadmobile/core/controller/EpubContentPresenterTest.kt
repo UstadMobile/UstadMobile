@@ -1,26 +1,27 @@
 package com.ustadmobile.core.controller
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.contentformats.epub.nav.EpubNavItem
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
+import com.ustadmobile.core.io.ext.openEntryInputStream
 import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.activeDbInstance
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.EpubContentView
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import io.ktor.client.HttpClient
-import io.ktor.client.request.get
-import io.ktor.client.statement.HttpStatement
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -40,7 +41,6 @@ import org.xmlpull.v1.XmlSerializer
 import java.io.File
 import java.io.IOException
 import java.util.*
-import java.util.zip.ZipFile
 
 class EpubContentPresenterTest {
 
@@ -48,8 +48,6 @@ class EpubContentPresenterTest {
     @JvmField
     @Rule
     var ustadTestRule = UstadTestRule()
-
-    private lateinit var epubTmpFile: File
 
     @Rule
     @JvmField
@@ -59,9 +57,9 @@ class EpubContentPresenterTest {
 
     private lateinit var mockEpubView: EpubContentView
 
-    private var epubContainer: Container? = null
+    private lateinit var epubContainer: Container
 
-    private var opf: OpfDocument? = null
+    private lateinit var opf: OpfDocument
 
     lateinit var di: DI
 
@@ -77,16 +75,6 @@ class EpubContentPresenterTest {
         di = DI {
             import(ustadTestRule.diModule)
             bind<XapiStatementEndpoint>() with singleton { mockStatementEndpoint }
-
-            bind<XmlPullParserFactory>() with singleton {
-                XmlPullParserFactory.newInstance().also {
-                    it.isNamespaceAware = true
-                }
-            }
-
-            bind<XmlPullParser>() with provider {
-                instance<XmlPullParserFactory>().newPullParser()
-            }
 
             bind<XmlSerializer>() with provider {
                 KXmlSerializer()
@@ -110,18 +98,12 @@ class EpubContentPresenterTest {
             containerUid = repo.containerDao.insert(this)
         }
 
-        epubTmpFile = tmpFileRule.newFile("epubTmpFile")
-
-        UmFileUtilSe.extractResourceToFile("/com/ustadmobile/core/contentformats/epub/test.epub",
-                epubTmpFile)
-
         containerDirTmp = tmpFileRule.newFolder("containerDirTmp")
-        val containerManager = ContainerManager(epubContainer!!, db, repo,
-                containerDirTmp.absolutePath)
-
-        val epubZipFile = ZipFile(epubTmpFile)
-        addEntriesFromZipToContainer(epubTmpFile.absolutePath, containerManager)
-        epubZipFile.close()
+        runBlocking {
+            repo.addEntriesToContainerFromZipResource(epubContainer.containerUid,
+                    this::class.java, "/com/ustadmobile/core/contentformats/epub/test.epub",
+                    ContainerAddOptions(containerDirTmp.toDoorUri()))
+        }
 
         mockEpubView = mock {
 
@@ -132,10 +114,13 @@ class EpubContentPresenterTest {
         }
 
 
-        //Used for verification purposes
-        val opfIn = containerManager.getInputStream(containerManager.getEntry("OEBPS/package.opf")!!)
+        //opf var is used when running assertions
+        val opfIn = db.containerEntryDao.openEntryInputStream(epubContainer.containerUid, "OEBPS/package.opf")!!
         opf = OpfDocument()
-        opf!!.loadFromOPF(UstadMobileSystemImpl.instance.newPullParser(opfIn, "UTF-8"))
+        val xpp = XmlPullParserFactory.newInstance().newPullParser().also {
+            it.setInput(opfIn, "UTF-8")
+        }
+        opf.loadFromOPF(xpp)
         opfIn.close()
     }
 
@@ -232,7 +217,7 @@ class EpubContentPresenterTest {
         presenter.onCreate(args)
         presenter.onStart()
 
-        verify(mockEpubView, timeout(15000)).tableOfContents = any()
+        verify(mockEpubView, timeout(15000 )).tableOfContents = any()
 
         presenter.handlePageChanged(1)
         verify(mockEpubView).windowTitle = "Page 2" //the title as specified in test.epub's OPF for this file

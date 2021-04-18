@@ -15,7 +15,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 import java.io.File
 
-@ExperimentalStdlibApi
+
 class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Long, endpoint: Endpoint, di: DI) : Scraper(contentEntryUid, sqiUid, parentContentEntryUid, endpoint, di) {
 
     private val contentImportManager: ContentImportManager by di.on(endpoint).instance()
@@ -62,7 +62,8 @@ class FileScraper(contentEntryUid: Long, sqiUid: Int, parentContentEntryUid: Lon
                 val params = scrapeQueueItem?.scrapeRun?.conversionParams
                 var conversionParams = mapOf<String, String>()
                 if(params != null){
-                    conversionParams = Json.parse(MapSerializer(String.serializer(), String.serializer()), params)
+                    conversionParams = Json.decodeFromString(
+                        MapSerializer(String.serializer(), String.serializer()), params)
                 }
                 contentImportManager.importFileToContainer(file.path, metadata.mimeType,
                         fileEntry.contentEntryUid, containerFolder.path, conversionParams){

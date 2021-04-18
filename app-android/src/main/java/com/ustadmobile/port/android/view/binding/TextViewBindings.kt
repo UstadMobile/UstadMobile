@@ -3,11 +3,10 @@ package com.ustadmobile.port.android.view.binding
 import android.annotation.SuppressLint
 import android.content.Context
 import android.text.format.DateFormat
-import android.view.View
-import android.widget.Button
 import android.widget.TextView
 import androidx.core.text.HtmlCompat
 import androidx.databinding.BindingAdapter
+import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
@@ -18,6 +17,8 @@ import com.ustadmobile.lib.db.entities.*
 import java.util.*
 import com.soywiz.klock.DateFormat as KlockDateFormat
 import com.ustadmobile.core.util.ext.roleToString
+import com.ustadmobile.core.util.ext.outcomeToString
+import java.util.concurrent.TimeUnit
 
 @BindingAdapter("textMessageId")
 fun TextView.setTextMessageId(messageId: Int) {
@@ -137,6 +138,15 @@ fun TextView.setTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long)
             " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) dateFormat.format(textToDateLong) else ""}"
 }
 
+@SuppressLint("SetTextI18n")
+@BindingAdapter(value = ["enrolmentTextFromDateLong", "enrolmentTextToDateLong"])
+fun TextView.setEnrolmentTextFromToDateLong(textFromDateLong: Long, textToDateLong: Long) {
+    val dateFormat = DateFormat.getDateFormat(context)
+    text = "${if (textFromDateLong > 0) dateFormat.format(textFromDateLong) else ""} -" +
+            " ${if (textToDateLong > 0 && textToDateLong != Long.MAX_VALUE) dateFormat.format(textToDateLong) else context.getString(R.string.time_present)}"
+}
+
+
 
 private val textViewSchoolGenderStringIds: Map<Int, Int> = mapOf(
         School.SCHOOL_GENDER_MIXED to R.string.mixed,
@@ -200,11 +210,11 @@ fun TextView.setFileSize(fileSize: Long) {
 }
 
 @BindingAdapter(value=["clazzMemberWithClazzWorkAndProgress"])
-fun TextView.setClazzWorkMarking(clazzMemberWithClazzWorkAndProgress: ClazzMemberWithClazzWorkProgress){
-    var line = clazzMemberWithClazzWorkAndProgress.mClazzWorkSubmission.statusString(context)
-    if(clazzMemberWithClazzWorkAndProgress.clazzWorkHasContent && clazzMemberWithClazzWorkAndProgress.mProgress >= 0) {
+fun TextView.setClazzWorkMarking(clazzEnrolmentWithClazzWorkAndProgress: ClazzEnrolmentWithClazzWorkProgress){
+    var line = clazzEnrolmentWithClazzWorkAndProgress.mClazzWorkSubmission.statusString(context)
+    if(clazzEnrolmentWithClazzWorkAndProgress.clazzWorkHasContent && clazzEnrolmentWithClazzWorkAndProgress.mProgress >= 0) {
         line += " ${context.getString(R.string.completed)} " +
-                "${clazzMemberWithClazzWorkAndProgress.mProgress.toInt()}% " +
+                "${clazzEnrolmentWithClazzWorkAndProgress.mProgress.toInt()}% " +
                 context.getString(R.string.of_content)
     }
     text = line
@@ -238,10 +248,31 @@ fun TextView.setResponseTextFilled(responseText: String?){
 }
 
 @BindingAdapter("memberRoleName")
-fun TextView.setMemberRoleName(clazzMember: ClazzMember?) {
-    text = clazzMember?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
+fun TextView.setMemberRoleName(clazzEnrolment: ClazzEnrolment?) {
+    text = clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance) ?: ""
 }
 
+@BindingAdapter("memberEnrolmentOutcomeWithReason")
+fun TextView.setMemberEnrolmentOutcome(clazzEnrolment: ClazzEnrolmentWithLeavingReason?){
+    text = "${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)} - ${clazzEnrolment?.outcomeToString(context,  UstadMobileSystemImpl.instance)}"
+}
+
+@BindingAdapter("clazzEnrolmentWithClazzAndOutcome")
+fun TextView.setClazzEnrolmentWithClazzAndOutcome(clazzEnrolment: ClazzEnrolmentWithClazz?){
+    text = "${clazzEnrolment?.clazz?.clazzName} (${clazzEnrolment?.roleToString(context, UstadMobileSystemImpl.instance)}) - ${clazzEnrolment?.outcomeToString(context,  UstadMobileSystemImpl.instance)}"
+}
+
+@BindingAdapter("showisolang")
+fun TextView.setIsoLang(language: Language){
+    var isoText = ""
+    if(language.iso_639_1_standard?.isNotEmpty() == true){
+        isoText += language.iso_639_1_standard
+    }
+    if(language.iso_639_2_standard?.isNotEmpty() == true){
+        isoText += "/${language.iso_639_2_standard}"
+    }
+    text = isoText
+}
 
 @BindingAdapter("rolesAndPermissionsText")
 fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
@@ -262,4 +293,90 @@ fun TextView.setRolesAndPermissionsText(entityRole: EntityRoleWithNameAndRole){
             entityRole.entityRoleScopeName + scopeType
     text = fullText
 
+}
+
+@BindingAdapter("statementDate")
+fun TextView.setStatementDate(person: PersonWithAttemptsSummary){
+    val dateFormatter = DateFormat.getDateFormat(context)
+    var statementDate = dateFormatter.format(person.startDate)
+
+    if(person.endDate != 0L && person.endDate != Long.MAX_VALUE){
+        val startDate = DateTime(person.startDate)
+        val endDate = DateTime(person.endDate)
+        if(startDate.dayOfYear != endDate.dayOfYear){
+            statementDate += " - ${dateFormatter.format(person.endDate)}"
+        }
+    }
+
+    text = statementDate
+
+}
+
+@BindingAdapter("shortDateTime")
+fun TextView.setShortDateTime(time: Long){
+    val dateFormat = DateFormat.getDateFormat(context)
+    val timeFormat = DateFormat.getTimeFormat(context)
+    text = dateFormat.format(time) + " - " + timeFormat.format(time)
+}
+
+@BindingAdapter("durationHoursMins")
+fun TextView.setDurationHoursAndMinutes(duration: Long){
+    val hours = TimeUnit.MILLISECONDS.toHours(duration).toInt()
+
+    var minutes = TimeUnit.MILLISECONDS.toMinutes(duration)
+
+    var durationString = " "
+
+    if(hours >= 1){
+        minutes -= TimeUnit.HOURS.toMinutes(TimeUnit.MILLISECONDS.toHours(duration))
+        durationString += "${resources.getQuantityString(R.plurals.duration_hours, hours, hours)} "
+    }
+
+    durationString += resources.getQuantityString(R.plurals.duration_minutes,
+            minutes.toInt(), minutes.toInt())
+
+    text = durationString
+
+}
+
+@BindingAdapter("durationMinsSecs")
+fun TextView.setDurationMinutesAndSeconds(duration: Long){
+    val minutes = TimeUnit.MILLISECONDS.toMinutes(duration).toInt()
+
+    var seconds = TimeUnit.MILLISECONDS.toSeconds(duration)
+
+    var durationString = " "
+
+    if(minutes >= 1){
+        seconds -= TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(duration))
+        durationString += "${resources.getQuantityString(R.plurals.duration_minutes, minutes, minutes)} "
+    }
+
+    durationString += resources.getQuantityString(R.plurals.duration_seconds,
+            seconds.toInt(), seconds.toInt())
+
+    text = durationString
+
+}
+
+
+@BindingAdapter("isContentComplete")
+fun TextView.setContentComplete(person: PersonWithSessionsDisplay){
+    text = if(person.resultComplete){
+        when(person.resultSuccess){
+            StatementEntity.RESULT_SUCCESS -> {
+                context.getString(R.string.passed)
+            }
+            StatementEntity.RESULT_FAILURE -> {
+                context.getString(R.string.failed)
+            }
+            StatementEntity.RESULT_UNSET ->{
+                context.getString(R.string.completed)
+            }else ->{
+                ""
+            }
+        }
+    }else{
+        context.getString(R.string.incomplete)
+    } + " - "
 }

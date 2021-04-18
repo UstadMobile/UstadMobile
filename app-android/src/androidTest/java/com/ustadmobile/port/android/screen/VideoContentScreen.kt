@@ -12,7 +12,6 @@ object VideoContentScreen : KScreen<VideoContentScreen>() {
     override val layoutId: Int?
         get() = R.layout.fragment_video_content
 
-    @OptIn(ExperimentalStdlibApi::class)
     override val viewClass: Class<*>?
         get() = VideoContentFragment::class.java
 

@@ -13,7 +13,7 @@ import androidx.lifecycle.Observer
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentListBinding
@@ -52,7 +52,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
 
     internal var mDataRecyclerViewAdapter: SelectablePagedListAdapter<DT, *>? = null
 
-    protected var mMergeRecyclerViewAdapter: MergeAdapter? = null
+    protected var mMergeRecyclerViewAdapter: ConcatAdapter? = null
 
     internal var mDataBinding: FragmentListBinding? = null
 
@@ -215,7 +215,7 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
         mListStatusAdapter = ListStatusRecyclerViewAdapter(viewLifecycleOwner)
 
         if (autoMergeRecyclerViewAdapter) {
-            mMergeRecyclerViewAdapter = MergeAdapter(mUstadListHeaderRecyclerViewAdapter,
+            mMergeRecyclerViewAdapter = ConcatAdapter(mUstadListHeaderRecyclerViewAdapter,
                     mDataRecyclerViewAdapter, mListStatusAdapter)
             mRecyclerView?.adapter = mMergeRecyclerViewAdapter
             mDataRecyclerViewAdapter?.selectedItemsLiveData?.observe(this.viewLifecycleOwner,
@@ -329,9 +329,6 @@ abstract class UstadListViewFragment<RT, DT> : UstadBaseFragment(),
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         (activity as? MainActivity)?.showSnackBar(message, action, actionMessageId)
     }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     override fun onAttach(context: Context) {
         super.onAttach(context)

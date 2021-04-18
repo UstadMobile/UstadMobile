@@ -22,12 +22,14 @@ class SimpleHeadingRecyclerAdapter(heading: String)
     private var viewHolder: SimpleHeadingViewHolder? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SimpleHeadingViewHolder {
-        return SimpleHeadingViewHolder(
+        val holder =  SimpleHeadingViewHolder(
                 ItemSimpleHeadingBinding.inflate(LayoutInflater.from(parent.context),
                         parent, false).also {
                     it.headingText = headingText
-                    viewHolder?.itemView?.tag = headingText
                 })
+        holder.itemView.tag = headingText
+        viewHolder = holder
+        return holder
     }
 
     override fun onDetachedFromRecyclerView(recyclerView: RecyclerView) {

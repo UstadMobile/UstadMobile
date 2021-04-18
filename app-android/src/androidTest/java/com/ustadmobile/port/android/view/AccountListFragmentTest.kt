@@ -37,7 +37,6 @@ import org.kodein.di.instance
 
 
 @AdbScreenRecord("Account List Tests")
-@ExperimentalStdlibApi
 class AccountListFragmentTest : TestCase() {
 
     @JvmField
@@ -371,7 +370,7 @@ class AccountListFragmentTest : TestCase() {
         impl.setAppPref(UstadAccountManager.ACCOUNTS_PREFKEY, null, context)
 
         impl.setAppPref(UstadAccountManager.ACCOUNTS_PREFKEY,
-                Json.stringify(UstadAccounts.serializer(), storedAccounts), context)
+                Json.encodeToString(UstadAccounts.serializer(), storedAccounts), context)
     }
 
 

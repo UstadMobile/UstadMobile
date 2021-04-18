@@ -2,9 +2,9 @@ package com.ustadmobile.sharedse.network
 
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.networkmanager.DownloadNotificationService
+import com.ustadmobile.core.util.ext.startForegroundServiceAsSupported
 
 /**
  *
@@ -18,10 +18,6 @@ class DownloadPreparationRequesterAndroidImpl(private val mContext: Context,
         prepareJobIntent.putExtra(DownloadNotificationService.EXTRA_DOWNLOADJOBUID, downloadJobId)
         prepareJobIntent.putExtra(DownloadNotificationService.EXTRA_ENDPOINT, endpoint.url)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            mContext.startForegroundService(prepareJobIntent)
-        } else {
-            mContext.startService(prepareJobIntent)
-        }
+        mContext.startForegroundServiceAsSupported(prepareJobIntent)
     }
 }

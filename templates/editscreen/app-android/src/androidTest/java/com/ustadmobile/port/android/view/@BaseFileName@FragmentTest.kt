@@ -71,9 +71,21 @@ class @BaseFileName@FragmentTest : TestCase(){
 
             @BaseFileName@Screen{
 
-                fillFields(fragmentScenario, formVals, currentEntity,
-                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
-                        testContext = this@run)
+                @Entity_VariableName@.@Entity_VariableName@Name?.takeIf {it != @Entity_VariableName@OnForm?.@Entity_VariableName@Name }?.also {
+                    @Entity@TitleInput{
+                        edit{
+                            clearText()
+                            typeText(it)
+                        }
+                    }
+                }
+
+                //TODO: if required, use the savedstatehandle to add link entities
+                fragmentScenario.onFragment { fragment ->
+                    fragment.takeIf {@Entity_VariableName@.relatedEntity != @Entity_VariableName@OnForm?.relatedEntity }
+                            ?.findNavController()?.currentBackStackEntry?.savedStateHandle
+                            ?.set("RelatedEntityName", defaultGson().toJson(listOf(@Entity_VariableName@.relatedEntity)))
+                }
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 
@@ -122,9 +134,22 @@ class @BaseFileName@FragmentTest : TestCase(){
 
             @BaseFileName@Screen {
 
-                fillFields(fragmentScenario, newClazzValues, entityLoadedByFragment,
-                        impl = systemImplNavRule.impl, context = ApplicationProvider.getApplicationContext(),
-                        testContext = this@run)
+                @Entity_VariableName@.@Entity_VariableName@Name?.takeIf {it != @Entity_VariableName@OnForm?.@Entity_VariableName@Name }?.also {
+                    @Entity@TitleInput{
+                        edit{
+                            clearText()
+                            typeText(it)
+                        }
+                    }
+                }
+
+                //TODO: if required, use the savedstatehandle to add link entities
+
+                fragmentScenario.onFragment { fragment ->
+                    fragment.takeIf {@Entity_VariableName@.relatedEntity != @Entity_VariableName@OnForm?.relatedEntity }
+                            ?.findNavController()?.currentBackStackEntry?.savedStateHandle
+                            ?.set("RelatedEntityName", defaultGson().toJson(listOf(@Entity_VariableName@.relatedEntity)))
+                }
 
                 fragmentScenario.clickOptionMenu(R.id.menu_done)
 

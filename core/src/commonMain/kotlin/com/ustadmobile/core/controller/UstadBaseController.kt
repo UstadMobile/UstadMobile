@@ -69,11 +69,11 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
         created = true
         this.savedState = savedState
 
-        synchronized(lifecycleListeners) {
-            for (listener in lifecycleListeners) {
-                listener.onLifecycleCreate(this)
-            }
+
+        for (listener in lifecycleListeners) {
+            listener.onLifecycleCreate(this)
         }
+
 
         lifecycleStatus.value = CREATED
     }
@@ -82,11 +82,11 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
      * Handle when the presenter is about to become visible. Analogous to Android's onStart
      */
     open fun onStart() {
-        synchronized(lifecycleListeners) {
-            for (listener in lifecycleListeners) {
-                listener.onLifecycleStart(this)
-            }
+
+        for (listener in lifecycleListeners) {
+            listener.onLifecycleStart(this)
         }
+
 
         lifecycleStatus.value = STARTED
     }
@@ -96,21 +96,19 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
      */
     @JsName("onResume")
     open fun onResume() {
-        synchronized(lifecycleListeners) {
-            for (listener in lifecycleListeners) {
-                listener.onLifecycleResume(this)
-            }
+        for (listener in lifecycleListeners) {
+            listener.onLifecycleResume(this)
         }
+
 
         lifecycleStatus.value = RESUMED
     }
 
     open fun onPause() {
-        synchronized(lifecycleListeners) {
-            for (listener in lifecycleListeners) {
-                listener.onLifecyclePause(this)
-            }
+        for (listener in lifecycleListeners) {
+            listener.onLifecyclePause(this)
         }
+
 
         lifecycleStatus.value = PAUSED
     }
@@ -119,10 +117,8 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
      * Handle when the presenter is no longer visible. Analogous to Android's onStop
      */
     open fun onStop() {
-        synchronized(lifecycleListeners) {
-            for (listener in lifecycleListeners) {
-                listener.onLifecycleStop(this)
-            }
+        for (listener in lifecycleListeners) {
+            listener.onLifecycleStop(this)
         }
 
         lifecycleStatus.value = STOPPED
@@ -132,11 +128,10 @@ abstract class UstadBaseController<V : UstadView>(override val context: Any,
      * Called when the view is destroyed and removed from memory. Analogous to Android's onDestroy
      */
     open fun onDestroy() {
-        synchronized(lifecycleListeners) {
-            for (listener in lifecycleListeners) {
-                listener.onLifecycleDestroy(this)
-            }
+        for (listener in lifecycleListeners) {
+            listener.onLifecycleDestroy(this)
         }
+
 
         lifecycleStatus.value = DESTROYED
     }

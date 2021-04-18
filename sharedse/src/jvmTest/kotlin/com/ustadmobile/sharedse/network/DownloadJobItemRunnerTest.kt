@@ -2,26 +2,29 @@ package com.ustadmobile.sharedse.network
 
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
 import com.ustadmobile.core.db.dao.ContainerEntryFileDao
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZip
+import com.ustadmobile.core.io.ext.toKmpUriString
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.util.UMURLEncoder
 import com.ustadmobile.door.DoorMutableLiveData
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.DoorTag.Companion.TAG_REPO
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
+import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTED_LOCAL
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_CONNECTING_LOCAL
@@ -29,25 +32,26 @@ import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCON
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_UNMETERED
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
-import com.ustadmobile.port.sharedse.ext.ConcatenatedHttpResponse
-import com.ustadmobile.port.sharedse.ext.generateConcatenatedFilesResponse
 import com.ustadmobile.port.sharedse.impl.http.EmbeddedHTTPD
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
-import com.ustadmobile.sharedse.ext.TestContainer.assertContainersHaveSameContent
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherJvm
+import com.ustadmobile.util.commontest.ext.assertContainerEqualToOther
+import com.ustadmobile.util.commontest.ext.mockResponseForConcatenatedFiles2Request
 import com.ustadmobile.util.test.ReverseProxyDispatcher
 import com.ustadmobile.util.test.ext.baseDebugIfNotEnabled
 import com.ustadmobile.util.test.extractTestResourceToFile
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import io.ktor.server.engine.ApplicationEngine
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.*
+import okhttp3.OkHttpClient
 import okhttp3.mockwebserver.*
-import okio.Buffer
-import okio.Okio
 import org.junit.*
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
@@ -127,8 +131,6 @@ class DownloadJobItemRunnerTest {
 
     private lateinit var containerWDuplicates: Container
 
-    private lateinit var containerManager: ContainerManager
-
     private val MAX_LATCH_WAITING_TIME = 15000L
 
     private val MAX_THREAD_SLEEP_TIME = 2000L
@@ -163,7 +165,7 @@ class DownloadJobItemRunnerTest {
 
         override fun dispatch(request: RecordedRequest): MockResponse {
             return when {
-                (endpointPrefix != "") && !request.requestUrl.encodedPath().startsWith(endpointPrefix) -> {
+                (endpointPrefix != "") && !request.requestUrl!!.encodedPath.startsWith(endpointPrefix) -> {
                     MockResponse()
                             .setResponseCode(404)
                             .addHeader("Content-Type", "text/plain")
@@ -177,16 +179,8 @@ class DownloadJobItemRunnerTest {
                             .setBody(Gson().toJson(entryList))
                 }
 
-                request.requestUrl.toString().contains(ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES) -> {
-                    val concatenatedResponse: ConcatenatedHttpResponse = serverDb.containerEntryFileDao
-                            .generateConcatenatedFilesResponse(request.requestUrl.toString().substringAfterLast("/"))
-                    val outBuffer = Buffer()
-                    val inBuffer = Okio.buffer(Okio.source(concatenatedResponse.dataSrc!!))
-                    inBuffer.readFully(outBuffer, concatenatedResponse.contentLength)
-
-                    MockResponse().also {
-                        it.setBody(outBuffer)
-                    }
+                request.requestUrl.toString().contains(ContainerEntryFileDao.ENDPOINT_CONCATENATEDFILES2) -> {
+                    serverDb.mockResponseForConcatenatedFiles2Request(request)
                 }
 
                 else -> {
@@ -258,7 +252,8 @@ class DownloadJobItemRunnerTest {
             }
 
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
+                spy(instance<UmAppDatabase>(tag = TAG_DB).asRepository(repositoryConfig(Any(), context.url,
+                    instance(), instance())))
             }
 
             bind<ContainerDownloadManager>() with scoped(endpointScope).singleton {
@@ -280,6 +275,34 @@ class DownloadJobItemRunnerTest {
             bind<Gson>() with singleton { Gson() }
 
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
+
+            bind<OkHttpClient>() with singleton {
+                OkHttpClient.Builder()
+                    .dispatcher(okhttp3.Dispatcher().also {
+                        it.maxRequests = 30
+                        it.maxRequestsPerHost = 10
+                    })
+                    .build()
+            }
+
+            bind<HttpClient>() with singleton {
+                HttpClient(OkHttp) {
+
+                    install(JsonFeature) {
+                        serializer = GsonSerializer()
+                    }
+                    install(HttpTimeout)
+
+                    val dispatcher = okhttp3.Dispatcher()
+                    dispatcher.maxRequests = 30
+                    dispatcher.maxRequestsPerHost = 10
+
+                    engine {
+                        preconfigured = instance()
+                    }
+
+                }
+            }
         }
 
 
@@ -301,26 +324,26 @@ class DownloadJobItemRunnerTest {
             it.clearAllTables()
         }
 
-        serverRepo = serverDb.asRepository(context, "http://localhost/dummy", "",
-            defaultHttpClient())
+        //this can be shared as needed
+        val httpClient: HttpClient= clientDi.direct.instance()
+        serverRepo = serverDb.asRepository(repositoryConfig(context, "http://localhost/dummy",
+            httpClient, clientDi.direct.instance()))
 
         mockLocalAvailabilityManager = clientDi.on(accountManager.activeAccount).direct.instance()
 
-        clientContainerDir = UmFileUtilSe.makeTempDir("clientContainerDir", "" + System.currentTimeMillis())
+        clientContainerDir = temporaryFolder.newFolder("clientContainerDir")
 
         networkNode = NetworkNode()
         networkNode.bluetoothMacAddress = "00:3F:2F:64:C6:4F"
         networkNode.lastUpdateTimeStamp = System.currentTimeMillis()
         networkNode.nodeId = clientDb.networkNodeDao.replace(networkNode)
 
-        webServerTmpDir = UmFileUtilSe.makeTempDir("webServerTmpDir",
-                "" + System.currentTimeMillis())
+        webServerTmpDir = temporaryFolder.newFolder("webServerTmpDir")
         webServerTmpContentEntryFile = File(webServerTmpDir, "" + TEST_CONTENT_ENTRY_FILE_UID)
 
-        extractTestResourceToFile(TEST_FILE_RESOURCE_PATH, webServerTmpContentEntryFile)
+        javaClass.getResourceAsStream(TEST_FILE_RESOURCE_PATH).writeToFile(webServerTmpContentEntryFile)
 
-        containerTmpDir = UmFileUtilSe.makeTempDir("containerTmpDir",
-                "" + System.currentTimeMillis())
+        containerTmpDir = temporaryFolder.newFolder("containerTmpDir")
 
         val contentEntry = ContentEntry()
         contentEntry.title = "Test entry"
@@ -328,9 +351,11 @@ class DownloadJobItemRunnerTest {
 
         container = Container(contentEntry)
         container.containerUid = serverRepo.containerDao.insert(container)
-        containerManager = ContainerManager(container, serverDb, serverRepo,
-                webServerTmpDir.absolutePath)
-        addEntriesFromZipToContainer(webServerTmpContentEntryFile.absolutePath, containerManager)
+        runBlocking {
+            serverRepo.addEntriesToContainerFromZip(container.containerUid,
+                webServerTmpContentEntryFile.toDoorUri(),
+                ContainerAddOptions(webServerTmpDir.toDoorUri()))
+        }
 
         //add the container itself to the client database (would normally happen via sync/preload)
         clientRepo.containerDao.insert(container)
@@ -341,7 +366,7 @@ class DownloadJobItemRunnerTest {
                 System.currentTimeMillis())
         downloadJob.timeRequested = System.currentTimeMillis()
         downloadJob.djStatus = JobStatus.QUEUED
-        downloadJob.djDestinationDir = clientContainerDir.absolutePath
+        downloadJob.djDestinationDir = clientContainerDir.toKmpUriString()
         downloadJob.djUid = clientDb.downloadJobDao.insert(downloadJob).toInt()
 
         downloadJobItem = DownloadJobItem(downloadJob, contentEntry.contentEntryUid,
@@ -365,7 +390,7 @@ class DownloadJobItemRunnerTest {
     @Test
     fun givenDownload_whenRun_shouldDownloadAndComplete() {
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container))
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container)
 
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
@@ -392,11 +417,7 @@ class DownloadJobItemRunnerTest {
                         lastValue.djiStatus)
             }
 
-            Assert.assertEquals("Correct number of ContentEntry items available in client db",
-                    container.cntNumEntries,
-                    clientDb.containerEntryDao.findByContainer(item.djiContainerUid).size)
-
-            assertContainersHaveSameContent(item.djiContainerUid, clientDb, serverDb)
+            serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
         }
     }
 
@@ -404,9 +425,9 @@ class DownloadJobItemRunnerTest {
     @Test
     fun givenDownloadStarted_whenFailsOnce_shouldRetryAndComplete() {
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 numTimesToFail.set(1)
-            })
+            }
 
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
@@ -427,16 +448,16 @@ class DownloadJobItemRunnerTest {
             Assert.assertTrue("Number of file get requests > 2",
                     cloudMockWebServer.requestCount > 2)
 
-            assertContainersHaveSameContent(item.djiContainerUid, clientDb, serverDb)
+            serverDb.assertContainerEqualToOther(container.containerUid, clientDb)
         }
     }
 
     @Test
     fun givenDownloadStarted_whenFailsExceedMaxAttempts_shouldStopAndSetStatusToFailed() {
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 numTimesToFail.set(10)
-            })
+            }
 
             val item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
@@ -458,11 +479,11 @@ class DownloadJobItemRunnerTest {
     fun givenDownloadUnmeteredConnectivityOnly_whenConnectivitySwitchesToMetered_shouldStopAndSetStatusToQueued() {
         val item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 //set speed to 512kbps (period unit by default is milliseconds)
                 throttleBytesPerPeriod = (8 * 1000)
                 throttlePeriod = 1000
-            })
+            }
 
             val queuedStatusLatch = CountDownLatch(1)
             whenever(containerDownloadManager.handleDownloadJobItemUpdated(any(), any())).thenAnswer{
@@ -498,11 +519,11 @@ class DownloadJobItemRunnerTest {
     @Test
     fun givenDownloadStarted_whenJobIsStopped_shouldStopAndSetStatus() {
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 //set speed to 512kbps (period unit by default is milliseconds)
                 throttleBytesPerPeriod = (8 * 1000)
                 throttlePeriod = 1000
-            })
+            }
 
             var item = clientDb.downloadJobItemDao.findByUid(
                     downloadJobItem.djiUid)!!
@@ -542,11 +563,11 @@ class DownloadJobItemRunnerTest {
     @Test
     fun givenDownloadJobItemRunnerStartedAndStopped_whenNextJobItemRunnerRuns_shouldFinishAndContentShouldMatch() {
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 //set speed to 1Mbps (period unit by default is milliseconds)
                 throttleBytesPerPeriod = (128 * 1000)
                 throttlePeriod = 1000
-            })
+            }
 
             val item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
             val jobItemRunner1 = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
@@ -568,7 +589,7 @@ class DownloadJobItemRunnerTest {
             connectivityStatusLiveData.sendValue(
                     ConnectivityStatus(ConnectivityStatus.STATE_DISCONNECTED, false, null))
 
-            val statusAfterDisconnect = withTimeout(5000) { queuedStatusDeferred.await() }
+            val statusAfterDisconnect = withTimeout(5000 * 1000) { queuedStatusDeferred.await() }
 
             connectivityStatusLiveData.sendValue(ConnectivityStatus(ConnectivityStatus.STATE_UNMETERED,
                     true, "wifi"))
@@ -584,7 +605,7 @@ class DownloadJobItemRunnerTest {
 
             downloadJobItemRunner2.download()
 
-            val completedStatus = withTimeout(15000) { completedStatusDeferred.await() }
+            val completedStatus = withTimeout(15000 * 1000) { completedStatusDeferred.await() }
 
 
             Assert.assertEquals("First download job item runner status was QUEUED after disconnect",
@@ -592,11 +613,7 @@ class DownloadJobItemRunnerTest {
             Assert.assertEquals("File download task completed successfully",
                     JobStatus.COMPLETE, completedStatus)
 
-            Assert.assertEquals("Correct number of ContainerEntry items available in client db",
-                    container.cntNumEntries,
-                    clientDb.containerEntryDao.findByContainer(item.djiContainerUid).size)
-
-            assertContainersHaveSameContent(item.djiContainerUid, clientDb, serverDb)
+            serverDb.assertContainerEqualToOther(item.djiContainerUid, clientDb)
         }
     }
 
@@ -605,11 +622,11 @@ class DownloadJobItemRunnerTest {
         var item = clientDb.downloadJobItemDao.findByUid(downloadJobItem.djiUid)!!
         var statusAfterWaitingForDownload = -1
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 //set speed to 1Mbps (period unit by default is milliseconds)
                 throttleBytesPerPeriod = (128 * 1000)
                 throttlePeriod = 1000
-            })
+            }
 
 
             clientDb.downloadJobDao.setMeteredConnectionAllowedByJobUidSync(
@@ -651,11 +668,11 @@ class DownloadJobItemRunnerTest {
                 downloadJobItem.djiUid)!!
 
         runBlocking {
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container).apply {
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container).apply {
                 //set speed to 1Mbps (period unit by default is milliseconds)
                 throttleBytesPerPeriod = (128 * 1000)
                 throttlePeriod = 1000
-            })
+            }
 
 
             val jobItemRunner = DownloadJobItemRunner(item, cloudEndPoint, 500, clientDi)
@@ -697,9 +714,9 @@ class DownloadJobItemRunnerTest {
 
             peerMockDispatcher  = ContainerDownloadDispatcher(serverDb, container,
                     endpointPrefix = "/${UMURLEncoder.encodeUTF8(cloudEndPoint)}/")
-            peerMockWebServer.setDispatcher(peerMockDispatcher)
+            peerMockWebServer.dispatcher = peerMockDispatcher!!
 
-            cloudMockWebServer.setDispatcher(ContainerDownloadDispatcher(serverDb, container))
+            cloudMockWebServer.dispatcher = ContainerDownloadDispatcher(serverDb, container)
 
             mockLocalAvailabilityManager.stub {
                 onBlocking { findBestLocalNodeForContentEntryDownload(any()) }.thenReturn(networkNode)
@@ -727,7 +744,7 @@ class DownloadJobItemRunnerTest {
                         lastValue.djiStatus)
             }
 
-            assertContainersHaveSameContent(item.djiContainerUid, clientDb, serverDb)
+            serverDb.assertContainerEqualToOther(item.djiContainerUid, clientDb)
         }
     }
 

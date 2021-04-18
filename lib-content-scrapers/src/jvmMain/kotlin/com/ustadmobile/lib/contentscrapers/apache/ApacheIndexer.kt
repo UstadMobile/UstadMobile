@@ -18,7 +18,7 @@ import org.kodein.di.on
 import java.net.HttpURLConnection
 import java.net.URL
 
-@ExperimentalStdlibApi
+
 class ApacheIndexer(parentContentEntryUid: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntryUid, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     private val logPrefix = "[ApacheIndexer SQI ID #$sqiUid] "

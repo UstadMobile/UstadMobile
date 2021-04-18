@@ -8,6 +8,9 @@ interface ClazzEdit2View: UstadEditView<ClazzWithHolidayCalendarAndSchool> {
 
     var clazzSchedules: DoorMutableLiveData<List<Schedule>>?
 
+    var clazzEndDateError: String?
+    var clazzStartDateError: String?
+
     companion object {
 
         const val VIEW_NAME = "ClazzEdit2"

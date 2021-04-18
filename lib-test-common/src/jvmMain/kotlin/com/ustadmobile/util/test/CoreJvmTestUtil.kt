@@ -14,27 +14,10 @@ actual fun checkJndiSetup() {
                 File(System.getProperty("user.dir"), "jndi-config").absolutePath)
 
         //setup the env from the file that we had gradle make
-        val envProps = Properties()
-        envProps.load(FileReader("build/local.env.properties"))
-        envProps.stringPropertyNames().filter { System.getProperty(it) == null }.forEach {
-            System.setProperty(it, envProps.getProperty(it))
-        }
-
-        jndiProps.stringPropertyNames().forEach {
-            System.setProperty(it, jndiProps.getProperty(it))
-        }
-
-        val sqliteTmpDir = File(System.getProperty("user.dir"), "build/tmp")
-        if(!sqliteTmpDir.isDirectory) {
-            try {
-                sqliteTmpDir.mkdirs()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
     }
 }
 
+@Deprecated("Not needed anymore - bug it was designed to address is obsolete")
 fun extractTestResourceToFile(testResPath: String, destFile: File,
                               resDirSearchPaths: List<String> = listOf("src/commonTest/resources", "src/jvmTest/resources")) {
     var inStream = null as InputStream?

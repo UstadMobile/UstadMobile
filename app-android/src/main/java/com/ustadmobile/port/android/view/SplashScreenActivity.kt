@@ -48,9 +48,6 @@ import kotlinx.coroutines.launch
 
 class SplashScreenActivity : AppCompatActivity(), SplashScreenView  {
 
-    override val viewContext: Any
-        get() = this
-
     override var loading: Boolean = false
         get() = false
         set(value) {

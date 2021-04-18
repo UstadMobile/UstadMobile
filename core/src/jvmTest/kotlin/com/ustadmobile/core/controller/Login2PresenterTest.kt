@@ -1,7 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.google.gson.Gson
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UnauthorizedException
@@ -104,7 +104,7 @@ class Login2PresenterTest {
             guestLogin = guestConnection
             registrationAllowed = registration
         }
-        var args = mapOf(ARG_SITE to Json.stringify(Site.serializer(), site))
+        var args = mapOf(ARG_SITE to Json.encodeToString(Site.serializer(), site))
         args = args.plus(extraParam)
         return args
     }

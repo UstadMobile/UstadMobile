@@ -2,23 +2,18 @@ package com.ustadmobile.lib.contentscrapers
 
 import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
-import com.ustadmobile.core.contentformats.epub.opf.OpfItem
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.checkIfPathsToDriversExist
 import com.ustadmobile.port.sharedse.util.UmZipUtils
 
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.IOUtils
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Attributes
-import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.nodes.Entities
-import org.jsoup.nodes.Node
 import org.jsoup.parser.Parser
-import org.jsoup.select.Elements
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -26,19 +21,17 @@ import org.junit.Test
 import java.io.File
 import java.io.FileInputStream
 import java.io.IOException
-import java.io.InputStream
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.ArrayList
 import java.util.HashMap
-import java.util.zip.ZipEntry
 import java.util.zip.ZipFile
 
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
-import org.kmp.io.KMPPullParserException
+import org.xmlpull.v1.XmlPullParserFactory
 import java.util.function.Consumer
 
-@ExperimentalStdlibApi
+
 class TestShrinkerUtils {
 
 
@@ -81,7 +74,6 @@ class TestShrinkerUtils {
 
 
     @Test
-    @Throws(IOException::class, KMPPullParserException::class)
     fun givenValidEpub_whenShrunk_shouldConvertAllImagesToWebPAndOutsourceStylesheets() {
 
         ShrinkerUtil.shrinkEpub(firstepub!!)
@@ -90,15 +82,19 @@ class TestShrinkerUtils {
         val ocfDoc = OcfDocument()
         val ocfFile = File(tmpTest, Paths.get("META-INF", "container.xml").toString())
         val ocfFileInputStream = FileInputStream(ocfFile)
-        val ocfParser = UstadMobileSystemImpl.instance
-                .newPullParser(ocfFileInputStream)
+        val xppFactory = XmlPullParserFactory.newInstance()
+
+        val ocfParser = xppFactory.newPullParser().also {
+            it.setInput(ocfFileInputStream, "UTF-8")
+        }
         ocfDoc.loadFromParser(ocfParser)
 
         val opfFile = File(tmpTest, ocfDoc.getRootFiles()[0].fullPath!!)
         val document = OpfDocument()
         val opfFileInputStream = FileInputStream(opfFile)
-        val xmlPullParser = UstadMobileSystemImpl.instance
-                .newPullParser(opfFileInputStream)
+        val xmlPullParser = xppFactory.newPullParser().also {
+            it.setInput(opfFileInputStream, "UTF-8")
+        }
         document.loadFromOPF(xmlPullParser)
 
         var countWebp = 0
@@ -281,12 +277,12 @@ class TestShrinkerUtils {
         val zipFile = ZipFile(epub)
         val entry = zipFile.getEntry("META-INF/container.xml")
         val `is` = zipFile.getInputStream(entry)
-        val document = Jsoup.parse(UMIOUtils.readStreamToString(`is`), "", Parser.xmlParser())
+        val document = Jsoup.parse(`is`.readString(), "", Parser.xmlParser())
         val path = document.selectFirst("rootfile").attr("full-path")
 
         val opfEntry = zipFile.getEntry(path)
         val opfis = zipFile.getInputStream(opfEntry)
-        val opfdoc = Jsoup.parse(UMIOUtils.readStreamToString(opfis), "", Parser.xmlParser())
+        val opfdoc = Jsoup.parse(opfis.readString(), "", Parser.xmlParser())
         val manifestitem = opfdoc.selectFirst("manifest item[href=images/images/logowhite.png]")
 
         Assert.assertEquals("images/images/logowhite.png", manifestitem.attr("href"))
@@ -307,12 +303,12 @@ class TestShrinkerUtils {
         val zipFile = ZipFile(epub)
         val entry = zipFile.getEntry("META-INF/container.xml")
         val `is` = zipFile.getInputStream(entry)
-        val document = Jsoup.parse(UMIOUtils.readStreamToString(`is`), "", Parser.xmlParser())
+        val document = Jsoup.parse(`is`.readString(), "", Parser.xmlParser())
         val path = document.selectFirst("rootfile").attr("full-path")
 
         val opfEntry = zipFile.getEntry(path)
         val opfis = zipFile.getInputStream(opfEntry)
-        val opfdoc = Jsoup.parse(UMIOUtils.readStreamToString(opfis), "", Parser.xmlParser())
+        val opfdoc = Jsoup.parse(opfis.readString(), "", Parser.xmlParser())
         val manifestitem = opfdoc.selectFirst("manifest item[href=images/cover.png]")
 
         Assert.assertEquals("images/cover.png", manifestitem.attr("href"))

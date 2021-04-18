@@ -16,21 +16,4 @@ object RoleEditScreen : KScreen<RoleEditScreen>() {
 
     val editNameLayout = KTextInputLayout { withId(R.id.role_edit_permission_role_name_til)}
 
-
-    fun fillFields(fragmentScenario: FragmentScenario<RoleEditFragment>,
-                   role: Role, roleOnForm: Role?) {
-
-        role.roleName?.takeIf { it != roleOnForm?.roleName }?.also {
-            editNameLayout{
-                edit{
-                    replaceText(it)
-                }
-            }
-        }
-
-        //TODO: Bitmask
-
-
-    }
-
 }

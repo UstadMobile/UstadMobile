@@ -4,10 +4,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.ClientSyncManager
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 
@@ -48,6 +45,9 @@ open class Role() {
 
     @LastChangedBy
     var roleLastChangedBy: Int = 0
+
+    @LastChangedTime
+    var roleLct: Long = 0
 
     //bit flags made of up PERMISSION_ constants
     var rolePermissions: Long = 0
@@ -199,7 +199,10 @@ open class Role() {
                 PERMISSION_CLAZZ_LOG_ACTIVITY_INSERT or
                 PERMISSION_CLAZZ_LOG_ACTIVITY_UPDATE or
                 PERMISSION_CLAZZWORK_SELECT or
-                PERMISSION_CLAZZWORK_UPDATE
+                PERMISSION_CLAZZWORK_UPDATE or
+                        PERMISSION_PERSON_LEARNINGRECORD_SELECT or
+                        PERMISSION_PERSON_LEARNINGRECORD_INSERT or
+                        PERMISSION_PERSON_LEARNINGRECORD_UPDATE
 
 
         const val ROLE_CLAZZ_STUDENT_NAME = "Class Student"

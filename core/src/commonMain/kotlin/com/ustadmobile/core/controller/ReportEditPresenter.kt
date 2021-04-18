@@ -19,7 +19,7 @@ import com.ustadmobile.lib.db.entities.Moment.Companion.TYPE_FLAG_RELATIVE
 import com.ustadmobile.lib.db.entities.Moment.Companion.WEEKS_REL_UNIT
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import kotlin.math.max
 
@@ -30,9 +30,9 @@ class ReportEditPresenter(context: Any,
                           lifecycleOwner: DoorLifecycleOwner)
     : UstadEditPresenter<ReportEditView, ReportWithSeriesWithFilters>(context, arguments, view, di, lifecycleOwner) {
 
-    val seriesCounter = atomic(0)
+    private val seriesCounter = atomic(0)
 
-    val filterCounter = atomic(0)
+    private val filterCounter = atomic(0)
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -59,7 +59,11 @@ class ReportEditPresenter(context: Any,
         GENDER(Report.GENDER,
                 MessageID.gender_literal),
         CLASS(Report.CLASS,
-                MessageID.clazz)
+                MessageID.clazz),
+        ENROLMENT_OUTCOME(Report.ENROLMENT_OUTCOME,
+                MessageID.class_enrolment_outcome),
+        ENROLMENT_LEAVING(Report.ENROLMENT_LEAVING_REASON,
+                MessageID.class_enrolment_leaving)
     }
 
     class XAxisMessageIdOption(day: XAxisOptions, context: Any)
@@ -136,7 +140,11 @@ class ReportEditPresenter(context: Any,
         GENDER(Report.GENDER,
                 MessageID.gender_literal),
         CLASS(Report.CLASS,
-                MessageID.clazz)
+                MessageID.clazz),
+        ENROLMENT_OUTCOME(Report.ENROLMENT_OUTCOME,
+                MessageID.class_enrolment_outcome),
+        ENROLMENT_LEAVING(Report.ENROLMENT_LEAVING_REASON,
+                MessageID.class_enrolment_leaving)
     }
 
     class SubGroupByMessageIdOption(day: SubGroupOptions, context: Any)
@@ -204,22 +212,24 @@ class ReportEditPresenter(context: Any,
         val reportSeries = report.reportSeries
         var reportSeriesList = listOf<ReportSeries>()
         if (!reportSeries.isNullOrBlank()) {
-            reportSeriesList = safeParseList(di, ReportSeries.serializer().list, ReportSeries::class, reportSeries)
+            reportSeriesList = safeParseList(di,
+                ListSerializer(ReportSeries.serializer()), ReportSeries::class, reportSeries)
             // set the series counter with an existing series
             val maxSeries = reportSeriesList.maxBy { it.reportSeriesUid }
-            var currentMaxFilter = 0L
+            var currentMaxFilter = 0
             reportSeriesList.forEach {
                 val maxFilter = it.reportSeriesFilters?.maxBy { it.reportFilterUid }?.reportFilterUid
                         ?: 0
                 currentMaxFilter = max(currentMaxFilter, maxFilter)
             }
-            seriesCounter.value = (maxSeries?.reportSeriesUid ?: 0 + 1).toInt()
-            filterCounter.value = currentMaxFilter.toInt() + 1
+            val nextSeries = maxSeries?.reportSeriesUid ?: 1
+            seriesCounter.value = nextSeries
+            filterCounter.value = currentMaxFilter + 1
         } else {
             reportSeriesList = listOf(ReportSeries().apply {
                 val id = seriesCounter.getAndIncrement()
                 reportSeriesName = "Series $id"
-                reportSeriesUid = id.toLong()
+                reportSeriesUid = id
             })
         }
 
@@ -246,11 +256,13 @@ class ReportEditPresenter(context: Any,
         val reportSeriesList: List<ReportSeries>
         if (!reportSeries.isNullOrBlank()) {
 
-            reportSeriesList = safeParseList(di, ReportSeries.serializer().list, ReportSeries::class, reportSeries)
+            reportSeriesList = safeParseList(di, ListSerializer(ReportSeries.serializer()),
+                ReportSeries::class, reportSeries)
             // set the series counter with an existing series
             val max = reportSeriesList.maxBy { it.reportSeriesUid }
-            seriesCounter.value = ((max?.reportSeriesUid ?: 0) + 1).toInt()
-            var currentMaxFilter = 0L
+            val nextSeries = ((max?.reportSeriesUid ?: 0) + 1)
+            seriesCounter.value = nextSeries
+            var currentMaxFilter = 0
             reportSeriesList.forEach {
                 val maxFilter = it.reportSeriesFilters?.maxBy { it.reportFilterUid }?.reportFilterUid
                         ?: 0
@@ -263,7 +275,7 @@ class ReportEditPresenter(context: Any,
             reportSeriesList = listOf(ReportSeries().apply {
                 val id = seriesCounter.getAndIncrement()
                 reportSeriesName = "Series $id"
-                reportSeriesUid = id.toLong()
+                reportSeriesUid = id
             })
             editEntity.reportSeriesWithFiltersList = reportSeriesList
         }
@@ -276,8 +288,8 @@ class ReportEditPresenter(context: Any,
     override fun onSaveInstanceState(savedState: MutableMap<String, String>) {
         super.onSaveInstanceState(savedState)
         val entityVal = entity ?: return
-        entityVal.reportSeries = safeStringify(di, ReportSeries.serializer().list, entityVal.reportSeriesWithFiltersList
-                ?: listOf())
+        entityVal.reportSeries = safeStringify(di, ListSerializer(ReportSeries.serializer()),
+            entityVal.reportSeriesWithFiltersList ?: listOf())
         savedState.putEntityAsJson(ARG_ENTITY_JSON, null, entityVal)
     }
 
@@ -304,7 +316,7 @@ class ReportEditPresenter(context: Any,
         val series = ReportSeries().apply {
             val id = seriesCounter.getAndIncrement()
             reportSeriesName = "Series $id"
-            reportSeriesUid = id.toLong()
+            reportSeriesUid = id
         }
         val entityVal = entity
         val newList = entityVal?.reportSeriesWithFiltersList?.toMutableList() ?: mutableListOf()
@@ -325,8 +337,8 @@ class ReportEditPresenter(context: Any,
                 ?: mutableListOf()
 
         // new filter
-        if (newFilter.reportFilterUid == 0L) {
-            newFilter.reportFilterUid = filterCounter.incrementAndGet().toLong()
+        if (newFilter.reportFilterUid == 0) {
+            newFilter.reportFilterUid = filterCounter.incrementAndGet()
             newFilterList.add(newFilter)
         } else {
             val indexOfFilter = newFilterList.indexOfFirst { it.reportFilterUid == newFilter.reportFilterUid }
@@ -379,8 +391,8 @@ class ReportEditPresenter(context: Any,
             view.titleErrorText = null
         }
 
-        entity.reportSeries = safeStringify(di, ReportSeries.serializer().list, entity.reportSeriesWithFiltersList
-                ?: listOf())
+        entity.reportSeries = safeStringify(di, ListSerializer(ReportSeries.serializer()),
+            entity.reportSeriesWithFiltersList ?: listOf())
 
         GlobalScope.launch(doorMainDispatcher()) {
 
@@ -408,11 +420,15 @@ class ReportEditPresenter(context: Any,
                     .filter {
                         it.code == Report.GENDER ||
                                 it.code == Report.CONTENT_ENTRY ||
-                                it.code == Report.CLASS || it.code == ReportSeries.NONE
+                                it.code == Report.CLASS || it.code == ReportSeries.NONE ||
+                                it.code == Report.ENROLMENT_LEAVING_REASON ||
+                                it.code == Report.ENROLMENT_OUTCOME
                     }
         } else if (selectedOption.optionId == Report.CLASS ||
                 selectedOption.optionId == Report.CONTENT_ENTRY ||
-                selectedOption.optionId == Report.GENDER) {
+                selectedOption.optionId == Report.GENDER ||
+                selectedOption.optionId == Report.ENROLMENT_LEAVING_REASON ||
+                selectedOption.optionId == Report.ENROLMENT_OUTCOME) {
             view.subGroupOptions = SubGroupOptions.values().map { SubGroupByMessageIdOption(it, context) }
         }
     }

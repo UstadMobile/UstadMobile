@@ -2,22 +2,31 @@ package com.ustadmobile.core.contentformats.epub.nav
 
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import org.junit.Assert
+import org.junit.Before
 import org.junit.Test
-import org.kmp.io.KMPPullParserException
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.IOException
 
 class TestEpubNavDocument {
 
+    lateinit var xppFactory: XmlPullParserFactory
+
+    @Before
+    fun setup() {
+        xppFactory = XmlPullParserFactory.newInstance().apply {
+            isNamespaceAware = true
+        }
+    }
+
     @Test
-    @Throws(KMPPullParserException::class, IOException::class)
     fun givenValidDoc_whenParsed_thenPropertiesShouldMatchFile() {
         val navDoc = EpubNavDocument()
         val docIn = javaClass.getResourceAsStream("TestEPUBNavDocument-valid.xhtml")
 
-        navDoc.load(
-                UstadMobileSystemImpl.instance.newPullParser(docIn, "UTF-8"))
+        val xppParser = xppFactory.newPullParser()
+        xppParser.setInput(docIn, "UTF-8")
+        navDoc.load(xppParser)
 
         Assert.assertNotNull("Navigation doc has found table of contents", navDoc.toc)
         Assert.assertEquals("Navigation doc has 7 children", 7,
@@ -30,22 +39,26 @@ class TestEpubNavDocument {
         val navDoc = EpubNavDocument()
         val docIn = javaClass.getResourceAsStream("TestEpubNcx.ncx")
 
-        navDoc.load(
-                UstadMobileSystemImpl.instance.newPullParser(docIn, "UTF-8"))
+        val xppParser = xppFactory.newPullParser().also {
+            it.setInput(docIn, "UTF-8")
+        }
+
+        navDoc.load(xppParser)
 
         Assert.assertNotNull("Navigation doc has found ncx", navDoc.ncxNavMap)
         Assert.assertEquals("NCX has 35 children", 35, navDoc.ncxNavMap!!.size())
     }
 
     @Test
-    @Throws(KMPPullParserException::class, IOException::class)
     fun givenDocLoaded_whenSerializedAndReloaded_thenShouldBeTheSame() {
         val navDoc = EpubNavDocument()
         val docIn = javaClass.getResourceAsStream("TestEPUBNavDocument-valid.xhtml")
-        navDoc.load(
-                UstadMobileSystemImpl.instance.newPullParser(docIn, "UTF-8"))
+        val xppParser = xppFactory.newPullParser().also {
+            it.setInput(docIn, "UTF-8")
+        }
+        navDoc.load(xppParser)
 
-        val serializer = UstadMobileSystemImpl.instance.newXMLSerializer()
+        val serializer = xppFactory.newSerializer()
         val bout = ByteArrayOutputStream()
         serializer.setOutput(bout, "UTF-8")
         navDoc.serialize(serializer)
@@ -53,8 +66,9 @@ class TestEpubNavDocument {
 
 
         val loadedDoc = EpubNavDocument()
-        val loadedXpp = UstadMobileSystemImpl.instance.newPullParser(
-                ByteArrayInputStream(bout.toByteArray()), "UTF-8")
+        val loadedXpp = xppFactory.newPullParser().also {
+            it.setInput(ByteArrayInputStream(bout.toByteArray()), "UTF-8")
+        }
         loadedDoc.load(loadedXpp)
 
         Assert.assertEquals("Loaded and reserialized docs have same toc id",

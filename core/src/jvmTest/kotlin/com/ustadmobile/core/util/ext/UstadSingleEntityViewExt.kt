@@ -1,9 +1,9 @@
 package com.ustadmobile.core.util.ext
 
-import com.nhaarman.mockitokotlin2.nullableArgumentCaptor
-import com.nhaarman.mockitokotlin2.timeout
-import com.nhaarman.mockitokotlin2.verify
 import com.ustadmobile.core.view.UstadSingleEntityView
+import org.mockito.kotlin.nullableArgumentCaptor
+import org.mockito.kotlin.timeout
+import org.mockito.kotlin.verify
 
 /**
  * This is a convenience function for use with UstadEditView and UstadDetailView. It will return the

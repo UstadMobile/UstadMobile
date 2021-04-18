@@ -11,7 +11,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.paging.DataSource
 import androidx.paging.PagedList
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.MergeAdapter
+import androidx.recyclerview.widget.ConcatAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentClazzWorkSubmissionMarkingBinding
@@ -32,7 +32,7 @@ import org.kodein.di.instance
 import org.kodein.di.on
 
 
-class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzWorkWithSubmission>(),
+class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<PersonWithClazzWorkAndSubmission>(),
         ClazzWorkSubmissionMarkingView, NewCommentHandler, SimpleButtonHandler,
         SimpleTwoButtonHandler{
 
@@ -40,13 +40,10 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
     private var mPresenter: ClazzWorkSubmissionMarkingPresenter? = null
 
-    override val mEditPresenter: UstadEditPresenter<*, ClazzMemberAndClazzWorkWithSubmission>?
+    override val mEditPresenter: UstadEditPresenter<*, PersonWithClazzWorkAndSubmission>?
         get() = mPresenter
 
     private lateinit var dbRepo : UmAppDatabase
-
-    override val viewContext: Any
-        get() = requireContext()
 
     private var submissionHeadingRecyclerAdapter: SimpleHeadingRecyclerAdapter?= null
 
@@ -72,12 +69,12 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
     private var privateCommentsRecyclerAdapter: CommentsRecyclerAdapter? = null
     private var privateCommentsLiveData: LiveData<PagedList<CommentsWithPerson>>? = null
     private var newPrivateCommentRecyclerAdapter: NewCommentRecyclerViewAdapter? = null
-    private var privateCommentsMergerRecyclerAdapter: MergeAdapter? = null
+    private var privateCommentsMergerRecyclerAdapter: ConcatAdapter? = null
     private var submitWithMetricsRecyclerAdapter: ClazzWorkSubmissionMarkingSubmitWithMetricsRecyclerAdapter ? = null
     private var recordForStudentButtonRecyclerAdapter: SimpleButtonRecyclerAdapter? = null
     private var simpleTwoButtonRecyclerAdapter: SimpleTwoButtonRecyclerAdapter? = null
 
-    private var detailMergerRecyclerAdapter: MergeAdapter? = null
+    private var detailMergerRecyclerAdapter: ConcatAdapter? = null
     private var detailMergerRecyclerView: RecyclerView? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -147,7 +144,7 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
 
         newPrivateCommentRecyclerAdapter = NewCommentRecyclerViewAdapter(this,
                 requireContext().getString(R.string.add_private_comment), false, ClazzWork.CLAZZ_WORK_TABLE_ID,
-                entity?.clazzWork?.clazzWorkUid?:0L, entity?.clazzMemberPersonUid?:0L
+                entity?.clazzWork?.clazzWorkUid?:0L, entity?.personUid?:0L
         )
         newPrivateCommentRecyclerAdapter?.visible = true
 
@@ -157,11 +154,11 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             privateCommentsObserver = PagedListSubmitObserver(it)
         }
 
-        privateCommentsMergerRecyclerAdapter = MergeAdapter(
+        privateCommentsMergerRecyclerAdapter = ConcatAdapter(
                 privateCommentsHeadingRecyclerAdapter, privateCommentsRecyclerAdapter,
                 newPrivateCommentRecyclerAdapter)
 
-        detailMergerRecyclerAdapter = MergeAdapter(
+        detailMergerRecyclerAdapter = ConcatAdapter(
                 submissionHeadingRecyclerAdapter, shortTextSubmissionRecyclerAdapter,
                 shortTextResultRecyclerAdapter,
                 quizViewRecyclerAdapter, quizEditRecyclerAdapter,
@@ -248,16 +245,16 @@ class ClazzWorkSubmissionMarkingFragment: UstadEditFragment<ClazzMemberAndClazzW
             shortTextSubmissionRecyclerAdapter?.visible = value
         }
 
-    override var entity: ClazzMemberAndClazzWorkWithSubmission? = null
+    override var entity: PersonWithClazzWorkAndSubmission? = null
         set(value) {
             field = value
 
             newPrivateCommentRecyclerAdapter?.entityUid = value?.clazzWork?.clazzWorkUid?:0L
-            newPrivateCommentRecyclerAdapter?.commentTo = value?.clazzMemberPersonUid?:0L
+            newPrivateCommentRecyclerAdapter?.commentTo = value?.personUid ?:0L
             newPrivateCommentRecyclerAdapter?.commentFrom = 0L
             newPrivateCommentRecyclerAdapter?.visible = true
 
-            ustadFragmentTitle = value?.person?.fullName()?:""
+            ustadFragmentTitle = value?.fullName()?:""
 
             //Don't show the button if submission exists or submission is not required.
             markingEditRecyclerAdapter?.clazzWorkVal = value
