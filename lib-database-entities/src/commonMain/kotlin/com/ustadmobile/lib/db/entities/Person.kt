@@ -98,6 +98,8 @@ open class Person() {
     @LastChangedTime
     var personLct: Long = 0
 
+    var personCountry: String? = null
+
     fun fullName():String{
         var f = ""
         var l = ""
