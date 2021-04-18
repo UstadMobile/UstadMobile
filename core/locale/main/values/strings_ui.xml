@@ -547,6 +547,8 @@
     <string name="active">Active</string>
     <string name="class_id">Class ID</string>
     <string name="gender_literal" value="306">Gender</string>
+    <string name="country">Country</string>
+    <string name="connectivity_status">Connectivity status</string>
     <!--
     SEL = Social Emotional Learning
     -->

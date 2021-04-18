@@ -270,6 +270,51 @@ abstract class PersonDao : BaseDao<Person> {
     @Query("SELECT * FROM Person")
     abstract fun getAllPerson(): List<Person>
 
+    @Query("""
+        SELECT COUNT(personUid) 
+          FROM Person 
+        WHERE username IS NOT NULL 
+          AND active
+    """)
+    abstract fun getTotalActiveCountUsers(): Int
+
+    @Query("""
+        SELECT COUNT(personUid) AS count, gender
+          FROM Person 
+         WHERE username IS NOT NULL 
+          AND active 
+        GROUP BY gender
+    """)
+    abstract fun getActiveCountUsersByGender(): List<ActiveUserGenderCount>
+
+    @Query("""
+        SELECT COUNT(personUid) AS count, personCountry AS country
+          FROM Person 
+         WHERE username IS NOT NULL 
+          AND active 
+        GROUP BY personCountry
+    """)
+    abstract fun getActiveCountUsersByCountry(): List<ActiveUserCountryCount>
+
+   /* @Query("""
+        SELECT COUNT(personUid) AS count, personConnectivityStatus AS status
+          FROM Person
+                 LEFT JOIN PersonConnectivity
+                  ON Person.personUid = PersonConnectivity.pcPersonUid
+         WHERE username IS NOT NULL 
+          AND active
+        GROUP BY personConnectivityStatus
+    """)
+    abstract fun getActiveCountUsersByConnectivity(): List<ActiveUserConnectivityCount>*/
+
+    @Serializable
+    data class ActiveUserGenderCount(var count: Int = 0, var gender: Int = 0)
+
+    @Serializable
+    data class ActiveUserCountryCount(var count: Int = 0, var country: String = "")
+
+    @Serializable
+    data class ActiveUserConnectivityCount(var count: Int = 0, var status: String = "")
 
     companion object {
 
@@ -317,6 +362,8 @@ abstract class PersonDao : BaseDao<Person> {
         const val SESSION_LENGTH = 28L * 24L * 60L * 60L * 1000L// 28 days
 
         const val ENTITY_PERSONS_WITH_LEARNING_RECORD_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_LEARNINGRECORD_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
+
+        const val ENTITY_PERSONS_WITH_CONNECTIVITY_PERMISSION = "$ENTITY_PERSONS_WITH_PERMISSION_PT1 0 ${ENTITY_PERSONS_WITH_PERMISSION_PT2} ${Role.PERMISSION_PERSON_CONNECTIVITY_SELECT} $ENTITY_PERSONS_WITH_PERMISSION_PT4"
 
 
     }

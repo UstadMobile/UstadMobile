@@ -41,7 +41,7 @@ import kotlin.jvm.Volatile
     SiteTerms::class,
     NotificationSetting::class,
     NotificationSettingLastChecked::class,
-    FeedEntry::class,
+    FeedEntry::class, PersonConnectivity::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -168,6 +168,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     @JsName("personPictureDao")
     abstract val personPictureDao: PersonPictureDao
 
+    @JsName("personConnectivityDao")
+    abstract val personConnectivityDao: PersonConnectivityDao
+
     @JsName("scrapeRunDao")
     abstract val scrapeRunDao: ScrapeRunDao
 
@@ -229,7 +232,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
     abstract val contentEntryProgressDao: ContentEntryProgressDao
 
     abstract val syncresultDao: SyncResultDao
-
 
     abstract val clazzLogAttendanceRecordDao: ClazzLogAttendanceRecordDao
     abstract val clazzLogDao: ClazzLogDao

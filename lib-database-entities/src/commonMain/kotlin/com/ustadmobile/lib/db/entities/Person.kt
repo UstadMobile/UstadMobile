@@ -78,6 +78,8 @@ open class Person() {
 
     var personAddress: String? = null
 
+    var personCountry: String? = null
+
     /**
      * The ID given to the person by their organization
      */

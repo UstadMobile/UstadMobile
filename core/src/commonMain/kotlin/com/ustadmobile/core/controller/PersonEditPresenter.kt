@@ -82,9 +82,10 @@ class PersonEditPresenter(context: Any,
 
     override fun onCreate(savedState: Map<String, String>?) {
         super.onCreate(savedState)
-        view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
-                MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
-                MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
+        view.genderOptions = PersonConstants.GENDER_MESSAGE_ID_MAP.map {
+            MessageIdOption(it.value, context, it.key) }
+        view.connectivityStatusOptions = PersonConstants.CONNECTIVITY_STATUS_MAP.map {
+            MessageIdOption(it.value, context, it.key) }
         view.clazzList = clazzEnrolmentWithClazzJoinEditHelper.liveList
 
         view.rolesAndPermissionsList = rolesAndPermissionEditHelper.liveList
@@ -179,7 +180,9 @@ class PersonEditPresenter(context: Any,
             dateOfBirthError != null ||
             noMatchPasswordError != null ||
                     firstNameError != null ||
-                    lastNameError != null
+                    lastNameError != null ||
+                    countryError != null ||
+                    connectivityStatusError != null
 
     override fun handleClickSave(entity: PersonWithAccount) {
         view.loading = true
@@ -193,10 +196,14 @@ class PersonEditPresenter(context: Any,
             view.noMatchPasswordError = null
             view.firstNameError = null
             view.lastNameError = null
+            view.countryError = null
+            view.connectivityStatusError = null
 
             val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
             view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNameError = requiredFieldMessage
             view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameError = requiredFieldMessage
+            view.takeIf { entity.personCountry.isNullOrEmpty() }?.countryError = requiredFieldMessage
+            view.takeIf { entity.personConnectivityStatus == 0 }?.connectivityStatusError = requiredFieldMessage
 
             if(view.hasErrors()) {
                 view.loading = false

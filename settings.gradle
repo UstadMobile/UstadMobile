@@ -17,6 +17,7 @@ pluginManagement {
 include ':app-android',
         ':app-ktor-server',
         ':lib-test-common',
+        ':app-stats-server',
         ':core',
         ':sharedse',
         ':app-android-launcher',

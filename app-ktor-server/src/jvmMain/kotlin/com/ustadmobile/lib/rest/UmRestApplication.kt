@@ -3,6 +3,7 @@ package com.ustadmobile.lib.rest
 import com.github.aakira.napier.DebugAntilog
 import com.github.aakira.napier.Napier
 import com.google.gson.Gson
+import com.maxmind.geoip2.DatabaseReader
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.catalog.contenttype.*
@@ -12,7 +13,6 @@ import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase_KtorRoute
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
 import com.ustadmobile.core.io.UploadSessionManager
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.notification.setupNotificationCheckerSyncListener
 import com.ustadmobile.core.schedule.setupScheduleSyncListener
 import com.ustadmobile.core.util.DiTag
@@ -31,9 +31,7 @@ import io.ktor.application.install
 import io.ktor.client.*
 import io.ktor.client.engine.okhttp.*
 import io.ktor.client.features.*
-import io.ktor.features.CORS
-import io.ktor.features.CallLogging
-import io.ktor.features.ContentNegotiation
+import io.ktor.client.*
 import io.ktor.gson.GsonConverter
 import io.ktor.gson.gson
 import io.ktor.http.ContentType
@@ -45,10 +43,7 @@ import okhttp3.Dispatcher
 import okhttp3.OkHttpClient
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
-import org.quartz.Job
-import org.quartz.JobExecutionContext
-import org.quartz.Scheduler
-import org.quartz.SchedulerFactory
+import org.quartz.*
 import org.quartz.impl.StdScheduler
 import org.quartz.impl.StdSchedulerFactory
 import java.io.File
@@ -58,6 +53,8 @@ import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
 import javax.sql.DataSource
 import io.ktor.client.features.json.JsonFeature
+import io.ktor.features.*
+import org.apache.commons.io.FileUtils
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -66,6 +63,12 @@ const val CONF_DBMODE_VIRTUALHOST = "virtualhost"
 const val CONF_DBMODE_SINGLETON = "singleton"
 
 const val CONF_GOOGLE_API = "secret"
+
+const val CONF_STATS_SERVER = "statsServer"
+
+const val INDICATOR_ENDPOINT = "endpoint"
+
+const val INDICATOR_STATS_ENDPOINT = "statsEndpoint"
 
 /**
  * Returns an identifier that is used as a subdirectory for data storage (e.g. attachments,
@@ -112,6 +115,12 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     dataDirPath.takeIf { !it.exists() }?.mkdirs()
 
     val apiKey = environment.config.propertyOrNull("ktor.ustad.googleApiKey")?.getString() ?: CONF_GOOGLE_API
+    val ustadStatsEndpoint = environment.config
+            .propertyOrNull("ktor.ustad.usageStatsDest")?.getString() ?: CONF_STATS_SERVER
+
+    val countryDbFile = File("country.mmdb")
+    FileUtils.copyToFile(javaClass.getResourceAsStream("/country.mmdb"),
+            countryDbFile)
 
     install(DIFeature) {
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
@@ -187,6 +196,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             HttpClient(OkHttp){
                 install(JsonFeature)
                 install(HttpTimeout)
+                install(XForwardedHeaderSupport)
 
                 engine {
                     preconfigured = instance()
@@ -225,6 +235,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             UploadSessionManager(context, di)
         }
 
+        bind<DatabaseReader>() with singleton {
+           DatabaseReader.Builder(countryDbFile).build()
+        }
+
         bind<Scheduler>() with singleton {
             InitialContext().initQuartzDb("java:/comp/env/jdbc/quartzds")
             StdSchedulerFactory.getDefaultScheduler().also {
@@ -246,7 +260,26 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                 di.on(Endpoint("localhost")).direct.instance<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR)
             }
 
-            instance<Scheduler>().start()
+            val scheduler = instance<Scheduler>()
+            scheduler.start()
+
+            if(ustadStatsEndpoint != CONF_STATS_SERVER){
+
+              /*  val job = JobBuilder.newJob(StatsIndicatorJob::class.java)
+                        .usingJobData(INDICATOR_ENDPOINT, "")
+                        .usingJobData(INDICATOR_STATS_ENDPOINT, ustadStatsEndpoint)
+                        .build()
+
+                val trigger: CronTrigger = TriggerBuilder.newTrigger()
+                        .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * ?"))
+                        .build()
+
+                scheduler.scheduleJob(job, trigger)*/
+            }
+
+
+
+
         }
     }
 

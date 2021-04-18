@@ -65,6 +65,8 @@ kotlin {
                 implementation "org.kodein.di:kodein-di:$version_kodein_di"
                 implementation "org.kodein.di:kodein-di-framework-ktor-server-jvm:$version_kodein_di"
 
+                implementation "com.soywiz.korlibs.klock:klock:$version_klock"
+
                 implementation "com.github.aakira:napier-jvm:$version_napier"
 
                 implementation project(":core")
@@ -81,6 +83,7 @@ kotlin {
 
                 implementation "io.netty:netty-tcnative-boringssl-static:$version_netty_tcnative"
                 implementation "org.quartz-scheduler:quartz:$version_quartz_scheduler"
+                implementation "com.maxmind.geoip2:geoip2:$version_geo_ip"
 
             }
         }

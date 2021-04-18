@@ -50,6 +50,8 @@ interface PersonEditFragmentEventHandler {
     fun onClickNewClazzMemberWithClazz()
 
     fun onClickNewRoleAndAssignment()
+
+    fun onClickCountry()
     
 }
 
@@ -64,6 +66,12 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         get() = mPresenter
 
     override var genderOptions: List<MessageIdOption>? = null
+        get() = field
+        set(value) {
+            field = value
+        }
+
+    override var connectivityStatusOptions: List<MessageIdOption>? = null
         get() = field
         set(value) {
             field = value
@@ -149,6 +157,11 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 EntityRoleWithNameAndRole::class.java)
     }
 
+    override fun onClickCountry() {
+        onSaveStateToBackStackStateHandle()
+        navigateToPickEntityFromList(String::class.java, R.id.country_list_dest)
+    }
+
 
     override fun handleRemoveEntityRole(entityRole: EntityRoleWithNameAndRole) {
         mPresenter?.handleRemoveRoleAndPermission(entityRole)
@@ -163,6 +176,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             //for some reason setting the options before (and indepently from) the value causes
             // a databinding problem
             mBinding?.genderOptions = genderOptions
+            mBinding?.connectivityStatusOptions = connectivityStatusOptions
             loading = false
         }
 
@@ -263,6 +277,19 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
         set(value) {
             field = value
             handleInputError(mBinding?.lastnameTextInputLayout, value != null, value)
+        }
+    override var countryError: String? = null
+        get() = field
+        set(value) {
+            field = value
+            handleInputError(mBinding?.countryTextinputlayout, value != null, value)
+        }
+
+    override var connectivityStatusError: String? = null
+        get() = field
+        set(value) {
+            field = value
+            handleInputError(mBinding?.connectivityStatusTextinputlayout, value != null, value)
         }
 
     override var firstNameError: String? = null

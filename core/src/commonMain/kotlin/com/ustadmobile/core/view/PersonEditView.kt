@@ -1,5 +1,6 @@
 package com.ustadmobile.core.view
 
+import com.ustadmobile.core.util.IdOption
 import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.door.DoorLiveData
 import com.ustadmobile.lib.db.entities.*
@@ -7,6 +8,8 @@ import com.ustadmobile.lib.db.entities.*
 interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var genderOptions: List<MessageIdOption>?
+
+    var connectivityStatusOptions: List<MessageIdOption>?
 
     var personPicturePath: String?
 
@@ -33,6 +36,10 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
     var firstNameError: String?
 
     var lastNameError: String?
+
+    var countryError: String?
+
+    var connectivityStatusError: String?
 
     fun navigateToNextDestination(account: UmAccount?, nextDestination: String)
 

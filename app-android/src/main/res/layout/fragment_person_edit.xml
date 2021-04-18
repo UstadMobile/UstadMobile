@@ -7,6 +7,7 @@
         <import type="java.util.List"/>
         <import type="com.ustadmobile.core.util.IdOption"/>
         <import type="android.text.InputType"/>
+        <import type="com.ustadmobile.lib.db.entities.PersonConnectivity"/>
 
         <variable
             name="person"
@@ -15,6 +16,15 @@
         <variable
             name="personPicture"
             type="com.ustadmobile.lib.db.entities.PersonPicture"/>
+
+        <variable
+            name="homeConnectivity"
+            type="PersonConnectivity" />
+
+        <variable
+            name="mobileConnectivity"
+            type="PersonConnectivity" />
+
 
         <variable
             name="personPictureUri"
@@ -28,6 +38,17 @@
             name="loading"
             type="boolean" />
 
+        <variable
+            name="countryFieldError"
+            type="String" />
+
+        <variable
+            name="homeConnectivityStatusFieldError"
+            type="String" />
+
+        <variable
+            name="mobileConnectivityStatusFieldError"
+            type="String" />
 
         <variable
             name="fieldsEnabled"
@@ -38,7 +59,15 @@
             type="boolean"/>
 
         <variable
+            name="viewConnectivity"
+            type="boolean" />
+
+        <variable
             name="genderOptions"
+            type="List&lt;IdOption&gt;" />
+
+        <variable
+            name="connectivityStatusOptions"
             type="List&lt;IdOption&gt;" />
 
         <variable
@@ -259,6 +288,90 @@
             </com.google.android.material.textfield.TextInputLayout>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/country_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginEnd="@dimen/dimen_16dp"
+                app:hintEnabled="true"
+                app:errorTextColor="?colorError"
+                app:errorText="@{countryFieldError}"
+                app:errorEnabled="@{countryFieldError != null}"
+                android:enabled="@{fieldsEnabled}"
+                android:onClick="@{() -> activityEventHandler.onClickCountry()}"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/address_textinputlayout">
+
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
+                    android:id="@+id/country_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/country" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:visibility="@{viewConnectivity ?  View.VISIBLE: View.GONE}"
+                android:id="@+id/home_connectivity_status_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginEnd="@dimen/dimen_16dp"
+                app:hintEnabled="true"
+                app:errorText="@{homeConnectivityStatusFieldError}"
+                app:errorEnabled="@{homeConnectivityStatusFieldError != null}"
+                android:enabled="@{fieldsEnabled}"
+                app:errorTextColor="?colorError"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/country_textinputlayout">
+
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
+                    android:id="@+id/home_connectivity_status_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/home_connectivity_status"
+                    app:messageIdOptions="@{connectivityStatusOptions}"
+                    app:selectedMessageIdOption="@={homeConnectivity.pcConType}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:visibility="@{viewConnectivity ?  View.VISIBLE: View.GONE}"
+                android:id="@+id/mobile_connectivity_status_textinputlayout"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginEnd="@dimen/dimen_16dp"
+                app:hintEnabled="true"
+                app:errorText="@{mobileConnectivityStatusFieldError}"
+                app:errorEnabled="@{mobileConnectivityStatusFieldError != null}"
+                android:enabled="@{fieldsEnabled}"
+                app:errorTextColor="?colorError"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/home_connectivity_status_textinputlayout">
+
+                <com.ustadmobile.port.android.view.IdOptionAutoCompleteTextView
+                    android:id="@+id/mobile_connectivity_status_value"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="@string/mobile_connectivity_status"
+                    app:messageIdOptions="@{connectivityStatusOptions}"
+                    app:selectedMessageIdOption="@={mobileConnectivity.pcConStatus}" />
+
+            </com.google.android.material.textfield.TextInputLayout>
+
+
+            <com.google.android.material.textfield.TextInputLayout
                 android:visibility="@{registrationMode ?  View.VISIBLE: View.GONE}"
                 android:id="@+id/username_textinputlayout"
                 android:layout_width="match_parent"
@@ -271,7 +384,7 @@
                 android:enabled="@{fieldsEnabled}"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/address_textinputlayout">
+                app:layout_constraintTop_toBottomOf="@+id/mobile_connectivity_status_textinputlayout">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/username_text"

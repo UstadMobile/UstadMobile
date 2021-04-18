@@ -160,6 +160,121 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                                             personUid: Long, contextRegistration: String)
             : DataSource.Factory<Int, StatementWithSessionDetailDisplay>
 
+
+    @Query("""
+        SELECT COUNT(DISTINCT personUid) 
+          FROM Person 
+                LEFT JOIN StatementEntity 
+                ON Person.personUid = StatementEntity.statementPersonUid
+        WHERE Person.username IS NOT NULL 
+          AND Person.active
+          AND (StatementEntity.timestamp >= :startDateTime 
+                AND StatementEntity.timestamp <= :endDateTime)
+    """)
+    abstract fun getActiveUsersUsedContent(startDateTime: Long, endDateTime: Long): Int
+
+
+    @Query("""
+        SELECT COUNT(DISTINCT personUid) AS count, gender
+          FROM Person 
+                LEFT JOIN StatementEntity 
+                ON Person.personUid = StatementEntity.statementPersonUid
+        WHERE Person.username IS NOT NULL 
+          AND Person.active
+          AND (StatementEntity.timestamp >= :startDateTime 
+                AND StatementEntity.timestamp <= :endDateTime)
+        GROUP BY Person.gender
+    """)
+    abstract fun getActiveUsersUsedContentByGender(startDateTime: Long, endDateTime: Long): List<ActiveUsageByGender>
+
+
+    @Query("""
+        SELECT COUNT(DISTINCT personUid) AS count, personCountry AS country
+          FROM Person 
+                LEFT JOIN StatementEntity 
+                ON Person.personUid = StatementEntity.statementPersonUid
+        WHERE Person.username IS NOT NULL 
+          AND Person.active
+          AND (StatementEntity.timestamp >= :startDateTime 
+                AND StatementEntity.timestamp <= :endDateTime)
+        GROUP BY Person.personCountry
+    """)
+    abstract fun getActiveUsersUsedContentByCountry(startDateTime: Long, endDateTime: Long): List<ActiveUsageByCountry>
+
+
+    @Query("""
+        SELECT COUNT(DISTINCT personUid) AS count, personConnectivityStatus AS status
+          FROM Person 
+                LEFT JOIN StatementEntity 
+                ON Person.personUid = StatementEntity.statementPersonUid
+        WHERE Person.username IS NOT NULL 
+          AND Person.active
+          AND (StatementEntity.timestamp >= :startDateTime 
+                AND StatementEntity.timestamp <= :endDateTime)
+        GROUP BY Person.personConnectivityStatus
+    """)
+    abstract fun getActiveUsersUsedContentByConnectivity(startDateTime: Long, endDateTime: Long): List<ActiveUsageByConnectivity>
+
+    @Query("""
+        SELECT SUM(resultDuration) 
+          FROM StatementEntity 
+         WHERE (StatementEntity.timestamp >= :startDateTime 
+                AND StatementEntity.timestamp <= :endDateTime)
+    """)
+    abstract fun getDurationUsageOverPastDay(startDateTime: Long, endDateTime: Long): Long
+
+    @Query("""
+        SELECT SUM(resultDuration) AS duration, gender
+          FROM StatementEntity 
+               LEFT JOIN Person 
+               ON Person.personUid = StatementEntity.statementPersonUid
+         WHERE (StatementEntity.timestamp >= :startDateTime 
+                AND StatementEntity.timestamp <= :endDateTime)
+         GROUP BY Person.gender
+    """)
+    abstract fun getDurationUsageOverPastDayByGender(startDateTime: Long, endDateTime: Long): List<DurationByGender>
+
+    @Query("""
+        SELECT SUM(resultDuration) AS duration, personCountry AS country
+          FROM StatementEntity 
+               LEFT JOIN Person 
+               ON Person.personUid = StatementEntity.statementPersonUid
+         WHERE (StatementEntity.timestamp >= :startDateTime 
+                AND StatementEntity.timestamp <= :endDateTime)
+         GROUP BY Person.personCountry
+    """)
+    abstract fun getDurationUsageOverPastDayByCountry(startDateTime: Long, endDateTime: Long): List<DurationByCountry>
+
+    @Query("""
+        SELECT SUM(resultDuration) AS duration, personConnectivityStatus AS status
+          FROM StatementEntity 
+               LEFT JOIN Person 
+               ON Person.personUid = StatementEntity.statementPersonUid
+         WHERE (StatementEntity.timestamp >= :startDateTime 
+                AND StatementEntity.timestamp <= :endDateTime)
+         GROUP BY Person.personConnectivityStatus
+    """)
+    abstract fun getDurationUsageOverPastDayByConnectivity(startDateTime: Long, endDateTime: Long): List<DurationByConnectivity>
+
+    @Serializable
+    data class DurationByGender(val duration: Long, val gender: Int)
+
+    @Serializable
+    data class DurationByCountry(val duration: Long, val country: String)
+
+    @Serializable
+    data class DurationByConnectivity(val duration: Long, val status: Int)
+
+    @Serializable
+    data class ActiveUsageByGender(val count: Int, val gender: Int)
+
+    @Serializable
+    data class ActiveUsageByCountry(val count: Int, val country: String)
+
+    @Serializable
+    data class ActiveUsageByConnectivity(val count: Int, val status: Int)
+
+
     @Serializable
     data class ReportData(var yAxis: Float = 0f, var xAxis: String? = "", var subgroup: String? = "")
 
