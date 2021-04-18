@@ -3,7 +3,6 @@ package com.ustadmobile.sharedse.xapi
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.reflect.TypeToken
-import com.nhaarman.mockitokotlin2.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.contentformats.xapi.Actor
@@ -12,26 +11,24 @@ import com.ustadmobile.core.contentformats.xapi.State
 import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStateEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
-import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.port.sharedse.contentformats.xapi.ContextDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiStateEndpointImpl
 import com.ustadmobile.port.sharedse.contentformats.xapi.endpoints.XapiUtil
 import com.ustadmobile.test.util.ext.bindDbAndRepoWithEndpoint
-import com.ustadmobile.util.test.checkJndiSetup
-import com.ustadmobile.util.test.extractTestResourceToFile
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Test
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
+import okhttp3.OkHttpClient
+import org.junit.*
+import org.junit.rules.TemporaryFolder
 import org.kodein.di.*
-import java.io.File
-import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
 import java.util.*
-import javax.naming.InitialContext
 
 class TestStateEndpoint {
 
@@ -49,11 +46,26 @@ class TestStateEndpoint {
 
     val context = Any()
 
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
+
+    private lateinit var httpClient: HttpClient
+
+    private lateinit var okHttpClient: OkHttpClient
+
     @Before
     fun setup() {
-        checkJndiSetup()
         val endpointScope = EndpointScope()
         val endpointUrl = Endpoint("http://localhost:8087/")
+        okHttpClient = OkHttpClient()
+        httpClient = HttpClient(OkHttp){
+            install(JsonFeature)
+            install(HttpTimeout)
+            engine {
+                preconfigured = okHttpClient
+            }
+        }
         di = DI {
             bindDbAndRepoWithEndpoint(endpointScope, clientMode = true)
             bind<Gson>() with singleton {
@@ -66,6 +78,14 @@ class TestStateEndpoint {
             bind<XapiStateEndpoint>() with singleton {
                 XapiStateEndpointImpl(endpointUrl, di)
             }
+
+            bind<OkHttpClient>() with singleton {
+                okHttpClient
+            }
+
+            bind<HttpClient>() with singleton {
+                httpClient
+            }
         }
 
         gson = di.direct.instance()
@@ -74,17 +94,20 @@ class TestStateEndpoint {
 
     }
 
+    @After
+    fun tearDown() {
+        httpClient.close()
+    }
 
     @Test
-    @Throws(IOException::class)
     fun givenStateObject_checkExistsInDb() {
 
         val activityId = "http://www.example.com/activities/1"
         val agentJson = "{\"objectType\": \"Agent\", \"name\": \"John Smith\", \"account\":{\"name\": \"123\", \"homePage\": \"http://www.example.com/users/\"}}"
         val stateId = "http://www.example.com/states/1"
 
-        val tmpFile = File.createTempFile("testStateEndpoint", "stateEndpoint")
-        extractTestResourceToFile(state, tmpFile)
+        val tmpFile =  temporaryFolder.newFile("stateEndpoint")
+        javaClass.getResourceAsStream(STATE_RESOURCE).writeToFile(tmpFile)
         val content = String(Files.readAllBytes(Paths.get(tmpFile.absolutePath)))
 
         val gson = Gson()
@@ -122,7 +145,7 @@ class TestStateEndpoint {
 
     companion object {
 
-        private const val state = "/com/ustadmobile/port/sharedse/xapi/state"
+        private const val STATE_RESOURCE = "/com/ustadmobile/port/sharedse/xapi/state"
     }
 
 }

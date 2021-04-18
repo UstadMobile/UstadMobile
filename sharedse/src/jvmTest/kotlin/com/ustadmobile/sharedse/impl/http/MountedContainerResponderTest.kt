@@ -1,11 +1,11 @@
 package com.ustadmobile.sharedse.impl.http
 
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.mock
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.core.io.ext.openEntryInputStream
-import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
@@ -18,13 +18,14 @@ import com.ustadmobile.port.sharedse.impl.http.MountedContainerResponder.Compani
 import fi.iki.elonen.NanoHTTPD
 import fi.iki.elonen.router.RouterNanoHTTPD
 import io.ktor.client.HttpClient
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import io.ktor.client.request.get
 import io.ktor.client.statement.HttpStatement
 import kotlinx.coroutines.runBlocking
-import org.junit.Assert
-import org.junit.Before
-import org.junit.Rule
-import org.junit.Test
+import okhttp3.OkHttpClient
+import org.junit.*
 import org.junit.rules.TemporaryFolder
 import java.io.File
 import java.io.IOException
@@ -41,6 +42,10 @@ class MountedContainerResponderTest {
 
 //    private lateinit var containerManager: ContainerManager
 
+    private lateinit var httpClient: HttpClient
+
+    private lateinit var okHttpClient: OkHttpClient
+
     @JvmField
     @Rule
     var temporaryFolder = TemporaryFolder()
@@ -51,8 +56,17 @@ class MountedContainerResponderTest {
         containerTmpDir = temporaryFolder.newFolder("TestMountedContainerResponder-containerTmp")
 
         db = UmAppDatabase.getInstance(Any())
-        repo = db.asRepository(Any(), "http://localhost/dummy", "",
-                defaultHttpClient())
+        okHttpClient = OkHttpClient()
+        httpClient = HttpClient(OkHttp) {
+            install(JsonFeature)
+            install(HttpTimeout)
+            engine {
+                preconfigured = okHttpClient
+            }
+        }
+
+        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
+            httpClient, okHttpClient))
         db.clearAllTables()
 
         container = Container()
@@ -72,6 +86,11 @@ class MountedContainerResponderTest {
             repo.addFileToContainer(container.containerUid, tmpFiles[1].toDoorUri(),
                     "subfolder/test file2.png", containerAddOptions)
         }
+    }
+
+    @After
+    fun tearDown() {
+        httpClient.close()
     }
 
     //Test handling of file names when url encoding is required

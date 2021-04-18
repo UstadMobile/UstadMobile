@@ -144,7 +144,7 @@ class ContainerUploader2Test {
         }
 
         mockUploadDispatcher = MockUploadDispatcher()
-        mockWebServer.setDispatcher(mockUploadDispatcher)
+        mockWebServer.dispatcher= mockUploadDispatcher
 
         val accountManager: UstadAccountManager = di.direct.instance()
         siteEndpoint = Endpoint(mockWebServer.url("/").toString())

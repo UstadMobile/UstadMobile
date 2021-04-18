@@ -1,6 +1,6 @@
 package com.ustadmobile.sharedse.network
 
-import com.nhaarman.mockitokotlin2.*
+import org.mockito.kotlin.*
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.account.UstadAccountManager
@@ -9,12 +9,12 @@ import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.io.ext.addFileToContainer
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.door.DoorMutableLiveData
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.toDoorUri
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
@@ -93,10 +93,10 @@ class DeleteDownloadJobTest{
         containerTmpDir = tmpFolderRule.newFolder("clientContainerDir")
 
         commonFile = File(containerTmpDir, "testfile1.png")
-        extractTestResourceToFile(commonFilePath, commonFile)
+        javaClass.getResourceAsStream(commonFilePath).writeToFile(commonFile)
 
         zombieFile = File(containerTmpDir, "testfile2.png")
-        extractTestResourceToFile(zombieFilePath, zombieFile)
+        javaClass.getResourceAsStream(zombieFilePath).writeToFile(zombieFile)
 
         // start of standalone
         val standAloneEntry = ContentEntry()
@@ -106,10 +106,6 @@ class DeleteDownloadJobTest{
         containerOfStandAlone.containerContentEntryUid = standAloneEntry.contentEntryUid
         containerOfStandAlone.containerUid = repo.containerDao.insert(containerOfStandAlone)
 
-//        val containerManager = ContainerManager(containerOfStandAlone, db, repo, containerTmpDir.path)
-//        runBlocking {
-//            containerManager.addEntries(ContainerManager.FileEntrySource(commonFile, "testfile1.png"))
-//        }
         runBlocking {
             repo.addFileToContainer(containerOfStandAlone.containerUid, commonFile.toDoorUri(),
                 "testfile1.png", ContainerAddOptions(containerTmpDir.toDoorUri()))
@@ -175,16 +171,11 @@ class DeleteDownloadJobTest{
         childOfParentJoin.djiPcjUid = 3
         db.downloadJobItemParentChildJoinDao.insert(childOfParentJoin)
 
-//        var parentContainerManager = ContainerManager(containerchildofparent, db, repo,
-//                containerTmpDir.path)
         runBlocking {
             repo.addFileToContainer(containerchildofparent.containerUid,
                 zombieFile.toDoorUri(), "testfile2.png", ContainerAddOptions(containerTmpDir.toDoorUri()))
             repo.addFileToContainer(containerchildofparent.containerUid,
                 commonFile.toDoorUri(), "testfile1.png", ContainerAddOptions(containerTmpDir.toDoorUri()))
-//
-//            parentContainerManager.addEntries(ContainerManager.FileEntrySource(zombieFile, "testfile2.png"))
-//            parentContainerManager.addEntries(ContainerManager.FileEntrySource(commonFile, "testfile1.png"))
         }
 
         commonFileContainerEntry = db.containerEntryDao.findByPathInContainer(

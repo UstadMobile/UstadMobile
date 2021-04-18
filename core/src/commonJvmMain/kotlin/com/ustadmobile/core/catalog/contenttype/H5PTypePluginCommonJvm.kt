@@ -8,8 +8,6 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.content
 import org.xmlpull.v1.XmlPullParserException
 import java.io.File
 import java.io.FileInputStream
@@ -22,6 +20,7 @@ import com.ustadmobile.core.io.ext.addFileToContainer
 import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.core.container.PrefixContainerFileNamer
+import kotlinx.serialization.json.*
 
 
 val licenseMap = mapOf(
@@ -56,14 +55,14 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
 
                             val data = String(it.readBytes())
 
-                            val json = Json.parseJson(data)
+                            val json = Json.parseToJsonElement(data) as JsonObject
 
                             // take the name from the role Author otherwise take last one
                             var author: String? = ""
                             var name: String? = ""
-                            json.jsonObject["authors"]?.jsonArray?.forEach {
-                                name = it.jsonObject["name"]?.content ?: ""
-                                val role = it.jsonObject["role"]?.content ?: ""
+                            json["authors"]?.jsonArray?.forEach {
+                                name = it.jsonObject["name"]?.jsonPrimitive?.content ?: ""
+                                val role = it.jsonObject["role"]?.jsonPrimitive?.content ?: ""
                                 if (role == "Author") {
                                     author = name
                                 }
@@ -77,8 +76,8 @@ class H5PTypePluginCommonJvm(): H5PTypePlugin() {
                                 contentTypeFlag = ContentEntry.TYPE_INTERACTIVE_EXERCISE
                                 licenseType = licenseMap[json.jsonObject["license"] ?: ""]
                                         ?: ContentEntry.LICENSE_TYPE_OTHER
-                                title = if(json.jsonObject["title"]?.content.isNullOrEmpty())
-                                    file.nameWithoutExtension else json.jsonObject["title"]?.content
+                                title = if(json.jsonObject["title"]?.jsonPrimitive?.content.isNullOrEmpty())
+                                    file.nameWithoutExtension else json.jsonObject["title"]?.jsonPrimitive?.content
                                 this.author = author
                                 leaf = true
                             }

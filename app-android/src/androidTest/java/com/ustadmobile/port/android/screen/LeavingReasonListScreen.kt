@@ -1,8 +1,6 @@
 package com.ustadmobile.port.android.screen
 
 import android.view.View
-import com.agoda.kakao.common.views.KView
-import com.agoda.kakao.image.KImageView
 import com.agoda.kakao.recycler.KRecyclerItem
 import com.agoda.kakao.recycler.KRecyclerView
 import com.agoda.kakao.text.KTextView

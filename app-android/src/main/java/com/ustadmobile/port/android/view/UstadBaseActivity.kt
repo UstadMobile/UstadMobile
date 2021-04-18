@@ -3,7 +3,6 @@ package com.ustadmobile.port.android.view
 import android.annotation.SuppressLint
 import android.content.*
 import android.hardware.SensorManager
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -29,17 +28,18 @@ import com.squareup.seismic.ShakeDetector
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadBaseController
 import com.ustadmobile.core.impl.UstadMobileSystemCommon
-import com.ustadmobile.core.impl.UstadMobileSystemImpl.Companion.instance
+import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.UstadViewWithNotifications
 import com.ustadmobile.port.android.impl.UserFeedbackException
 import com.ustadmobile.port.android.netwokmanager.UmAppDatabaseSyncService
+import com.ustadmobile.port.android.util.ext.getUstadLocaleSetting
 import com.ustadmobile.sharedse.network.NetworkManagerBle
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.Runnable
 import org.acra.ACRA
 import org.kodein.di.DIAware
 import org.kodein.di.android.di
+import org.kodein.di.instance
 import java.util.*
 
 /**
@@ -48,12 +48,10 @@ import java.util.*
  *
  * Created by mike on 10/15/15.
  */
-abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, UstadViewWithNotifications,
+abstract class UstadBaseActivity : AppCompatActivity(), UstadViewWithNotifications,
         UstadView, ShakeDetector.Listener, BleNetworkManagerProvider, DIAware {
 
     override val di by di()
-
-    private var baseController: UstadBaseController<*>? = null
 
     /**
      * Get the toolbar that's used for the support action bar
@@ -64,32 +62,11 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     protected lateinit var baseProgressBar: ProgressBar
 
-    @Volatile
-    private var bleServiceBound = false
-
     private var localeOnCreate: String? = null
 
-    private var runAfterFileSelection: Runnable? = null
-
-    /**
-     * Can be used to check if the activity has been started.
-     *
-     * @return true if the activity is started. false if it has not been started yet, or it was started, but has since stopped
-     */
-    var isStarted = false
-        private set
-
-    private var permissionRequestRationalesShown = false
-
-    private var permissionDialogTitle: String? = null
-
-    private var permissionDialogMessage: String? = null
-
-    internal var selectedFileUri: Uri? = null
-
-    internal var isOpeningFilePickerOrCamera = false
-
     lateinit var appUpdateManager: AppUpdateManager
+
+    private val systemImpl: UstadMobileSystemImpl by instance()
 
 
     private val mSyncServiceConnection = object : ServiceConnection {
@@ -171,10 +148,8 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
             WebView.setWebContentsDebuggingEnabled(true);
         }
-        //bind to the LRS forwarding service
-        instance.handleActivityCreate(this, savedInstanceState)
         super.onCreate(savedInstanceState)
-        localeOnCreate = instance.getDisplayedLocale(this)
+        localeOnCreate = systemImpl.getDisplayedLocale(this)
 
 
         val syncServiceIntent = Intent(this, UmAppDatabaseSyncService::class.java)
@@ -212,11 +187,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     }
 
-//    override fun showBaseProgressBar(showProgress: Boolean) {
-//        runOnUiThread {
-//            baseProgressBar.visibility = if (showProgress) View.VISIBLE else View.INVISIBLE
-//        }
-//    }
 
 
     /**
@@ -230,7 +200,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
 
     override fun onResume() {
         super.onResume()
-        if (instance.hasDisplayedLocaleChanged(localeOnCreate, this)) {
+        if (systemImpl.hasDisplayedLocaleChanged(localeOnCreate, this)) {
             Handler().postDelayed({ this.recreate() }, 200)
         }
 
@@ -244,40 +214,11 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
         shakeDetector?.stop()
     }
 
-    /**
-     * UstadMobileSystemImpl will bind certain services to each activity (e.g. HTTP, P2P services)
-     * If needed the child activity can override this method to listen for when the service is ready
-     *
-     * @param name
-     * @param iBinder
-     */
-    override fun onServiceConnected(name: ComponentName, iBinder: IBinder) {
-
-    }
-
-    override fun onServiceDisconnected(name: ComponentName) {
-
-    }
 
     protected fun setUMToolbar(toolbarID: Int) {
         umToolbar = findViewById<View>(toolbarID) as Toolbar
         setSupportActionBar(umToolbar)
         supportActionBar?.setHomeButtonEnabled(true)
-    }
-
-    protected fun setBaseController(baseController: UstadBaseController<*>) {
-        this.baseController = baseController
-    }
-
-
-    public override fun onStart() {
-        isStarted = true
-        super.onStart()
-    }
-
-    public override fun onStop() {
-        isStarted = false
-        super.onStop()
     }
 
     public override fun onDestroy() {
@@ -292,7 +233,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     override fun showSnackBar(message: String, action: () -> Unit, actionMessageId: Int) {
         val snackBar = Snackbar.make(coordinator_layout, message, Snackbar.LENGTH_LONG)
         if (actionMessageId != 0) {
-            snackBar.setAction(instance.getString(actionMessageId, this)) { action() }
+            snackBar.setAction(systemImpl.getString(actionMessageId, this)) { action() }
             snackBar.setActionTextColor(ContextCompat.getColor(this, R.color.secondaryColor))
         }
         snackBar.anchorView = bottom_nav_view
@@ -302,13 +243,6 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        if (resultCode == RESULT_OK) {
-            if (requestCode == FILE_SELECTION_REQUEST_CODE) {
-                selectedFileUri = data?.data
-                runAfterFileSelection?.run()
-                runAfterFileSelection = null
-            }
-        }
         if (requestCode == APP_UPDATE_REQUEST_CODE) {
             if (resultCode != RESULT_OK) {
                 Toast.makeText(this,
@@ -321,23 +255,17 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
 
-    //The devMinApi21 flavor has SDK Min 21, but other flavors have a lower SDK
-    @SuppressLint("ObsoleteSdkInt")
     override fun attachBaseContext(newBase: Context) {
         val res = newBase.resources
         val config = res.configuration
-        val languageSetting = instance.getLocale(newBase)
+        val languageSetting = newBase.getUstadLocaleSetting()
 
-        if (Build.VERSION.SDK_INT >= 17) {
-            val locale = if (languageSetting == UstadMobileSystemCommon.LOCALE_USE_SYSTEM)
-                Locale.getDefault()
-            else
-                Locale(languageSetting)
-            config.setLocale(locale)
-            super.attachBaseContext(newBase.createConfigurationContext(config))
-        } else {
-            super.attachBaseContext(newBase)
-        }
+        val locale = if (languageSetting == UstadMobileSystemCommon.LOCALE_USE_SYSTEM)
+            Locale.getDefault()
+        else
+            Locale(languageSetting)
+        config.setLocale(locale)
+        super.attachBaseContext(newBase.createConfigurationContext(config))
     }
 
 
@@ -346,33 +274,7 @@ abstract class UstadBaseActivity : AppCompatActivity(), ServiceConnection, Ustad
     }
 
 
-    @SuppressLint("ObsoleteSdkInt")
-    protected fun runAfterFileSection(runnable: java.lang.Runnable, vararg mimeTypes: String) {
-        this.runAfterFileSelection = runnable
-
-        val intent = Intent(Intent.ACTION_GET_CONTENT)
-        intent.addCategory(Intent.CATEGORY_OPENABLE)
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
-            intent.type = "*/*"
-            intent.putExtra(Intent.EXTRA_MIME_TYPES, mimeTypes)
-        } else {
-            val mimeTypesStr = StringBuilder()
-            for (mimeType in mimeTypes) {
-                mimeTypesStr.append(mimeType).append("|")
-            }
-            intent.type = mimeTypesStr.substring(0, mimeTypesStr.length - 1)
-        }
-        startActivityForResult(Intent.createChooser(intent, ""),
-                FILE_SELECTION_REQUEST_CODE)
-    }
-
-
     companion object {
-
-        private const val RUN_TIME_REQUEST_CODE = 111
-
-        private const val FILE_SELECTION_REQUEST_CODE = 112
 
         private const val APP_UPDATE_REQUEST_CODE = 113
     }

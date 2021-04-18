@@ -28,10 +28,7 @@ import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.core.networkmanager.DeletePreparationRequester
 import com.ustadmobile.sharedse.network.DownloadPreparationRequester
 import kotlinx.atomicfu.atomic
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Runnable
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import kotlin.jvm.Volatile
 import org.kodein.di.DI
 import org.kodein.di.instance
@@ -61,7 +58,7 @@ class DownloadDialogPresenter(context: Any,
 
     private val jobSizeTotals = atomic(null as DownloadJobSizeInfo?)
 
-    private val wifiOnlyChecked = atomic(false)
+    private val wifiOnlyChecked = atomic(0)
 
     private lateinit var downloadJobItemLiveData : DoorLiveData<DownloadJobItem?>
 
@@ -114,9 +111,11 @@ class DownloadDialogPresenter(context: Any,
             downloadJobItemLiveData = containerDownloadManager.getDownloadJobItemByContentEntryUid(
                     contentEntryUid)
             downloadJobCompletable.complete(true)
-            val isWifiOnly = !appDatabase.downloadJobDao.getMeteredNetworkAllowed(currentJobId)
-            wifiOnlyChecked.value = isWifiOnly
-            view.setDownloadOverWifiOnly(isWifiOnly)
+            val wifiOnly: Boolean = !appDatabase.downloadJobDao.getMeteredNetworkAllowed(currentJobId)
+            view.setDownloadOverWifiOnly(wifiOnly)
+            val checkedVal = if(wifiOnly) 1 else 0
+            wifiOnlyChecked.value = checkedVal
+
             downloadJobItemLiveData.observe(lifecycleOwner, downloadJobItemObserver)
 
             updateWarningMessage(downloadJobItemLiveData.getValue())
@@ -233,7 +232,7 @@ class DownloadDialogPresenter(context: Any,
         newDownloadJob.djDestinationDir = selectedStorageDir?.dirURI
         newDownloadJob.djStatus = JobStatus.NEEDS_PREPARED
         val isWifiOnlyChecked = wifiOnlyChecked.value
-        newDownloadJob.meteredNetworkAllowed = !isWifiOnlyChecked
+        newDownloadJob.meteredNetworkAllowed = isWifiOnlyChecked == 0
         containerDownloadManager.createDownloadJob(newDownloadJob)
         currentJobId = newDownloadJob.djUid
         val downloadPrepRequester: DownloadPreparationRequester by on(accountManager.activeAccount).instance()
@@ -286,7 +285,10 @@ class DownloadDialogPresenter(context: Any,
                     containerDownloadManager.pause(currentDownloadJobItemVal.djiDjUid)
                 }
 
-                //The continue button will do NOTHING - the download is already running
+                //If the download is already running, this will have no effect
+                STACKED_BUTTON_CONTINUE -> GlobalScope.launch {
+                    containerDownloadManager.enqueue(currentDownloadJobItemVal.djiDjUid)
+                }
 
                 STACKED_BUTTON_CANCEL -> GlobalScope.launch {
                     containerDownloadManager.cancel(currentDownloadJobItemVal.djiDjUid)
@@ -294,10 +296,7 @@ class DownloadDialogPresenter(context: Any,
             }
 
             dismissDialog()
-        }else {
-            //something is wrong - we should not have been able to get here...
         }
-
     }
 
     private fun dismissDialog() {
@@ -305,7 +304,8 @@ class DownloadDialogPresenter(context: Any,
     }
 
     fun handleClickWiFiOnlyOption(wifiOnly: Boolean) {
-        wifiOnlyChecked.value = wifiOnly
+        val wifiOnlyCheckedVal = if(wifiOnly) 1 else 0
+        wifiOnlyChecked.value = wifiOnlyCheckedVal
         if(currentJobId != 0) {
             GlobalScope.launch {
                 containerDownloadManager.setMeteredDataAllowed(currentJobId, !wifiOnly)
@@ -315,7 +315,7 @@ class DownloadDialogPresenter(context: Any,
 
     fun handleStorageOptionSelection(selectedDir: UMStorageDir) {
         selectedStorageDir = selectedDir
-        GlobalScope.launch {
+        GlobalScope.launch(doorMainDispatcher()) {
             downloadJobCompletable.await()
             updateWarningMessage(downloadJobItemLiveData.getValue())
             val downloadJob = containerDownloadManager.getDownloadJob(currentJobId).getValue()

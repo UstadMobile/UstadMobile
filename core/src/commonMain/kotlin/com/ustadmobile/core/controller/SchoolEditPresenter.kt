@@ -19,8 +19,7 @@ import com.ustadmobile.lib.db.entities.SchoolWithHolidayCalendar
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -45,8 +44,9 @@ class SchoolEditPresenter(context: Any,
         get() = PersistenceMode.DB
 
     private val clazzOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<Clazz>(
-            Clazz::clazzUid,"state_Clazz_list", Clazz.serializer().list,
-            Clazz.serializer().list, this, Clazz::class) { clazzUid = it }
+            Clazz::clazzUid,"state_Clazz_list",
+            ListSerializer(Clazz.serializer()),
+            ListSerializer(Clazz.serializer()), this, Clazz::class) { clazzUid = it }
 
     fun handleAddOrEditClazz(clazz: Clazz) {
         clazzOneToManyJoinEditHelper.onEditResult(clazz)

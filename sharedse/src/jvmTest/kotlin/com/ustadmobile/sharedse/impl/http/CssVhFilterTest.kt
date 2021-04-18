@@ -1,6 +1,6 @@
 package com.ustadmobile.sharedse.impl.http
 
-import com.nhaarman.mockitokotlin2.mock
+import org.mockito.kotlin.mock
 import com.ustadmobile.port.sharedse.impl.http.CssVhFilter
 import fi.iki.elonen.NanoHTTPD
 import org.junit.Assert

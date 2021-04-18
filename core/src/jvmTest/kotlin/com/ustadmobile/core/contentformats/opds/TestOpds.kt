@@ -1,8 +1,8 @@
 package com.ustadmobile.core.contentformats.opds
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import org.junit.Assert
 import org.junit.Test
+import org.xmlpull.v1.XmlPullParserFactory
 
 class TestOpds {
 
@@ -10,9 +10,9 @@ class TestOpds {
     fun givenValidOpds_whenLoaded_thenShouldHavePropertiesLoaded() {
 
         val opfIn = javaClass.getResourceAsStream("root.xml")
-        val parser = UstadMobileSystemImpl.instance.newPullParser()
+        val parser = XmlPullParserFactory.newInstance().newPullParser()
         parser.setInput(opfIn, "UTF-8")
-        var feed = OpdsFeed()
+        val feed = OpdsFeed()
         feed.loadFromParser(parser)
 
         Assert.assertEquals("Global Digital Library - Book Catalog", feed.title)

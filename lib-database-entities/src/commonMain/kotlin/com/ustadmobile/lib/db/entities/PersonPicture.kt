@@ -43,6 +43,9 @@ open class PersonPicture() {
     @LastChangedBy
     var personPictureLastChangedBy: Int = 0
 
+    @LastChangedTime
+    var personPictureLct: Long = 0
+
     @AttachmentUri
     var personPictureUri: String? = null
 

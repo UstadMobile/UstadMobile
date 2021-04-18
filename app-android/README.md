@@ -41,6 +41,10 @@ Note: Espresso end-to-end tests are being updated.
 
 ### To use as a library in another app
 
+This is a work in progress and has not been tested recently. The consuming app can set a manifest
+preference "com.ustadmobile.core.appconfig" to set the path to the appconfig to override the
+defaults.
+
 Add Ustad Mobile's maven repo to your build.gradle file:
 
 ```

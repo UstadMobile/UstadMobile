@@ -1,6 +1,5 @@
 package com.ustadmobile.core.contentformats.har
 
-import com.nhaarman.mockitokotlin2.mock
 import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
@@ -22,8 +21,9 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
-import java.io.File
+import org.mockito.kotlin.mock
 
 class TestHarContainer {
 
@@ -89,7 +89,7 @@ class TestHarContainer {
                     "/com/ustadmobile/core/contentformats/har.zip", ContainerAddOptions(tmpDir.toDoorUri()))
 
             harContainer = HarContainer(container.containerUid, targetEntry,
-                    accountManager.activeAccount, db, context, httpd.localHttpUrl){
+                    accountManager.activeAccount, db, context, httpd.localHttpUrl, di.direct.instance()){
             }
             harContainer?.startingUrlDeferred?.await()
         }

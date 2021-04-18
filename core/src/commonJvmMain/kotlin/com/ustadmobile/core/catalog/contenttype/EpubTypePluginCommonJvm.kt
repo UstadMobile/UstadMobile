@@ -20,8 +20,9 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.door.ext.toDoorUri
+import org.xmlpull.v1.XmlPullParserFactory
 
-class EpubTypePluginCommonJvm : EpubTypePlugin() {
+class EpubTypePluginCommonJvm() : EpubTypePlugin() {
 
     override suspend fun extractMetadata(filePath: String): ContentEntryWithLanguage? {
         return withContext(Dispatchers.Default) {
@@ -34,7 +35,9 @@ class EpubTypePluginCommonJvm : EpubTypePlugin() {
 
                         val fileName = zipEntry?.name
                         if (fileName!!.contains(".opf")) {
-                            val xpp = UstadMobileSystemImpl.instance.newPullParser(it)
+                            val xppFactory = XmlPullParserFactory.newInstance()
+                            val xpp = xppFactory.newPullParser()
+                            xpp.setInput(it, "UTF-8")
                             val opfDocument = OpfDocument()
                             opfDocument.loadFromOPF(xpp)
                             val contentEntryVal = ContentEntryWithLanguage()
