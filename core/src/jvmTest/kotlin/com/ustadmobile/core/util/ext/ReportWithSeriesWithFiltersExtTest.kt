@@ -8,7 +8,7 @@ import com.ustadmobile.core.util.UstadTestRule
 import com.ustadmobile.core.util.directActiveDbInstance
 import com.ustadmobile.core.util.directActiveRepoInstance
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.util.test.ext.insertTestStatements
+import com.ustadmobile.util.test.ext.insertTestStatementsForReports
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before
@@ -57,7 +57,7 @@ class ReportWithSeriesWithFiltersExtTest {
                 firstNames = "Bob"
                 lastName = "Jones"
             })
-            repo.insertTestStatements()
+            repo.insertTestStatementsForReports()
         }
     }
 
@@ -147,7 +147,7 @@ class ReportWithSeriesWithFiltersExtTest {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
                 val numberOfActivitiesRecordedForClass = reportList.find {
-                    it.xAxis == "11 06 2019" && it.subgroup == "200" }
+                    it.xAxis == "11/06/2019" && it.subgroup == "200" }
                 Assert.assertEquals("data matches", 13f, numberOfActivitiesRecordedForClass!!.yAxis)
             }
         }
@@ -171,7 +171,7 @@ class ReportWithSeriesWithFiltersExtTest {
             queryList.entries.forEach {
                 val reportList = db.statementDao.getResults(it.value.sqlStr, it.value.queryParams)
                 val avgDurationForWeek09JuneByContent = reportList.find {
-                    it.xAxis == "10 06 2019" && it.subgroup == "23223" }
+                    it.xAxis == "10/06/2019" && it.subgroup == "23223" }
                 Assert.assertEquals("data matches", 212307.0f, avgDurationForWeek09JuneByContent!!.yAxis)
             }
         }

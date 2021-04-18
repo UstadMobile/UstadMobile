@@ -28,30 +28,31 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
 
     @Query("""
             SELECT ClazzWork.*, 
-            
-            (
-                SELECT COUNT(*) FROM ClazzEnrolment WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
-                AND CAST(ClazzEnrolment.clazzEnrolmentActive AS INTEGER) = 1 
-                AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT} 
-            ) as totalStudents, 
-            (
-                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
-                clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-            ) as submittedStudents, 
-            0 as notSubmittedStudents,
-            0 as completedStudents, 
-            (
-                SELECT COUNT(*) FROM ClazzWorkSubmission WHERE 
-                ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
-                AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0
-            ) as markedStudents,
-             0 as firstContentEntryUid,
-             Clazz.clazzTimeZone as clazzTimeZone 
-             FROM ClazzWork 
-             LEFT JOIN Clazz ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
-             WHERE clazzWorkClazzUid = :clazzUid
-             AND (:role = ${ClazzEnrolment.ROLE_TEACHER} OR clazzWorkStartDateTime < :today)
-            AND CAST(clazzWorkActive as INTEGER) = 1 
+                    (SELECT COUNT(*) 
+                        FROM ClazzEnrolment 
+                        WHERE ClazzEnrolment.clazzEnrolmentClazzUid = Clazz.clazzUid 
+                        AND CAST(ClazzEnrolment.clazzEnrolmentActive AS INTEGER) = 1 
+                        AND ClazzEnrolment.clazzEnrolmentRole = ${ClazzEnrolment.ROLE_STUDENT}) 
+                        AS totalStudents, 
+                    (SELECT COUNT(*) 
+                        FROM ClazzWorkSubmission 
+                        WHERE clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid) 
+                        AS submittedStudents, 
+                    0 AS notSubmittedStudents,
+                    0 AS completedStudents, 
+                    (SELECT COUNT(*) 
+                        FROM ClazzWorkSubmission
+                        WHERE ClazzWorkSubmission.clazzWorkSubmissionClazzWorkUid = ClazzWork.clazzWorkUid
+                        AND ClazzWorkSubmission.clazzWorkSubmissionDateTimeMarked > 0) 
+                        AS markedStudents,
+                    0 AS firstContentEntryUid,
+                    Clazz.clazzTimeZone AS clazzTimeZone 
+            FROM ClazzWork 
+                 LEFT JOIN Clazz 
+                 ON Clazz.clazzUid = ClazzWork.clazzWorkClazzUid 
+            WHERE clazzWorkClazzUid = :clazzUid
+            AND (:role = ${ClazzEnrolment.ROLE_TEACHER} OR clazzWorkStartDateTime < :today)
+            AND CAST(clazzWorkActive AS INTEGER) = 1 
             AND ClazzWork.clazzWorkTitle LIKE :searchText 
             ORDER BY CASE(:sortOrder)
                 WHEN $SORT_DEADLINE_ASC THEN ClazzWork.clazzWorkDueDateTime
@@ -192,9 +193,15 @@ abstract class ClazzWorkDao : BaseDao<ClazzWork> {
                 (
                     (
                         SELECT SUM(ContentEntryProgress.contentEntryProgressProgress) 
-                        FROM ContentEntryProgress WHERE
-                        CAST(ContentEntryProgress.contentEntryProgressActive AS INTEGER) = 1
+                        FROM ClazzWorkContentJoin 
+                        LEFT JOIN ContentEntry ON 
+                        ContentEntry.contentEntryUid = ClazzWorkContentJoin.clazzWorkContentJoinContentUid
+                        LEFT JOIN ContentEntryProgress ON 
+                        ContentEntryProgress.contentEntryProgressContentEntryUid = ContentEntry.contentEntryUid
+                        WHERE CAST(ContentEntryProgress.contentEntryProgressActive AS INTEGER) = 1
                         AND ContentEntryProgress.contentEntryProgressPersonUid = Person.personUid
+                        AND ClazzWorkContentJoin.clazzWorkContentJoinClazzWorkUid = ClazzWork.clazzWorkUid
+                        AND CAST(clazzWorkContentJoinInactive AS INTEGER) = 0
                     ) 
                     /
                     (

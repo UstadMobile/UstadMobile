@@ -9,7 +9,6 @@ import com.ustadmobile.core.db.dao.ContentEntryParentChildJoinDao
 import com.ustadmobile.core.db.dao.LanguageDao
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil
-import com.ustadmobile.lib.contentscrapers.LanguageList
 import com.ustadmobile.lib.contentscrapers.ScraperConstants
 import com.ustadmobile.lib.contentscrapers.ShrinkerUtil
 import com.ustadmobile.lib.contentscrapers.UMLogUtil
@@ -89,8 +88,6 @@ class IndexPrathamContentScraper {
         contentParentChildJoinDao = repository!!.contentEntryParentChildJoinDao
         containerDao = repository!!.containerDao
         languageDao = repository!!.languageDao
-
-        LanguageList().addAllLanguages()
 
         val englishLang = ContentScraperUtil.insertOrUpdateLanguageByName(languageDao, "English")
 

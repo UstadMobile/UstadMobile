@@ -21,6 +21,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.rules.TemporaryFolder
 import org.kodein.di.DI
+import org.kodein.di.direct
 import org.kodein.di.instance
 import org.mockito.kotlin.mock
 
@@ -88,7 +89,7 @@ class TestHarContainer {
                     "/com/ustadmobile/core/contentformats/har.zip", ContainerAddOptions(tmpDir.toDoorUri()))
 
             harContainer = HarContainer(container.containerUid, targetEntry,
-                    accountManager.activeAccount, db, context, httpd.localHttpUrl){
+                    accountManager.activeAccount, db, context, httpd.localHttpUrl, di.direct.instance()){
             }
             harContainer?.startingUrlDeferred?.await()
         }

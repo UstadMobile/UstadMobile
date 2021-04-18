@@ -29,6 +29,10 @@
             name="reasonLeavingVisible"
             type="boolean" />
 
+        <variable
+            name="langListVisible"
+            type="boolean" />
+
     </data>
 
     <androidx.core.widget.NestedScrollView
@@ -78,13 +82,14 @@
                 <TextView
                     android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/textView9"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/dimen_8dp"
                     android:layout_marginTop="@dimen/dimen_8dp"
                     android:layout_marginBottom="@dimen/dimen_8dp"
                     android:text="@string/holiday_calendars_desc"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/imageView14"
                     app:layout_constraintTop_toBottomOf="@+id/textView10" />
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -126,13 +131,14 @@
                 <TextView
                     android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/activity_settings2_roles_desc"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/dimen_8dp"
                     android:layout_marginTop="@dimen/dimen_8dp"
                     android:layout_marginBottom="@dimen/dimen_8dp"
                     android:text="@string/roles_setting_desc"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_roles_imageview"
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings2_roles_title" />
             </androidx.constraintlayout.widget.ConstraintLayout>
@@ -175,13 +181,14 @@
                 <TextView
                     android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/activity_settings2_workspace_desc"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/dimen_8dp"
                     android:layout_marginTop="@dimen/dimen_8dp"
                     android:layout_marginBottom="@dimen/dimen_8dp"
                     android:text="@string/manage_site_settings"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_workspace_iv"
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings2_workspace_title" />
 
@@ -218,7 +225,7 @@
                 <TextView
                     android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                     android:id="@+id/activity_settings2_leaving_reason_title"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/dimen_8dp"
                     android:layout_marginTop="@dimen/dimen_8dp"
@@ -229,18 +236,69 @@
                 <TextView
                     android:textAppearance="@style/UmTheme.TextAppearance.Body2"
                     android:id="@+id/activity_settings2_leaving_reason_desc"
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="@dimen/dimen_8dp"
                     android:layout_marginTop="@dimen/dimen_8dp"
                     android:layout_marginBottom="@dimen/dimen_8dp"
                     android:text="@string/leaving_reason_manage"
                     app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toEndOf="@+id/activity_settings2_leaving_reason_iv"
                     app:layout_constraintTop_toBottomOf="@+id/activity_settings2_leaving_reason_title" />
 
             </androidx.constraintlayout.widget.ConstraintLayout>
 
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/activity_settings2_lang_list_cl"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="@dimen/dimen_8dp"
+                android:visibility="@{langListVisible ? View.VISIBLE : View.GONE}"
+                android:background="?android:selectableItemBackground"
+                android:onClick="@{() -> presenter.handleClickLangList()}">
+
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/activity_settings2_lang_list_iv"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:tint="?colorOnIconTint"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintVertical_bias="0.0"
+                    app:srcCompat="@drawable/ic_language_blue_grey_600_24dp" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/activity_settings2_lang_list_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:text="@string/languages"
+                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_lang_list_iv"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    android:id="@+id/activity_settings2_lang_list_desc"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_8dp"
+                    android:layout_marginBottom="@dimen/dimen_8dp"
+                    android:text="@string/languages_description"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toEndOf="@+id/activity_settings2_lang_list_iv"
+                    app:layout_constraintTop_toBottomOf="@+id/activity_settings2_lang_list_title" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>

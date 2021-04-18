@@ -53,7 +53,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 62)
+], version = 64)
 @MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -88,6 +88,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
         verbDao.initPreloadedVerbs()
         reportDao.initPreloadedTemplates()
         leavingReasonDao.initPreloadedLeavingReasons()
+        languageDao.initPreloadedLanguages()
     }
 
     @JsName("networkNodeDao")
@@ -4211,23 +4212,53 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                 }
 
             }
+
+
         }
 
         val MIGRATION_61_62 = object : DoorMigration(61, 62) {
             override fun migrate(database: DoorSqlDatabase) {
-                database.execSQL("""
+
+                database.execSQL("""ALTER TABLE Language 
+                        ADD COLUMN languageActive INTEGER DEFAULT 1 NOT NULL""".trimMargin())
+
+                if (database.dbType() == DoorDbType.POSTGRES) {
+
+                    database.execSQL("""UPDATE Language SET languageActive = true 
+                        WHERE languageActive is NULL""".trimMargin())
+
+                }
+
+
+            }
+        }
+
+        val MIGRATION_62_63 = object: DoorMigration(62, 63) {
+            //Adds LastChangedTime field to all syncable entities so the field will be ready to use
+            //for the new p2p enabled sync systme
+            override fun migrate(database: DoorSqlDatabase) {
+                val fieldType = if (database.dbType() == DoorDbType.SQLITE) {
+                    "INTEGER"
+                } else {
+                    "BIGINT"
+                }
+
+
+                val MIGRATION_63_64 = object : DoorMigration(61, 62) {
+                    override fun migrate(database: DoorSqlDatabase) {
+                        database.execSQL("""
                     ALTER TABLE ClazzLog 
                      ADD COLUMN logDuration INTEGER NOT NULL DEFAULT 0""")
-                database.execSQL("""
+                        database.execSQL("""
                         INSERT INTO TableSyncStatus(tsTableId, tsLastChanged, tsLastSynced)
                                VALUES (${NotificationSetting.TABLE_ID}, 0, 0) 
                     """.trimIndent())
 
-                if(database.dbType() == DoorDbType.POSTGRES) {
-                    database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting (  nsLcb  INTEGER  NOT NULL , nsPcsn  BIGINT  NOT NULL , nsLcsn  BIGINT  NOT NULL , nsPersonUid  BIGINT  NOT NULL , nsType  INTEGER  NOT NULL , nsEntityFilterScope  INTEGER  NOT NULL , nsEntityFilterUid  BIGINT  NOT NULL , nsChannel  INTEGER  NOT NULL , nsParams  TEXT , nsThreshold  FLOAT  NOT NULL , nsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS NotificationSetting_mcsn_seq")
-                    database.execSQL("CREATE SEQUENCE IF NOT EXISTS NotificationSetting_lcsn_seq")
-                    database.execSQL("""
+                        if (database.dbType() == DoorDbType.POSTGRES) {
+                            database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting (  nsLcb  INTEGER  NOT NULL , nsPcsn  BIGINT  NOT NULL , nsLcsn  BIGINT  NOT NULL , nsPersonUid  BIGINT  NOT NULL , nsType  INTEGER  NOT NULL , nsEntityFilterScope  INTEGER  NOT NULL , nsEntityFilterUid  BIGINT  NOT NULL , nsChannel  INTEGER  NOT NULL , nsParams  TEXT , nsThreshold  FLOAT  NOT NULL , nsUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                            database.execSQL("CREATE SEQUENCE IF NOT EXISTS NotificationSetting_mcsn_seq")
+                            database.execSQL("CREATE SEQUENCE IF NOT EXISTS NotificationSetting_lcsn_seq")
+                            database.execSQL("""
                       |CREATE OR REPLACE FUNCTION 
                       | inccsn_271_fn() RETURNS trigger AS ${'$'}${'$'}
                       | BEGIN  
@@ -4246,35 +4277,35 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       | END ${'$'}${'$'}
                       | LANGUAGE plpgsql
                       """.trimMargin())
-                    database.execSQL("""
+                            database.execSQL("""
                       |CREATE TRIGGER inccsn_271_trig 
                       |AFTER UPDATE OR INSERT ON NotificationSetting 
                       |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                       |EXECUTE PROCEDURE inccsn_271_fn()
                       """.trimMargin())
-                    /* START MIGRATION:
-                    _stmt.executeUpdate("DROP FUNCTION IF EXISTS inc_csn_271_fn")
-                    _stmt.executeUpdate("DROP SEQUENCE IF EXISTS spk_seq_271")
-                    END MIGRATION*/
-                    database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("""
+                            /* START MIGRATION:
+                            _stmt.executeUpdate("DROP FUNCTION IF EXISTS inc_csn_271_fn")
+                            _stmt.executeUpdate("DROP SEQUENCE IF EXISTS spk_seq_271")
+                            END MIGRATION*/
+                            database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                            database.execSQL("""
                       |CREATE 
                       | INDEX index_NotificationSetting_trk_clientId_epk_csn 
                       |ON NotificationSetting_trk (clientId, epk, csn)
                       """.trimMargin())
-                    database.execSQL("""
+                            database.execSQL("""
                       |CREATE 
                       |UNIQUE INDEX index_NotificationSetting_trk_epk_clientId 
                       |ON NotificationSetting_trk (epk, clientId)
                       """.trimMargin())
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSettingLastChecked (  nslcNsUid  BIGINT  PRIMARY KEY  NOT NULL , lastCheckTime  BIGINT  NOT NULL )")
-                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry (  fePersonUid  BIGINT  NOT NULL , feTimestamp  BIGINT  NOT NULL , feTitle  TEXT , feDescription  TEXT , feViewDest  TEXT , feEntityUid  BIGINT  NOT NULL , feNsUid  BIGINT  NOT NULL , feUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
-                    database.execSQL("CREATE INDEX index_FeedEntry_fePersonUid ON FeedEntry (fePersonUid)")
-                }else {
-                    database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting (  nsLcb  INTEGER  NOT NULL , nsPcsn  INTEGER  NOT NULL , nsLcsn  INTEGER  NOT NULL , nsPersonUid  INTEGER  NOT NULL , nsType  INTEGER  NOT NULL , nsEntityFilterScope  INTEGER  NOT NULL , nsEntityFilterUid  INTEGER  NOT NULL , nsChannel  INTEGER  NOT NULL , nsParams  TEXT , nsThreshold  REAL  NOT NULL , nsUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                            database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSettingLastChecked (  nslcNsUid  BIGINT  PRIMARY KEY  NOT NULL , lastCheckTime  BIGINT  NOT NULL )")
+                            database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry (  fePersonUid  BIGINT  NOT NULL , feTimestamp  BIGINT  NOT NULL , feTitle  TEXT , feDescription  TEXT , feViewDest  TEXT , feEntityUid  BIGINT  NOT NULL , feNsUid  BIGINT  NOT NULL , feUid  BIGSERIAL  PRIMARY KEY  NOT NULL )")
+                            database.execSQL("CREATE INDEX index_FeedEntry_fePersonUid ON FeedEntry (fePersonUid)")
+                        } else {
+                            database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting (  nsLcb  INTEGER  NOT NULL , nsPcsn  INTEGER  NOT NULL , nsLcsn  INTEGER  NOT NULL , nsPersonUid  INTEGER  NOT NULL , nsType  INTEGER  NOT NULL , nsEntityFilterScope  INTEGER  NOT NULL , nsEntityFilterUid  INTEGER  NOT NULL , nsChannel  INTEGER  NOT NULL , nsParams  TEXT , nsThreshold  REAL  NOT NULL , nsUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
 
-                    database.execSQL("""
+                            database.execSQL("""
                           |CREATE TRIGGER INS_LOC_1077
                           |AFTER INSERT ON NotificationSetting
                           |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0) AND
@@ -4289,7 +4320,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           |    WHERE sCsnTableId = 1077;
                           |END
                           """.trimMargin())
-                    database.execSQL("""
+                            database.execSQL("""
                           |            CREATE TRIGGER INS_PRI_1077
                           |            AFTER INSERT ON NotificationSetting
                           |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1) AND
@@ -4307,7 +4338,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           |SELECT 1077, NEW.nsUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
                           |            END
                           """.trimMargin())
-                    database.execSQL("""
+                            database.execSQL("""
                           |CREATE TRIGGER UPD_LOC_1077
                           |AFTER UPDATE ON NotificationSetting
                           |FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 0)
@@ -4323,7 +4354,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           |    WHERE sCsnTableId = 1077;
                           |END
                           """.trimMargin())
-                    database.execSQL("""
+                            database.execSQL("""
                           |            CREATE TRIGGER UPD_PRI_1077
                           |            AFTER UPDATE ON NotificationSetting
                           |            FOR EACH ROW WHEN (((SELECT CAST(master AS INTEGER) FROM SyncNode) = 1)
@@ -4342,26 +4373,26 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                           |SELECT 1077, NEW.nsUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
                           |            END
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting_trk (  epk  INTEGER NOT NULL, clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL, reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL, pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-                    database.execSQL("""
+                            database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting_trk (  epk  INTEGER NOT NULL, clientId  INTEGER NOT NULL, csn  INTEGER NOT NULL, rx  INTEGER NOT NULL, reqId  INTEGER NOT NULL, ts  INTEGER NOT NULL, pk  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                            database.execSQL("""
                           |CREATE 
                           | INDEX index_NotificationSetting_trk_clientId_epk_csn 
                           |ON NotificationSetting_trk (clientId, epk, csn)
                           """.trimMargin())
-                    database.execSQL("""
+                            database.execSQL("""
                           |CREATE 
                           |UNIQUE INDEX index_NotificationSetting_trk_epk_clientId 
                           |ON NotificationSetting_trk (epk, clientId)
                           """.trimMargin())
-                    database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSettingLastChecked (  nslcNsUid  INTEGER  PRIMARY KEY  NOT NULL , lastCheckTime  INTEGER  NOT NULL )")
+                            database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSettingLastChecked (  nslcNsUid  INTEGER  PRIMARY KEY  NOT NULL , lastCheckTime  INTEGER  NOT NULL )")
 
-                    database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry (  fePersonUid  INTEGER  NOT NULL , feTimestamp  INTEGER  NOT NULL , feTitle  TEXT , feDescription  TEXT , feViewDest  TEXT , feEntityUid  INTEGER  NOT NULL , feNsUid  INTEGER  NOT NULL , feUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
-                    database.execSQL("CREATE INDEX index_FeedEntry_fePersonUid ON FeedEntry (fePersonUid)")
+                            database.execSQL("CREATE TABLE IF NOT EXISTS FeedEntry (  fePersonUid  INTEGER  NOT NULL , feTimestamp  INTEGER  NOT NULL , feTitle  TEXT , feDescription  TEXT , feViewDest  TEXT , feEntityUid  INTEGER  NOT NULL , feNsUid  INTEGER  NOT NULL , feUid  INTEGER  PRIMARY KEY  AUTOINCREMENT  NOT NULL )")
+                            database.execSQL("CREATE INDEX index_FeedEntry_fePersonUid ON FeedEntry (fePersonUid)")
+                        }
+                    }
                 }
+
             }
-        }
-
-
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 

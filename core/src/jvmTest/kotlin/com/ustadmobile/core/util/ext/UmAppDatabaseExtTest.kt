@@ -4,10 +4,16 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultHttpClient
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.lib.db.entities.*
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
+import org.junit.After
 import org.junit.Assert
 import org.junit.Before
 import org.junit.Test
@@ -23,20 +29,39 @@ class UmAppDatabaseExtTest {
 
     private lateinit var mockSystemImpl: UstadMobileSystemImpl
 
+    private lateinit var httpClient: HttpClient
+
+    private lateinit var okHttpClient: OkHttpClient
+
     @Before
     fun setup() {
         db = UmAppDatabase.getInstance(context).also {
             it.clearAllTables()
         }
 
-        repo = db.asRepository(context, "http://localhost/dummy/", "",
-                defaultHttpClient())
+        okHttpClient = OkHttpClient()
+
+        httpClient = HttpClient(OkHttp) {
+            install(JsonFeature)
+            install(HttpTimeout)
+            engine {
+                preconfigured = okHttpClient
+            }
+        }
+
+        repo = db.asRepository(repositoryConfig(context, "http://localhost/dummy/",
+            httpClient, okHttpClient))
 
         mockSystemImpl = mock {
             on { getString(any(), any())}.thenAnswer {
                 "${it.arguments[0]}"
             }
         }
+    }
+
+    @After
+    fun tearDown() {
+        httpClient.close()
     }
 
     @Test

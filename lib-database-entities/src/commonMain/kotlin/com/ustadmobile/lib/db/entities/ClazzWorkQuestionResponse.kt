@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 @SyncableEntity(tableId = ClazzWorkQuestionResponse.TABLE_ID,
@@ -59,6 +56,8 @@ open class ClazzWorkQuestionResponse {
     @LastChangedBy
     var clazzWorkQuestionResponseLCB: Int = 0
 
+    @LastChangedTime
+    var clazzWorkQuestionResponseLct: Long = 0
 
     companion object {
         const val TABLE_ID = 209

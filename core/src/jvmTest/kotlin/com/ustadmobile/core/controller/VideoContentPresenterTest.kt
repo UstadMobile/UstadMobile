@@ -11,10 +11,10 @@ import com.ustadmobile.core.contentformats.xapi.Statement
 import com.ustadmobile.core.contentformats.xapi.endpoints.XapiStatementEndpoint
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.activeRepoInstance
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.VideoPlayerView
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.ext.bindNewSqliteDataSourceIfNotExisting
 import com.ustadmobile.lib.db.entities.Container
@@ -25,7 +25,12 @@ import com.ustadmobile.port.sharedse.contentformats.xapi.StatementDeserializer
 import com.ustadmobile.port.sharedse.contentformats.xapi.StatementSerializer
 import com.ustadmobile.util.test.checkJndiSetup
 import com.ustadmobile.util.test.ext.insertVideoContent
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
+import io.ktor.client.features.json.*
 import kotlinx.coroutines.runBlocking
+import okhttp3.OkHttpClient
 import org.junit.Before
 import org.junit.Test
 import org.kodein.di.*
@@ -71,8 +76,24 @@ class VideoContentPresenterTest {
                     it.preload()
                 })
             }
+
+            bind<HttpClient>() with singleton {
+                HttpClient(OkHttp) {
+                    install(JsonFeature)
+                    install(HttpTimeout)
+                    engine {
+                        preconfigured = instance()
+                    }
+                }
+            }
+
+            bind<OkHttpClient>() with singleton {
+                OkHttpClient()
+            }
+
             bind<UmAppDatabase>(tag = UmAppDatabase.TAG_REPO) with scoped(endpointScope!!).singleton {
-                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository<UmAppDatabase>(Any(), context.url, "", defaultHttpClient(), null))
+                spy(instance<UmAppDatabase>(tag = UmAppDatabase.TAG_DB).asRepository(
+                    repositoryConfig(Any(), context.url, instance(), instance())))
             }
             registerContextTranslator { account: UmAccount -> Endpoint(account.endpointUrl) }
 

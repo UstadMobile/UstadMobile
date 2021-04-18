@@ -20,7 +20,6 @@ import org.junit.Test
 
 
 @AdbScreenRecord("Redirect screen Test")
-@ExperimentalStdlibApi
 class RedirectFragmentTest {
 
     @JvmField

@@ -25,6 +25,14 @@ kotlin {
 
     sourceSets {
 
+        commonMain {
+            dependencies {
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-json:$version_ktor"
+                implementation "io.ktor:ktor-io:$version_ktor"
+            }
+        }
+
         jvmMain {
 
             kotlin.srcDir("build/generated/source/door")
@@ -90,8 +98,6 @@ kotlin {
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
                 implementation "com.squareup.okhttp3:mockwebserver:$version_mockwebserver"
 
-                implementation "io.ktor:ktor-client-core:$version_ktor"
-                implementation "io.ktor:ktor-client-json:$version_ktor"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
                 implementation "io.ktor:ktor-client-gson:$version_ktor"
 

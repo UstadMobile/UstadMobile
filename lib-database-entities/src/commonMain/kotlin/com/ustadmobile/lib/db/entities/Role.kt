@@ -4,10 +4,7 @@ import androidx.room.Entity
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import com.ustadmobile.door.ClientSyncManager
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 
@@ -48,6 +45,9 @@ open class Role() {
 
     @LastChangedBy
     var roleLastChangedBy: Int = 0
+
+    @LastChangedTime
+    var roleLct: Long = 0
 
     //bit flags made of up PERMISSION_ constants
     var rolePermissions: Long = 0

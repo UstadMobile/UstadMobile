@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import kotlinx.serialization.Serializable
 
 /**
@@ -74,6 +71,9 @@ open class ClazzLog()  {
 
     @LastChangedBy
     var clazzLogLCB: Int = 0
+
+    @LastChangedTime
+    var clazzLogLastChangedTime: Long = 0
 
     constructor(clazzLogUid: Long, clazzUid: Long, logDate: Long, scheduleUid: Long): this() {
         this.clazzLogUid = clazzLogUid

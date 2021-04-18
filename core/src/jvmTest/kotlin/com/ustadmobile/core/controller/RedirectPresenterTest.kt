@@ -57,10 +57,10 @@ class RedirectPresenterTest {
 
     @Test
     fun givenNextArgProvied_whenOnCreateCalled_thenShouldGoToNextDest() {
-        mPresenter = RedirectPresenter(context, mapOf(ARG_NEXT to "${ContentEntry2DetailView.VIEW_NAME}?entityUid=42"),
+        mPresenter = RedirectPresenter(context, mapOf(ARG_NEXT to "${ContentEntryDetailView.VIEW_NAME}?entityUid=42"),
                 mockedView, di)
         mPresenter.onCreate(null)
-        verify(mockedView).showNextScreen(eq(ContentEntry2DetailView.VIEW_NAME),
+        verify(mockedView).showNextScreen(eq(ContentEntryDetailView.VIEW_NAME),
             eq(mapOf("entityUid" to "42")))
     }
 

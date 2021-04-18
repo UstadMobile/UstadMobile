@@ -413,11 +413,6 @@ class EpubContentActivity : UstadBaseActivity(),EpubContentView, AdapterView.OnI
         setSupportActionBar(mBinding.root.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
 
-        if (!UstadMobileSystemImpl.instance.getAppConfigBoolean(AppConfig.KEY_EPUB_TOC_ENABLED,
-                        this)) {
-            mBinding.containerDrawerLayout.setDrawerLockMode(DrawerLayout.LOCK_MODE_LOCKED_CLOSED)
-        }
-
         mContentPagerAdapter = EpubContentPagerAdapter(mScrollDownInterface)
         recyclerViewLinearLayout = NoFocusScrollLinearLayoutManager(this)
 

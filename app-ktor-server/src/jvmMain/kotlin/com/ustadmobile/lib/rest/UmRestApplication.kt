@@ -19,6 +19,7 @@ import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.DiTag.TAG_CONTEXT_DATA_ROOT
 import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.rest.ext.bindHostDatabase
@@ -27,6 +28,9 @@ import com.ustadmobile.lib.util.sanitizeDbNameFromUrl
 import io.ktor.application.Application
 import io.ktor.application.ApplicationCall
 import io.ktor.application.install
+import io.ktor.client.*
+import io.ktor.client.engine.okhttp.*
+import io.ktor.client.features.*
 import io.ktor.features.CORS
 import io.ktor.features.CallLogging
 import io.ktor.features.ContentNegotiation
@@ -37,6 +41,8 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpMethod
 import io.ktor.request.header
 import io.ktor.routing.Routing
+import okhttp3.Dispatcher
+import okhttp3.OkHttpClient
 import org.kodein.di.*
 import org.kodein.di.ktor.DIFeature
 import org.quartz.Job
@@ -48,8 +54,10 @@ import org.quartz.impl.StdSchedulerFactory
 import java.io.File
 import java.nio.file.Files
 import java.util.*
+import java.util.concurrent.TimeUnit
 import javax.naming.InitialContext
 import javax.sql.DataSource
+import io.ktor.client.features.json.JsonFeature
 
 const val TAG_UPLOAD_DIR = 10
 
@@ -98,8 +106,6 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
     val tmpRootDir = Files.createTempDirectory("upload").toFile()
 
-    val autoCreateDb = environment.config.propertyOrNull("ktor.ustad.autocreatedb")?.getString()?.toBoolean() ?: false
-    println("auto create = $autoCreateDb")
     val dbMode = dbModeOverride ?:
         environment.config.propertyOrNull("ktor.ustad.dbmode")?.getString() ?: CONF_DBMODE_SINGLETON
     val dataDirPath = File(environment.config.propertyOrNull("ktor.ustad.datadir")?.getString() ?: "data")
@@ -147,10 +153,15 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             val dbHostName = context.identifier(dbMode, singletonDbName)
             val appConfig = environment.config
             InitialContext().bindHostDatabase(dbHostName, Properties().apply {
-                setProperty("driver", appConfig.property("ktor.database.driver").getString())
-                setProperty("url", appConfig.property("ktor.database.url").getString())
-                setProperty("user", appConfig.property("ktor.database.user").getString())
-                setProperty("password", appConfig.property("ktor.database.password").getString())
+                setProperty("driver",
+                    appConfig.propertyOrNull("ktor.database.driver")?.getString() ?: "org.sqlite.JDBC")
+                setProperty("url",
+                    appConfig.propertyOrNull("ktor.database.url")?.getString()
+                        ?: "jdbc:sqlite:data/singleton/UmAppDatabase.sqlite?journal_mode=WAL&synchronous=OFF&busy_timeout=30000")
+                setProperty("user",
+                    appConfig.propertyOrNull("ktor.database.user")?.getString() ?: "")
+                setProperty("password",
+                    appConfig.propertyOrNull("ktor.database.password")?.getString() ?: "")
             })
 
             UmAppDatabase.getInstance(Any(), dbHostName)
@@ -160,13 +171,37 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             ServerUpdateNotificationManagerImpl()
         }
 
+        bind<OkHttpClient>() with singleton {
+            OkHttpClient.Builder()
+                .dispatcher(Dispatcher().also {
+                    it.maxRequests = 30
+                    it.maxRequestsPerHost = 10
+                })
+                .connectTimeout(45, TimeUnit.SECONDS)
+                .readTimeout(45, TimeUnit.SECONDS)
+                .build()
+        }
+
+
+        bind<HttpClient>() with singleton {
+            HttpClient(OkHttp){
+                install(JsonFeature)
+                install(HttpTimeout)
+
+                engine {
+                    preconfigured = instance()
+                }
+            }
+        }
+
         bind<UmAppDatabase>(tag = DoorTag.TAG_REPO) with scoped(EndpointScope.Default).singleton {
             val db = instance<UmAppDatabase>(tag = DoorTag.TAG_DB)
-            val attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
-                UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME)
-            val repo = db.asRepository(Any(), "http://localhost/",
-                    "", defaultHttpClient(), attachmentsDir.absolutePath,
-                    instance(), false)
+            val repo = db.asRepository(repositoryConfig(Any(), "http://localhost/",
+                instance(), instance()) {
+                attachmentsDir = File(instance<File>(tag = TAG_CONTEXT_DATA_ROOT),
+                    UstadMobileSystemCommon.SUBDIR_ATTACHMENTS_NAME).absolutePath
+                updateNotificationManager = instance()
+            })
             ServerChangeLogMonitor(db, repo as DoorDatabaseRepository)
             repo.preload()
             db.ktorInitDbWithRepo(repo, instance<File>(tag = TAG_CONTEXT_DATA_ROOT).absolutePath)

@@ -16,7 +16,6 @@ import com.ustadmobile.port.android.screen.ClazzEnrolmentListScreen
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import com.ustadmobile.util.test.ext.insertTestStatements
 import kotlinx.coroutines.runBlocking
 import org.junit.Assert
 import org.junit.Before

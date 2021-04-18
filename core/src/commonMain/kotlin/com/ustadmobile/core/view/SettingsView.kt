@@ -6,6 +6,7 @@ interface SettingsView : UstadView {
     var holidayCalendarVisible: Boolean
     var rolesVisible: Boolean
     var reasonLeavingVisible: Boolean
+    var langListVisible: Boolean
 
     companion object {
         val VIEW_NAME = "SettingsFromToolbar"

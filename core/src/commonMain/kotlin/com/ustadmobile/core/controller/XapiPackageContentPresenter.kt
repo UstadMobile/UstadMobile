@@ -13,6 +13,7 @@ import com.ustadmobile.core.util.ext.toXapiGroupJsonObject
 import com.ustadmobile.core.view.ContainerMounter
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.core.view.XapiPackageContentView
+import com.ustadmobile.door.util.randomUuid
 import com.ustadmobile.xmlpullparserkmp.XmlPullParserFactory
 import com.ustadmobile.xmlpullparserkmp.setInputString
 import io.ktor.client.*
@@ -88,7 +89,7 @@ class XapiPackageContentPresenter(context: Any, args: Map<String, String>, view:
                     "endpoint" to UMFileUtil.resolveLink(mountedPath,
                             "/${UMURLEncoder.encodeUTF8(activeEndpoint)}/xapi/$contentEntryUid/"),
                     "auth" to "OjFjMGY4NTYxNzUwOGI4YWY0NjFkNzU5MWUxMzE1ZGQ1",
-                    "registration" to UMUUID.randomUUID().toString(),
+                    "registration" to randomUuid().toString(),
                     "activity_id" to (tinCanXml?.launchActivity?.id ?: "xapi_id"))
             if(launchHref != null) {
                 val launchUrl = UMFileUtil.joinPaths(mountedPath, launchHref) + "?"  +

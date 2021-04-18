@@ -84,7 +84,6 @@ class AsbScraper {
 
         val containerDao = repository.containerDao
 
-        LanguageList().addAllLanguages()
 
         val url = africanStoryBookUrl
 

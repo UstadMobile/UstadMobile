@@ -20,6 +20,10 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.port.sharedse.view.DownloadDialogView
 import com.ustadmobile.sharedse.controller.DownloadDialogPresenter
+import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CANCEL
+import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_CONTINUE
+import com.ustadmobile.sharedse.controller.DownloadDialogPresenter.Companion.STACKED_BUTTON_PAUSE
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.kodein.di.instance
@@ -53,7 +57,7 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     private lateinit var storageDirs: List<UMStorageDir>
 
-    internal var viewIdMap = HashMap<Int, Int>()
+    //internal var viewIdMap = HashMap<Int, Int>()
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
         val inflater = requireContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
@@ -79,16 +83,16 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
         wifiOnlyHolder.setOnClickListener(this)
 
         //mapping presenter constants to view ids
-        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_PAUSE] = R.id.action_btn_pause_download
-        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CANCEL] = R.id.action_btn_cancel_download
-        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CONTINUE] = R.id.action_btn_continue_download
+//        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_PAUSE] = R.id.action_btn_pause_download
+//        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CANCEL] = R.id.action_btn_cancel_download
+//        viewIdMap[DownloadDialogPresenter.STACKED_BUTTON_CONTINUE] = R.id.action_btn_continue_download
 
 
         mPresenter = DownloadDialogPresenter(context as Context, bundleToMap(arguments),
                 this@DownloadDialogFragment, di, this).also {
             it.onCreate(null)
 
-            GlobalScope.launch {
+            GlobalScope.launch(Dispatchers.Main) {
                 showStorageOptions()
             }
         }
@@ -145,7 +149,9 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     override fun setStackedOptions(optionIds: IntArray, optionTexts: Array<String>) {
         for (i in optionIds.indices) {
-            val mStackedButton = rootView.findViewById<Button>(viewIdMap[optionIds[i]]!!)
+            val viewId = STACKED_BUTTON_ANDROID_ID_TO_PRESENTER_ID_MAP.entries.find { it.value == i }?.key
+                ?: throw IllegalArgumentException("setStackOptions: cant find view id $i")
+            val mStackedButton = rootView.findViewById<Button>(viewId)
             mStackedButton.text = optionTexts[i]
             mStackedButton.setOnClickListener(this)
         }
@@ -183,8 +189,10 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     override fun onClick(stackedButton: View) {
         val viewId = stackedButton.id
-        if (viewId != R.id.wifi_only_option_holder && viewId != R.id.use_sdcard_option_holder) {
-            mPresenter?.handleClickStackedButton(viewId)
+        if (viewId in STACKED_BUTTON_ANDROID_ID_TO_PRESENTER_ID_MAP.keys) {
+            STACKED_BUTTON_ANDROID_ID_TO_PRESENTER_ID_MAP.get(viewId)?.let { presenterButtonId ->
+                mPresenter?.handleClickStackedButton(presenterButtonId)
+            }
         } else if (viewId == R.id.wifi_only_option_holder) {
             val checkboxState = !wifiOnlyView.isChecked
             wifiOnlyView.isChecked = checkboxState
@@ -229,5 +237,13 @@ class DownloadDialogFragment : UstadDialogFragment(), DownloadDialogView,
 
     override fun onNothingSelected(parent: AdapterView<*>) {
         mPresenter?.handleStorageOptionSelection(storageDirs[0])
+    }
+
+    companion object {
+        val STACKED_BUTTON_ANDROID_ID_TO_PRESENTER_ID_MAP = mapOf(
+            R.id.action_btn_pause_download to STACKED_BUTTON_PAUSE,
+            R.id.action_btn_cancel_download to STACKED_BUTTON_CANCEL,
+            R.id.action_btn_continue_download to STACKED_BUTTON_CONTINUE
+        )
     }
 }

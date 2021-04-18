@@ -285,7 +285,10 @@ class DownloadDialogPresenter(context: Any,
                     containerDownloadManager.pause(currentDownloadJobItemVal.djiDjUid)
                 }
 
-                //The continue button will do NOTHING - the download is already running
+                //If the download is already running, this will have no effect
+                STACKED_BUTTON_CONTINUE -> GlobalScope.launch {
+                    containerDownloadManager.enqueue(currentDownloadJobItemVal.djiDjUid)
+                }
 
                 STACKED_BUTTON_CANCEL -> GlobalScope.launch {
                     containerDownloadManager.cancel(currentDownloadJobItemVal.djiDjUid)
@@ -293,10 +296,7 @@ class DownloadDialogPresenter(context: Any,
             }
 
             dismissDialog()
-        }else {
-            //something is wrong - we should not have been able to get here...
         }
-
     }
 
     private fun dismissDialog() {
