@@ -10,6 +10,7 @@ import androidx.databinding.BindingAdapter
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 import com.toughra.ustadmobile.R
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.model.BitmaskFlag
 import com.ustadmobile.core.util.MessageIdOption
@@ -19,6 +20,10 @@ import java.util.*
 import com.soywiz.klock.DateFormat as KlockDateFormat
 import com.ustadmobile.core.util.ext.roleToString
 import com.ustadmobile.core.util.ext.outcomeToString
+import kotlinx.serialization.builtins.MapSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 
 @BindingAdapter("textMessageId")
@@ -360,6 +365,19 @@ fun TextView.setDurationMinutesAndSeconds(duration: Long){
 
 }
 
+@BindingAdapter("countryName")
+fun TextView.setCountryName(code: String){
+    val locale = UstadMobileSystemImpl.instance.getDisplayedLocale(context)
+    var json = ""
+    try {
+        json = context.assets.open("countrynames/${locale}.json")
+                .bufferedReader().use { it.readText() }
+    }catch (io: IOException){
+
+    }
+    val countryMap = Json.decodeFromString(MapSerializer(String.serializer(), String.serializer()), json)
+    text = countryMap[code.toUpperCase()] ?: ""
+}
 
 @BindingAdapter("isContentComplete")
 fun TextView.setContentComplete(person: PersonWithSessionsDisplay){

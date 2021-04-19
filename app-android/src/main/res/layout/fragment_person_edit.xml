@@ -289,11 +289,11 @@
 
             <com.google.android.material.textfield.TextInputLayout
                 android:id="@+id/country_textinputlayout"
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.ExposedDropdownMenu"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dimen_16dp"
-                android:layout_marginTop="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
                 android:layout_marginEnd="@dimen/dimen_16dp"
                 app:hintEnabled="true"
                 app:errorTextColor="?colorError"
@@ -309,6 +309,7 @@
                     android:id="@+id/country_value"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    app:countryName="@{person.personCountry}"
                     android:hint="@string/country" />
 
             </com.google.android.material.textfield.TextInputLayout>

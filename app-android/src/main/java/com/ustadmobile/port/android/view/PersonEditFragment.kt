@@ -25,7 +25,6 @@ import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzEnrolmentEditView
-import com.ustadmobile.core.view.ClazzList2View
 import com.ustadmobile.core.view.ClazzList2View.Companion.ARG_FILTER_EXCLUDE_SELECTED_CLASS_LIST
 import com.ustadmobile.core.view.ClazzMemberListView.Companion.ARG_HIDE_CLAZZES
 import com.ustadmobile.core.view.PersonEditView
@@ -40,7 +39,6 @@ import com.ustadmobile.port.android.view.binding.ImageViewLifecycleObserver2
 import com.ustadmobile.port.android.view.ext.navigateToEditEntity
 import com.ustadmobile.port.android.view.ext.navigateToPickEntityFromList
 import com.ustadmobile.port.android.view.util.ListHeaderRecyclerViewAdapter
-import kotlinx.coroutines.runBlocking
 import org.kodein.di.direct
 import org.kodein.di.instance
 import java.io.File
@@ -177,6 +175,7 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             // a databinding problem
             mBinding?.genderOptions = genderOptions
             mBinding?.connectivityStatusOptions = connectivityStatusOptions
+
             loading = false
         }
 

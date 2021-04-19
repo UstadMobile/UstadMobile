@@ -473,7 +473,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginStart="@dimen/dimen_8dp"
                 android:layout_marginTop="@dimen/dimen_10dp"
-                android:text="@{person.username}"
+                app:countryName="@{person.personCountry}"
                 tools:text="United Arab Emirates"
                 app:layout_constraintStart_toEndOf="@+id/fragment_person_detail_country_imageview"
                 app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_username_barrier" />
