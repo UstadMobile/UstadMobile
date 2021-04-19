@@ -78,8 +78,6 @@ open class Person() {
 
     var personAddress: String? = null
 
-    var personCountry: String? = null
-
     /**
      * The ID given to the person by their organization
      */
@@ -99,6 +97,8 @@ open class Person() {
 
     @LastChangedTime
     var personLct: Long = 0
+
+    var personCountry: String? = null
 
     fun fullName():String{
         var f = ""

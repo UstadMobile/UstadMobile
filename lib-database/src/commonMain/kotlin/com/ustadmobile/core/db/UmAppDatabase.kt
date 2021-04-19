@@ -53,7 +53,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 65)
+], version = 66)
 @MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -4220,18 +4220,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         val MIGRATION_61_62 = object : DoorMigration(61, 62) {
             override fun migrate(database: DoorSqlDatabase) {
-
-                database.execSQL("""ALTER TABLE Language 
-                        ADD COLUMN languageActive INTEGER DEFAULT 1 NOT NULL""".trimMargin())
-
                 if (database.dbType() == DoorDbType.POSTGRES) {
-
-                    database.execSQL("""UPDATE Language SET languageActive = true 
-                        WHERE languageActive is NULL""".trimMargin())
-
+                    database.execSQL("""ALTER TABLE Language 
+                        ADD COLUMN languageActive BOOL DEFAULT FALSE NOT NULL""")
+                    database.execSQL("""UPDATE Language SET languageActive = true""")
+                }else {
+                    database.execSQL("""ALTER TABLE Language 
+                        ADD COLUMN languageActive INTEGER DEFAULT 0 NOT NULL""")
                 }
-
-
             }
         }
 
@@ -4307,8 +4303,14 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
             }
         }
 
+        val MIGRATION_63_64 = object: DoorMigration(63, 64) {
+            override fun migrate(database: DoorSqlDatabase) {
+                database.execSQL("ALTER TABLE Person ADD COLUMN personCountry TEXT")
+            }
+        }
 
-        val MIGRATION_63_64 = object : DoorMigration(63, 64) {
+
+        val MIGRATION_64_65 = object : DoorMigration(64, 65) {
             override fun migrate(database: DoorSqlDatabase) {
 
                 database.execSQL("""
@@ -4355,10 +4357,6 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                       |FOR EACH ROW WHEN (pg_trigger_depth() = 0) 
                       |EXECUTE PROCEDURE inccsn_271_fn()
                       """.trimMargin())
-                    /* START MIGRATION:
-                    database.execSQL("DROP FUNCTION IF EXISTS inc_csn_271_fn")
-                    database.execSQL("DROP SEQUENCE IF EXISTS spk_seq_271")
-                    END MIGRATION*/
                     database.execSQL("CREATE TABLE IF NOT EXISTS NotificationSetting_trk (  epk  BIGINT , clientId  INTEGER , csn  INTEGER , rx  BOOL , reqId  INTEGER , ts  BIGINT , pk  BIGSERIAL  PRIMARY KEY  NOT NULL )")
                     database.execSQL("""
                       |CREATE 
@@ -4465,12 +4463,9 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
         }
 
-        val MIGRATION_64_65 = object: DoorMigration(64, 65) {
+        val MIGRATION_65_66 = object: DoorMigration(65, 66) {
             override fun migrate(database: DoorSqlDatabase) {
 
-                database.execSQL("""
-                    ALTER TABLE Person 
-                        ADD COLUMN personCountry TEXT""".trimMargin())
 
                 if (database.dbType() == DoorDbType.POSTGRES) {
 
@@ -4518,11 +4513,11 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
           |UNIQUE INDEX index_PersonConnectivity_trk_epk_clientId 
           |ON PersonConnectivity_trk (epk, clientId)
           """.trimMargin())
-                    
-                    
+
+
 
                 }else if(database.dbType() == DoorDbType.SQLITE){
-                    
+
                     database.execSQL("""
                         CREATE TABLE IF NOT EXISTS PersonConnectivity (`pcUid` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `pcPersonUid` INTEGER NOT NULL, `pcConType` INTEGER NOT NULL, `pcConStatus` INTEGER NOT NULL, `pcMasterChangeSeqNum` INTEGER NOT NULL, `pcLocalChangeSeqNum` INTEGER NOT NULL, `pcLastChangedBy` INTEGER NOT NULL, `pcLct` INTEGER NOT NULL)
                     """.trimIndent())
@@ -4595,12 +4590,12 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
           |SELECT 153, NEW.pcUid, 0, (strftime('%s','now') * 1000) + ((strftime('%f','now') * 1000) % 1000);
           |            END
           """.trimMargin())
-                    
+
                     database.execSQL("CREATE TABLE IF NOT EXISTS PersonConnectivity_trk (`pk` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `epk` INTEGER NOT NULL, `clientId` INTEGER NOT NULL, `csn` INTEGER NOT NULL, `rx` INTEGER NOT NULL, `reqId` INTEGER NOT NULL, `ts` INTEGER NOT NULL)")
                     database.execSQL("CREATE INDEX IF NOT EXISTS `index_PersonConnectivity_trk_clientId_epk_csn` ON PersonConnectivity_trk (`clientId`, `epk`, `csn`)")
                     database.execSQL( "CREATE UNIQUE INDEX IF NOT EXISTS `index_PersonConnectivity_trk_epk_clientId` ON PersonConnectivity_trk (`epk`, `clientId`)")
-                            
-                    
+
+
                 }
 
 
