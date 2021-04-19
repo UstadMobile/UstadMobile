@@ -548,7 +548,13 @@
     <string name="class_id">Class ID</string>
     <string name="gender_literal" value="306">Gender</string>
     <string name="country">Country</string>
-    <string name="connectivity_status">Connectivity status</string>
+    <string name="connectivity">Connectivity</string>
+    <string name="home_connectivity_status">Home internet access</string>
+    <string name="mobile_connectivity_status">Mobile internet access</string>
+    <string name="connectivity_limited">Limited - I avoid downloading too much</string>
+    <string name="connectivity_full">Full - I download as much as I want</string>
+    <string name="prefer_not_to_say">Prefer not to say</string>
+
     <!--
     SEL = Social Emotional Learning
     -->
@@ -985,10 +991,6 @@ Content is provided under license by external content providers. Ustad Mobile, u
     <string name="video">Video</string>
 
     <string name="content_editor_create_new_category">New folder</string>
-
-    <string name="content_pieces_completed">Content pieces completed</string>
-
-    <string name="content_usage_duration">Content usage duration</string>
 
     <string name="manage_download">Manage download</string>
 
