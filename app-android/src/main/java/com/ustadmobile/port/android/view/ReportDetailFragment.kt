@@ -63,7 +63,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
 
     private var chartAdapter: RecyclerViewChartAdapter? = null
 
-    private var mergeAdapter: MergeAdapter? = null
+    private var mergeAdapter: ConcatAdapter? = null
 
     private var reportRecyclerView: RecyclerView? = null
 
@@ -140,7 +140,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
                               val dbRepo: UmAppDatabase?,
                               val lifecycleOwner: LifecycleOwner): Observer<PagedList<StatementEntityWithDisplayDetails>> {
 
-        val adapter = MergeAdapter(seriesHeaderAdapter, statementAdapter)
+        val adapter = ConcatAdapter(seriesHeaderAdapter, statementAdapter)
 
         private var currentLiveData: LiveData<PagedList<StatementEntityWithDisplayDetails>>? = null
 
@@ -222,7 +222,7 @@ class ReportDetailFragment : UstadDetailFragment<ReportWithSeriesWithFilters>(),
         reportRecyclerView = rootView.findViewById(R.id.fragment_detail_report_list)
         chartAdapter = RecyclerViewChartAdapter(this, null)
 
-        mergeAdapter = MergeAdapter(chartAdapter)
+        mergeAdapter = ConcatAdapter(chartAdapter)
         reportRecyclerView?.adapter = mergeAdapter
         reportRecyclerView?.layoutManager = LinearLayoutManager(requireContext())
 

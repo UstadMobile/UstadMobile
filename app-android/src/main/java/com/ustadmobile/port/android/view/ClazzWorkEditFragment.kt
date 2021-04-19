@@ -19,7 +19,6 @@ import com.ustadmobile.core.controller.ClazzWorkEditPresenter
 import com.ustadmobile.core.controller.ContentEntryListItemListener
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.observeResult
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkEditView
@@ -68,9 +67,6 @@ class ClazzWorkEditFragment: UstadEditFragment<ClazzWork>(), ClazzWorkEditView,
             holder.binding.contentEntry = getItem(position)
         }
     }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     var mBinding: FragmentClazzWorkEditBinding? = null
 

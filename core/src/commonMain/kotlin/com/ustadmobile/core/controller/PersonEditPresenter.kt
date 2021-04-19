@@ -1,7 +1,6 @@
 package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
-import com.soywiz.klock.until
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.AppConfig
@@ -10,8 +9,8 @@ import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.schedule.age
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.MessageIdOption
+import com.ustadmobile.core.util.ext.createPersonGroupAndMemberWithEnrolment
 import com.ustadmobile.core.util.ext.insertPersonAndGroup
-import com.ustadmobile.core.util.ext.enrolPersonIntoClazzAtLocalTimezone
 import com.ustadmobile.core.util.ext.putEntityAsJson
 import com.ustadmobile.core.util.safeParse
 import com.ustadmobile.core.view.ContentEntryListTabsView
@@ -24,13 +23,11 @@ import com.ustadmobile.door.DoorLifecycleOwner
 import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.lib.db.entities.*
-import com.ustadmobile.lib.util.getSystemTimeInMillis
 import io.ktor.client.features.json.*
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.Json
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -55,23 +52,24 @@ class PersonEditPresenter(context: Any,
 
     private var regViaLink: Boolean = false
 
-    private val clazzMemberJoinEditHelper =
-            DefaultOneToManyJoinEditHelper(ClazzMemberWithClazz::clazzMemberUid,
-            "state_ClazzMemberWithClazz_list", ClazzMemberWithClazz.serializer().list,
-            ClazzMemberWithClazz.serializer().list, this, ClazzMemberWithClazz::class) { clazzMemberUid = it }
+    private val clazzEnrolmentWithClazzJoinEditHelper =
+            DefaultOneToManyJoinEditHelper(ClazzEnrolmentWithClazz::clazzEnrolmentUid,
+            "state_ClazzMemberWithClazz_list",
+                ListSerializer(ClazzEnrolmentWithClazz.serializer()),
+            ListSerializer(ClazzEnrolmentWithClazz.serializer()), this, ClazzEnrolmentWithClazz::class) { clazzEnrolmentUid = it }
 
-    fun handleAddOrEditClazzMemberWithClazz(clazzMemberWithClazz: ClazzMemberWithClazz) {
-        clazzMemberJoinEditHelper.onEditResult(clazzMemberWithClazz)
-    }
-
-    fun handleClickRemovePersonFromClazz(clazzMemberWithClazz: ClazzMemberWithClazz) {
-        clazzMemberJoinEditHelper.onDeactivateEntity(clazzMemberWithClazz)
+    fun handleAddOrEditClazzMemberWithClazz(clazzEnrolmentWithClazz: ClazzEnrolmentWithClazz) {
+        GlobalScope.launch(doorMainDispatcher()) {
+            clazzEnrolmentWithClazz.clazz = repo.clazzDao.findByUidAsync(clazzEnrolmentWithClazz.clazzEnrolmentClazzUid)
+            clazzEnrolmentWithClazzJoinEditHelper.onEditResult(clazzEnrolmentWithClazz)
+        }
     }
 
     private val rolesAndPermissionEditHelper = DefaultOneToManyJoinEditHelper<EntityRoleWithNameAndRole>(
             EntityRoleWithNameAndRole::erUid,
-            "state_EntityRoleWithNameAndRole_list", EntityRoleWithNameAndRole.serializer().list,
-            EntityRoleWithNameAndRole.serializer().list, this, EntityRoleWithNameAndRole::class) { erUid = it }
+            "state_EntityRoleWithNameAndRole_list",
+            ListSerializer(EntityRoleWithNameAndRole.serializer()),
+        ListSerializer(EntityRoleWithNameAndRole.serializer()), this, EntityRoleWithNameAndRole::class) { erUid = it }
 
     fun handleAddOrEditRoleAndPermission(entityRoleWithNameAndRole: EntityRoleWithNameAndRole) {
         rolesAndPermissionEditHelper.onEditResult(entityRoleWithNameAndRole)
@@ -87,7 +85,7 @@ class PersonEditPresenter(context: Any,
         view.genderOptions = listOf(MessageIdOption(MessageID.female, context, Person.GENDER_FEMALE),
                 MessageIdOption(MessageID.male, context, Person.GENDER_MALE),
                 MessageIdOption(MessageID.other, context, Person.GENDER_OTHER))
-        view.clazzList = clazzMemberJoinEditHelper.liveList
+        view.clazzList = clazzEnrolmentWithClazzJoinEditHelper.liveList
 
         view.rolesAndPermissionsList = rolesAndPermissionEditHelper.liveList
 
@@ -120,9 +118,9 @@ class PersonEditPresenter(context: Any,
         } ?: PersonPicture()
 
         val clazzMemberWithClazzList = withTimeoutOrNull(2000) {
-            db.takeIf { entityUid != 0L }?.clazzMemberDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid, getSystemTimeInMillis())
+            db.takeIf { entityUid != 0L }?.clazzEnrolmentDao?.findAllClazzesByPersonWithClazzAsListAsync(entityUid)
         } ?: listOf()
-        clazzMemberJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
+        clazzEnrolmentWithClazzJoinEditHelper.liveList.sendValue(clazzMemberWithClazzList)
 
 
         val rolesAndPermissionList = withTimeoutOrNull(2000){
@@ -179,7 +177,9 @@ class PersonEditPresenter(context: Any,
             passwordError != null ||
             confirmError != null ||
             dateOfBirthError != null ||
-            noMatchPasswordError != null
+            noMatchPasswordError != null ||
+                    firstNameError != null ||
+                    lastNameError != null
 
     override fun handleClickSave(entity: PersonWithAccount) {
         view.loading = true
@@ -191,9 +191,20 @@ class PersonEditPresenter(context: Any,
             view.confirmError = null
             view.dateOfBirthError = null
             view.noMatchPasswordError = null
+            view.firstNameError = null
+            view.lastNameError = null
+
+            val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
+            view.takeIf { entity.firstNames.isNullOrEmpty() }?.firstNameError = requiredFieldMessage
+            view.takeIf { entity.lastName.isNullOrEmpty() }?.lastNameError = requiredFieldMessage
+
+            if(view.hasErrors()) {
+                view.loading = false
+                view.fieldsEnabled = true
+                return@launch
+            }
 
             if(registrationMode) {
-                val requiredFieldMessage = impl.getString(MessageID.field_required_prompt, context)
 
                 view.takeIf { entity.username.isNullOrEmpty() }?.usernameError = requiredFieldMessage
                 view.takeIf { entity.newPassword.isNullOrEmpty() }?.passwordError = requiredFieldMessage
@@ -263,15 +274,14 @@ class PersonEditPresenter(context: Any,
                 repo.entityRoleDao.deactivateByUids(
                         rolesAndPermissionEditHelper.primaryKeysToDeactivate)
 
-                //Insert any Clazz enrollments
-                clazzMemberJoinEditHelper.entitiesToInsert.forEach {
-                    repo.enrolPersonIntoClazzAtLocalTimezone(entity, it.clazzMemberClazzUid,
-                            it.clazzMemberRole)
+                //Insert any Clazz Enrolments
+                clazzEnrolmentWithClazzJoinEditHelper.entitiesToInsert.forEach {
+                    // if new person, add the personUid
+                    it.clazzEnrolmentPersonUid = entity.personUid
+                    // remove fake pk
+                    it.clazzEnrolmentUid = 0
+                    repo.createPersonGroupAndMemberWithEnrolment(it)
                 }
-                //Update any clazz enrollments
-                repo.clazzMemberDao.updateDateLeft(clazzMemberJoinEditHelper.primaryKeysToDeactivate,
-                        getSystemTimeInMillis())
-
 
                 val personPictureVal = view.personPicture
                 if(personPictureVal != null) {
@@ -284,7 +294,15 @@ class PersonEditPresenter(context: Any,
                     }
                 }
 
-                onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)
+                //Handle the following scenario: ClazzMemberList (user selects to add a student to enrol),
+                // PersonList, PersonEdit, EnrolmentEdit
+                if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
+                    systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
+                            arguments.plus(UstadView.ARG_PERSON_UID to entity.personUid.toString()),
+                            context)
+                }else{
+                    onFinish(PersonDetailView.VIEW_NAME, entity.personUid, entity)
+                }
             }
         }
     }

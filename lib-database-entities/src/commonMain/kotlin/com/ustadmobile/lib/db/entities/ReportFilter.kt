@@ -5,9 +5,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 open class ReportFilter {
 
-    var reportFilterUid: Long = 0
+    var reportFilterUid: Int = 0
 
-    var reportFilterSeriesUid: Long = 0
+    var reportFilterSeriesUid: Int = 0
 
     var reportFilterField: Int = FIELD_PERSON_GENDER
 
@@ -35,6 +35,9 @@ open class ReportFilter {
 
         const val FIELD_ATTENDANCE_PERCENTAGE = 105
 
+        const val FIELD_CLAZZ_ENROLMENT_OUTCOME = 106
+
+        const val FIELD_CLAZZ_ENROLMENT_LEAVING_REASON = 107
 
         const val CONDITION_IS = 200
 

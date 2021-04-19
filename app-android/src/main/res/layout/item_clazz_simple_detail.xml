@@ -7,7 +7,7 @@
         <import type="java.util.List"/>
         <import type="com.ustadmobile.core.util.MessageIdOption"/>
         <variable name="clazz"
-            type="com.ustadmobile.lib.db.entities.Clazz" />
+            type="com.ustadmobile.lib.db.entities.ClazzWithListDisplayDetails" />
 
         <variable name="mPresenter"
             type="com.ustadmobile.core.controller.SchoolDetailOverviewPresenter" />

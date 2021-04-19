@@ -21,7 +21,8 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.Okio
+import okio.buffer
+import okio.source
 import org.apache.commons.io.IOUtils
 import org.junit.Assert
 import org.junit.Before
@@ -31,7 +32,7 @@ import java.io.IOException
 import java.nio.charset.Charset
 import java.nio.file.Files
 
-@ExperimentalStdlibApi
+
 class TestEdraakContentScraper {
 
 
@@ -61,42 +62,41 @@ class TestEdraakContentScraper {
     }
 
     internal val dispatcher: Dispatcher = object : Dispatcher() {
-        @Throws(InterruptedException::class)
         override fun dispatch(request: RecordedRequest): MockResponse {
-
+            val requestPath = request.path ?: ""
 
             try {
 
-                if (request.path.startsWith(COMPONENT_API_PREFIX)) {
+                if (requestPath.startsWith(COMPONENT_API_PREFIX)) {
 
                     val prefixLength = COMPONENT_API_PREFIX.length
-                    val fileName = request.path.substring(prefixLength,
-                            request.path.indexOf(".txt", prefixLength))
+                    val fileName = requestPath.substring(prefixLength,
+                        requestPath.indexOf(".txt", prefixLength))
                     return MockResponse().setBody(IOUtils.toString(javaClass.getResourceAsStream("$fileName.txt"), UTF_ENCODING))
 
-                } else if (request.path == "/media/video.mp4") {
+                } else if (requestPath == "/media/video.mp4") {
                     val videoIn = javaClass.getResourceAsStream(VIDEO_LOCATION_FILE)
-                    val source = Okio.buffer(Okio.source(videoIn))
+                    val source = videoIn.source().buffer()
                     val buffer = Buffer()
                     source.readAll(buffer)
                     val response = MockResponse().setResponseCode(200)
-                    response.setHeader("ETag", (buffer.size().toString() + VIDEO_LOCATION_FILE).hashCode())
+                    response.setHeader("ETag", (buffer.size.toString() + VIDEO_LOCATION_FILE).hashCode())
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
-                } else if (request.path.contains("picture")) {
+                } else if (requestPath.contains("picture")) {
                     val length = "/media/".length
-                    val fileName = request.path.substring(request.path.indexOf("/media/") + length,
-                            request.path.indexOf(".png", length))
+                    val fileName = requestPath.substring(requestPath.indexOf("/media/") + length,
+                        requestPath.indexOf(".png", length))
                     val pictureIn = javaClass.getResourceAsStream("$RESOURCE_PATH$fileName.png")
-                    val source = Okio.buffer(Okio.source(pictureIn))
+                    val source = pictureIn.source().buffer()
                     val buffer = Buffer()
                     source.readAll(buffer)
                     val response = MockResponse().setResponseCode(200)
-                    response.setHeader("ETag", (buffer.size().toString() + RESOURCE_PATH).hashCode())
+                    response.setHeader("ETag", (buffer.size.toString() + RESOURCE_PATH).hashCode())
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
                 }
@@ -115,7 +115,7 @@ class TestEdraakContentScraper {
 
         val tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile()
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
         val url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41)
 
         val courseDirectory = File(tmpDir, "5a60a25f0ed49f0498cb201d")
@@ -160,7 +160,7 @@ class TestEdraakContentScraper {
 
         val tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile()
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
         val url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_CONTENT_CONTENT_FILE, 41)
 
         val scraper = EdraakK12ContentScraper(url, tmpDir)
@@ -173,7 +173,7 @@ class TestEdraakContentScraper {
 
         val tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile()
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
 
         val url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_WITHOUT_TARGET_FILE, 41)
@@ -188,7 +188,7 @@ class TestEdraakContentScraper {
 
         val tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile()
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_WITHOUT_CHILDREN_FILE, 41)
         val scraper = EdraakK12ContentScraper(url, tmpDir)
@@ -202,7 +202,7 @@ class TestEdraakContentScraper {
 
         val tmpDir = Files.createTempDirectory("testedxcontentscraper").toFile()
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), MAIN_DETAIL_NO_VIDEO_FOUND, 41)
         val scraper = EdraakK12ContentScraper(url, tmpDir)
@@ -244,7 +244,7 @@ class TestEdraakContentScraper {
 
         val tmpDir = Files.createTempDirectory("testmodifiededraak").toFile()
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41)
         val scraper = EdraakK12ContentScraper(url, tmpDir)
@@ -267,7 +267,7 @@ class TestEdraakContentScraper {
 
         val tmpDir = Files.createTempDirectory("testmodifiededraak").toFile()
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val url = EdraakK12ContentScraper.generateUrl(mockWebServer.url("/api/").toString(), DETAIL_JSON_CONTENT_FILE, 41)
         val scraper = EdraakK12ContentScraper(url, tmpDir)

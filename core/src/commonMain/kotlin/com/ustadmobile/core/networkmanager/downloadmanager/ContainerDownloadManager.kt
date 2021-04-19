@@ -51,15 +51,18 @@ abstract class ContainerDownloadManager {
 
     fun determineParentStatusFromChildStatuses(childStatuses: List<DownloadJobItemUidAndStatus>): Int {
         return when {
-            childStatuses.all { it.djiStatus > JobStatus.COMPLETE } -> {
-                childStatuses.maxBy { it.djiStatus }?.djiStatus ?: JobStatus.FAILED
-            }
+            childStatuses.all { it.djiStatus == JobStatus.COMPLETE } -> JobStatus.COMPLETE
+            childStatuses.all { it.djiStatus >= JobStatus.COMPLETE_MIN } -> JobStatus.FAILED
             childStatuses.any { it.djiStatus == JobStatus.RUNNING } -> JobStatus.RUNNING
             childStatuses.any { it.djiStatus == JobStatus.QUEUED } -> JobStatus.QUEUED
-            else -> childStatuses.minBy { it.djiStatus }?.djiStatus ?: 0
+            else -> childStatuses.minByOrNull { it.djiStatus }?.djiStatus ?: 0
         }
     }
 
     abstract suspend fun getDownloadJobItemHolderRef(jobItemUid: Int): Any?
+
+    abstract fun addContainerDownloadListener(listener: ContainerDownloadListener)
+
+    abstract fun removeContainerDownloadListener(listener: ContainerDownloadListener)
 
 }

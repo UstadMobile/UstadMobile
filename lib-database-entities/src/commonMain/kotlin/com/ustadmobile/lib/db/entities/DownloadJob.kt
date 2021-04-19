@@ -38,6 +38,9 @@ open class DownloadJob() {
 
     var djRootContentEntryUid: Long = 0
 
+    /**
+     * This must be the destination directory URI, not just a file path.
+     */
     var djDestinationDir: String? = null
 
 

@@ -1,14 +1,12 @@
 package com.ustadmobile.lib.rest
 
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.container.ContainerAddOptions
 import com.ustadmobile.core.db.UmAppDatabase
-import com.ustadmobile.core.db.dao.ContainerEntryFileDao
-import com.ustadmobile.core.util.ext.encodeBase64
-import com.ustadmobile.door.DatabaseBuilder
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
+import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.asRepository
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
-import com.ustadmobile.lib.db.entities.ContainerEntryWithMd5
 import io.ktor.application.install
 import io.ktor.client.HttpClient
 import io.ktor.client.features.json.JsonFeature
@@ -20,8 +18,6 @@ import io.ktor.routing.Routing
 import io.ktor.server.engine.ApplicationEngine
 import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
-import org.junit.Before
-import org.junit.Test
 import java.io.File
 import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import io.ktor.client.engine.okhttp.*
@@ -29,18 +25,10 @@ import io.ktor.client.request.get
 import io.ktor.client.request.head
 import io.ktor.client.statement.HttpStatement
 import io.ktor.http.HttpHeaders
-import io.netty.handler.codec.http.DefaultHttpResponse
 import io.netty.handler.codec.http.HttpResponseStatus
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import kotlinx.coroutines.runBlocking
-import kotlinx.io.InputStream
-import org.junit.After
+import okhttp3.OkHttpClient
 import org.junit.Assert
-import java.io.ByteArrayInputStream
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.util.concurrent.TimeUnit
 
 /**
  * This test is BROKEN 16/Dec/2020
@@ -61,23 +49,29 @@ class TestContainerMountRoute {
 
     private val defaultPort = 8098
 
-    private lateinit var containerManager: ContainerManager
+    //private lateinit var containerManager: ContainerManager
 
     private var testPath: String = ""
 
     private lateinit var httpClient: HttpClient
 
+    private lateinit var okHttpClient: OkHttpClient
+
     //@Before
     fun setup() {
+        okHttpClient = OkHttpClient()
         httpClient = HttpClient(OkHttp){
             install(JsonFeature)
+            engine {
+                preconfigured = okHttpClient
+            }
         }
 
         db = UmAppDatabase.getInstance(Any(), "UmAppDatabase")
         db.clearAllTables()
 
-        repo = db.asRepository(Any(), "http://localhost/dummy", "", httpClient,
-            null, null, false)
+        repo = db.asRepository(repositoryConfig(Any(), "http://localhost/dummy",
+            httpClient, okHttpClient))
         server = embeddedServer(Netty, port = defaultPort) {
             install(ContentNegotiation) {
                 gson {
@@ -94,13 +88,14 @@ class TestContainerMountRoute {
         containerTmpDir = UmFileUtilSe.makeTempDir("testcontainermountroute", "tmpdir")
         container = Container()
         container.containerUid = repo.containerDao.insert(container)
-        epubTmpFile = File.createTempFile("tmp", "epub")
-        UmFileUtilSe.extractResourceToFile("/testfiles/thelittlechicks.epub",
-                epubTmpFile!!)
 
-        containerManager = ContainerManager(container, db, repo, containerTmpDir.absolutePath)
-        addEntriesFromZipToContainer(epubTmpFile.absolutePath, containerManager)
-        testPath = containerManager.allEntries[13].cePath!!
+        runBlocking {
+            repo.addEntriesToContainerFromZipResource(container.containerUid, this::class.java,
+                    "/testfiles/thelittlechicks.epub",
+                    ContainerAddOptions(storageDirUri = containerTmpDir.toDoorUri()))
+        }
+
+        testPath = db.containerEntryDao.findByContainer(container.containerUid)[13].cePath!!
     }
 
     //@After

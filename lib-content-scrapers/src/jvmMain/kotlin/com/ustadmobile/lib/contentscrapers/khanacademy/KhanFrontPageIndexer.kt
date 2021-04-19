@@ -12,7 +12,7 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.kodein.di.DI
 
-@ExperimentalStdlibApi
+
 class KhanFrontPageIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntry, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
     private lateinit var parentEntry: ContentEntry

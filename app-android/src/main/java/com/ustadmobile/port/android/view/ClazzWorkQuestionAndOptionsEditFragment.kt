@@ -16,7 +16,6 @@ import com.toughra.ustadmobile.databinding.ItemClazzWorkQuestionOptionBinding
 import com.ustadmobile.core.controller.ClazzWorkQuestionAndOptionsEditPresenter
 import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.util.IdOption
-import com.ustadmobile.core.util.MessageIdOption
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.view.ClazzWorkQuestionAndOptionsEditView
 import com.ustadmobile.door.DoorMutableLiveData
@@ -73,9 +72,6 @@ class ClazzWorkQuestionAndOptionsEditFragment: UstadEditFragment<ClazzWorkQuesti
             holder.binding.clazzWorkQuestionOption = option
         }
     }
-
-    override val viewContext: Any
-        get() = requireContext()
 
     override var clazzWorkQuestionOptionList: DoorMutableLiveData<List<ClazzWorkQuestionOption>>? = null
         get() = field

@@ -23,13 +23,14 @@ import com.ustadmobile.core.util.LiveDataWorkQueue
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.apache.commons.lang.exception.ExceptionUtils
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.File
 import java.io.InputStream
 import java.net.MalformedURLException
 import java.net.URL
 import kotlin.system.exitProcess
 
-@ExperimentalStdlibApi
+
 class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val destLocation: File,
                         val contentType: String, val scrapeQueueItemUid: Int, val runId: Int) : Runnable {
 
@@ -113,9 +114,10 @@ class GdlContentIndexer(val queueUrl: URL, val parentEntry: ContentEntry, val de
 
     private fun getFeed(queueUrl: URL): OpdsFeed {
         var opfIn: InputStream? = null
+        val xppFactory = XmlPullParserFactory.newInstance()
         try {
             opfIn = queueUrl.openStream()
-            val parser = UstadMobileSystemImpl.instance.newPullParser()
+            val parser = xppFactory.newPullParser()
             parser.setInput(opfIn, "UTF-8")
             var feed = OpdsFeed()
             feed.loadFromParser(parser)

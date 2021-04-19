@@ -20,7 +20,7 @@ import com.ustadmobile.lib.util.copyOnWriteListOf
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -34,8 +34,9 @@ class ClazzLogEditAttendancePresenter(context: Any,
         get() = PersistenceMode.DB
 
     private val attendanceRecordOneToManyJoinHelper = DefaultOneToManyJoinEditHelper(ClazzLogAttendanceRecord::clazzLogAttendanceRecordUid,
-            "state_ClazzLogAttendanceRecord_list", ClazzLogAttendanceRecordWithPerson.serializer().list,
-            ClazzLogAttendanceRecordWithPerson.serializer().list, this,
+            "state_ClazzLogAttendanceRecord_list",
+            ListSerializer(ClazzLogAttendanceRecordWithPerson.serializer()),
+            ListSerializer(ClazzLogAttendanceRecordWithPerson.serializer()), this,
             ClazzLogAttendanceRecordWithPerson::class) { clazzLogAttendanceRecordUid = it }
 
     private var currentClazzLogUid: Long = 0
@@ -85,16 +86,16 @@ class ClazzLogEditAttendancePresenter(context: Any,
         view.clazzLogTimezone = clazzWithSchool.effectiveTimeZone()
 
         //Find all those who are members of the class at the corresponding class schedule.
-        val clazzMembersAtTime = db.clazzMemberDao.getAllClazzMembersAtTimeAsync(
-                clazzLog.clazzLogClazzUid, clazzLog.logDate, ClazzMember.ROLE_STUDENT)
+        val clazzMembersAtTime = db.clazzEnrolmentDao.getAllClazzEnrolledAtTimeAsync(
+                clazzLog.clazzLogClazzUid, clazzLog.logDate, ClazzEnrolment.ROLE_STUDENT)
 
 
         var clazzAttendanceLogsInDb = db.clazzLogAttendanceRecordDao.findByClazzLogUid(currentClazzLogUid)
         clazzAttendanceLogsInDb = clazzAttendanceLogsInDb.map { dbAttendanceRec ->
                     clazzAttendanceRecords.firstOrNull { jsonAttendanceRec ->
                     jsonAttendanceRec.clazzLogAttendanceRecordClazzLogUid == clazzLog.clazzLogUid &&
-                        dbAttendanceRec.clazzLogAttendanceRecordClazzMemberUid ==
-                            jsonAttendanceRec.clazzLogAttendanceRecordClazzMemberUid
+                        dbAttendanceRec.clazzLogAttendanceRecordPersonUid ==
+                            jsonAttendanceRec.clazzLogAttendanceRecordPersonUid
                     } ?: dbAttendanceRec
                 }
 
@@ -105,15 +106,15 @@ class ClazzLogEditAttendancePresenter(context: Any,
          */
         val allMembers = clazzMembersAtTime.map { clazzMember ->
             clazzAttendanceRecords.firstOrNull {
-                it.clazzLogAttendanceRecordClazzMemberUid == clazzMember.clazzMemberUid &&
+                it.clazzLogAttendanceRecordPersonUid == clazzMember.clazzEnrolmentPersonUid &&
                         it.clazzLogAttendanceRecordClazzLogUid == currentClazzLogUid
             } ?: clazzAttendanceLogsInDb.firstOrNull {
-                it.clazzLogAttendanceRecordClazzMemberUid == clazzMember.clazzMemberUid &&
+                it.clazzLogAttendanceRecordPersonUid == clazzMember.clazzEnrolmentPersonUid &&
                         it.clazzLogAttendanceRecordClazzLogUid == currentClazzLogUid
             } ?:ClazzLogAttendanceRecordWithPerson().apply {
                 person = clazzMember.person
                 clazzLogAttendanceRecordClazzLogUid = currentClazzLogUid
-                clazzLogAttendanceRecordClazzMemberUid = clazzMember.clazzMemberUid
+                clazzLogAttendanceRecordPersonUid = clazzMember.clazzEnrolmentPersonUid
             }
         }.sortedBy { "${it.person?.firstNames} ${it.person?.lastName}" }
 
@@ -182,7 +183,7 @@ class ClazzLogEditAttendancePresenter(context: Any,
         clazzLogAttendanceRecords.forEach { viewClazzLogAttendanceRec ->
             val existingIndex = this.clazzAttendanceRecords.indexOfFirst {
                 it.clazzLogAttendanceRecordClazzLogUid == viewClazzLogAttendanceRec.clazzLogAttendanceRecordClazzLogUid &&
-                        it.clazzLogAttendanceRecordClazzMemberUid == viewClazzLogAttendanceRec.clazzLogAttendanceRecordClazzMemberUid
+                        it.clazzLogAttendanceRecordPersonUid == viewClazzLogAttendanceRec.clazzLogAttendanceRecordPersonUid
             }
 
             if(existingIndex >= 0) {

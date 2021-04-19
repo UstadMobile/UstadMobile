@@ -11,7 +11,8 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import okhttp3.mockwebserver.RecordedRequest
 import okio.Buffer
-import okio.Okio
+import okio.buffer
+import okio.source
 import org.apache.commons.io.IOUtils
 import org.junit.Assert
 import org.junit.Before
@@ -20,22 +21,21 @@ import java.io.File
 import java.io.IOException
 import java.nio.file.Files
 
-@ExperimentalStdlibApi
+
 class TestEtekScraper {
 
     internal val dispatcher: Dispatcher = object : Dispatcher() {
         override fun dispatch(request: RecordedRequest): MockResponse {
-
+            val requestPath = request.path ?: ""
             try {
-
-                if (request.path.contains("json")) {
+                if (requestPath.contains("json")) {
 
                     val fileName: String
-                    if (request.path.contains("?handle")) {
-                        fileName = request.path.substring(5,
-                                request.path.indexOf("?handle"))
+                    if (requestPath.contains("?handle")) {
+                        fileName = requestPath.substring(5,
+                            requestPath.indexOf("?handle"))
                     } else {
-                        fileName = request.path.substring(5)
+                        fileName = requestPath.substring(5)
                     }
                     val body = IOUtils.toString(javaClass.getResourceAsStream(fileName), UTF_ENCODING)
                     val response = MockResponse().setResponseCode(200)
@@ -46,20 +46,20 @@ class TestEtekScraper {
 
                     return response
 
-                } else if (request.path.contains("media")) {
+                } else if (requestPath.contains("media")) {
 
-                    val fileLocation = request.path.substring(6)
+                    val fileLocation = requestPath.substring(6)
                     val videoIn = javaClass.getResourceAsStream(fileLocation)
-                    val source = Okio.buffer(Okio.source(videoIn))
+                    val source = videoIn.source().buffer()
                     val buffer = Buffer()
                     source.readAll(buffer)
 
 
                     val response = MockResponse().setResponseCode(200)
-                    response.setHeader("ETag", (buffer.size().toString() + UTF_ENCODING).hashCode())
+                    response.setHeader("ETag", (buffer.size.toString() + UTF_ENCODING).hashCode())
                     response.addHeader("Content-Type","image/png")
                     if (!request.method.equals("HEAD", ignoreCase = true))
-                        response.body = buffer
+                        response.setBody(buffer)
 
                     return response
                 }
@@ -87,7 +87,7 @@ class TestEtekScraper {
         val tmpDir = Files.createTempDirectory("testEtekScraper").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val scraper = EtekkathoScraper(
                 mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/etek/lesson.html?handle=123-321").toString(),
@@ -121,7 +121,7 @@ class TestEtekScraper {
         val containerDir = Files.createTempDirectory("container").toFile()
 
         val mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(dispatcher)
+        mockWebServer.dispatcher = dispatcher
 
         val scraper = IndexEtekkathoScraper()
         scraper.findContent(mockWebServer.url("/json/com/ustadmobile/lib/contentscrapers/etek/etekhomepage.html").toString(),

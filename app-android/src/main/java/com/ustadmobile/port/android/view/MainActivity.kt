@@ -102,7 +102,7 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
 
     private fun loadFromUriString(uri: String?){
 
-        UstadMobileSystemImpl.instance.go(uri, getActivityContext())
+        impl.go(uri, getActivityContext())
 
     }
 
@@ -207,9 +207,6 @@ class MainActivity : UstadBaseActivity(), UstadListViewActivityWithFab,
         }
 
     }
-
-    override val viewContext: Any
-        get() = this
 
     override fun onDestroy() {
         super.onDestroy()

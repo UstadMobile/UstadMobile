@@ -1,6 +1,6 @@
 package com.ustadmobile.lib.contentscrapers.apache
 
-import com.nhaarman.mockitokotlin2.spy
+import org.mockito.kotlin.spy
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
 import com.ustadmobile.core.db.UmAppDatabase
@@ -22,7 +22,7 @@ import java.io.File
 import java.nio.file.Files
 import javax.naming.InitialContext
 
-@ExperimentalStdlibApi
+
 class TestApacheIndexer {
 
     @Rule
@@ -53,7 +53,7 @@ class TestApacheIndexer {
                     it.clearAllTables()
                 })
             }
-            bind<File>(tag = DiTag.TAG_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
+            bind<File>(tag = DiTag.TAG_DEFAULT_CONTAINER_DIR) with scoped(EndpointScope.Default).singleton {
                 containerDir
             }
             bind<String>(tag = DiTag.TAG_GOOGLE_API) with singleton {
@@ -65,7 +65,7 @@ class TestApacheIndexer {
 
 
         mockWebServer = MockWebServer()
-        mockWebServer.setDispatcher(globalDisptacher)
+        mockWebServer.dispatcher = globalDisptacher
 
     }
 

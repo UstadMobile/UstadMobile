@@ -7,9 +7,6 @@ import androidx.room.Update
 import com.ustadmobile.core.db.dao.PersonDao.Companion.SESSION_LENGTH
 import com.ustadmobile.door.annotation.Repository
 import com.ustadmobile.door.annotation.Repository.Companion.METHOD_DELEGATE_TO_WEB
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
-import com.ustadmobile.lib.database.annotation.UmRestAccessible
 import com.ustadmobile.lib.db.entities.AccessToken
 import com.ustadmobile.lib.db.entities.Person
 import com.ustadmobile.lib.db.entities.PersonAuth
@@ -17,9 +14,7 @@ import com.ustadmobile.lib.db.entities.UmAccount
 import com.ustadmobile.lib.util.encryptPassword
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 
-@UmDao
 @Dao
-@UmRepository
 abstract class PersonAuthDao : BaseDao<PersonAuth> {
 
 

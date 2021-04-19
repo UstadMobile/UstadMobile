@@ -7,21 +7,21 @@ import com.kaspersky.kaspresso.testcases.api.testcase.TestCase
 import com.toughra.ustadmobile.R
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecord
 import com.ustadmobile.adbscreenrecorder.client.AdbScreenRecordRule
-import com.ustadmobile.core.container.ContainerManager
-import com.ustadmobile.core.container.addEntriesFromZipToContainer
+import com.ustadmobile.core.container.ContainerAddOptions
+import com.ustadmobile.core.io.ext.addEntriesToContainerFromZipResource
 import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.door.ext.toDoorUri
 import com.ustadmobile.lib.db.entities.Container
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.screen.XapiContentScreen
-import com.ustadmobile.port.sharedse.util.UmFileUtilSe
 import com.ustadmobile.test.port.android.util.installNavController
 import com.ustadmobile.test.rules.SystemImplTestNavHostRule
 import com.ustadmobile.test.rules.UmAppDatabaseAndroidClientRule
-import org.junit.After
+import kotlinx.coroutines.runBlocking
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
-import java.io.File
+import org.junit.rules.TemporaryFolder
 
 
 @AdbScreenRecord("Xapi package content screen test")
@@ -41,12 +41,13 @@ class XapiPackageContentFragmentTest : TestCase() {
 
     private var contentEntry: ContentEntry? = null
 
-    private var container: Container? = null
+    private lateinit var container: Container
 
-    private lateinit var containerTmpDir: File
+    @JvmField
+    @Rule
+    val temporaryFolder = TemporaryFolder()
 
-
-
+    @Suppress("BlockingMethodInNonBlockingContext")
     @Before
     fun setUp(){
         contentEntry = ContentEntry().apply {
@@ -58,19 +59,12 @@ class XapiPackageContentFragmentTest : TestCase() {
             containerContentEntryUid = contentEntry?.contentEntryUid!!
             containerUid = dbRule.repo.containerDao.insert(this)
         }
-        containerTmpDir = UmFileUtilSe.makeTempDir("xapicontent", "${System.currentTimeMillis()}")
-        val testFile = File.createTempFile("xapicontent", "xapifile", containerTmpDir)
-        val input = javaClass.getResourceAsStream("/com/ustadmobile/app/android/XapiPackage-JsTetris_TCAPI.zip")
-        testFile.outputStream().use { input?.copyTo(it) }
 
-        val containerManager = ContainerManager(container!!, dbRule.db, dbRule.repo,containerTmpDir.absolutePath)
-        addEntriesFromZipToContainer(testFile.absolutePath, containerManager)
-    }
-
-    @After
-    fun tearDown(){
-        //clean up
-        containerTmpDir.deleteRecursively()
+        runBlocking {
+            dbRule.repo.addEntriesToContainerFromZipResource(container.containerUid, this::class.java,
+                "/com/ustadmobile/app/android/XapiPackage-JsTetris_TCAPI.zip",
+                    ContainerAddOptions(temporaryFolder.newFolder().toDoorUri()))
+        }
     }
 
     @AdbScreenRecord("Given valid xapi package content when created should be loaded to the view")

@@ -12,7 +12,7 @@ class ClazzLogAttendanceRecordWithPerson : ClazzLogAttendanceRecord() {
     fun copy() = ClazzLogAttendanceRecordWithPerson().also {
         it.person = person
         it.clazzLogAttendanceRecordUid = clazzLogAttendanceRecordUid
-        it.clazzLogAttendanceRecordClazzMemberUid = clazzLogAttendanceRecordClazzMemberUid
+        it.clazzLogAttendanceRecordPersonUid = clazzLogAttendanceRecordPersonUid
         it.clazzLogAttendanceRecordClazzLogUid = clazzLogAttendanceRecordClazzLogUid
         it.clazzLogAttendanceRecordLastChangedBy = clazzLogAttendanceRecordLastChangedBy
         it.clazzLogAttendanceRecordLocalChangeSeqNum = clazzLogAttendanceRecordLocalChangeSeqNum

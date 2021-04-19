@@ -2,6 +2,7 @@ package com.ustadmobile.core.controller
 
 import com.soywiz.klock.DateTime
 import com.ustadmobile.core.db.UmAppDatabase
+import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.schedule.*
 import com.ustadmobile.core.util.DefaultOneToManyJoinEditHelper
 import com.ustadmobile.core.util.ext.createNewClazzAndGroups
@@ -21,7 +22,7 @@ import com.ustadmobile.lib.db.entities.Schedule
 import com.ustadmobile.lib.util.getDefaultTimeZoneId
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.builtins.list
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -34,8 +35,8 @@ class ClazzEdit2Presenter(context: Any,
 
     private val scheduleOneToManyJoinEditHelper
             = DefaultOneToManyJoinEditHelper<Schedule>(Schedule::scheduleUid,
-            ARG_SAVEDSTATE_SCHEDULES, Schedule.serializer().list,
-            Schedule.serializer().list, this, Schedule::class) {scheduleUid = it}
+            ARG_SAVEDSTATE_SCHEDULES, ListSerializer(Schedule.serializer()),
+            ListSerializer(Schedule.serializer()), this, Schedule::class) {scheduleUid = it}
 
     override val persistenceMode: PersistenceMode
         get() = PersistenceMode.DB
@@ -90,8 +91,27 @@ class ClazzEdit2Presenter(context: Any,
 
     override fun handleClickSave(entity: ClazzWithHolidayCalendarAndSchool) {
         GlobalScope.launch(doorMainDispatcher()) {
+
+            if (entity.clazzStartTime == 0L) {
+                view.clazzStartDateError = systemImpl.getString(MessageID.field_required_prompt, context)
+                return@launch
+            }
+
+            if (entity.clazzEndTime <= entity.clazzStartTime) {
+                view.clazzEndDateError = systemImpl.getString(MessageID.end_is_before_start_error, context)
+                return@launch
+            }
+
             view.loading = true
             view.fieldsEnabled = false
+
+            entity.clazzStartTime = DateTime(entity.clazzStartTime)
+                    .toOffsetByTimezone(entity.effectiveTimeZone).localMidnight.utc.unixMillisLong
+            if(entity.clazzEndTime != Long.MAX_VALUE){
+                entity.clazzEndTime = DateTime(entity.clazzEndTime)
+                        .toOffsetByTimezone(entity.effectiveTimeZone).localEndOfDay.utc.unixMillisLong
+            }
+
             if(entity.clazzUid == 0L) {
                 repo.createNewClazzAndGroups(entity, systemImpl, context)
             }else {
@@ -111,7 +131,16 @@ class ClazzEdit2Presenter(context: Any,
                     fromDateTime.utc.unixMillisLong, fromDateTime.localEndOfDay.utc.unixMillisLong)
 
             view.loading = false
-            onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
+
+            //Handle the following scenario: PersonEdit (user selects to add an enrolment), ClazzList
+            // ClazzEdit, EnrolmentEdit
+            if(arguments.containsKey(UstadView.ARG_GO_TO_COMPLETE)) {
+                systemImpl.go(arguments[UstadView.ARG_GO_TO_COMPLETE].toString(),
+                        arguments.plus(UstadView.ARG_FILTER_BY_CLAZZUID to entity.clazzUid.toString()),
+                        context)
+            }else{
+                onFinish(ClazzDetailView.VIEW_NAME, entity.clazzUid, entity)
+            }
         }
     }
 

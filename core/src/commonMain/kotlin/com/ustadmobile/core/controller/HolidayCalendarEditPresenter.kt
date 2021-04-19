@@ -14,9 +14,7 @@ import com.ustadmobile.lib.db.entities.HolidayCalendar
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
-import kotlinx.serialization.builtins.list
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.Json.Default.parseJson
+import kotlinx.serialization.builtins.ListSerializer
 import org.kodein.di.DI
 
 
@@ -31,8 +29,9 @@ class HolidayCalendarEditPresenter(context: Any,
 
 
     val holidayOneToManyJoinEditHelper = DefaultOneToManyJoinEditHelper<Holiday>(Holiday::holUid,
-            "state_Holiday_list", Holiday.serializer().list,
-            Holiday.serializer().list, this, Holiday::class) { holUid = it }
+            "state_Holiday_list",
+            ListSerializer(Holiday.serializer()),
+            ListSerializer(Holiday.serializer()), this, Holiday::class) { holUid = it }
 
     fun handleAddOrEditHoliday(holiday: Holiday) {
         holidayOneToManyJoinEditHelper.onEditResult(holiday)

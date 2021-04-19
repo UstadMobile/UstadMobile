@@ -80,7 +80,7 @@ class ReportListPresenter(context: Any, arguments: Map<String, String>, view: Re
                                     selectedItem.map { it.reportUid })
                         }
 
-                    }, MessageID.content_editor_menu_undo)
+                    }, MessageID.undo)
                 }
             }
         }

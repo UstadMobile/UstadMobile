@@ -2,10 +2,7 @@ package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.ustadmobile.door.annotation.LastChangedBy
-import com.ustadmobile.door.annotation.LocalChangeSeqNum
-import com.ustadmobile.door.annotation.MasterChangeSeqNum
-import com.ustadmobile.door.annotation.SyncableEntity
+import com.ustadmobile.door.annotation.*
 import com.ustadmobile.lib.db.entities.ContentEntryRelatedEntryJoin.Companion.TABLE_ID
 import kotlinx.serialization.Serializable
 
@@ -46,6 +43,9 @@ open class ContentEntryRelatedEntryJoin() {
 
     @MasterChangeSeqNum
     var cerejMasterChangeSeqNum: Long = 0
+
+    @LastChangedTime
+    var cerejLct: Long = 0
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

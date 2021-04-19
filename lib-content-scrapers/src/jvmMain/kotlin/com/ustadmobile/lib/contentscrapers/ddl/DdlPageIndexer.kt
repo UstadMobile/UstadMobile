@@ -6,7 +6,7 @@ import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.jsoup.Jsoup
 import org.kodein.di.DI
 
-@ExperimentalStdlibApi
+
 class DdlPageIndexer(parentContentEntryUid: Long, runId: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntryUid, runId, sqiUid, contentEntryUid, endpoint, di ) {
 
     override fun indexUrl(sourceUrl: String) {

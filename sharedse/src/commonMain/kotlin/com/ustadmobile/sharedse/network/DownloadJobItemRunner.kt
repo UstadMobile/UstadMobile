@@ -2,23 +2,23 @@ package com.ustadmobile.sharedse.network
 
 import com.github.aakira.napier.Napier
 import com.ustadmobile.core.account.Endpoint
-import com.ustadmobile.core.container.ContainerManager
 import com.ustadmobile.core.db.JobStatus
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.UmAppDatabase.Companion.TAG_DB
-import com.ustadmobile.core.db.dao.ContainerEntryFileDao.Companion.ENDPOINT_CONCATENATEDFILES
 import com.ustadmobile.core.db.waitForLiveData
 import com.ustadmobile.core.impl.UMLog
 import com.ustadmobile.core.impl.UstadMobileSystemCommon.Companion.TAG_MAIN_COROUTINE_CONTEXT
-import com.ustadmobile.sharedse.io.ConcatenatedInputStream
+import com.ustadmobile.core.network.containerfetcher.AbstractContainerFetcherListener2
+import com.ustadmobile.core.network.containerfetcher.ContainerFetcherRequest2
 import com.ustadmobile.core.networkmanager.LocalAvailabilityManager
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadManager
 import com.ustadmobile.core.networkmanager.downloadmanager.ContainerDownloadRunner
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.util.UMURLEncoder
+import com.ustadmobile.core.util.ext.linkExistingContainerEntries
 import com.ustadmobile.door.DoorObserver
 import com.ustadmobile.door.ObserverFnWrapper
+import com.ustadmobile.door.ext.doorIdentityHashCode
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_DISCONNECTED
 import com.ustadmobile.lib.db.entities.ConnectivityStatus.Companion.STATE_METERED
@@ -26,15 +26,11 @@ import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_CLO
 import com.ustadmobile.lib.db.entities.DownloadJobItemHistory.Companion.MODE_LOCAL
 import com.ustadmobile.lib.util.getSystemTimeInMillis
 import com.ustadmobile.lib.util.sumByLong
-import com.ustadmobile.sharedse.container.addEntriesFromConcatenatedInputStream
-import com.ustadmobile.sharedse.io.FileInputStreamSe
 import com.ustadmobile.sharedse.io.FileSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_CREATION_RESPONSE
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.WIFI_GROUP_REQUEST
 import io.ktor.client.HttpClient
 import io.ktor.client.request.get
-import com.ustadmobile.sharedse.network.containerfetcher.AbstractContainerFetcherListener
-import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcherRequest
 import kotlinx.atomicfu.atomic
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
@@ -42,10 +38,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlin.coroutines.coroutineContext
 import kotlin.jvm.Volatile
 import com.ustadmobile.sharedse.network.containerfetcher.ContainerFetcher
-import org.kodein.di.DI
-import org.kodein.di.DIAware
-import org.kodein.di.instance
-import org.kodein.di.on
+import org.kodein.di.*
 
 data class DownloadJobItemRunnerDIArgs(val endpoint: Endpoint, val downloadJobItem: DownloadJobItem)
 
@@ -219,6 +212,7 @@ class DownloadJobItemRunner
                 networkManager.releaseWifiLock(downloadWiFiLock)
             }
         }
+        Napier.d({"${mkLogPrefix()} stop complete"})
     }
 
 
@@ -279,10 +273,11 @@ class DownloadJobItemRunner
         val attemptsRemaining = 3
 
         val container = appDb.containerDao.findByUid(downloadItem.djiContainerUid)
+                ?: throw IllegalArgumentException("startDownload: container ${downloadItem.djiContainerUid} not found!")
 
         //Note: the Container must be put in the database by the preparer. Therefor it's better
         // to use the DAO object and avoid any potential to make additional http requests
-        val containerManager = ContainerManager(container!!, appDb, appDb, destinationDir!!)
+        //val containerManager = ContainerManager(container!!, appDb, appDb, destinationDir!!)
 
         var downloadStartTime = 0L
 
@@ -291,8 +286,6 @@ class DownloadJobItemRunner
 
         //list of all container entries in the container - used to
         val containerEntriesList = mutableListOf<ContainerEntryWithMd5>()
-
-        val containerEntriesToDownloadList = mutableListOf<ContainerEntryWithMd5>()
 
         var attemptNum = 0
         while(attemptNum++ < 3 && coroutineContext.isActive) {
@@ -333,7 +326,7 @@ class DownloadJobItemRunner
                     }
 
                     downloadEndpoint = endpointUrl
-                    currentHttpClient = defaultHttpClient()
+                    currentHttpClient = di.direct.instance()
                 } else {
                     if (networkNodeToUse.groupSsid == null
                             || connectivityStatusVal?.connectivityState != ConnectivityStatus.STATE_CONNECTED_LOCAL
@@ -348,12 +341,12 @@ class DownloadJobItemRunner
                     }
 
                     downloadEndpoint = currentNetworkNode!!.endpointUrl!!
-                    currentHttpClient = networkManager.localHttpClient ?: defaultHttpClient()
+                    currentHttpClient = networkManager.localHttpClient ?: di.direct.instance()
                 }
 
                 history.url = downloadEndpoint
 
-                UMLog.l(UMLog.INFO, 699, mkLogPrefix() +
+                Napier.i(mkLogPrefix() +
                         " starting download from " + downloadEndpoint + " FromCloud=" + isFromCloud +
                         " Attempts remaining= " + attemptsRemaining)
                 downloadStartTime = getSystemTimeInMillis()
@@ -367,16 +360,11 @@ class DownloadJobItemRunner
 
                 entriesDownloaded.value = 0
 
-                val entriesToDownloadVal = containerManager.linkExistingItems(containerEntryListVal)
-                        .distinctBy { it.cefMd5 }
-                        .sortedBy { it.cefMd5 }
-                containerEntriesToDownloadList.clear()
-                containerEntriesToDownloadList.addAll(entriesToDownloadVal)
+                val containerEntriesPartition = appDb.linkExistingContainerEntries(container.containerUid,
+                    containerEntryListVal)
 
-                existingEntriesBytesDownloaded = containerManager.allEntries
-                        .sumByLong { it.containerEntryFile?.ceCompressedSize ?: 0L}
-
-                val entriesListStr = entriesToDownloadVal.joinToString(separator = ";") { it.ceCefUid.toString() }
+                existingEntriesBytesDownloaded = containerEntriesPartition.entriesWithMatchingFile
+                        .sumByLong { it.containerEntryFile?.ceCompressedSize ?: 0L }
 
 
                 history.startTime = getSystemTimeInMillis()
@@ -384,29 +372,34 @@ class DownloadJobItemRunner
 
                 val fetchStartTime = getSystemTimeInMillis()
                 Napier.d({"Requesting fetch download $timeSinceStart ms after start"})
-                val downloadUrl = UMFileUtil.joinPaths(downloadEndpoint, ENDPOINT_CONCATENATEDFILES,
-                        entriesListStr)
-                val containerRequest = ContainerFetcherRequest(downloadUrl,
-                        destTmpFile.getAbsolutePath())
-                var jobDeferred: Deferred<Int>? = null
-                downloadStatusLock.withLock {
-                    Napier.d({"${mkLogPrefix()} enqueuing download URL=$downloadUrl fileDest=" +
-                            destTmpFile.getAbsolutePath()})
-                    jobDeferred = containerFetcher.enqueue(containerRequest,
-                            object: AbstractContainerFetcherListener() {
-                                override fun onProgress(request: ContainerFetcherRequest,
+
+                if(containerEntriesPartition.entriesWithoutMatchingFile.isNotEmpty()) {
+                    val containerRequest = ContainerFetcherRequest2(
+                        containerEntriesPartition.entriesWithoutMatchingFile, siteUrl = endpointUrl,
+                        mirrorUrl =  downloadEndpoint,
+                        destDirUri = destinationDir ?: throw IllegalStateException("Null destination dir"))
+                    var jobDeferred: Deferred<Int>? = null
+                    downloadStatusLock.withLock {
+                        Napier.d({"${mkLogPrefix()} enqueuing download URL=$downloadEndpoint fileDest=" +
+                                destTmpFile.getAbsolutePath()})
+                        jobDeferred = containerFetcher.enqueue(containerRequest,
+                            object: AbstractContainerFetcherListener2() {
+                                override fun onProgress(request: ContainerFetcherRequest2,
                                                         bytesDownloaded: Long, contentLength: Long) {
                                     GlobalScope.launch {
                                         downloadItem.downloadedSoFar = existingEntriesBytesDownloaded + bytesDownloaded
                                         containerDownloadManager.handleDownloadJobItemUpdated(
-                                                DownloadJobItem(downloadItem))
+                                            DownloadJobItem(downloadItem))
                                     }
                                 }
                             })
-                    Napier.d({"${mkLogPrefix()} download queued"})
-                    currentDownloadAttempt.value = jobDeferred
+                        Napier.d({"${mkLogPrefix()} download queued"})
+                        currentDownloadAttempt.value = jobDeferred
+                    }
+                    downloadAttemptStatus = jobDeferred?.await() ?: JobStatus.FAILED
+                }else {
+                    downloadAttemptStatus = JobStatus.COMPLETE
                 }
-                downloadAttemptStatus = jobDeferred?.await() ?: JobStatus.FAILED
 
                 Napier.d({"Fetch over in ${getSystemTimeInMillis() - fetchStartTime}ms status=$downloadAttemptStatus"})
                 if(downloadAttemptStatus == JobStatus.COMPLETE) {
@@ -414,8 +407,10 @@ class DownloadJobItemRunner
                 }
             }catch(e: Exception) {
                 Napier.e({"${mkLogPrefix()} exception in download attempt"}, e)
-                if(coroutineContext.isActive)
+                if(coroutineContext.isActive) {
+                    Napier.e({"${mkLogPrefix()} waiting for retry"}, e)
                     delay(retryDelay)
+                }
             }finally {
 
             }
@@ -430,18 +425,6 @@ class DownloadJobItemRunner
             UMLog.l(UMLog.INFO, 0, "DownloadJob ${downloadItem.djiUid}  Completed " +
                     "download of ${downloadItem.downloadedSoFar}bytes " +
                     "in $downloadTime ms Speed = $downloadSpeed KB/s")
-
-            var concatenatedInputStream: ConcatenatedInputStream? = null
-
-            //TODO Here: Make the download fail if the validation does not check out, don't crash the app
-            try {
-                concatenatedInputStream = ConcatenatedInputStream(FileInputStreamSe(destTmpFile))
-                val downloadedMd5s = containerEntriesToDownloadList.mapNotNull { it.cefMd5 }
-                containerManager.addEntriesFromConcatenatedInputStream(concatenatedInputStream,
-                        containerEntriesList.filter { entryItem -> entryItem.cefMd5 in downloadedMd5s })
-            }finally {
-                concatenatedInputStream?.close()
-            }
         }
 
         stop(if(downloadAttemptStatus != -1) downloadAttemptStatus else JobStatus.FAILED)
@@ -576,7 +559,7 @@ class DownloadJobItemRunner
 
 
     private fun mkLogPrefix(): String {
-        return "DownloadJobItem #" + downloadItem.djiUid + ":"
+        return "DownloadJobItem #" + downloadItem.djiUid + " (${this.doorIdentityHashCode}) :"
     }
 
     companion object {

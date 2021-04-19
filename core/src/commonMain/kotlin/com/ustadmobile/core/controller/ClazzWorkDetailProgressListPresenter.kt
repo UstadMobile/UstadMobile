@@ -2,13 +2,15 @@ package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.db.dao.ClazzWorkDao
 import com.ustadmobile.core.generated.locale.MessageID
+import com.ustadmobile.core.util.ListFilterIdOption
 import com.ustadmobile.core.util.SortOrderOption
 import com.ustadmobile.core.util.ext.toQueryLikeParam
 import com.ustadmobile.core.view.ClazzWorkDetailProgressListView
 import com.ustadmobile.core.view.ClazzWorkSubmissionMarkingView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.door.DoorLifecycleOwner
-import com.ustadmobile.lib.db.entities.ClazzMemberWithClazzWorkProgress
+import com.ustadmobile.door.util.systemTimeInMillis
+import com.ustadmobile.lib.db.entities.ClazzEnrolmentWithClazzWorkProgress
 import com.ustadmobile.lib.db.entities.UmAccount
 import org.kodein.di.DI
 
@@ -16,7 +18,7 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
                                            view: ClazzWorkDetailProgressListView, di: DI,
                                            lifecycleOwner: DoorLifecycleOwner)
     : UstadListPresenter<ClazzWorkDetailProgressListView,
-        ClazzMemberWithClazzWorkProgress>(context, arguments, view, di, lifecycleOwner),
+        ClazzEnrolmentWithClazzWorkProgress>(context, arguments, view, di, lifecycleOwner),
         OnSortOptionSelected, OnSearchSubmitted {
 
     private var filterByClazzWorkUid: Long = -1
@@ -30,7 +32,6 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
         super.onCreate(savedState)
         filterByClazzWorkUid = arguments[UstadView.ARG_ENTITY_UID]?.toLong() ?: -1
         selectedSortOption = SORT_OPTIONS[0]
-
     }
 
     override suspend fun onCheckAddPermission(account: UmAccount?): Boolean {
@@ -46,22 +47,22 @@ class ClazzWorkDetailProgressListPresenter(context: Any, arguments: Map<String, 
     private fun updateListOnView() {
 
         view.clazzWorkWithMetrics = repo.clazzWorkDao.findClazzWorkWithMetricsByClazzWorkUid(
-                filterByClazzWorkUid)
+                filterByClazzWorkUid, systemTimeInMillis())
 
         view.list = repo.clazzWorkDao.findStudentProgressByClazzWork(
                 filterByClazzWorkUid,
                 selectedSortOption?.flag ?: ClazzWorkDao.SORT_FIRST_NAME_ASC,
-                searchText.toQueryLikeParam())
+                searchText.toQueryLikeParam(), systemTimeInMillis())
     }
 
-    override fun handleClickEntry(entry: ClazzMemberWithClazzWorkProgress) {
+    override fun handleClickEntry(entry: ClazzEnrolmentWithClazzWorkProgress) {
 
-        val clazzMemberUid = entry.mClazzMember?.clazzMemberUid ?: 0L
+        val personUid = entry.personUid
         val clazzWorkUid = filterByClazzWorkUid
 
         systemImpl.go(ClazzWorkSubmissionMarkingView.VIEW_NAME,
                 mapOf(UstadView.ARG_CLAZZWORK_UID to clazzWorkUid.toString(),
-                        UstadView.ARG_CLAZZMEMBER_UID to clazzMemberUid.toString()),
+                        UstadView.ARG_PERSON_UID to personUid.toString()),
                 context)
 
     }

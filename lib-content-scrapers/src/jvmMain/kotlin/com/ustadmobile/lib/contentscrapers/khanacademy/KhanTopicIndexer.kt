@@ -15,7 +15,7 @@ import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import org.kodein.di.DI
 import java.net.URL
 
-@ExperimentalStdlibApi
+
 class KhanTopicIndexer(parentContentEntry: Long, runUid: Int, sqiUid: Int, contentEntryUid: Long, endpoint: Endpoint, di: DI) : Indexer(parentContentEntry, runUid, sqiUid, contentEntryUid, endpoint, di) {
 
 

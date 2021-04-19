@@ -5,7 +5,7 @@ import com.ustadmobile.lib.db.entities.ClazzWork
 
 interface ClazzWorkDetailView: UstadDetailView<ClazzWork> {
 
-    var isStudent : Boolean
+    var progressOverviewVisible : Boolean
 
     var ustadFragmentTitle: String?
 

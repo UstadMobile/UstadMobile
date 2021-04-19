@@ -4,8 +4,8 @@ import com.ustadmobile.core.contentformats.epub.ocf.OcfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfDocument
 import com.ustadmobile.core.contentformats.epub.opf.OpfItem
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
+import com.ustadmobile.core.io.ext.readString
 import com.ustadmobile.core.util.UMFileUtil
-import com.ustadmobile.core.util.UMIOUtils
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.CODEC2_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.FFMPEG_PATH_KEY
 import com.ustadmobile.lib.contentscrapers.ContentScraperUtil.WEBP_PATH_KEY
@@ -20,11 +20,6 @@ import org.jsoup.nodes.Element
 import org.jsoup.nodes.Entities
 import org.jsoup.parser.Parser
 
-import java.io.File
-import java.io.FileInputStream
-import java.io.FileNotFoundException
-import java.io.FileOutputStream
-import java.io.IOException
 import java.nio.file.InvalidPathException
 import java.nio.file.Paths
 import java.util.ArrayList
@@ -35,9 +30,11 @@ import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_CSS
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.MIMETYPE_JPG
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.PNG_EXT
 import com.ustadmobile.lib.contentscrapers.ScraperConstants.UTF_ENCODING
-import org.kmp.io.KMPPullParserException
+import org.xmlpull.v1.XmlPullParserException
+import org.xmlpull.v1.XmlPullParserFactory
+import java.io.*
 
-@ExperimentalStdlibApi
+
 object ShrinkerUtil {
 
     val HTML_MIME_TYPES = listOf("application/xhtml+xml", "text/html")
@@ -138,12 +135,13 @@ object ShrinkerUtil {
         var opfFileInputStream: FileInputStream? = null
         var ocfFileInputStream: FileInputStream? = null
         var opfFileOutputStream: FileOutputStream? = null
+        val xppFactory = XmlPullParserFactory.newInstance()
+
         try {
             val ocfDoc = OcfDocument()
             val ocfFile = File(directory, Paths.get("META-INF", "container.xml").toString())
             ocfFileInputStream = FileInputStream(ocfFile)
-            val ocfParser = UstadMobileSystemImpl.instance
-                    .newPullParser(ocfFileInputStream)
+            val ocfParser = xppFactory.newPullParser()
             ocfDoc.loadFromParser(ocfParser)
 
             val opfFile = File(directory, ocfDoc.getRootFiles()[0].fullPath!!)
@@ -152,8 +150,7 @@ object ShrinkerUtil {
             cleanXml(opfFile)
             val document = OpfDocument()
             opfFileInputStream = FileInputStream(opfFile)
-            val xmlPullParser = UstadMobileSystemImpl.instance
-                    .newPullParser(opfFileInputStream)
+            val xmlPullParser = xppFactory.newPullParser()
             document.loadFromOPF(xmlPullParser)
 
             val manifestList = document.getManifestItems()
@@ -192,7 +189,7 @@ object ShrinkerUtil {
 
                     val htmlFile = File(opfDir, opfItem.href!!)
                     FileInputStream(htmlFile).use { htmlFileInputStream ->
-                        var html = UMIOUtils.readStreamToString(htmlFileInputStream)
+                        var html = htmlFileInputStream.readString()
                         /*
                          * Pratham uses an entity code to map &nbsp; to &#160; - this confuses jsoup
                          */
@@ -287,7 +284,7 @@ object ShrinkerUtil {
                 return false
             }
 
-            val xmlSerializer = UstadMobileSystemImpl.instance.newXMLSerializer()
+            val xmlSerializer = xppFactory.newSerializer()
             opfFileOutputStream = FileOutputStream(opfFile)
             xmlSerializer.setOutput(opfFileOutputStream, UTF_ENCODING)
             document.serialize(xmlSerializer)
@@ -299,16 +296,16 @@ object ShrinkerUtil {
                 }
             }
             return true
-        } catch (e: KMPPullParserException) {
+        } catch (e: XmlPullParserException) {
             UMLogUtil.logError(ExceptionUtils.getStackTrace(e))
             UMLogUtil.logError("Failed to xmlpullparse for directory " + directory.path)
         } catch (e: IOException) {
             UMLogUtil.logError("IO Exception for directory " + directory.path)
             throw e
         } finally {
-            UMIOUtils.closeInputStream(opfFileInputStream)
-            UMIOUtils.closeOutputStream(opfFileOutputStream)
-            UMIOUtils.closeInputStream(ocfFileInputStream)
+            opfFileInputStream?.close()
+            opfFileOutputStream?.close()
+            ocfFileInputStream?.close()
         }
 
         return false
@@ -387,7 +384,7 @@ object ShrinkerUtil {
             process!!.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream for src " + src.path + UMIOUtils.readStreamToString(process.errorStream))
+                UMLogUtil.logError("Error Stream for src " + src.path + process.errorStream.bufferedReader().use { it.readText() })
                 pngFile = File(UMFileUtil.stripExtensionIfPresent(src.path) + PNG_EXT)
                 convertJpgToPng(src, pngFile)
                 convertImageToWebp(pngFile, dest)
@@ -433,7 +430,7 @@ object ShrinkerUtil {
             process!!.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream for src " + src.path + UMIOUtils.readStreamToString(process.errorStream))
+                UMLogUtil.logError("Error Stream for src " + src.path + process.errorStream.readString())
                 throw IOException()
             }
         } catch (e: IOException) {
@@ -469,11 +466,11 @@ object ShrinkerUtil {
         var process: Process? = null
         try {
             process = builder.start()
-            UMIOUtils.readStreamToByteArray(process!!.inputStream)
+            process?.inputStream?.readBytes()
             process.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream for src " + src.path + UMIOUtils.readStreamToString(process.errorStream))
+                UMLogUtil.logError("Error Stream for src " + src.path + process.errorStream.readString())
                 throw IOException()
             }
             process.destroy()
@@ -507,11 +504,11 @@ object ShrinkerUtil {
         var process: Process? = null
         try {
             process = builder.start()
-            UMIOUtils.readStreamToByteArray(process!!.inputStream)
-            process.waitFor()
+            process?.inputStream?.readBytes()
+            process?.waitFor()
             val exitValue = process.exitValue()
             if (exitValue != 0) {
-                UMLogUtil.logError("Error Stream for src " + src.path + UMIOUtils.readStreamToString(process.errorStream))
+                UMLogUtil.logError("Error Stream for src " + src.path + process.errorStream.readString())
             }
             process.destroy()
         } catch (e: IOException) {
@@ -592,13 +589,16 @@ object ShrinkerUtil {
 
     @Throws(IOException::class, InterruptedException::class)
     private fun startProcess(process: Process) {
-        UMIOUtils.readStreamToByteArray(process.inputStream)
-        process.waitFor()
-        val exitValue = process.exitValue()
-        if (exitValue != 0) {
-            UMLogUtil.logError("Error Stream for src " + UMIOUtils.readStreamToString(process.errorStream))
+        try {
+            process.inputStream.readBytes()
+            process.waitFor()
+            val exitValue = process.exitValue()
+            if (exitValue != 0) {
+                UMLogUtil.logError("Error Stream for src " + process.errorStream.readString())
+            }
+        }finally {
+            process.destroy()
         }
-        process.destroy()
     }
 
 

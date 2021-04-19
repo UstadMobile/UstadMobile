@@ -1,14 +1,10 @@
 package com.ustadmobile.sharedse.network
 
-import com.ustadmobile.core.impl.UMLog
-import com.ustadmobile.core.util.UMIOUtils
+import com.ustadmobile.sharedse.ext.compressWithGzip
+import com.ustadmobile.sharedse.ext.decompressWithGzip
 import com.ustadmobile.sharedse.io.ByteBufferSe
 import com.ustadmobile.sharedse.io.GzInputStreamConstants.GZIP_MAGIC
-import com.ustadmobile.sharedse.io.GzipInputStreamSe
-import com.ustadmobile.sharedse.io.GzipOutputStreamSe
 import com.ustadmobile.sharedse.network.NetworkManagerBleCommon.Companion.MINIMUM_MTU_SIZE
-import kotlinx.io.ByteArrayInputStream
-import kotlinx.io.ByteArrayOutputStream
 import kotlin.jvm.Synchronized
 import kotlin.math.ceil
 import kotlin.math.min
@@ -130,7 +126,6 @@ class BleMessage {
         assignHeaderValuesFromFirstPacket(packetsReceived[0])
 
         val receivedPayload = ByteArray(length)
-        //System.arraycopy(messageBytes, HEADER_SIZE, receivedPayload, 0, length)
         messageBytes.copyInto(receivedPayload, 0, HEADER_SIZE, HEADER_SIZE + length)
 
         val isCompressed = (receivedPayload.isNotEmpty() &&
@@ -138,7 +133,7 @@ class BleMessage {
                 && receivedPayload[1] == (GZIP_MAGIC shr 8).toByte())
         this.payload = receivedPayload
         if (isCompressed) {
-            this.payload = decompressPayload(receivedPayload)
+            this.payload = receivedPayload.decompressWithGzip()
         }
     }
 
@@ -162,7 +157,7 @@ class BleMessage {
      */
     fun getPackets(mtu: Int): Array<ByteArray> {
         this.mtu = mtu
-        val compressedPayload = compressPayload(this.payload)
+        val compressedPayload = this.payload?.compressWithGzip()//  compressPayload(this.payload)
 
         return if (compressedPayload!!.size < this.payload!!.size) {
             packetizePayload(compressedPayload)
@@ -171,42 +166,6 @@ class BleMessage {
         }
 
     }
-
-    /**
-     * Internal message to compress message payload
-     * @param payload payload to be compressed
-     * @return Compressed payload in byte array, null if something goes wrong
-     */
-    private fun compressPayload(payload: ByteArray?): ByteArray? {
-        val bos = ByteArrayOutputStream()
-        val gzip = GzipOutputStreamSe(bos)
-        gzip.write(payload!!)
-        gzip.flush()
-        gzip.close()
-        return bos.toByteArray()
-    }
-
-    /**
-     * Internal method for decompressing compressed payload
-     * @param receivedPayload Compressed payload
-     * @return Decompressed payload in byte array.
-     */
-    private fun decompressPayload(receivedPayload: ByteArray): ByteArray {
-        val BUFFER_SIZE = min(32, receivedPayload.size)
-        val `is` = ByteArrayInputStream(receivedPayload)
-        val bout = ByteArrayOutputStream()
-        val gis = GzipInputStreamSe(`is`, BUFFER_SIZE)
-        val data = ByteArray(BUFFER_SIZE)
-        var bytesRead: Int
-        while (gis.read(data).also { bytesRead = it } != -1) {
-            bout.write(data, 0, bytesRead)
-        }
-        bout.flush()
-        bout.close()
-
-        return bout.toByteArray()
-    }
-
 
     private fun calculateNumPackets(payloadLength: Int, mtu: Int): Int {
         return ceil((payloadLength + HEADER_SIZE) / (mtu - 1).toDouble()).toInt()
@@ -227,23 +186,11 @@ class BleMessage {
                     .put(requestType)
                     .putShort(mtu.toShort())
                     .putInt(payload.size).array()
-            val outputStream = ByteArrayOutputStream()
-            try {
-                outputStream.write(header)
-                outputStream.write(payload)
-            } catch (e: Exception) {
-                UMLog.l(UMLog.ERROR, 100, "IOException", e)
-                return arrayOf()
-            } finally {
-                UMIOUtils.closeOutputStream(outputStream)
-            }
-            val totalPayLoad = outputStream.toByteArray()
+            val totalPayLoad = header + payload
             val packets = Array(numPackets) { ByteArray(mtu) }
             for (i in packets.indices) {
                 packets[i][0] = messageId
                 val payloadPos = i * (mtu - 1)
-//                System.arraycopy(totalPayLoad, payloadPos, packets[i], 1,
-//                        Math.min(mtu - 1, totalPayLoad.size - payloadPos))
                 totalPayLoad.copyInto(packets[i], 1, payloadPos, payloadPos + min(mtu - 1, totalPayLoad.size - payloadPos))
             }
 
@@ -252,26 +199,20 @@ class BleMessage {
     }
 
     /**
-     * Internal method for reconstructing the payload from packets. Strips out the mesage id
+     * Internal method for reconstructing the payload from packets. Checks that the message id is
+     * as expected, and then strips it out.
      *
      * @param packets Payload packets to be depacketized
      *
      * @return Constructed payload in byte array
      */
-//TODO: Throw an exception if any packet has a different message id
     private fun depacketizePayload(packets: Array<ByteArray>): ByteArray {
-        if (packets.isEmpty()) {
-            throw NullPointerException()
-        } else {
-            val outputStream = ByteArrayOutputStream()
-            for (packetContent in packets) {
-                try {
-                    outputStream.write(packetContent, 1, packetContent.size - 1)
-                } finally {
-                    UMIOUtils.closeOutputStream(outputStream)
-                }
-            }
-            return outputStream.toByteArray()
+        return packets.fold(ByteArray(0)) { acc: ByteArray, bytes: ByteArray ->
+            val packetMessageId = bytes[0]
+            if(packetMessageId != messageId)
+                throw IllegalArgumentException("Packet message id error: expected $messageId / received $packetMessageId")
+
+            acc + bytes.copyOfRange(1, bytes.size)
         }
     }
 

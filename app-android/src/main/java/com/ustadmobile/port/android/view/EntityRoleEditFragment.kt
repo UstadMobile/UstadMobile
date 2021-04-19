@@ -32,9 +32,6 @@ class EntityRoleEditFragment() : UstadEditFragment<EntityRoleWithNameAndRole>(),
 
     override var loading: Boolean = false
 
-    override val viewContext: Any
-        get() = requireContext()
-
 
     override var entity: EntityRoleWithNameAndRole? = null
         set(value) {

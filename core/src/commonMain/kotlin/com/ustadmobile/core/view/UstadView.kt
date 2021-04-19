@@ -44,17 +44,6 @@ enum class GetResultMode {
 interface UstadView {
 
 
-    /**
-     * Return the system specific context for this view (e.g. Activity on Android
-     * etc)
-     *
-     * Nullable so that this is compliant with fragment.getViewContext()
-     *
-     * @return
-     */
-    val viewContext: Any
-
-
     var loading: Boolean
 
     /**
@@ -111,9 +100,11 @@ interface UstadView {
 
         const val ARG_FILTER_BY_PERSONGROUPUID = "filterByPersonGroupUid"
 
+        const val ARG_FILTER_BY_ENROLMENT_ROLE = "filterByEnrolmentRole"
+
         const val ARG_CLAZZWORK_UID = "clazzworkUid"
 
-        const val ARG_CLAZZMEMBER_UID = "clazzMemberUid"
+        const val ARG_PERSON_UID = "personUid"
 
         const val ARG_NEXT = "next"
 
@@ -132,6 +123,13 @@ interface UstadView {
         const val ARG_ENTITY_NAME = "argEntityName"
 
         const val CURRENT_DEST = ""
+
+        /**
+         * if after selecting from a list, need to open an edit page
+         */
+        const val ARG_GO_TO_COMPLETE = "goToComplete"
+
+        const val ARG_SAVE_TO_DB = "saveDb"
 
         /**
          * Tasks that involve multiple destinations (e.g. Login - AcceptTerms - PersonEditRegister )

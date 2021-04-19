@@ -7,7 +7,6 @@ import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.metadata.ImportedContentEntryMetaData
 import com.ustadmobile.core.db.UmAppDatabase
 import com.ustadmobile.core.db.dao.ScrapeQueueItemDao
-import com.ustadmobile.core.networkmanager.defaultHttpClient
 import com.ustadmobile.core.util.DiTag
 import com.ustadmobile.core.util.LiveDataWorkQueue
 import com.ustadmobile.core.util.ext.requirePostfix
@@ -20,13 +19,11 @@ import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.ContentEntryWithLanguage
 import com.ustadmobile.lib.db.entities.ScrapeQueueItem
 import com.ustadmobile.lib.db.entities.ScrapeRun
+import io.ktor.client.*
 import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.TimeoutCancellationException
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.*
 import org.apache.commons.cli.*
 import org.apache.commons.io.FileUtils
 import org.apache.commons.io.FilenameUtils
@@ -45,7 +42,6 @@ import java.net.URLDecoder
 import java.nio.file.Files
 import kotlin.system.exitProcess
 
-@ExperimentalStdlibApi
 class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpoint, override val di: DI) : DIAware {
 
     private val db: UmAppDatabase by on(endpoint).instance(tag = UmAppDatabase.TAG_DB)
@@ -56,6 +52,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
     private val contentImportManager: ContentImportManager by on(endpoint).instance()
 
+    private val httpClient: HttpClient by instance()
 
     private val logPrefix = "[ScraperManager endpoint url: ${endpoint.url}] "
 
@@ -202,7 +199,7 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
                     return null
                 }
 
-                val statement = defaultHttpClient().get<HttpStatement>(apiCall) {
+                val statement = httpClient.get<HttpStatement>(apiCall) {
                     parameter("key", apiKey)
                     parameter("fields", "id,modifiedTime,name,mimeType,description,thumbnailLink")
                 }.execute()
@@ -219,23 +216,26 @@ class ScraperManager(indexTotal: Int = 4, scraperTotal: Int = 1, endpoint: Endpo
 
                 Napier.d("$logPrefix mimetype found for google drive link: ${file.mimeType}", tag = SCRAPER_TAG)
 
-                val dataStatement = defaultHttpClient().get<HttpStatement>(apiCall) {
+                val dataStatement = httpClient.get<HttpStatement>(apiCall) {
                     parameter("alt", "media")
                     parameter("key", apiKey)
                 }.execute()
 
                 tempDir = Files.createTempDirectory("folder").toFile()
                 tempDir.mkdir()
-                val googleStream = dataStatement.receive<InputStream>()
-                val googleFile = File(tempDir, file.name ?: file.id ?: fileId)
+                var metadata: ImportedContentEntryMetaData?
+                withContext(Dispatchers.IO){
+                    val googleStream = dataStatement.receive<InputStream>()
+                    val googleFile = File(tempDir, file.name ?: file.id ?: fileId)
 
-                FileOutputStream(googleFile).use {
-                    googleStream.copyTo(it)
-                    it.flush()
+                    FileOutputStream(googleFile).use {
+                        googleStream.copyTo(it)
+                        it.flush()
+                    }
+                    stream.close()
+                    metadata = contentImportManager.extractMetadata(googleFile.path)
                 }
-                stream.close()
 
-                val metadata = contentImportManager.extractMetadata(googleFile.path)
                 metadata?.scraperType = ScraperTypes.GOOGLE_DRIVE_SCRAPE
                 metadata?.uri = apiCall
                 metadata?.contentEntry?.sourceUrl = apiCall

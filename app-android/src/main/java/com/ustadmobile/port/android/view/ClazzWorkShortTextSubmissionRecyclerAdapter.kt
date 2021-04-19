@@ -1,20 +1,19 @@
 package com.ustadmobile.port.android.view
 
 import android.view.LayoutInflater
-import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.toughra.ustadmobile.databinding.ItemClazzworkSubmissionShortTextEntryBinding
-import com.ustadmobile.lib.db.entities.ClazzMemberAndClazzWorkWithSubmission
+import com.ustadmobile.lib.db.entities.PersonWithClazzWorkAndSubmission
 import com.ustadmobile.lib.db.entities.ClazzWork
 import com.ustadmobile.port.android.view.util.SingleItemRecyclerViewAdapter
 
-class ClazzWorkShortTextSubmissionRecyclerAdapter(clazzWorkWithSubmission: ClazzMemberAndClazzWorkWithSubmission?)
+class ClazzWorkShortTextSubmissionRecyclerAdapter(clazzWorkWithSubmission: PersonWithClazzWorkAndSubmission?)
     : SingleItemRecyclerViewAdapter<
         ClazzWorkShortTextSubmissionRecyclerAdapter.ClazzWorkShortTextSubmissionViewHolder>() {
 
 
-    var clazzWorkWithSubmission: ClazzMemberAndClazzWorkWithSubmission? = clazzWorkWithSubmission
+    var clazzWorkWithSubmission: PersonWithClazzWorkAndSubmission? = clazzWorkWithSubmission
         set(value){
             if(field == value){
                 return

@@ -3,18 +3,12 @@ package com.ustadmobile.port.android.view
 import android.content.Context
 import android.os.Bundle
 import android.view.View
-import androidx.core.content.ContextCompat
-import androidx.lifecycle.Lifecycle
 import com.toughra.ustadmobile.R
 import com.ustadmobile.core.controller.UstadDetailPresenter
-import com.ustadmobile.core.controller.UstadEditPresenter
 import com.ustadmobile.core.view.EditButtonMode
 import com.ustadmobile.core.view.UstadDetailView
 
 abstract class UstadDetailFragment<T: Any>: UstadBaseFragment(), UstadDetailView<T> {
-
-    override val viewContext: Any
-        get() = requireContext()
 
     abstract val detailPresenter: UstadDetailPresenter<*, *>?
 

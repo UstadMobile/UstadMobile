@@ -7,19 +7,21 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
+import com.toughra.ustadmobile.R
 import com.toughra.ustadmobile.databinding.FragmentWebChunkBinding
-import com.ustadmobile.core.container.ContainerManager
+import com.ustadmobile.core.account.UstadAccountManager
 import com.ustadmobile.core.controller.WebChunkPresenter
-import com.ustadmobile.core.generated.locale.MessageID
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.core.util.ext.toNullableStringMap
 import com.ustadmobile.core.util.ext.toStringMap
 import com.ustadmobile.core.util.mimeTypeToPlayStoreIdMap
 import com.ustadmobile.core.view.WebChunkView
+import com.ustadmobile.door.ext.DoorTag
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.port.android.impl.WebChunkWebViewClient
+import org.kodein.di.direct
+import org.kodein.di.instance
+import org.kodein.di.on
 
-@ExperimentalStdlibApi
 class WebChunkFragment : UstadBaseFragment(), WebChunkView, FragmentBackHandler {
 
     private var mBinding: FragmentWebChunkBinding? = null
@@ -64,16 +66,19 @@ class WebChunkFragment : UstadBaseFragment(), WebChunkView, FragmentBackHandler 
             //title = value?.title
         }
 
-    override var containerManager: ContainerManager? = null
+    override var containerUid: Long? = null
         get() = field
         set(value) {
             field = value
             if (value == null) {
-                showSnackBar(UstadMobileSystemImpl.instance
-                        .getString(MessageID.error_opening_file, this))
+                showSnackBar(requireContext().getString(R.string.error_opening_file))
                 return
             }
-            val webClient = WebChunkWebViewClient(value, mPresenter)
+
+            val accountManager = di.direct.instance<UstadAccountManager>()
+            val webClient = WebChunkWebViewClient(value,
+                    di.on(accountManager.activeAccount).direct.instance(tag = DoorTag.TAG_DB),
+                    mPresenter)
             runOnUiThread(Runnable {
                 webView?.webViewClient = webClient
                 webView?.loadUrl(webClient.url)

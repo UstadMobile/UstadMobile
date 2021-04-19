@@ -1,12 +1,10 @@
 package com.ustadmobile.core.contentformats.epub.opf
 
-import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import org.junit.Assert
 import org.junit.Test
-import org.kmp.io.KMPPullParserException
+import org.xmlpull.v1.XmlPullParserFactory
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
-import java.io.IOException
 
 /**
  * Created by mike on 10/17/17.
@@ -15,10 +13,9 @@ import java.io.IOException
 class TestOpfDocument {
 
     @Test
-    @Throws(IOException::class, KMPPullParserException::class)
     fun givenValidOpf_whenLoaded_thenShouldHavePropertiesFromOpfFile() {
         val opfIn = javaClass.getResourceAsStream("TestOpfDocument-valid.opf")
-        val parser = UstadMobileSystemImpl.instance.newPullParser()
+        val parser = XmlPullParserFactory.newInstance().newPullParser()
         parser.setInput(opfIn, "UTF-8")
         val opf = OpfDocument()
         opf.loadFromOPF(parser)
@@ -40,7 +37,7 @@ class TestOpfDocument {
     @Test
     fun givenValidEpub2Opf_whenLoaded_thenShouldHavePropertiesFromFileIncNcxNav() {
         val opfIn = javaClass.getResourceAsStream("TestOpfDocument-v2.opf")
-        val parser = UstadMobileSystemImpl.instance.newPullParser()
+        val parser = XmlPullParserFactory.newInstance().newPullParser()
         parser.setInput(opfIn, "UTF-8")
         val opf = OpfDocument()
         opf.loadFromOPF(parser)
@@ -49,23 +46,24 @@ class TestOpfDocument {
     }
 
     @Test
-    @Throws(IOException::class, KMPPullParserException::class)
     fun givenOpfLoaded_whenSerializedThenLoaded_shouldBeEqual() {
         val opfIn = javaClass.getResourceAsStream("TestOpfDocument-valid.opf")
-        val parser = UstadMobileSystemImpl.instance.newPullParser()
+        val xppFactory = XmlPullParserFactory.newInstance()
+        val parser = xppFactory.newPullParser()
         parser.setInput(opfIn, "UTF-8")
         val opf = OpfDocument()
         opf.loadFromOPF(parser)
 
         val bout = ByteArrayOutputStream()
-        val serializer = UstadMobileSystemImpl.instance.newXMLSerializer()
+        val serializer = xppFactory.newSerializer()
         serializer.setOutput(bout, "UTF-8")
         opf.serialize(serializer)
         bout.flush()
 
         val loadedOpf = OpfDocument()
-        val xpp = UstadMobileSystemImpl.instance.newPullParser(
-                ByteArrayInputStream(bout.toByteArray()), "UTF-8")
+        val xpp = xppFactory.newPullParser().also {
+            it.setInput(ByteArrayInputStream(bout.toByteArray()), "UTF-8")
+        }
         loadedOpf.loadFromOPF(xpp)
 
         Assert.assertEquals("Original and reserialized title is the same", opf.title,

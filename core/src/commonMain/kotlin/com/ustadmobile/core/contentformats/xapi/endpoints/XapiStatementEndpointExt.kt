@@ -6,7 +6,8 @@ import com.ustadmobile.core.util.UMTinCanUtil
 import com.ustadmobile.lib.db.entities.ContentEntry
 import com.ustadmobile.lib.db.entities.UmAccount
 
-fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: ContentEntry, progress: Int, duration: Long) {
+fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: ContentEntry,
+                                                 progress: Int, duration: Long, contextRegistration: String) {
     val statement = Statement().apply {
         this.actor = Actor().apply {
             this.account = Account().apply {
@@ -17,6 +18,9 @@ fun XapiStatementEndpoint.storeProgressStatement(account: UmAccount, entry: Cont
         this.verb = Verb().apply {
             this.id = if (progress == 100) "https://w3id.org/xapi/adl/verbs/satisfied" else "http://adlnet.gov/expapi/verbs/progressed"
             this.display = mapOf("en-US" to if (progress == 100) "satisfied" else "progressed")
+        }
+        this.context = XContext().apply {
+            registration = contextRegistration
         }
         this.result = Result().apply {
             this.completion = progress == 100

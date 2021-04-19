@@ -17,7 +17,7 @@ import org.kodein.di.instance
 import org.kodein.di.ktor.di
 import org.kodein.di.on
 
-@ExperimentalStdlibApi
+
 fun Route.ContentEntryLinkImporter() {
 
     route("import") {

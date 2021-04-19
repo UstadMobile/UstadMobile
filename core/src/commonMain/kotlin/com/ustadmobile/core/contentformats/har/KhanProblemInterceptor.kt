@@ -1,11 +1,11 @@
 package com.ustadmobile.core.contentformats.har
 
+import com.ustadmobile.core.io.ext.getStringFromContainerEntry
+import com.ustadmobile.core.util.ext.isTextContent
 
-
-@OptIn(ExperimentalStdlibApi::class)
 class KhanProblemInterceptor : HarInterceptor() {
 
-    override fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
+    override suspend fun intercept(request: HarRequest, response: HarResponse, harContainer: HarContainer, jsonArgs: String?): HarResponse {
 
         if (request.regexedUrl?.contains("getAssessmentItem") == false){
             return response
@@ -25,26 +25,26 @@ class KhanProblemInterceptor : HarInterceptor() {
         }
 
         val harResponse = harEntry.response ?: return response
-        val harText = harResponse.content?.text
+        val harText = harResponse.content?.text ?: ""
 
-        val containerEntry = harContainer.containerManager.getEntry(harText
-                ?: "") ?: return response
+        val containerEntryFile = harContainer.db.containerEntryDao.findByPathInContainer(
+                harContainer.containerUid, harText)?.containerEntryFile ?: harResponse.content?.entryFile
 
-        val entryFile = containerEntry.containerEntryFile
-        if (entryFile == null) {
+        if (containerEntryFile == null) {
             harResponse.status = 402
             harResponse.statusText = "Not Found"
-
             harResponse.content = null
             return harResponse
         }
 
-        val data = harContainer.containerManager.getInputStream(containerEntry)
 
-        harResponse.content?.data = data
-
-        val mutMap = harContainer.getHeaderMap(harResponse.headers, entryFile)
+        val mutMap = harContainer.getHeaderMap(harResponse.headers, containerEntryFile)
         harResponse.headers = mutMap.map { HarNameValuePair(it.key, it.value) }
+
+        if(harResponse.content?.isTextContent() == true){
+            harResponse.content?.text = containerEntryFile.getStringFromContainerEntry()
+        }
+        harResponse.content?.entryFile = containerEntryFile
 
         return harResponse
     }

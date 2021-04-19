@@ -14,13 +14,11 @@ fun Report.toDateRangeMoment(): DateRangeMoment{
                 relOffSet = fromRelOffSet
 
     }, Moment().apply {
-        Moment().apply {
             typeFlag = if(toDate == 0L) Moment.TYPE_FLAG_RELATIVE else Moment.TYPE_FLAG_FIXED
             fixedTime = toDate
             relTo = toRelTo
             relUnit = toRelUnit
             relOffSet = toRelOffSet
-
-        }
+        
     })
 }

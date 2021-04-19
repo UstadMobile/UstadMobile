@@ -31,9 +31,9 @@
 package com.ustadmobile.core.contentformats.epub.opf
 
 import com.ustadmobile.core.impl.UMLog
-import org.kmp.io.KMPPullParser
-import org.kmp.io.KMPSerializerParser
-import org.kmp.io.KMPXmlParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParser
+import com.ustadmobile.xmlpullparserkmp.XmlPullParserConstants
+import com.ustadmobile.xmlpullparserkmp.XmlSerializer
 
 /**
  *
@@ -147,7 +147,7 @@ class OpfDocument {
     /*
      * xpp: Parser of the OPF
      */
-    fun loadFromOPF(xpp: KMPXmlParser, parseFlags: Int = PARSE_METADATA or PARSE_MANIFEST) {
+    fun loadFromOPF(xpp: XmlPullParser, parseFlags: Int = PARSE_METADATA or PARSE_MANIFEST) {
         val parseMetadata = parseFlags and PARSE_METADATA == PARSE_METADATA
         val parseManifest = parseFlags and PARSE_MANIFEST == PARSE_MANIFEST
 
@@ -171,7 +171,7 @@ class OpfDocument {
 
             //If we are parsing the manifest
             if (parseManifest) {
-                if (evtType == KMPPullParser.START_TAG) {
+                if (evtType == XmlPullParserConstants.START_TAG) {
                     tagName = xpp.getName()
                     if (tagName != null && tagName == "item") {
 
@@ -225,7 +225,7 @@ class OpfDocument {
             }
 
             if (parseMetadata) {
-                if (evtType == KMPPullParser.START_TAG) {
+                if (evtType == XmlPullParserConstants.START_TAG) {
                     if (uniqueIdentifier == null && xpp.getName() == "package") {
                         uniqueIdentifier = xpp.getAttributeValue(null,
                                 "unique-identifier")
@@ -259,7 +259,7 @@ class OpfDocument {
                         } else if (xpp.getName() == "dc:creator") {
                             creator = OpfCreator()
                             creator.id = xpp.getAttributeValue(null, LinkElement.ATTR_ID)
-                            if (xpp.next() == KMPPullParser.TEXT)
+                            if (xpp.next() == XmlPullParserConstants.TEXT)
                                 creator.creator = xpp.getText()
 
                             if (creators == null)
@@ -267,13 +267,13 @@ class OpfDocument {
 
                             creators!!.add(creator)
                         } else if (xpp.getName() == "dc:language") {
-                            if (xpp.next() == KMPPullParser.TEXT) {
+                            if (xpp.next() == XmlPullParserConstants.TEXT) {
                                 tagVal = xpp.getText()!!
                                 languages.add(tagVal)
                             }
                         }
                     }
-                } else if (evtType == KMPPullParser.END_TAG) {
+                } else if (evtType == XmlPullParserConstants.END_TAG) {
                     if (inMetadata && xpp.getName() == "metadata") {
                         inMetadata = false
                     }
@@ -283,7 +283,7 @@ class OpfDocument {
 
             evtType = xpp.next()
 
-        } while (evtType != KMPPullParser.END_DOCUMENT)
+        } while (evtType != XmlPullParserConstants.END_DOCUMENT)
     }
 
     /**
@@ -293,7 +293,7 @@ class OpfDocument {
      *
      * @throws IOException if an IOException occurs in the underlying IO
      */
-    fun serialize(xs: KMPSerializerParser) {
+    fun serialize(xs: XmlSerializer) {
         xs.startDocument("UTF-8", false)
         xs.setPrefix("", NAMESPACE_OPF)
 

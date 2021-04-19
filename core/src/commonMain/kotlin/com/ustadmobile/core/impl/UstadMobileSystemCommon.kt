@@ -4,9 +4,6 @@ import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileConstants.LANGUAGE_NAMES
 import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.UstadView
-import kotlinx.io.InputStream
-import org.kmp.io.KMPSerializerParser
-import org.kmp.io.KMPXmlParser
 import kotlin.js.JsName
 import kotlin.jvm.JvmOverloads
 
@@ -15,17 +12,8 @@ import kotlin.jvm.JvmOverloads
  */
 abstract class UstadMobileSystemCommon {
 
-    /**
-     * Returns whether or not the init method has already been run
-     *
-     * @return true if init has been called with a first context used to load certain resources,
-     * false otherwise
-     */
-    private var isInitialized: Boolean = false
-
     //for testing purpose only
     var networkManager: Any? = null
-
 
     /**
      * The currently active locale
@@ -57,35 +45,6 @@ abstract class UstadMobileSystemCommon {
     internal var lastDestination: LastGoToDest? = null
 
     /**
-     * Do any required startup operations: init will be called on creation
-     *
-     * This must make the shared content directory if it does not already exist
-     */
-    open fun init(context: Any) {
-        UMLog.l(UMLog.DEBUG, 519, null)
-        //We don't need to do init again
-        if (isInitialized) {
-            return
-        }
-        isInitialized = true
-    }
-
-    /**
-     * Wrapper to retrieve preference keys from the system Manifest.
-     *
-     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
-     * On J2ME: uses the jad file
-     *
-     * @param key The key to lookup
-     * @param context System context object
-     *
-     * @return The value of the manifest preference key if found, null otherwise
-     */
-    @JsName("getManifestPreference")
-    abstract fun getManifestPreference(key: String, context: Any): String?
-
-
-    /**
      * Return absolute path of the application setup file. Asynchronous.
      *
      * @param context System context
@@ -99,8 +58,7 @@ abstract class UstadMobileSystemCommon {
 
     /**
      * Lookup a value from the app runtime configuration. These come from a properties file loaded
-     * from the assets folder, the path of which is set by the manifest preference
-     * com.sutadmobile.core.appconfig .
+     * from the assets folder.
      *
      * @param key The config key to lookup
      * @param defaultVal The default value to return if the key is not found
@@ -110,23 +68,6 @@ abstract class UstadMobileSystemCommon {
      */
     @JsName("getAppConfigString")
     abstract fun getAppConfigString(key: String, defaultVal: String?, context: Any): String?
-
-
-    /**
-     * Wrapper to retrieve preference keys from the system Manifest.
-     *
-     * On Android: uses meta-data elements on the application element in AndroidManifest.xml
-     *
-     * @param key The key to lookup
-     * @param defaultVal The default value to return if the key is not found
-     * @param context System context object
-     *
-     * @return The value of the manifest preference key if found, otherwise the default value
-     */
-    open fun getManifestPreference(key: String, defaultVal: String, context: Any): String {
-        val `val` = getManifestPreference(key, context)
-        return `val` ?: defaultVal
-    }
 
 
     /**
@@ -289,44 +230,6 @@ abstract class UstadMobileSystemCommon {
                 availableLangs.map { it to (LANGUAGE_NAMES[it] ?: it) }
     }
 
-
-    /**
-     * Make a new instance of an XmlPullParser (e.g. Kxml).  This is added as a
-     * method in the implementation instead of using the factory API because
-     * it enables the J2ME version to use the minimal jar
-     *
-     * @return A new default options XmlPullParser
-     */
-
-    open fun newPullParser(): KMPXmlParser {
-        return KMPXmlParser()
-    }
-
-    /**
-     * Make a new instance of an XmlSerializer (org.xmlpull.v1.XmlSerializer)
-     *
-     * @return New instance of an XML Serializer
-     */
-    open fun newXMLSerializer(): KMPSerializerParser {
-        return KMPSerializerParser()
-    }
-
-    /**
-     * Make a new XmlPullParser from a given inputstream
-     * @param in InputStream to read from
-     * @param encoding Encoding to be used e.g. UTF-8
-     *
-     * @return a new XmlPullParser with set with the given inputstream
-     */
-    @JvmOverloads
-    fun newPullParser(`in`: InputStream, encoding: String = UstadMobileConstants.UTF8): KMPXmlParser {
-        UMLog.l(UMLog.DEBUG, 523, encoding)
-        val xpp = newPullParser()
-        xpp.setInput(`in`, encoding)
-        return xpp
-    }
-
-
     @JsName("getStorageDirAsync")
     abstract suspend fun getStorageDirsAsync(context: Any): List<UMStorageDir?>
 
@@ -413,10 +316,6 @@ abstract class UstadMobileSystemCommon {
         return getAppConfigString(AppConfig.KEY_CONTENT_DIR_NAME, DEFAULT_CONTENT_DIR_NAME, context)
     }
 
-    fun scheduleChecks(context: Any) {
-
-    }
-
 
     companion object {
         private val MIME_TYPES = mapOf("image/jpg" to "jpg", "image/jpg" to "jpg",
@@ -460,11 +359,6 @@ abstract class UstadMobileSystemCommon {
         const val ARG_REFERRER = "ref"
 
         /**
-         * As per Android Intent.FLAG_ACTIVITY_SINGLE_TOP
-         */
-        const val GO_FLAG_SINGLE_TOP = 536870912
-
-        /**
          * As per Android Intent.FLAG_CLEAR_TOP
          */
         const val GO_FLAG_CLEAR_TOP = 67108864
@@ -478,6 +372,13 @@ abstract class UstadMobileSystemCommon {
         const val TAG_LOCAL_HTTP_PORT = 64
 
         const val LINK_INTENT_FILTER = "umclient"
+
+        const val SUBDIR_SITEDATA_NAME = "sitedata"
+
+        const val SUBDIR_CONTAINER_NAME = "container"
+
+        const val SUBDIR_ATTACHMENTS_NAME = "attachments"
+
 
     }
 }

@@ -3,8 +3,6 @@ package com.ustadmobile.core.db.dao
 import androidx.room.Dao
 import androidx.room.Query
 import com.ustadmobile.door.annotation.Repository
-import com.ustadmobile.lib.database.annotation.UmDao
-import com.ustadmobile.lib.database.annotation.UmRepository
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestion
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionRow
 import com.ustadmobile.lib.db.entities.ClazzWorkQuestionAndOptionWithResponse
@@ -39,7 +37,6 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
 
     @Query("""
         SELECT ClazzWorkQuestion.* , ClazzWorkQuestionOption.*, ClazzWorkQuestionResponse.* 
-
         FROM ClazzWorkQuestion 
         LEFT JOIN ClazzWorkQuestionOption ON 
             ClazzWorkQuestionOption.clazzWorkQuestionOptionQuestionUid = ClazzWorkQuestion.clazzWorkQuestionUid 
@@ -47,13 +44,13 @@ abstract class ClazzWorkQuestionDao : BaseDao<ClazzWorkQuestion>, OneToManyJoinD
         LEFT JOIN ClazzWorkQuestionResponse ON 
             ClazzWorkQuestionResponse.clazzWorkQuestionResponseQuestionUid = ClazzWorkQuestion.clazzWorkQuestionUid
             AND CAST(clazzWorkQuestionResponseInactive AS INTEGER) = 0
-            AND clazzWorkQuestionResponseClazzMemberUid = :clazzMemberUid
+            AND clazzWorkQuestionResponsePersonUid = :personUid
         WHERE 
         ClazzWorkQuestion.clazzWorkQuestionClazzWorkUid = :clazzWorkUid 
         AND CAST(ClazzWorkQuestion.clazzWorkQuestionActive AS INTEGER) = 1	
     """)
     abstract suspend fun findAllQuestionsAndOptionsWithResponse(clazzWorkUid: Long,
-                                                                clazzMemberUid: Long)
+                                                                personUid: Long)
             :List<ClazzWorkQuestionAndOptionWithResponseRow>
 
 
