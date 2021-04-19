@@ -57,16 +57,5 @@ class FeedEntryListFragment(): UstadListViewFragment<FeedEntry, FeedEntry>(),
     override val displayTypeRepo: Any?
         get() = null
 
-    companion object {
-        val DIFF_UTIL_FEED_SUMMARY : DiffUtil.ItemCallback<FeedSummary> = object: DiffUtil.ItemCallback<FeedSummary>() {
-            override fun areItemsTheSame(oldItem: FeedSummary, newItem: FeedSummary): Boolean {
-                return oldItem == newItem
-            }
-
-            override fun areContentsTheSame(oldItem: FeedSummary, newItem: FeedSummary): Boolean {
-                return oldItem == newItem
-            }
-        }
-    }
 
 }
