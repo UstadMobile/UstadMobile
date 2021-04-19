@@ -1,4 +1,3 @@
-/*
 package com.ustadmobile.lib.rest
 
 import com.soywiz.klock.DateTime
@@ -51,36 +50,40 @@ class StatsIndicatorJob : Job {
         val totalDurationUsedByCountry = db.statementDao.getDurationUsageOverPastDayByCountry(
                 dayOffset.unixMillisLong, now.unixMillisLong)
 
-        val userReport = UstadCentralReportRow().apply {
+        val rowReportList = mutableListOf<UstadCentralReportRow>()
+
+        rowReportList.add(UstadCentralReportRow().apply {
             indicatorId = UstadCentralReportRow.REGISTERED_USERS_INDICATOR
             disaggregationKey = UstadCentralReportRow.TOTAL_KEY
             disaggregationValue = UstadCentralReportRow.TOTAL_KEY
             value = totalUserCount.toDouble()
             timestamp = systemTimeInMillis()
-        }
+        })
 
         genderUserCount.forEach{
 
-            UstadCentralReportRow().apply {
+            rowReportList.add(UstadCentralReportRow().apply {
                 indicatorId = UstadCentralReportRow.REGISTERED_USERS_INDICATOR
                 disaggregationKey = UstadCentralReportRow.GENDER_KEY
                 disaggregationValue = it.gender
                 value = it.count.toDouble()
                 timestamp = systemTimeInMillis()
-            }
+            })
 
         }
+
+        // TODO other reports
 
 
         val client: HttpClient by di.instance()
 
         GlobalScope.launch {
             client.post<HttpStatement>(statsEndpoint){
-                //header("content-type", "application/json")
-                //body = listOf(userReport)
+                header("content-type", "application/json")
+                body = listOf(rowReportList)
             }
         }
 
 
     }
-}*/
+}
