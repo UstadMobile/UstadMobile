@@ -1,6 +1,7 @@
 package com.ustadmobile.core.controller
 
 import com.ustadmobile.core.view.CountryListView
+import com.ustadmobile.lib.db.entities.Country
 import org.kodein.di.DI
 
 class CountryListPresenter(context: Any, args: Map<String, String>, view: CountryListView, di: DI)
@@ -12,8 +13,8 @@ class CountryListPresenter(context: Any, args: Map<String, String>, view: Countr
     }
 
 
-    fun handleClickCountry(countryCode: String) {
-        view.finishWithResult(countryCode)
+    fun handleClickCountry(country: Country) {
+        view.finishWithResult(country)
     }
 
 }

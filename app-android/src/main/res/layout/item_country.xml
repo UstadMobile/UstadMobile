@@ -11,7 +11,7 @@
 
         <variable
             name="country"
-            type="com.ustadmobile.port.android.view.CountryListFragment.Country" />
+            type="com.ustadmobile.lib.db.entities.Country" />
 
     </data>
 
@@ -25,7 +25,8 @@
 
         <TextView
             android:textAppearance="@style/UmTheme.TextAppearance.Body1"
-            android:id="@+id/item_timezoneentity_text"
+            android:id="@+id/item_country_text"
+            android:text="@{country.name}"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/dimen_16dp"

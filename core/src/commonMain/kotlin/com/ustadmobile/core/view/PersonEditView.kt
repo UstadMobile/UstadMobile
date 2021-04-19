@@ -31,7 +31,9 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var dateOfBirthError: String?
 
-    var canDelegatePermissions: Boolean?
+    var canDelegatePermissions: Boolean
+
+    var viewConnectivityPermission: Boolean
 
     var firstNameError: String?
 
@@ -39,7 +41,13 @@ interface PersonEditView: UstadEditView<PersonWithAccount> {
 
     var countryError: String?
 
-    var connectivityStatusError: String?
+    var homeConnectivityStatusError: String?
+
+    var mobileConnectivityStatusError: String?
+
+    var homeConnectivityStatus: PersonConnectivity?
+
+    var mobileConnectivityStatus: PersonConnectivity?
 
     fun navigateToNextDestination(account: UmAccount?, nextDestination: String)
 

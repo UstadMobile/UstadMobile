@@ -9,10 +9,19 @@
         <import type="com.ustadmobile.port.android.view.ext.StringExtKt"/>
         <import type="com.ustadmobile.core.controller.PersonDetailPresenter"/>
         <import type="com.ustadmobile.port.android.view.PersonDetailFragment"/>
+        <import type="com.ustadmobile.lib.db.entities.PersonConnectivity"/>
 
         <variable
             name="person"
             type="com.ustadmobile.lib.db.entities.Person" />
+
+        <variable
+            name="homeConnectivity"
+            type="PersonConnectivity" />
+
+        <variable
+            name="mobileConnectivity"
+            type="PersonConnectivity" />
 
         <variable
             name="personImageAdapter"
@@ -33,6 +42,10 @@
         <variable
             name="createAccountVisibility"
             type="Integer" />
+
+        <variable
+            name="connectivityVisible"
+            type="boolean" />
 
         <variable
             name="changePasswordVisibility"
@@ -439,6 +452,52 @@
                 app:constraint_referenced_ids="fragment_person_detail_username_fieldnametext,fragment_person_detail_orgid_barrier"
                 tools:layout_editor_absoluteY="528dp" />
 
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/fragment_person_detail_country_imageview"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.username)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_10dp"
+                app:layout_constraintStart_toStartOf="parent"
+                android:tint="?colorOnIconTint"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_username_barrier"
+                app:srcCompat="@drawable/ic_language_blue_grey_600_24dp" />
+
+            <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                android:id="@+id/fragment_person_detail_country_valuetext"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.personCountry)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_10dp"
+                android:text="@{person.username}"
+                tools:text="United Arab Emirates"
+                app:layout_constraintStart_toEndOf="@+id/fragment_person_detail_country_imageview"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_username_barrier" />
+
+            <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                android:id="@+id/fragment_person_detail_country_fieldnametext"
+                android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.personCountry)}"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:text="@string/country"
+                app:layout_constraintStart_toEndOf="@+id/fragment_person_detail_country_imageview"
+                app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_country_valuetext" />
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/fragment_person_detail_country_barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="fragment_person_detail_country_fieldnametext,fragment_person_detail_username_barrier"
+                tools:layout_editor_absoluteY="528dp" />
+
+
             <TextView
                 android:paddingBottom="@dimen/dimen_5dp"
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
@@ -449,7 +508,7 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:text="@string/contact_details"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_username_barrier" />
+                app:layout_constraintTop_toBottomOf="@+id/fragment_person_detail_country_barrier" />
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:visibility="@{StringExtKt.visibleIfNotNullOrEmpty(person.phoneNum)}"
@@ -628,6 +687,121 @@
                 app:constraint_referenced_ids="email_barrier,address_constraintlayout"
                 />
 
+
+            <TextView
+                android:visibility="@{connectivityVisible ? View.VISIBLE : View.GONE}"
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                android:id="@+id/connectivity_heading_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_16dp"
+                android:text="@string/connectivity"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/address_barrier" />
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:visibility="@{homeConnectivity == null ? View.GONE : View.VISIBLE}"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/connectivity_heading_textview"
+            android:background="@drawable/bg_listitem"
+            android:id="@+id/home_connectivity_constraintlayout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/fragment_person_details_home_connectivity_imageview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:tint="?colorOnIconTint"
+                android:layout_marginStart="@dimen/dimen_16dp"
+                android:layout_marginTop="@dimen/dimen_10dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:srcCompat="@drawable/ic_baseline_home_24" />
+
+            <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                android:id="@+id/home_connectivity_textview"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:layout_marginTop="@dimen/dimen_10dp"
+                app:textMessageIdLookupKey="@{homeConnectivity.pcConStatus}"
+                app:textMessageIdLookupMap="@{PersonConstants.CONNECTIVITY_STATUS_MAP}"
+                tools:text="Full - I can download as much as I like"
+                app:layout_constraintStart_toEndOf="@+id/fragment_person_details_home_connectivity_imageview"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                android:id="@+id/home_connectivity_fieldname_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="@dimen/dimen_8dp"
+                android:text="@string/home_connectivity_status"
+                app:layout_constraintStart_toEndOf="@+id/fragment_person_details_home_connectivity_imageview"
+                app:layout_constraintTop_toBottomOf="@+id/home_connectivity_textview" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:visibility="@{mobileConnectivity == null ? View.GONE : View.VISIBLE}"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/home_connectivity_constraintlayout"
+                android:background="@drawable/bg_listitem"
+                android:id="@+id/mobile_connectivity_constraintlayout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <androidx.appcompat.widget.AppCompatImageView
+                    android:id="@+id/fragment_person_details_mobile_connectivity_imageview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:tint="?colorOnIconTint"
+                    android:layout_marginStart="@dimen/dimen_16dp"
+                    android:layout_marginTop="@dimen/dimen_10dp"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:srcCompat="@drawable/ic_baseline_signal_cellular_alt_24" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body1"
+                    android:id="@+id/mobile_connectivity_textview"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:layout_marginTop="@dimen/dimen_10dp"
+                    app:textMessageIdLookupKey="@{mobileConnectivity.pcConStatus}"
+                    app:textMessageIdLookupMap="@{PersonConstants.CONNECTIVITY_STATUS_MAP}"
+                    tools:text="Limited - I avoid downloading too much"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_person_details_mobile_connectivity_imageview"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:textAppearance="@style/UmTheme.TextAppearance.Body2"
+                    android:id="@+id/mobile_connectivity_fieldname_text"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="@dimen/dimen_8dp"
+                    android:text="@string/mobile_connectivity_status"
+                    app:layout_constraintStart_toEndOf="@+id/fragment_person_details_mobile_connectivity_imageview"
+                    app:layout_constraintTop_toBottomOf="@+id/mobile_connectivity_textview" />
+
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+            <androidx.constraintlayout.widget.Barrier
+                android:id="@+id/connectivity_barrier"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:barrierDirection="bottom"
+                app:constraint_referenced_ids="mobile_connectivity_constraintlayout"
+                />
+
+
             <TextView
                 android:textAppearance="@style/UmTheme.TextAppearance.Body1"
                 android:id="@+id/classes_heading_textview"
@@ -637,7 +811,7 @@
                 android:layout_marginTop="@dimen/dimen_16dp"
                 android:text="@string/classes"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/address_barrier" />
+                app:layout_constraintTop_toBottomOf="@+id/connectivity_barrier" />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/classes_recyclerview"

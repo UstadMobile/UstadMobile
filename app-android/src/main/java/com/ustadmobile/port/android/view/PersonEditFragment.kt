@@ -266,9 +266,17 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             field = value
             handleInputError(mBinding?.birthdayTextinputlayout, value != null, value)
         }
-    override var canDelegatePermissions: Boolean? = false
+    override var canDelegatePermissions: Boolean = false
+        get() = field
         set(value) {
-            mBinding?.isAdmin = value?:false
+            mBinding?.isAdmin = value
+            field = value
+        }
+
+    override var viewConnectivityPermission: Boolean = false
+        get() = field
+        set(value) {
+            mBinding?.viewConnectivity = value
             field = value
         }
 
@@ -285,11 +293,30 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
             handleInputError(mBinding?.countryTextinputlayout, value != null, value)
         }
 
-    override var connectivityStatusError: String? = null
+    override var homeConnectivityStatusError: String? = null
         get() = field
         set(value) {
             field = value
-            handleInputError(mBinding?.connectivityStatusTextinputlayout, value != null, value)
+            handleInputError(mBinding?.homeConnectivityStatusTextinputlayout, value != null, value)
+        }
+
+    override var mobileConnectivityStatusError: String? = null
+        get() = field
+        set(value) {
+            field = value
+            handleInputError(mBinding?.mobileConnectivityStatusTextinputlayout, value != null, value)
+        }
+
+    override var homeConnectivityStatus: PersonConnectivity? = null
+        get() = field
+        set(value) {
+            field = value
+        }
+
+    override var mobileConnectivityStatus: PersonConnectivity? = null
+        get() = field
+        set(value) {
+            field = value
         }
 
     override var firstNameError: String? = null
@@ -427,6 +454,13 @@ class PersonEditFragment: UstadEditFragment<PersonWithAccount>(), PersonEditView
                 EntityRoleWithNameAndRole::class.java ) {
             val entityRole = it.firstOrNull() ?: return@observeResult
             mPresenter?.handleAddOrEditRoleAndPermission(entityRole)
+        }
+
+        findNavController().currentBackStackEntry?.savedStateHandle?.observeResult(viewLifecycleOwner,
+                Country::class.java){
+            val country = it.firstOrNull() ?: return@observeResult
+            entity?.personCountry = country.code
+            entity = entity
         }
 
         if(registrationMode == true) {

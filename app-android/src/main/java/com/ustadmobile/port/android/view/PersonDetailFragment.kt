@@ -99,6 +99,29 @@ class PersonDetailFragment: UstadDetailFragment<PersonWithDisplayDetails>(), Per
             mBinding?.createAccountVisibility = if(value) View.VISIBLE else View.GONE
         }
 
+    override var homeConnectivityStatus: PersonConnectivity? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.homeConnectivity = value
+        }
+
+    override var mobileConnectivityStatus: PersonConnectivity? = null
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.mobileConnectivity = value
+        }
+
+    override var showConnectivityVisible: Boolean = false
+        get() = field
+        set(value) {
+            field = value
+            mBinding?.connectivityVisible = value &&
+                    (homeConnectivityStatus != null || mobileConnectivityStatus != null)
+        }
+
+
     private var clazzesLiveData: LiveData<PagedList<ClazzEnrolmentWithClazzAndAttendance>>? = null
 
     private var clazzEnrolmentWithClazzRecyclerAdapter: ClazzEnrolmentWithClazzRecyclerAdapter? = null
