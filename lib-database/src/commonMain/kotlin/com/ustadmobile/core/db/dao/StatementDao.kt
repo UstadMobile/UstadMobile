@@ -202,18 +202,18 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     abstract fun getActiveUsersUsedContentByCountry(startDateTime: Long, endDateTime: Long): List<ActiveUsageByCountry>
 
 
-    @Query("""
+  /*  @Query("""
         SELECT COUNT(DISTINCT personUid) AS count, personConnectivityStatus AS status
-          FROM Person 
-                LEFT JOIN StatementEntity 
+          FROM Person
+                LEFT JOIN StatementEntity
                 ON Person.personUid = StatementEntity.statementPersonUid
-        WHERE Person.username IS NOT NULL 
+        WHERE Person.username IS NOT NULL
           AND Person.active
-          AND (StatementEntity.timestamp >= :startDateTime 
+          AND (StatementEntity.timestamp >= :startDateTime
                 AND StatementEntity.timestamp <= :endDateTime)
         GROUP BY Person.personConnectivityStatus
     """)
-    abstract fun getActiveUsersUsedContentByConnectivity(startDateTime: Long, endDateTime: Long): List<ActiveUsageByConnectivity>
+    abstract fun getActiveUsersUsedContentByConnectivity(startDateTime: Long, endDateTime: Long): List<ActiveUsageByConnectivity>*/
 
     @Query("""
         SELECT SUM(resultDuration) 
@@ -245,34 +245,34 @@ abstract class StatementDao : BaseDao<StatementEntity> {
     """)
     abstract fun getDurationUsageOverPastDayByCountry(startDateTime: Long, endDateTime: Long): List<DurationByCountry>
 
-    @Query("""
+  /*  @Query("""
         SELECT SUM(resultDuration) AS duration, personConnectivityStatus AS status
-          FROM StatementEntity 
-               LEFT JOIN Person 
+          FROM StatementEntity
+               LEFT JOIN Person
                ON Person.personUid = StatementEntity.statementPersonUid
-         WHERE (StatementEntity.timestamp >= :startDateTime 
+         WHERE (StatementEntity.timestamp >= :startDateTime
                 AND StatementEntity.timestamp <= :endDateTime)
          GROUP BY Person.personConnectivityStatus
     """)
-    abstract fun getDurationUsageOverPastDayByConnectivity(startDateTime: Long, endDateTime: Long): List<DurationByConnectivity>
+    abstract fun getDurationUsageOverPastDayByConnectivity(startDateTime: Long, endDateTime: Long): List<DurationByConnectivity>*/
 
     @Serializable
-    data class DurationByGender(val duration: Long, val gender: Int)
+    data class DurationByGender(var duration: Long = 0L, var gender: Int = 0)
 
     @Serializable
-    data class DurationByCountry(val duration: Long, val country: String)
+    data class DurationByCountry(var duration: Long = 0L, var country: String = "")
 
     @Serializable
-    data class DurationByConnectivity(val duration: Long, val status: Int)
+    data class DurationByConnectivity(var duration: Long = 0L,  var status: Int = 0)
 
     @Serializable
-    data class ActiveUsageByGender(val count: Int, val gender: Int)
+    data class ActiveUsageByGender(var count: Int = 0, var gender: Int = 0)
 
     @Serializable
-    data class ActiveUsageByCountry(val count: Int, val country: String)
+    data class ActiveUsageByCountry(var count: Int = 0, var country: String = "")
 
     @Serializable
-    data class ActiveUsageByConnectivity(val count: Int, val status: Int)
+    data class ActiveUsageByConnectivity(var count: Int = 0, var status: Int = 0)
 
 
     @Serializable
