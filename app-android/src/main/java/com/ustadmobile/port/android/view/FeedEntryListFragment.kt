@@ -30,18 +30,6 @@ class FeedEntryListFragment(): UstadListViewFragment<FeedEntry, FeedEntry>(),
             field = value
         }
 
-    class FeedSummaryViewHolder(val v: View): RecyclerView.ViewHolder(v)
-
-    class FeedSummaryRecyclerViewAdapter: ListAdapter<FeedSummary, FeedSummaryViewHolder>(DIFF_UTIL_FEED_SUMMARY){
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): FeedSummaryViewHolder {
-
-        }
-
-        override fun onBindViewHolder(holder: FeedSummaryViewHolder, position: Int) {
-
-        }
-    }
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         autoMergeRecyclerViewAdapter = false
         val view = super.onCreateView(inflater, container, savedInstanceState)

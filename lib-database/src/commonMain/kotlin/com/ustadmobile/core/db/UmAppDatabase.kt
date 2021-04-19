@@ -41,7 +41,7 @@ import kotlin.jvm.Volatile
     SiteTerms::class,
     NotificationSetting::class,
     NotificationSettingLastChecked::class,
-    FeedEntry::class, PersonConnectivity::class,
+    FeedEntry::class, PersonConnectivity::class, UstadCentralReportRow::class,
 
     //Door Helper entities
     SqliteChangeSeqNums::class,
@@ -53,7 +53,7 @@ import kotlin.jvm.Volatile
     //TODO: DO NOT REMOVE THIS COMMENT!
     //#DOORDB_TRACKER_ENTITIES
 
-], version = 66)
+], version = 67)
 @MinSyncVersion(58)
 abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
@@ -4598,10 +4598,18 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
 
                 }
 
+            }
+        }
 
+        val MIGRATION_66_67 = object: DoorMigration(66, 67) {
+            override fun migrate(database: DoorSqlDatabase) {
+
+                // TODO centralRow from JDBC
 
             }
         }
+
+
 
         private fun addMigrations(builder: DatabaseBuilder<UmAppDatabase>): DatabaseBuilder<UmAppDatabase> {
 
@@ -4613,7 +4621,7 @@ abstract class UmAppDatabase : DoorDatabase(), SyncableDoorDatabase {
                     MIGRATION_51_52, MIGRATION_52_53, MIGRATION_53_54, MIGRATION_54_55,
                     MIGRATION_55_56, MIGRATION_56_57, MIGRATION_57_58, MIGRATION_58_59,
                     MIGRATION_59_60, MIGRATION_60_61, MIGRATION_61_62, MIGRATION_62_63,
-                    MIGRATION_63_64, MIGRATION_64_65)
+                    MIGRATION_63_64, MIGRATION_64_65, MIGRATION_65_66, MIGRATION_66_67)
 
 
 

@@ -1,0 +1,74 @@
+
+plugins {
+    id 'application'
+    id 'org.jetbrains.kotlin.multiplatform'
+    id 'maven-publish'
+    id 'com.github.johnrengelman.shadow'
+    id 'kotlinx-serialization'
+    id 'com.github.psxpaul.execfork' version '0.1.13'
+}
+
+kotlin {
+
+    jvm {
+        compilations.main.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+
+        compilations.test.kotlinOptions {
+            // Setup the Kotlin compiler options for the 'main' compilation:
+            jvmTarget = "$version_kotlin_jvmTarget"
+        }
+    }
+
+    sourceSets {
+
+        jvmMain {
+
+            kotlin.srcDir("build/generated/source/door")
+
+            dependencies {
+                implementation project(":lib-database")
+                implementation project(":lib-database-mpp")
+                implementation "com.ustadmobile.door:room-annotations:$version_door"
+                implementation "com.ustadmobile.door:door-runtime:$version_door"
+                implementation project(":lib-database-entities")
+
+                implementation "io.ktor:ktor-server-netty:$version_ktor"
+                implementation "io.ktor:ktor-server-servlet:$version_ktor"
+                implementation "io.ktor:ktor-jackson:$version_ktor"
+                implementation "io.ktor:ktor-gson:$version_ktor"
+                implementation "io.ktor:ktor-client-core:$version_ktor"
+                implementation "io.ktor:ktor-client-okhttp:$version_ktor"
+
+            }
+
+        }
+
+        jvmTest {
+            dependencies {
+
+
+            }
+        }
+    }
+}
+
+mainClassName = 'com.ustadmobile.lib.rest.StatsAppMain'
+
+// This task will generate your fat JAR and put it in the ./build/libs/ directory
+shadowJar {
+    manifest {
+        attributes 'Main-Class': mainClassName
+    }
+    archiveBaseName = "stats-server"
+
+    def target = kotlin.targets.jvm
+    from target.compilations.main.output
+    def runtimeClasspath = target.compilations.main.runtimeDependencyFiles
+    configurations = [runtimeClasspath]
+}
+
+sourceCompatibility = "8"
+targetCompatibility = "8"

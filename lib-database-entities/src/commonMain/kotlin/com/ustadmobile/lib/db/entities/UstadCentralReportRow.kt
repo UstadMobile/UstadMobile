@@ -1,13 +1,15 @@
 package com.ustadmobile.lib.db.entities
 
 import androidx.room.Entity
+import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
 
 @Serializable
 @Entity
 class UstadCentralReportRow {
 
-    var instanceId: Int = 0
+    @PrimaryKey(autoGenerate = true)
+    var instanceUid: Long = 0L
 
     var indicatorId: Int = 0
 
