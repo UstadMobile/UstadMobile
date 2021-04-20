@@ -180,7 +180,7 @@ class PersonEditPresenter(context: Any,
 
         if(person.personCountry.isNullOrEmpty()){
             person.personCountry = httpClient.get<String>{
-                url(UMFileUtil.joinPaths(serverUrl,
+                url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
                         "country/code"))
             }
         }

@@ -169,7 +169,11 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN ${UstadCentralReportRow.TOTAL_KEY}
                 WHEN ${UstadCentralReportRow.GENDER_KEY} THEN Person.gender
                 WHEN ${UstadCentralReportRow.COUNTRY_KEY} THEN Person.personCountry
-                WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} THEN Connectivity
+                WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} 
+                    THEN 
+                         (SELECT MAX(pcConStatus) 
+                            FROM PersonConnectivity 
+                           WHERE pcPersonUid = Person.personUid)
                 END AS disaggregationValue, 
                 COUNT(DISTINCT personUid) AS value, :timestamp AS timestamp 
           FROM Person
@@ -196,8 +200,8 @@ abstract class StatementDao : BaseDao<StatementEntity> {
                 WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} THEN Connectivity
                 END AS disaggregationValue, 
                 SUM(StatementEntity.resultDuration) AS value, :timestamp AS timestamp 
-         FROM StatementEntity 
-               LEFT JOIN Person 
+         FROM Person 
+               LEFT JOIN StatementEntity 
                ON Person.personUid = StatementEntity.statementPersonUid
          WHERE Person.username IS NOT NULL 
            AND Person.active

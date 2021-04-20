@@ -279,7 +279,11 @@ abstract class PersonDao : BaseDao<Person> {
                 WHEN ${UstadCentralReportRow.TOTAL_KEY} THEN ${UstadCentralReportRow.TOTAL_KEY}
                 WHEN ${UstadCentralReportRow.GENDER_KEY} THEN Person.gender
                 WHEN ${UstadCentralReportRow.COUNTRY_KEY} THEN Person.personCountry
-                WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} THEN Connectivity
+                WHEN ${UstadCentralReportRow.CONNECTIVITY_KEY} 
+                    THEN 
+                         (SELECT MAX(pcConStatus) 
+                            FROM PersonConnectivity 
+                           WHERE pcPersonUid = Person.personUid)
                 END AS disaggregationValue, 
                 COUNT(Person.personUid) AS value, :timestamp AS timestamp 
           FROM Person
