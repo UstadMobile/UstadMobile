@@ -366,7 +366,7 @@ fun TextView.setDurationMinutesAndSeconds(duration: Long){
 }
 
 @BindingAdapter("countryName")
-fun TextView.setCountryName(code: String){
+fun TextView.setCountryName(code: String?){
     val locale = UstadMobileSystemImpl.instance.getDisplayedLocale(context)
     var json = ""
     try {
@@ -376,7 +376,7 @@ fun TextView.setCountryName(code: String){
 
     }
     val countryMap = Json.decodeFromString(MapSerializer(String.serializer(), String.serializer()), json)
-    text = countryMap[code.toUpperCase()] ?: ""
+    text = countryMap[code?.toUpperCase()] ?: ""
 }
 
 @BindingAdapter("isContentComplete")

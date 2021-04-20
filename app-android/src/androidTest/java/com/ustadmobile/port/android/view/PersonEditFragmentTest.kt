@@ -65,6 +65,16 @@ class PersonEditFragmentTest : TestCase() {
         mockWebServer = MockWebServer()
         mockWebServer.start()
         serverUrl = mockWebServer.url("/").toString()
+
+        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("AE"))
+        mockWebServer.enqueue(MockResponse().setResponseCode(200).setBody("AE"))
+       dbRule.insertPersonForActiveUser(Person().apply {
+            firstNames = "Bob"
+            lastName = "Jones"
+            admin = true
+            personUid = 42
+        })
+
     }
 
     @After
@@ -402,6 +412,32 @@ class PersonEditFragmentTest : TestCase() {
             }
 
         }
+    }
+
+    @Test
+    fun givenPersonEdit_whenUserIsAdminAndConnectivityNotSet_thenShouldShowErrors(){
+
+        init {
+
+
+        }.run {
+            PersonEditScreen {
+
+
+                launchFragment(registrationMode = true, serverUrl = serverUrl, systemImplNavRule = systemImplNavRule,
+                        impl = impl, context = context, testContext = this@run, personUid = 42,
+                        databinding = dataBindingIdlingResourceRule, crud = crudIdlingResourceRule)
+
+                homeConnectivity {
+                    hasInputLayoutError(context.getString(R.string.field_required_prompt))
+                }
+                mobileConnectivity{
+                    hasInputLayoutError(context.getString(R.string.field_required_prompt))
+                }
+
+            }
+        }
+
     }
 
 

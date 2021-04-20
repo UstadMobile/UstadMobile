@@ -25,6 +25,7 @@ import com.ustadmobile.door.doorMainDispatcher
 import com.ustadmobile.door.ext.onDbThenRepoWithTimeout
 import com.ustadmobile.lib.db.entities.*
 import io.ktor.client.*
+import io.ktor.client.call.*
 import io.ktor.client.features.json.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
@@ -179,8 +180,8 @@ class PersonEditPresenter(context: Any,
 
         if(person.personCountry.isNullOrEmpty()){
             person.personCountry = httpClient.get<String>{
-                url(UMFileUtil.joinPaths(accountManager.activeAccount.endpointUrl,
-                        "/country/code"))
+                url(UMFileUtil.joinPaths(serverUrl,
+                        "country/code"))
             }
         }
 

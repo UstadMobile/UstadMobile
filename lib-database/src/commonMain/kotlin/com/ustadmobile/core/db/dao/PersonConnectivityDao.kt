@@ -24,7 +24,7 @@ abstract class PersonConnectivityDao : BaseDao<PersonConnectivity> {
             AND :accountPersonUid 
                 IN (${PersonDao.ENTITY_PERSONS_WITH_CONNECTIVITY_PERMISSION}) 
     """)
-    abstract fun getConnectivityStatusForPerson(accountPersonUid: Long,
+    abstract suspend fun getConnectivityStatusForPerson(accountPersonUid: Long,
                                                 personUid: Long): List<PersonConnectivity>
 
     @Query("""

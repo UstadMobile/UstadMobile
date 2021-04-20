@@ -72,6 +72,12 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
 
     val genderValue = KTextView { withId(R.id.gender_value) }
 
+    val countryTextInput = KTextInputLayout { withId(R.id.country_textinputlayout)}
+
+    val homeConnectivity = KTextInputLayout {withId(R.id.home_connectivity_status_textinputlayout)}
+
+    val mobileConnectivity = KTextInputLayout {withId(R.id.mobile_connectivity_status_textinputlayout)}
+
     fun launchFragment(registrationMode: Boolean = false, misMatchPassword: Boolean = false,
                        leftOutPassword: Boolean = false, leftOutUsername: Boolean = false,
                        fillForm: Boolean = true,
@@ -120,6 +126,7 @@ object PersonEditScreen : KScreen<PersonEditScreen>() {
                 dateOfBirth = selectedDateOfBirth
                 emailAddr = "email@dummy.com"
                 personAddress = "dummy address, 101 dummy"
+                personCountry = "AE"
                 if (!leftOutUsername) {
                     username = "jane.doe"
                 }
