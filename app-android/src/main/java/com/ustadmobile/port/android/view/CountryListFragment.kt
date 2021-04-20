@@ -50,9 +50,8 @@ class CountryListFragment : UstadBaseFragment(), CountryListView, OnSearchSubmit
 
     private var mPresenter: CountryListPresenter? = null
 
-    private var systemImpl: UstadMobileSystemImpl = di.direct.instance()
-
     fun allCountries(): List<Country> {
+        val systemImpl: UstadMobileSystemImpl = di.direct.instance()
         val locale = systemImpl.getDisplayedLocale(requireContext())
         var json = ""
         try {
