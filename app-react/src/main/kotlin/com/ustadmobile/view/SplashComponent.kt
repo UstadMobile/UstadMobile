@@ -4,10 +4,9 @@ import com.ccfraser.muirwik.components.*
 import com.ustadmobile.controller.SplashPresenter
 import com.ustadmobile.model.UmReactDestination
 import com.ustadmobile.util.CssStyleManager.appContainer
-import com.ustadmobile.util.CssStyleManager.centeredDiv
+import com.ustadmobile.util.CssStyleManager.splashComponentPreloadDiv
 import com.ustadmobile.util.CssStyleManager.splashComponentCenteredImage
 import com.ustadmobile.util.CssStyleManager.splashComponentProgressBar
-import com.ustadmobile.util.CssStyleManager.splashComponentPreload
 import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 import kotlinx.browser.document
 import kotlinx.coroutines.Dispatchers
@@ -62,10 +61,7 @@ class SplashComponent (props: SplashProps): UmBaseComponent<SplashProps, RState>
                     mainScreen(props.nextDestination, props.nextArgs)
                 } else {
                     styledDiv {
-                        css{
-                            +centeredDiv
-                            +splashComponentPreload
-                        }
+                        css{ +splashComponentPreloadDiv }
                         styledImg {
                             css (splashComponentCenteredImage)
                             attrs{

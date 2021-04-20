@@ -45,18 +45,16 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         width = 100.pc
     }
 
-    val centeredDiv by css{
+    val splashComponentPreloadDiv by css{
         left = LinearDimension("50%")
         top = LinearDimension("50%")
         marginLeft = (-100).px
         marginTop = (-50).px
         position =  Position.fixed
-    }
-
-    val splashComponentPreload by css{
         height = 200.px
         width = 200.px
     }
+
     val splashComponentProgressBar by css {
         width = 200.px
         marginTop = 140.px
@@ -218,6 +216,27 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         display = Display.flex
         justifyContent = JustifyContent.start
         flexWrap = FlexWrap.wrap
+    }
+
+    val loginComponentContainer by css{
+        position = Position.relative
+        left = LinearDimension("50%")
+        float = Float.left
+    }
+
+    val loginComponentForm by css{
+        position = Position.relative
+        left = LinearDimension("-50%")
+        float = Float.left
+        display = Display.flex
+        flexDirection = FlexDirection.column
+        width = 300.px
+    }
+
+    val loginComponentFormElements by css {
+        marginLeft = 1.spacingUnits
+        marginRight = 1.spacingUnits
+        width = LinearDimension("100%")
     }
 
 }
