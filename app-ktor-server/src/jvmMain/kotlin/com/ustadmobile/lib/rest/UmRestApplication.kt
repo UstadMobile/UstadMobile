@@ -266,12 +266,17 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
             if(ustadStatsEndpoint != CONF_STATS_SERVER){
 
-
                 val job = JobBuilder.newJob(StatsIndicatorJob::class.java)
                         .usingJobData(INDICATOR_STATS_ENDPOINT, ustadStatsEndpoint)
                         .build()
 
+                val triggerKey = TriggerKey("stats-server")
+
+                //unschedule any existing instance of the trigger
+                scheduler.unscheduleJob(triggerKey)
+
                 val trigger: CronTrigger = TriggerBuilder.newTrigger()
+                        .withIdentity(triggerKey)
                         .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * ?"))
                         .build()
 
