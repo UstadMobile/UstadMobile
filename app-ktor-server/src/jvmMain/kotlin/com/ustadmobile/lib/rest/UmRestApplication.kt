@@ -6,6 +6,7 @@ import com.google.gson.Gson
 import com.maxmind.geoip2.DatabaseReader
 import com.ustadmobile.core.account.Endpoint
 import com.ustadmobile.core.account.EndpointScope
+import com.ustadmobile.core.account.EndpointSet
 import com.ustadmobile.core.catalog.contenttype.*
 import com.ustadmobile.core.contentformats.ContentImportManager
 import com.ustadmobile.core.contentformats.ContentImportManagerImpl
@@ -21,6 +22,7 @@ import com.ustadmobile.door.asRepository
 import com.ustadmobile.door.*
 import com.ustadmobile.door.RepositoryConfig.Companion.repositoryConfig
 import com.ustadmobile.door.ext.DoorTag
+import com.ustadmobile.door.ext.writeToFile
 import com.ustadmobile.lib.contentscrapers.abztract.ScraperManager
 import com.ustadmobile.lib.rest.ext.bindDataSourceIfNotExisting
 import com.ustadmobile.lib.rest.ext.databasePropertiesFromSection
@@ -118,9 +120,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
     val ustadStatsEndpoint = environment.config
             .propertyOrNull("ktor.ustad.usageStatsDest")?.getString() ?: CONF_STATS_SERVER
 
-    val countryDbFile = File("country.mmdb")
-    FileUtils.copyToFile(javaClass.getResourceAsStream("/country.mmdb"),
-            countryDbFile)
+    val countryDbFile = File(dataDirPath,"country.mmdb")
+    javaClass.takeIf { !countryDbFile.exists() }?.getResourceAsStream("/country.mmdb")?.writeToFile(countryDbFile)
 
     install(DIFeature) {
         bind<File>(tag = TAG_UPLOAD_DIR) with scoped(EndpointScope.Default).singleton {
@@ -242,6 +243,10 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
             }
         }
 
+        bind<EndpointSet>() with provider {
+            EndpointSet(EndpointScope.Default.activeEndpointUrls)
+        }
+
         registerContextTranslator { call: ApplicationCall ->
             if(dbMode == CONF_DBMODE_SINGLETON) {
                 Endpoint("localhost")
@@ -261,8 +266,8 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
 
             if(ustadStatsEndpoint != CONF_STATS_SERVER){
 
-              /*  val job = JobBuilder.newJob(StatsIndicatorJob::class.java)
-                        .usingJobData(INDICATOR_ENDPOINT, "")
+
+                val job = JobBuilder.newJob(StatsIndicatorJob::class.java)
                         .usingJobData(INDICATOR_STATS_ENDPOINT, ustadStatsEndpoint)
                         .build()
 
@@ -270,7 +275,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
                         .withSchedule(CronScheduleBuilder.cronSchedule("0 0 0 * * ?"))
                         .build()
 
-                scheduler.scheduleJob(job, trigger)*/
+                scheduler.scheduleJob(job, trigger)
             }
 
 
@@ -286,6 +291,7 @@ fun Application.umRestApplication(devMode: Boolean = false, dbModeOverride: Stri
         ContainerUploadRoute2()
         UmAppDatabase_KtorRoute(true)
         SiteRoute()
+        CountryRoute()
         ContentEntryLinkImporter()
         if (devMode) {
             DevModeRoute()

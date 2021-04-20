@@ -5,7 +5,7 @@ plugins {
     id 'maven-publish'
     id 'com.github.johnrengelman.shadow'
     id 'kotlinx-serialization'
-    id 'com.github.psxpaul.execfork' version '0.1.13'
+    id 'org.jetbrains.kotlin.kapt'
 }
 
 kotlin {
@@ -29,15 +29,11 @@ kotlin {
             kotlin.srcDir("build/generated/source/door")
 
             dependencies {
-                implementation project(":lib-database")
-                implementation project(":lib-database-mpp")
                 implementation "com.ustadmobile.door:room-annotations:$version_door"
                 implementation "com.ustadmobile.door:door-runtime:$version_door"
                 implementation project(":lib-database-entities")
 
                 implementation "io.ktor:ktor-server-netty:$version_ktor"
-                implementation "io.ktor:ktor-server-servlet:$version_ktor"
-                implementation "io.ktor:ktor-jackson:$version_ktor"
                 implementation "io.ktor:ktor-gson:$version_ktor"
                 implementation "io.ktor:ktor-client-core:$version_ktor"
                 implementation "io.ktor:ktor-client-okhttp:$version_ktor"
@@ -55,7 +51,37 @@ kotlin {
     }
 }
 
-mainClassName = 'com.ustadmobile.lib.rest.StatsAppMain'
+kapt {
+    arguments {
+        arg("doordb_android_out", project.file("build/android/"))
+        arg("doordb_source_path", project.file("src/jvmMain/kotlin"))
+      /*  arg("doordb_jvm_out", rootProject.file("lib-database-mpp/build/generated/source/door").absolutePath)
+        arg("doordb_js_out", rootProject.file("lib-database-mpp/build/generated/source/door-js").absolutePath)
+        arg("doordb_ktor_out", rootProject.file("app-ktor-server/build/generated/source/door").absolutePath)
+
+        arg("doordb_template_fixupdatetrigger_sqlite", project.file("build/migrationtemplates"))
+        arg("doordb_migrations_out", "$buildDir/generated/source/door-migrations")*/
+    }
+}
+
+dependencies {
+    kapt "com.ustadmobile.door:door-compiler:$version_door"
+}
+
+def platformTypeAttr = Attribute.of("org.jetbrains.kotlin.platform.type", String)
+
+afterEvaluate {
+    configurations.all { configuration ->
+        // Workaround for kapt bug with MPP dependencies
+        // https://youtrack.jetbrains.com/issue/KT-31641
+        // https://youtrack.jetbrains.com/issue/KT-33206
+        if (name.contains('kapt')) {
+            attributes.attribute(platformTypeAttr, "jvm")
+        }
+    }
+}
+
+mainClassName = 'com.ustadmobile.lib.rest.Application'
 
 // This task will generate your fat JAR and put it in the ./build/libs/ directory
 shadowJar {
