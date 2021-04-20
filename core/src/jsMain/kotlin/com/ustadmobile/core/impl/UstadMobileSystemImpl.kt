@@ -132,7 +132,8 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
 
     actual companion object {
 
-        private const val hashPath = "#/"
+        private const val hashType = "#/"
+
         /**
          * Get an instance of the system implementation - relies on the platform
          * specific factory method
@@ -161,11 +162,16 @@ actual open class UstadMobileSystemImpl : UstadMobileSystemCommon() {
         flags: Int,
         ustadGoOptions: UstadGoOptions) {
         val params = if(args.isEmpty())  "" else "?${UMFileUtil.mapToQueryString(args)}"
-        window.location.assign("$hashPath$viewName$params")
+        if(ustadGoOptions.popUpToViewName?.isNotEmpty() == true){
+            window.history.replaceState(args,"","$hashType$viewName$params")
+        }else{
+            window.history.pushState(args,"","$hashType$viewName$params")
+        }
     }
 
     actual fun popBack(popUpToViewName: String, popUpInclusive: Boolean, context: Any) {
-        window.location.replace("$hashPath$popUpToViewName")
+        window.location.replace("$hashType$popUpToViewName")
+        window.history.replaceState(null,"","$hashType$popUpToViewName")
     }
 
     /**

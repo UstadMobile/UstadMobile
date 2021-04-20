@@ -45,9 +45,7 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         width = 100.pc
     }
 
-    val preloadComponentCenteredDiv by css{
-        height = 200.px
-        width = 200.px
+    val centeredDiv by css{
         left = LinearDimension("50%")
         top = LinearDimension("50%")
         marginLeft = (-100).px
@@ -55,13 +53,17 @@ object CssStyleManager: StyleSheet("ComponentStyles", isStatic = true) {
         position =  Position.fixed
     }
 
-    val preloadComponentProgressBar by css {
+    val splashComponentPreload by css{
+        height = 200.px
+        width = 200.px
+    }
+    val splashComponentProgressBar by css {
         width = 200.px
         marginTop = 140.px
         position = Position.absolute
     }
 
-    val preloadComponentCenteredImage by css{
+    val splashComponentCenteredImage by css{
         width = 180.px
         marginLeft = 10.px
         position = Position.absolute

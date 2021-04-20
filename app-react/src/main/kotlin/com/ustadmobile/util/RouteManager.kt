@@ -6,11 +6,8 @@ import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_PARENT_ENTRY_UID
 import com.ustadmobile.core.view.UstadView.Companion.MASTER_SERVER_ROOT_ENTRY_UID
 import com.ustadmobile.model.UmReactDestination
-import com.ustadmobile.view.ContentEntryDetailComponent
-import com.ustadmobile.view.ContentEntryListComponent
-import com.ustadmobile.view.PlaceHolderComponent
+import com.ustadmobile.view.*
 import kotlinx.browser.window
-import org.w3c.dom.url.URL
 import react.RBuilder
 import react.router.dom.hashRouter
 import react.router.dom.route
@@ -37,9 +34,11 @@ object RouteManager {
         UmReactDestination("settings", MessageID.settings, SettingsView.VIEW_NAME,
             PlaceHolderComponent::class),
         UmReactDestination( labelId= MessageID.accounts, view = AccountListView.VIEW_NAME,
-             component = ContentEntryDetailComponent::class),
-        UmReactDestination(view = ContentEntry2DetailView.VIEW_NAME,
-            component = ContentEntryDetailComponent::class)
+             component = PlaceHolderComponent::class),
+        UmReactDestination(view = ContentEntryDetailOverviewView.VIEW_NAME,
+            component = ContentEntryDetailOverviewComponent::class),
+        UmReactDestination(view = Login2View.VIEW_NAME, labelId = MessageID.login,
+            component = LoginComponent::class, showNavigation = false)
     )
 
     /**
@@ -53,18 +52,19 @@ object RouteManager {
     /**
      * Get current path name from location
      */
-    fun getPathName (path:String? = null) : String {
-        val mPath = (path ?: window.location.href).replace("#/","")
-        return URL(mPath).pathname.replace("/","")
+    fun getPathName(path: String? = null): String {
+        return (path ?: window.location.href)
+            .substringBefore("?").substringAfter("#/")
     }
 
     /**
      * Parse query params into map of arguments
      */
-    fun getArgs(): Map<String, String> {
-        val cleanUrl = window.location.href.replace("#/","")
-        return if(cleanUrl.indexOf("?") != -1)
-            UMFileUtil.parseURLQueryString(cleanUrl) else mapOf()
+    fun getArgs(): MutableMap<String, String> {
+        val href = window.location.href
+        return if(href.indexOf("?") != -1)
+            UMFileUtil.parseURLQueryString(href.substringAfter("?"))
+                .toMutableMap() else mutableMapOf()
     }
 
     /**

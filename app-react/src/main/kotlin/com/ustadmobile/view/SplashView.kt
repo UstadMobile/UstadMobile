@@ -1,8 +1,8 @@
 package com.ustadmobile.view
 
-import com.ustadmobile.core.view.UstadView
+import com.ustadmobile.core.view.SplashScreenView
 
-interface SplashView: UstadView {
+interface SplashView: SplashScreenView {
 
     var appName: String?
 

@@ -7,6 +7,7 @@ import com.ustadmobile.core.util.UMFileUtil
 import com.ustadmobile.core.view.*
 import com.ustadmobile.core.view.UstadView.Companion.ARG_INTENT
 import com.ustadmobile.core.view.UstadView.Companion.ARG_NEXT
+import com.ustadmobile.core.view.UstadView.Companion.ARG_WEB_PLATFORM
 import org.kodein.di.DI
 import org.kodein.di.instance
 
@@ -20,6 +21,7 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
         super.onCreate(savedState)
         val nextViewArg = arguments[ARG_NEXT]
         val intentArg = arguments[ARG_INTENT]
+        val isWebPlatform = arguments[ARG_WEB_PLATFORM].toBoolean()
 
         if(intentArg?.isNotEmpty() == true){
             loadFromUriString(intentArg)
@@ -34,14 +36,18 @@ class RedirectPresenter(context: Any, arguments: Map<String, String>, view: Redi
                 args.putAll(UMFileUtil.parseURLQueryString(nextViewArg))
                 nextViewArg.substringBefore('?')
             } else if (!userHasLoggedInOrSelectedGuest) {
-                if (canSelectServer)
+                if (canSelectServer && !isWebPlatform)
                     SiteEnterLinkView.VIEW_NAME
                 else
                     Login2View.VIEW_NAME
             } else {
-                ContentEntryListTabsView.VIEW_NAME
+                if(isWebPlatform){
+                    ContentEntryList2View.VIEW_NAME
+                }else{
+                    ContentEntryListTabsView.VIEW_NAME
+                }
             }
-
+            args.remove(ARG_WEB_PLATFORM)
             view.showNextScreen(destination, args)
         }
     }

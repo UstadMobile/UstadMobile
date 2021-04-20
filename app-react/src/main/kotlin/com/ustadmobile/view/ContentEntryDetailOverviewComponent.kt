@@ -5,11 +5,11 @@ import com.ccfraser.muirwik.components.*
 import com.ccfraser.muirwik.components.button.MButtonSize
 import com.ccfraser.muirwik.components.button.MButtonVariant
 import com.ccfraser.muirwik.components.button.mButton
-import com.ustadmobile.core.controller.ContentEntry2DetailPresenter
+import com.ustadmobile.core.controller.ContentEntryDetailOverviewPresenter
 import com.ustadmobile.core.controller.UstadDetailPresenter
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.util.SortOrderOption
-import com.ustadmobile.core.view.ContentEntry2DetailView
+import com.ustadmobile.core.view.ContentEntryDetailOverviewView
 import com.ustadmobile.core.view.UstadView
 import com.ustadmobile.lib.db.entities.*
 import com.ustadmobile.util.CssStyleManager.chipSet
@@ -29,10 +29,10 @@ import styled.css
 import styled.styledDiv
 import styled.styledImg
 
-class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentEntryWithMostRecentContainer>(mProps),
-    ContentEntry2DetailView {
+class ContentEntryDetailOverviewComponent(mProps: RProps): UstadDetailComponent<ContentEntryWithMostRecentContainer>(mProps),
+    ContentEntryDetailOverviewView {
 
-    private lateinit var mPresenter: ContentEntry2DetailPresenter
+    private lateinit var mPresenter: ContentEntryDetailOverviewPresenter
 
     override val detailPresenter: UstadDetailPresenter<*, *>?
         get() = mPresenter
@@ -72,7 +72,7 @@ class ContentEntryDetailComponent(mProps: RProps): UstadDetailComponent<ContentE
 
     override fun componentDidMount() {
         super.componentDidMount()
-        mPresenter = ContentEntry2DetailPresenter(this,getArgs(),
+        mPresenter = ContentEntryDetailOverviewPresenter(this,getArgs(),
             this,di,this)
         //mPresenter.onCreate(mapOf())
 

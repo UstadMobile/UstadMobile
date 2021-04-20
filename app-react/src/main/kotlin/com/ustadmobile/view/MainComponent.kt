@@ -11,6 +11,7 @@ import com.ccfraser.muirwik.components.styles.up
 import com.ustadmobile.core.generated.locale.MessageID
 import com.ustadmobile.core.impl.UstadMobileSystemImpl
 import com.ustadmobile.lib.db.entities.UmAccount
+import com.ustadmobile.model.UmReactDestination
 import com.ustadmobile.model.statemanager.AppBarState
 import com.ustadmobile.model.statemanager.FabState
 import com.ustadmobile.model.statemanager.GlobalStateSlice
@@ -25,8 +26,6 @@ import com.ustadmobile.util.CssStyleManager.mainComponentSearch
 import com.ustadmobile.util.CssStyleManager.mainComponentSearchIcon
 import com.ustadmobile.util.CssStyleManager.progressIndicator
 import com.ustadmobile.util.RouteManager.destinationList
-import com.ustadmobile.util.RouteManager.findDestination
-import com.ustadmobile.util.RouteManager.getPathName
 import com.ustadmobile.util.RouteManager.renderRoutes
 import com.ustadmobile.util.StateManager
 import com.ustadmobile.util.UmReactUtil.drawerWidth
@@ -35,7 +34,6 @@ import com.ustadmobile.util.UmReactUtil.isDarkModeEnabled
 import com.ustadmobile.util.UmReactUtil.placeHolderImage
 import com.ustadmobile.util.UmReactUtil.zeroPx
 import kotlinext.js.jsObject
-import kotlinx.browser.window
 import kotlinx.css.*
 import org.w3c.dom.events.Event
 import react.*
@@ -45,7 +43,7 @@ import styled.css
 import styled.styledDiv
 
 interface MainProps: RProps {
-    var viewToDisplay: String?
+    var currentDestination: UmReactDestination
 }
 
 
@@ -63,6 +61,8 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     private var showFab: Boolean = false
 
+    private var showNavigation: Boolean = false
+
     private var fabIcon: String = ""
 
     private var fabLabel: String = ""
@@ -71,7 +71,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
 
     private var onSnackActionClicked:(Event)-> Unit = {}
 
-    private lateinit var currentView: String
+    private lateinit var currentDestination: UmReactDestination
 
     private var snackBarOpen = false
 
@@ -104,16 +104,16 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
     }
 
     override fun RState.init(props: MainProps) {
-        currentView = (props.viewToDisplay?: getPathName())
+        currentDestination = props.currentDestination
+        showNavigation = props.currentDestination.showNavigation
     }
 
     override fun componentDidMount() {
         super.componentDidMount()
-        val dest = findDestination(currentView)
         setState {
-            currentTile = dest?.let { systemImpl.getString(it.labelId, this) }.toString()
+            currentTile = systemImpl.getString(currentDestination.labelId, this)
             responsiveDrawerOpen = true
-            showSearch = dest?.showSearch?:false
+            showSearch = currentDestination.showSearch
         }
         StateManager.subscribe(stateChangeListener)
     }
@@ -145,46 +145,43 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                         css { +mainComponentContainer }
                         mAppBar(position = MAppBarPosition.absolute) {
                             css {
+                                val removeLeftMargin = isRTLSupport or !showNavigation
                                 position = Position.absolute
-                                marginLeft = if(isRTLSupport) 0.px else drawerWidth
+                                marginLeft = if(removeLeftMargin) zeroPx else drawerWidth
                                 media(theme.breakpoints.up(Breakpoint.md)) {
-                                    width = fullWidth - if(isRTLSupport) zeroPx else drawerWidth
+                                    width = fullWidth - if(removeLeftMargin) zeroPx else drawerWidth
                                 }
                             }
 
                             mToolbar {
-                                mHidden(mdUp = true, implementation = MHiddenImplementation.css) {
-                                    mIconButton("menu", color = MColor.inherit, onClick = {
-                                        setState {
-                                            responsiveDrawerOpen = !responsiveDrawerOpen
-                                        }
-                                    })
-                                }
 
                                 mToolbarTitle(currentTile)
 
-
-                                if(showSearch){
+                                styledDiv {
+                                    css{
+                                        +mainComponentSearch
+                                        display = if(showSearch) Display.block else Display.none
+                                    }
                                     styledDiv {
-                                        css(mainComponentSearch)
-                                        styledDiv {
-                                            css(mainComponentSearchIcon)
-                                            mIcon("search")
-                                        }
-                                        val inputProps = object: RProps {
-                                            val className = "${CssStyleManager.name}-mainComponentInputSearch"
-                                            val id = "um-search"
-                                        }
-                                        mInput(placeholder = "Search...", disableUnderline = true) {
-                                            attrs.inputProps = inputProps
-                                            css {
-                                                color = Color.inherit
-                                            }
+                                        css(mainComponentSearchIcon)
+                                        mIcon("search")
+                                    }
+                                    val inputProps = object: RProps {
+                                        val className = "${CssStyleManager.name}-mainComponentInputSearch"
+                                        val id = "um-search"
+                                    }
+                                    mInput(placeholder = "Search...", disableUnderline = true) {
+                                        attrs.inputProps = inputProps
+                                        css {
+                                            color = Color.inherit
                                         }
                                     }
                                 }
 
                                 mAvatar {
+                                    css {
+                                        display = if(showNavigation) Display.block else Display.none
+                                    }
                                     attrs{
                                         src = placeHolderImage
                                         sizes = "large"
@@ -194,23 +191,16 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                             }
                         }
 
-                        val p: MPaperProps = jsObject { }
-                        p.asDynamic().style = kotlinext.js.js {
-                            position = "relative"; width = drawerWidth.value; display = "block"; height =
-                            "100%"; minHeight = "100vh"
-                        }
-                        mHidden(mdUp = true) {
-                            mDrawer(responsiveDrawerOpen, MDrawerAnchor.left, MDrawerVariant.temporary, paperProps = p,
-                                onClose = { setState { responsiveDrawerOpen = !responsiveDrawerOpen }}) {
-                                appBarSpacer()
-                                renderDrawerItems()
-                            }
-                        }
+                        if(showNavigation){
+                            mHidden(mdUp = true) {
+                                //render on small display (Bottom nav)
+                                console.log("Moja")
+                                styledDiv {  }
 
-                        mHidden(smDown = true, implementation = MHiddenImplementation.css) {
-                            mDrawer(true, MDrawerAnchor.left, MDrawerVariant.permanent, paperProps = p) {
-                                appBarSpacer()
-                                renderDrawerItems()
+                            }
+                            mHidden(smDown = true, implementation = MHiddenImplementation.css) {
+                                //render on larger display (Bottom nav)
+                                renderSideNavigation()
                             }
                         }
 
@@ -275,6 +265,19 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
         }
     }
 
+    private fun RBuilder.renderSideNavigation(){
+        val p: MPaperProps = jsObject { }
+        p.asDynamic().style = kotlinext.js.js {
+            position = "relative"; width = drawerWidth.value; display = "block"; height =
+            "100%"; minHeight = "100vh"
+        }
+        mDrawer(responsiveDrawerOpen, MDrawerAnchor.left, MDrawerVariant.temporary, paperProps = p,
+            onClose = { setState { responsiveDrawerOpen = !responsiveDrawerOpen }}) {
+            appBarSpacer()
+            renderDrawerItems()
+        }
+    }
+
     private fun fallbackComponent(text: String): ReactElement {
         // Note we purposely use a new RBuilder so we don't render into our normal display
         return RBuilder().mPaper {
@@ -297,6 +300,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
                             divider = destination.divider , onClick = {
                             setState {
                                 showSearch = destination.showSearch
+                                showNavigation = destination.showNavigation
                                 currentTile = systemImpl.getString(destination.labelId, this)
                             }
                             systemImpl.go(destination.view, destination.args,this)
@@ -323,8 +327,7 @@ class MainComponent(props: MainProps): UmBaseComponent<MainProps, RState>(props)
     }
 }
 
-fun RBuilder.initMainComponent(mView: String, args: Map<String,String>) = child(MainComponent::class){
-    attrs.viewToDisplay = mView
-    val destination = findDestination(getPathName())?.view?:mView
-    UstadMobileSystemImpl.instance.go(destination, args, this)
+fun RBuilder.mainScreen(destination: UmReactDestination, args: Map<String,String>) = child(MainComponent::class){
+    attrs.currentDestination = destination
+    UstadMobileSystemImpl.instance.go(destination.view, args, this)
 }
